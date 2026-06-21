@@ -76,6 +76,19 @@ theorem folded_snd (bs : List Bool) :
   unfold folded
   simpa using foldl_foldStep₂_snd bs bs (([] : List TableTransition), 0)
 
+theorem foldl_foldStep₂_fst_append (bs : List Bool) :
+    ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
+      ∃ rest : List TableTransition,
+        (xs.foldl (fun acc b => foldStep₂ bs (acc, b)) s).1 = s.1 ++ rest
+  | [], s => by
+      exact ⟨[], by simp⟩
+  | b :: xs, s => by
+      rcases foldl_foldStep₂_fst_append bs xs (foldStep₂ bs (s, b)) with
+        ⟨rest, hrest⟩
+      refine ⟨[transition (bs.length + 1) s.2 b] ++ rest, ?_⟩
+      rw [List.foldl_cons, hrest]
+      simp [foldStep₂, foldStep, List.append_assoc]
+
 @[simp]
 theorem program_start (bs : List Bool) :
     (program bs).start = 0 := rfl
@@ -109,6 +122,55 @@ theorem program_nil_not_halts :
     rfl
   exact TableProgram.not_haltsEmpty_of_initial_right_blank_loop
     (program_start_ne_halt []) hfind hwrite hnext hloop
+
+theorem program_cons_true_halts (bs : List Bool) :
+    (program (true :: bs)).toMachine.HaltsEmpty := by
+  let e := transition ((true :: bs).length + 1) 0 true
+  rcases foldl_foldStep₂_fst_append (true :: bs) bs ([e], 1) with ⟨rest, hrest⟩
+  have hrest' :
+      (List.foldl
+        (fun s b => (s.1 ++ [transition ((true :: bs).length + 1) s.2 b], s.2 + 1))
+        ([e], 1) bs).1 = [e] ++ rest := by
+    simpa [foldStep₂, foldStep] using hrest
+  have hrest'' :
+      (List.foldl
+        (fun s b => (s.1 ++ [transition (bs.length + 1 + 1) s.2 b], s.2 + 1))
+        ([transition (bs.length + 1 + 1) 0 true], 1) bs).1 =
+        [transition (bs.length + 1 + 1) 0 true] ++ rest := by
+    simpa [e] using hrest'
+  have htable : ∃ table : List TableTransition,
+      (program (true :: bs)).table = e :: table := by
+    refine ⟨rest ++ [loopTransition (folded (true :: bs)).2], ?_⟩
+    change
+      (List.foldl
+        (fun s b => (s.1 ++ [transition (bs.length + 1 + 1) s.2 b], s.2 + 1))
+        ([transition (bs.length + 1 + 1) 0 true], 1) bs).1 ++
+          [loopTransition
+            (List.foldl
+              (fun s b => (s.1 ++ [transition (bs.length + 1 + 1) s.2 b], s.2 + 1))
+              ([transition (bs.length + 1 + 1) 0 true], 1) bs).2] =
+        transition (bs.length + 1 + 1) 0 true ::
+          (rest ++
+            [loopTransition
+              (List.foldl
+                (fun s b => (s.1 ++ [transition (bs.length + 1 + 1) s.2 b], s.2 + 1))
+                ([transition (bs.length + 1 + 1) 0 true], 1) bs).2])
+    rw [hrest'']
+    rfl
+  rcases htable with ⟨table, htable⟩
+  have hfind :
+      (program (true :: bs)).toTableMachine.transition?
+          (program (true :: bs)).start (program (true :: bs)).blank = some e :=
+    TableProgram.transition?_eq_some_of_table_head_matches htable
+      (by simp [e, transition])
+  have hwrite : e.write ∈ (program (true :: bs)).supportedSymbols := by
+    simp [e, transition, TableProgram.supportedSymbols]
+  have hnext : e.next ∈ (program (true :: bs)).supportedStates := by
+    simp [e, transition, TableProgram.supportedStates]
+  have hhalt : e.next = (program (true :: bs)).halt := by
+    simp [e, transition]
+  exact TableProgram.toMachine_haltsEmpty_of_initial_transition_to_halt
+    hfind hwrite hnext hhalt
 
 theorem transition_primrec :
     Primrec (fun p : Nat × Nat × Bool => transition p.1 p.2.1 p.2.2) := by
