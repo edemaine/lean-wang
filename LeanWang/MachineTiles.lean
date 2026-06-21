@@ -572,6 +572,27 @@ theorem vMatches_toWangTile_iff_cells (lower upper : MachineHistoryTile) :
         lower.nextRight = upper.prevRight := by
   rw [vMatches_toWangTile_iff, tripleCellColor_eq_iff]
 
+theorem toWangTile_injective : Function.Injective toWangTile := by
+  intro t u h
+  have hs : tripleCellColor t.prevLeft t.prevCenter t.prevRight =
+      tripleCellColor u.prevLeft u.prevCenter u.prevRight := by
+    simpa [toWangTile] using congrArg WangTile.s h
+  have hn : tripleCellColor t.nextLeft t.nextCenter t.nextRight =
+      tripleCellColor u.nextLeft u.nextCenter u.nextRight := by
+    simpa [toWangTile] using congrArg WangTile.n h
+  rw [tripleCellColor_eq_iff] at hs hn
+  cases t
+  cases u
+  simp_all
+
+theorem toWangTile_eq_iff {t u : MachineHistoryTile} :
+    t.toWangTile = u.toWangTile ↔ t = u := by
+  constructor
+  · intro h
+    exact toWangTile_injective h
+  · intro h
+    rw [h]
+
 end MachineHistoryTile
 
 /-- The local-history block cut from two consecutive rows of an actual machine run. -/
@@ -687,6 +708,15 @@ theorem toWangTile_mem_machineTiles {M : Machine} {t : MachineHistoryTile}
     t.toWangTile ∈ machineTiles M := by
   rw [mem_machineTiles_iff]
   exact ⟨t, ht, rfl⟩
+
+theorem toWangTile_mem_machineTiles_iff (M : Machine) (t : MachineHistoryTile) :
+    t.toWangTile ∈ machineTiles M ↔ t ∈ machineHistoryTiles M := by
+  constructor
+  · intro ht
+    rcases (mem_machineTiles_iff M t.toWangTile).1 ht with ⟨u, hu, htile⟩
+    exact MachineHistoryTile.toWangTile_injective htile
+      ▸ hu
+  · exact toWangTile_mem_machineTiles
 
 theorem toWangTile_mem_machineTiles_of_supported {M : Machine} {t : MachineHistoryTile}
     (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
