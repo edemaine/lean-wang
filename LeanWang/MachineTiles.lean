@@ -293,6 +293,10 @@ def initialRowTag : Nat := 0
 
 def normalRowTag : Nat := 1
 
+theorem initialRowTag_ne_normalRowTag :
+    initialRowTag ≠ normalRowTag := by
+  decide
+
 def taggedTripleCellColor (tag : Nat) (a b c : MachineCell) : Nat :=
   Nat.pair tag (tripleCellColor a b c)
 
@@ -656,6 +660,25 @@ theorem vMatches_toTaggedWangTile_iff_cells
   unfold WangTile.VMatches toTaggedWangTile
   rw [taggedTripleCellColor_eq_iff]
 
+theorem toTaggedWangTile_injective
+    {rowTag nextRowTag rowTag' nextRowTag' : Nat}
+    {t u : MachineHistoryTile}
+    (h : t.toTaggedWangTile rowTag nextRowTag =
+      u.toTaggedWangTile rowTag' nextRowTag') :
+    rowTag = rowTag' ∧ nextRowTag = nextRowTag' ∧ t = u := by
+  have hs : taggedTripleCellColor rowTag t.prevLeft t.prevCenter t.prevRight =
+      taggedTripleCellColor rowTag' u.prevLeft u.prevCenter u.prevRight := by
+    simpa [toTaggedWangTile] using congrArg WangTile.s h
+  have hn : taggedTripleCellColor nextRowTag t.nextLeft t.nextCenter t.nextRight =
+      taggedTripleCellColor nextRowTag' u.nextLeft u.nextCenter u.nextRight := by
+    simpa [toTaggedWangTile] using congrArg WangTile.n h
+  rw [taggedTripleCellColor_eq_iff] at hs hn
+  rcases hs with ⟨hrow, hprevLeft, hprevCenter, hprevRight⟩
+  rcases hn with ⟨hnextRow, hnextLeft, hnextCenter, hnextRight⟩
+  cases t
+  cases u
+  simp_all
+
 end MachineHistoryTile
 
 /-- The local-history block cut from two consecutive rows of an actual machine run. -/
@@ -855,6 +878,13 @@ theorem mem_machineTiles_iff (M : Machine) (tile : WangTile) :
           t.toTaggedWangTile normalRowTag normalRowTag = tile) := by
   simp [machineTiles, taggedMachineTiles, initialRowMachineTiles,
     normalRowMachineTiles]
+
+theorem initialTagged_ne_normalTagged {t u : MachineHistoryTile} :
+    t.toTaggedWangTile initialRowTag normalRowTag ≠
+      u.toTaggedWangTile normalRowTag normalRowTag := by
+  intro h
+  exact initialRowTag_ne_normalRowTag
+    (MachineHistoryTile.toTaggedWangTile_injective h).1
 
 theorem initialRowHistoryTile_zero_mem (M : Machine) :
     runHistoryTile M 0 0 ∈ initialRowHistoryTiles M := by
