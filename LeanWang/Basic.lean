@@ -114,6 +114,57 @@ def product (base payload : WangTile) : WangTile where
   e := Nat.pair base.e payload.e
   w := Nat.pair base.w payload.w
 
+theorem toTuple_primrec : Primrec WangTile.toTuple := by
+  simpa [WangTile.equivTuple] using
+    (Primrec.of_equiv (e := WangTile.equivTuple) : Primrec WangTile.equivTuple)
+
+theorem ofTuple_primrec : Primrec WangTile.ofTuple := by
+  simpa [WangTile.equivTuple] using
+    (Primrec.of_equiv_symm (e := WangTile.equivTuple) : Primrec WangTile.equivTuple.symm)
+
+theorem n_primrec : Primrec WangTile.n :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem s_primrec : Primrec WangTile.s :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem e_primrec : Primrec WangTile.e :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem w_primrec : Primrec WangTile.w :=
+  Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem product_primrec : Primrec (fun p : WangTile × WangTile => product p.1 p.2) := by
+  let f : WangTile × WangTile → Nat × Nat × Nat × Nat := fun p =>
+    (Nat.pair p.1.n p.2.n, Nat.pair p.1.s p.2.s,
+      Nat.pair p.1.e p.2.e, Nat.pair p.1.w p.2.w)
+  have hf : Primrec f := by
+    dsimp [f]
+    exact (Primrec.pair
+      (Primrec₂.natPair.comp (n_primrec.comp Primrec.fst) (n_primrec.comp Primrec.snd))
+      (Primrec.pair
+        (Primrec₂.natPair.comp (s_primrec.comp Primrec.fst) (s_primrec.comp Primrec.snd))
+        (Primrec.pair
+          (Primrec₂.natPair.comp (e_primrec.comp Primrec.fst) (e_primrec.comp Primrec.snd))
+          (Primrec₂.natPair.comp (w_primrec.comp Primrec.fst) (w_primrec.comp Primrec.snd)))))
+  have hprod : Primrec fun p => WangTile.equivTuple.symm (f p) :=
+    (Primrec.of_equiv_symm_iff (e := WangTile.equivTuple) (f := f)).2 hf
+  exact hprod.of_eq fun p => by
+    cases p with
+    | mk base payload =>
+      cases base
+      cases payload
+      rfl
+
+theorem product_primrec₂ : Primrec₂ product :=
+  Primrec₂.mk product_primrec
+
+theorem product_computable : Computable (fun p : WangTile × WangTile => product p.1 p.2) :=
+  product_primrec.to_comp
+
+theorem product_computable₂ : Computable₂ product :=
+  Computable₂.mk product_computable
+
 theorem product_injective :
     Function.Injective (fun p : WangTile × WangTile => product p.1 p.2) := by
   intro p q h
@@ -143,6 +194,26 @@ end WangTile
 /-- The finite tileset obtained by layering every base tile with every payload tile. -/
 def productTileSet (base payload : TileSet) : TileSet :=
   base.flatMap fun b => payload.map fun p => WangTile.product b p
+
+theorem productTileSet_primrec :
+    Primrec (fun p : TileSet × TileSet => productTileSet p.1 p.2) := by
+  unfold productTileSet
+  refine Primrec.list_flatMap Primrec.fst ?_
+  apply Primrec₂.mk
+  refine Primrec.list_map (Primrec.snd.comp Primrec.fst) ?_
+  rw [← Primrec₂.uncurry]
+  exact WangTile.product_primrec.comp
+    (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd)
+
+theorem productTileSet_primrec₂ : Primrec₂ productTileSet :=
+  Primrec₂.mk productTileSet_primrec
+
+theorem productTileSet_computable :
+    Computable (fun p : TileSet × TileSet => productTileSet p.1 p.2) :=
+  productTileSet_primrec.to_comp
+
+theorem productTileSet_computable₂ : Computable₂ productTileSet :=
+  Computable₂.mk productTileSet_computable
 
 theorem mem_productTileSet_iff {base payload : TileSet} {tile : WangTile} :
     tile ∈ productTileSet base payload ↔
