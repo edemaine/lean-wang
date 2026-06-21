@@ -56,6 +56,60 @@ def program (bs : List Bool) : TableProgram where
   halt := bs.length + 1
   table := transitions bs
 
+theorem foldStep₂_snd (bs : List Bool)
+    (s : List TableTransition × Nat) (b : Bool) :
+    (foldStep₂ bs (s, b)).2 = s.2 + 1 := by
+  rfl
+
+theorem foldl_foldStep₂_snd (bs : List Bool) :
+    ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
+      (xs.foldl (fun acc b => foldStep₂ bs (acc, b)) s).2 = s.2 + xs.length
+  | [], s => by
+      simp
+  | b :: xs, s => by
+      rw [List.foldl_cons, foldl_foldStep₂_snd bs xs (foldStep₂ bs (s, b))]
+      rw [foldStep₂_snd]
+      simp [Nat.add_comm, Nat.add_left_comm]
+
+theorem folded_snd (bs : List Bool) :
+    (folded bs).2 = bs.length := by
+  unfold folded
+  simpa using foldl_foldStep₂_snd bs bs (([] : List TableTransition), 0)
+
+@[simp]
+theorem program_start (bs : List Bool) :
+    (program bs).start = 0 := rfl
+
+@[simp]
+theorem program_blank (bs : List Bool) :
+    (program bs).blank = 0 := rfl
+
+@[simp]
+theorem program_halt (bs : List Bool) :
+    (program bs).halt = bs.length + 1 := rfl
+
+theorem program_start_ne_halt (bs : List Bool) :
+    (program bs).start ≠ (program bs).halt := by
+  simp
+
+theorem program_nil_not_halts :
+    ¬ (program []).toMachine.HaltsEmpty := by
+  let e := loopTransition 0
+  have htable : (program []).table = e :: [] := by
+    rfl
+  have hfind : (program []).toTableMachine.transition? (program []).start (program []).blank =
+      some e :=
+    TableProgram.transition?_eq_some_of_table_head_matches htable
+      (by simp [e, loopTransition])
+  have hwrite : e.write ∈ (program []).supportedSymbols := by
+    simp [e, loopTransition, TableProgram.supportedSymbols]
+  have hnext : e.next ∈ (program []).supportedStates := by
+    simp [e, loopTransition, TableProgram.supportedStates]
+  have hloop : e.action = ((program []).blank, (program []).start, Move.right) := by
+    rfl
+  exact TableProgram.not_haltsEmpty_of_initial_right_blank_loop
+    (program_start_ne_halt []) hfind hwrite hnext hloop
+
 theorem transition_primrec :
     Primrec (fun p : Nat × Nat × Bool => transition p.1 p.2.1 p.2.2) := by
   unfold transition
