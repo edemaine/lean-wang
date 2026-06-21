@@ -358,11 +358,26 @@ theorem hMatches_toWangTile_iff (left right : MachineHistoryTile) :
         overlapCellColor right.prevLeft right.prevCenter right.nextLeft right.nextCenter := by
   rfl
 
+theorem hMatches_toWangTile_iff_cells (left right : MachineHistoryTile) :
+    WangTile.HMatches left.toWangTile right.toWangTile ↔
+      left.prevCenter = right.prevLeft ∧
+        left.prevRight = right.prevCenter ∧
+        left.nextCenter = right.nextLeft ∧
+        left.nextRight = right.nextCenter := by
+  rw [hMatches_toWangTile_iff, overlapCellColor_eq_iff]
+
 theorem vMatches_toWangTile_iff (lower upper : MachineHistoryTile) :
     WangTile.VMatches lower.toWangTile upper.toWangTile ↔
       tripleCellColor lower.nextLeft lower.nextCenter lower.nextRight =
         tripleCellColor upper.prevLeft upper.prevCenter upper.prevRight := by
   rfl
+
+theorem vMatches_toWangTile_iff_cells (lower upper : MachineHistoryTile) :
+    WangTile.VMatches lower.toWangTile upper.toWangTile ↔
+      lower.nextLeft = upper.prevLeft ∧
+        lower.nextCenter = upper.prevCenter ∧
+        lower.nextRight = upper.prevRight := by
+  rw [vMatches_toWangTile_iff, tripleCellColor_eq_iff]
 
 end MachineHistoryTile
 
