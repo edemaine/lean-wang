@@ -1204,6 +1204,41 @@ theorem IsNormalMachineTile.positive_row_of_seeded_tiling {M : Machine}
             (hvalid.1 (pos, time + 1 + 1))
             (x (pos + 1, time + 1 + 1)).2
 
+theorem seeded_tiling_positive_row_decode {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) (time pos : Nat) :
+    ∃ t : MachineHistoryTile,
+      t ∈ machineHistoryTiles M ∧
+        t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1 := by
+  exact IsNormalMachineTile.positive_row_of_seeded_tiling hvalid hseed time pos
+
+theorem seeded_tiling_positive_row_prev_cells_of_lower {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M)
+    {time pos : Nat} {lower : MachineHistoryTile}
+    (hlower :
+      (x (pos, time)).1 =
+        lower.toTaggedWangTile (machineRowTag time) normalRowTag) :
+    ∃ upper : MachineHistoryTile,
+      upper ∈ machineHistoryTiles M ∧
+        upper.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1 ∧
+        upper.prevLeft = lower.nextLeft ∧
+        upper.prevCenter = lower.nextCenter ∧
+        upper.prevRight = lower.nextRight := by
+  rcases seeded_tiling_positive_row_decode hvalid hseed time pos with
+    ⟨upper, hupperMem, hupperTile⟩
+  have hv : WangTile.VMatches
+      (lower.toTaggedWangTile (machineRowTag time) normalRowTag)
+      (upper.toTaggedWangTile normalRowTag normalRowTag) := by
+    simpa [hlower, hupperTile] using hvalid.2 (pos, time)
+  have hcells := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+    (machineRowTag time) normalRowTag normalRowTag normalRowTag
+    lower upper).1 hv
+  exact ⟨upper, hupperMem, hupperTile, hcells.2.1.symm,
+    hcells.2.2.1.symm, hcells.2.2.2.symm⟩
+
 theorem seeded_tiling_row_zero_one_eq {M : Machine}
     {x : Nat × Nat → TileIn (machineTiles M)}
     (hvalid : ValidQuarterTiling (machineTiles M) x)
