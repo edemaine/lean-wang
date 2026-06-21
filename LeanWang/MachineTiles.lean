@@ -845,6 +845,17 @@ def taggedMachineTiles (M : Machine) : TileSet :=
 def machineTiles (M : Machine) : TileSet :=
   taggedMachineTiles M
 
+theorem mem_machineTiles_iff (M : Machine) (tile : WangTile) :
+    tile ∈ machineTiles M ↔
+      (∃ t : MachineHistoryTile,
+        t ∈ initialRowHistoryTiles M ∧
+          t.toTaggedWangTile initialRowTag normalRowTag = tile) ∨
+      (∃ t : MachineHistoryTile,
+        t ∈ machineHistoryTiles M ∧
+          t.toTaggedWangTile normalRowTag normalRowTag = tile) := by
+  simp [machineTiles, taggedMachineTiles, initialRowMachineTiles,
+    normalRowMachineTiles]
+
 theorem initialRowHistoryTile_zero_mem (M : Machine) :
     runHistoryTile M 0 0 ∈ initialRowHistoryTiles M := by
   simp [initialRowHistoryTiles]
