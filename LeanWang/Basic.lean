@@ -259,6 +259,40 @@ theorem tilesPlane_right_of_tilesPlane_productTileSet {base payload : TileSet}
       (baseAt p).1 (payloadAt p).1
       (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1)).1).1 hmatch |>.2
 
+theorem tilesPlane_productTileSet_of_tilesPlane {base payload : TileSet}
+    (hbase : TilesPlane base) (hpayload : TilesPlane payload) :
+    TilesPlane (productTileSet base payload) := by
+  rcases hbase with ⟨baseAt, hbaseValid⟩
+  rcases hpayload with ⟨payloadAt, hpayloadValid⟩
+  let x : Int × Int → TileIn (productTileSet base payload) := fun p =>
+    ⟨WangTile.product (baseAt p).1 (payloadAt p).1,
+      product_mem_productTileSet (baseAt p).2 (payloadAt p).2⟩
+  refine ⟨x, ?_⟩
+  constructor
+  · intro p
+    rw [show (x p).1 = WangTile.product (baseAt p).1 (payloadAt p).1 by rfl,
+      show (x (p.1 + 1, p.2)).1 =
+        WangTile.product (baseAt (p.1 + 1, p.2)).1
+          (payloadAt (p.1 + 1, p.2)).1 by rfl,
+      WangTile.HMatches_product_iff]
+    exact ⟨hbaseValid.1 p, hpayloadValid.1 p⟩
+  · intro p
+    rw [show (x p).1 = WangTile.product (baseAt p).1 (payloadAt p).1 by rfl,
+      show (x (p.1, p.2 + 1)).1 =
+        WangTile.product (baseAt (p.1, p.2 + 1)).1
+          (payloadAt (p.1, p.2 + 1)).1 by rfl,
+      WangTile.VMatches_product_iff]
+    exact ⟨hbaseValid.2 p, hpayloadValid.2 p⟩
+
+theorem tilesPlane_productTileSet_iff (base payload : TileSet) :
+    TilesPlane (productTileSet base payload) ↔ TilesPlane base ∧ TilesPlane payload := by
+  constructor
+  · intro h
+    exact ⟨tilesPlane_left_of_tilesPlane_productTileSet h,
+      tilesPlane_right_of_tilesPlane_productTileSet h⟩
+  · rintro ⟨hbase, hpayload⟩
+    exact tilesPlane_productTileSet_of_tilesPlane hbase hpayload
+
 /-- The centered integer box `[-r, r] × [-r, r]`. -/
 def InBox (r : Nat) (p : Int × Int) : Prop :=
   -(r : Int) ≤ p.1 ∧ p.1 ≤ (r : Int) ∧
@@ -376,6 +410,23 @@ theorem validRectangleBool_eq_true (T : TileSet) {w h : Nat} (x : Rectangle w h)
     validRectangleBool T x = true ↔ ValidRectangle T x := by
   simp [validRectangleBool]
 
+theorem validRectangle_product_of_validRectangle {base payload : TileSet}
+    {w h : Nat} {baseRect payloadRect : Rectangle w h}
+    (hbase : ValidRectangle base baseRect)
+    (hpayload : ValidRectangle payload payloadRect) :
+    ValidRectangle (productTileSet base payload)
+      (fun i j => WangTile.product (baseRect i j) (payloadRect i j)) := by
+  constructor
+  · intro i j
+    exact product_mem_productTileSet (hbase.1 i j) (hpayload.1 i j)
+  constructor
+  · intro i j hi
+    rw [WangTile.HMatches_product_iff]
+    exact ⟨hbase.2.1 i j hi, hpayload.2.1 i j hi⟩
+  · intro i j hj
+    rw [WangTile.VMatches_product_iff]
+    exact ⟨hbase.2.2 i j hj, hpayload.2.2 i j hj⟩
+
 /-- A tileset tiles a finite `w × h` rectangle. -/
 def TileableRectangle (T : TileSet) (w h : Nat) : Prop :=
   ∃ x : Rectangle w h, ValidRectangle T x
@@ -384,6 +435,22 @@ def TileableRectangle (T : TileSet) (w h : Nat) : Prop :=
 def TileableSquare (T : TileSet) (n : Nat) : Prop :=
   TileableRectangle T n n
 
+theorem tileableRectangle_product_of_tileableRectangle {base payload : TileSet}
+    {w h : Nat} :
+    TileableRectangle base w h →
+      TileableRectangle payload w h →
+      TileableRectangle (productTileSet base payload) w h := by
+  rintro ⟨baseRect, hbase⟩ ⟨payloadRect, hpayload⟩
+  exact ⟨fun i j => WangTile.product (baseRect i j) (payloadRect i j),
+    validRectangle_product_of_validRectangle hbase hpayload⟩
+
+theorem tileableSquare_product_of_tileableSquare {base payload : TileSet}
+    {n : Nat} :
+    TileableSquare base n →
+      TileableSquare payload n →
+      TileableSquare (productTileSet base payload) n := by
+  exact tileableRectangle_product_of_tileableRectangle
+
 /--
 A tileset tiles a nonempty `n × n` square with a prescribed tile in the lower-left
 corner. The `0 < n` witness avoids manufacturing a corner in the empty square.
@@ -391,6 +458,18 @@ corner. The `0 < n` witness avoids manufacturing a corner in the empty square.
 def TileableFixedCornerSquare (T : TileSet) (seed : WangTile) (n : Nat) : Prop :=
   ∃ hn : 0 < n, ∃ x : Rectangle n n,
     ValidRectangle T x ∧ x ⟨0, hn⟩ ⟨0, hn⟩ = seed
+
+theorem tileableFixedCornerSquare_product_of_tileableFixedCornerSquare
+    {base payload : TileSet} {baseSeed payloadSeed : WangTile} {n : Nat} :
+    TileableFixedCornerSquare base baseSeed n →
+      TileableFixedCornerSquare payload payloadSeed n →
+      TileableFixedCornerSquare (productTileSet base payload)
+        (WangTile.product baseSeed payloadSeed) n := by
+  rintro ⟨hn, baseRect, hbaseValid, hbaseSeed⟩
+    ⟨_hn, payloadRect, hpayloadValid, hpayloadSeed⟩
+  refine ⟨hn, fun i j => WangTile.product (baseRect i j) (payloadRect i j), ?_, ?_⟩
+  · exact validRectangle_product_of_validRectangle hbaseValid hpayloadValid
+  · simp [hbaseSeed, hpayloadSeed]
 
 /-- If a plane tiling exists, every finite square is tileable by restriction. -/
 theorem tileableSquare_of_tilesPlane {T : TileSet} :
