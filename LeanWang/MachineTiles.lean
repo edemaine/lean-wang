@@ -2017,6 +2017,12 @@ theorem mem_machineHistoryTiles_iff (M : Machine) (t : MachineHistoryTile) :
   cases t
   simp [machineHistoryTiles]
 
+theorem mem_tableProgramMachineHistoryTilesData_iff_machineHistoryTiles
+    (P : TableProgram) (t : MachineHistoryTile) :
+    t ∈ tableProgramMachineHistoryTilesData P ↔ t ∈ machineHistoryTiles P.toMachine := by
+  rw [mem_tableProgramMachineHistoryTilesData_iff, mem_machineHistoryTiles_iff]
+  simp [tableProgramMachineCells_eq_machineCells, tableProgramLocalNextCell?_eq_localNextCell?]
+
 theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTile}
     (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
     (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
@@ -2130,6 +2136,12 @@ def initialRowMachineTiles (M : Machine) : TileSet :=
 def normalRowMachineTiles (M : Machine) : TileSet :=
   (machineHistoryTiles M).map
     (MachineHistoryTile.toTaggedWangTile normalRowTag normalRowTag)
+
+theorem mem_tableProgramNormalRowMachineTilesData_iff
+    (P : TableProgram) (tile : WangTile) :
+    tile ∈ tableProgramNormalRowMachineTilesData P ↔ tile ∈ normalRowMachineTiles P.toMachine := by
+  simp [tableProgramNormalRowMachineTilesData, normalRowMachineTiles,
+    mem_tableProgramMachineHistoryTilesData_iff_machineHistoryTiles]
 
 def taggedMachineTiles (M : Machine) : TileSet :=
   initialRowMachineTiles M ++ normalRowMachineTiles M
