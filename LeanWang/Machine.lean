@@ -414,6 +414,33 @@ theorem toTableMachine_states (P : TableProgram) :
 theorem toTableMachine_step (P : TableProgram) :
     P.toTableMachine.step = P.toTableMachine.toMachine.step := rfl
 
+@[simp]
+theorem toMachine_step (P : TableProgram) :
+    P.toMachine.step = P.toTableMachine.step := rfl
+
+@[simp]
+theorem toMachine_blank (P : TableProgram) :
+    P.toMachine.blank = P.blank := rfl
+
+@[simp]
+theorem toMachine_start (P : TableProgram) :
+    P.toMachine.start = P.start := rfl
+
+@[simp]
+theorem toMachine_halt (P : TableProgram) :
+    P.toMachine.halt = P.halt := rfl
+
+theorem toMachine_step_of_transition?_eq_some {P : TableProgram} {q a : Nat}
+    {e : TableTransition} (h : P.toTableMachine.transition? q a = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates) :
+    P.toMachine.step q a = e.action :=
+  TableMachine.step_of_transition?_eq_some h hwrite hnext
+
+theorem toMachine_step_of_transition?_eq_none {P : TableProgram} {q a : Nat}
+    (h : P.toTableMachine.transition? q a = none) :
+    P.toMachine.step q a = (P.blank, P.halt, Move.right) :=
+  TableMachine.step_of_transition?_eq_none h
+
 end TableProgram
 
 instance instPrimcodableTableProgram : Primcodable TableProgram :=
