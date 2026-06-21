@@ -291,6 +291,24 @@ theorem matchesInput_primrec :
     (Primrec.beq.comp (read_primrec.comp Primrec.fst)
       (Primrec.snd.comp Primrec.snd))
 
+@[simp]
+theorem matchesInput_mk_self (q a write next : Nat) (move : Move) :
+    ({ state := q, read := a, write := write, next := next, move := move } :
+      TableTransition).matchesInput q a = true := by
+  simp [matchesInput]
+
+theorem matchesInput_mk_of_state_ne {q q' a read write next : Nat} {move : Move}
+    (h : q' ≠ q) :
+    ({ state := q', read := read, write := write, next := next, move := move } :
+      TableTransition).matchesInput q a = false := by
+  simp [matchesInput, h]
+
+theorem matchesInput_mk_of_read_ne {q a a' write next : Nat} {move : Move}
+    (h : a' ≠ a) :
+    ({ state := q, read := a', write := write, next := next, move := move } :
+      TableTransition).matchesInput q a = false := by
+  simp [matchesInput, h]
+
 def lookup? (table : List TableTransition) (q a : Nat) : Option TableTransition :=
   (table.drop (table.findIdx fun e => e.matchesInput q a)).head?
 
@@ -329,6 +347,19 @@ theorem find?_computable :
     Computable (fun p : List TableTransition × Nat × Nat =>
       p.1.find? fun e => e.matchesInput p.2.1 p.2.2) :=
   find?_primrec.to_comp
+
+@[simp]
+theorem find?_cons_of_matchesInput {e : TableTransition} {table : List TableTransition}
+    {q a : Nat} (h : e.matchesInput q a = true) :
+    (e :: table).find? (fun e => e.matchesInput q a) = some e := by
+  simp [h]
+
+@[simp]
+theorem find?_cons_of_not_matchesInput {e : TableTransition} {table : List TableTransition}
+    {q a : Nat} (h : e.matchesInput q a = false) :
+    (e :: table).find? (fun e => e.matchesInput q a) =
+      table.find? (fun e => e.matchesInput q a) := by
+  simp [h]
 
 end TableTransition
 
@@ -556,6 +587,21 @@ theorem toMachine_step_of_transition?_eq_none {P : TableProgram} {q a : Nat}
     (h : P.toTableMachine.transition? q a = none) :
     P.toMachine.step q a = (P.blank, P.halt, Move.right) :=
   TableMachine.step_of_transition?_eq_none h
+
+theorem transition?_eq_some_of_table_head_matches {P : TableProgram}
+    {e : TableTransition} {table : List TableTransition} {q a : Nat}
+    (htable : P.table = e :: table) (hmatch : e.matchesInput q a = true) :
+    P.toTableMachine.transition? q a = some e := by
+  unfold TableMachine.transition?
+  simp [TableProgram.toTableMachine, htable, hmatch]
+
+theorem transition?_eq_tail_of_table_head_not_matches {P : TableProgram}
+    {e : TableTransition} {table : List TableTransition} {q a : Nat}
+    (htable : P.table = e :: table) (hmatch : e.matchesInput q a = false) :
+    P.toTableMachine.transition? q a =
+      table.find? fun e => e.matchesInput q a := by
+  unfold TableMachine.transition?
+  simp [TableProgram.toTableMachine, htable, hmatch]
 
 theorem toMachine_nextID_of_transition?_eq_some {P : TableProgram} {c : ID}
     {e : TableTransition}
