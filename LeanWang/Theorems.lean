@@ -160,6 +160,10 @@ def fixedDominoReduction (c : Code) : TileSet × WangTile :=
   let M := programMachine c
   (machineTiles M, machineSeed M)
 
+theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
+  unfold fixedDominoReduction programMachine
+  exact Computable.const (machineTiles dummyMachine, machineSeed dummyMachine)
+
 /-- Correctness of the fixed domino reduction from nonhalting. -/
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
@@ -250,6 +254,28 @@ theorem payload_eq_seed_of_product_corner_mem_combineWithScaffold {S : Scaffold}
   have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
   exact hparts.2.symm.trans (hseed hparts.1)
 
+theorem combineWithScaffold_primrec (S : Scaffold) :
+    Primrec (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) := by
+  classical
+  unfold combineWithScaffold
+  refine Primrec.list_flatMap (Primrec.const S.tiles) ?_
+  apply Primrec₂.mk
+  have hpayload : Primrec fun a : (TileSet × WangTile) × WangTile =>
+      if a.2 = S.corner then a.1.1.filter (fun p => p = a.1.2) else a.1.1 := by
+    refine Primrec.ite ?_ ?_ ?_
+    · exact Primrec.eq.comp Primrec.snd (Primrec.const S.corner)
+    · exact (PrimrecRel.listFilter (R := fun p seed : WangTile => p = seed) Primrec.eq).comp
+        (Primrec.fst.comp Primrec.fst) (Primrec.snd.comp Primrec.fst)
+    · exact Primrec.fst.comp Primrec.fst
+  refine Primrec.list_map hpayload ?_
+  rw [← Primrec₂.uncurry]
+  exact WangTile.product_primrec.comp
+    (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd)
+
+theorem combineWithScaffold_computable (S : Scaffold) :
+    Computable (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) :=
+  (combineWithScaffold_primrec S).to_comp
+
 /-- The abstract property required of a scaffold for the Berger/Robinson reduction. -/
 def IsScaffold (S : Scaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
@@ -276,6 +302,10 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
 def dominoReduction (c : Code) : TileSet :=
   combineWithScaffold ollingerScaffold (fixedDominoReduction c).1 (fixedDominoReduction c).2
 
+theorem dominoReduction_computable : Computable dominoReduction := by
+  unfold dominoReduction
+  exact (combineWithScaffold_computable ollingerScaffold).comp fixedDominoReduction_computable
+
 /-- Correctness of the final domino reduction from nonhalting. -/
 theorem dominoReduction_correct (c : Code) :
     TilesPlane (dominoReduction c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
@@ -292,8 +322,8 @@ def dominoReductionCode (c : Code) : Nat :=
 
 /-- Computability target for the encoded final reduction. -/
 theorem dominoReductionCode_computable : Computable dominoReductionCode := by
-  unfold dominoReductionCode dominoReduction combineWithScaffold ollingerScaffold encodeTileSet
-  exact Computable.const (Encodable.encode ([] : TileSet))
+  unfold dominoReductionCode
+  exact encodeTileSet_computable.comp dominoReduction_computable
 
 /-- Correctness target for the encoded final reduction. -/
 theorem dominoReductionCode_correct (c : Code) :
