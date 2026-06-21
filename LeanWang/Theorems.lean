@@ -5,6 +5,7 @@ Authors: Erik Demaine, OpenAI
 -/
 import LeanWang.Compactness
 import LeanWang.Machine
+import LeanWang.MachineTiles
 import Mathlib.Computability.Reduce
 
 /-!
@@ -36,14 +37,6 @@ def programMachine (_c : Code) : Machine :=
 theorem programMachine_correct (c : Code) :
     Machine.HaltsEmpty (programMachine c) ↔ (Nat.Partrec.Code.eval c 0).Dom := by
   sorry
-
-/-- The tileset produced from a concrete machine for the fixed domino construction. -/
-def machineTiles (_M : Machine) : TileSet :=
-  []
-
-/-- The distinguished origin/corner tile for the fixed domino construction. -/
-def machineSeed (_M : Machine) : WangTile :=
-  monochromeTile
 
 /-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
 theorem machineTiles_correct (M : Machine) :

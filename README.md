@@ -15,6 +15,8 @@ the concrete definitions needed for the Berger/Robinson route:
   `tilesQuarterWithSeed_iff_all_fixedCornerSquares`.
 - `LeanWang.Machine`: a small deterministic one-tape machine model for the
   Wang-tile simulation layer.
+- `LeanWang.MachineTiles`: finite local-history Wang-tile data generated from a
+  concrete machine.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
@@ -30,8 +32,8 @@ placeholders:
 
 - `programMachine_correct`: compile Mathlib partial-recursive codes to the
   concrete machine model.
-- `machineTiles_correct`: prove the machine-to-Wang-tile fixed domino
-  construction.
+- `machineTiles_correct`: prove correctness of the local-history
+  machine-to-Wang-tile fixed domino construction.
 - `ollingerScaffold_isScaffold`: prove the scaffold converts fixed-corner
   finite-square instances to ordinary plane tiling.
 
