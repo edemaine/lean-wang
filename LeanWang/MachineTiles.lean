@@ -329,6 +329,46 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
 
+namespace Machine
+
+theorem localNextCell?_at_head {M : Machine} {c : ID}
+    (hstate : c.state ≠ M.halt)
+    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
+    localNextCell? M (c.cellAtLeft c.head) (c.cellAt c.head) (c.cellAt (c.head + 1)) =
+      some ((M.nextID c).cellAt c.head) := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  cases hhead : c.head with
+  | zero =>
+      cases move with
+      | left =>
+          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          have hstate' : state' ≠ M.halt := by
+            simpa [hstep] using hnextState
+          simp [ID.cellAt, Machine.nextID, hstate, hhead, hstep0,
+            localNextCell?, Move.apply, hstate']
+      | right =>
+          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.right) := by
+            simpa [hhead] using hstep
+          simp [ID.cellAt, Machine.nextID, hstate, hhead, hstep0,
+            localNextCell?, Move.apply]
+  | succ pred =>
+      cases move with
+      | left =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1)) = (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
+            localNextCell?, Move.apply]
+      | right =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1)) = (write, state', Move.right) := by
+            simpa [hhead] using hstep
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
+            localNextCell?, Move.apply]
+
+end Machine
+
 /-- A local `2 × 3` machine-history block. -/
 structure MachineHistoryTile where
   prevLeft : MachineCell
