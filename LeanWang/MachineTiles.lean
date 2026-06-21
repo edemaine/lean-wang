@@ -1543,16 +1543,165 @@ theorem runHistoryTile_boundaryOK (M : Machine) (time pos : Nat) :
       exact False.elim (hnot (by
         simpa [runHistoryTile, Machine.runCellLeft] using hprev))
 
+def machineHistoryTilePrefixes2 (cells : List MachineCell) :
+    List (MachineCell × MachineCell) := do
+  let prevLeft ← cells
+  let prevCenter ← cells
+  pure (prevLeft, prevCenter)
+
+theorem machineHistoryTilePrefixes2_primrec : Primrec machineHistoryTilePrefixes2 := by
+  unfold machineHistoryTilePrefixes2
+  refine Primrec.list_flatMap Primrec.id ?_
+  apply Primrec₂.mk
+  have hmap :
+      Primrec₂ (fun p : List MachineCell × MachineCell =>
+        fun c : MachineCell => (p.2, c)) := by
+    rw [← Primrec₂.uncurry]
+    exact Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd
+  exact (Primrec.list_map
+    (show Primrec (fun p : List MachineCell × MachineCell => p.1) from Primrec.fst) hmap
+    ).of_eq fun p => by
+      induction p.1 with
+      | nil => rfl
+      | cons _ _ ih => simp [ih]
+
+def machineHistoryTilePrefixes3 (cells : List MachineCell) :
+    List ((MachineCell × MachineCell) × MachineCell) := do
+  let pref ← machineHistoryTilePrefixes2 cells
+  let prevRight ← cells
+  pure (pref, prevRight)
+
+theorem machineHistoryTilePrefixes3_primrec : Primrec machineHistoryTilePrefixes3 := by
+  unfold machineHistoryTilePrefixes3
+  refine Primrec.list_flatMap machineHistoryTilePrefixes2_primrec ?_
+  apply Primrec₂.mk
+  have hmap :
+      Primrec₂ (fun p : List MachineCell × (MachineCell × MachineCell) =>
+        fun c : MachineCell => (p.2, c)) := by
+    rw [← Primrec₂.uncurry]
+    exact Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd
+  exact (Primrec.list_map
+    (show Primrec (fun p : List MachineCell × (MachineCell × MachineCell) => p.1) from
+      Primrec.fst) hmap).of_eq fun p => by
+      induction p.1 with
+      | nil => rfl
+      | cons _ _ ih => simp [ih]
+
+def machineHistoryTilePrefixes4 (cells : List MachineCell) :
+    List (((MachineCell × MachineCell) × MachineCell) × MachineCell) := do
+  let pref ← machineHistoryTilePrefixes3 cells
+  let nextLeft ← cells
+  pure (pref, nextLeft)
+
+theorem machineHistoryTilePrefixes4_primrec : Primrec machineHistoryTilePrefixes4 := by
+  unfold machineHistoryTilePrefixes4
+  refine Primrec.list_flatMap machineHistoryTilePrefixes3_primrec ?_
+  apply Primrec₂.mk
+  have hmap :
+      Primrec₂ (fun p : List MachineCell × ((MachineCell × MachineCell) × MachineCell) =>
+        fun c : MachineCell => (p.2, c)) := by
+    rw [← Primrec₂.uncurry]
+    exact Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd
+  exact (Primrec.list_map
+    (show Primrec
+      (fun p : List MachineCell × ((MachineCell × MachineCell) × MachineCell) => p.1) from
+      Primrec.fst) hmap).of_eq fun p => by
+      induction p.1 with
+      | nil => rfl
+      | cons _ _ ih => simp [ih]
+
+def machineHistoryTilePrefixes5 (cells : List MachineCell) :
+    List ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell) := do
+  let pref ← machineHistoryTilePrefixes4 cells
+  let nextCenter ← cells
+  pure (pref, nextCenter)
+
+theorem machineHistoryTilePrefixes5_primrec : Primrec machineHistoryTilePrefixes5 := by
+  unfold machineHistoryTilePrefixes5
+  refine Primrec.list_flatMap machineHistoryTilePrefixes4_primrec ?_
+  apply Primrec₂.mk
+  have hmap :
+      Primrec₂ (fun p : List MachineCell ×
+        (((MachineCell × MachineCell) × MachineCell) × MachineCell) =>
+        fun c : MachineCell => (p.2, c)) := by
+    rw [← Primrec₂.uncurry]
+    exact Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd
+  exact (Primrec.list_map
+    (show Primrec
+      (fun p : List MachineCell ×
+        (((MachineCell × MachineCell) × MachineCell) × MachineCell) => p.1) from
+      Primrec.fst) hmap).of_eq fun p => by
+      induction p.1 with
+      | nil => rfl
+      | cons _ _ ih => simp [ih]
+
 /-- All six-cell history blocks over a given finite cell support,
 before local validity filtering. -/
 def machineHistoryTileCandidates (cells : List MachineCell) : List MachineHistoryTile := do
-  let prevLeft ← cells
-  let prevCenter ← cells
-  let prevRight ← cells
-  let nextLeft ← cells
-  let nextCenter ← cells
+  let pref ← machineHistoryTilePrefixes5 cells
   let nextRight ← cells
-  pure { prevLeft, prevCenter, prevRight, nextLeft, nextCenter, nextRight }
+  pure
+    { prevLeft := pref.1.1.1.1
+      prevCenter := pref.1.1.1.2
+      prevRight := pref.1.1.2
+      nextLeft := pref.1.2
+      nextCenter := pref.2
+      nextRight }
+
+theorem machineHistoryTileCandidates_primrec : Primrec machineHistoryTileCandidates := by
+  unfold machineHistoryTileCandidates
+  refine Primrec.list_flatMap machineHistoryTilePrefixes5_primrec ?_
+  apply Primrec₂.mk
+  let pref :
+      (List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell)) ×
+        MachineCell →
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell) :=
+    fun p => p.1.2
+  have hprefix : Primrec pref := Primrec.snd.comp Primrec.fst
+  let a4 : (List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell)) ×
+        MachineCell →
+        (((MachineCell × MachineCell) × MachineCell) × MachineCell) :=
+    fun p => (pref p).1
+  let a3 : (List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell)) ×
+        MachineCell →
+        ((MachineCell × MachineCell) × MachineCell) :=
+    fun p => (pref p).1.1
+  let a2 : (List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell)) ×
+        MachineCell →
+        (MachineCell × MachineCell) :=
+    fun p => (pref p).1.1.1
+  have ha4 : Primrec a4 := Primrec.fst.comp hprefix
+  have ha3 : Primrec a3 := Primrec.fst.comp ha4
+  have ha2 : Primrec a2 := Primrec.fst.comp ha3
+  have hmap :
+      Primrec₂ (fun p : List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell) =>
+        fun nextRight : MachineCell =>
+          ({ prevLeft := p.2.1.1.1.1
+             prevCenter := p.2.1.1.1.2
+             prevRight := p.2.1.1.2
+             nextLeft := p.2.1.2
+             nextCenter := p.2.2
+             nextRight } : MachineHistoryTile)) := by
+    rw [← Primrec₂.uncurry]
+    exact MachineHistoryTile.mk_primrec.comp
+      (Primrec.pair (Primrec.fst.comp ha2)
+        (Primrec.pair (Primrec.snd.comp ha2)
+          (Primrec.pair (Primrec.snd.comp ha3)
+            (Primrec.pair (Primrec.snd.comp ha4)
+              (Primrec.pair (Primrec.snd.comp hprefix) Primrec.snd)))))
+  exact (Primrec.list_map
+    (show Primrec
+      (fun p : List MachineCell ×
+        ((((MachineCell × MachineCell) × MachineCell) × MachineCell) × MachineCell) => p.1)
+      from Primrec.fst) hmap).of_eq fun p => by
+      induction p.1 with
+      | nil => rfl
+      | cons _ _ ih => simp [ih]
 
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
