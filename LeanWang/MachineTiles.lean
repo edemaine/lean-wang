@@ -1543,6 +1543,17 @@ theorem runHistoryTile_boundaryOK (M : Machine) (time pos : Nat) :
       exact False.elim (hnot (by
         simpa [runHistoryTile, Machine.runCellLeft] using hprev))
 
+/-- All six-cell history blocks over a given finite cell support,
+before local validity filtering. -/
+def machineHistoryTileCandidates (cells : List MachineCell) : List MachineHistoryTile := do
+  let prevLeft ← cells
+  let prevCenter ← cells
+  let prevRight ← cells
+  let nextLeft ← cells
+  let nextCenter ← cells
+  let nextRight ← cells
+  pure { prevLeft, prevCenter, prevRight, nextLeft, nextCenter, nextRight }
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
