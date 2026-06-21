@@ -755,4 +755,19 @@ theorem machineSeed_eq (M : Machine) :
     machineSeed M = (initialHistoryTile M).toWangTile :=
   rfl
 
+theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) :
+    TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  let x : Nat × Nat → TileIn (machineTiles M) := fun p =>
+    ⟨(runHistoryTile M p.2 p.1).toWangTile,
+      toWangTile_mem_machineTiles
+        (runHistoryTile_mem_machineHistoryTiles_of_not_halts h p.2 p.1)⟩
+  refine ⟨x, ?_, ?_⟩
+  · constructor
+    · intro p
+      exact runHistoryTile_hMatches M p.2 p.1
+    · intro p
+      exact runHistoryTile_vMatches M p.2 p.1
+  · simp [x, machineSeed_eq, initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+
 end LeanWang
