@@ -112,22 +112,20 @@ theorem dominoReduction_correct (c : Code) :
     TilesPlane (dominoReduction c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   sorry
 
-/-- Decode natural-number inputs as tilesets for an encoded statement of the domino problem. -/
-def decodeTileSet (_n : Nat) : TileSet :=
-  []
-
-/-- Encoded version of `dominoReduction`; later this should be the computable tile encoding. -/
-def dominoReductionCode (_c : Code) : Nat :=
-  0
+/-- Encoded version of `dominoReduction`, using the canonical finite tileset encoding. -/
+def dominoReductionCode (c : Code) : Nat :=
+  encodeTileSet (dominoReduction c)
 
 /-- Computability target for the encoded final reduction. -/
 theorem dominoReductionCode_computable : Computable dominoReductionCode := by
-  sorry
+  unfold dominoReductionCode dominoReduction combineWithScaffold encodeTileSet
+  exact Computable.const (Encodable.encode ([] : TileSet))
 
 /-- Correctness target for the encoded final reduction. -/
 theorem dominoReductionCode_correct (c : Code) :
     TilesPlane (decodeTileSet (dominoReductionCode c)) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  sorry
+  rw [dominoReductionCode, decodeTileSet_encodeTileSet]
+  exact dominoReduction_correct c
 
 /-- The domino problem is undecidable for encoded finite Wang tilesets. -/
 theorem encoded_domino_problem_undecidable :

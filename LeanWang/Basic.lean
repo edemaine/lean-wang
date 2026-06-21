@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, OpenAI
 -/
 import Mathlib.Computability.Halting
+import Mathlib.Computability.Primrec.List
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Int.Basic
 import Mathlib.Data.List.Basic
@@ -27,6 +28,61 @@ deriving DecidableEq, Repr
 
 /-- A finite Wang tileset. Duplicates are harmless and ignored by membership predicates. -/
 abbrev TileSet := List WangTile
+
+/-- View a Wang tile as the quadruple of its edge colors. -/
+def WangTile.toTuple (t : WangTile) : Nat × Nat × Nat × Nat :=
+  (t.n, t.s, t.e, t.w)
+
+/-- Build a Wang tile from the quadruple of its edge colors. -/
+def WangTile.ofTuple (p : Nat × Nat × Nat × Nat) : WangTile where
+  n := p.1
+  s := p.2.1
+  e := p.2.2.1
+  w := p.2.2.2
+
+/-- Wang tiles are encoded by their four natural-number edge colors. -/
+def WangTile.equivTuple : WangTile ≃ Nat × Nat × Nat × Nat where
+  toFun := WangTile.toTuple
+  invFun := WangTile.ofTuple
+  left_inv := by
+    intro t
+    cases t
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨n, s, e, w⟩
+    rfl
+
+instance instPrimcodableWangTile : Primcodable WangTile :=
+  Primcodable.ofEquiv (Nat × Nat × Nat × Nat) WangTile.equivTuple
+
+/-- Encode a finite Wang tileset as a natural number. -/
+def encodeTileSet (T : TileSet) : Nat :=
+  Encodable.encode T
+
+/--
+Decode a natural number as a finite Wang tileset. Invalid codes decode to the
+empty tileset; every actual tileset has a canonical code via `encodeTileSet`.
+-/
+def decodeTileSet (n : Nat) : TileSet :=
+  (Encodable.decode (α := TileSet) n).getD []
+
+@[simp]
+theorem decodeTileSet_encodeTileSet (T : TileSet) :
+    decodeTileSet (encodeTileSet T) = T := by
+  simp [decodeTileSet, encodeTileSet]
+
+theorem decodeTileSet_surjective : Function.Surjective decodeTileSet := by
+  intro T
+  exact ⟨encodeTileSet T, decodeTileSet_encodeTileSet T⟩
+
+theorem encodeTileSet_computable : Computable encodeTileSet := by
+  change Computable fun T : TileSet => Encodable.encode T
+  exact Computable.encode
+
+theorem decodeTileSet_computable : Computable decodeTileSet := by
+  change Computable fun n : Nat => (Encodable.decode (α := TileSet) n).getD []
+  exact Computable.option_getD Computable.decode (Computable.const ([] : TileSet))
 
 /-- The type of tiles belonging to a fixed tileset. -/
 abbrev TileIn (T : TileSet) :=

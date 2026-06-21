@@ -6,8 +6,9 @@ The proof plan is in [`plan.md`](plan.md). The current implementation starts wit
 the concrete definitions needed for the Berger/Robinson route:
 
 - `LeanWang.Basic`: Wang tiles, plane and quarter-plane tilings, finite rectangle
-  tilings, executable finite rectangle search, and the easy compactness
-  restriction directions.
+  tilings, executable finite rectangle search, canonical natural-number
+  encoding/decoding for finite tilesets, and the easy compactness restriction
+  directions.
 - `LeanWang.Compactness`: the proved centered-box compactness theorem
   `tilesPlane_iff_all_tileableBoxes`, plus the square compactness theorem
   `tilesPlane_iff_all_tileableSquares`.
@@ -26,4 +27,6 @@ The build succeeds. The remaining compactness `sorry` is:
 - `tilesQuarterWithSeed_iff_all_fixedCornerSquares`
 
 Additional `sorry`s in `LeanWang.Theorems` are roadmap placeholders for the
-machine simulation, scaffold construction, and final undecidability reductions.
+machine simulation, scaffold construction, and undecidability reductions. The
+encoded reduction code now uses the canonical tileset encoding, and its
+correctness theorem follows from `dominoReduction_correct`.
