@@ -1281,6 +1281,25 @@ theorem seeded_tiling_positive_row_prev_cells_of_lower {M : Machine}
   exact ⟨upper, hupperMem, hupperTile, hcells.2.1.symm,
     hcells.2.2.1.symm, hcells.2.2.2.symm⟩
 
+theorem seeded_tiling_positive_row_hMatches_cells {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    {time pos : Nat} {left right : MachineHistoryTile}
+    (hleft :
+      left.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1)
+    (hright :
+      right.toTaggedWangTile normalRowTag normalRowTag = (x (pos + 1, time + 1)).1) :
+    left.prevCenter = right.prevLeft ∧
+      left.prevRight = right.prevCenter ∧
+      left.nextCenter = right.nextLeft ∧
+      left.nextRight = right.nextCenter := by
+  have hh : WangTile.HMatches
+      (left.toTaggedWangTile normalRowTag normalRowTag)
+      (right.toTaggedWangTile normalRowTag normalRowTag) := by
+    simpa [hleft, hright] using hvalid.1 (pos, time + 1)
+  exact (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+    normalRowTag normalRowTag normalRowTag normalRowTag left right).1 hh |>.2
+
 theorem nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells {M : Machine}
     {time pos : Nat} {t : MachineHistoryTile}
     (ht : t ∈ machineHistoryTiles M)
