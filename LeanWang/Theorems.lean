@@ -62,6 +62,14 @@ theorem codeEvalnHalts_primrec :
   simpa [codeEvalnHalts] using
     Primrec.option_isSome.comp Nat.Partrec.Code.primrec_evaln
 
+theorem codeEvaln_nonhalting_undecidable :
+    ¬ ComputablePred (fun c : Code => ¬ ∃ k : Nat, codeEvalnHalts c 0 k = true) := by
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => by
+      rw [code_eval_dom_iff_exists_codeEvalnHalts]
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- A dummy machine used until the compiler from partial-recursive codes is implemented. -/
 def dummyMachine : Machine where
   symbols := [0]
