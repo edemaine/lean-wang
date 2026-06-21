@@ -2506,6 +2506,43 @@ theorem tableProgramInitialHistoryTile1_eq_runHistoryTile (P : TableProgram) :
         TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
         -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart, hstep, Move.apply]
 
+theorem tableProgramInitialHistoryTile2_eq_runHistoryTile (P : TableProgram) :
+    tableProgramInitialHistoryTile2 P = runHistoryTile P.toMachine 0 2 := by
+  unfold tableProgramInitialHistoryTile2 tableProgramInitialNext1 tableProgramInitialNext2
+    tableProgramInitialBlankCell
+  have htmBlank : P.toTableMachine.blank = P.blank := rfl
+  have htmStart : P.toTableMachine.start = P.start := rfl
+  have htmHalt : P.toTableMachine.halt = P.halt := rfl
+  by_cases hstart : P.start = P.halt
+  · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+      Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+      TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+      -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart]
+  · rcases hstep : P.toTableMachine.step P.start P.blank with ⟨write, state', move⟩
+    cases move <;>
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+        Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+        TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+        -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart, hstep, Move.apply]
+
+theorem tableProgramInitialHistoryTile3_eq_runHistoryTile (P : TableProgram) :
+    tableProgramInitialHistoryTile3 P = runHistoryTile P.toMachine 0 3 := by
+  unfold tableProgramInitialHistoryTile3 tableProgramInitialNext2 tableProgramInitialBlankCell
+  have htmBlank : P.toTableMachine.blank = P.blank := rfl
+  have htmStart : P.toTableMachine.start = P.start := rfl
+  have htmHalt : P.toTableMachine.halt = P.halt := rfl
+  by_cases hstart : P.start = P.halt
+  · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+      Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+      TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+      -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart]
+  · rcases hstep : P.toTableMachine.step P.start P.blank with ⟨write, state', move⟩
+    cases move <;>
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+        Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+        TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+        -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart, hstep, Move.apply]
+
 theorem tableProgramSeedData_eq_tableProgramSeed (P : TableProgram) :
     tableProgramSeedData P = tableProgramSeed P := by
   unfold tableProgramSeedData tableProgramSeed machineSeed taggedMachineSeed
@@ -2604,6 +2641,15 @@ def tableProgramInitialRowHistoryTilesData (P : TableProgram) : List MachineHist
     tableProgramInitialHistoryTile2 P,
     tableProgramInitialHistoryTile3 P]
 
+theorem tableProgramInitialRowHistoryTilesData_eq_initialRowHistoryTiles
+    (P : TableProgram) :
+    tableProgramInitialRowHistoryTilesData P = initialRowHistoryTiles P.toMachine := by
+  simp [tableProgramInitialRowHistoryTilesData, initialRowHistoryTiles,
+    tableProgramSeedHistoryTile_eq_runHistoryTile,
+    tableProgramInitialHistoryTile1_eq_runHistoryTile,
+    tableProgramInitialHistoryTile2_eq_runHistoryTile,
+    tableProgramInitialHistoryTile3_eq_runHistoryTile]
+
 theorem tableProgramInitialRowHistoryTilesData_primrec :
     Primrec tableProgramInitialRowHistoryTilesData := by
   unfold tableProgramInitialRowHistoryTilesData
@@ -2616,6 +2662,18 @@ theorem tableProgramInitialRowHistoryTilesData_primrec :
 def tableProgramInitialRowMachineTilesData (P : TableProgram) : TileSet :=
   (tableProgramInitialRowHistoryTilesData P).map
     (MachineHistoryTile.toTaggedWangTile initialRowTag normalRowTag)
+
+theorem tableProgramInitialRowMachineTilesData_eq_initialRowMachineTiles
+    (P : TableProgram) :
+    tableProgramInitialRowMachineTilesData P = initialRowMachineTiles P.toMachine := by
+  unfold tableProgramInitialRowMachineTilesData initialRowMachineTiles
+  rw [tableProgramInitialRowHistoryTilesData_eq_initialRowHistoryTiles]
+
+theorem mem_tableProgramInitialRowMachineTilesData_iff
+    (P : TableProgram) (tile : WangTile) :
+    tile ∈ tableProgramInitialRowMachineTilesData P ↔
+      tile ∈ initialRowMachineTiles P.toMachine := by
+  rw [tableProgramInitialRowMachineTilesData_eq_initialRowMachineTiles]
 
 theorem tableProgramInitialRowMachineTilesData_primrec :
     Primrec tableProgramInitialRowMachineTilesData := by
