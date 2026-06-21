@@ -210,6 +210,117 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
 
+set_option linter.flexible false in
+theorem localNextCell?_mem {M : Machine} {left center right next : MachineCell}
+    (hleft : left.Mem M) (hcenter : center.Mem M) (hright : right.Mem M)
+    (hnext : localNextCell? M left center right = some next) :
+    next.Mem M := by
+  cases left with
+  | plain la =>
+      cases center with
+      | plain ca =>
+          cases right with
+          | plain ra =>
+              simp [localNextCell?] at hnext
+              cases hnext
+              exact hcenter
+          | head rq ra =>
+              simp [localNextCell?, MachineCell.Mem] at hcenter hright hnext ⊢
+              by_cases hrq : rq = M.halt
+              · simp [hrq] at hnext
+              · simp [hrq] at hnext
+                rcases hright with ⟨hrqState, _hrqHalt, hraSym⟩
+                rcases hstep : M.step rq ra with ⟨write, q', move⟩
+                simp [hstep] at hnext
+                cases move with
+                | left =>
+                    by_cases hq' : q' = M.halt
+                    · rw [if_pos hq'] at hnext
+                      cases hnext
+                    · rw [if_neg hq'] at hnext
+                      cases hnext
+                      exact ⟨by simpa [hstep] using M.step_state_mem rq ra hrqState hraSym,
+                        hq', hcenter⟩
+                | right =>
+                    cases hnext
+                    exact hcenter
+      | head cq ca =>
+          cases right with
+          | plain ra =>
+              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
+              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
+              simp [hcqHalt] at hnext
+              rcases hstep : M.step cq ca with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases hnext
+              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
+          | head rq ra =>
+              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
+              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
+              simp [hcqHalt] at hnext
+              rcases hstep : M.step cq ca with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases hnext
+              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
+  | head lq la =>
+      cases center with
+      | plain ca =>
+          cases right with
+          | plain ra =>
+              simp [localNextCell?, MachineCell.Mem] at hleft hcenter hnext ⊢
+              rcases hleft with ⟨hlqState, hlqHalt, hlaSym⟩
+              simp [hlqHalt] at hnext
+              rcases hstep : M.step lq la with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases move with
+              | left =>
+                  cases hnext
+                  exact hcenter
+              | right =>
+                  by_cases hq' : q' = M.halt
+                  · rw [if_pos hq'] at hnext
+                    cases hnext
+                  · rw [if_neg hq'] at hnext
+                    cases hnext
+                    exact ⟨by simpa [hstep] using M.step_state_mem lq la hlqState hlaSym,
+                      hq', hcenter⟩
+          | head rq ra =>
+              simp [localNextCell?, MachineCell.Mem] at hleft hcenter hnext ⊢
+              rcases hleft with ⟨hlqState, hlqHalt, hlaSym⟩
+              simp [hlqHalt] at hnext
+              rcases hstep : M.step lq la with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases move with
+              | left =>
+                  cases hnext
+                  exact hcenter
+              | right =>
+                  by_cases hq' : q' = M.halt
+                  · rw [if_pos hq'] at hnext
+                    cases hnext
+                  · rw [if_neg hq'] at hnext
+                    cases hnext
+                    exact ⟨by simpa [hstep] using M.step_state_mem lq la hlqState hlaSym,
+                      hq', hcenter⟩
+      | head cq ca =>
+          cases right with
+          | plain ra =>
+              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
+              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
+              simp [hcqHalt] at hnext
+              rcases hstep : M.step cq ca with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases hnext
+              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
+          | head rq ra =>
+              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
+              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
+              simp [hcqHalt] at hnext
+              rcases hstep : M.step cq ca with ⟨write, q', move⟩
+              simp [hstep] at hnext
+              cases hnext
+              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
+
 /-- A local `2 × 3` machine-history block. -/
 structure MachineHistoryTile where
   prevLeft : MachineCell
