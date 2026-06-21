@@ -1,0 +1,174 @@
+# Plan for Formalizing Wang Tile Undecidability in Lean
+
+## Recommendation
+
+Use the Berger/Robinson proof route as presented in [Jeandel and Vanier's notes](cirm.pdf), via the Ollinger/Robinson intrinsically substitutive scaffold.
+
+The proposed proof pipeline is:
+
+1. Prove the fixed domino problem undecidable by encoding computation in a quarter-plane.
+2. Prove a general scaffold reduction: if a finite Wang tileset produces arbitrarily large locally recognizable free squares, then fixed-corner square tiling reduces to ordinary plane tiling.
+3. Instantiate the scaffold with the Ollinger/Robinson substitutive tileset from the paper.
+
+This looks easiest to formalize because it separates the computability content from the geometric forcing construction. The other proof families have larger hidden dependencies:
+
+- Kari's proof is short in the paper only after assuming Hooper's immortality theorem, whose formalization would likely dominate the project.
+- The Aanderaa-Lewis proof needs sofic shifts, distance shifts, and p-adic/Toeplitz machinery.
+- The Durand-Romashchenko-Shen fixed-point proof aligns philosophically with Mathlib computability, but self-simulating macrotiles and runtime bookkeeping look significantly heavier.
+
+## Mathlib Starting Point
+
+Use Mathlib's computability layer for the undecidability source:
+
+- `Mathlib.Computability.Halting` provides the noncomputability of the halting predicate for `Nat.Partrec.Code.eval`.
+- `Mathlib.Computability.Partrec` provides `Partrec`, `Computable`, and `ComputablePred` over `Primcodable` types.
+- `Mathlib.Computability.Encoding` provides finite encodings useful for computability-facing syntax and data.
+
+The final theorem should be stated algorithmically, for example as a noncomputability result:
+
+```lean
+theorem domino_not_computable :
+  ¬ ComputablePred (fun T : TileSet => TilesPlane T)
+```
+
+or an equivalent encoded-list statement over `Nat`.
+
+## Implementation Plan
+
+### 1. Define Wang Tiles
+
+Use a concrete computable representation:
+
+```lean
+structure WangTile where
+  n s e w : Nat
+
+abbrev TileSet := List WangTile
+```
+
+Then define:
+
+- `ValidPlaneTiling T`
+- `TilesPlane T`
+- finite square tilings
+- fixed-corner square tilings
+- quarter-plane tilings with a fixed seed tile
+
+Keep the first version concrete and computability-friendly. Generalizing to finite color types can wait.
+
+### 2. Prove Finite Checking Is Computable
+
+Show that validity of an `m x n` rectangle assignment is decidable and computable. This gives the infrastructure needed for reductions and compactness statements.
+
+Useful finite predicates:
+
+- a tile belongs to a `TileSet`
+- adjacent tiles match horizontally
+- adjacent tiles match vertically
+- an array/list/function on `Fin m x Fin n` is a valid rectangle tiling
+- the lower-left tile is a prescribed tile
+
+### 3. Formalize Compactness
+
+Prove the finite-to-infinite compactness principle:
+
+```lean
+TilesPlane T ↔ ∀ n, TileableSquare T n
+```
+
+Also prove the variants needed later:
+
+- quarter-plane compactness
+- fixed-corner square compactness
+- arbitrary-large fixed-corner square tilings iff fixed-corner quarter-plane tiling
+
+This should be finite-alphabet diagonal compactness. A tree of finite square tilings plus an infinite path argument is likely the cleanest route.
+
+### 4. Fixed Domino Problem
+
+Formalize the paper's Figure 10 construction:
+
+- rows are instantaneous descriptions,
+- vertical adjacency enforces one computation step,
+- horizontal adjacency enforces row well-formedness,
+- the seed tile initializes the empty input computation at the quarter-plane corner,
+- halting-state tiles are omitted.
+
+Target theorem:
+
+```lean
+TilesQuarterWithSeed (tmTiles M) seed ↔ ¬ Halts M
+```
+
+This should reduce Mathlib's halting theorem to fixed domino undecidability.
+
+The machine-to-Wang-tile correspondence is expected to be straightforward. If Mathlib's Turing-machine API is awkward for row encodings, define a small one-tape or register-machine model tailored to the tiling construction, and connect it to `Nat.Partrec.Code` by a computable simulation. The user can help with this bridge as needed.
+
+### 5. Abstract Scaffold Reduction
+
+Before formalizing the concrete Ollinger tileset, prove an abstract theorem parameterized by a scaffold tileset `S`.
+
+Assume `S` has:
+
+- arbitrarily large locally recognizable squares in every global tiling,
+- a locally recognizable free subsquare inside each scaffold square,
+- local signals identifying the usable rows and columns,
+- a recognizable lower-left corner where the fixed tile is forced.
+
+Then define `combine S T t`, the superimposed tileset that places a copy of `T` into each free subsquare and forces `t` at the lower-left corner.
+
+Prove:
+
+```lean
+TilesPlane (combine S T t) ↔
+  ∀ n, TileableFixedCornerSquare T t n
+```
+
+This is the formal core of Theorem 10 in the paper.
+
+### 6. Instantiate the Scaffold
+
+Instantiate the abstract scaffold theorem using the Ollinger/Robinson tileset from the paper.
+
+For finite local verification, avoid hand-proving hundreds of color matches. Instead:
+
+- encode the finite tileset as Lean data,
+- define the finite local predicates,
+- use `native_decide` or reflection-style lemmas for exhaustive checks,
+- keep a small number of human-readable lemmas explaining what the verified checks imply.
+
+The goal is to make the large finite verification auditable without turning the proof into manual casework.
+
+### 7. Final Undecidability Theorem
+
+Compose:
+
+1. Mathlib halting undecidability.
+2. Computable reduction from halting/nonhalting to fixed domino.
+3. Compactness equivalence for fixed-corner square tilings.
+4. Abstract scaffold reduction.
+5. Concrete scaffold instantiation.
+
+Final target:
+
+```lean
+theorem domino_problem_undecidable :
+  ¬ ComputablePred (fun T : TileSet => TilesPlane T)
+```
+
+or the corresponding version over encoded natural-number inputs.
+
+## Milestones
+
+1. Basic Wang tile definitions and finite rectangle checking.
+2. Plane/quarter-plane compactness.
+3. Fixed domino theorem from halting.
+4. Abstract scaffold reduction.
+5. Concrete Ollinger/Robinson scaffold data and finite verification.
+6. Final noncomputability theorem.
+
+## Main Risks
+
+The largest risk is not the machine-to-Wang-tile encoding itself, which should be manageable, but choosing the right bridge from Mathlib's computability theorem to the machine model used in the tiling construction.
+
+The second largest risk is the concrete scaffold verification. This can be controlled by isolating it behind an abstract scaffold interface and using mechanical finite checks.
