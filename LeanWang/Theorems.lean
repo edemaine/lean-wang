@@ -483,6 +483,16 @@ theorem tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_act
   · exact validRectangle_payload_of_validCombinedRectangleLayers_of_active hlayers hactive
   · exact (hlayers.2.2.1 ⟨0, hn⟩ ⟨0, hn⟩ (hactive ⟨0, hn⟩ ⟨0, hn⟩)).2 hcorner
 
+def PlaneTilingForcesActiveCornerWindows (S : Scaffold) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold S T seed)),
+    ValidPlaneTiling (combineWithScaffold S T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ rect baseRect payloadRect : Rectangle n n,
+          ValidCombinedRectangleLayers S T seed rect baseRect payloadRect ∧
+            (∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true) ∧
+            baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner
+
 def ForcesActiveCornerSquares (S : Scaffold) : Prop :=
   ∀ {T : TileSet} {seed : WangTile},
     TilesPlane (combineWithScaffold S T seed) →
@@ -491,6 +501,13 @@ def ForcesActiveCornerSquares (S : Scaffold) : Prop :=
           ValidCombinedRectangleLayers S T seed rect baseRect payloadRect ∧
             (∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true) ∧
             baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner
+
+theorem forcesActiveCornerSquares_of_planeTilingForcesActiveCornerWindows
+    {S : Scaffold} (hS : PlaneTilingForcesActiveCornerWindows S) :
+    ForcesActiveCornerSquares S := by
+  intro T seed htiles n hn
+  rcases htiles with ⟨x, hx⟩
+  exact hS x hx n hn
 
 def RealizesActiveCornerSquares (S : Scaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
@@ -564,10 +581,10 @@ def ollingerScaffold : Scaffold where
 theorem ollingerScaffold_isScaffold : IsScaffold ollingerScaffold := by
   have hprops :
       RealizesActiveCornerSquares ollingerScaffold ∧
-        ForcesActiveCornerSquares ollingerScaffold := by
+        PlaneTilingForcesActiveCornerWindows ollingerScaffold := by
     sorry
   exact isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
-    hprops.1 hprops.2
+    hprops.1 (forcesActiveCornerSquares_of_planeTilingForcesActiveCornerWindows hprops.2)
 
 /-- Abstract scaffold reduction from fixed-corner squares to ordinary plane tiling. -/
 theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
