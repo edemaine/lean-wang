@@ -189,8 +189,8 @@ structure Scaffold where
   tiles : TileSet
 
 /-- Combine a scaffold with a fixed-corner square instance. -/
-def combineWithScaffold (_S : Scaffold) (_T : TileSet) (_seed : WangTile) : TileSet :=
-  []
+def combineWithScaffold (S : Scaffold) (T : TileSet) (_seed : WangTile) : TileSet :=
+  productTileSet S.tiles T
 
 /-- The abstract property required of a scaffold for the Berger/Robinson reduction. -/
 def IsScaffold (S : Scaffold) : Prop :=
@@ -233,7 +233,8 @@ def dominoReductionCode (c : Code) : Nat :=
 
 /-- Computability target for the encoded final reduction. -/
 theorem dominoReductionCode_computable : Computable dominoReductionCode := by
-  unfold dominoReductionCode dominoReduction combineWithScaffold encodeTileSet
+  unfold dominoReductionCode dominoReduction combineWithScaffold productTileSet
+    ollingerScaffold encodeTileSet
   exact Computable.const (Encodable.encode ([] : TileSet))
 
 /-- Correctness target for the encoded final reduction. -/

@@ -8,6 +8,7 @@ import Mathlib.Computability.Primrec.List
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Int.Basic
 import Mathlib.Data.List.Basic
+import Mathlib.Data.Nat.Pairing
 
 /-!
 This file contains the concrete Wang-tile objects used by the project.
@@ -106,7 +107,70 @@ instance (lower upper : WangTile) : Decidable (VMatches lower upper) := by
   unfold VMatches
   infer_instance
 
+/-- Layer two Wang tiles by pairing the corresponding edge colors. -/
+def product (base payload : WangTile) : WangTile where
+  n := Nat.pair base.n payload.n
+  s := Nat.pair base.s payload.s
+  e := Nat.pair base.e payload.e
+  w := Nat.pair base.w payload.w
+
+theorem product_injective :
+    Function.Injective (fun p : WangTile × WangTile => product p.1 p.2) := by
+  intro p q h
+  rcases p with ⟨base, payload⟩
+  rcases q with ⟨base', payload'⟩
+  cases base
+  cases payload
+  cases base'
+  cases payload'
+  simp [product] at h ⊢
+  simp [h.1, h.2.1, h.2.2.1, h.2.2.2]
+
+theorem HMatches_product_iff (baseLeft payloadLeft baseRight payloadRight : WangTile) :
+    HMatches (product baseLeft payloadLeft) (product baseRight payloadRight) ↔
+      HMatches baseLeft baseRight ∧ HMatches payloadLeft payloadRight := by
+  unfold HMatches product
+  rw [Nat.pair_eq_pair]
+
+theorem VMatches_product_iff (baseLower payloadLower baseUpper payloadUpper : WangTile) :
+    VMatches (product baseLower payloadLower) (product baseUpper payloadUpper) ↔
+      VMatches baseLower baseUpper ∧ VMatches payloadLower payloadUpper := by
+  unfold VMatches product
+  rw [Nat.pair_eq_pair]
+
 end WangTile
+
+/-- The finite tileset obtained by layering every base tile with every payload tile. -/
+def productTileSet (base payload : TileSet) : TileSet :=
+  base.flatMap fun b => payload.map fun p => WangTile.product b p
+
+theorem mem_productTileSet_iff {base payload : TileSet} {tile : WangTile} :
+    tile ∈ productTileSet base payload ↔
+      ∃ b ∈ base, ∃ p ∈ payload, WangTile.product b p = tile := by
+  simp [productTileSet]
+
+theorem product_mem_productTileSet {base payload : TileSet}
+    {b p : WangTile} (hb : b ∈ base) (hp : p ∈ payload) :
+    WangTile.product b p ∈ productTileSet base payload := by
+  rw [mem_productTileSet_iff]
+  exact ⟨b, hb, p, hp, rfl⟩
+
+theorem product_eq_iff {base payload base' payload' : WangTile} :
+    WangTile.product base payload = WangTile.product base' payload' ↔
+      base = base' ∧ payload = payload' := by
+  constructor
+  · intro h
+    have hp : (base, payload) = (base', payload') :=
+      WangTile.product_injective h
+    exact ⟨congrArg Prod.fst hp, congrArg Prod.snd hp⟩
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
+theorem productTileSet_nonempty_left {base payload : TileSet}
+    {tile : WangTile} (htile : tile ∈ productTileSet base payload) :
+    ∃ b : WangTile, b ∈ base := by
+  rcases mem_productTileSet_iff.1 htile with ⟨b, hb, _p, _hp, _htile⟩
+  exact ⟨b, hb⟩
 
 /-- A complete tiling of the integer plane by a finite tileset. -/
 def ValidPlaneTiling (T : TileSet) (x : Int × Int → TileIn T) : Prop :=
@@ -116,6 +180,84 @@ def ValidPlaneTiling (T : TileSet) (x : Int × Int → TileIn T) : Prop :=
 /-- A tileset tiles the whole plane. -/
 def TilesPlane (T : TileSet) : Prop :=
   ∃ x : Int × Int → TileIn T, ValidPlaneTiling T x
+
+theorem tilesPlane_left_of_tilesPlane_productTileSet {base payload : TileSet}
+    (h : TilesPlane (productTileSet base payload)) :
+    TilesPlane base := by
+  classical
+  rcases h with ⟨x, hx⟩
+  have hdecode : ∀ p : Int × Int,
+      ∃ b : TileIn base, ∃ q : TileIn payload,
+        WangTile.product b.1 q.1 = (x p).1 := by
+    intro p
+    rcases mem_productTileSet_iff.1 (x p).2 with ⟨b, hb, q, hq, htile⟩
+    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
+  let baseAt : Int × Int → TileIn base := fun p => Classical.choose (hdecode p)
+  let payloadAt : Int × Int → TileIn payload := fun p =>
+    Classical.choose (Classical.choose_spec (hdecode p))
+  have hproduct : ∀ p : Int × Int,
+      WangTile.product (baseAt p).1 (payloadAt p).1 = (x p).1 := by
+    intro p
+    exact Classical.choose_spec (Classical.choose_spec (hdecode p))
+  refine ⟨baseAt, ?_⟩
+  constructor
+  · intro p
+    have hmatch : WangTile.HMatches
+        (WangTile.product (baseAt p).1 (payloadAt p).1)
+        (WangTile.product (baseAt (p.1 + 1, p.2)).1
+          (payloadAt (p.1 + 1, p.2)).1) := by
+      simpa [hproduct p, hproduct (p.1 + 1, p.2)] using hx.1 p
+    exact (WangTile.HMatches_product_iff
+      (baseAt p).1 (payloadAt p).1
+      (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2)).1).1 hmatch |>.1
+  · intro p
+    have hmatch : WangTile.VMatches
+        (WangTile.product (baseAt p).1 (payloadAt p).1)
+        (WangTile.product (baseAt (p.1, p.2 + 1)).1
+          (payloadAt (p.1, p.2 + 1)).1) := by
+      simpa [hproduct p, hproduct (p.1, p.2 + 1)] using hx.2 p
+    exact (WangTile.VMatches_product_iff
+      (baseAt p).1 (payloadAt p).1
+      (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1)).1).1 hmatch |>.1
+
+theorem tilesPlane_right_of_tilesPlane_productTileSet {base payload : TileSet}
+    (h : TilesPlane (productTileSet base payload)) :
+    TilesPlane payload := by
+  classical
+  rcases h with ⟨x, hx⟩
+  have hdecode : ∀ p : Int × Int,
+      ∃ b : TileIn base, ∃ q : TileIn payload,
+        WangTile.product b.1 q.1 = (x p).1 := by
+    intro p
+    rcases mem_productTileSet_iff.1 (x p).2 with ⟨b, hb, q, hq, htile⟩
+    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
+  let baseAt : Int × Int → TileIn base := fun p => Classical.choose (hdecode p)
+  let payloadAt : Int × Int → TileIn payload := fun p =>
+    Classical.choose (Classical.choose_spec (hdecode p))
+  have hproduct : ∀ p : Int × Int,
+      WangTile.product (baseAt p).1 (payloadAt p).1 = (x p).1 := by
+    intro p
+    exact Classical.choose_spec (Classical.choose_spec (hdecode p))
+  refine ⟨payloadAt, ?_⟩
+  constructor
+  · intro p
+    have hmatch : WangTile.HMatches
+        (WangTile.product (baseAt p).1 (payloadAt p).1)
+        (WangTile.product (baseAt (p.1 + 1, p.2)).1
+          (payloadAt (p.1 + 1, p.2)).1) := by
+      simpa [hproduct p, hproduct (p.1 + 1, p.2)] using hx.1 p
+    exact (WangTile.HMatches_product_iff
+      (baseAt p).1 (payloadAt p).1
+      (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2)).1).1 hmatch |>.2
+  · intro p
+    have hmatch : WangTile.VMatches
+        (WangTile.product (baseAt p).1 (payloadAt p).1)
+        (WangTile.product (baseAt (p.1, p.2 + 1)).1
+          (payloadAt (p.1, p.2 + 1)).1) := by
+      simpa [hproduct p, hproduct (p.1, p.2 + 1)] using hx.2 p
+    exact (WangTile.VMatches_product_iff
+      (baseAt p).1 (payloadAt p).1
+      (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1)).1).1 hmatch |>.2
 
 /-- The centered integer box `[-r, r] × [-r, r]`. -/
 def InBox (r : Nat) (p : Int × Int) : Prop :=
