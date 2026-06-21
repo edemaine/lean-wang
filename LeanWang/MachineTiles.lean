@@ -104,6 +104,15 @@ namespace Machine
 def runCell (M : Machine) (time : Nat) (pos : Nat) : MachineCell :=
   (M.runEmpty time).cellAt pos
 
+/--
+Left neighbor for a one-sided space-time row. At the left boundary, the
+missing neighbor is represented by a blank plain cell.
+-/
+def runCellLeft (M : Machine) (time pos : Nat) : MachineCell :=
+  match pos with
+  | 0 => MachineCell.plain M.blank
+  | i + 1 => M.runCell time i
+
 @[simp]
 theorem runCell_zero_head (M : Machine) :
     M.runCell 0 0 = MachineCell.head M.start M.blank := by
@@ -154,6 +163,15 @@ theorem runCell_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
     (M.runCell time pos).Mem M := by
   exact ID.cellAt_mem (M.runEmpty_mem time)
     (M.runEmpty_state_ne_halt_of_not_halts h time) pos
+
+theorem runCellLeft_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
+    (time pos : Nat) :
+    (M.runCellLeft time pos).Mem M := by
+  cases pos with
+  | zero =>
+      simp [runCellLeft, MachineCell.Mem, M.blank_mem]
+  | succ pos =>
+      simpa [runCellLeft] using M.runCell_mem_of_not_halts h time pos
 
 end Machine
 
@@ -427,6 +445,26 @@ theorem vMatches_toWangTile_iff (lower upper : MachineHistoryTile) :
   rfl
 
 end MachineHistoryTile
+
+/-- The local-history block cut from two consecutive rows of an actual machine run. -/
+def runHistoryTile (M : Machine) (time pos : Nat) : MachineHistoryTile where
+  prevLeft := M.runCellLeft time pos
+  prevCenter := M.runCell time pos
+  prevRight := M.runCell time (pos + 1)
+  nextLeft := M.runCellLeft (time + 1) pos
+  nextCenter := M.runCell (time + 1) pos
+  nextRight := M.runCell (time + 1) (pos + 1)
+
+theorem runHistoryTile_cells_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
+    (time pos : Nat) :
+    (runHistoryTile M time pos).prevLeft.Mem M ∧
+      (runHistoryTile M time pos).prevCenter.Mem M ∧
+      (runHistoryTile M time pos).prevRight.Mem M ∧
+      (runHistoryTile M time pos).nextLeft.Mem M ∧
+      (runHistoryTile M time pos).nextCenter.Mem M ∧
+      (runHistoryTile M time pos).nextRight.Mem M := by
+  simp [runHistoryTile, M.runCellLeft_mem_of_not_halts h,
+    M.runCell_mem_of_not_halts h]
 
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
