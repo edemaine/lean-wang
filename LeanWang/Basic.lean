@@ -28,6 +28,10 @@ deriving DecidableEq, Repr
 /-- A finite Wang tileset. Duplicates are harmless and ignored by membership predicates. -/
 abbrev TileSet := List WangTile
 
+/-- The type of tiles belonging to a fixed tileset. -/
+abbrev TileIn (T : TileSet) :=
+  { t : WangTile // t ∈ T }
+
 namespace WangTile
 
 /-- Horizontal compatibility: `left` may be placed immediately west of `right`. -/
@@ -49,14 +53,13 @@ instance (lower upper : WangTile) : Decidable (VMatches lower upper) := by
 end WangTile
 
 /-- A complete tiling of the integer plane by a finite tileset. -/
-def ValidPlaneTiling (T : TileSet) (x : Int × Int → WangTile) : Prop :=
-  (∀ p : Int × Int, x p ∈ T) ∧
-    (∀ p : Int × Int, WangTile.HMatches (x p) (x (p.1 + 1, p.2))) ∧
-      (∀ p : Int × Int, WangTile.VMatches (x p) (x (p.1, p.2 + 1)))
+def ValidPlaneTiling (T : TileSet) (x : Int × Int → TileIn T) : Prop :=
+  (∀ p : Int × Int, WangTile.HMatches (x p).1 (x (p.1 + 1, p.2)).1) ∧
+    (∀ p : Int × Int, WangTile.VMatches (x p).1 (x (p.1, p.2 + 1)).1)
 
 /-- A tileset tiles the whole plane. -/
 def TilesPlane (T : TileSet) : Prop :=
-  ∃ x : Int × Int → WangTile, ValidPlaneTiling T x
+  ∃ x : Int × Int → TileIn T, ValidPlaneTiling T x
 
 /-- The centered integer box `[-r, r] × [-r, r]`. -/
 def InBox (r : Nat) (p : Int × Int) : Prop :=
@@ -68,30 +71,28 @@ abbrev Box (r : Nat) :=
   { p : Int × Int // InBox r p }
 
 /-- A finite centered box assignment. -/
-abbrev BoxPattern (r : Nat) :=
-  Box r → WangTile
+abbrev BoxPattern (T : TileSet) (r : Nat) :=
+  Box r → TileIn T
 
 /-- Validity of a centered finite box tiling. -/
-def ValidBoxTiling (T : TileSet) (r : Nat) (x : BoxPattern r) : Prop :=
-  (∀ p : Box r, x p ∈ T) ∧
-    (∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
-      WangTile.HMatches (x p) (x ⟨(p.1.1 + 1, p.1.2), hp⟩)) ∧
-      (∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
-        WangTile.VMatches (x p) (x ⟨(p.1.1, p.1.2 + 1), hp⟩))
+def ValidBoxTiling (T : TileSet) (r : Nat) (x : BoxPattern T r) : Prop :=
+  (∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+    WangTile.HMatches (x p).1 (x ⟨(p.1.1 + 1, p.1.2), hp⟩).1) ∧
+    (∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+      WangTile.VMatches (x p).1 (x ⟨(p.1.1, p.1.2 + 1), hp⟩).1)
 
 /-- A tileset tiles the centered integer box `[-r, r] × [-r, r]`. -/
 def TileableBox (T : TileSet) (r : Nat) : Prop :=
-  ∃ x : BoxPattern r, ValidBoxTiling T r x
+  ∃ x : BoxPattern T r, ValidBoxTiling T r x
 
 /-- A complete tiling of the first quadrant `Nat × Nat`. -/
-def ValidQuarterTiling (T : TileSet) (x : Nat × Nat → WangTile) : Prop :=
-  (∀ p : Nat × Nat, x p ∈ T) ∧
-    (∀ p : Nat × Nat, WangTile.HMatches (x p) (x (p.1 + 1, p.2))) ∧
-      (∀ p : Nat × Nat, WangTile.VMatches (x p) (x (p.1, p.2 + 1)))
+def ValidQuarterTiling (T : TileSet) (x : Nat × Nat → TileIn T) : Prop :=
+  (∀ p : Nat × Nat, WangTile.HMatches (x p).1 (x (p.1 + 1, p.2)).1) ∧
+    (∀ p : Nat × Nat, WangTile.VMatches (x p).1 (x (p.1, p.2 + 1)).1)
 
 /-- A tileset tiles the first quadrant with a prescribed tile at the origin. -/
 def TilesQuarterWithSeed (T : TileSet) (seed : WangTile) : Prop :=
-  ∃ x : Nat × Nat → WangTile, ValidQuarterTiling T x ∧ x (0, 0) = seed
+  ∃ x : Nat × Nat → TileIn T, ValidQuarterTiling T x ∧ (x (0, 0)).1 = seed
 
 /-- A finite rectangle assignment with width `w` and height `h`. -/
 abbrev Rectangle (w h : Nat) :=
@@ -197,11 +198,11 @@ def TileableFixedCornerSquare (T : TileSet) (seed : WangTile) (n : Nat) : Prop :
 theorem tileableSquare_of_tilesPlane {T : TileSet} :
     TilesPlane T → ∀ n : Nat, TileableSquare T n := by
   intro hT n
-  rcases hT with ⟨x, hxmem, hxH, hxV⟩
-  refine ⟨fun i j => x (Int.ofNat i.val, Int.ofNat j.val), ?_⟩
+  rcases hT with ⟨x, hxH, hxV⟩
+  refine ⟨fun i j => (x (Int.ofNat i.val, Int.ofNat j.val)).1, ?_⟩
   constructor
   · intro i j
-    exact hxmem (Int.ofNat i.val, Int.ofNat j.val)
+    exact (x (Int.ofNat i.val, Int.ofNat j.val)).2
   constructor
   · intro i j hi
     exact hxH (Int.ofNat i.val, Int.ofNat j.val)
@@ -212,11 +213,8 @@ theorem tileableSquare_of_tilesPlane {T : TileSet} :
 theorem tileableBox_of_tilesPlane {T : TileSet} :
     TilesPlane T → ∀ r : Nat, TileableBox T r := by
   intro hT r
-  rcases hT with ⟨x, hxmem, hxH, hxV⟩
+  rcases hT with ⟨x, hxH, hxV⟩
   refine ⟨fun p => x p.1, ?_⟩
-  constructor
-  · intro p
-    exact hxmem p.1
   constructor
   · intro p hp
     exact hxH p.1
@@ -229,11 +227,11 @@ theorem fixedCornerSquare_of_tilesQuarterWithSeed {T : TileSet} {seed : WangTile
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n := by
   intro hT n hn
   rcases hT with ⟨x, hx, hseed⟩
-  rcases hx with ⟨hxmem, hxH, hxV⟩
-  refine ⟨hn, fun i j => x (i.val, j.val), ?_, ?_⟩
+  rcases hx with ⟨hxH, hxV⟩
+  refine ⟨hn, fun i j => (x (i.val, j.val)).1, ?_, ?_⟩
   · constructor
     · intro i j
-      exact hxmem (i.val, j.val)
+      exact (x (i.val, j.val)).2
     constructor
     · intro i j hi
       exact hxH (i.val, j.val)
