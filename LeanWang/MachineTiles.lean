@@ -1162,6 +1162,39 @@ def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   else
     []
 
+def tableProgramMachineHistoryTiles (P : TableProgram) : List MachineHistoryTile := do
+  let cells := tableProgramMachineCells P
+  let prevLeft ← cells
+  let prevCenter ← cells
+  let prevRight ← cells
+  let nextLeft ← cells
+  let nextCenter ← cells
+  let nextRight ← cells
+  if tableProgramLocalNextCell? P prevLeft prevCenter prevRight = some nextCenter ∧
+      (prevLeft = MachineCell.boundary → nextLeft = MachineCell.boundary) then
+    pure { prevLeft, prevCenter, prevRight, nextLeft, nextCenter, nextRight }
+  else
+    []
+
+theorem tableProgramMachineHistoryTiles_eq_machineHistoryTiles (P : TableProgram) :
+    tableProgramMachineHistoryTiles P = machineHistoryTiles P.toMachine := by
+  simp [tableProgramMachineHistoryTiles, machineHistoryTiles,
+    tableProgramMachineCells_eq_machineCells,
+    tableProgramLocalNextCell?_eq_localNextCell?]
+
+theorem mem_tableProgramMachineHistoryTiles_iff (P : TableProgram) (t : MachineHistoryTile) :
+    t ∈ tableProgramMachineHistoryTiles P ↔
+      t.prevLeft ∈ tableProgramMachineCells P ∧
+      t.prevCenter ∈ tableProgramMachineCells P ∧
+      t.prevRight ∈ tableProgramMachineCells P ∧
+      t.nextLeft ∈ tableProgramMachineCells P ∧
+      t.nextCenter ∈ tableProgramMachineCells P ∧
+      t.nextRight ∈ tableProgramMachineCells P ∧
+      tableProgramLocalNextCell? P t.prevLeft t.prevCenter t.prevRight = some t.nextCenter ∧
+      (t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary) := by
+  cases t
+  simp [tableProgramMachineHistoryTiles]
+
 theorem mem_machineHistoryTiles_iff (M : Machine) (t : MachineHistoryTile) :
     t ∈ machineHistoryTiles M ↔
       t.prevLeft ∈ machineCells M ∧
