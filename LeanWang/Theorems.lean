@@ -645,15 +645,6 @@ def ollingerScaffold : Scaffold where
   active_primrec :=
     Primrec.eq.decide.comp Primrec.id (Primrec.const monochromeTile)
 
-/-- The Ollinger/Robinson scaffold satisfies the abstract scaffold property. -/
-theorem ollingerScaffold_isScaffold : IsScaffold ollingerScaffold := by
-  have hprops :
-      RealizesActiveCornerSquares ollingerScaffold ∧
-        PlaneTilingForcesActiveCornerWindows ollingerScaffold := by
-    sorry
-  exact isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
-    hprops.1 (forcesActiveCornerSquares_of_planeTilingForcesActiveCornerWindows hprops.2)
-
 /-- Abstract scaffold reduction from fixed-corner squares to ordinary plane tiling. -/
 theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
     (T : TileSet) (seed : WangTile) :
@@ -661,50 +652,52 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
   hS T seed
 
-/-- The final Berger/Robinson tileset produced from a partial-recursive code. -/
-def dominoReduction (c : Code) : TileSet :=
-  combineWithScaffold ollingerScaffold (fixedDominoReduction c).1 (fixedDominoReduction c).2
+/-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
+def dominoReduction (S : Scaffold) (c : Code) : TileSet :=
+  combineWithScaffold S (fixedDominoReduction c).1 (fixedDominoReduction c).2
 
-theorem dominoReduction_computable : Computable dominoReduction := by
+theorem dominoReduction_computable (S : Scaffold) : Computable (dominoReduction S) := by
   unfold dominoReduction
-  exact (combineWithScaffold_computable ollingerScaffold).comp fixedDominoReduction_computable
+  exact (combineWithScaffold_computable S).comp fixedDominoReduction_computable
 
 /-- Correctness of the final domino reduction from nonhalting. -/
-theorem dominoReduction_correct (c : Code) :
-    TilesPlane (dominoReduction c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+theorem dominoReduction_correct {S : Scaffold} (hS : IsScaffold S) (c : Code) :
+    TilesPlane (dominoReduction S c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [dominoReduction]
-  exact (scaffold_reduction_correct ollingerScaffold_isScaffold
+  exact (scaffold_reduction_correct hS
     (fixedDominoReduction c).1 (fixedDominoReduction c).2).trans
       ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
         (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm.trans
           (fixedDominoReduction_correct c))
 
 /-- Encoded version of `dominoReduction`, using the canonical finite tileset encoding. -/
-def dominoReductionCode (c : Code) : Nat :=
-  encodeTileSet (dominoReduction c)
+def dominoReductionCode (S : Scaffold) (c : Code) : Nat :=
+  encodeTileSet (dominoReduction S c)
 
 /-- Computability target for the encoded final reduction. -/
-theorem dominoReductionCode_computable : Computable dominoReductionCode := by
+theorem dominoReductionCode_computable (S : Scaffold) : Computable (dominoReductionCode S) := by
   unfold dominoReductionCode
-  exact encodeTileSet_computable.comp dominoReduction_computable
+  exact encodeTileSet_computable.comp (dominoReduction_computable S)
 
 /-- Correctness target for the encoded final reduction. -/
-theorem dominoReductionCode_correct (c : Code) :
-    TilesPlane (decodeTileSet (dominoReductionCode c)) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S) (c : Code) :
+    TilesPlane (decodeTileSet (dominoReductionCode S c)) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [dominoReductionCode, decodeTileSet_encodeTileSet]
-  exact dominoReduction_correct c
+  exact dominoReduction_correct hS c
 
-/-- The domino problem is undecidable for encoded finite Wang tilesets. -/
-theorem encoded_domino_problem_undecidable :
+/-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold. -/
+theorem encoded_domino_problem_undecidable_of_scaffold
+    (S : Scaffold) (hS : IsScaffold S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   intro h
   have hencoded : ComputablePred
-      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode c))) :=
+      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode S c))) :=
     ComputablePred.computable_of_manyOneReducible
       (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
-        dominoReductionCode_computable) h
+        (dominoReductionCode_computable S)) h
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    hencoded.of_eq fun c => dominoReductionCode_correct c
+    hencoded.of_eq fun c => dominoReductionCode_correct hS c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 end LeanWang
