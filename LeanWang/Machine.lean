@@ -664,6 +664,58 @@ theorem transition?_computable :
       p.1.toTableMachine.transition? p.2.1 p.2.2) :=
   transition?_primrec.to_comp
 
+theorem nat_mem_list_primrecPred :
+    PrimrecPred (fun p : List Nat × Nat => p.2 ∈ p.1) := by
+  classical
+  have hrel : PrimrecRel (fun x y : Nat => x = y) :=
+    Primrec.eq
+  exact (hrel.exists_mem_list.comp Primrec.fst Primrec.snd).of_eq fun p => by
+    constructor
+    · rintro ⟨x, hxmem, rfl⟩
+      exact hxmem
+    · intro hmem
+      exact ⟨p.2, hmem, rfl⟩
+
+theorem step_primrec :
+    Primrec (fun p : TableProgram × Nat × Nat =>
+      p.1.toTableMachine.step p.2.1 p.2.2) := by
+  let fallback : TableProgram × Nat × Nat → Nat × Nat × Move := fun p =>
+    (p.1.blank, p.1.halt, Move.right)
+  have hfallback : Primrec fallback := by
+    dsimp [fallback]
+    exact Primrec.pair (blank_primrec.comp Primrec.fst)
+      (Primrec.pair (halt_primrec.comp Primrec.fst) (Primrec.const Move.right))
+  have hsome :
+      Primrec₂ (fun p : TableProgram × Nat × Nat => fun e : TableTransition =>
+        if e.write ∈ p.1.supportedSymbols then
+          if e.next ∈ p.1.supportedStates then e.action else fallback p
+        else fallback p) := by
+    apply Primrec₂.mk
+    have hwrite :
+        PrimrecPred (fun p : (TableProgram × Nat × Nat) × TableTransition =>
+          p.2.write ∈ p.1.1.supportedSymbols) :=
+      nat_mem_list_primrecPred.comp
+        (Primrec.pair (supportedSymbols_primrec.comp (Primrec.fst.comp Primrec.fst))
+          (TableTransition.write_primrec.comp Primrec.snd))
+    have hnext :
+        PrimrecPred (fun p : (TableProgram × Nat × Nat) × TableTransition =>
+          p.2.next ∈ p.1.1.supportedStates) :=
+      nat_mem_list_primrecPred.comp
+        (Primrec.pair (supportedStates_primrec.comp (Primrec.fst.comp Primrec.fst))
+          (TableTransition.next_primrec.comp Primrec.snd))
+    exact Primrec.ite hwrite
+      (Primrec.ite hnext (TableTransition.action_primrec.comp Primrec.snd)
+        (hfallback.comp Primrec.fst))
+      (hfallback.comp Primrec.fst)
+  exact (Primrec.option_casesOn transition?_primrec hfallback hsome).of_eq fun p => by
+    unfold TableMachine.step fallback
+    cases p.1.toTableMachine.transition? p.2.1 p.2.2 <;> rfl
+
+theorem step_computable :
+    Computable (fun p : TableProgram × Nat × Nat =>
+      p.1.toTableMachine.step p.2.1 p.2.2) :=
+  step_primrec.to_comp
+
 end TableProgram
 
 end LeanWang
