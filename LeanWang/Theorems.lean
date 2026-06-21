@@ -13,9 +13,10 @@ import Mathlib.Computability.TuringMachine.ToPartrec
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
 
-The definitions in this file are placeholders for later constructions. The theorems
-record the proof obligations from the plan, so the rest of the development has a
-concrete target in Lean.
+This file collects the main reduction theorems. The final undecidability theorem
+is currently parameterized by the two external construction obligations: a
+compiler from Mathlib partial-recursive codes to finite table machines, and a
+concrete scaffold satisfying the abstract square-forcing property.
 -/
 
 namespace LeanWang
@@ -122,7 +123,7 @@ theorem exists_tm2_for_natPartrecCode (c : Code) :
   exact (part_dom_map_iff Turing.PartrecToTM2.halt
     (Turing.ToPartrec.Code.eval tc [0])).trans (htc 0)
 
-/-- A dummy machine used until the compiler from partial-recursive codes is implemented. -/
+/-- A small sample table program, useful for concrete tests and examples. -/
 def dummyProgram : TableProgram where
   symbols := []
   states := []
@@ -137,25 +138,28 @@ def dummyProgram : TableProgram where
     move := Move.right
   }]
 
-/-- A dummy semantic machine used until the compiler is implemented. -/
-def dummyMachine : Machine :=
-  dummyProgram.toMachine
+/-- A compiler from Mathlib partial-recursive codes into finite table-machine data. -/
+structure TableCompiler where
+  compile : Code → TableProgram
+  compile_computable : Computable compile
+  correct : ∀ c : Code,
+    Machine.HaltsEmpty (compile c).toMachine ↔ (Nat.Partrec.Code.eval c 0).Dom
 
 /-- Compile a Mathlib partial-recursive code into finite machine data. -/
-def programTable (_c : Code) : TableProgram :=
-  dummyProgram
+def programTable (C : TableCompiler) (c : Code) : TableProgram :=
+  C.compile c
 
-theorem programTable_computable : Computable programTable :=
-  Computable.const dummyProgram
+theorem programTable_computable (C : TableCompiler) : Computable (programTable C) := by
+  exact C.compile_computable
 
 /-- Compile a Mathlib partial-recursive code into the concrete one-tape machine model. -/
-def programMachine (c : Code) : Machine :=
-  (programTable c).toMachine
+def programMachine (C : TableCompiler) (c : Code) : Machine :=
+  (programTable C c).toMachine
 
-/-- Correctness target for the compiler from partial-recursive codes to concrete machines. -/
-theorem programMachine_correct (c : Code) :
-    Machine.HaltsEmpty (programMachine c) ↔ (Nat.Partrec.Code.eval c 0).Dom := by
-  sorry
+/-- Correctness of a compiler from partial-recursive codes to concrete machines. -/
+theorem programMachine_correct (C : TableCompiler) (c : Code) :
+    Machine.HaltsEmpty (programMachine C c) ↔ (Nat.Partrec.Code.eval c 0).Dom :=
+  C.correct c
 
 /-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
 theorem machineTiles_correct (M : Machine) :
@@ -175,45 +179,46 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
   exact machineTiles_correct P.toMachine
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
-def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDominoData (programTable c)
+def fixedDominoReduction (C : TableCompiler) (c : Code) : TileSet × WangTile :=
+  tableProgramFixedDominoData (programTable C c)
 
-theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  exact tableProgramFixedDominoData_computable.comp programTable_computable
+theorem fixedDominoReduction_computable (C : TableCompiler) :
+    Computable (fixedDominoReduction C) := by
+  exact tableProgramFixedDominoData_computable.comp (programTable_computable C)
 
 /-- Correctness of the fixed domino reduction from nonhalting. -/
-theorem fixedDominoReduction_correct (c : Code) :
-    TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
+theorem fixedDominoReduction_correct (C : TableCompiler) (c : Code) :
+    TilesQuarterWithSeed (fixedDominoReduction C c).1 (fixedDominoReduction C c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   unfold fixedDominoReduction
   rw [tableProgramFixedDominoData_seed_eq]
   rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff (programTable c))]
+    (tableProgramFixedDominoData_mem_iff (programTable C c))]
   rw [tableProgramFixedDomino_correct]
-  change ¬ Machine.HaltsEmpty (programMachine c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom
-  rw [programMachine_correct]
+  change ¬ Machine.HaltsEmpty (programMachine C c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom
+  rw [programMachine_correct C]
 
 /-- The fixed domino problem is undecidable, in reduction form. -/
-theorem fixed_domino_problem_undecidable :
+theorem fixed_domino_problem_undecidable (C : TableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
-        TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2) := by
+        TilesQuarterWithSeed (fixedDominoReduction C c).1 (fixedDominoReduction C c).2) := by
   intro h
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => fixedDominoReduction_correct c
+    h.of_eq fun c => fixedDominoReduction_correct C c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- The fixed-corner finite-square problem is undecidable, in reduction form. -/
-theorem fixed_corner_square_problem_undecidable :
+theorem fixed_corner_square_problem_undecidable (C : TableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
-        ∀ n : Nat, 0 < n →
-          TileableFixedCornerSquare (fixedDominoReduction c).1 (fixedDominoReduction c).2 n) := by
+        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
+          (fixedDominoReduction C c).1 (fixedDominoReduction C c).2 n) := by
   intro h
-  apply fixed_domino_problem_undecidable
+  apply fixed_domino_problem_undecidable C
   exact h.of_eq fun c =>
     (tilesQuarterWithSeed_iff_all_fixedCornerSquares
-      (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm
+      (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -653,51 +658,56 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
   hS T seed
 
 /-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
-def dominoReduction (S : Scaffold) (c : Code) : TileSet :=
-  combineWithScaffold S (fixedDominoReduction c).1 (fixedDominoReduction c).2
+def dominoReduction (S : Scaffold) (C : TableCompiler) (c : Code) : TileSet :=
+  combineWithScaffold S (fixedDominoReduction C c).1 (fixedDominoReduction C c).2
 
-theorem dominoReduction_computable (S : Scaffold) : Computable (dominoReduction S) := by
+theorem dominoReduction_computable (S : Scaffold) (C : TableCompiler) :
+    Computable (dominoReduction S C) := by
   unfold dominoReduction
-  exact (combineWithScaffold_computable S).comp fixedDominoReduction_computable
+  exact (combineWithScaffold_computable S).comp (fixedDominoReduction_computable C)
 
 /-- Correctness of the final domino reduction from nonhalting. -/
-theorem dominoReduction_correct {S : Scaffold} (hS : IsScaffold S) (c : Code) :
-    TilesPlane (dominoReduction S c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+theorem dominoReduction_correct {S : Scaffold} (hS : IsScaffold S)
+    (C : TableCompiler) (c : Code) :
+    TilesPlane (dominoReduction S C c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [dominoReduction]
   exact (scaffold_reduction_correct hS
-    (fixedDominoReduction c).1 (fixedDominoReduction c).2).trans
+    (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).trans
       ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm.trans
-          (fixedDominoReduction_correct c))
+        (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm.trans
+          (fixedDominoReduction_correct C c))
 
 /-- Encoded version of `dominoReduction`, using the canonical finite tileset encoding. -/
-def dominoReductionCode (S : Scaffold) (c : Code) : Nat :=
-  encodeTileSet (dominoReduction S c)
+def dominoReductionCode (S : Scaffold) (C : TableCompiler) (c : Code) : Nat :=
+  encodeTileSet (dominoReduction S C c)
 
 /-- Computability target for the encoded final reduction. -/
-theorem dominoReductionCode_computable (S : Scaffold) : Computable (dominoReductionCode S) := by
+theorem dominoReductionCode_computable (S : Scaffold) (C : TableCompiler) :
+    Computable (dominoReductionCode S C) := by
   unfold dominoReductionCode
-  exact encodeTileSet_computable.comp (dominoReduction_computable S)
+  exact encodeTileSet_computable.comp (dominoReduction_computable S C)
 
 /-- Correctness target for the encoded final reduction. -/
-theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S) (c : Code) :
-    TilesPlane (decodeTileSet (dominoReductionCode S c)) ↔
+theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S)
+    (C : TableCompiler) (c : Code) :
+    TilesPlane (decodeTileSet (dominoReductionCode S C c)) ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [dominoReductionCode, decodeTileSet_encodeTileSet]
-  exact dominoReduction_correct hS c
+  exact dominoReduction_correct hS C c
 
-/-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold. -/
+/-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold
+and a compiler from partial-recursive codes to table machines. -/
 theorem encoded_domino_problem_undecidable_of_scaffold
-    (S : Scaffold) (hS : IsScaffold S) :
+    (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   intro h
   have hencoded : ComputablePred
-      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode S c))) :=
+      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode S C c))) :=
     ComputablePred.computable_of_manyOneReducible
       (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
-        (dominoReductionCode_computable S)) h
+        (dominoReductionCode_computable S C)) h
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    hencoded.of_eq fun c => dominoReductionCode_correct hS c
+    hencoded.of_eq fun c => dominoReductionCode_correct hS C c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 end LeanWang
