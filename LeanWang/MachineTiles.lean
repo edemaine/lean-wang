@@ -104,6 +104,21 @@ theorem cellAt_of_ne {c : ID} {i : Nat} (hi : i ≠ c.head) :
     c.cellAt i = MachineCell.plain (c.tape i) := by
   simp [cellAt, hi]
 
+/-- The cell immediately left of a position, using a boundary marker at `0`. -/
+def cellAtLeft (c : ID) : Nat → MachineCell
+  | 0 => MachineCell.boundary
+  | i + 1 => c.cellAt i
+
+@[simp]
+theorem cellAtLeft_zero (c : ID) :
+    c.cellAtLeft 0 = MachineCell.boundary :=
+  rfl
+
+@[simp]
+theorem cellAtLeft_succ (c : ID) (i : Nat) :
+    c.cellAtLeft (i + 1) = c.cellAt i :=
+  rfl
+
 /-- A machine configuration uses only the finite supports declared by `M`. -/
 def Mem (M : Machine) (c : ID) : Prop :=
   c.state ∈ M.states ∧ ∀ i : Nat, c.tape i ∈ M.symbols
@@ -116,6 +131,15 @@ theorem cellAt_mem {M : Machine} {c : ID} (hc : c.Mem M)
     simp [cellAt, MachineCell.Mem, hc.1, hstate, hc.2]
   · simp [cellAt, hi, MachineCell.Mem, hc.2]
 
+theorem cellAtLeft_mem {M : Machine} {c : ID} (hc : c.Mem M)
+    (hstate : c.state ≠ M.halt) (i : Nat) :
+    (c.cellAtLeft i).Mem M := by
+  cases i with
+  | zero =>
+      simp [cellAtLeft, MachineCell.Mem]
+  | succ i =>
+      simpa [cellAtLeft] using cellAt_mem hc hstate i
+
 end ID
 
 namespace Machine
@@ -124,14 +148,9 @@ namespace Machine
 def runCell (M : Machine) (time : Nat) (pos : Nat) : MachineCell :=
   (M.runEmpty time).cellAt pos
 
-/--
-Left neighbor for a one-sided space-time row. At the left boundary, the
-missing neighbor is represented by a blank plain cell.
--/
+/-- Left neighbor for a one-sided space-time row, using the boundary marker at `0`. -/
 def runCellLeft (M : Machine) (time pos : Nat) : MachineCell :=
-  match pos with
-  | 0 => MachineCell.boundary
-  | i + 1 => M.runCell time i
+  (M.runEmpty time).cellAtLeft pos
 
 @[simp]
 theorem runCell_zero_head (M : Machine) :
@@ -187,11 +206,8 @@ theorem runCell_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
 theorem runCellLeft_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
     (time pos : Nat) :
     (M.runCellLeft time pos).Mem M := by
-  cases pos with
-  | zero =>
-      simp [runCellLeft, MachineCell.Mem]
-  | succ pos =>
-      simpa [runCellLeft] using M.runCell_mem_of_not_halts h time pos
+  exact ID.cellAtLeft_mem (M.runEmpty_mem time)
+    (M.runEmpty_state_ne_halt_of_not_halts h time) pos
 
 end Machine
 
@@ -405,7 +421,7 @@ theorem runHistoryTile_hMatches (M : Machine) (time pos : Nat) :
     WangTile.HMatches (runHistoryTile M time pos).toWangTile
       (runHistoryTile M time (pos + 1)).toWangTile := by
   simp [WangTile.HMatches, MachineHistoryTile.toWangTile,
-    runHistoryTile, Machine.runCellLeft]
+    runHistoryTile, Machine.runCellLeft, Machine.runCell, Machine.runEmpty_succ]
 
 theorem runHistoryTile_vMatches (M : Machine) (time pos : Nat) :
     WangTile.VMatches (runHistoryTile M time pos).toWangTile
