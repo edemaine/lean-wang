@@ -1098,8 +1098,8 @@ theorem normalTaggedWangTile_ne_machineSeed {M : Machine}
   intro h
   exact initialTagged_ne_normalTagged (t := runHistoryTile M 0 0) (u := t) h.symm
 
-theorem not_tilesQuarterWithSeed_machineTiles_of_initial_halt {M : Machine}
-    (hstart : M.start = M.halt) :
+theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
+    {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
   rintro ⟨x, hvalid, hseed⟩
   have hv : WangTile.VMatches (machineSeed M) (x (0, 1)).1 := by
@@ -1122,14 +1122,84 @@ theorem not_tilesQuarterWithSeed_machineTiles_of_initial_halt {M : Machine}
       initialRowTag normalRowTag normalRowTag normalRowTag
       (runHistoryTile M 0 0) t).1 (by
         simpa [machineSeed_eq] using hv')
-    have hnext :
-        (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt M.blank := by
+    exact prevCenter_not_halt_of_mem_machineHistoryTiles (M := M)
+      (t := t) (a := a) ht (by
+        rw [← hcells.2.2.1, hnext])
+
+theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextRight_halt {M : Machine}
+    {a : Nat} (hnext : (runHistoryTile M 0 0).nextRight = MachineCell.head M.halt a) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  rintro ⟨x, hvalid, hseed⟩
+  have hv : WangTile.VMatches (machineSeed M) (x (0, 1)).1 := by
+    simpa [hseed] using hvalid.2 (0, 0)
+  rcases (mem_machineTiles_iff M (x (0, 1)).1).1 (x (0, 1)).2 with hinit | hnormal
+  · rcases hinit with ⟨t, _ht, htilet⟩
+    have hv' : WangTile.VMatches (machineSeed M)
+        (t.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [htilet] using hv
+    have htag := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag initialRowTag normalRowTag
+      (runHistoryTile M 0 0) t).1 (by
+        simpa [machineSeed_eq] using hv')
+    exact initialRowTag_ne_normalRowTag htag.1.symm
+  · rcases hnormal with ⟨t0, ht0, ht0tile⟩
+    have hv0' : WangTile.VMatches (machineSeed M)
+        (t0.toTaggedWangTile normalRowTag normalRowTag) := by
+      simpa [ht0tile] using hv
+    have hv0cells := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag normalRowTag normalRowTag
+      (runHistoryTile M 0 0) t0).1 (by
+        simpa [machineSeed_eq] using hv0')
+    have hh : WangTile.HMatches (x (0, 1)).1 (x (1, 1)).1 := by
+      simpa using hvalid.1 (0, 1)
+    rcases (mem_machineTiles_iff M (x (1, 1)).1).1 (x (1, 1)).2 with hinit1 | hnormal1
+    · rcases hinit1 with ⟨t1, _ht1, ht1tile⟩
+      have hh' : WangTile.HMatches
+          (t0.toTaggedWangTile normalRowTag normalRowTag)
+          (t1.toTaggedWangTile initialRowTag normalRowTag) := by
+        simpa [ht0tile, ht1tile] using hh
+      have htag := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+        normalRowTag normalRowTag initialRowTag normalRowTag t0 t1).1 hh'
+      exact initialRowTag_ne_normalRowTag htag.1.symm
+    · rcases hnormal1 with ⟨t1, ht1, ht1tile⟩
+      have hh' : WangTile.HMatches
+          (t0.toTaggedWangTile normalRowTag normalRowTag)
+          (t1.toTaggedWangTile normalRowTag normalRowTag) := by
+        simpa [ht0tile, ht1tile] using hh
+      have hhcells := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+        normalRowTag normalRowTag normalRowTag normalRowTag t0 t1).1 hh'
+      exact prevCenter_not_halt_of_mem_machineHistoryTiles (M := M)
+        (t := t1) (a := a) ht1 (by
+          rw [← hhcells.2.2.1, ← hv0cells.2.2.2, hnext])
+
+theorem not_tilesQuarterWithSeed_machineTiles_of_initial_halt {M : Machine}
+    (hstart : M.start = M.halt) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  exact not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt
+    (M := M) (a := M.blank) (by
       simp [runHistoryTile, Machine.runCell, Machine.runEmpty_succ,
         Machine.runEmpty_zero, Machine.nextID, Machine.initialID, ID.cellAt,
-        hstart]
-    exact prevCenter_not_halt_of_mem_machineHistoryTiles (M := M)
-      (t := t) (a := M.blank) ht (by
-        rw [← hcells.2.2.1, hnext])
+        hstart])
+
+theorem not_tilesQuarterWithSeed_machineTiles_of_first_step_left_halt {M : Machine}
+    {write : Nat} (hstart : M.start ≠ M.halt)
+    (hstep : M.step M.start M.blank = (write, M.halt, Move.left)) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  exact not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt
+    (M := M) (a := write) (by
+      simp [runHistoryTile, Machine.runCell, Machine.runEmpty_succ,
+        Machine.runEmpty_zero, Machine.nextID, Machine.initialID, ID.cellAt,
+        hstart, hstep, Move.apply])
+
+theorem not_tilesQuarterWithSeed_machineTiles_of_first_step_right_halt {M : Machine}
+    {write : Nat} (hstart : M.start ≠ M.halt)
+    (hstep : M.step M.start M.blank = (write, M.halt, Move.right)) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  exact not_tilesQuarterWithSeed_machineTiles_of_seed_nextRight_halt
+    (M := M) (a := M.blank) (by
+      simp [runHistoryTile, Machine.runCell, Machine.runEmpty_succ,
+        Machine.runEmpty_zero, Machine.nextID, Machine.initialID, ID.cellAt,
+        hstart, hstep, Move.apply])
 
 theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
