@@ -790,37 +790,37 @@ theorem runHistoryTile_mem_machineHistoryTiles_of_not_halts {M : Machine}
     hnextLeft hnextCenter hnextRight
     (runHistoryTile_local_of_not_halts h time pos)
 
-/-- The Wang tiles produced from a concrete machine by the local-history construction. -/
-def machineTiles (M : Machine) : TileSet :=
+/-- The untagged Wang tiles produced from the local-history construction. -/
+def rawMachineTiles (M : Machine) : TileSet :=
   (machineHistoryTiles M).map MachineHistoryTile.toWangTile
 
-theorem mem_machineTiles_iff (M : Machine) (tile : WangTile) :
-    tile ∈ machineTiles M ↔
+theorem mem_rawMachineTiles_iff (M : Machine) (tile : WangTile) :
+    tile ∈ rawMachineTiles M ↔
       ∃ t : MachineHistoryTile, t ∈ machineHistoryTiles M ∧ t.toWangTile = tile := by
-  simp [machineTiles]
+  simp [rawMachineTiles]
 
-theorem toWangTile_mem_machineTiles {M : Machine} {t : MachineHistoryTile}
+theorem toWangTile_mem_rawMachineTiles {M : Machine} {t : MachineHistoryTile}
     (ht : t ∈ machineHistoryTiles M) :
-    t.toWangTile ∈ machineTiles M := by
-  rw [mem_machineTiles_iff]
+    t.toWangTile ∈ rawMachineTiles M := by
+  rw [mem_rawMachineTiles_iff]
   exact ⟨t, ht, rfl⟩
 
-theorem toWangTile_mem_machineTiles_iff (M : Machine) (t : MachineHistoryTile) :
-    t.toWangTile ∈ machineTiles M ↔ t ∈ machineHistoryTiles M := by
+theorem toWangTile_mem_rawMachineTiles_iff (M : Machine) (t : MachineHistoryTile) :
+    t.toWangTile ∈ rawMachineTiles M ↔ t ∈ machineHistoryTiles M := by
   constructor
   · intro ht
-    rcases (mem_machineTiles_iff M t.toWangTile).1 ht with ⟨u, hu, htile⟩
+    rcases (mem_rawMachineTiles_iff M t.toWangTile).1 ht with ⟨u, hu, htile⟩
     exact MachineHistoryTile.toWangTile_injective htile
       ▸ hu
-  · exact toWangTile_mem_machineTiles
+  · exact toWangTile_mem_rawMachineTiles
 
-theorem toWangTile_mem_machineTiles_of_supported {M : Machine} {t : MachineHistoryTile}
+theorem toWangTile_mem_rawMachineTiles_of_supported {M : Machine} {t : MachineHistoryTile}
     (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
     (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
     (hnextCenter : t.nextCenter.Mem M) (hnextRight : t.nextRight.Mem M)
     (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter) :
-    t.toWangTile ∈ machineTiles M :=
-  toWangTile_mem_machineTiles
+    t.toWangTile ∈ rawMachineTiles M :=
+  toWangTile_mem_rawMachineTiles
     (mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
       hnextLeft hnextCenter hnextRight hlocal)
 
@@ -840,6 +840,10 @@ def normalRowMachineTiles (M : Machine) : TileSet :=
 
 def taggedMachineTiles (M : Machine) : TileSet :=
   initialRowMachineTiles M ++ normalRowMachineTiles M
+
+/-- The public machine tileset, with row tags that force the bottom initial row. -/
+def machineTiles (M : Machine) : TileSet :=
+  taggedMachineTiles M
 
 theorem initialRowHistoryTile_zero_mem (M : Machine) :
     runHistoryTile M 0 0 ∈ initialRowHistoryTiles M := by
@@ -968,11 +972,15 @@ theorem initialHistoryTile_eq_runHistoryTile_zero_of_not_halts {M : Machine}
       localNextCell?, Move.apply, hstart, hstep, hq']
 
 /-- The distinguished lower-left tile forcing the empty-input initial configuration. -/
-def machineSeed (M : Machine) : WangTile :=
+def rawMachineSeed (M : Machine) : WangTile :=
   (initialHistoryTile M).toWangTile
 
 def taggedMachineSeed (M : Machine) : WangTile :=
   (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag
+
+/-- The public machine seed, using the initial-row tag. -/
+def machineSeed (M : Machine) : WangTile :=
+  taggedMachineSeed M
 
 def machineRowTag : Nat → Nat
   | 0 => initialRowTag
@@ -1023,16 +1031,22 @@ theorem runTaggedHistoryTile_vMatches (M : Machine) (time pos : Nat) :
   exact ⟨rfl, hcells⟩
 
 @[simp]
-theorem machineSeed_eq (M : Machine) :
-    machineSeed M = (initialHistoryTile M).toWangTile :=
+theorem rawMachineSeed_eq (M : Machine) :
+    rawMachineSeed M = (initialHistoryTile M).toWangTile :=
   rfl
 
-theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
+@[simp]
+theorem machineSeed_eq (M : Machine) :
+    machineSeed M =
+      (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag :=
+  rfl
+
+theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
-    TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
-  let x : Nat × Nat → TileIn (machineTiles M) := fun p =>
+    TilesQuarterWithSeed (rawMachineTiles M) (rawMachineSeed M) := by
+  let x : Nat × Nat → TileIn (rawMachineTiles M) := fun p =>
     ⟨(runHistoryTile M p.2 p.1).toWangTile,
-      toWangTile_mem_machineTiles
+      toWangTile_mem_rawMachineTiles
         (runHistoryTile_mem_machineHistoryTiles_of_not_halts h p.2 p.1)⟩
   refine ⟨x, ?_, ?_⟩
   · constructor
@@ -1040,7 +1054,7 @@ theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
       exact runHistoryTile_hMatches M p.2 p.1
     · intro p
       exact runHistoryTile_vMatches M p.2 p.1
-  · simp [x, machineSeed_eq, initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+  · simp [x, rawMachineSeed_eq, initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
 
 theorem tilesQuarterWithSeed_taggedMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
@@ -1056,5 +1070,11 @@ theorem tilesQuarterWithSeed_taggedMachineTiles_of_not_halts {M : Machine}
       exact runTaggedHistoryTile_vMatches M p.2 p.1
   · simp [x, runTaggedHistoryTile, taggedMachineSeed,
       initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+
+theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) :
+    TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  simpa [machineTiles, machineSeed] using
+    tilesQuarterWithSeed_taggedMachineTiles_of_not_halts h
 
 end LeanWang
