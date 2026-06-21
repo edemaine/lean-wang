@@ -483,6 +483,18 @@ theorem tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_act
   · exact validRectangle_payload_of_validCombinedRectangleLayers_of_active hlayers hactive
   · exact (hlayers.2.2.1 ⟨0, hn⟩ ⟨0, hn⟩ (hactive ⟨0, hn⟩ ⟨0, hn⟩)).2 hcorner
 
+def PlaneTilingHasActiveCornerBaseWindows (S : Scaffold) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold S T seed)),
+    ValidPlaneTiling (combineWithScaffold S T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ origin : Int × Int, ∃ baseRect : Rectangle n n,
+          (∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true) ∧
+            baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner ∧
+            ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+              WangTile.product (baseRect i j) payload =
+                (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
+
 def PlaneTilingForcesActiveCornerWindows (S : Scaffold) : Prop :=
   ∀ {T : TileSet} {seed : WangTile}
     (x : Int × Int → TileIn (combineWithScaffold S T seed)),
@@ -492,6 +504,40 @@ def PlaneTilingForcesActiveCornerWindows (S : Scaffold) : Prop :=
           ValidCombinedRectangleLayers S T seed rect baseRect payloadRect ∧
             (∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true) ∧
             baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner
+
+theorem planeTilingForcesActiveCornerWindows_of_hasActiveCornerBaseWindows
+    {S : Scaffold} (hS : PlaneTilingHasActiveCornerBaseWindows S) :
+    PlaneTilingForcesActiveCornerWindows S := by
+  intro T seed x hx n hn
+  rcases hS x hx n hn with ⟨origin, forcedBase, hforcedActive, hforcedCorner, hforcedProduct⟩
+  let rect : Rectangle n n := fun i j =>
+    (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
+  have hrect : ValidRectangle (combineWithScaffold S T seed) rect := by
+    constructor
+    · intro i j
+      exact (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).2
+    constructor
+    · intro i j hi
+      convert hx.1 (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val) using 2
+      ext
+      all_goals simp [Nat.cast_add, add_assoc]
+    · intro i j hj
+      convert hx.2 (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val) using 2
+      ext
+      all_goals simp [Nat.cast_add, add_assoc]
+  rcases exists_validCombinedRectangleLayers_of_validRectangle_combineWithScaffold
+      (S := S) (T := T) (seed := seed) hrect with
+    ⟨baseRect, payloadRect, hlayers⟩
+  refine ⟨rect, baseRect, payloadRect, hlayers, ?_, ?_⟩
+  · intro i j
+    rcases hforcedProduct i j with ⟨payload, hproduct⟩
+    have hbase : baseRect i j = forcedBase i j := by
+      exact (product_eq_iff.1 ((hlayers.2.1 i j).trans hproduct.symm)).1
+    simpa [hbase] using hforcedActive i j
+  · rcases hforcedProduct ⟨0, hn⟩ ⟨0, hn⟩ with ⟨payload, hproduct⟩
+    have hbase : baseRect ⟨0, hn⟩ ⟨0, hn⟩ = forcedBase ⟨0, hn⟩ ⟨0, hn⟩ := by
+      exact (product_eq_iff.1 ((hlayers.2.1 ⟨0, hn⟩ ⟨0, hn⟩).trans hproduct.symm)).1
+    exact hbase.trans hforcedCorner
 
 def ForcesActiveCornerSquares (S : Scaffold) : Prop :=
   ∀ {T : TileSet} {seed : WangTile},
