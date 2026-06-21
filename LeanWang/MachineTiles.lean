@@ -1785,6 +1785,148 @@ theorem tableProgramNormalRowMachineTilesData_computable :
     Computable tableProgramNormalRowMachineTilesData :=
   tableProgramNormalRowMachineTilesData_primrec.to_comp
 
+def tableProgramLocalNextCellDataD
+    (P : TableProgram) (left center right fallback : MachineCell) : MachineCell :=
+  (tableProgramLocalNextCellData? P left center right).getD fallback
+
+theorem tableProgramLocalNextCellDataD_primrec :
+    Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell × MachineCell =>
+      tableProgramLocalNextCellDataD p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  unfold tableProgramLocalNextCellDataD
+  have hoption :
+      Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell × MachineCell =>
+      tableProgramLocalNextCellData? p.1 p.2.1 p.2.2.1 p.2.2.2.1) :=
+    tableProgramLocalNextCellData?_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))))
+  have hfallback : Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell ×
+      MachineCell => p.2.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+  exact Primrec.option_getD.comp hoption hfallback
+
+def tableProgramInitialBlankCell (P : TableProgram) : MachineCell :=
+  MachineCell.plain P.blank
+
+theorem tableProgramInitialBlankCell_primrec :
+    Primrec tableProgramInitialBlankCell :=
+  MachineCell.plain_primrec.comp TableProgram.blank_primrec
+
+def tableProgramInitialHeadCell (P : TableProgram) : MachineCell :=
+  MachineCell.head P.start P.blank
+
+theorem tableProgramInitialHeadCell_primrec :
+    Primrec tableProgramInitialHeadCell :=
+  MachineCell.head_primrec.comp
+    (Primrec.pair TableProgram.start_primrec TableProgram.blank_primrec)
+
+def tableProgramInitialNextAt
+    (P : TableProgram) (left center right : MachineCell) : MachineCell :=
+  tableProgramLocalNextCellDataD P left center right (tableProgramInitialBlankCell P)
+
+theorem tableProgramInitialNextAt_primrec :
+    Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+      tableProgramInitialNextAt p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  unfold tableProgramInitialNextAt
+  exact tableProgramLocalNextCellDataD_primrec.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.pair (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+            (tableProgramInitialBlankCell_primrec.comp Primrec.fst)))))
+
+def tableProgramInitialNext0 (P : TableProgram) : MachineCell :=
+  tableProgramInitialNextAt P MachineCell.boundary (tableProgramInitialHeadCell P)
+    (tableProgramInitialBlankCell P)
+
+theorem tableProgramInitialNext0_primrec : Primrec tableProgramInitialNext0 := by
+  unfold tableProgramInitialNext0
+  exact tableProgramInitialNextAt_primrec.comp
+    (Primrec.pair Primrec.id
+      (Primrec.pair (Primrec.const MachineCell.boundary)
+        (Primrec.pair tableProgramInitialHeadCell_primrec
+          tableProgramInitialBlankCell_primrec)))
+
+def tableProgramInitialNext1 (P : TableProgram) : MachineCell :=
+  tableProgramInitialNextAt P (tableProgramInitialHeadCell P) (tableProgramInitialBlankCell P)
+    (tableProgramInitialBlankCell P)
+
+theorem tableProgramInitialNext1_primrec : Primrec tableProgramInitialNext1 := by
+  unfold tableProgramInitialNext1
+  exact tableProgramInitialNextAt_primrec.comp
+    (Primrec.pair Primrec.id
+      (Primrec.pair tableProgramInitialHeadCell_primrec
+        (Primrec.pair tableProgramInitialBlankCell_primrec
+          tableProgramInitialBlankCell_primrec)))
+
+def tableProgramInitialNext2 (P : TableProgram) : MachineCell :=
+  tableProgramInitialNextAt P (tableProgramInitialBlankCell P) (tableProgramInitialBlankCell P)
+    (tableProgramInitialBlankCell P)
+
+theorem tableProgramInitialNext2_primrec : Primrec tableProgramInitialNext2 := by
+  unfold tableProgramInitialNext2
+  exact tableProgramInitialNextAt_primrec.comp
+    (Primrec.pair Primrec.id
+      (Primrec.pair tableProgramInitialBlankCell_primrec
+        (Primrec.pair tableProgramInitialBlankCell_primrec
+          tableProgramInitialBlankCell_primrec)))
+
+def tableProgramInitialHistoryTile1 (P : TableProgram) : MachineHistoryTile where
+  prevLeft := tableProgramInitialHeadCell P
+  prevCenter := tableProgramInitialBlankCell P
+  prevRight := tableProgramInitialBlankCell P
+  nextLeft := tableProgramInitialNext0 P
+  nextCenter := tableProgramInitialNext1 P
+  nextRight := tableProgramInitialNext2 P
+
+theorem tableProgramInitialHistoryTile1_primrec :
+    Primrec tableProgramInitialHistoryTile1 := by
+  exact MachineHistoryTile.mk_primrec.comp
+    (Primrec.pair tableProgramInitialHeadCell_primrec
+      (Primrec.pair tableProgramInitialBlankCell_primrec
+        (Primrec.pair tableProgramInitialBlankCell_primrec
+          (Primrec.pair tableProgramInitialNext0_primrec
+            (Primrec.pair tableProgramInitialNext1_primrec
+              tableProgramInitialNext2_primrec)))))
+
+def tableProgramInitialHistoryTile2 (P : TableProgram) : MachineHistoryTile where
+  prevLeft := tableProgramInitialBlankCell P
+  prevCenter := tableProgramInitialBlankCell P
+  prevRight := tableProgramInitialBlankCell P
+  nextLeft := tableProgramInitialNext1 P
+  nextCenter := tableProgramInitialNext2 P
+  nextRight := tableProgramInitialNext2 P
+
+theorem tableProgramInitialHistoryTile2_primrec :
+    Primrec tableProgramInitialHistoryTile2 := by
+  exact MachineHistoryTile.mk_primrec.comp
+    (Primrec.pair tableProgramInitialBlankCell_primrec
+      (Primrec.pair tableProgramInitialBlankCell_primrec
+        (Primrec.pair tableProgramInitialBlankCell_primrec
+          (Primrec.pair tableProgramInitialNext1_primrec
+            (Primrec.pair tableProgramInitialNext2_primrec
+              tableProgramInitialNext2_primrec)))))
+
+def tableProgramInitialHistoryTile3 (P : TableProgram) : MachineHistoryTile where
+  prevLeft := tableProgramInitialBlankCell P
+  prevCenter := tableProgramInitialBlankCell P
+  prevRight := tableProgramInitialBlankCell P
+  nextLeft := tableProgramInitialNext2 P
+  nextCenter := tableProgramInitialNext2 P
+  nextRight := tableProgramInitialNext2 P
+
+theorem tableProgramInitialHistoryTile3_primrec :
+    Primrec tableProgramInitialHistoryTile3 := by
+  exact MachineHistoryTile.mk_primrec.comp
+    (Primrec.pair tableProgramInitialBlankCell_primrec
+      (Primrec.pair tableProgramInitialBlankCell_primrec
+        (Primrec.pair tableProgramInitialBlankCell_primrec
+          (Primrec.pair tableProgramInitialNext2_primrec
+            (Primrec.pair tableProgramInitialNext2_primrec
+              tableProgramInitialNext2_primrec)))))
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
@@ -2338,6 +2480,49 @@ theorem tableProgramSeedData_primrec : Primrec tableProgramSeedData := by
 
 theorem tableProgramSeed_computable : Computable tableProgramSeed :=
   tableProgramSeedData_primrec.to_comp.of_eq tableProgramSeedData_eq_tableProgramSeed
+
+def tableProgramInitialRowHistoryTilesData (P : TableProgram) : List MachineHistoryTile :=
+  [tableProgramSeedHistoryTile P,
+    tableProgramInitialHistoryTile1 P,
+    tableProgramInitialHistoryTile2 P,
+    tableProgramInitialHistoryTile3 P]
+
+theorem tableProgramInitialRowHistoryTilesData_primrec :
+    Primrec tableProgramInitialRowHistoryTilesData := by
+  unfold tableProgramInitialRowHistoryTilesData
+  exact Primrec.list_cons.comp tableProgramSeedHistoryTile_primrec
+    (Primrec.list_cons.comp tableProgramInitialHistoryTile1_primrec
+      (Primrec.list_cons.comp tableProgramInitialHistoryTile2_primrec
+        (Primrec.list_cons.comp tableProgramInitialHistoryTile3_primrec
+          (Primrec.const []))))
+
+def tableProgramInitialRowMachineTilesData (P : TableProgram) : TileSet :=
+  (tableProgramInitialRowHistoryTilesData P).map
+    (MachineHistoryTile.toTaggedWangTile initialRowTag normalRowTag)
+
+theorem tableProgramInitialRowMachineTilesData_primrec :
+    Primrec tableProgramInitialRowMachineTilesData := by
+  unfold tableProgramInitialRowMachineTilesData
+  refine Primrec.list_map tableProgramInitialRowHistoryTilesData_primrec ?_
+  apply Primrec₂.mk
+  exact MachineHistoryTile.toTaggedWangTile_primrec.comp
+    (Primrec.pair (Primrec.const initialRowTag)
+      (Primrec.pair (Primrec.const normalRowTag) Primrec.snd))
+
+theorem tableProgramInitialRowMachineTilesData_computable :
+    Computable tableProgramInitialRowMachineTilesData :=
+  tableProgramInitialRowMachineTilesData_primrec.to_comp
+
+def tableProgramTilesData (P : TableProgram) : TileSet :=
+  tableProgramInitialRowMachineTilesData P ++ tableProgramNormalRowMachineTilesData P
+
+theorem tableProgramTilesData_primrec : Primrec tableProgramTilesData := by
+  unfold tableProgramTilesData
+  exact Primrec.list_append.comp tableProgramInitialRowMachineTilesData_primrec
+    tableProgramNormalRowMachineTilesData_primrec
+
+theorem tableProgramTilesData_computable : Computable tableProgramTilesData :=
+  tableProgramTilesData_primrec.to_comp
 
 /-- The fixed-domino instance generated by finite table-program data. -/
 def tableProgramFixedDomino (P : TableProgram) : TileSet × WangTile :=
