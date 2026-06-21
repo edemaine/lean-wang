@@ -176,19 +176,19 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDomino (programTable c)
+  tableProgramFixedDominoData (programTable c)
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  unfold fixedDominoReduction programTable tableProgramFixedDomino
-  unfold tableProgramTiles tableProgramSeed
-  exact Computable.const
-    (machineTiles dummyProgram.toMachine, machineSeed dummyProgram.toMachine)
+  exact tableProgramFixedDominoData_computable.comp programTable_computable
 
 /-- Correctness of the fixed domino reduction from nonhalting. -/
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   unfold fixedDominoReduction
+  rw [tableProgramFixedDominoData_seed_eq]
+  rw [tilesQuarterWithSeed_congr
+    (tableProgramFixedDominoData_mem_iff (programTable c))]
   rw [tableProgramFixedDomino_correct]
   change ¬ Machine.HaltsEmpty (programMachine c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom
   rw [programMachine_correct]
