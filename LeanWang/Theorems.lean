@@ -7,6 +7,7 @@ import LeanWang.Compactness
 import LeanWang.Machine
 import LeanWang.MachineTiles
 import Mathlib.Computability.Reduce
+import Mathlib.Computability.TuringMachine.ToPartrec
 
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
@@ -19,6 +20,11 @@ concrete target in Lean.
 namespace LeanWang
 
 open Nat.Partrec (Code)
+
+theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
+    (f <$> p).Dom ↔ p.Dom := by
+  rw [Part.map_eq_map]
+  rfl
 
 /--
 Bounded Mathlib code evaluation succeeds at some fuel exactly when full
@@ -69,6 +75,47 @@ theorem codeEvaln_nonhalting_undecidable :
     h.of_eq fun c => by
       rw [code_eval_dom_iff_exists_codeEvalnHalts]
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
+Every Mathlib `Nat.Partrec.Code` has a corresponding `Turing.ToPartrec.Code`
+whose singleton-list output is defined exactly when the original unary code is
+defined.
+-/
+theorem exists_toPartrecCode_for_natPartrecCode (c : Code) :
+    ∃ tc : Turing.ToPartrec.Code,
+      ∀ n : Nat,
+        (Turing.ToPartrec.Code.eval tc [n]).Dom ↔
+          (Nat.Partrec.Code.eval c n).Dom := by
+  have hpart : Partrec (Nat.Partrec.Code.eval c) :=
+    (Nat.Partrec.Code.eval_part.comp (Computable.const c) Computable.id).of_eq
+      fun n => by rfl
+  rcases Turing.ToPartrec.Code.exists_code (Nat.Partrec'.part_iff₁.2 hpart) with
+    ⟨tc, htc⟩
+  refine ⟨tc, fun n => ?_⟩
+  let v : List.Vector Nat 1 := ⟨[n], by simp⟩
+  have hv : v.head = n := rfl
+  have htc' :
+      Turing.ToPartrec.Code.eval tc [n] =
+        pure <$> Nat.Partrec.Code.eval c n := by
+    simpa [v, hv] using htc v
+  rw [htc']
+  exact part_dom_map_iff pure (Nat.Partrec.Code.eval c n)
+
+/--
+Mathlib's TM2 evaluator for the translated `ToPartrec.Code` halts exactly when
+the original `Nat.Partrec.Code` halts on input `0`.
+-/
+theorem exists_tm2_for_natPartrecCode (c : Code) :
+    ∃ tc : Turing.ToPartrec.Code,
+      (StateTransition.eval
+          (Turing.TM2.step Turing.PartrecToTM2.tr)
+          (Turing.PartrecToTM2.init tc [0])).Dom ↔
+        (Nat.Partrec.Code.eval c 0).Dom := by
+  rcases exists_toPartrecCode_for_natPartrecCode c with ⟨tc, htc⟩
+  refine ⟨tc, ?_⟩
+  rw [Turing.PartrecToTM2.tr_eval tc [0]]
+  exact (part_dom_map_iff Turing.PartrecToTM2.halt
+    (Turing.ToPartrec.Code.eval tc [0])).trans (htc 0)
 
 /-- A dummy machine used until the compiler from partial-recursive codes is implemented. -/
 def dummyMachine : Machine where
