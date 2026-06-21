@@ -169,19 +169,22 @@ theorem machineTiles_correct (M : Machine) :
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  let M := programMachine c
-  (machineTiles M, machineSeed M)
+  tableProgramFixedDomino (programTable c)
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  unfold fixedDominoReduction programMachine programTable
-  exact Computable.const (machineTiles dummyMachine, machineSeed dummyMachine)
+  unfold fixedDominoReduction programTable tableProgramFixedDomino
+  unfold tableProgramTiles tableProgramSeed
+  exact Computable.const
+    (machineTiles dummyProgram.toMachine, machineSeed dummyProgram.toMachine)
 
 /-- Correctness of the fixed domino reduction from nonhalting. -/
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  unfold fixedDominoReduction
-  rw [machineTiles_correct, programMachine_correct]
+  unfold fixedDominoReduction tableProgramFixedDomino tableProgramTiles tableProgramSeed
+  rw [machineTiles_correct]
+  change ¬ Machine.HaltsEmpty (programMachine c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom
+  rw [programMachine_correct]
 
 /-- The fixed domino problem is undecidable, in reduction form. -/
 theorem fixed_domino_problem_undecidable :
