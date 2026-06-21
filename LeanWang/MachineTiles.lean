@@ -1392,6 +1392,104 @@ theorem seeded_tiling_row_zero_eq_of_le_three {M : Machine}
               | succ pos =>
                   omega
 
+theorem seeded_tiling_row_zero_tail_succ_eq {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    {pos : Nat} (hpos : 3 ≤ pos)
+    (hleft : (x (pos, 0)).1 = runTaggedHistoryTile M 0 pos) :
+    (x (pos + 1, 0)).1 = runTaggedHistoryTile M 0 (pos + 1) := by
+  have hposSucc : 3 ≤ pos + 1 := by omega
+  have hleftTail : runHistoryTile M 0 pos = runHistoryTile M 0 3 :=
+    runHistoryTile_zero_eq_three_of_three_le M hpos
+  have hrightTail : runHistoryTile M 0 (pos + 1) = runHistoryTile M 0 3 :=
+    runHistoryTile_zero_eq_three_of_three_le M hposSucc
+  have hh : WangTile.HMatches
+      ((runHistoryTile M 0 3).toTaggedWangTile initialRowTag normalRowTag)
+      (x (pos + 1, 0)).1 := by
+    simpa [runTaggedHistoryTile, hleft, hleftTail] using hvalid.1 (pos, 0)
+  rcases (mem_machineTiles_iff M (x (pos + 1, 0)).1).1 (x (pos + 1, 0)).2 with hinit | hnormal
+  · rcases hinit with ⟨t, ht, htile⟩
+    have hh' : WangTile.HMatches
+        ((runHistoryTile M 0 3).toTaggedWangTile initialRowTag normalRowTag)
+        (t.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [htile] using hh
+    have hcells := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag initialRowTag normalRowTag
+      (runHistoryTile M 0 3) t).1 hh'
+    have htCases :
+        t = runHistoryTile M 0 0 ∨
+          t = runHistoryTile M 0 1 ∨
+          t = runHistoryTile M 0 2 ∨
+          t = runHistoryTile M 0 3 := by
+      simpa [initialRowHistoryTiles] using ht
+    rcases htCases with ht | ht | ht | ht
+    · subst t
+      have hbad := hcells.2.1
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+        Machine.runEmpty_zero, Machine.initialID, ID.cellAt, ID.cellAtLeft] at hbad
+    · subst t
+      have hbad := hcells.2.1
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+        Machine.runEmpty_zero, Machine.initialID, ID.cellAt, ID.cellAtLeft] at hbad
+    · subst t
+      rw [← htile]
+      simp [runTaggedHistoryTile, hrightTail]
+      by_cases hstart : M.start = M.halt
+      · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+          Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+          Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart] at hcells ⊢
+      · rcases hstep : M.step M.start M.blank with ⟨write, q', move⟩
+        cases move <;>
+          simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+            Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+            Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart, hstep,
+            Move.apply] at hcells ⊢
+    · subst t
+      rw [← htile]
+      simp [runTaggedHistoryTile, hrightTail]
+  · rcases hnormal with ⟨t, _ht, htile⟩
+    have hh' : WangTile.HMatches
+        ((runHistoryTile M 0 3).toTaggedWangTile initialRowTag normalRowTag)
+        (t.toTaggedWangTile normalRowTag normalRowTag) := by
+      simpa [htile] using hh
+    have htag := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag normalRowTag normalRowTag
+      (runHistoryTile M 0 3) t).1 hh'
+    exact False.elim (initialRowTag_ne_normalRowTag htag.1)
+
+theorem seeded_tiling_row_zero_eq {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) :
+    ∀ pos : Nat, (x (pos, 0)).1 = runTaggedHistoryTile M 0 pos := by
+  intro pos
+  cases pos with
+  | zero =>
+      exact seeded_tiling_row_zero_eq_of_le_three hvalid hseed (by decide : 0 ≤ 3)
+  | succ pos =>
+      cases pos with
+      | zero =>
+          exact seeded_tiling_row_zero_eq_of_le_three hvalid hseed (by decide : 1 ≤ 3)
+      | succ pos =>
+          cases pos with
+          | zero =>
+              exact seeded_tiling_row_zero_eq_of_le_three hvalid hseed (by decide : 2 ≤ 3)
+          | succ pos =>
+              cases pos with
+              | zero =>
+                  exact seeded_tiling_row_zero_eq_of_le_three hvalid hseed (by decide : 3 ≤ 3)
+              | succ pos =>
+                  induction pos with
+                  | zero =>
+                      exact seeded_tiling_row_zero_tail_succ_eq hvalid
+                        (by decide : 3 ≤ 3)
+                        (seeded_tiling_row_zero_eq_of_le_three hvalid hseed
+                          (by decide : 3 ≤ 3))
+                  | succ pos ih =>
+                      exact seeded_tiling_row_zero_tail_succ_eq hvalid
+                        (by omega : 3 ≤ pos + 1 + 1 + 1 + 1)
+                        ih
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
