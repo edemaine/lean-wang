@@ -605,6 +605,24 @@ theorem runHistoryTile_vMatches (M : Machine) (time pos : Nat) :
       (runHistoryTile M (time + 1) pos).toWangTile := by
   simp [WangTile.VMatches, MachineHistoryTile.toWangTile, runHistoryTile]
 
+theorem runHistoryTile_local_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
+    (time pos : Nat) :
+    localNextCell? M (runHistoryTile M time pos).prevLeft
+        (runHistoryTile M time pos).prevCenter
+        (runHistoryTile M time pos).prevRight =
+      some (runHistoryTile M time pos).nextCenter := by
+  let c := M.runEmpty time
+  have hstate : c.state ≠ M.halt := by
+    exact M.runEmpty_state_ne_halt_of_not_halts h time
+  have hnextRun : (M.runEmpty (time + 1)).state ≠ M.halt := by
+    exact M.runEmpty_state_ne_halt_of_not_halts h (time + 1)
+  have hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt := by
+    rw [← Machine.nextID_state_of_ne_halt hstate]
+    simpa [c, Machine.runEmpty_succ] using hnextRun
+  simpa [runHistoryTile, Machine.runCell, Machine.runCellLeft, c,
+    Machine.runEmpty_succ] using
+    Machine.localNextCell?_cellAt (M := M) (c := c) (pos := pos) hstate hnextState
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
@@ -645,6 +663,15 @@ theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTi
     mem_machineCells_of_mem hnextCenter,
     mem_machineCells_of_mem hnextRight,
     hlocal⟩
+
+theorem runHistoryTile_mem_machineHistoryTiles_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) (time pos : Nat) :
+    runHistoryTile M time pos ∈ machineHistoryTiles M := by
+  rcases runHistoryTile_cells_mem_of_not_halts h time pos with
+    ⟨hprevLeft, hprevCenter, hprevRight, hnextLeft, hnextCenter, hnextRight⟩
+  exact mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
+    hnextLeft hnextCenter hnextRight
+    (runHistoryTile_local_of_not_halts h time pos)
 
 /-- The Wang tiles produced from a concrete machine by the local-history construction. -/
 def machineTiles (M : Machine) : TileSet :=
