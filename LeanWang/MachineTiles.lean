@@ -35,8 +35,29 @@ def isHead : MachineCell → Bool
 
 /-- Encode machine cells as Wang colors. -/
 def code : MachineCell → Nat
-  | plain a => 2 * a
-  | head q a => 2 * Nat.pair q a + 1
+  | plain a => Nat.pair 0 a
+  | head q a => Nat.pair 1 (Nat.pair q a)
+
+theorem code_injective : Function.Injective code := by
+  intro c d h
+  cases c with
+  | plain a =>
+      cases d with
+      | plain b =>
+          have hb : a = b := (Nat.pair_eq_pair.mp h).2
+          simp [hb]
+      | head q b =>
+          have htag : 0 = 1 := (Nat.pair_eq_pair.mp h).1
+          cases htag
+  | head q a =>
+      cases d with
+      | plain b =>
+          have htag : 1 = 0 := (Nat.pair_eq_pair.mp h).1
+          cases htag
+      | head r b =>
+          have hpair : Nat.pair q a = Nat.pair r b := (Nat.pair_eq_pair.mp h).2
+          rcases Nat.pair_eq_pair.mp hpair with ⟨hq, ha⟩
+          simp [hq, ha]
 
 end MachineCell
 
@@ -87,13 +108,45 @@ def machineCells (M : Machine) : List MachineCell :=
 def pairCellColor (a b : MachineCell) : Nat :=
   Nat.pair a.code b.code
 
+theorem pairCellColor_eq_iff {a b c d : MachineCell} :
+    pairCellColor a b = pairCellColor c d ↔ a = c ∧ b = d := by
+  unfold pairCellColor
+  rw [Nat.pair_eq_pair]
+  constructor
+  · rintro ⟨ha, hb⟩
+    exact ⟨MachineCell.code_injective ha, MachineCell.code_injective hb⟩
+  · rintro ⟨rfl, rfl⟩
+    exact ⟨rfl, rfl⟩
+
 /-- Encode a row triple as one Wang color. -/
 def tripleCellColor (a b c : MachineCell) : Nat :=
   Nat.pair a.code (Nat.pair b.code c.code)
 
+theorem tripleCellColor_eq_iff {a b c d e f : MachineCell} :
+    tripleCellColor a b c = tripleCellColor d e f ↔ a = d ∧ b = e ∧ c = f := by
+  unfold tripleCellColor
+  rw [Nat.pair_eq_pair, Nat.pair_eq_pair]
+  constructor
+  · rintro ⟨ha, hb, hc⟩
+    exact ⟨MachineCell.code_injective ha,
+      MachineCell.code_injective hb, MachineCell.code_injective hc⟩
+  · rintro ⟨rfl, rfl, rfl⟩
+    exact ⟨rfl, rfl, rfl⟩
+
 /-- Encode the two-column overlap of two consecutive local-history tiles. -/
 def overlapCellColor (prev₀ prev₁ next₀ next₁ : MachineCell) : Nat :=
   Nat.pair (pairCellColor prev₀ prev₁) (pairCellColor next₀ next₁)
+
+theorem overlapCellColor_eq_iff {a b c d e f g h : MachineCell} :
+    overlapCellColor a b c d = overlapCellColor e f g h ↔
+      a = e ∧ b = f ∧ c = g ∧ d = h := by
+  unfold overlapCellColor
+  rw [Nat.pair_eq_pair, pairCellColor_eq_iff, pairCellColor_eq_iff]
+  constructor
+  · rintro ⟨⟨ha, hb⟩, hc, hd⟩
+    exact ⟨ha, hb, hc, hd⟩
+  · rintro ⟨rfl, rfl, rfl, rfl⟩
+    exact ⟨⟨rfl, rfl⟩, rfl, rfl⟩
 
 /--
 The local one-step update for the center cell of a three-cell window.
