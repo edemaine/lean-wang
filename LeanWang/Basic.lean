@@ -58,6 +58,31 @@ def ValidPlaneTiling (T : TileSet) (x : Int × Int → WangTile) : Prop :=
 def TilesPlane (T : TileSet) : Prop :=
   ∃ x : Int × Int → WangTile, ValidPlaneTiling T x
 
+/-- The centered integer box `[-r, r] × [-r, r]`. -/
+def InBox (r : Nat) (p : Int × Int) : Prop :=
+  -(r : Int) ≤ p.1 ∧ p.1 ≤ (r : Int) ∧
+    -(r : Int) ≤ p.2 ∧ p.2 ≤ (r : Int)
+
+/-- Coordinates in the centered integer box `[-r, r] × [-r, r]`. -/
+abbrev Box (r : Nat) :=
+  { p : Int × Int // InBox r p }
+
+/-- A finite centered box assignment. -/
+abbrev BoxPattern (r : Nat) :=
+  Box r → WangTile
+
+/-- Validity of a centered finite box tiling. -/
+def ValidBoxTiling (T : TileSet) (r : Nat) (x : BoxPattern r) : Prop :=
+  (∀ p : Box r, x p ∈ T) ∧
+    (∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+      WangTile.HMatches (x p) (x ⟨(p.1.1 + 1, p.1.2), hp⟩)) ∧
+      (∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+        WangTile.VMatches (x p) (x ⟨(p.1.1, p.1.2 + 1), hp⟩))
+
+/-- A tileset tiles the centered integer box `[-r, r] × [-r, r]`. -/
+def TileableBox (T : TileSet) (r : Nat) : Prop :=
+  ∃ x : BoxPattern r, ValidBoxTiling T r x
+
 /-- A complete tiling of the first quadrant `Nat × Nat`. -/
 def ValidQuarterTiling (T : TileSet) (x : Nat × Nat → WangTile) : Prop :=
   (∀ p : Nat × Nat, x p ∈ T) ∧
@@ -183,6 +208,21 @@ theorem tileableSquare_of_tilesPlane {T : TileSet} :
   · intro i j hj
     exact hxV (Int.ofNat i.val, Int.ofNat j.val)
 
+/-- If a plane tiling exists, every centered finite box is tileable by restriction. -/
+theorem tileableBox_of_tilesPlane {T : TileSet} :
+    TilesPlane T → ∀ r : Nat, TileableBox T r := by
+  intro hT r
+  rcases hT with ⟨x, hxmem, hxH, hxV⟩
+  refine ⟨fun p => x p.1, ?_⟩
+  constructor
+  · intro p
+    exact hxmem p.1
+  constructor
+  · intro p hp
+    exact hxH p.1
+  · intro p hp
+    exact hxV p.1
+
 /-- A seeded quarter-plane tiling restricts to every nonempty seeded square. -/
 theorem fixedCornerSquare_of_tilesQuarterWithSeed {T : TileSet} {seed : WangTile} :
     TilesQuarterWithSeed T seed →
@@ -209,6 +249,18 @@ theorem tilesPlane_iff_all_tileableSquares (T : TileSet) :
     TilesPlane T ↔ ∀ n : Nat, TileableSquare T n := by
   constructor
   · exact tileableSquare_of_tilesPlane
+  · intro _h
+    sorry
+
+/--
+Centered-box compactness for Wang tilings. This is the form that should be used
+for the diagonal/Kőnig proof: every finite window around the origin is tileable iff
+the whole plane is tileable.
+-/
+theorem tilesPlane_iff_all_tileableBoxes (T : TileSet) :
+    TilesPlane T ↔ ∀ r : Nat, TileableBox T r := by
+  constructor
+  · exact tileableBox_of_tilesPlane
   · intro _h
     sorry
 
