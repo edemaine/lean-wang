@@ -1201,6 +1201,23 @@ theorem not_tilesQuarterWithSeed_machineTiles_of_first_step_right_halt {M : Mach
         Machine.runEmpty_zero, Machine.nextID, Machine.initialID, ID.cellAt,
         hstart, hstep, Move.apply])
 
+theorem not_tilesQuarterWithSeed_machineTiles_of_halts_at_one {M : Machine}
+    (hhalt : (M.runEmpty 1).state = M.halt) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  by_cases hstart : M.start = M.halt
+  · exact not_tilesQuarterWithSeed_machineTiles_of_initial_halt hstart
+  · rcases hstep : M.step M.start M.blank with ⟨write, q', move⟩
+    have hq' : q' = M.halt := by
+      simpa [Machine.runEmpty_succ, Machine.runEmpty_zero, Machine.nextID,
+        Machine.initialID, hstart, hstep] using hhalt
+    cases move with
+    | left =>
+        exact not_tilesQuarterWithSeed_machineTiles_of_first_step_left_halt
+          hstart (by simpa [hq'] using hstep)
+    | right =>
+        exact not_tilesQuarterWithSeed_machineTiles_of_first_step_right_halt
+          hstart (by simpa [hq'] using hstep)
+
 theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
     TilesQuarterWithSeed (rawMachineTiles M) (rawMachineSeed M) := by
