@@ -857,6 +857,46 @@ theorem initialRowHistoryTile_three_mem (M : Machine) :
     runHistoryTile M 0 3 ∈ initialRowHistoryTiles M := by
   simp [initialRowHistoryTiles]
 
+theorem runHistoryTile_zero_eq_three_of_three_le (M : Machine) {pos : Nat}
+    (hpos : 3 ≤ pos) :
+    runHistoryTile M 0 pos = runHistoryTile M 0 3 := by
+  cases pos with
+  | zero => omega
+  | succ pos =>
+      cases pos with
+      | zero => omega
+      | succ pos =>
+          cases pos with
+          | zero => omega
+          | succ pos =>
+              by_cases hstart : M.start = M.halt
+              · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+                  Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+                  Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart]
+              · rcases hstep : M.step M.start M.blank with ⟨write, q', move⟩
+                cases move <;>
+                  simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+                    Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+                    Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart, hstep,
+                    Move.apply]
+
+theorem runHistoryTile_zero_mem_initialRowHistoryTiles (M : Machine) (pos : Nat) :
+    runHistoryTile M 0 pos ∈ initialRowHistoryTiles M := by
+  cases pos with
+  | zero =>
+      exact initialRowHistoryTile_zero_mem M
+  | succ pos =>
+      cases pos with
+      | zero =>
+          exact initialRowHistoryTile_one_mem M
+      | succ pos =>
+          cases pos with
+          | zero =>
+              exact initialRowHistoryTile_two_mem M
+          | succ pos =>
+              rw [runHistoryTile_zero_eq_three_of_three_le M (by omega : 3 ≤ pos + 1 + 1 + 1)]
+              exact initialRowHistoryTile_three_mem M
+
 theorem toTaggedWangTile_mem_initialRowMachineTiles {M : Machine}
     {t : MachineHistoryTile} (ht : t ∈ initialRowHistoryTiles M) :
     t.toTaggedWangTile initialRowTag normalRowTag ∈ initialRowMachineTiles M := by
