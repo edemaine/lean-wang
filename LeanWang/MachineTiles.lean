@@ -386,6 +386,17 @@ theorem runHistoryTile_cells_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty
   simp [runHistoryTile, M.runCellLeft_mem_of_not_halts h,
     M.runCell_mem_of_not_halts h]
 
+theorem runHistoryTile_hMatches (M : Machine) (time pos : Nat) :
+    WangTile.HMatches (runHistoryTile M time pos).toWangTile
+      (runHistoryTile M time (pos + 1)).toWangTile := by
+  simp [WangTile.HMatches, MachineHistoryTile.toWangTile,
+    runHistoryTile, Machine.runCellLeft]
+
+theorem runHistoryTile_vMatches (M : Machine) (time pos : Nat) :
+    WangTile.VMatches (runHistoryTile M time pos).toWangTile
+      (runHistoryTile M (time + 1) pos).toWangTile := by
+  simp [WangTile.VMatches, MachineHistoryTile.toWangTile, runHistoryTile]
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
