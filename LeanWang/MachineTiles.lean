@@ -40,6 +40,43 @@ def code : MachineCell → Nat
 
 end MachineCell
 
+namespace ID
+
+/-- Read one configuration position as a row cell for the space-time diagram. -/
+def cellAt (c : ID) (i : Int) : MachineCell :=
+  if i = c.head then
+    MachineCell.head c.state (c.tape i)
+  else
+    MachineCell.plain (c.tape i)
+
+@[simp]
+theorem cellAt_head (c : ID) :
+    c.cellAt c.head = MachineCell.head c.state (c.tape c.head) := by
+  simp [cellAt]
+
+theorem cellAt_of_ne {c : ID} {i : Int} (hi : i ≠ c.head) :
+    c.cellAt i = MachineCell.plain (c.tape i) := by
+  simp [cellAt, hi]
+
+end ID
+
+namespace Machine
+
+/-- Cell in the space-time diagram after `time` steps at tape position `pos`. -/
+def runCell (M : Machine) (time : Nat) (pos : Int) : MachineCell :=
+  (M.runEmpty time).cellAt pos
+
+@[simp]
+theorem runCell_zero_head (M : Machine) :
+    M.runCell 0 0 = MachineCell.head M.start M.blank := by
+  simp [runCell, initialID, ID.cellAt]
+
+theorem runCell_zero_of_ne {M : Machine} {pos : Int} (hpos : pos ≠ 0) :
+    M.runCell 0 pos = MachineCell.plain M.blank := by
+  simp [runCell, initialID, ID.cellAt, hpos]
+
+end Machine
+
 /-- A finite list of row cells generated from a machine's finite supports. -/
 def machineCells (M : Machine) : List MachineCell :=
   (M.symbols.map MachineCell.plain) ++
