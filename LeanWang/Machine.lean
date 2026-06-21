@@ -488,4 +488,44 @@ instance instPrimcodableTableProgram : Primcodable TableProgram :=
     (List Nat × List Nat × Nat × Nat × Nat × List TableTransition)
     TableProgram.equivTuple
 
+namespace Move
+
+theorem toBool_primrec : Primrec Move.toBool := by
+  simpa [Move.equivBool] using
+    (Primrec.of_equiv (e := Move.equivBool) : Primrec Move.equivBool)
+
+theorem ofBool_primrec : Primrec Move.ofBool := by
+  simpa [Move.equivBool] using
+    (Primrec.of_equiv_symm (e := Move.equivBool) : Primrec Move.equivBool.symm)
+
+end Move
+
+namespace TableProgram
+
+theorem toTuple_primrec : Primrec TableProgram.toTuple := by
+  simpa [TableProgram.equivTuple] using
+    (Primrec.of_equiv (e := TableProgram.equivTuple) : Primrec TableProgram.equivTuple)
+
+theorem supportedSymbols_primrec : Primrec TableProgram.supportedSymbols :=
+  Primrec.list_cons.comp
+    (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+    (Primrec.fst.comp toTuple_primrec)
+
+theorem supportedStates_primrec : Primrec TableProgram.supportedStates := by
+  unfold supportedStates
+  exact Primrec.list_cons.comp
+    (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))))
+    (Primrec.list_cons.comp
+      (Primrec.fst.comp
+        (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))))
+      (Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem supportedSymbols_computable : Computable TableProgram.supportedSymbols :=
+  supportedSymbols_primrec.to_comp
+
+theorem supportedStates_computable : Computable TableProgram.supportedStates :=
+  supportedStates_primrec.to_comp
+
+end TableProgram
+
 end LeanWang
