@@ -10,6 +10,7 @@ import Mathlib.Topology.Compactness.Compact
 import Mathlib.Topology.Continuous
 import Mathlib.Topology.Constructions
 import Mathlib.Topology.Separation.Basic
+import Mathlib.Tactic.Linarith
 
 /-!
 Compactness arguments for Wang tilings.
@@ -69,6 +70,82 @@ theorem inBox_of_natAbs_le {r : Nat} {p : Int × Int}
   constructor
   · exact (neg_le_neg hy').trans hylow
   · exact hyhigh.trans hy'
+
+/-- Side length of the square corresponding to the centered box of radius `r`. -/
+def boxSide (r : Nat) : Nat :=
+  2 * r + 1
+
+/-- Coordinate map from `[-r, r]` to `[0, 2*r]`. -/
+def boxCoord (r : Nat) (z : Int) : Nat :=
+  (z + (r : Int)).toNat
+
+theorem boxCoord_lt {r : Nat} {z : Int}
+    (hlo : -(r : Int) ≤ z) (hhi : z ≤ (r : Int)) :
+    boxCoord r z < boxSide r := by
+  have hnonneg : 0 ≤ z + (r : Int) := by linarith
+  rw [boxCoord, Int.toNat_lt hnonneg]
+  unfold boxSide
+  norm_num
+  linarith
+
+theorem boxCoord_succ {r : Nat} {z : Int} (hlo : -(r : Int) ≤ z) :
+    boxCoord r (z + 1) = boxCoord r z + 1 := by
+  have h0 : 0 ≤ z + (r : Int) := by linarith
+  have h1 : 0 ≤ z + 1 + (r : Int) := by linarith
+  apply Int.ofNat.inj
+  simp [boxCoord, Int.toNat_of_nonneg h0, Int.toNat_of_nonneg h1]
+  linarith
+
+theorem boxCoord_lt_of_inBox {r : Nat} {p : Int × Int} (hp : InBox r p) :
+    boxCoord r p.1 < boxSide r ∧ boxCoord r p.2 < boxSide r := by
+  exact ⟨boxCoord_lt hp.1 hp.2.1, boxCoord_lt hp.2.2.1 hp.2.2.2⟩
+
+def boxFinX {r : Nat} (p : Box r) : Fin (boxSide r) :=
+  ⟨boxCoord r p.1.1, (boxCoord_lt_of_inBox p.2).1⟩
+
+def boxFinY {r : Nat} (p : Box r) : Fin (boxSide r) :=
+  ⟨boxCoord r p.1.2, (boxCoord_lt_of_inBox p.2).2⟩
+
+/-- A tiling of the square of side `2 * r + 1` restricts to the centered box of radius `r`. -/
+theorem tileableBox_of_tileableSquare {T : TileSet} {r : Nat} :
+    TileableSquare T (boxSide r) → TileableBox T r := by
+  rintro ⟨x, hx⟩
+  let y : BoxPattern T r := fun p => ⟨x (boxFinX p) (boxFinY p), hx.1 (boxFinX p) (boxFinY p)⟩
+  refine ⟨y, ?_⟩
+  constructor
+  · intro p hp
+    let q : Box r := ⟨(p.1.1 + 1, p.1.2), hp⟩
+    have hsucc : boxCoord r (p.1.1 + 1) = boxCoord r p.1.1 + 1 :=
+      boxCoord_succ p.2.1
+    have hi : (boxFinX p).val + 1 < boxSide r := by
+      simpa [boxFinX, q, hsucc] using (boxFinX q).isLt
+    have hxq : boxFinX q = ⟨(boxFinX p).val + 1, hi⟩ := by
+      apply Fin.ext
+      simp [boxFinX, q, hsucc]
+    have hyq : boxFinY q = boxFinY p := by
+      apply Fin.ext
+      simp [boxFinY, q]
+    have hmatch := hx.2.1 (boxFinX p) (boxFinY p) hi
+    simpa [y, q, hxq, hyq] using hmatch
+  · intro p hp
+    let q : Box r := ⟨(p.1.1, p.1.2 + 1), hp⟩
+    have hsucc : boxCoord r (p.1.2 + 1) = boxCoord r p.1.2 + 1 :=
+      boxCoord_succ p.property.right.right.left
+    have hj : (boxFinY p).val + 1 < boxSide r := by
+      simpa [boxFinY, q, hsucc] using (boxFinY q).isLt
+    have hxq : boxFinX q = boxFinX p := by
+      apply Fin.ext
+      simp [boxFinX, q]
+    have hyq : boxFinY q = ⟨(boxFinY p).val + 1, hj⟩ := by
+      apply Fin.ext
+      simp [boxFinY, q, hsucc]
+    have hmatch := hx.2.2 (boxFinX p) (boxFinY p) hj
+    simpa [y, q, hxq, hyq] using hmatch
+
+theorem all_tileableBoxes_of_all_tileableSquares {T : TileSet} :
+    (∀ n : Nat, TileableSquare T n) → ∀ r : Nat, TileableBox T r := by
+  intro hsquares r
+  exact tileableBox_of_tileableSquare (hsquares (boxSide r))
 
 /-- Extend a finite centered box pattern to an arbitrary global assignment. -/
 def extendBoxPattern {T : TileSet} {r : Nat} (x : BoxPattern T r) : GlobalAssignment T :=
@@ -171,5 +248,16 @@ theorem tilesPlane_iff_all_tileableBoxes (T : TileSet) :
   constructor
   · exact tileableBox_of_tilesPlane
   · exact tilesPlane_of_all_tileableBoxes
+
+/--
+Square compactness for plane tilings, derived by translating centered boxes to
+ordinary finite squares and applying centered-box compactness.
+-/
+theorem tilesPlane_iff_all_tileableSquares (T : TileSet) :
+    TilesPlane T ↔ ∀ n : Nat, TileableSquare T n := by
+  constructor
+  · exact tileableSquare_of_tilesPlane
+  · intro hsquares
+    exact tilesPlane_of_all_tileableBoxes (all_tileableBoxes_of_all_tileableSquares hsquares)
 
 end LeanWang

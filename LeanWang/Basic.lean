@@ -240,17 +240,6 @@ theorem fixedCornerSquare_of_tilesQuarterWithSeed {T : TileSet} {seed : WangTile
   · exact hseed
 
 /--
-The compactness direction needed for the domino problem. This is the main
-topological/combinatorial lemma still to be formalized.
--/
-theorem tilesPlane_iff_all_tileableSquares (T : TileSet) :
-    TilesPlane T ↔ ∀ n : Nat, TileableSquare T n := by
-  constructor
-  · exact tileableSquare_of_tilesPlane
-  · intro _h
-    sorry
-
-/--
 Seeded quarter-plane compactness. The forward direction is
 `fixedCornerSquare_of_tilesQuarterWithSeed`; the reverse direction is another
 diagonal compactness argument.

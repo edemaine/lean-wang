@@ -9,7 +9,8 @@ the concrete definitions needed for the Berger/Robinson route:
   tilings, executable finite rectangle search, and the easy compactness
   restriction directions.
 - `LeanWang.Compactness`: the proved centered-box compactness theorem
-  `tilesPlane_iff_all_tileableBoxes`.
+  `tilesPlane_iff_all_tileableBoxes`, plus the square compactness theorem
+  `tilesPlane_iff_all_tileableSquares`.
 - `LeanWang.Machine`: a small deterministic one-tape machine model for the
   Wang-tile simulation layer.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
@@ -20,9 +21,8 @@ Current build:
 lake build
 ```
 
-The build succeeds. The remaining compactness `sorry`s are:
+The build succeeds. The remaining compactness `sorry` is:
 
-- `tilesPlane_iff_all_tileableSquares`
 - `tilesQuarterWithSeed_iff_all_fixedCornerSquares`
 
 Additional `sorry`s in `LeanWang.Theorems` are roadmap placeholders for the
