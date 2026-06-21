@@ -1793,6 +1793,66 @@ theorem seeded_tiling_row_one_prev_run_cells {M : Machine}
     simpa [runHistoryTile] using hprevCenter, by
     simpa [runHistoryTile] using hprevRight⟩
 
+theorem seeded_tiling_positive_row_prev_run_cells_of_nonhalting_prefix {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) (time : Nat)
+    (hprefix : ∀ k : Nat, 1 ≤ k → k ≤ time + 1 →
+      (M.runEmpty k).state ≠ M.halt) :
+    ∀ pos : Nat,
+      ∃ t : MachineHistoryTile,
+        t ∈ machineHistoryTiles M ∧
+          t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1 ∧
+          t.prevLeft = (runHistoryTile M (time + 1) pos).prevLeft ∧
+          t.prevCenter = (runHistoryTile M (time + 1) pos).prevCenter ∧
+          t.prevRight = (runHistoryTile M (time + 1) pos).prevRight := by
+  induction time with
+  | zero =>
+      intro pos
+      exact seeded_tiling_row_one_prev_run_cells hvalid hseed pos
+  | succ time ih =>
+      exact seeded_tiling_next_row_prev_run_cells hvalid hseed
+        (time := time)
+        (ih fun k hk1 hkbound => hprefix k hk1 (by omega))
+        (hprefix (time + 1) (by omega) (by omega))
+        (hprefix (time + 1 + 1) (by omega) (by omega))
+
+theorem seeded_tiling_false_of_next_halt_from_decoded_row {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (_hvalid : ValidQuarterTiling (machineTiles M) x)
+    (_hseed : (x (0, 0)).1 = machineSeed M)
+    {time : Nat}
+    (hrow : ∀ pos : Nat,
+      ∃ t : MachineHistoryTile,
+        t ∈ machineHistoryTiles M ∧
+          t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1 ∧
+          t.prevLeft = (runHistoryTile M (time + 1) pos).prevLeft ∧
+          t.prevCenter = (runHistoryTile M (time + 1) pos).prevCenter ∧
+          t.prevRight = (runHistoryTile M (time + 1) pos).prevRight)
+    (hstate : (M.runEmpty (time + 1)).state ≠ M.halt)
+    (hnextRun : (M.runEmpty (time + 1 + 1)).state = M.halt) :
+    False := by
+  let c := M.runEmpty (time + 1)
+  let pos := (M.step c.state (c.tape c.head)).2.2.apply c.head
+  rcases hrow pos with
+    ⟨t, ht, _htile, hprevLeft, hprevCenter, hprevRight⟩
+  have hstate' : c.state ≠ M.halt := by
+    simpa [c] using hstate
+  have hnextState : (M.step c.state (c.tape c.head)).2.1 = M.halt := by
+    rw [← Machine.nextID_state_of_ne_halt hstate']
+    simpa [c, Machine.runEmpty_succ] using hnextRun
+  have htlocal := localNextCell?_of_mem_machineHistoryTiles ht
+  rw [hprevLeft, hprevCenter, hprevRight] at htlocal
+  have hnone := Machine.localNextCell?_at_next_halt_head
+    (M := M) (c := c) hstate' hnextState
+  have hnoneRun :
+      localNextCell? M (runHistoryTile M (time + 1) pos).prevLeft
+          (runHistoryTile M (time + 1) pos).prevCenter
+          (runHistoryTile M (time + 1) pos).prevRight = none := by
+    simpa [runHistoryTile, Machine.runCell, Machine.runCellLeft, c, pos] using hnone
+  rw [hnoneRun] at htlocal
+  cases htlocal
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
