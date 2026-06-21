@@ -820,6 +820,78 @@ theorem tableProgramRightHeadNext?_primrec :
   rcases p with ⟨P, b, q, a⟩
   rfl
 
+def tableProgramRightHeadOrPlainNext?
+    (P : TableProgram) (right : MachineCell) (b : Nat) : Option MachineCell :=
+  match right.head? with
+  | some (q, a) =>
+      tableProgramRightHeadNext? P b q a
+  | none => some (MachineCell.plain b)
+
+theorem tableProgramRightHeadOrPlainNext?_primrec :
+    Primrec (fun p : TableProgram × MachineCell × Nat =>
+      tableProgramRightHeadOrPlainNext? p.1 p.2.1 p.2.2) := by
+  let rightFn : TableProgram × MachineCell × Nat → MachineCell := fun p => p.2.1
+  let bFn : TableProgram × MachineCell × Nat → Nat := fun p => p.2.2
+  have hright : Primrec rightFn := Primrec.fst.comp Primrec.snd
+  have hb : Primrec bFn := Primrec.snd.comp Primrec.snd
+  have hrightHead : Primrec (fun p : TableProgram × MachineCell × Nat => (rightFn p).head?) :=
+    MachineCell.head?_primrec.comp hright
+  have hnone : Primrec (fun p : TableProgram × MachineCell × Nat =>
+      some (MachineCell.plain (bFn p))) :=
+    Primrec.option_some.comp (MachineCell.plain_primrec.comp hb)
+  have hsome : Primrec₂ (fun p : TableProgram × MachineCell × Nat => fun qa : Nat × Nat =>
+      tableProgramRightHeadNext? p.1 p.2.2 qa.1 qa.2) := by
+    apply Primrec₂.mk
+    exact tableProgramRightHeadNext?_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)) Primrec.snd))
+  exact (Primrec.option_casesOn hrightHead hnone hsome).of_eq fun p => by
+    rcases p with ⟨P, right, b⟩
+    cases h : right.head? with
+    | none => simp [tableProgramRightHeadOrPlainNext?, bFn, h]
+    | some qa =>
+        rcases qa with ⟨q, a⟩
+        simp [tableProgramRightHeadOrPlainNext?, h]
+
+def tableProgramPlainCenterNext?
+    (P : TableProgram) (left right : MachineCell) (b : Nat) : Option MachineCell :=
+  match left.head? with
+  | some (q, a) =>
+      tableProgramLeftHeadNext? P b q a
+  | none =>
+      tableProgramRightHeadOrPlainNext? P right b
+
+theorem tableProgramPlainCenterNext?_primrec :
+    Primrec (fun p : TableProgram × MachineCell × MachineCell × Nat =>
+      tableProgramPlainCenterNext? p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let leftFn : TableProgram × MachineCell × MachineCell × Nat → MachineCell := fun p => p.2.1
+  have hleft : Primrec leftFn := Primrec.fst.comp Primrec.snd
+  have hleftHead :
+      Primrec (fun p : TableProgram × MachineCell × MachineCell × Nat => (leftFn p).head?) :=
+    MachineCell.head?_primrec.comp hleft
+  have hnone : Primrec (fun p : TableProgram × MachineCell × MachineCell × Nat =>
+      tableProgramRightHeadOrPlainNext? p.1 p.2.2.1 p.2.2.2) :=
+    tableProgramRightHeadOrPlainNext?_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+  have hsome :
+      Primrec₂ (fun p : TableProgram × MachineCell × MachineCell × Nat =>
+        fun qa : Nat × Nat => tableProgramLeftHeadNext? p.1 p.2.2.2 qa.1 qa.2) := by
+    apply Primrec₂.mk
+    exact tableProgramLeftHeadNext?_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          Primrec.snd))
+  exact (Primrec.option_casesOn hleftHead hnone hsome).of_eq fun p => by
+    rcases p with ⟨P, left, right, b⟩
+    cases h : left.head? with
+    | none => simp [tableProgramPlainCenterNext?, h]
+    | some qa =>
+        rcases qa with ⟨q, a⟩
+        simp [tableProgramPlainCenterNext?, h]
+
 def tableProgramLocalNextCellData?
     (P : TableProgram) (left center right : MachineCell) : Option MachineCell :=
   match center.head? with
@@ -829,14 +901,51 @@ def tableProgramLocalNextCellData?
       match center.plain? with
       | none => none
       | some b =>
-          match left.head? with
-          | some (q, a) =>
-              tableProgramLeftHeadNext? P b q a
-          | none =>
-              match right.head? with
-              | some (q, a) =>
-                  tableProgramRightHeadNext? P b q a
-              | none => some (MachineCell.plain b)
+          tableProgramPlainCenterNext? P left right b
+
+theorem tableProgramLocalNextCellData?_primrec :
+    Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+      tableProgramLocalNextCellData? p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let centerFn : TableProgram × MachineCell × MachineCell × MachineCell → MachineCell :=
+    fun p => p.2.2.1
+  have hcenter : Primrec centerFn := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hcenterHead :
+      Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+        (centerFn p).head?) :=
+    MachineCell.head?_primrec.comp hcenter
+  have hcenterPlain :
+      Primrec (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+        (centerFn p).plain?) :=
+    MachineCell.plain?_primrec.comp hcenter
+  have hcenterSome :
+      Primrec₂ (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+        fun qa : Nat × Nat => tableProgramCenterHeadNext? p.1 p.2.1 qa.1 qa.2) := by
+    apply Primrec₂.mk
+    exact tableProgramCenterHeadNext?_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.fst)) Primrec.snd))
+  have hplainSome :
+      Primrec₂ (fun p : TableProgram × MachineCell × MachineCell × MachineCell =>
+        fun b : Nat => tableProgramPlainCenterNext? p.1 p.2.1 p.2.2.2 b) := by
+    apply Primrec₂.mk
+    exact tableProgramPlainCenterNext?_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+          (Primrec.pair
+            (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+            Primrec.snd)))
+  have hcenterNone :=
+    Primrec.option_casesOn hcenterPlain (Primrec.const (none : Option MachineCell)) hplainSome
+  exact (Primrec.option_casesOn hcenterHead hcenterNone hcenterSome).of_eq fun p => by
+    rcases p with ⟨P, left, center, right⟩
+    cases hhead : center.head? with
+    | none =>
+        cases hplain : center.plain? with
+        | none => simp [tableProgramLocalNextCellData?, hhead, hplain]
+        | some b => simp [tableProgramLocalNextCellData?, hhead, hplain]
+    | some qa =>
+        rcases qa with ⟨q, a⟩
+        simp [tableProgramLocalNextCellData?, hhead]
 
 theorem tableProgramLocalNextCell?_eq_localNextCell?
     (P : TableProgram) (left center right : MachineCell) :
