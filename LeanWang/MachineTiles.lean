@@ -33,6 +33,11 @@ def isHead : MachineCell → Bool
   | plain _ => false
   | head _ _ => true
 
+/-- A machine cell is supported by a machine's finite symbol and state sets. -/
+def Mem (M : Machine) : MachineCell → Prop
+  | plain a => a ∈ M.symbols
+  | head q a => q ∈ M.states ∧ q ≠ M.halt ∧ a ∈ M.symbols
+
 /-- Encode machine cells as Wang colors. -/
 def code : MachineCell → Nat
   | plain a => Nat.pair 0 a
@@ -103,6 +108,29 @@ def machineCells (M : Machine) : List MachineCell :=
   (M.symbols.map MachineCell.plain) ++
     (M.states.filter (· ≠ M.halt)).flatMap fun q =>
       M.symbols.map fun a => MachineCell.head q a
+
+@[simp]
+theorem plain_mem_machineCells_iff (M : Machine) (a : Nat) :
+    MachineCell.plain a ∈ machineCells M ↔ a ∈ M.symbols := by
+  simp [machineCells]
+
+@[simp]
+theorem head_mem_machineCells_iff (M : Machine) (q a : Nat) :
+    MachineCell.head q a ∈ machineCells M ↔
+      q ∈ M.states ∧ q ≠ M.halt ∧ a ∈ M.symbols := by
+  simp [machineCells, and_assoc]
+
+theorem mem_machineCells_iff (M : Machine) (c : MachineCell) :
+    c ∈ machineCells M ↔ c.Mem M := by
+  cases c <;> simp [MachineCell.Mem]
+
+theorem mem_machineCells_of_mem {M : Machine} {c : MachineCell} :
+    c.Mem M → c ∈ machineCells M :=
+  (mem_machineCells_iff M c).2
+
+theorem mem_of_mem_machineCells {M : Machine} {c : MachineCell} :
+    c ∈ machineCells M → c.Mem M :=
+  (mem_machineCells_iff M c).1
 
 /-- Pair two cell colors into one Wang color. -/
 def pairCellColor (a b : MachineCell) : Nat :=
