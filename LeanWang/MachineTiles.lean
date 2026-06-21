@@ -974,6 +974,54 @@ def machineSeed (M : Machine) : WangTile :=
 def taggedMachineSeed (M : Machine) : WangTile :=
   (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag
 
+def machineRowTag : Nat → Nat
+  | 0 => initialRowTag
+  | _ + 1 => normalRowTag
+
+@[simp]
+theorem machineRowTag_zero :
+    machineRowTag 0 = initialRowTag :=
+  rfl
+
+@[simp]
+theorem machineRowTag_succ (time : Nat) :
+    machineRowTag (time + 1) = normalRowTag :=
+  rfl
+
+def runTaggedHistoryTile (M : Machine) (time pos : Nat) : WangTile :=
+  (runHistoryTile M time pos).toTaggedWangTile (machineRowTag time) normalRowTag
+
+theorem runTaggedHistoryTile_mem_taggedMachineTiles_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) (time pos : Nat) :
+    runTaggedHistoryTile M time pos ∈ taggedMachineTiles M := by
+  cases time with
+  | zero =>
+      exact toTaggedWangTile_mem_taggedMachineTiles_initial
+        (runHistoryTile_zero_mem_initialRowHistoryTiles M pos)
+  | succ time =>
+      exact toTaggedWangTile_mem_taggedMachineTiles_normal
+        (runHistoryTile_mem_machineHistoryTiles_of_not_halts h (time + 1) pos)
+
+theorem runTaggedHistoryTile_hMatches (M : Machine) (time pos : Nat) :
+    WangTile.HMatches (runTaggedHistoryTile M time pos)
+      (runTaggedHistoryTile M time (pos + 1)) := by
+  have hcells := (MachineHistoryTile.hMatches_toWangTile_iff_cells
+    (runHistoryTile M time pos) (runHistoryTile M time (pos + 1))).1
+    (runHistoryTile_hMatches M time pos)
+  simp only [runTaggedHistoryTile]
+  rw [MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells]
+  exact ⟨rfl, hcells⟩
+
+theorem runTaggedHistoryTile_vMatches (M : Machine) (time pos : Nat) :
+    WangTile.VMatches (runTaggedHistoryTile M time pos)
+      (runTaggedHistoryTile M (time + 1) pos) := by
+  have hcells := (MachineHistoryTile.vMatches_toWangTile_iff_cells
+    (runHistoryTile M time pos) (runHistoryTile M (time + 1) pos)).1
+    (runHistoryTile_vMatches M time pos)
+  simp only [runTaggedHistoryTile]
+  rw [MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells]
+  exact ⟨rfl, hcells⟩
+
 @[simp]
 theorem machineSeed_eq (M : Machine) :
     machineSeed M = (initialHistoryTile M).toWangTile :=
@@ -993,5 +1041,20 @@ theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
     · intro p
       exact runHistoryTile_vMatches M p.2 p.1
   · simp [x, machineSeed_eq, initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+
+theorem tilesQuarterWithSeed_taggedMachineTiles_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) :
+    TilesQuarterWithSeed (taggedMachineTiles M) (taggedMachineSeed M) := by
+  let x : Nat × Nat → TileIn (taggedMachineTiles M) := fun p =>
+    ⟨runTaggedHistoryTile M p.2 p.1,
+      runTaggedHistoryTile_mem_taggedMachineTiles_of_not_halts h p.2 p.1⟩
+  refine ⟨x, ?_, ?_⟩
+  · constructor
+    · intro p
+      exact runTaggedHistoryTile_hMatches M p.2 p.1
+    · intro p
+      exact runTaggedHistoryTile_vMatches M p.2 p.1
+  · simp [x, runTaggedHistoryTile, taggedMachineSeed,
+      initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
 
 end LeanWang
