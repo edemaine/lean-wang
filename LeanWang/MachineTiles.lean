@@ -1838,16 +1838,17 @@ theorem tableProgramInitialNextAt_primrec :
             (tableProgramInitialBlankCell_primrec.comp Primrec.fst)))))
 
 def tableProgramInitialNext0 (P : TableProgram) : MachineCell :=
-  tableProgramInitialNextAt P MachineCell.boundary (tableProgramInitialHeadCell P)
-    (tableProgramInitialBlankCell P)
+  tableProgramLocalNextCellDataD P MachineCell.boundary (tableProgramInitialHeadCell P)
+    (tableProgramInitialBlankCell P) (tableProgramInitialHeadCell P)
 
 theorem tableProgramInitialNext0_primrec : Primrec tableProgramInitialNext0 := by
   unfold tableProgramInitialNext0
-  exact tableProgramInitialNextAt_primrec.comp
+  exact tableProgramLocalNextCellDataD_primrec.comp
     (Primrec.pair Primrec.id
       (Primrec.pair (Primrec.const MachineCell.boundary)
         (Primrec.pair tableProgramInitialHeadCell_primrec
-          tableProgramInitialBlankCell_primrec)))
+          (Primrec.pair tableProgramInitialBlankCell_primrec
+            tableProgramInitialHeadCell_primrec))))
 
 def tableProgramInitialNext1 (P : TableProgram) : MachineCell :=
   tableProgramInitialNextAt P (tableProgramInitialHeadCell P) (tableProgramInitialBlankCell P)
