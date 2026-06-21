@@ -685,6 +685,39 @@ theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTi
     mem_machineCells_of_mem hnextRight,
     hlocal⟩
 
+theorem localNextCell?_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M) :
+    localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter := by
+  exact (mem_machineHistoryTiles_iff M t).1 ht |>.2.2.2.2.2.2
+
+theorem prevCenter_mem_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M) :
+    t.prevCenter.Mem M := by
+  exact mem_of_mem_machineCells ((mem_machineHistoryTiles_iff M t).1 ht).2.1
+
+theorem nextCenter_mem_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M) :
+    t.nextCenter.Mem M := by
+  exact mem_of_mem_machineCells ((mem_machineHistoryTiles_iff M t).1 ht).2.2.2.2.1
+
+theorem prevCenter_not_halt_of_mem_machineHistoryTiles {M : Machine}
+    {t : MachineHistoryTile} {a : Nat}
+    (ht : t ∈ machineHistoryTiles M) :
+    t.prevCenter ≠ MachineCell.head M.halt a := by
+  intro hcell
+  have hmem := prevCenter_mem_of_mem_machineHistoryTiles ht
+  rw [hcell] at hmem
+  exact hmem.2.1 rfl
+
+theorem nextCenter_not_halt_of_mem_machineHistoryTiles {M : Machine}
+    {t : MachineHistoryTile} {a : Nat}
+    (ht : t ∈ machineHistoryTiles M) :
+    t.nextCenter ≠ MachineCell.head M.halt a := by
+  intro hcell
+  have hmem := nextCenter_mem_of_mem_machineHistoryTiles ht
+  rw [hcell] at hmem
+  exact hmem.2.1 rfl
+
 theorem runHistoryTile_mem_machineHistoryTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) (time pos : Nat) :
     runHistoryTile M time pos ∈ machineHistoryTiles M := by
