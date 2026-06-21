@@ -169,6 +169,32 @@ theorem runEmpty_state_ne_halt_of_le {M : Machine} {m n : Nat}
   intro hm
   exact hn (runEmpty_state_eq_halt_of_le hmn hm)
 
+/--
+A machine whose start state, on blank input, writes blank, keeps the same state,
+and moves right has a completely explicit empty-input run.
+-/
+theorem runEmpty_eq_right_blank_loop {M : Machine}
+    (hstart : M.start ≠ M.halt)
+    (hstep : M.step M.start M.blank = (M.blank, M.start, Move.right)) :
+    ∀ n : Nat,
+      M.runEmpty n = { tape := fun _ => M.blank, head := n, state := M.start }
+  | 0 => by
+      rfl
+  | n + 1 => by
+      rw [runEmpty_succ, runEmpty_eq_right_blank_loop hstart hstep n]
+      rw [nextID_of_ne_halt (M := M) (c :=
+        { tape := fun _ => M.blank, head := n, state := M.start }) hstart]
+      simp [hstep, Move.apply]
+
+theorem not_haltsEmpty_of_right_blank_loop {M : Machine}
+    (hstart : M.start ≠ M.halt)
+    (hstep : M.step M.start M.blank = (M.blank, M.start, Move.right)) :
+    ¬ M.HaltsEmpty := by
+  rintro ⟨n, hn⟩
+  have hrun := runEmpty_eq_right_blank_loop (M := M) hstart hstep n
+  rw [hrun] at hn
+  exact hstart hn
+
 end Machine
 
 /-- One finite transition-table entry for the concrete machine model. -/
@@ -571,6 +597,29 @@ theorem toMachine_haltsEmpty_of_initial_transition_to_halt {P : TableProgram}
     simp [Machine.nextID, Machine.initialID, hstart,
       toMachine_step_of_transition?_eq_some hfind hwrite hnext,
       TableTransition.action, hhalt]
+
+theorem toMachine_runEmpty_eq_right_blank_loop {P : TableProgram} {e : TableTransition}
+    (hstart : P.start ≠ P.halt)
+    (hfind : P.toTableMachine.transition? P.start P.blank = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates)
+    (hloop : e.action = (P.blank, P.start, Move.right)) :
+    ∀ n : Nat,
+      P.toMachine.runEmpty n =
+        { tape := fun _ => P.blank, head := n, state := P.start } := by
+  apply Machine.runEmpty_eq_right_blank_loop
+  · simpa using hstart
+  · have hstep := toMachine_step_of_transition?_eq_some hfind hwrite hnext
+    simpa [hloop] using hstep
+
+theorem not_haltsEmpty_of_initial_right_blank_loop {P : TableProgram} {e : TableTransition}
+    (hstart : P.start ≠ P.halt)
+    (hfind : P.toTableMachine.transition? P.start P.blank = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates)
+    (hloop : e.action = (P.blank, P.start, Move.right)) :
+    ¬ P.toMachine.HaltsEmpty :=
+  Machine.not_haltsEmpty_of_right_blank_loop (by simpa using hstart) (by
+    have hstep := toMachine_step_of_transition?_eq_some hfind hwrite hnext
+    simpa [hloop] using hstep)
 
 end TableProgram
 
