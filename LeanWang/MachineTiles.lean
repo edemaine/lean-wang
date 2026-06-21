@@ -84,6 +84,18 @@ theorem cellAt_of_ne {c : ID} {i : Nat} (hi : i ≠ c.head) :
     c.cellAt i = MachineCell.plain (c.tape i) := by
   simp [cellAt, hi]
 
+/-- A machine configuration uses only the finite supports declared by `M`. -/
+def Mem (M : Machine) (c : ID) : Prop :=
+  c.state ∈ M.states ∧ ∀ i : Nat, c.tape i ∈ M.symbols
+
+theorem cellAt_mem {M : Machine} {c : ID} (hc : c.Mem M)
+    (hstate : c.state ≠ M.halt) (i : Nat) :
+    (c.cellAt i).Mem M := by
+  by_cases hi : i = c.head
+  · subst i
+    simp [cellAt, MachineCell.Mem, hc.1, hstate, hc.2]
+  · simp [cellAt, hi, MachineCell.Mem, hc.2]
+
 end ID
 
 namespace Machine
@@ -100,6 +112,48 @@ theorem runCell_zero_head (M : Machine) :
 theorem runCell_zero_of_ne {M : Machine} {pos : Nat} (hpos : pos ≠ 0) :
     M.runCell 0 pos = MachineCell.plain M.blank := by
   simp [runCell, initialID, ID.cellAt, hpos]
+
+theorem initialID_mem (M : Machine) :
+    M.initialID.Mem M := by
+  constructor
+  · exact M.start_mem
+  · intro _
+    exact M.blank_mem
+
+theorem nextID_mem {M : Machine} {c : ID} (hc : c.Mem M) :
+    (M.nextID c).Mem M := by
+  by_cases hhalt : c.state = M.halt
+  · simpa [nextID, hhalt] using hc
+  · rw [nextID, if_neg hhalt]
+    rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+    constructor
+    · simpa [hstep] using M.step_state_mem c.state (c.tape c.head) hc.1 (hc.2 c.head)
+    · intro i
+      by_cases hi : i = c.head
+      · simp [hi]
+        simpa [hstep] using M.step_symbol_mem c.state (c.tape c.head) hc.1 (hc.2 c.head)
+      · simp [hi, hc.2 i]
+
+theorem runEmpty_mem (M : Machine) (n : Nat) :
+    (M.runEmpty n).Mem M := by
+  induction n with
+  | zero =>
+      simpa using M.initialID_mem
+  | succ n ih =>
+      rw [runEmpty_succ]
+      exact nextID_mem ih
+
+theorem runEmpty_state_ne_halt_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) (n : Nat) :
+    (M.runEmpty n).state ≠ M.halt := by
+  intro hn
+  exact h ⟨n, hn⟩
+
+theorem runCell_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
+    (time pos : Nat) :
+    (M.runCell time pos).Mem M := by
+  exact ID.cellAt_mem (M.runEmpty_mem time)
+    (M.runEmpty_state_ne_halt_of_not_halts h time) pos
 
 end Machine
 
