@@ -539,6 +539,66 @@ theorem localNextCell?_cellAt {M : Machine} {c : ID} {pos : Nat}
           intro h
           exact hright h.symm)
 
+theorem localNextCell?_at_next_halt_head {M : Machine} {c : ID}
+    (hstate : c.state ≠ M.halt)
+    (hnextState : (M.step c.state (c.tape c.head)).2.1 = M.halt) :
+    localNextCell? M
+        (c.cellAtLeft ((M.step c.state (c.tape c.head)).2.2.apply c.head))
+        (c.cellAt ((M.step c.state (c.tape c.head)).2.2.apply c.head))
+        (c.cellAt ((M.step c.state (c.tape c.head)).2.2.apply c.head + 1)) =
+      none := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  have hstate' : state' = M.halt := by
+    simpa [hstep] using hnextState
+  cases move with
+  | left =>
+      cases hhead : c.head with
+      | zero =>
+          have hstep0 :
+              M.step c.state (c.tape 0) = (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          simp [ID.cellAt, hstate, hstep0, hstate',
+            localNextCell?, Move.apply, hhead]
+      | succ pred =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1)) =
+                (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          cases pred with
+          | zero =>
+              have hcenter :
+                  c.cellAt 0 = MachineCell.plain (c.tape 0) :=
+                ID.cellAt_of_ne (c := c) (i := 0) (by omega)
+              have hright :
+                  c.cellAt 1 = MachineCell.head c.state (c.tape 1) := by
+                simpa [hhead] using ID.cellAt_head c
+              change localNextCell? M MachineCell.boundary (c.cellAt 0)
+                  (c.cellAt 1) = none
+              rw [hcenter, hright]
+              simp [localNextCell?, hstate, hstepPred, hstate']
+          | succ leftPred =>
+              have hleft :
+                  c.cellAtLeft (leftPred + 1) =
+                    MachineCell.plain (c.tape leftPred) := by
+                have hne : leftPred ≠ c.head := by omega
+                simp [ID.cellAtLeft, ID.cellAt, hne]
+              have hcenter :
+                  c.cellAt (leftPred + 1) =
+                    MachineCell.plain (c.tape (leftPred + 1)) :=
+                ID.cellAt_of_ne (c := c) (i := leftPred + 1) (by omega)
+              have hright :
+                  c.cellAt (leftPred + 1 + 1) =
+                    MachineCell.head c.state (c.tape (leftPred + 1 + 1)) := by
+                simpa [hhead] using ID.cellAt_head c
+              change localNextCell? M (c.cellAtLeft (leftPred + 1))
+                  (c.cellAt (leftPred + 1))
+                  (c.cellAt (leftPred + 1 + 1)) = none
+              rw [hleft, hcenter, hright]
+              simp [localNextCell?, hstate, hstepPred, hstate']
+  | right =>
+      simp [ID.cellAt, ID.cellAtLeft, hstate, hstep,
+        hstate', localNextCell?, Move.apply]
+
 end Machine
 
 /-- A local `2 × 3` machine-history block. -/
