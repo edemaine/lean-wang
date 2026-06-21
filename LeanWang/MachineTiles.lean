@@ -410,6 +410,47 @@ theorem localNextCell?_left_of_head {M : Machine} {c : ID} {pos : Nat}
           simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
             hstepPred, localNextCell?, Move.apply, hpred]
 
+theorem localNextCell?_right_of_head {M : Machine} {c : ID}
+    (hstate : c.state ≠ M.halt)
+    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
+    localNextCell? M (c.cellAtLeft (c.head + 1)) (c.cellAt (c.head + 1))
+        (c.cellAt (c.head + 1 + 1)) =
+      some ((M.nextID c).cellAt (c.head + 1)) := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  cases hhead : c.head with
+  | zero =>
+      cases move with
+      | left =>
+          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstep0,
+            localNextCell?, Move.apply]
+      | right =>
+          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.right) := by
+            simpa [hhead] using hstep
+          have hstate' : state' ≠ M.halt := by
+            simpa [hstep] using hnextState
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstep0,
+            localNextCell?, Move.apply, hstate']
+  | succ pred =>
+      cases move with
+      | left =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1)) = (write, state', Move.left) := by
+            simpa [hhead] using hstep
+          have hpred : pred + 1 + 1 ≠ pred := by
+            exact Nat.ne_of_gt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
+            localNextCell?, Move.apply, hpred]
+      | right =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1)) = (write, state', Move.right) := by
+            simpa [hhead] using hstep
+          have hstate' : state' ≠ M.halt := by
+            simpa [hstep] using hnextState
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
+            localNextCell?, Move.apply, hstate']
+
 end Machine
 
 /-- A local `2 × 3` machine-history block. -/
