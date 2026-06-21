@@ -483,6 +483,30 @@ theorem tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_act
   · exact validRectangle_payload_of_validCombinedRectangleLayers_of_active hlayers hactive
   · exact (hlayers.2.2.1 ⟨0, hn⟩ ⟨0, hn⟩ (hactive ⟨0, hn⟩ ⟨0, hn⟩)).2 hcorner
 
+def ForcesActiveCornerSquares (S : Scaffold) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile},
+    TilesPlane (combineWithScaffold S T seed) →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ rect baseRect payloadRect : Rectangle n n,
+          ValidCombinedRectangleLayers S T seed rect baseRect payloadRect ∧
+            (∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true) ∧
+            baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner
+
+def RealizesActiveCornerSquares (S : Scaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      TilesPlane (combineWithScaffold S T seed)
+
+theorem all_fixedCornerSquares_of_tilesPlane_combineWithScaffold
+    {S : Scaffold} (hS : ForcesActiveCornerSquares S)
+    {T : TileSet} {seed : WangTile}
+    (h : TilesPlane (combineWithScaffold S T seed)) :
+    ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n := by
+  intro n hn
+  rcases hS h n hn with ⟨rect, baseRect, payloadRect, hlayers, hactive, hcorner⟩
+  exact tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_active_corner
+    hn hlayers hactive hcorner
+
 theorem combineWithScaffold_primrec (S : Scaffold) :
     Primrec (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) := by
   classical
@@ -516,6 +540,18 @@ def IsScaffold (S : Scaffold) : Prop :=
     TilesPlane (combineWithScaffold S T seed) ↔
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
 
+theorem isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
+    {S : Scaffold}
+    (hrealizes : RealizesActiveCornerSquares S)
+    (hforces : ForcesActiveCornerSquares S) :
+    IsScaffold S := by
+  intro T seed
+  constructor
+  · intro htiles
+    exact all_fixedCornerSquares_of_tilesPlane_combineWithScaffold hforces htiles
+  · intro hsquares
+    exact hrealizes T seed hsquares
+
 /-- The concrete Ollinger/Robinson scaffold tileset. -/
 def ollingerScaffold : Scaffold where
   tiles := []
@@ -526,7 +562,12 @@ def ollingerScaffold : Scaffold where
 
 /-- The Ollinger/Robinson scaffold satisfies the abstract scaffold property. -/
 theorem ollingerScaffold_isScaffold : IsScaffold ollingerScaffold := by
-  sorry
+  have hprops :
+      RealizesActiveCornerSquares ollingerScaffold ∧
+        ForcesActiveCornerSquares ollingerScaffold := by
+    sorry
+  exact isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
+    hprops.1 hprops.2
 
 /-- Abstract scaffold reduction from fixed-corner squares to ordinary plane tiling. -/
 theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
