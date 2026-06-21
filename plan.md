@@ -35,6 +35,59 @@ or an equivalent encoded-list statement over `Nat`.
 
 ## Implementation Plan
 
+## Current Lean State
+
+The repository now has a build-clean conditional proof skeleton with no `sorry`
+or `axiom` in `LeanWang`.
+
+Completed proof layers:
+
+- concrete Wang tiles, finite rectangles, plane and quarter-plane tiling notions;
+- compactness and fixed-corner square compactness variants;
+- the concrete one-tape `Machine` and finite `TableProgram` models;
+- the machine-to-Wang fixed-domino construction;
+- computable table-tile data decoding, including the initial-row and normal-row
+  tile membership bridges;
+- the fixed-domino reduction from any verified `TableCompiler`;
+- the abstract scaffold reduction from any verified `IsScaffold S`;
+- the encoded domino undecidability theorem from a verified compiler and
+  verified scaffold.
+
+The remaining construction obligations are explicit Lean interfaces:
+
+```lean
+structure TableCompiler where
+  compile : Code -> TableProgram
+  compile_computable : Computable compile
+  correct : forall c : Code,
+    Machine.HaltsEmpty (compile c).toMachine <-> (Nat.Partrec.Code.eval c 0).Dom
+
+structure FuelTableCompiler where
+  compile : Code -> TableProgram
+  compile_computable : Computable compile
+  correct : forall c : Code,
+    Machine.HaltsEmpty (compile c).toMachine <-> FuelMachine.Halts (codeEvalnHalts c 0)
+
+def IsScaffold (S : Scaffold) : Prop :=
+  forall (T : TileSet) (seed : WangTile),
+    TilesPlane (combineWithScaffold S T seed) <->
+      forall n : Nat, 0 < n -> TileableFixedCornerSquare T seed n
+```
+
+`FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
+compiler obligation into a `TableCompiler`, using the proved equivalence between
+`codeEvalnHalts` and `Nat.Partrec.Code.eval`.
+
+Next implementation targets:
+
+1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
+   implementing the bounded evaluator fuel search in `TableProgram`.
+2. Replace the placeholder `ollingerScaffold` data with the actual
+   Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+3. Specialize
+   `encoded_domino_problem_undecidable_of_scaffold_fuelCompiler` to those two
+   concrete instances to recover the unconditional encoded domino theorem.
+
 ### 1. Define Wang Tiles
 
 Use a concrete computable representation:
