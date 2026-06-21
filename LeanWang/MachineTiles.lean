@@ -660,6 +660,60 @@ def tableProgramCenterHeadNext?
     else
       some (MachineCell.plain write)
 
+theorem tableProgramCenterHeadNext?_primrec :
+    Primrec (fun p : TableProgram × MachineCell × Nat × Nat =>
+      tableProgramCenterHeadNext? p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let action : TableProgram × MachineCell × Nat × Nat → Nat × Nat × Move := fun p =>
+    p.1.toTableMachine.step p.2.2.1 p.2.2.2
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))).of_eq fun _ => rfl
+  let leftFn : TableProgram × MachineCell × Nat × Nat → MachineCell := fun p => p.2.1
+  let qFn : TableProgram × MachineCell × Nat × Nat → Nat := fun p => p.2.2.1
+  let write : TableProgram × MachineCell × Nat × Nat → Nat := fun p => (action p).1
+  let q' : TableProgram × MachineCell × Nat × Nat → Nat := fun p => (action p).2.1
+  let move : TableProgram × MachineCell × Nat × Nat → Move := fun p => (action p).2.2
+  have hleft : Primrec leftFn := Primrec.fst.comp Primrec.snd
+  have hq : Primrec qFn := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hwrite : Primrec write := Primrec.fst.comp haction
+  have hq' : Primrec q' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hqHalt :
+      PrimrecPred (fun p : TableProgram × MachineCell × Nat × Nat => qFn p = p.1.halt) :=
+    Primrec.eq.comp hq (TableProgram.halt_primrec.comp Primrec.fst)
+  have hq'Halt :
+      PrimrecPred (fun p : TableProgram × MachineCell × Nat × Nat => q' p = p.1.halt) :=
+    Primrec.eq.comp hq' (TableProgram.halt_primrec.comp Primrec.fst)
+  have hleftBoundary : Primrec (fun p : TableProgram × MachineCell × Nat × Nat =>
+      (leftFn p).isBoundary) :=
+    MachineCell.isBoundary_primrec.comp hleft
+  have hmoveLeftBool : Primrec (fun p : TableProgram × MachineCell × Nat × Nat =>
+      decide (move p = Move.left)) :=
+    Primrec.eq.decide.comp hmove (Primrec.const Move.left)
+  have hboundaryMove :
+      PrimrecPred (fun p : TableProgram × MachineCell × Nat × Nat =>
+        ((leftFn p).isBoundary && decide (move p = Move.left)) = true) :=
+    Primrec.primrecPred
+      (Primrec.eq.decide.comp
+        (Primrec.and.comp hleftBoundary hmoveLeftBool)
+        (Primrec.const true))
+  have hsomeHead : Primrec (fun p : TableProgram × MachineCell × Nat × Nat =>
+      some (MachineCell.head (q' p) (write p))) :=
+    Primrec.option_some.comp
+      (MachineCell.head_primrec.comp (Primrec.pair hq' hwrite))
+  have hsomePlain : Primrec (fun p : TableProgram × MachineCell × Nat × Nat =>
+      some (MachineCell.plain (write p))) :=
+    Primrec.option_some.comp (MachineCell.plain_primrec.comp hwrite)
+  refine (Primrec.ite hqHalt (Primrec.const none)
+    (Primrec.ite hboundaryMove
+      (Primrec.ite hq'Halt (Primrec.const none) hsomeHead)
+      hsomePlain)).of_eq ?_
+  intro p
+  rcases p with ⟨P, left, q, a⟩
+  rfl
+
 def tableProgramLeftHeadNext?
     (P : TableProgram) (b q a : Nat) : Option MachineCell :=
   if q = P.toTableMachine.halt then
