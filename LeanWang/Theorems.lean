@@ -3,7 +3,9 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, OpenAI
 -/
+import LeanWang.Compactness
 import LeanWang.Machine
+import Mathlib.Computability.Reduce
 
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
@@ -57,14 +59,18 @@ def fixedDominoReduction (c : Code) : TileSet × WangTile :=
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  sorry
+  unfold fixedDominoReduction
+  rw [machineTiles_correct, programMachine_correct]
 
 /-- The fixed domino problem is undecidable, in reduction form. -/
 theorem fixed_domino_problem_undecidable :
     ¬ ComputablePred
       (fun c : Code =>
         TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2) := by
-  sorry
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => fixedDominoReduction_correct c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- The fixed-corner finite-square problem is undecidable, in reduction form. -/
 theorem fixed_corner_square_problem_undecidable :
@@ -72,7 +78,11 @@ theorem fixed_corner_square_problem_undecidable :
       (fun c : Code =>
         ∀ n : Nat, 0 < n →
           TileableFixedCornerSquare (fixedDominoReduction c).1 (fixedDominoReduction c).2 n) := by
-  sorry
+  intro h
+  apply fixed_domino_problem_undecidable
+  exact h.of_eq fun c =>
+    (tilesQuarterWithSeed_iff_all_fixedCornerSquares
+      (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -110,7 +120,12 @@ def dominoReduction (c : Code) : TileSet :=
 /-- Correctness of the final domino reduction from nonhalting. -/
 theorem dominoReduction_correct (c : Code) :
     TilesPlane (dominoReduction c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  sorry
+  rw [dominoReduction]
+  exact (scaffold_reduction_correct ollingerScaffold_isScaffold
+    (fixedDominoReduction c).1 (fixedDominoReduction c).2).trans
+      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
+        (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm.trans
+          (fixedDominoReduction_correct c))
 
 /-- Encoded version of `dominoReduction`, using the canonical finite tileset encoding. -/
 def dominoReductionCode (c : Code) : Nat :=
@@ -130,6 +145,14 @@ theorem dominoReductionCode_correct (c : Code) :
 /-- The domino problem is undecidable for encoded finite Wang tilesets. -/
 theorem encoded_domino_problem_undecidable :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  sorry
+  intro h
+  have hencoded : ComputablePred
+      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode c))) :=
+    ComputablePred.computable_of_manyOneReducible
+      (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
+        dominoReductionCode_computable) h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    hencoded.of_eq fun c => dominoReductionCode_correct c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 end LeanWang

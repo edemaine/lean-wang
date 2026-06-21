@@ -25,7 +25,15 @@ lake build
 
 The build succeeds. All compactness theorems are proved.
 
-Additional `sorry`s in `LeanWang.Theorems` are roadmap placeholders for the
-machine simulation, scaffold construction, and undecidability reductions. The
-encoded reduction code now uses the canonical tileset encoding, and its
-correctness theorem follows from `dominoReduction_correct`.
+The remaining `sorry`s in `LeanWang.Theorems` are the three core construction
+placeholders:
+
+- `programMachine_correct`: compile Mathlib partial-recursive codes to the
+  concrete machine model.
+- `machineTiles_correct`: prove the machine-to-Wang-tile fixed domino
+  construction.
+- `ollingerScaffold_isScaffold`: prove the scaffold converts fixed-corner
+  finite-square instances to ordinary plane tiling.
+
+The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
+undecidability reductions are now proved from those construction interfaces.
