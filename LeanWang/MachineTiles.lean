@@ -335,6 +335,45 @@ theorem mem_of_mem_machineCells {M : Machine} {c : MachineCell} :
     c ∈ machineCells M → c.Mem M :=
   (mem_machineCells_iff M c).1
 
+/-- The machine-cell support generated directly from finite table-program data. -/
+def tableProgramMachineCells (P : TableProgram) : List MachineCell :=
+  MachineCell.boundary :: (P.supportedSymbols.map MachineCell.plain) ++
+    (P.supportedStates.filter fun q => q ≠ P.halt).flatMap fun q =>
+      P.supportedSymbols.map fun a => MachineCell.head q a
+
+theorem tableProgramMachineCells_eq_machineCells (P : TableProgram) :
+    tableProgramMachineCells P = machineCells P.toMachine := by
+  rfl
+
+theorem tableProgramMachineCells_primrec : Primrec tableProgramMachineCells := by
+  have hplain : Primrec (fun P : TableProgram =>
+      P.supportedSymbols.map MachineCell.plain) :=
+    Primrec.list_map TableProgram.supportedSymbols_primrec
+      (MachineCell.plain_primrec.comp Primrec.snd).to₂
+  have hnonhaltRel : PrimrecRel (fun (q : Nat) (P : TableProgram) => q ≠ P.halt) := by
+    have hrelEq : PrimrecRel (fun (q : Nat) (P : TableProgram) => q = P.halt) :=
+      Primrec.eq.comp₂ Primrec₂.left (TableProgram.halt_primrec.comp₂ Primrec₂.right)
+    exact hrelEq.not
+  have hnonhalt : Primrec (fun P : TableProgram =>
+      P.supportedStates.filter fun q => q ≠ P.halt) :=
+    (hnonhaltRel.listFilter.comp TableProgram.supportedStates_primrec Primrec.id).of_eq
+      fun _ => rfl
+  have hheads : Primrec (fun P : TableProgram =>
+      (P.supportedStates.filter fun q => q ≠ P.halt).flatMap fun q =>
+        P.supportedSymbols.map fun a => MachineCell.head q a) := by
+    refine Primrec.list_flatMap hnonhalt ?_
+    apply Primrec₂.mk
+    refine Primrec.list_map (TableProgram.supportedSymbols_primrec.comp Primrec.fst) ?_
+    rw [← Primrec₂.uncurry]
+    exact MachineCell.head_primrec.comp
+      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd)
+  unfold tableProgramMachineCells
+  exact Primrec.list_cons.comp (Primrec.const MachineCell.boundary)
+    (Primrec.list_append.comp hplain hheads)
+
+theorem tableProgramMachineCells_computable : Computable tableProgramMachineCells :=
+  tableProgramMachineCells_primrec.to_comp
+
 /-- Pair two cell colors into one Wang color. -/
 def pairCellColor (a b : MachineCell) : Nat :=
   Nat.pair a.code b.code
