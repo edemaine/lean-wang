@@ -451,6 +451,40 @@ theorem localNextCell?_right_of_head {M : Machine} {c : ID}
           simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
             localNextCell?, Move.apply, hstate']
 
+theorem localNextCell?_away_from_head {M : Machine} {c : ID} {pos : Nat}
+    (hstate : c.state ≠ M.halt)
+    (hcenter : pos ≠ c.head)
+    (hrightOld : pos + 1 ≠ c.head)
+    (hleftOld : c.head + 1 ≠ pos) :
+    localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
+      some ((M.nextID c).cellAt pos) := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  cases hpos : pos with
+  | zero =>
+      cases hhead : c.head with
+      | zero =>
+          omega
+      | succ pred =>
+          cases move <;>
+            (simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+              Move.apply]
+             try omega)
+  | succ posPred =>
+      cases hhead : c.head with
+      | zero =>
+          cases move <;>
+            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+              Move.apply]
+      | succ headPred =>
+          have hleftCell : posPred ≠ headPred + 1 := by omega
+          have hcenterCell : posPred ≠ headPred := by omega
+          have hrightCell : posPred + 1 + 1 ≠ headPred + 1 := by omega
+          have hnewLeft : posPred + 1 ≠ headPred := by omega
+          have hnewRight : posPred + 1 ≠ headPred + 1 + 1 := by omega
+          cases move <;>
+            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+              Move.apply]
+
 end Machine
 
 /-- A local `2 × 3` machine-history block. -/
