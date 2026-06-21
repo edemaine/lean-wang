@@ -260,4 +260,148 @@ theorem tilesPlane_iff_all_tileableSquares (T : TileSet) :
   · intro hsquares
     exact tilesPlane_of_all_tileableBoxes (all_tileableBoxes_of_all_tileableSquares hsquares)
 
+/-- Global assignments of tiles on the first quadrant, without adjacency constraints. -/
+abbrev QuarterAssignment (T : TileSet) :=
+  Nat × Nat → TileIn T
+
+/--
+A global first-quadrant assignment whose restriction to `[0,n] × [0,n]` is valid
+and whose origin is the prescribed seed.
+-/
+def QuarterCylinder (T : TileSet) (seed : WangTile) (n : Nat) :
+    Set (QuarterAssignment T) :=
+  {x |
+    (∀ p : Nat × Nat, p.1 + 1 ≤ n → p.2 ≤ n →
+      WangTile.HMatches (x p).1 (x (p.1 + 1, p.2)).1) ∧
+    (∀ p : Nat × Nat, p.1 ≤ n → p.2 + 1 ≤ n →
+      WangTile.VMatches (x p).1 (x (p.1, p.2 + 1)).1) ∧
+    (x (0, 0)).1 = seed}
+
+/-- Extend a seeded finite square to an arbitrary first-quadrant assignment. -/
+def extendFixedCornerSquare {T : TileSet} {seed : WangTile} {n : Nat}
+    (x : Rectangle (n + 1) (n + 1)) (hx : ValidRectangle T x)
+    (hseed : x ⟨0, Nat.succ_pos n⟩ ⟨0, Nat.succ_pos n⟩ = seed) :
+    QuarterAssignment T :=
+  have hseed_mem : seed ∈ T := by
+    rw [← hseed]
+    exact hx.1 ⟨0, Nat.succ_pos n⟩ ⟨0, Nat.succ_pos n⟩
+  fun p =>
+    if hp : p.1 < n + 1 ∧ p.2 < n + 1 then
+      ⟨x ⟨p.1, hp.1⟩ ⟨p.2, hp.2⟩, hx.1 ⟨p.1, hp.1⟩ ⟨p.2, hp.2⟩⟩
+    else
+      ⟨seed, hseed_mem⟩
+
+theorem quarterCylinder_nonempty {T : TileSet} {seed : WangTile} {n : Nat} :
+    TileableFixedCornerSquare T seed (n + 1) →
+      (QuarterCylinder T seed n).Nonempty := by
+  rintro ⟨_hn, x, hx, hseed⟩
+  let y := extendFixedCornerSquare x hx hseed
+  refine ⟨y, ?_⟩
+  constructor
+  · intro p hpE hpY
+    have hpX : p.1 < n + 1 :=
+      Nat.lt_succ_of_le ((Nat.le_succ p.1).trans hpE)
+    have hpY' : p.2 < n + 1 :=
+      Nat.lt_succ_of_le hpY
+    have hpEX : p.1 + 1 < n + 1 :=
+      Nat.lt_succ_of_le hpE
+    have hmatch := hx.2.1 ⟨p.1, hpX⟩ ⟨p.2, hpY'⟩ hpEX
+    simpa [y, extendFixedCornerSquare, hpX, hpY', hpEX] using hmatch
+  constructor
+  · intro p hpX hpN
+    have hpX' : p.1 < n + 1 :=
+      Nat.lt_succ_of_le hpX
+    have hpY : p.2 < n + 1 :=
+      Nat.lt_succ_of_le ((Nat.le_succ p.2).trans hpN)
+    have hpNY : p.2 + 1 < n + 1 :=
+      Nat.lt_succ_of_le hpN
+    have hmatch := hx.2.2 ⟨p.1, hpX'⟩ ⟨p.2, hpY⟩ hpNY
+    simpa [y, extendFixedCornerSquare, hpX', hpY, hpNY] using hmatch
+  · simpa [y, extendFixedCornerSquare] using hseed
+
+theorem isClosed_quarterCylinder (T : TileSet) (seed : WangTile) (n : Nat) :
+    IsClosed (QuarterCylinder T seed n) := by
+  unfold QuarterCylinder
+  rw [Set.setOf_and, Set.setOf_and]
+  apply IsClosed.inter
+  · convert (isClosed_iInter fun (p : Nat × Nat) =>
+      isClosed_iInter fun (_hpE : p.1 + 1 ≤ n) =>
+        isClosed_iInter fun (_hpY : p.2 ≤ n) => by
+          have hclosed : IsClosed
+              {q : TileIn T × TileIn T | WangTile.HMatches q.1.1 q.2.1} := by
+            exact isClosed_discrete _
+          exact (IsClosed.preimage
+            ((continuous_apply p).prodMk (continuous_apply (p.1 + 1, p.2))) hclosed :
+              IsClosed ((fun x : QuarterAssignment T => (x p, x (p.1 + 1, p.2))) ⁻¹'
+                {q : TileIn T × TileIn T | WangTile.HMatches q.1.1 q.2.1}))) using 1
+    ext x
+    simp
+  · apply IsClosed.inter
+    · convert (isClosed_iInter fun (p : Nat × Nat) =>
+        isClosed_iInter fun (_hpX : p.1 ≤ n) =>
+          isClosed_iInter fun (_hpN : p.2 + 1 ≤ n) => by
+            have hclosed : IsClosed
+                {q : TileIn T × TileIn T | WangTile.VMatches q.1.1 q.2.1} := by
+              exact isClosed_discrete _
+            exact (IsClosed.preimage
+              ((continuous_apply p).prodMk (continuous_apply (p.1, p.2 + 1))) hclosed :
+                IsClosed ((fun x : QuarterAssignment T => (x p, x (p.1, p.2 + 1))) ⁻¹'
+                  {q : TileIn T × TileIn T | WangTile.VMatches q.1.1 q.2.1}))) using 1
+      ext x
+      simp
+    · have hclosed : IsClosed {t : TileIn T | t.1 = seed} := by
+        exact isClosed_discrete _
+      exact (IsClosed.preimage (continuous_apply (0, 0)) hclosed :
+        IsClosed ((fun x : QuarterAssignment T => x (0, 0)) ⁻¹' {t : TileIn T | t.1 = seed}))
+
+theorem quarterCylinder_succ_subset (T : TileSet) (seed : WangTile) (n : Nat) :
+    QuarterCylinder T seed (n + 1) ⊆ QuarterCylinder T seed n := by
+  intro x hx
+  rcases hx with ⟨hxH, hxV, hxSeed⟩
+  constructor
+  · intro p hpE hpY
+    exact hxH p (Nat.le_trans hpE (Nat.le_succ n)) (Nat.le_trans hpY (Nat.le_succ n))
+  constructor
+  · intro p hpX hpN
+    exact hxV p (Nat.le_trans hpX (Nat.le_succ n)) (Nat.le_trans hpN (Nat.le_succ n))
+  · exact hxSeed
+
+theorem tilesQuarterWithSeed_of_all_fixedCornerSquares {T : TileSet} {seed : WangTile} :
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      TilesQuarterWithSeed T seed := by
+  intro hsquares
+  have hnonempty : ∀ n : Nat, (QuarterCylinder T seed n).Nonempty := by
+    intro n
+    exact quarterCylinder_nonempty (hsquares (n + 1) (Nat.succ_pos n))
+  have hclosed : ∀ n : Nat, IsClosed (QuarterCylinder T seed n) :=
+    isClosed_quarterCylinder T seed
+  have hcompact0 : IsCompact (QuarterCylinder T seed 0) :=
+    (hclosed 0).isCompact
+  rcases IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
+      (QuarterCylinder T seed) (quarterCylinder_succ_subset T seed)
+      hnonempty hcompact0 hclosed with ⟨x, hx⟩
+  have hxall : ∀ n : Nat, x ∈ QuarterCylinder T seed n := by
+    simpa using hx
+  refine ⟨x, ?_, ?_⟩
+  · constructor
+    · intro p
+      exact (hxall (max (p.1 + 1) p.2)).1 p
+        (Nat.le_max_left _ _) (Nat.le_max_right _ _)
+    · intro p
+      exact (hxall (max p.1 (p.2 + 1))).2.1 p
+        (Nat.le_max_left _ _) (Nat.le_max_right _ _)
+  · exact (hxall 0).2.2
+
+/--
+Seeded quarter-plane compactness: a seeded first-quadrant tiling exists exactly
+when every nonempty finite square has a tiling with that lower-left seed.
+-/
+theorem tilesQuarterWithSeed_iff_all_fixedCornerSquares (T : TileSet) (seed : WangTile) :
+    TilesQuarterWithSeed T seed ↔
+      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n := by
+  constructor
+  · exact fixedCornerSquare_of_tilesQuarterWithSeed
+  · intro hsquares
+    exact tilesQuarterWithSeed_of_all_fixedCornerSquares hsquares
+
 end LeanWang

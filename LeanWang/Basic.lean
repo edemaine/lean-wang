@@ -295,17 +295,4 @@ theorem fixedCornerSquare_of_tilesQuarterWithSeed {T : TileSet} {seed : WangTile
       exact hxV (i.val, j.val)
   · exact hseed
 
-/--
-Seeded quarter-plane compactness. The forward direction is
-`fixedCornerSquare_of_tilesQuarterWithSeed`; the reverse direction is another
-diagonal compactness argument.
--/
-theorem tilesQuarterWithSeed_iff_all_fixedCornerSquares (T : TileSet) (seed : WangTile) :
-    TilesQuarterWithSeed T seed ↔
-      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n := by
-  constructor
-  · exact fixedCornerSquare_of_tilesQuarterWithSeed
-  · intro _h
-    sorry
-
 end LeanWang
