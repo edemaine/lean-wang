@@ -1368,6 +1368,30 @@ theorem seeded_tiling_row_zero_three_eq {M : Machine}
       (runHistoryTile M 0 2) t).1 hh'
     exact False.elim (initialRowTag_ne_normalRowTag htag.1)
 
+theorem seeded_tiling_row_zero_eq_of_le_three {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) :
+    ∀ {pos : Nat}, pos ≤ 3 → (x (pos, 0)).1 = runTaggedHistoryTile M 0 pos := by
+  intro pos hpos
+  cases pos with
+  | zero =>
+      simpa [runTaggedHistoryTile, machineSeed_eq] using hseed
+  | succ pos =>
+      cases pos with
+      | zero =>
+          exact seeded_tiling_row_zero_one_eq hvalid hseed
+      | succ pos =>
+          cases pos with
+          | zero =>
+              exact seeded_tiling_row_zero_two_eq hvalid hseed
+          | succ pos =>
+              cases pos with
+              | zero =>
+                  exact seeded_tiling_row_zero_three_eq hvalid hseed
+              | succ pos =>
+                  omega
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
