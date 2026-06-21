@@ -1490,6 +1490,29 @@ theorem seeded_tiling_row_zero_eq {M : Machine}
                         (by omega : 3 ≤ pos + 1 + 1 + 1 + 1)
                         ih
 
+theorem seeded_tiling_row_one_prev_cells {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) (pos : Nat) :
+    ∃ t : MachineHistoryTile,
+      t ∈ machineHistoryTiles M ∧
+        t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, 1)).1 ∧
+        t.prevLeft = (runHistoryTile M 0 pos).nextLeft ∧
+        t.prevCenter = (runHistoryTile M 0 pos).nextCenter ∧
+        t.prevRight = (runHistoryTile M 0 pos).nextRight := by
+  rcases IsNormalMachineTile.row_one_of_seeded_tiling hvalid hseed pos with
+    ⟨t, ht, htilet⟩
+  have hbottom := seeded_tiling_row_zero_eq (M := M) (x := x) hvalid hseed pos
+  have hv : WangTile.VMatches
+      ((runHistoryTile M 0 pos).toTaggedWangTile initialRowTag normalRowTag)
+      (t.toTaggedWangTile normalRowTag normalRowTag) := by
+    simpa [runTaggedHistoryTile, hbottom, htilet] using hvalid.2 (pos, 0)
+  have hcells := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+    initialRowTag normalRowTag normalRowTag normalRowTag
+    (runHistoryTile M 0 pos) t).1 hv
+  exact ⟨t, ht, htilet, hcells.2.1.symm, hcells.2.2.1.symm,
+    hcells.2.2.2.symm⟩
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
