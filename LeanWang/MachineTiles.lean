@@ -1160,6 +1160,28 @@ theorem normalTaggedWangTile_ne_machineSeed {M : Machine}
   intro h
   exact initialTagged_ne_normalTagged (t := runHistoryTile M 0 0) (u := t) h.symm
 
+theorem IsInitialMachineTile_machineSeed (M : Machine) :
+    IsInitialMachineTile M (machineSeed M) := by
+  exact ⟨runHistoryTile M 0 0, runHistoryTile_zero_mem_initialRowHistoryTiles M 0,
+    by simp [machineSeed_eq]⟩
+
+theorem IsNormalMachineTile.row_one_of_seeded_tiling {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) :
+    ∀ pos : Nat, IsNormalMachineTile M (x (pos, 1)).1 := by
+  intro pos
+  induction pos with
+  | zero =>
+      exact IsNormalMachineTile.of_vMatches_initial_below
+        (by simpa [hseed] using IsInitialMachineTile_machineSeed M)
+        (hvalid.2 (0, 0))
+        (x (0, 1)).2
+  | succ pos ih =>
+      exact IsNormalMachineTile.of_hMatches_left ih
+        (hvalid.1 (pos, 1))
+        (x (pos + 1, 1)).2
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
