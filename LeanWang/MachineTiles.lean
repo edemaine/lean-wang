@@ -1182,6 +1182,28 @@ theorem IsNormalMachineTile.row_one_of_seeded_tiling {M : Machine}
         (hvalid.1 (pos, 1))
         (x (pos + 1, 1)).2
 
+theorem IsNormalMachineTile.positive_row_of_seeded_tiling {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) :
+    ∀ time pos : Nat, IsNormalMachineTile M (x (pos, time + 1)).1 := by
+  intro time
+  induction time with
+  | zero =>
+      exact IsNormalMachineTile.row_one_of_seeded_tiling hvalid hseed
+  | succ time ih =>
+      intro pos
+      induction pos with
+      | zero =>
+          exact IsNormalMachineTile.of_vMatches_below
+            (ih 0)
+            (hvalid.2 (0, time + 1))
+            (x (0, time + 1 + 1)).2
+      | succ pos ihpos =>
+          exact IsNormalMachineTile.of_hMatches_left ihpos
+            (hvalid.1 (pos, time + 1 + 1))
+            (x (pos + 1, time + 1 + 1)).2
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
