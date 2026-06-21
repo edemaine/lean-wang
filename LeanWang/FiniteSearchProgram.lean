@@ -118,6 +118,61 @@ theorem transitions_eq_transitionsFrom (bs : List Bool) :
   rw [transitions, folded_eq_coreTransitionsFrom]
   simpa using coreTransitionsFrom_append_loop (bs.length + 1) 0 bs
 
+theorem find?_transitionsFrom_replicate_false (halt i n : Nat) :
+    ∀ bs : List Bool,
+      (transitionsFrom halt i (List.replicate n false ++ bs)).find?
+          (fun e => e.matchesInput (i + n) 0) =
+        match bs with
+        | [] => some (loopTransition (i + n))
+        | b :: _ => some (transition halt (i + n) b)
+  | [] => by
+      induction n generalizing i with
+      | zero =>
+          simp [transitionsFrom, loopTransition]
+      | succ n ih =>
+          simp only [List.replicate_succ, List.append_nil, transitionsFrom, List.find?_cons]
+          have hhead :
+              (transition halt i false).matchesInput (i + (n + 1)) 0 = false := by
+            apply TableTransition.matchesInput_mk_of_state_ne
+            omega
+          rw [hhead]
+          simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ih (i + 1)
+  | b :: bs => by
+      induction n generalizing i with
+      | zero =>
+          simp [transitionsFrom, transition]
+      | succ n ih =>
+          simp only [List.replicate_succ, List.cons_append, transitionsFrom, List.find?_cons]
+          have hhead :
+              (transition halt i false).matchesInput (i + (n + 1)) 0 = false := by
+            apply TableTransition.matchesInput_mk_of_state_ne
+            omega
+          rw [hhead]
+          simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ih (i + 1)
+
+theorem program_transition?_after_false_prefix (n : Nat) :
+    ∀ bs : List Bool,
+      (program (List.replicate n false ++ bs)).toTableMachine.transition? n 0 =
+        match bs with
+        | [] => some (loopTransition n)
+        | b :: _ => some (transition ((List.replicate n false ++ bs).length + 1) n b)
+  | [] => by
+      unfold TableMachine.transition?
+      rw [show (program (List.replicate n false ++ [])).toTableMachine.table =
+          transitionsFrom ((List.replicate n false ++ []).length + 1) 0
+            (List.replicate n false ++ []) by
+        simp [program, TableProgram.toTableMachine, transitions_eq_transitionsFrom]]
+      simpa [Nat.zero_add, List.length_replicate] using
+        find?_transitionsFrom_replicate_false (n + 1) 0 n []
+  | b :: bs => by
+      unfold TableMachine.transition?
+      rw [show (program (List.replicate n false ++ (b :: bs))).toTableMachine.table =
+          transitionsFrom ((List.replicate n false ++ (b :: bs)).length + 1) 0
+            (List.replicate n false ++ (b :: bs)) by
+        simp [program, TableProgram.toTableMachine, transitions_eq_transitionsFrom]]
+      simpa [List.length_replicate] using find?_transitionsFrom_replicate_false
+        ((List.replicate n false ++ (b :: bs)).length + 1) 0 n (b :: bs)
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
