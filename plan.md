@@ -53,7 +53,8 @@ Completed proof layers:
 - the encoded domino undecidability theorem from a verified compiler and
   verified scaffold.
 - a primitive-recursive finite Boolean search `TableProgram` generator, with
-  verified empty-loop and first-true halting behavior.
+  a recursive transition-table view, verified empty-loop and first-true halting
+  behavior, and verified one-step behavior for a leading `false`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -86,7 +87,8 @@ Next implementation targets:
    implementing the bounded evaluator fuel search in `TableProgram`.
    The next local step is proving full correctness of
    `FiniteSearchProgram.program`: it should halt iff its input Boolean list
-   contains `true`.
+   contains `true`. The remaining induction step is lifting the verified
+   leading-`false` one-step behavior through arbitrary false prefixes.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_fuelCompiler` to those two
