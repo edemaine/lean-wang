@@ -52,6 +52,8 @@ Completed proof layers:
 - the abstract scaffold reduction from any verified `IsScaffold S`;
 - the encoded domino undecidability theorem from a verified compiler and
   verified scaffold.
+- a primitive-recursive finite Boolean search `TableProgram` generator, with
+  verified empty-loop and first-true halting behavior.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -82,6 +84,9 @@ Next implementation targets:
 
 1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
    implementing the bounded evaluator fuel search in `TableProgram`.
+   The next local step is proving full correctness of
+   `FiniteSearchProgram.program`: it should halt iff its input Boolean list
+   contains `true`.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_fuelCompiler` to those two
