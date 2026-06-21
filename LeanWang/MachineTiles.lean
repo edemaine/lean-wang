@@ -718,23 +718,35 @@ theorem runHistoryTile_vMatches (M : Machine) (time pos : Nat) :
       (runHistoryTile M (time + 1) pos).toWangTile := by
   simp [WangTile.VMatches, MachineHistoryTile.toWangTile, runHistoryTile]
 
+theorem runHistoryTile_local_of_state_ne_halt {M : Machine} {time : Nat}
+    (hstate : (M.runEmpty time).state ≠ M.halt)
+    (hnextRun : (M.runEmpty (time + 1)).state ≠ M.halt)
+    (pos : Nat) :
+    localNextCell? M (runHistoryTile M time pos).prevLeft
+        (runHistoryTile M time pos).prevCenter
+        (runHistoryTile M time pos).prevRight =
+      some (runHistoryTile M time pos).nextCenter := by
+  let c := M.runEmpty time
+  have hstate' : c.state ≠ M.halt := by
+    simpa [c] using hstate
+  have hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt := by
+    rw [← Machine.nextID_state_of_ne_halt hstate']
+    simpa [c, Machine.runEmpty_succ] using hnextRun
+  simpa [runHistoryTile, Machine.runCell, Machine.runCellLeft, c,
+    Machine.runEmpty_succ] using
+    Machine.localNextCell?_cellAt (M := M) (c := c) (pos := pos) hstate' hnextState
+
 theorem runHistoryTile_local_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
     (time pos : Nat) :
     localNextCell? M (runHistoryTile M time pos).prevLeft
         (runHistoryTile M time pos).prevCenter
         (runHistoryTile M time pos).prevRight =
       some (runHistoryTile M time pos).nextCenter := by
-  let c := M.runEmpty time
-  have hstate : c.state ≠ M.halt := by
-    exact M.runEmpty_state_ne_halt_of_not_halts h time
-  have hnextRun : (M.runEmpty (time + 1)).state ≠ M.halt := by
-    exact M.runEmpty_state_ne_halt_of_not_halts h (time + 1)
-  have hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt := by
-    rw [← Machine.nextID_state_of_ne_halt hstate]
-    simpa [c, Machine.runEmpty_succ] using hnextRun
-  simpa [runHistoryTile, Machine.runCell, Machine.runCellLeft, c,
-    Machine.runEmpty_succ] using
-    Machine.localNextCell?_cellAt (M := M) (c := c) (pos := pos) hstate hnextState
+  exact runHistoryTile_local_of_state_ne_halt
+    (M := M)
+    (M.runEmpty_state_ne_halt_of_not_halts h time)
+    (M.runEmpty_state_ne_halt_of_not_halts h (time + 1))
+    pos
 
 theorem runHistoryTile_boundaryOK (M : Machine) (time pos : Nat) :
     (runHistoryTile M time pos).prevLeft = MachineCell.boundary →
@@ -1268,6 +1280,22 @@ theorem seeded_tiling_positive_row_prev_cells_of_lower {M : Machine}
     lower upper).1 hv
   exact ⟨upper, hupperMem, hupperTile, hcells.2.1.symm,
     hcells.2.2.1.symm, hcells.2.2.2.symm⟩
+
+theorem nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells {M : Machine}
+    {time pos : Nat} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M)
+    (hstate : (M.runEmpty time).state ≠ M.halt)
+    (hnextRun : (M.runEmpty (time + 1)).state ≠ M.halt)
+    (hprevLeft : t.prevLeft = (runHistoryTile M time pos).prevLeft)
+    (hprevCenter : t.prevCenter = (runHistoryTile M time pos).prevCenter)
+    (hprevRight : t.prevRight = (runHistoryTile M time pos).prevRight) :
+    t.nextCenter = (runHistoryTile M time pos).nextCenter := by
+  have htlocal := localNextCell?_of_mem_machineHistoryTiles ht
+  rw [hprevLeft, hprevCenter, hprevRight] at htlocal
+  have hrun := runHistoryTile_local_of_state_ne_halt
+    (M := M) hstate hnextRun pos
+  rw [hrun] at htlocal
+  exact Option.some.inj htlocal.symm
 
 theorem seeded_tiling_row_zero_one_eq {M : Machine}
     {x : Nat × Nat → TileIn (machineTiles M)}
