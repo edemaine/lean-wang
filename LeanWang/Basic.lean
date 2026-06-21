@@ -251,18 +251,6 @@ theorem tilesPlane_iff_all_tileableSquares (T : TileSet) :
     sorry
 
 /--
-Centered-box compactness for Wang tilings. This is the form that should be used
-for the diagonal/Kőnig proof: every finite window around the origin is tileable iff
-the whole plane is tileable.
--/
-theorem tilesPlane_iff_all_tileableBoxes (T : TileSet) :
-    TilesPlane T ↔ ∀ r : Nat, TileableBox T r := by
-  constructor
-  · exact tileableBox_of_tilesPlane
-  · intro _h
-    sorry
-
-/--
 Seeded quarter-plane compactness. The forward direction is
 `fixedCornerSquare_of_tilesQuarterWithSeed`; the reverse direction is another
 diagonal compactness argument.
