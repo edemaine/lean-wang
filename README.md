@@ -13,7 +13,7 @@ the concrete definitions needed for the Berger/Robinson route:
   `tilesPlane_iff_all_tileableBoxes`, plus the square compactness theorem
   `tilesPlane_iff_all_tileableSquares` and seeded quarter-plane compactness
   `tilesQuarterWithSeed_iff_all_fixedCornerSquares`.
-- `LeanWang.Machine`: a small deterministic one-tape machine model with
+- `LeanWang.Machine`: a small deterministic one-sided tape machine model with
   well-formed finite supports for the Wang-tile simulation layer.
 - `LeanWang.MachineTiles`: finite local-history Wang-tile data generated from a
   concrete machine.

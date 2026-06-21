@@ -24,10 +24,10 @@ deriving DecidableEq, Repr
 
 namespace Move
 
-/-- Interpret a movement as a displacement of the integer tape head. -/
-def delta : Move → Int
-  | left => -1
-  | right => 1
+/-- Move a one-sided tape head. A left move at the boundary stays at `0`. -/
+def apply : Move → Nat → Nat
+  | left, i => i.pred
+  | right, i => i + 1
 
 end Move
 
@@ -53,8 +53,8 @@ structure Machine where
 
 /-- An instantaneous description of a one-tape machine. -/
 structure ID where
-  tape : Int → Nat
-  head : Int
+  tape : Nat → Nat
+  head : Nat
   state : Nat
 
 namespace Machine
@@ -73,7 +73,7 @@ def nextID (M : Machine) (c : ID) : ID :=
     let read := c.tape c.head
     let (write, state', move) := M.step c.state read
     { tape := fun i => if i = c.head then write else c.tape i
-      head := c.head + move.delta
+      head := move.apply c.head
       state := state' }
 
 /-- The configuration after `n` steps from the empty input. -/
