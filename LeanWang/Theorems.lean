@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, OpenAI
 -/
 import LeanWang.Compactness
+import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
 import Mathlib.Computability.Reduce
@@ -75,6 +76,10 @@ theorem codeEvaln_nonhalting_undecidable :
     h.of_eq fun c => by
       rw [code_eval_dom_iff_exists_codeEvalnHalts]
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+theorem codeEvalnFuelMachine_correct (c : Code) (n : Nat) :
+    FuelMachine.Halts (codeEvalnHalts c n) ↔ (Nat.Partrec.Code.eval c n).Dom := by
+  rw [FuelMachine.halts_iff_exists_true, code_eval_dom_iff_exists_codeEvalnHalts]
 
 /--
 Every Mathlib `Nat.Partrec.Code` has a corresponding `Turing.ToPartrec.Code`
