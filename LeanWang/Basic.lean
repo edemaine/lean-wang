@@ -252,6 +252,25 @@ def ValidPlaneTiling (T : TileSet) (x : Int × Int → TileIn T) : Prop :=
 def TilesPlane (T : TileSet) : Prop :=
   ∃ x : Int × Int → TileIn T, ValidPlaneTiling T x
 
+theorem validPlaneTiling_congr {T U : TileSet}
+    (hmem : ∀ tile : WangTile, tile ∈ T ↔ tile ∈ U)
+    {x : Int × Int → TileIn T} :
+    ValidPlaneTiling T x →
+      ValidPlaneTiling U (fun p => (⟨(x p).1, (hmem (x p).1).1 (x p).2⟩ : TileIn U)) := by
+  intro hvalid
+  exact hvalid
+
+theorem tilesPlane_congr {T U : TileSet}
+    (hmem : ∀ tile : WangTile, tile ∈ T ↔ tile ∈ U) :
+    TilesPlane T ↔ TilesPlane U := by
+  constructor
+  · rintro ⟨x, hvalid⟩
+    exact ⟨fun p => ⟨(x p).1, (hmem (x p).1).1 (x p).2⟩,
+      validPlaneTiling_congr hmem hvalid⟩
+  · rintro ⟨x, hvalid⟩
+    exact ⟨fun p => ⟨(x p).1, (hmem (x p).1).2 (x p).2⟩,
+      validPlaneTiling_congr (fun tile => (hmem tile).symm) hvalid⟩
+
 theorem tilesPlane_left_of_tilesPlane_productTileSet {base payload : TileSet}
     (h : TilesPlane (productTileSet base payload)) :
     TilesPlane base := by
@@ -396,6 +415,25 @@ def ValidQuarterTiling (T : TileSet) (x : Nat × Nat → TileIn T) : Prop :=
 /-- A tileset tiles the first quadrant with a prescribed tile at the origin. -/
 def TilesQuarterWithSeed (T : TileSet) (seed : WangTile) : Prop :=
   ∃ x : Nat × Nat → TileIn T, ValidQuarterTiling T x ∧ (x (0, 0)).1 = seed
+
+theorem validQuarterTiling_congr {T U : TileSet}
+    (hmem : ∀ tile : WangTile, tile ∈ T ↔ tile ∈ U)
+    {x : Nat × Nat → TileIn T} :
+    ValidQuarterTiling T x →
+      ValidQuarterTiling U (fun p => (⟨(x p).1, (hmem (x p).1).1 (x p).2⟩ : TileIn U)) := by
+  intro hvalid
+  exact hvalid
+
+theorem tilesQuarterWithSeed_congr {T U : TileSet} {seed : WangTile}
+    (hmem : ∀ tile : WangTile, tile ∈ T ↔ tile ∈ U) :
+    TilesQuarterWithSeed T seed ↔ TilesQuarterWithSeed U seed := by
+  constructor
+  · rintro ⟨x, hvalid, hseed⟩
+    exact ⟨fun p => ⟨(x p).1, (hmem (x p).1).1 (x p).2⟩,
+      validQuarterTiling_congr hmem hvalid, hseed⟩
+  · rintro ⟨x, hvalid, hseed⟩
+    exact ⟨fun p => ⟨(x p).1, (hmem (x p).1).2 (x p).2⟩,
+      validQuarterTiling_congr (fun tile => (hmem tile).symm) hvalid, hseed⟩
 
 /-- A finite rectangle assignment with width `w` and height `h`. -/
 abbrev Rectangle (w h : Nat) :=
