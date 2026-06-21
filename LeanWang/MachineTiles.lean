@@ -1703,6 +1703,67 @@ theorem machineHistoryTileCandidates_primrec : Primrec machineHistoryTileCandida
       | nil => rfl
       | cons _ _ ih => simp [ih]
 
+def tableProgramHistoryTileValid (P : TableProgram) (t : MachineHistoryTile) : Prop :=
+  tableProgramLocalNextCellData? P t.prevLeft t.prevCenter t.prevRight = some t.nextCenter ∧
+    (t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary)
+
+instance tableProgramHistoryTileValid_decidable (P : TableProgram) (t : MachineHistoryTile) :
+    Decidable (tableProgramHistoryTileValid P t) := by
+  unfold tableProgramHistoryTileValid
+  infer_instance
+
+theorem tableProgramHistoryTileValid_primrecPred :
+    PrimrecPred (fun p : TableProgram × MachineHistoryTile =>
+      tableProgramHistoryTileValid p.1 p.2) := by
+  have hprevLeft : Primrec (fun p : TableProgram × MachineHistoryTile => p.2.prevLeft) :=
+    MachineHistoryTile.prevLeft_primrec.comp Primrec.snd
+  have hprevCenter : Primrec (fun p : TableProgram × MachineHistoryTile => p.2.prevCenter) :=
+    MachineHistoryTile.prevCenter_primrec.comp Primrec.snd
+  have hprevRight : Primrec (fun p : TableProgram × MachineHistoryTile => p.2.prevRight) :=
+    MachineHistoryTile.prevRight_primrec.comp Primrec.snd
+  have hnextLeft : Primrec (fun p : TableProgram × MachineHistoryTile => p.2.nextLeft) :=
+    MachineHistoryTile.nextLeft_primrec.comp Primrec.snd
+  have hnextCenter : Primrec (fun p : TableProgram × MachineHistoryTile => p.2.nextCenter) :=
+    MachineHistoryTile.nextCenter_primrec.comp Primrec.snd
+  have hlocal : Primrec (fun p : TableProgram × MachineHistoryTile =>
+      tableProgramLocalNextCellData? p.1 p.2.prevLeft p.2.prevCenter p.2.prevRight) :=
+    tableProgramLocalNextCellData?_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair hprevLeft (Primrec.pair hprevCenter hprevRight)))
+  have hlocalOK : PrimrecPred (fun p : TableProgram × MachineHistoryTile =>
+      tableProgramLocalNextCellData? p.1 p.2.prevLeft p.2.prevCenter p.2.prevRight =
+        some p.2.nextCenter) :=
+    Primrec.eq.comp hlocal (Primrec.option_some.comp hnextCenter)
+  have hprevBoundary : PrimrecPred (fun p : TableProgram × MachineHistoryTile =>
+      p.2.prevLeft = MachineCell.boundary) :=
+    Primrec.eq.comp hprevLeft (Primrec.const MachineCell.boundary)
+  have hnextBoundary : PrimrecPred (fun p : TableProgram × MachineHistoryTile =>
+      p.2.nextLeft = MachineCell.boundary) :=
+    Primrec.eq.comp hnextLeft (Primrec.const MachineCell.boundary)
+  have hboundaryOK : PrimrecPred (fun p : TableProgram × MachineHistoryTile =>
+      p.2.prevLeft = MachineCell.boundary → p.2.nextLeft = MachineCell.boundary) :=
+    (PrimrecPred.or hprevBoundary.not hnextBoundary).of_eq fun p => by
+      by_cases h : p.2.prevLeft = MachineCell.boundary <;> simp [h]
+  exact (PrimrecPred.and hlocalOK hboundaryOK).of_eq fun p => by
+    rfl
+
+def tableProgramMachineHistoryTilesData (P : TableProgram) : List MachineHistoryTile :=
+  (machineHistoryTileCandidates (tableProgramMachineCells P)).filterMap fun t =>
+    if tableProgramHistoryTileValid P t then some t else none
+
+theorem tableProgramMachineHistoryTilesData_primrec :
+    Primrec tableProgramMachineHistoryTilesData := by
+  unfold tableProgramMachineHistoryTilesData
+  have hcandidates : Primrec (fun P : TableProgram =>
+      machineHistoryTileCandidates (tableProgramMachineCells P)) :=
+    machineHistoryTileCandidates_primrec.comp tableProgramMachineCells_primrec
+  have hfilter :
+      Primrec₂ (fun P : TableProgram => fun t : MachineHistoryTile =>
+        if tableProgramHistoryTileValid P t then some t else none) :=
+    Primrec.ite tableProgramHistoryTileValid_primrecPred
+      (Primrec.option_some.comp Primrec.snd) (Primrec.const none)
+  exact Primrec.listFilterMap hcandidates hfilter
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
