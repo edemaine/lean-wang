@@ -59,6 +59,19 @@ def isHead : MachineCell → Bool
   | plain _ => false
   | head _ _ => true
 
+def isBoundary : MachineCell → Bool
+  | boundary => true
+  | plain _ => false
+  | head _ _ => false
+
+def plain? : MachineCell → Option Nat
+  | plain a => some a
+  | _ => none
+
+def head? : MachineCell → Option (Nat × Nat)
+  | head q a => some (q, a)
+  | _ => none
+
 /-- A machine cell is supported by a machine's finite symbol and state sets. -/
 def Mem (M : Machine) : MachineCell → Prop
   | boundary => True
@@ -165,6 +178,72 @@ theorem code_primrec : Primrec MachineCell.code := by
       | Sum.inr p => Nat.pair 1 (Nat.pair p.1 p.2))
     toSum_primrec ?_ hrest).of_eq ?_
   · exact (Primrec.const (Nat.pair 2 0)).to₂
+  · intro c
+    cases c <;> rfl
+
+theorem isBoundary_primrec : Primrec MachineCell.isBoundary := by
+  exact (Primrec.eq.decide.comp Primrec.id (Primrec.const MachineCell.boundary)).of_eq
+    fun c => by cases c <;> rfl
+
+theorem plain?_primrec : Primrec MachineCell.plain? := by
+  have hrest :
+      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
+        match r with
+        | Sum.inl a => some a
+        | Sum.inr _ => none) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat)
+      (σ := Option Nat)
+      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
+      (g := fun _ a => some a)
+      (h := fun _ _ => none)
+      Primrec.snd ?_ ?_).of_eq ?_
+    · exact (Primrec.option_some.comp Primrec.snd).to₂
+    · exact (Primrec.const none).to₂
+    · intro p
+      cases p.2 <;> rfl
+  refine (Primrec.sumCasesOn
+    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Option Nat)
+    (f := MachineCell.toSum)
+    (g := fun _ _ => none)
+    (h := fun _ r =>
+      match r with
+      | Sum.inl a => some a
+      | Sum.inr _ => none)
+    toSum_primrec ?_ hrest).of_eq ?_
+  · exact (Primrec.const none).to₂
+  · intro c
+    cases c <;> rfl
+
+theorem head?_primrec : Primrec MachineCell.head? := by
+  have hrest :
+      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
+        match r with
+        | Sum.inl _ => none
+        | Sum.inr p => some p) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat)
+      (σ := Option (Nat × Nat))
+      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
+      (g := fun _ _ => none)
+      (h := fun _ p => some p)
+      Primrec.snd ?_ ?_).of_eq ?_
+    · exact (Primrec.const none).to₂
+    · exact (Primrec.option_some.comp Primrec.snd).to₂
+    · intro p
+      cases p.2 <;> rfl
+  refine (Primrec.sumCasesOn
+    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Option (Nat × Nat))
+    (f := MachineCell.toSum)
+    (g := fun _ _ => none)
+    (h := fun _ r =>
+      match r with
+      | Sum.inl _ => none
+      | Sum.inr p => some p)
+    toSum_primrec ?_ hrest).of_eq ?_
+  · exact (Primrec.const none).to₂
   · intro c
     cases c <;> rfl
 
@@ -566,6 +645,52 @@ def tableProgramLocalNextCell?
       some (MachineCell.plain b)
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
+
+def tableProgramLocalNextCellData?
+    (P : TableProgram) (left center right : MachineCell) : Option MachineCell :=
+  match center.head? with
+  | some (q, a) =>
+      if q = P.toTableMachine.halt then
+        none
+      else
+        let action := P.toTableMachine.step q a
+        let write := action.1
+        let q' := action.2.1
+        let move := action.2.2
+        if left.isBoundary && decide (move = Move.left) then
+          if q' = P.toTableMachine.halt then none else some (MachineCell.head q' write)
+        else
+          some (MachineCell.plain write)
+  | none =>
+      match center.plain? with
+      | none => none
+      | some b =>
+          match left.head? with
+          | some (q, a) =>
+              if q = P.toTableMachine.halt then
+                none
+              else
+                let action := P.toTableMachine.step q a
+                let q' := action.2.1
+                let move := action.2.2
+                if move = Move.right then
+                  if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+                else
+                  some (MachineCell.plain b)
+          | none =>
+              match right.head? with
+              | some (q, a) =>
+                  if q = P.toTableMachine.halt then
+                    none
+                  else
+                    let action := P.toTableMachine.step q a
+                    let q' := action.2.1
+                    let move := action.2.2
+                    if move = Move.left then
+                      if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+                    else
+                      some (MachineCell.plain b)
+              | none => some (MachineCell.plain b)
 
 theorem tableProgramLocalNextCell?_eq_localNextCell?
     (P : TableProgram) (left center right : MachineCell) :
