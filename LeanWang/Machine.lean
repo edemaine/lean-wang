@@ -414,7 +414,6 @@ theorem toTableMachine_states (P : TableProgram) :
 theorem toTableMachine_step (P : TableProgram) :
     P.toTableMachine.step = P.toTableMachine.toMachine.step := rfl
 
-@[simp]
 theorem toMachine_step (P : TableProgram) :
     P.toMachine.step = P.toTableMachine.step := rfl
 
@@ -440,6 +439,20 @@ theorem toMachine_step_of_transition?_eq_none {P : TableProgram} {q a : Nat}
     (h : P.toTableMachine.transition? q a = none) :
     P.toMachine.step q a = (P.blank, P.halt, Move.right) :=
   TableMachine.step_of_transition?_eq_none h
+
+theorem toMachine_haltsEmpty_of_initial_transition_to_halt {P : TableProgram}
+    {e : TableTransition}
+    (hfind : P.toTableMachine.transition? P.start P.blank = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates)
+    (hhalt : e.next = P.halt) :
+    P.toMachine.HaltsEmpty := by
+  by_cases hstart : P.start = P.halt
+  · exact ⟨0, by simp [Machine.initialID, hstart]⟩
+  · refine ⟨1, ?_⟩
+    rw [Machine.runEmpty_succ, Machine.runEmpty_zero]
+    simp [Machine.nextID, Machine.initialID, hstart,
+      toMachine_step_of_transition?_eq_some hfind hwrite hnext,
+      TableTransition.action, hhalt]
 
 end TableProgram
 
