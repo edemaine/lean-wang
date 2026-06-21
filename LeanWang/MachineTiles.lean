@@ -1252,6 +1252,64 @@ theorem seeded_tiling_row_zero_one_eq {M : Machine}
       (runHistoryTile M 0 0) t).1 hh'
     exact False.elim (initialRowTag_ne_normalRowTag htag.1)
 
+theorem seeded_tiling_row_zero_two_eq {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) :
+    (x (2, 0)).1 = runTaggedHistoryTile M 0 2 := by
+  have hleft := seeded_tiling_row_zero_one_eq (M := M) (x := x) hvalid hseed
+  have hh : WangTile.HMatches (runTaggedHistoryTile M 0 1) (x (2, 0)).1 := by
+    simpa [hleft] using hvalid.1 (1, 0)
+  rcases (mem_machineTiles_iff M (x (2, 0)).1).1 (x (2, 0)).2 with hinit | hnormal
+  · rcases hinit with ⟨t, ht, htile⟩
+    have hh' : WangTile.HMatches
+        ((runHistoryTile M 0 1).toTaggedWangTile initialRowTag normalRowTag)
+        (t.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [runTaggedHistoryTile, htile] using hh
+    have hcells := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag initialRowTag normalRowTag
+      (runHistoryTile M 0 1) t).1 hh'
+    have htCases :
+        t = runHistoryTile M 0 0 ∨
+          t = runHistoryTile M 0 1 ∨
+          t = runHistoryTile M 0 2 ∨
+          t = runHistoryTile M 0 3 := by
+      simpa [initialRowHistoryTiles] using ht
+    rcases htCases with ht | ht | ht | ht
+    · subst t
+      have hbad := hcells.2.1
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+        Machine.runEmpty_zero, Machine.initialID, ID.cellAt, ID.cellAtLeft] at hbad
+    · subst t
+      have hbad := hcells.2.1
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+        Machine.runEmpty_zero, Machine.initialID, ID.cellAt, ID.cellAtLeft] at hbad
+    · subst t
+      rw [← htile]
+      rfl
+    · subst t
+      rw [← htile]
+      simp [runTaggedHistoryTile]
+      by_cases hstart : M.start = M.halt
+      · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+          Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+          Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart]
+      · rcases hstep : M.step M.start M.blank with ⟨write, q', move⟩
+        cases move <;>
+          simp [runHistoryTile, Machine.runCell, Machine.runCellLeft,
+            Machine.runEmpty_zero, Machine.runEmpty_succ, Machine.nextID,
+            Machine.initialID, ID.cellAt, ID.cellAtLeft, hstart, hstep,
+            Move.apply] at hcells ⊢
+  · rcases hnormal with ⟨t, _ht, htile⟩
+    have hh' : WangTile.HMatches
+        ((runHistoryTile M 0 1).toTaggedWangTile initialRowTag normalRowTag)
+        (t.toTaggedWangTile normalRowTag normalRowTag) := by
+      simpa [runTaggedHistoryTile, htile] using hh
+    have htag := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag normalRowTag normalRowTag
+      (runHistoryTile M 0 1) t).1 hh'
+    exact False.elim (initialRowTag_ne_normalRowTag htag.1)
+
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
     ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
