@@ -1316,6 +1316,97 @@ theorem nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells {M : Machine}
   rw [hrun] at htlocal
   exact Option.some.inj htlocal.symm
 
+theorem seeded_tiling_next_row_prev_run_cells {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M)
+    {time : Nat}
+    (hrow : ∀ pos : Nat,
+      ∃ t : MachineHistoryTile,
+        t ∈ machineHistoryTiles M ∧
+          t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1)).1 ∧
+          t.prevLeft = (runHistoryTile M (time + 1) pos).prevLeft ∧
+          t.prevCenter = (runHistoryTile M (time + 1) pos).prevCenter ∧
+          t.prevRight = (runHistoryTile M (time + 1) pos).prevRight)
+    (hstate : (M.runEmpty (time + 1)).state ≠ M.halt)
+    (hnextRun : (M.runEmpty (time + 1 + 1)).state ≠ M.halt)
+    (pos : Nat) :
+    ∃ t : MachineHistoryTile,
+      t ∈ machineHistoryTiles M ∧
+        t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, time + 1 + 1)).1 ∧
+        t.prevLeft = (runHistoryTile M (time + 1 + 1) pos).prevLeft ∧
+        t.prevCenter = (runHistoryTile M (time + 1 + 1) pos).prevCenter ∧
+        t.prevRight = (runHistoryTile M (time + 1 + 1) pos).prevRight := by
+  rcases hrow pos with
+    ⟨lower, hlowerMem, hlowerTile, hlowerPrevLeft,
+      hlowerPrevCenter, hlowerPrevRight⟩
+  rcases seeded_tiling_positive_row_prev_cells_of_lower hvalid hseed
+      (time := time + 1) (pos := pos) (lower := lower)
+      (by simpa using hlowerTile.symm) with
+    ⟨upper, hupperMem, hupperTile, hupperPrevLeft,
+      hupperPrevCenter, hupperPrevRight⟩
+  have hlowerNextCenter :
+      lower.nextCenter = (runHistoryTile M (time + 1) pos).nextCenter :=
+    nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells
+      hlowerMem hstate hnextRun
+      hlowerPrevLeft hlowerPrevCenter hlowerPrevRight
+  have hlowerNextLeft :
+      lower.nextLeft = (runHistoryTile M (time + 1) pos).nextLeft := by
+    cases pos with
+    | zero =>
+        have hprevBoundary : lower.prevLeft = MachineCell.boundary := by
+          simpa [runHistoryTile, Machine.runCellLeft] using hlowerPrevLeft
+        calc
+          lower.nextLeft = MachineCell.boundary :=
+            nextLeft_boundary_of_mem_machineHistoryTiles hlowerMem hprevBoundary
+          _ = (runHistoryTile M (time + 1) 0).nextLeft := by
+            exact (runHistoryTile_boundaryOK M (time + 1) 0 (by
+              simp [runHistoryTile, Machine.runCellLeft])).symm
+    | succ pred =>
+        rcases hrow pred with
+          ⟨left, hleftMem, hleftTile, hleftPrevLeft,
+            hleftPrevCenter, hleftPrevRight⟩
+        have hmatches := seeded_tiling_positive_row_hMatches_cells
+          (M := M) (x := x) hvalid (time := time) (pos := pred)
+          (left := left) (right := lower) hleftTile hlowerTile
+        have hleftNextCenter :
+            left.nextCenter = (runHistoryTile M (time + 1) pred).nextCenter :=
+          nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells
+            hleftMem hstate hnextRun
+            hleftPrevLeft hleftPrevCenter hleftPrevRight
+        calc
+          lower.nextLeft = left.nextCenter := hmatches.2.2.1.symm
+          _ = (runHistoryTile M (time + 1) pred).nextCenter := hleftNextCenter
+          _ = (runHistoryTile M (time + 1) (pred + 1)).nextLeft := by
+            simp [runHistoryTile, Machine.runCellLeft, Machine.runCell]
+  have hlowerNextRight :
+      lower.nextRight = (runHistoryTile M (time + 1) pos).nextRight := by
+    rcases hrow (pos + 1) with
+      ⟨right, hrightMem, hrightTile, hrightPrevLeft,
+        hrightPrevCenter, hrightPrevRight⟩
+    have hmatches := seeded_tiling_positive_row_hMatches_cells
+      (M := M) (x := x) hvalid (time := time) (pos := pos)
+      (left := lower) (right := right) hlowerTile hrightTile
+    have hrightNextCenter :
+        right.nextCenter = (runHistoryTile M (time + 1) (pos + 1)).nextCenter :=
+      nextCenter_eq_runHistoryTile_nextCenter_of_prev_cells
+        hrightMem hstate hnextRun
+        hrightPrevLeft hrightPrevCenter hrightPrevRight
+    calc
+      lower.nextRight = right.nextCenter := hmatches.2.2.2
+      _ = (runHistoryTile M (time + 1) (pos + 1)).nextCenter := hrightNextCenter
+      _ = (runHistoryTile M (time + 1) pos).nextRight := by
+        simp [runHistoryTile]
+  exact ⟨upper, hupperMem, hupperTile, by
+      rw [hupperPrevLeft, hlowerNextLeft]
+      simp [runHistoryTile],
+    by
+      rw [hupperPrevCenter, hlowerNextCenter]
+      simp [runHistoryTile],
+    by
+      rw [hupperPrevRight, hlowerNextRight]
+      simp [runHistoryTile]⟩
+
 theorem seeded_tiling_row_zero_one_eq {M : Machine}
     {x : Nat × Nat → TileIn (machineTiles M)}
     (hvalid : ValidQuarterTiling (machineTiles M) x)
