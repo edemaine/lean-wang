@@ -289,6 +289,31 @@ theorem overlapCellColor_eq_iff {a b c d e f g h : MachineCell} :
   · rintro ⟨rfl, rfl, rfl, rfl⟩
     exact ⟨⟨rfl, rfl⟩, rfl, rfl⟩
 
+def initialRowTag : Nat := 0
+
+def normalRowTag : Nat := 1
+
+def taggedTripleCellColor (tag : Nat) (a b c : MachineCell) : Nat :=
+  Nat.pair tag (tripleCellColor a b c)
+
+theorem taggedTripleCellColor_eq_iff {tag tag' : Nat}
+    {a b c d e f : MachineCell} :
+    taggedTripleCellColor tag a b c = taggedTripleCellColor tag' d e f ↔
+      tag = tag' ∧ a = d ∧ b = e ∧ c = f := by
+  unfold taggedTripleCellColor
+  rw [Nat.pair_eq_pair, tripleCellColor_eq_iff]
+
+def taggedOverlapCellColor (tag : Nat)
+    (prev₀ prev₁ next₀ next₁ : MachineCell) : Nat :=
+  Nat.pair tag (overlapCellColor prev₀ prev₁ next₀ next₁)
+
+theorem taggedOverlapCellColor_eq_iff {tag tag' : Nat}
+    {a b c d e f g h : MachineCell} :
+    taggedOverlapCellColor tag a b c d = taggedOverlapCellColor tag' e f g h ↔
+      tag = tag' ∧ a = e ∧ b = f ∧ c = g ∧ d = h := by
+  unfold taggedOverlapCellColor
+  rw [Nat.pair_eq_pair, overlapCellColor_eq_iff]
+
 /--
 The local one-step update for the center cell of a three-cell window.
 
@@ -592,6 +617,44 @@ theorem toWangTile_eq_iff {t u : MachineHistoryTile} :
     exact toWangTile_injective h
   · intro h
     rw [h]
+
+/--
+Convert a local-history block to a Wang tile carrying row-mode tags.
+
+The south and horizontal edges carry the current row tag; the north edge carries
+the next row tag. This lets a corner seed force a special initial row while all
+later rows use the normal tag.
+-/
+def toTaggedWangTile (rowTag nextRowTag : Nat) (t : MachineHistoryTile) : WangTile where
+  n := taggedTripleCellColor nextRowTag t.nextLeft t.nextCenter t.nextRight
+  s := taggedTripleCellColor rowTag t.prevLeft t.prevCenter t.prevRight
+  e := taggedOverlapCellColor rowTag t.prevCenter t.prevRight t.nextCenter t.nextRight
+  w := taggedOverlapCellColor rowTag t.prevLeft t.prevCenter t.nextLeft t.nextCenter
+
+theorem hMatches_toTaggedWangTile_iff_cells
+    (rowTag nextRowTag rowTag' nextRowTag' : Nat)
+    (left right : MachineHistoryTile) :
+    WangTile.HMatches (left.toTaggedWangTile rowTag nextRowTag)
+        (right.toTaggedWangTile rowTag' nextRowTag') ↔
+      rowTag = rowTag' ∧
+        left.prevCenter = right.prevLeft ∧
+        left.prevRight = right.prevCenter ∧
+        left.nextCenter = right.nextLeft ∧
+        left.nextRight = right.nextCenter := by
+  unfold WangTile.HMatches toTaggedWangTile
+  rw [taggedOverlapCellColor_eq_iff]
+
+theorem vMatches_toTaggedWangTile_iff_cells
+    (rowTag nextRowTag rowTag' nextRowTag' : Nat)
+    (lower upper : MachineHistoryTile) :
+    WangTile.VMatches (lower.toTaggedWangTile rowTag nextRowTag)
+        (upper.toTaggedWangTile rowTag' nextRowTag') ↔
+      nextRowTag = rowTag' ∧
+        lower.nextLeft = upper.prevLeft ∧
+        lower.nextCenter = upper.prevCenter ∧
+        lower.nextRight = upper.prevRight := by
+  unfold WangTile.VMatches toTaggedWangTile
+  rw [taggedTripleCellColor_eq_iff]
 
 end MachineHistoryTile
 
