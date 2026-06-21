@@ -1764,6 +1764,27 @@ theorem tableProgramMachineHistoryTilesData_primrec :
       (Primrec.option_some.comp Primrec.snd) (Primrec.const none)
   exact Primrec.listFilterMap hcandidates hfilter
 
+theorem tableProgramMachineHistoryTilesData_computable :
+    Computable tableProgramMachineHistoryTilesData :=
+  tableProgramMachineHistoryTilesData_primrec.to_comp
+
+def tableProgramNormalRowMachineTilesData (P : TableProgram) : TileSet :=
+  (tableProgramMachineHistoryTilesData P).map
+    (MachineHistoryTile.toTaggedWangTile normalRowTag normalRowTag)
+
+theorem tableProgramNormalRowMachineTilesData_primrec :
+    Primrec tableProgramNormalRowMachineTilesData := by
+  unfold tableProgramNormalRowMachineTilesData
+  refine Primrec.list_map tableProgramMachineHistoryTilesData_primrec ?_
+  apply Primrec₂.mk
+  exact MachineHistoryTile.toTaggedWangTile_primrec.comp
+    (Primrec.pair (Primrec.const normalRowTag)
+      (Primrec.pair (Primrec.const normalRowTag) Primrec.snd))
+
+theorem tableProgramNormalRowMachineTilesData_computable :
+    Computable tableProgramNormalRowMachineTilesData :=
+  tableProgramNormalRowMachineTilesData_primrec.to_comp
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
