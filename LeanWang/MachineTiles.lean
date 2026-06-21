@@ -758,8 +758,8 @@ theorem runHistoryTile_boundaryOK (M : Machine) (time pos : Nat) :
       intro hprev
       have hnot : (M.runEmpty time).cellAt pos ≠ MachineCell.boundary :=
         ID.cellAt_ne_boundary (M.runEmpty time) pos
-      simp [runHistoryTile, Machine.runCellLeft] at hprev
-      exact False.elim (hnot hprev)
+      exact False.elim (hnot (by
+        simpa [runHistoryTile, Machine.runCellLeft] using hprev))
 
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
@@ -1624,6 +1624,23 @@ theorem seeded_tiling_row_one_prev_cells {M : Machine}
     (runHistoryTile M 0 pos) t).1 hv
   exact ⟨t, ht, htilet, hcells.2.1.symm, hcells.2.2.1.symm,
     hcells.2.2.2.symm⟩
+
+theorem seeded_tiling_row_one_prev_run_cells {M : Machine}
+    {x : Nat × Nat → TileIn (machineTiles M)}
+    (hvalid : ValidQuarterTiling (machineTiles M) x)
+    (hseed : (x (0, 0)).1 = machineSeed M) (pos : Nat) :
+    ∃ t : MachineHistoryTile,
+      t ∈ machineHistoryTiles M ∧
+        t.toTaggedWangTile normalRowTag normalRowTag = (x (pos, 1)).1 ∧
+        t.prevLeft = (runHistoryTile M 1 pos).prevLeft ∧
+        t.prevCenter = (runHistoryTile M 1 pos).prevCenter ∧
+        t.prevRight = (runHistoryTile M 1 pos).prevRight := by
+  rcases seeded_tiling_row_one_prev_cells hvalid hseed pos with
+    ⟨t, ht, htile, hprevLeft, hprevCenter, hprevRight⟩
+  exact ⟨t, ht, htile, by
+    simpa [runHistoryTile] using hprevLeft, by
+    simpa [runHistoryTile] using hprevCenter, by
+    simpa [runHistoryTile] using hprevRight⟩
 
 theorem not_tilesQuarterWithSeed_machineTiles_of_seed_nextCenter_halt {M : Machine}
     {a : Nat} (hnext : (runHistoryTile M 0 0).nextCenter = MachineCell.head M.halt a) :
