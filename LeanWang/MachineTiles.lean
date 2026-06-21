@@ -111,6 +111,38 @@ def toWangTile (t : MachineHistoryTile) : WangTile where
   e := overlapCellColor t.prevCenter t.prevRight t.nextCenter t.nextRight
   w := overlapCellColor t.prevLeft t.prevCenter t.nextLeft t.nextCenter
 
+@[simp]
+theorem toWangTile_n (t : MachineHistoryTile) :
+    t.toWangTile.n = tripleCellColor t.nextLeft t.nextCenter t.nextRight :=
+  rfl
+
+@[simp]
+theorem toWangTile_s (t : MachineHistoryTile) :
+    t.toWangTile.s = tripleCellColor t.prevLeft t.prevCenter t.prevRight :=
+  rfl
+
+@[simp]
+theorem toWangTile_e (t : MachineHistoryTile) :
+    t.toWangTile.e = overlapCellColor t.prevCenter t.prevRight t.nextCenter t.nextRight :=
+  rfl
+
+@[simp]
+theorem toWangTile_w (t : MachineHistoryTile) :
+    t.toWangTile.w = overlapCellColor t.prevLeft t.prevCenter t.nextLeft t.nextCenter :=
+  rfl
+
+theorem hMatches_toWangTile_iff (left right : MachineHistoryTile) :
+    WangTile.HMatches left.toWangTile right.toWangTile ↔
+      overlapCellColor left.prevCenter left.prevRight left.nextCenter left.nextRight =
+        overlapCellColor right.prevLeft right.prevCenter right.nextLeft right.nextCenter := by
+  rfl
+
+theorem vMatches_toWangTile_iff (lower upper : MachineHistoryTile) :
+    WangTile.VMatches lower.toWangTile upper.toWangTile ↔
+      tripleCellColor lower.nextLeft lower.nextCenter lower.nextRight =
+        tripleCellColor upper.prevLeft upper.prevCenter upper.prevRight := by
+  rfl
+
 end MachineHistoryTile
 
 /-- All locally valid history blocks over the finite cell support of `M`. -/
@@ -152,14 +184,22 @@ def initialNextRight (M : Machine) : MachineCell :=
   (localNextCell? M (MachineCell.head M.start M.blank) (MachineCell.plain M.blank)
     (MachineCell.plain M.blank)).getD (MachineCell.plain M.blank)
 
+/-- The local-history block forced at the lower-left corner. -/
+def initialHistoryTile (M : Machine) : MachineHistoryTile where
+  prevLeft := initialPrevLeft M
+  prevCenter := initialPrevCenter M
+  prevRight := initialPrevRight M
+  nextLeft := initialNextLeft M
+  nextCenter := initialNextCenter M
+  nextRight := initialNextRight M
+
 /-- The distinguished lower-left tile forcing the empty-input initial configuration. -/
 def machineSeed (M : Machine) : WangTile :=
-  MachineHistoryTile.toWangTile
-    { prevLeft := initialPrevLeft M
-      prevCenter := initialPrevCenter M
-      prevRight := initialPrevRight M
-      nextLeft := initialNextLeft M
-      nextCenter := initialNextCenter M
-      nextRight := initialNextRight M }
+  (initialHistoryTile M).toWangTile
+
+@[simp]
+theorem machineSeed_eq (M : Machine) :
+    machineSeed M = (initialHistoryTile M).toWangTile :=
+  rfl
 
 end LeanWang
