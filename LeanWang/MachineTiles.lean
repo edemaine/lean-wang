@@ -646,50 +646,142 @@ def tableProgramLocalNextCell?
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
 
+def tableProgramCenterHeadNext?
+    (P : TableProgram) (left : MachineCell) (q a : Nat) : Option MachineCell :=
+  if q = P.toTableMachine.halt then
+    none
+  else
+    let action := P.toTableMachine.step q a
+    let write := action.1
+    let q' := action.2.1
+    let move := action.2.2
+    if left.isBoundary && decide (move = Move.left) then
+      if q' = P.toTableMachine.halt then none else some (MachineCell.head q' write)
+    else
+      some (MachineCell.plain write)
+
+def tableProgramLeftHeadNext?
+    (P : TableProgram) (b q a : Nat) : Option MachineCell :=
+  if q = P.toTableMachine.halt then
+    none
+  else
+    let action := P.toTableMachine.step q a
+    let q' := action.2.1
+    let move := action.2.2
+    if move = Move.right then
+      if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+    else
+      some (MachineCell.plain b)
+
+theorem tableProgramLeftHeadNext?_primrec :
+    Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      tableProgramLeftHeadNext? p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let action : TableProgram × Nat × Nat × Nat → Nat × Nat × Move := fun p =>
+    p.1.toTableMachine.step p.2.2.1 p.2.2.2
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))).of_eq fun _ => rfl
+  let bFn : TableProgram × Nat × Nat × Nat → Nat := fun p => p.2.1
+  let qFn : TableProgram × Nat × Nat × Nat → Nat := fun p => p.2.2.1
+  let q' : TableProgram × Nat × Nat × Nat → Nat := fun p => (action p).2.1
+  let move : TableProgram × Nat × Nat × Nat → Move := fun p => (action p).2.2
+  have hb : Primrec bFn := Primrec.fst.comp Primrec.snd
+  have hq : Primrec qFn := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hq' : Primrec q' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hqHalt : PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => qFn p = p.1.halt) :=
+    Primrec.eq.comp hq (TableProgram.halt_primrec.comp Primrec.fst)
+  have hq'Halt : PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => q' p = p.1.halt) :=
+    Primrec.eq.comp hq' (TableProgram.halt_primrec.comp Primrec.fst)
+  have hmoveRight :
+      PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => move p = Move.right) :=
+    Primrec.eq.comp hmove (Primrec.const Move.right)
+  have hsomeHead : Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      some (MachineCell.head (q' p) (bFn p))) :=
+    Primrec.option_some.comp
+      (MachineCell.head_primrec.comp (Primrec.pair hq' hb))
+  have hsomePlain : Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      some (MachineCell.plain (bFn p))) :=
+    Primrec.option_some.comp (MachineCell.plain_primrec.comp hb)
+  refine (Primrec.ite hqHalt (Primrec.const none)
+    (Primrec.ite hmoveRight
+      (Primrec.ite hq'Halt (Primrec.const none) hsomeHead)
+      hsomePlain)).of_eq ?_
+  intro p
+  rcases p with ⟨P, b, q, a⟩
+  rfl
+
+def tableProgramRightHeadNext?
+    (P : TableProgram) (b q a : Nat) : Option MachineCell :=
+  if q = P.toTableMachine.halt then
+    none
+  else
+    let action := P.toTableMachine.step q a
+    let q' := action.2.1
+    let move := action.2.2
+    if move = Move.left then
+      if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+    else
+      some (MachineCell.plain b)
+
+theorem tableProgramRightHeadNext?_primrec :
+    Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      tableProgramRightHeadNext? p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let action : TableProgram × Nat × Nat × Nat → Nat × Nat × Move := fun p =>
+    p.1.toTableMachine.step p.2.2.1 p.2.2.2
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))).of_eq fun _ => rfl
+  let bFn : TableProgram × Nat × Nat × Nat → Nat := fun p => p.2.1
+  let qFn : TableProgram × Nat × Nat × Nat → Nat := fun p => p.2.2.1
+  let q' : TableProgram × Nat × Nat × Nat → Nat := fun p => (action p).2.1
+  let move : TableProgram × Nat × Nat × Nat → Move := fun p => (action p).2.2
+  have hb : Primrec bFn := Primrec.fst.comp Primrec.snd
+  have hq : Primrec qFn := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hq' : Primrec q' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hqHalt : PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => qFn p = p.1.halt) :=
+    Primrec.eq.comp hq (TableProgram.halt_primrec.comp Primrec.fst)
+  have hq'Halt : PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => q' p = p.1.halt) :=
+    Primrec.eq.comp hq' (TableProgram.halt_primrec.comp Primrec.fst)
+  have hmoveLeft :
+      PrimrecPred (fun p : TableProgram × Nat × Nat × Nat => move p = Move.left) :=
+    Primrec.eq.comp hmove (Primrec.const Move.left)
+  have hsomeHead : Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      some (MachineCell.head (q' p) (bFn p))) :=
+    Primrec.option_some.comp
+      (MachineCell.head_primrec.comp (Primrec.pair hq' hb))
+  have hsomePlain : Primrec (fun p : TableProgram × Nat × Nat × Nat =>
+      some (MachineCell.plain (bFn p))) :=
+    Primrec.option_some.comp (MachineCell.plain_primrec.comp hb)
+  refine (Primrec.ite hqHalt (Primrec.const none)
+    (Primrec.ite hmoveLeft
+      (Primrec.ite hq'Halt (Primrec.const none) hsomeHead)
+      hsomePlain)).of_eq ?_
+  intro p
+  rcases p with ⟨P, b, q, a⟩
+  rfl
+
 def tableProgramLocalNextCellData?
     (P : TableProgram) (left center right : MachineCell) : Option MachineCell :=
   match center.head? with
   | some (q, a) =>
-      if q = P.toTableMachine.halt then
-        none
-      else
-        let action := P.toTableMachine.step q a
-        let write := action.1
-        let q' := action.2.1
-        let move := action.2.2
-        if left.isBoundary && decide (move = Move.left) then
-          if q' = P.toTableMachine.halt then none else some (MachineCell.head q' write)
-        else
-          some (MachineCell.plain write)
+      tableProgramCenterHeadNext? P left q a
   | none =>
       match center.plain? with
       | none => none
       | some b =>
           match left.head? with
           | some (q, a) =>
-              if q = P.toTableMachine.halt then
-                none
-              else
-                let action := P.toTableMachine.step q a
-                let q' := action.2.1
-                let move := action.2.2
-                if move = Move.right then
-                  if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
-                else
-                  some (MachineCell.plain b)
+              tableProgramLeftHeadNext? P b q a
           | none =>
               match right.head? with
               | some (q, a) =>
-                  if q = P.toTableMachine.halt then
-                    none
-                  else
-                    let action := P.toTableMachine.step q a
-                    let q' := action.2.1
-                    let move := action.2.2
-                    if move = Move.left then
-                      if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
-                    else
-                      some (MachineCell.plain b)
+                  tableProgramRightHeadNext? P b q a
               | none => some (MachineCell.plain b)
 
 theorem tableProgramLocalNextCell?_eq_localNextCell?
