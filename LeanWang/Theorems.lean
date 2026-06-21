@@ -46,7 +46,11 @@ theorem programMachine_correct (c : Code) :
 /-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
 theorem machineTiles_correct (M : Machine) :
     TilesQuarterWithSeed (machineTiles M) (machineSeed M) ↔ ¬ Machine.HaltsEmpty M := by
-  sorry
+  constructor
+  · intro _htiles
+    sorry
+  · intro hnonhalts
+    exact tilesQuarterWithSeed_machineTiles_of_not_halts hnonhalts
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
