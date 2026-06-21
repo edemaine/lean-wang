@@ -1703,6 +1703,19 @@ theorem machineHistoryTileCandidates_primrec : Primrec machineHistoryTileCandida
       | nil => rfl
       | cons _ _ ih => simp [ih]
 
+theorem mem_machineHistoryTileCandidates_iff (cells : List MachineCell) (t : MachineHistoryTile) :
+    t ∈ machineHistoryTileCandidates cells ↔
+      t.prevLeft ∈ cells ∧
+      t.prevCenter ∈ cells ∧
+      t.prevRight ∈ cells ∧
+      t.nextLeft ∈ cells ∧
+      t.nextCenter ∈ cells ∧
+      t.nextRight ∈ cells := by
+  cases t
+  simp [machineHistoryTileCandidates, machineHistoryTilePrefixes2,
+    machineHistoryTilePrefixes3, machineHistoryTilePrefixes4, machineHistoryTilePrefixes5,
+    and_assoc]
+
 def tableProgramHistoryTileValid (P : TableProgram) (t : MachineHistoryTile) : Prop :=
   tableProgramLocalNextCellData? P t.prevLeft t.prevCenter t.prevRight = some t.nextCenter ∧
     (t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary)
@@ -1767,6 +1780,21 @@ theorem tableProgramMachineHistoryTilesData_primrec :
 theorem tableProgramMachineHistoryTilesData_computable :
     Computable tableProgramMachineHistoryTilesData :=
   tableProgramMachineHistoryTilesData_primrec.to_comp
+
+theorem mem_tableProgramMachineHistoryTilesData_iff (P : TableProgram)
+    (t : MachineHistoryTile) :
+    t ∈ tableProgramMachineHistoryTilesData P ↔
+      t.prevLeft ∈ tableProgramMachineCells P ∧
+      t.prevCenter ∈ tableProgramMachineCells P ∧
+      t.prevRight ∈ tableProgramMachineCells P ∧
+      t.nextLeft ∈ tableProgramMachineCells P ∧
+      t.nextCenter ∈ tableProgramMachineCells P ∧
+      t.nextRight ∈ tableProgramMachineCells P ∧
+      tableProgramLocalNextCell? P t.prevLeft t.prevCenter t.prevRight = some t.nextCenter ∧
+      (t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary) := by
+  simp [tableProgramMachineHistoryTilesData, tableProgramHistoryTileValid,
+    mem_machineHistoryTileCandidates_iff,
+    tableProgramLocalNextCellData?_eq_tableProgramLocalNextCell?, and_assoc]
 
 def tableProgramNormalRowMachineTilesData (P : TableProgram) : TileSet :=
   (tableProgramMachineHistoryTilesData P).map
