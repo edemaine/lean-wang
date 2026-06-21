@@ -1014,10 +1014,10 @@ theorem initialHistoryTile_eq_runHistoryTile_zero_of_not_halts {M : Machine}
 
 /-- The distinguished lower-left tile forcing the empty-input initial configuration. -/
 def rawMachineSeed (M : Machine) : WangTile :=
-  (initialHistoryTile M).toWangTile
+  (runHistoryTile M 0 0).toWangTile
 
 def taggedMachineSeed (M : Machine) : WangTile :=
-  (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag
+  (runHistoryTile M 0 0).toTaggedWangTile initialRowTag normalRowTag
 
 /-- The public machine seed, using the initial-row tag. -/
 def machineSeed (M : Machine) : WangTile :=
@@ -1073,19 +1073,19 @@ theorem runTaggedHistoryTile_vMatches (M : Machine) (time pos : Nat) :
 
 @[simp]
 theorem rawMachineSeed_eq (M : Machine) :
-    rawMachineSeed M = (initialHistoryTile M).toWangTile :=
+    rawMachineSeed M = (runHistoryTile M 0 0).toWangTile :=
   rfl
 
 @[simp]
 theorem machineSeed_eq (M : Machine) :
     machineSeed M =
-      (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag :=
+      (runHistoryTile M 0 0).toTaggedWangTile initialRowTag normalRowTag :=
   rfl
 
 theorem initialTaggedWangTile_eq_machineSeed_iff {M : Machine}
     {t : MachineHistoryTile} :
     t.toTaggedWangTile initialRowTag normalRowTag = machineSeed M ↔
-      t = initialHistoryTile M := by
+      t = runHistoryTile M 0 0 := by
   constructor
   · intro h
     exact (MachineHistoryTile.toTaggedWangTile_injective h).2.2
@@ -1096,7 +1096,7 @@ theorem normalTaggedWangTile_ne_machineSeed {M : Machine}
     {t : MachineHistoryTile} :
     t.toTaggedWangTile normalRowTag normalRowTag ≠ machineSeed M := by
   intro h
-  exact initialTagged_ne_normalTagged (t := initialHistoryTile M) (u := t) h.symm
+  exact initialTagged_ne_normalTagged (t := runHistoryTile M 0 0) (u := t) h.symm
 
 theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
@@ -1111,7 +1111,7 @@ theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
       exact runHistoryTile_hMatches M p.2 p.1
     · intro p
       exact runHistoryTile_vMatches M p.2 p.1
-  · simp [x, rawMachineSeed_eq, initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+  · simp [x, rawMachineSeed_eq]
 
 theorem tilesQuarterWithSeed_taggedMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
@@ -1125,8 +1125,7 @@ theorem tilesQuarterWithSeed_taggedMachineTiles_of_not_halts {M : Machine}
       exact runTaggedHistoryTile_hMatches M p.2 p.1
     · intro p
       exact runTaggedHistoryTile_vMatches M p.2 p.1
-  · simp [x, runTaggedHistoryTile, taggedMachineSeed,
-      initialHistoryTile_eq_runHistoryTile_zero_of_not_halts h]
+  · simp [x, runTaggedHistoryTile, taggedMachineSeed]
 
 theorem tilesQuarterWithSeed_machineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
