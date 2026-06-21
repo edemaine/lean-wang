@@ -463,8 +463,8 @@ theorem toWangTile_mem_machineTiles_of_supported {M : Machine} {t : MachineHisto
     (mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
       hnextLeft hnextCenter hnextRight hlocal)
 
-def initialPrevLeft (M : Machine) : MachineCell :=
-  MachineCell.plain M.blank
+def initialPrevLeft (_M : Machine) : MachineCell :=
+  MachineCell.boundary
 
 def initialPrevCenter (M : Machine) : MachineCell :=
   MachineCell.head M.start M.blank
@@ -472,12 +472,11 @@ def initialPrevCenter (M : Machine) : MachineCell :=
 def initialPrevRight (M : Machine) : MachineCell :=
   MachineCell.plain M.blank
 
-def initialNextLeft (M : Machine) : MachineCell :=
-  (localNextCell? M (MachineCell.plain M.blank) (MachineCell.plain M.blank)
-    (MachineCell.head M.start M.blank)).getD (MachineCell.plain M.blank)
+def initialNextLeft (_M : Machine) : MachineCell :=
+  MachineCell.boundary
 
 def initialNextCenter (M : Machine) : MachineCell :=
-  (localNextCell? M (MachineCell.plain M.blank) (MachineCell.head M.start M.blank)
+  (localNextCell? M MachineCell.boundary (MachineCell.head M.start M.blank)
     (MachineCell.plain M.blank)).getD (MachineCell.plain M.blank)
 
 def initialNextRight (M : Machine) : MachineCell :=
