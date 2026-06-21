@@ -167,6 +167,13 @@ theorem machineTiles_correct (M : Machine) :
   · intro hnonhalts
     exact tilesQuarterWithSeed_machineTiles_of_not_halts hnonhalts
 
+/-- Correctness of the table-program fixed-domino construction. -/
+theorem tableProgramFixedDomino_correct (P : TableProgram) :
+    TilesQuarterWithSeed (tableProgramFixedDomino P).1 (tableProgramFixedDomino P).2 ↔
+      ¬ Machine.HaltsEmpty P.toMachine := by
+  unfold tableProgramFixedDomino tableProgramTiles tableProgramSeed
+  exact machineTiles_correct P.toMachine
+
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
   tableProgramFixedDomino (programTable c)
@@ -181,8 +188,8 @@ theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1 (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  unfold fixedDominoReduction tableProgramFixedDomino tableProgramTiles tableProgramSeed
-  rw [machineTiles_correct]
+  unfold fixedDominoReduction
+  rw [tableProgramFixedDomino_correct]
   change ¬ Machine.HaltsEmpty (programMachine c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom
   rw [programMachine_correct]
 
