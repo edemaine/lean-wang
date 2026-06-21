@@ -196,63 +196,114 @@ theorem fixed_corner_square_problem_undecidable :
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
   tiles : TileSet
+  active : WangTile → Bool
   corner : WangTile
+  active_primrec : Primrec active
+
+/--
+Payload symbols carried by a scaffold tile. Active scaffold cells carry the
+instance tileset, with the marked corner restricted to the requested seed.
+Inactive scaffold cells carry one dummy payload tile, so they do not force the
+instance tileset outside the free regions.
+-/
+def scaffoldPayloads (S : Scaffold) (T : TileSet) (seed b : WangTile) : TileSet :=
+  if S.active b then
+    if b = S.corner then T.filter fun p => p = seed else T
+  else
+    [monochromeTile]
 
 /-- Combine a scaffold with a fixed-corner square instance. -/
 def combineWithScaffold (S : Scaffold) (T : TileSet) (seed : WangTile) : TileSet :=
   S.tiles.flatMap fun b =>
-    ((if b = S.corner then T.filter fun p => p = seed else T).map fun p =>
-      WangTile.product b p)
+    (scaffoldPayloads S T seed b).map fun p => WangTile.product b p
 
 theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
     {seed tile : WangTile} :
     tile ∈ combineWithScaffold S T seed ↔
-      ∃ b ∈ S.tiles, ∃ p ∈ T,
-        (b = S.corner → p = seed) ∧ WangTile.product b p = tile := by
+      ∃ b ∈ S.tiles, ∃ p : WangTile,
+        (S.active b = true → p ∈ T ∧ (b = S.corner → p = seed)) ∧
+          (S.active b = false → p = monochromeTile) ∧
+          WangTile.product b p = tile := by
   constructor
   · intro htile
     rw [combineWithScaffold, List.mem_flatMap] at htile
     rcases htile with ⟨b, hb, hpayload⟩
-    by_cases hcorner : b = S.corner
-    · rw [if_pos hcorner, List.mem_map] at hpayload
+    by_cases hactive : S.active b = true
+    · rw [scaffoldPayloads, if_pos hactive] at hpayload
+      by_cases hcorner : b = S.corner
+      · rw [if_pos hcorner, List.mem_map] at hpayload
+        rcases hpayload with ⟨p, hp, htile⟩
+        refine ⟨b, hb, p, ?_⟩
+        have hmem : S.active b = true → p ∈ T ∧ (b = S.corner → p = seed) := by
+          intro _hactive
+          exact ⟨(List.mem_filter.1 hp).1,
+            by intro _; exact of_decide_eq_true (List.mem_filter.1 hp).2⟩
+        have hinactive : S.active b = false → p = monochromeTile := by
+          intro hfalse
+          rw [hactive] at hfalse
+          nomatch hfalse
+        exact And.intro hmem (And.intro hinactive htile)
+      · rw [if_neg hcorner, List.mem_map] at hpayload
+        rcases hpayload with ⟨p, hp, htile⟩
+        refine ⟨b, hb, p, ?_⟩
+        have hmem : S.active b = true → p ∈ T ∧ (b = S.corner → p = seed) := by
+          intro _hactive
+          exact ⟨hp, by intro hbcorner; exact False.elim (hcorner hbcorner)⟩
+        have hinactive : S.active b = false → p = monochromeTile := by
+          intro hfalse
+          rw [hactive] at hfalse
+          nomatch hfalse
+        exact And.intro hmem (And.intro hinactive htile)
+    · have hfalse : S.active b = false := by
+        cases h : S.active b
+        · rfl
+        · exact False.elim (hactive h)
+      rw [scaffoldPayloads, if_neg hactive, List.mem_map] at hpayload
       rcases hpayload with ⟨p, hp, htile⟩
-      exact ⟨b, hb, p, (List.mem_filter.1 hp).1,
-        by intro _; exact of_decide_eq_true (List.mem_filter.1 hp).2, htile⟩
-    · rw [if_neg hcorner, List.mem_map] at hpayload
-      rcases hpayload with ⟨p, hp, htile⟩
-      exact ⟨b, hb, p, hp, by intro hbcorner; exact False.elim (hcorner hbcorner), htile⟩
-  · rintro ⟨b, hb, p, hp, hseed, htile⟩
+      rw [List.mem_singleton] at hp
+      refine ⟨b, hb, p, ?_⟩
+      have hmem : S.active b = true → p ∈ T ∧ (b = S.corner → p = seed) := by
+        intro htrue
+        rw [hfalse] at htrue
+        nomatch htrue
+      have hinactive : S.active b = false → p = monochromeTile := by
+        intro _
+        exact hp
+      exact And.intro hmem (And.intro hinactive htile)
+  · rintro ⟨b, hb, p, hactiveMem, hinactive, htile⟩
     rw [combineWithScaffold, List.mem_flatMap]
     refine ⟨b, hb, ?_⟩
-    by_cases hcorner : b = S.corner
-    · rw [if_pos hcorner, List.mem_map]
-      exact ⟨p, List.mem_filter.2 ⟨hp, decide_eq_true (hseed hcorner)⟩, htile⟩
-    · rw [if_neg hcorner, List.mem_map]
-      exact ⟨p, hp, htile⟩
-
-theorem combineWithScaffold_subset_productTileSet {S : Scaffold} {T : TileSet}
-    {seed tile : WangTile} :
-    tile ∈ combineWithScaffold S T seed → tile ∈ productTileSet S.tiles T := by
-  intro htile
-  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, hb, p, hp, _hseed, htile⟩
-  rw [mem_productTileSet_iff]
-  exact ⟨b, hb, p, hp, htile⟩
+    by_cases hactive : S.active b = true
+    · rw [scaffoldPayloads, if_pos hactive]
+      by_cases hcorner : b = S.corner
+      · rw [if_pos hcorner, List.mem_map]
+        exact ⟨p, List.mem_filter.2 ⟨(hactiveMem hactive).1,
+          decide_eq_true ((hactiveMem hactive).2 hcorner)⟩, htile⟩
+      · rw [if_neg hcorner, List.mem_map]
+        exact ⟨p, (hactiveMem hactive).1, htile⟩
+    · rw [scaffoldPayloads, if_neg hactive, List.mem_map]
+      exact ⟨p, by rw [List.mem_singleton]; exact hinactive (by
+        cases h : S.active b
+        · rfl
+        · exact False.elim (hactive h)), htile⟩
 
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
+    (hactive : S.active S.corner = true)
     (htile : WangTile.product S.corner payload ∈ combineWithScaffold S T seed) :
     payload ∈ T := by
-  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hp, _hseed, hproduct⟩
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hactiveMem, _hinactive, hproduct⟩
   have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
-  simpa [hparts.2] using hp
+  simpa [hparts.2] using (hactiveMem (by simpa [hparts.1] using hactive)).1
 
 theorem payload_eq_seed_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
+    (hactive : S.active S.corner = true)
     (htile : WangTile.product S.corner payload ∈ combineWithScaffold S T seed) :
     payload = seed := by
-  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, _hp, hseed, hproduct⟩
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hactiveMem, _hinactive, hproduct⟩
   have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
-  exact hparts.2.symm.trans (hseed hparts.1)
+  exact hparts.2.symm.trans ((hactiveMem (by simpa [hparts.1] using hactive)).2 hparts.1)
 
 theorem combineWithScaffold_primrec (S : Scaffold) :
     Primrec (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) := by
@@ -261,7 +312,12 @@ theorem combineWithScaffold_primrec (S : Scaffold) :
   refine Primrec.list_flatMap (Primrec.const S.tiles) ?_
   apply Primrec₂.mk
   have hpayload : Primrec fun a : (TileSet × WangTile) × WangTile =>
-      if a.2 = S.corner then a.1.1.filter (fun p => p = a.1.2) else a.1.1 := by
+      scaffoldPayloads S a.1.1 a.1.2 a.2 := by
+    unfold scaffoldPayloads
+    have hactive : Primrec fun a : (TileSet × WangTile) × WangTile => S.active a.2 :=
+      S.active_primrec.comp Primrec.snd
+    refine Primrec.ite (Primrec.eq.comp hactive (Primrec.const true)) ?_
+      (Primrec.const ([monochromeTile] : TileSet))
     refine Primrec.ite ?_ ?_ ?_
     · exact Primrec.eq.comp Primrec.snd (Primrec.const S.corner)
     · exact (PrimrecRel.listFilter (R := fun p seed : WangTile => p = seed) Primrec.eq).comp
@@ -285,7 +341,10 @@ def IsScaffold (S : Scaffold) : Prop :=
 /-- The concrete Ollinger/Robinson scaffold tileset. -/
 def ollingerScaffold : Scaffold where
   tiles := []
+  active := fun t => decide (t = monochromeTile)
   corner := monochromeTile
+  active_primrec :=
+    Primrec.eq.decide.comp Primrec.id (Primrec.const monochromeTile)
 
 /-- The Ollinger/Robinson scaffold satisfies the abstract scaffold property. -/
 theorem ollingerScaffold_isScaffold : IsScaffold ollingerScaffold := by
