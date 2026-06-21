@@ -824,6 +824,61 @@ theorem toWangTile_mem_machineTiles_of_supported {M : Machine} {t : MachineHisto
     (mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
       hnextLeft hnextCenter hnextRight hlocal)
 
+def initialRowHistoryTiles (M : Machine) : List MachineHistoryTile :=
+  [runHistoryTile M 0 0,
+    runHistoryTile M 0 1,
+    runHistoryTile M 0 2,
+    runHistoryTile M 0 3]
+
+def initialRowMachineTiles (M : Machine) : TileSet :=
+  (initialRowHistoryTiles M).map
+    (MachineHistoryTile.toTaggedWangTile initialRowTag normalRowTag)
+
+def normalRowMachineTiles (M : Machine) : TileSet :=
+  (machineHistoryTiles M).map
+    (MachineHistoryTile.toTaggedWangTile normalRowTag normalRowTag)
+
+def taggedMachineTiles (M : Machine) : TileSet :=
+  initialRowMachineTiles M ++ normalRowMachineTiles M
+
+theorem initialRowHistoryTile_zero_mem (M : Machine) :
+    runHistoryTile M 0 0 ∈ initialRowHistoryTiles M := by
+  simp [initialRowHistoryTiles]
+
+theorem initialRowHistoryTile_one_mem (M : Machine) :
+    runHistoryTile M 0 1 ∈ initialRowHistoryTiles M := by
+  simp [initialRowHistoryTiles]
+
+theorem initialRowHistoryTile_two_mem (M : Machine) :
+    runHistoryTile M 0 2 ∈ initialRowHistoryTiles M := by
+  simp [initialRowHistoryTiles]
+
+theorem initialRowHistoryTile_three_mem (M : Machine) :
+    runHistoryTile M 0 3 ∈ initialRowHistoryTiles M := by
+  simp [initialRowHistoryTiles]
+
+theorem toTaggedWangTile_mem_initialRowMachineTiles {M : Machine}
+    {t : MachineHistoryTile} (ht : t ∈ initialRowHistoryTiles M) :
+    t.toTaggedWangTile initialRowTag normalRowTag ∈ initialRowMachineTiles M := by
+  rw [initialRowMachineTiles, List.mem_map]
+  exact ⟨t, ht, rfl⟩
+
+theorem toTaggedWangTile_mem_normalRowMachineTiles {M : Machine}
+    {t : MachineHistoryTile} (ht : t ∈ machineHistoryTiles M) :
+    t.toTaggedWangTile normalRowTag normalRowTag ∈ normalRowMachineTiles M := by
+  rw [normalRowMachineTiles, List.mem_map]
+  exact ⟨t, ht, rfl⟩
+
+theorem toTaggedWangTile_mem_taggedMachineTiles_initial {M : Machine}
+    {t : MachineHistoryTile} (ht : t ∈ initialRowHistoryTiles M) :
+    t.toTaggedWangTile initialRowTag normalRowTag ∈ taggedMachineTiles M := by
+  simp [taggedMachineTiles, toTaggedWangTile_mem_initialRowMachineTiles ht]
+
+theorem toTaggedWangTile_mem_taggedMachineTiles_normal {M : Machine}
+    {t : MachineHistoryTile} (ht : t ∈ machineHistoryTiles M) :
+    t.toTaggedWangTile normalRowTag normalRowTag ∈ taggedMachineTiles M := by
+  simp [taggedMachineTiles, toTaggedWangTile_mem_normalRowMachineTiles ht]
+
 def initialPrevLeft (_M : Machine) : MachineCell :=
   MachineCell.boundary
 
@@ -875,6 +930,9 @@ theorem initialHistoryTile_eq_runHistoryTile_zero_of_not_halts {M : Machine}
 /-- The distinguished lower-left tile forcing the empty-input initial configuration. -/
 def machineSeed (M : Machine) : WangTile :=
   (initialHistoryTile M).toWangTile
+
+def taggedMachineSeed (M : Machine) : WangTile :=
+  (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag
 
 @[simp]
 theorem machineSeed_eq (M : Machine) :
