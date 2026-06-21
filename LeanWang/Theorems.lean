@@ -145,6 +145,23 @@ structure TableCompiler where
   correct : ∀ c : Code,
     Machine.HaltsEmpty (compile c).toMachine ↔ (Nat.Partrec.Code.eval c 0).Dom
 
+/--
+A smaller compiler obligation: implement the fuel-search machine for the
+primitive-recursive bounded evaluator predicate.
+-/
+structure FuelTableCompiler where
+  compile : Code → TableProgram
+  compile_computable : Computable compile
+  correct : ∀ c : Code,
+    Machine.HaltsEmpty (compile c).toMachine ↔ FuelMachine.Halts (codeEvalnHalts c 0)
+
+def FuelTableCompiler.toTableCompiler (C : FuelTableCompiler) : TableCompiler where
+  compile := C.compile
+  compile_computable := C.compile_computable
+  correct := by
+    intro c
+    exact (C.correct c).trans (codeEvalnFuelMachine_correct c 0)
+
 /-- Compile a Mathlib partial-recursive code into finite machine data. -/
 def programTable (C : TableCompiler) (c : Code) : TableProgram :=
   C.compile c
@@ -219,6 +236,24 @@ theorem fixed_corner_square_problem_undecidable (C : TableCompiler) :
   exact h.of_eq fun c =>
     (tilesQuarterWithSeed_iff_all_fixedCornerSquares
       (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
+
+/-- Fixed-domino undecidability from the smaller fuel-search compiler obligation. -/
+theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        TilesQuarterWithSeed
+          (fixedDominoReduction C.toTableCompiler c).1
+          (fixedDominoReduction C.toTableCompiler c).2) :=
+  fixed_domino_problem_undecidable C.toTableCompiler
+
+/-- Fixed-corner square undecidability from the smaller fuel-search compiler obligation. -/
+theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
+          (fixedDominoReduction C.toTableCompiler c).1
+          (fixedDominoReduction C.toTableCompiler c).2 n) :=
+  fixed_corner_square_problem_undecidable C.toTableCompiler
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -709,5 +744,14 @@ theorem encoded_domino_problem_undecidable_of_scaffold
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
     hencoded.of_eq fun c => dominoReductionCode_correct hS C c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
+Encoded domino undecidability from a scaffold and the smaller fuel-search
+compiler obligation.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
+    (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
 
 end LeanWang
