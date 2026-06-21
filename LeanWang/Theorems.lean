@@ -20,6 +20,48 @@ namespace LeanWang
 
 open Nat.Partrec (Code)
 
+/--
+Bounded Mathlib code evaluation succeeds at some fuel exactly when full
+evaluation is defined.
+-/
+theorem code_eval_dom_iff_exists_evaln (c : Code) (n : Nat) :
+    (Nat.Partrec.Code.eval c n).Dom ↔
+      ∃ k x : Nat, x ∈ Nat.Partrec.Code.evaln k c n := by
+  constructor
+  · intro hdom
+    rcases Part.dom_iff_mem.1 hdom with ⟨x, hx⟩
+    rcases Nat.Partrec.Code.evaln_complete.1 hx with ⟨k, hk⟩
+    exact ⟨k, x, hk⟩
+  · rintro ⟨k, x, hx⟩
+    exact Part.dom_iff_mem.2 ⟨x, Nat.Partrec.Code.evaln_sound hx⟩
+
+/-- Boolean bounded halting predicate for `Nat.Partrec.Code.evaln`. -/
+def codeEvalnHalts (c : Code) (n k : Nat) : Bool :=
+  (Nat.Partrec.Code.evaln k c n).isSome
+
+theorem code_eval_dom_iff_exists_codeEvalnHalts (c : Code) (n : Nat) :
+    (Nat.Partrec.Code.eval c n).Dom ↔ ∃ k : Nat, codeEvalnHalts c n k = true := by
+  rw [code_eval_dom_iff_exists_evaln]
+  constructor
+  · rintro ⟨k, x, hx⟩
+    refine ⟨k, ?_⟩
+    cases h : Nat.Partrec.Code.evaln k c n with
+    | none =>
+        simp [Option.mem_def, h] at hx
+    | some y =>
+        simp [codeEvalnHalts, h]
+  · rintro ⟨k, hk⟩
+    cases h : Nat.Partrec.Code.evaln k c n with
+    | none =>
+        simp [codeEvalnHalts, h] at hk
+    | some x =>
+        exact ⟨k, x, by simp [Option.mem_def, h]⟩
+
+theorem codeEvalnHalts_primrec :
+    Primrec fun a : (Nat × Code) × Nat => codeEvalnHalts a.1.2 a.2 a.1.1 := by
+  simpa [codeEvalnHalts] using
+    Primrec.option_isSome.comp Nat.Partrec.Code.primrec_evaln
+
 /-- A dummy machine used until the compiler from partial-recursive codes is implemented. -/
 def dummyMachine : Machine where
   symbols := [0]
