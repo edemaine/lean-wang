@@ -26,6 +26,29 @@ deriving DecidableEq, Repr
 
 namespace MachineCell
 
+abbrev CodeType : Type :=
+  Unit ⊕ Nat ⊕ Nat × Nat
+
+def toSum : MachineCell → CodeType
+  | boundary => Sum.inl ⟨⟩
+  | plain a => Sum.inr (Sum.inl a)
+  | head q a => Sum.inr (Sum.inr (q, a))
+
+def ofSum : CodeType → MachineCell
+  | Sum.inl _ => boundary
+  | Sum.inr (Sum.inl a) => plain a
+  | Sum.inr (Sum.inr (q, a)) => head q a
+
+def equivSum : MachineCell ≃ CodeType where
+  toFun := toSum
+  invFun := ofSum
+  left_inv := by
+    intro c
+    cases c <;> rfl
+  right_inv := by
+    intro p
+    rcases p with _ | a | ⟨q, a⟩ <;> rfl
+
 def symbol : MachineCell → Nat
   | boundary => 0
   | plain a => a
@@ -83,6 +106,67 @@ theorem code_injective : Function.Injective code := by
           have hpair : Nat.pair q a = Nat.pair r b := (Nat.pair_eq_pair.mp h).2
           rcases Nat.pair_eq_pair.mp hpair with ⟨hq, ha⟩
           simp [hq, ha]
+
+end MachineCell
+
+instance instPrimcodableMachineCell : Primcodable MachineCell :=
+  Primcodable.ofEquiv MachineCell.CodeType MachineCell.equivSum
+
+namespace MachineCell
+
+theorem toSum_primrec : Primrec MachineCell.toSum := by
+  simpa [MachineCell.equivSum] using
+    (Primrec.of_equiv (e := MachineCell.equivSum) : Primrec MachineCell.equivSum)
+
+theorem ofSum_primrec : Primrec MachineCell.ofSum := by
+  simpa [MachineCell.equivSum] using
+    (Primrec.of_equiv_symm (e := MachineCell.equivSum) : Primrec MachineCell.equivSum.symm)
+
+theorem plain_primrec : Primrec MachineCell.plain := by
+  have h :
+      Primrec (fun a : Nat =>
+        MachineCell.ofSum (Sum.inr (Sum.inl a) : MachineCell.CodeType)) :=
+    ofSum_primrec.comp (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id))
+  exact h.of_eq fun _ => rfl
+
+theorem head_primrec : Primrec (fun p : Nat × Nat => MachineCell.head p.1 p.2) := by
+  have h :
+      Primrec (fun p : Nat × Nat =>
+        MachineCell.ofSum (Sum.inr (Sum.inr p) : MachineCell.CodeType)) :=
+    ofSum_primrec.comp (Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id))
+  exact h.of_eq fun _ => rfl
+
+theorem code_primrec : Primrec MachineCell.code := by
+  have hrest :
+      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
+        match r with
+        | Sum.inl a => Nat.pair 0 a
+        | Sum.inr p => Nat.pair 1 (Nat.pair p.1 p.2)) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat) (σ := Nat)
+      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
+      (g := fun _ a => Nat.pair 0 a)
+      (h := fun _ p => Nat.pair 1 (Nat.pair p.1 p.2))
+      Primrec.snd ?_ ?_).of_eq ?_
+    · exact Primrec₂.natPair.comp (Primrec.const 0) Primrec.snd
+    · exact Primrec₂.natPair.comp (Primrec.const 1)
+        (Primrec₂.natPair.comp (Primrec.fst.comp Primrec.snd)
+          (Primrec.snd.comp Primrec.snd))
+    · intro p
+      cases p.2 <;> rfl
+  refine (Primrec.sumCasesOn
+    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Nat)
+    (f := MachineCell.toSum)
+    (g := fun _ _ => Nat.pair 2 0)
+    (h := fun _ r =>
+      match r with
+      | Sum.inl a => Nat.pair 0 a
+      | Sum.inr p => Nat.pair 1 (Nat.pair p.1 p.2))
+    toSum_primrec ?_ hrest).of_eq ?_
+  · exact (Primrec.const (Nat.pair 2 0)).to₂
+  · intro c
+    cases c <;> rfl
 
 end MachineCell
 
@@ -323,6 +407,52 @@ theorem taggedOverlapCellColor_eq_iff {tag tag' : Nat}
       tag = tag' ∧ a = e ∧ b = f ∧ c = g ∧ d = h := by
   unfold taggedOverlapCellColor
   rw [Nat.pair_eq_pair, overlapCellColor_eq_iff]
+
+theorem pairCellColor_primrec :
+    Primrec (fun p : MachineCell × MachineCell => pairCellColor p.1 p.2) :=
+  Primrec₂.natPair.comp (MachineCell.code_primrec.comp Primrec.fst)
+    (MachineCell.code_primrec.comp Primrec.snd)
+
+theorem tripleCellColor_primrec :
+    Primrec (fun p : MachineCell × MachineCell × MachineCell =>
+      tripleCellColor p.1 p.2.1 p.2.2) := by
+  unfold tripleCellColor
+  exact Primrec₂.natPair.comp (MachineCell.code_primrec.comp Primrec.fst)
+    (Primrec₂.natPair.comp
+      (MachineCell.code_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (MachineCell.code_primrec.comp (Primrec.snd.comp Primrec.snd)))
+
+theorem overlapCellColor_primrec :
+    Primrec (fun p : MachineCell × MachineCell × MachineCell × MachineCell =>
+      overlapCellColor p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  unfold overlapCellColor
+  exact Primrec₂.natPair.comp
+    (pairCellColor_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd)))
+    (pairCellColor_primrec.comp
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+
+theorem taggedTripleCellColor_primrec :
+    Primrec (fun p : Nat × MachineCell × MachineCell × MachineCell =>
+      taggedTripleCellColor p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  unfold taggedTripleCellColor
+  exact Primrec₂.natPair.comp Primrec.fst
+    (tripleCellColor_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+
+theorem taggedOverlapCellColor_primrec :
+    Primrec (fun p : Nat × MachineCell × MachineCell × MachineCell × MachineCell =>
+      taggedOverlapCellColor p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  unfold taggedOverlapCellColor
+  exact Primrec₂.natPair.comp Primrec.fst
+    (overlapCellColor_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+            (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))))
 
 /--
 The local one-step update for the center cell of a three-cell window.
@@ -613,6 +743,81 @@ deriving DecidableEq, Repr
 
 namespace MachineHistoryTile
 
+def toTuple (t : MachineHistoryTile) :
+    MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell :=
+  (t.prevLeft, t.prevCenter, t.prevRight, t.nextLeft, t.nextCenter, t.nextRight)
+
+def ofTuple
+    (p : MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell) :
+    MachineHistoryTile where
+  prevLeft := p.1
+  prevCenter := p.2.1
+  prevRight := p.2.2.1
+  nextLeft := p.2.2.2.1
+  nextCenter := p.2.2.2.2.1
+  nextRight := p.2.2.2.2.2
+
+def equivTuple :
+    MachineHistoryTile ≃
+      MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell where
+  toFun := toTuple
+  invFun := ofTuple
+  left_inv := by
+    intro t
+    cases t
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨prevLeft, prevCenter, prevRight, nextLeft, nextCenter, nextRight⟩
+    rfl
+
+instance instPrimcodableMachineHistoryTile : Primcodable MachineHistoryTile :=
+  Primcodable.ofEquiv
+    (MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell)
+    MachineHistoryTile.equivTuple
+
+theorem toTuple_primrec : Primrec MachineHistoryTile.toTuple := by
+  simpa [MachineHistoryTile.equivTuple] using
+    (Primrec.of_equiv (e := MachineHistoryTile.equivTuple) :
+      Primrec MachineHistoryTile.equivTuple)
+
+theorem ofTuple_primrec : Primrec MachineHistoryTile.ofTuple := by
+  simpa [MachineHistoryTile.equivTuple] using
+    (Primrec.of_equiv_symm (e := MachineHistoryTile.equivTuple) :
+      Primrec MachineHistoryTile.equivTuple.symm)
+
+theorem prevLeft_primrec : Primrec MachineHistoryTile.prevLeft :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem prevCenter_primrec : Primrec MachineHistoryTile.prevCenter :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem prevRight_primrec : Primrec MachineHistoryTile.prevRight :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem nextLeft_primrec : Primrec MachineHistoryTile.nextLeft :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem nextCenter_primrec : Primrec MachineHistoryTile.nextCenter :=
+  Primrec.fst.comp
+    (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))))
+
+theorem nextRight_primrec : Primrec MachineHistoryTile.nextRight :=
+  Primrec.snd.comp
+    (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))))
+
+theorem mk_primrec :
+    Primrec
+      (fun p :
+        MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell =>
+        ({ prevLeft := p.1
+           prevCenter := p.2.1
+           prevRight := p.2.2.1
+           nextLeft := p.2.2.2.1
+           nextCenter := p.2.2.2.2.1
+           nextRight := p.2.2.2.2.2 } : MachineHistoryTile)) :=
+  ofTuple_primrec
+
 /-- Convert a local-history block to the corresponding Wang tile. -/
 def toWangTile (t : MachineHistoryTile) : WangTile where
   n := tripleCellColor t.nextLeft t.nextCenter t.nextRight
@@ -700,6 +905,48 @@ def toTaggedWangTile (rowTag nextRowTag : Nat) (t : MachineHistoryTile) : WangTi
   s := taggedTripleCellColor rowTag t.prevLeft t.prevCenter t.prevRight
   e := taggedOverlapCellColor rowTag t.prevCenter t.prevRight t.nextCenter t.nextRight
   w := taggedOverlapCellColor rowTag t.prevLeft t.prevCenter t.nextLeft t.nextCenter
+
+theorem toTaggedWangTile_primrec :
+    Primrec (fun p : Nat × Nat × MachineHistoryTile =>
+      p.2.2.toTaggedWangTile p.1 p.2.1) := by
+  let f : Nat × Nat × MachineHistoryTile → Nat × Nat × Nat × Nat := fun p =>
+    (taggedTripleCellColor p.2.1 p.2.2.nextLeft p.2.2.nextCenter p.2.2.nextRight,
+      taggedTripleCellColor p.1 p.2.2.prevLeft p.2.2.prevCenter p.2.2.prevRight,
+      taggedOverlapCellColor p.1 p.2.2.prevCenter p.2.2.prevRight
+        p.2.2.nextCenter p.2.2.nextRight,
+      taggedOverlapCellColor p.1 p.2.2.prevLeft p.2.2.prevCenter
+        p.2.2.nextLeft p.2.2.nextCenter)
+  have hf : Primrec f := by
+    dsimp [f]
+    exact Primrec.pair
+      (taggedTripleCellColor_primrec.comp
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair (nextLeft_primrec.comp (Primrec.snd.comp Primrec.snd))
+            (Primrec.pair (nextCenter_primrec.comp (Primrec.snd.comp Primrec.snd))
+              (nextRight_primrec.comp (Primrec.snd.comp Primrec.snd))))))
+      (Primrec.pair
+        (taggedTripleCellColor_primrec.comp
+          (Primrec.pair Primrec.fst
+            (Primrec.pair (prevLeft_primrec.comp (Primrec.snd.comp Primrec.snd))
+              (Primrec.pair (prevCenter_primrec.comp (Primrec.snd.comp Primrec.snd))
+                (prevRight_primrec.comp (Primrec.snd.comp Primrec.snd))))))
+        (Primrec.pair
+          (taggedOverlapCellColor_primrec.comp
+            (Primrec.pair Primrec.fst
+              (Primrec.pair (prevCenter_primrec.comp (Primrec.snd.comp Primrec.snd))
+                (Primrec.pair (prevRight_primrec.comp (Primrec.snd.comp Primrec.snd))
+                  (Primrec.pair (nextCenter_primrec.comp (Primrec.snd.comp Primrec.snd))
+                    (nextRight_primrec.comp (Primrec.snd.comp Primrec.snd)))))))
+          (taggedOverlapCellColor_primrec.comp
+            (Primrec.pair Primrec.fst
+              (Primrec.pair (prevLeft_primrec.comp (Primrec.snd.comp Primrec.snd))
+                (Primrec.pair (prevCenter_primrec.comp (Primrec.snd.comp Primrec.snd))
+                  (Primrec.pair (nextLeft_primrec.comp (Primrec.snd.comp Primrec.snd))
+                    (nextCenter_primrec.comp (Primrec.snd.comp Primrec.snd)))))))))
+  exact (WangTile.ofTuple_primrec.comp hf).of_eq fun p => by
+    rcases p with ⟨rowTag, nextRowTag, t⟩
+    cases t
+    rfl
 
 theorem hMatches_toTaggedWangTile_iff_cells
     (rowTag nextRowTag rowTag' nextRowTag' : Nat)
@@ -1204,6 +1451,143 @@ in terms of the finite table data produced by the compiler.
 -/
 def tableProgramSeed (P : TableProgram) : WangTile :=
   machineSeed P.toMachine
+
+def tableProgramSeedHistoryTile (P : TableProgram) : MachineHistoryTile :=
+  let action := P.toTableMachine.step P.start P.blank
+  let write := action.1
+  let state' := action.2.1
+  let move := action.2.2
+  { prevLeft := MachineCell.boundary
+    prevCenter := MachineCell.head P.start P.blank
+    prevRight := MachineCell.plain P.blank
+    nextLeft := MachineCell.boundary
+    nextCenter :=
+      if P.start = P.halt then
+        MachineCell.head P.start P.blank
+      else
+        match move with
+        | Move.left => MachineCell.head state' write
+        | Move.right => MachineCell.plain write
+    nextRight :=
+      if P.start = P.halt then
+        MachineCell.plain P.blank
+      else
+        match move with
+        | Move.left => MachineCell.plain P.blank
+        | Move.right => MachineCell.head state' P.blank }
+
+def tableProgramSeedData (P : TableProgram) : WangTile :=
+  (tableProgramSeedHistoryTile P).toTaggedWangTile initialRowTag normalRowTag
+
+theorem tableProgramSeedHistoryTile_eq_runHistoryTile (P : TableProgram) :
+    tableProgramSeedHistoryTile P = runHistoryTile P.toMachine 0 0 := by
+  unfold tableProgramSeedHistoryTile
+  have htmBlank : P.toTableMachine.blank = P.blank := rfl
+  have htmStart : P.toTableMachine.start = P.start := rfl
+  have htmHalt : P.toTableMachine.halt = P.halt := rfl
+  by_cases hstart : P.start = P.halt
+  · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+      Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+      TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+      -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart]
+  · rcases hstep : P.toTableMachine.step P.start P.blank with ⟨write, state', move⟩
+    cases move <;>
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+        Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+        TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+        -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart, hstep, Move.apply]
+
+theorem tableProgramSeedData_eq_tableProgramSeed (P : TableProgram) :
+    tableProgramSeedData P = tableProgramSeed P := by
+  unfold tableProgramSeedData tableProgramSeed machineSeed taggedMachineSeed
+  rw [tableProgramSeedHistoryTile_eq_runHistoryTile]
+
+theorem tableProgramSeedHistoryTile_primrec :
+    Primrec tableProgramSeedHistoryTile := by
+  let action : TableProgram → Nat × Nat × Move := fun P =>
+    P.toTableMachine.step P.start P.blank
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.id
+        (Primrec.pair TableProgram.start_primrec TableProgram.blank_primrec))).of_eq fun _ => rfl
+  let write : TableProgram → Nat := fun P => (action P).1
+  let state' : TableProgram → Nat := fun P => (action P).2.1
+  let move : TableProgram → Move := fun P => (action P).2.2
+  have hwrite : Primrec write := Primrec.fst.comp haction
+  have hstate' : Primrec state' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hstartHalt : PrimrecPred (fun P : TableProgram => P.start = P.halt) :=
+    Primrec.eq.comp TableProgram.start_primrec TableProgram.halt_primrec
+  have hmoveLeft : PrimrecPred (fun P : TableProgram => move P = Move.left) :=
+    Primrec.eq.comp hmove (Primrec.const Move.left)
+  have hprevCenter : Primrec (fun P : TableProgram => MachineCell.head P.start P.blank) :=
+    MachineCell.head_primrec.comp
+      (Primrec.pair TableProgram.start_primrec TableProgram.blank_primrec)
+  have hprevRight : Primrec (fun P : TableProgram => MachineCell.plain P.blank) :=
+    MachineCell.plain_primrec.comp TableProgram.blank_primrec
+  have hnextCenter : Primrec (fun P : TableProgram =>
+      if P.start = P.halt then
+        MachineCell.head P.start P.blank
+      else
+        match move P with
+        | Move.left => MachineCell.head (state' P) (write P)
+        | Move.right => MachineCell.plain (write P)) := by
+    refine Primrec.ite hstartHalt hprevCenter ?_
+    refine (Primrec.ite hmoveLeft
+      (MachineCell.head_primrec.comp (Primrec.pair hstate' hwrite))
+      (MachineCell.plain_primrec.comp hwrite)).of_eq ?_
+    intro P
+    cases move P <;> rfl
+  have hnextRight : Primrec (fun P : TableProgram =>
+      if P.start = P.halt then
+        MachineCell.plain P.blank
+      else
+        match move P with
+        | Move.left => MachineCell.plain P.blank
+        | Move.right => MachineCell.head (state' P) P.blank) := by
+    refine Primrec.ite hstartHalt hprevRight ?_
+    refine (Primrec.ite hmoveLeft hprevRight
+      (MachineCell.head_primrec.comp (Primrec.pair hstate' TableProgram.blank_primrec))).of_eq ?_
+    intro P
+    cases move P <;> rfl
+  let tileTuple :
+      TableProgram →
+        MachineCell × MachineCell × MachineCell × MachineCell × MachineCell × MachineCell :=
+    fun P =>
+      (MachineCell.boundary,
+        MachineCell.head P.start P.blank,
+        MachineCell.plain P.blank,
+        MachineCell.boundary,
+        if P.start = P.halt then
+          MachineCell.head P.start P.blank
+        else
+          match move P with
+          | Move.left => MachineCell.head (state' P) (write P)
+          | Move.right => MachineCell.plain (write P),
+        if P.start = P.halt then
+          MachineCell.plain P.blank
+        else
+          match move P with
+          | Move.left => MachineCell.plain P.blank
+          | Move.right => MachineCell.head (state' P) P.blank)
+  have htuple : Primrec tileTuple := by
+    dsimp [tileTuple]
+    exact
+      Primrec.pair (Primrec.const MachineCell.boundary)
+        (Primrec.pair hprevCenter
+          (Primrec.pair hprevRight
+            (Primrec.pair (Primrec.const MachineCell.boundary)
+              (Primrec.pair hnextCenter hnextRight))))
+  exact (MachineHistoryTile.mk_primrec.comp htuple).of_eq fun _ => rfl
+
+theorem tableProgramSeedData_primrec : Primrec tableProgramSeedData := by
+  unfold tableProgramSeedData
+  exact MachineHistoryTile.toTaggedWangTile_primrec.comp
+    (Primrec.pair (Primrec.const initialRowTag)
+      (Primrec.pair (Primrec.const normalRowTag) tableProgramSeedHistoryTile_primrec))
+
+theorem tableProgramSeed_computable : Computable tableProgramSeed :=
+  tableProgramSeedData_primrec.to_comp.of_eq tableProgramSeedData_eq_tableProgramSeed
 
 /-- The fixed-domino instance generated by finite table-program data. -/
 def tableProgramFixedDomino (P : TableProgram) : TileSet × WangTile :=
