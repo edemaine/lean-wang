@@ -19,6 +19,7 @@ namespace LeanWang
 
 /-- A cell in a machine configuration row. -/
 inductive MachineCell where
+  | boundary
   | plain (symbol : Nat)
   | head (state symbol : Nat)
 deriving DecidableEq, Repr
@@ -26,28 +27,44 @@ deriving DecidableEq, Repr
 namespace MachineCell
 
 def symbol : MachineCell → Nat
+  | boundary => 0
   | plain a => a
   | head _ a => a
 
 def isHead : MachineCell → Bool
+  | boundary => false
   | plain _ => false
   | head _ _ => true
 
 /-- A machine cell is supported by a machine's finite symbol and state sets. -/
 def Mem (M : Machine) : MachineCell → Prop
+  | boundary => True
   | plain a => a ∈ M.symbols
   | head q a => q ∈ M.states ∧ q ≠ M.halt ∧ a ∈ M.symbols
 
 /-- Encode machine cells as Wang colors. -/
 def code : MachineCell → Nat
+  | boundary => Nat.pair 2 0
   | plain a => Nat.pair 0 a
   | head q a => Nat.pair 1 (Nat.pair q a)
 
 theorem code_injective : Function.Injective code := by
   intro c d h
   cases c with
+  | boundary =>
+      cases d with
+      | boundary => rfl
+      | plain b =>
+          have htag : 2 = 0 := (Nat.pair_eq_pair.mp h).1
+          cases htag
+      | head q b =>
+          have htag : 2 = 1 := (Nat.pair_eq_pair.mp h).1
+          cases htag
   | plain a =>
       cases d with
+      | boundary =>
+          have htag : 0 = 2 := (Nat.pair_eq_pair.mp h).1
+          cases htag
       | plain b =>
           have hb : a = b := (Nat.pair_eq_pair.mp h).2
           simp [hb]
@@ -56,6 +73,9 @@ theorem code_injective : Function.Injective code := by
           cases htag
   | head q a =>
       cases d with
+      | boundary =>
+          have htag : 1 = 2 := (Nat.pair_eq_pair.mp h).1
+          cases htag
       | plain b =>
           have htag : 1 = 0 := (Nat.pair_eq_pair.mp h).1
           cases htag
@@ -110,7 +130,7 @@ missing neighbor is represented by a blank plain cell.
 -/
 def runCellLeft (M : Machine) (time pos : Nat) : MachineCell :=
   match pos with
-  | 0 => MachineCell.plain M.blank
+  | 0 => MachineCell.boundary
   | i + 1 => M.runCell time i
 
 @[simp]
@@ -169,7 +189,7 @@ theorem runCellLeft_mem_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
     (M.runCellLeft time pos).Mem M := by
   cases pos with
   | zero =>
-      simp [runCellLeft, MachineCell.Mem, M.blank_mem]
+      simp [runCellLeft, MachineCell.Mem]
   | succ pos =>
       simpa [runCellLeft] using M.runCell_mem_of_not_halts h time pos
 
@@ -177,9 +197,14 @@ end Machine
 
 /-- A finite list of row cells generated from a machine's finite supports. -/
 def machineCells (M : Machine) : List MachineCell :=
-  (M.symbols.map MachineCell.plain) ++
+  MachineCell.boundary :: (M.symbols.map MachineCell.plain) ++
     (M.states.filter (· ≠ M.halt)).flatMap fun q =>
       M.symbols.map fun a => MachineCell.head q a
+
+@[simp]
+theorem boundary_mem_machineCells (M : Machine) :
+    MachineCell.boundary ∈ machineCells M := by
+  simp [machineCells]
 
 @[simp]
 theorem plain_mem_machineCells_iff (M : Machine) (a : Nat) :
@@ -257,12 +282,18 @@ part of `machineCells`, so a global tiling cannot contain a halting head.
 -/
 def localNextCell? (M : Machine) (left center right : MachineCell) : Option MachineCell :=
   match left, center, right with
+  | _, MachineCell.boundary, _ => none
   | _, MachineCell.head q a, _ =>
       if _h : q = M.halt then
         none
       else
-        let (write, _q', _move) := M.step q a
-        some (MachineCell.plain write)
+        let (write, q', move) := M.step q a
+        match left, move with
+        | MachineCell.boundary, Move.left =>
+            if q' = M.halt then none else some (MachineCell.head q' write)
+        | _, _ => some (MachineCell.plain write)
+  | MachineCell.boundary, MachineCell.plain b, _ =>
+      some (MachineCell.plain b)
   | MachineCell.head q a, MachineCell.plain b, _ =>
       if _h : q = M.halt then
         none
@@ -281,117 +312,6 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
         | Move.right => some (MachineCell.plain b)
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
-
-set_option linter.flexible false in
-theorem localNextCell?_mem {M : Machine} {left center right next : MachineCell}
-    (hleft : left.Mem M) (hcenter : center.Mem M) (hright : right.Mem M)
-    (hnext : localNextCell? M left center right = some next) :
-    next.Mem M := by
-  cases left with
-  | plain la =>
-      cases center with
-      | plain ca =>
-          cases right with
-          | plain ra =>
-              simp [localNextCell?] at hnext
-              cases hnext
-              exact hcenter
-          | head rq ra =>
-              simp [localNextCell?, MachineCell.Mem] at hcenter hright hnext ⊢
-              by_cases hrq : rq = M.halt
-              · simp [hrq] at hnext
-              · simp [hrq] at hnext
-                rcases hright with ⟨hrqState, _hrqHalt, hraSym⟩
-                rcases hstep : M.step rq ra with ⟨write, q', move⟩
-                simp [hstep] at hnext
-                cases move with
-                | left =>
-                    by_cases hq' : q' = M.halt
-                    · rw [if_pos hq'] at hnext
-                      cases hnext
-                    · rw [if_neg hq'] at hnext
-                      cases hnext
-                      exact ⟨by simpa [hstep] using M.step_state_mem rq ra hrqState hraSym,
-                        hq', hcenter⟩
-                | right =>
-                    cases hnext
-                    exact hcenter
-      | head cq ca =>
-          cases right with
-          | plain ra =>
-              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
-              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
-              simp [hcqHalt] at hnext
-              rcases hstep : M.step cq ca with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases hnext
-              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
-          | head rq ra =>
-              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
-              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
-              simp [hcqHalt] at hnext
-              rcases hstep : M.step cq ca with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases hnext
-              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
-  | head lq la =>
-      cases center with
-      | plain ca =>
-          cases right with
-          | plain ra =>
-              simp [localNextCell?, MachineCell.Mem] at hleft hcenter hnext ⊢
-              rcases hleft with ⟨hlqState, hlqHalt, hlaSym⟩
-              simp [hlqHalt] at hnext
-              rcases hstep : M.step lq la with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases move with
-              | left =>
-                  cases hnext
-                  exact hcenter
-              | right =>
-                  by_cases hq' : q' = M.halt
-                  · rw [if_pos hq'] at hnext
-                    cases hnext
-                  · rw [if_neg hq'] at hnext
-                    cases hnext
-                    exact ⟨by simpa [hstep] using M.step_state_mem lq la hlqState hlaSym,
-                      hq', hcenter⟩
-          | head rq ra =>
-              simp [localNextCell?, MachineCell.Mem] at hleft hcenter hnext ⊢
-              rcases hleft with ⟨hlqState, hlqHalt, hlaSym⟩
-              simp [hlqHalt] at hnext
-              rcases hstep : M.step lq la with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases move with
-              | left =>
-                  cases hnext
-                  exact hcenter
-              | right =>
-                  by_cases hq' : q' = M.halt
-                  · rw [if_pos hq'] at hnext
-                    cases hnext
-                  · rw [if_neg hq'] at hnext
-                    cases hnext
-                    exact ⟨by simpa [hstep] using M.step_state_mem lq la hlqState hlaSym,
-                      hq', hcenter⟩
-      | head cq ca =>
-          cases right with
-          | plain ra =>
-              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
-              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
-              simp [hcqHalt] at hnext
-              rcases hstep : M.step cq ca with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases hnext
-              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
-          | head rq ra =>
-              simp [localNextCell?, MachineCell.Mem] at hcenter hnext ⊢
-              rcases hcenter with ⟨hcqState, hcqHalt, hcaSym⟩
-              simp [hcqHalt] at hnext
-              rcases hstep : M.step cq ca with ⟨write, q', move⟩
-              simp [hstep] at hnext
-              cases hnext
-              simpa [hstep, MachineCell.Mem] using M.step_symbol_mem cq ca hcqState hcaSym
 
 /-- A local `2 × 3` machine-history block. -/
 structure MachineHistoryTile where
