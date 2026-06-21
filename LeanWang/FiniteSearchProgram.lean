@@ -173,6 +173,64 @@ theorem program_transition?_after_false_prefix (n : Nat) :
       simpa [List.length_replicate] using find?_transitionsFrom_replicate_false
         ((List.replicate n false ++ (b :: bs)).length + 1) 0 n (b :: bs)
 
+theorem replicate_false_append_split {k n : Nat} (hk : k ≤ n) (bs : List Bool) :
+    List.replicate n false ++ bs =
+      List.replicate k false ++ (List.replicate (n - k) false ++ bs) := by
+  rw [← List.append_assoc, ← List.replicate_add]
+  rw [Nat.add_sub_of_le hk]
+
+theorem replicate_false_append_split_succ {k n : Nat} (hk : k + 1 ≤ n)
+    (bs : List Bool) :
+    List.replicate n false ++ bs =
+      List.replicate k false ++
+        (false :: (List.replicate (n - (k + 1)) false ++ bs)) := by
+  rw [replicate_false_append_split (k := k) (n := n) (by omega) bs]
+  rw [show n - k = n - (k + 1) + 1 by omega]
+  simp [List.replicate_succ]
+
+theorem program_runEmpty_false_prefix_aux (n : Nat) (bs : List Bool) :
+    ∀ k : Nat, k ≤ n →
+      (program (List.replicate n false ++ bs)).toMachine.runEmpty k =
+        { tape := fun _ => 0, head := k, state := k }
+  | 0, _ => by
+      rfl
+  | k + 1, hk => by
+      have hk' : k ≤ n := by omega
+      rw [Machine.runEmpty_succ, program_runEmpty_false_prefix_aux n bs k hk']
+      have hsplit := replicate_false_append_split_succ (k := k) (n := n) hk bs
+      have hfind :=
+        program_transition?_after_false_prefix k
+          (false :: (List.replicate (n - (k + 1)) false ++ bs))
+      rw [← hsplit] at hfind
+      have hstate :
+          k ≠ (program (List.replicate n false ++ bs)).halt := by
+        simp [program, List.length_replicate]
+        omega
+      have hwrite :
+          (transition ((List.replicate n false ++ bs).length + 1) k false).write ∈
+            (program (List.replicate n false ++ bs)).supportedSymbols := by
+        simp [transition, TableProgram.supportedSymbols, program]
+      have hnext :
+          (transition ((List.replicate n false ++ bs).length + 1) k false).next ∈
+            (program (List.replicate n false ++ bs)).supportedStates := by
+        unfold TableProgram.supportedStates
+        right
+        right
+        change k + 1 ∈ List.range ((List.replicate n false ++ bs).length + 1)
+        rw [List.mem_range]
+        simp [List.length_replicate]
+        omega
+      simpa [transition, Move.apply] using
+        TableProgram.toMachine_nextID_of_transition?_eq_some
+          (P := program (List.replicate n false ++ bs))
+          (c := { tape := fun _ => 0, head := k, state := k })
+          hstate hfind hwrite hnext
+
+theorem program_runEmpty_false_prefix (n : Nat) (bs : List Bool) :
+    (program (List.replicate n false ++ bs)).toMachine.runEmpty n =
+      { tape := fun _ => 0, head := n, state := n } :=
+  program_runEmpty_false_prefix_aux n bs n (by rfl)
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
