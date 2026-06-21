@@ -308,8 +308,6 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
         | MachineCell.boundary, Move.left =>
             if q' = M.halt then none else some (MachineCell.head q' write)
         | _, _ => some (MachineCell.plain write)
-  | MachineCell.boundary, MachineCell.plain b, _ =>
-      some (MachineCell.plain b)
   | MachineCell.head q a, MachineCell.plain b, _ =>
       if _h : q = M.halt then
         none
@@ -326,6 +324,8 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
         match move with
         | Move.left => if q' = M.halt then none else some (MachineCell.head q' b)
         | Move.right => some (MachineCell.plain b)
+  | MachineCell.boundary, MachineCell.plain b, _ =>
+      some (MachineCell.plain b)
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
 
@@ -366,6 +366,49 @@ theorem localNextCell?_at_head {M : Machine} {c : ID}
             simpa [hhead] using hstep
           simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
             localNextCell?, Move.apply]
+
+theorem localNextCell?_left_of_head {M : Machine} {c : ID} {pos : Nat}
+    (hstate : c.state ≠ M.halt)
+    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt)
+    (hhead : c.head = pos + 1) :
+    localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
+      some ((M.nextID c).cellAt pos) := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  cases hpos : pos with
+  | zero =>
+      cases move with
+      | left =>
+          have hstep0 : M.step c.state (c.tape 1) = (write, state', Move.left) := by
+            simpa [hhead, hpos] using hstep
+          have hstate' : state' ≠ M.halt := by
+            simpa [hstep] using hnextState
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
+            hstep0, localNextCell?, Move.apply, hstate']
+      | right =>
+          have hstep0 : M.step c.state (c.tape 1) = (write, state', Move.right) := by
+            simpa [hhead, hpos] using hstep
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
+            hstep0, localNextCell?, Move.apply]
+  | succ pred =>
+      cases move with
+      | left =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1 + 1)) = (write, state', Move.left) := by
+            simpa [hhead, hpos] using hstep
+          have hpred : pred ≠ pred + 1 + 1 := by
+            exact Nat.ne_of_lt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
+          have hstate' : state' ≠ M.halt := by
+            simpa [hstep] using hnextState
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
+            hstepPred, localNextCell?, Move.apply, hpred, hstate']
+      | right =>
+          have hstepPred :
+              M.step c.state (c.tape (pred + 1 + 1)) = (write, state', Move.right) := by
+            simpa [hhead, hpos] using hstep
+          have hpred : pred ≠ pred + 1 + 1 := by
+            exact Nat.ne_of_lt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
+          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
+            hstepPred, localNextCell?, Move.apply, hpred]
 
 end Machine
 
