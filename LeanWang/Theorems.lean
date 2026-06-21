@@ -123,22 +123,34 @@ theorem exists_tm2_for_natPartrecCode (c : Code) :
     (Turing.ToPartrec.Code.eval tc [0])).trans (htc 0)
 
 /-- A dummy machine used until the compiler from partial-recursive codes is implemented. -/
-def dummyMachine : Machine where
-  symbols := [0]
-  states := [0, 1]
+def dummyProgram : TableProgram where
+  symbols := []
+  states := []
   blank := 0
   start := 0
   halt := 1
-  step := fun _ _ => (0, 1, Move.right)
-  blank_mem := by simp
-  start_mem := by simp
-  halt_mem := by simp
-  step_symbol_mem := by simp
-  step_state_mem := by simp
+  table := [{
+    state := 0
+    read := 0
+    write := 0
+    next := 1
+    move := Move.right
+  }]
+
+/-- A dummy semantic machine used until the compiler is implemented. -/
+def dummyMachine : Machine :=
+  dummyProgram.toMachine
+
+/-- Compile a Mathlib partial-recursive code into finite machine data. -/
+def programTable (_c : Code) : TableProgram :=
+  dummyProgram
+
+theorem programTable_computable : Computable programTable :=
+  Computable.const dummyProgram
 
 /-- Compile a Mathlib partial-recursive code into the concrete one-tape machine model. -/
-def programMachine (_c : Code) : Machine :=
-  dummyMachine
+def programMachine (c : Code) : Machine :=
+  (programTable c).toMachine
 
 /-- Correctness target for the compiler from partial-recursive codes to concrete machines. -/
 theorem programMachine_correct (c : Code) :
@@ -161,7 +173,7 @@ def fixedDominoReduction (c : Code) : TileSet × WangTile :=
   (machineTiles M, machineSeed M)
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  unfold fixedDominoReduction programMachine
+  unfold fixedDominoReduction programMachine programTable
   exact Computable.const (machineTiles dummyMachine, machineSeed dummyMachine)
 
 /-- Correctness of the fixed domino reduction from nonhalting. -/
