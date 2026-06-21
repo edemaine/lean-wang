@@ -104,6 +104,12 @@ theorem cellAt_of_ne {c : ID} {i : Nat} (hi : i ≠ c.head) :
     c.cellAt i = MachineCell.plain (c.tape i) := by
   simp [cellAt, hi]
 
+theorem cellAt_ne_boundary (c : ID) (i : Nat) :
+    c.cellAt i ≠ MachineCell.boundary := by
+  by_cases hi : i = c.head
+  · simp [cellAt, hi]
+  · simp [cellAt, hi]
+
 /-- The cell immediately left of a position, using a boundary marker at `0`. -/
 def cellAtLeft (c : ID) : Nat → MachineCell
   | 0 => MachineCell.boundary
@@ -730,6 +736,19 @@ theorem runHistoryTile_local_of_not_halts {M : Machine} (h : ¬ M.HaltsEmpty)
     Machine.runEmpty_succ] using
     Machine.localNextCell?_cellAt (M := M) (c := c) (pos := pos) hstate hnextState
 
+theorem runHistoryTile_boundaryOK (M : Machine) (time pos : Nat) :
+    (runHistoryTile M time pos).prevLeft = MachineCell.boundary →
+      (runHistoryTile M time pos).nextLeft = MachineCell.boundary := by
+  cases pos with
+  | zero =>
+      simp [runHistoryTile, Machine.runCellLeft]
+  | succ pos =>
+      intro hprev
+      have hnot : (M.runEmpty time).cellAt pos ≠ MachineCell.boundary :=
+        ID.cellAt_ne_boundary (M.runEmpty time) pos
+      simp [runHistoryTile, Machine.runCellLeft] at hprev
+      exact False.elim (hnot hprev)
+
 /-- All locally valid history blocks over the finite cell support of `M`. -/
 def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let cells := machineCells M
@@ -739,7 +758,8 @@ def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   let nextLeft ← cells
   let nextCenter ← cells
   let nextRight ← cells
-  if localNextCell? M prevLeft prevCenter prevRight = some nextCenter then
+  if localNextCell? M prevLeft prevCenter prevRight = some nextCenter ∧
+      (prevLeft = MachineCell.boundary → nextLeft = MachineCell.boundary) then
     pure { prevLeft, prevCenter, prevRight, nextLeft, nextCenter, nextRight }
   else
     []
@@ -752,7 +772,8 @@ theorem mem_machineHistoryTiles_iff (M : Machine) (t : MachineHistoryTile) :
       t.nextLeft ∈ machineCells M ∧
       t.nextCenter ∈ machineCells M ∧
       t.nextRight ∈ machineCells M ∧
-      localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter := by
+      localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter ∧
+      (t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary) := by
   cases t
   simp [machineHistoryTiles]
 
@@ -760,7 +781,8 @@ theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTi
     (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
     (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
     (hnextCenter : t.nextCenter.Mem M) (hnextRight : t.nextRight.Mem M)
-    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter) :
+    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter)
+    (hboundary : t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary) :
     t ∈ machineHistoryTiles M := by
   rw [mem_machineHistoryTiles_iff]
   exact ⟨mem_machineCells_of_mem hprevLeft,
@@ -769,12 +791,18 @@ theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTi
     mem_machineCells_of_mem hnextLeft,
     mem_machineCells_of_mem hnextCenter,
     mem_machineCells_of_mem hnextRight,
-    hlocal⟩
+    hlocal, hboundary⟩
 
 theorem localNextCell?_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
     (ht : t ∈ machineHistoryTiles M) :
     localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter := by
-  exact (mem_machineHistoryTiles_iff M t).1 ht |>.2.2.2.2.2.2
+  exact (mem_machineHistoryTiles_iff M t).1 ht |>.2.2.2.2.2.2.1
+
+theorem nextLeft_boundary_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M)
+    (hprev : t.prevLeft = MachineCell.boundary) :
+    t.nextLeft = MachineCell.boundary := by
+  exact (mem_machineHistoryTiles_iff M t).1 ht |>.2.2.2.2.2.2.2 hprev
 
 theorem prevCenter_mem_of_mem_machineHistoryTiles {M : Machine} {t : MachineHistoryTile}
     (ht : t ∈ machineHistoryTiles M) :
@@ -812,6 +840,7 @@ theorem runHistoryTile_mem_machineHistoryTiles_of_not_halts {M : Machine}
   exact mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
     hnextLeft hnextCenter hnextRight
     (runHistoryTile_local_of_not_halts h time pos)
+    (runHistoryTile_boundaryOK M time pos)
 
 /-- The untagged Wang tiles produced from the local-history construction. -/
 def rawMachineTiles (M : Machine) : TileSet :=
@@ -841,11 +870,12 @@ theorem toWangTile_mem_rawMachineTiles_of_supported {M : Machine} {t : MachineHi
     (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
     (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
     (hnextCenter : t.nextCenter.Mem M) (hnextRight : t.nextRight.Mem M)
-    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter) :
+    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter)
+    (hboundary : t.prevLeft = MachineCell.boundary → t.nextLeft = MachineCell.boundary) :
     t.toWangTile ∈ rawMachineTiles M :=
   toWangTile_mem_rawMachineTiles
     (mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
-      hnextLeft hnextCenter hnextRight hlocal)
+      hnextLeft hnextCenter hnextRight hlocal hboundary)
 
 def initialRowHistoryTiles (M : Machine) : List MachineHistoryTile :=
   [runHistoryTile M 0 0,
