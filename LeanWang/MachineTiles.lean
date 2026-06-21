@@ -485,6 +485,25 @@ theorem localNextCell?_away_from_head {M : Machine} {c : ID} {pos : Nat}
             simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
               Move.apply]
 
+theorem localNextCell?_cellAt {M : Machine} {c : ID} {pos : Nat}
+    (hstate : c.state ≠ M.halt)
+    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
+    localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
+      some ((M.nextID c).cellAt pos) := by
+  by_cases hcenter : pos = c.head
+  · subst pos
+    exact localNextCell?_at_head hstate hnextState
+  · by_cases hleft : c.head = pos + 1
+    · exact localNextCell?_left_of_head hstate hnextState hleft
+    · by_cases hright : pos = c.head + 1
+      · subst pos
+        exact localNextCell?_right_of_head hstate hnextState
+      · exact localNextCell?_away_from_head hstate hcenter (by
+          intro h
+          exact hleft h.symm) (by
+          intro h
+          exact hright h.symm)
+
 end Machine
 
 /-- A local `2 × 3` machine-history block. -/
