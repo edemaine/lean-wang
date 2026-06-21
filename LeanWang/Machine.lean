@@ -131,6 +131,23 @@ theorem nextID_tape_of_ne_head {M : Machine} {c : ID} {i : Nat} (hi : i ≠ c.he
     rcases M.step c.state (c.tape c.head) with ⟨write, state', move⟩
     simp [hi]
 
+theorem runEmpty_state_eq_halt_of_le {M : Machine} {m n : Nat}
+    (hmn : m ≤ n) (hm : (M.runEmpty m).state = M.halt) :
+    (M.runEmpty n).state = M.halt := by
+  rcases Nat.exists_eq_add_of_le hmn with ⟨k, rfl⟩
+  induction k with
+  | zero =>
+      simpa using hm
+  | succ k ih =>
+      rw [show m + (k + 1) = m + k + 1 by omega, runEmpty_succ]
+      simp [nextID, ih]
+
+theorem runEmpty_state_ne_halt_of_le {M : Machine} {m n : Nat}
+    (hmn : m ≤ n) (hn : (M.runEmpty n).state ≠ M.halt) :
+    (M.runEmpty m).state ≠ M.halt := by
+  intro hm
+  exact hn (runEmpty_state_eq_halt_of_le hmn hm)
+
 end Machine
 
 end LeanWang
