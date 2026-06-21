@@ -1866,41 +1866,97 @@ theorem tableProgramInitialNextAt_primrec :
             (tableProgramInitialBlankCell_primrec.comp Primrec.fst)))))
 
 def tableProgramInitialNext0 (P : TableProgram) : MachineCell :=
-  tableProgramLocalNextCellDataD P MachineCell.boundary (tableProgramInitialHeadCell P)
-    (tableProgramInitialBlankCell P) (tableProgramInitialHeadCell P)
+  let action := P.toTableMachine.step P.start P.blank
+  let write := action.1
+  let state' := action.2.1
+  let move := action.2.2
+  if P.start = P.halt then
+    MachineCell.head P.start P.blank
+  else
+    match move with
+    | Move.left => MachineCell.head state' write
+    | Move.right => MachineCell.plain write
 
 theorem tableProgramInitialNext0_primrec : Primrec tableProgramInitialNext0 := by
   unfold tableProgramInitialNext0
-  exact tableProgramLocalNextCellDataD_primrec.comp
-    (Primrec.pair Primrec.id
-      (Primrec.pair (Primrec.const MachineCell.boundary)
-        (Primrec.pair tableProgramInitialHeadCell_primrec
-          (Primrec.pair tableProgramInitialBlankCell_primrec
-            tableProgramInitialHeadCell_primrec))))
+  let action : TableProgram → Nat × Nat × Move := fun P =>
+    P.toTableMachine.step P.start P.blank
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.id
+        (Primrec.pair TableProgram.start_primrec TableProgram.blank_primrec))).of_eq fun _ => rfl
+  let write : TableProgram → Nat := fun P => (action P).1
+  let state' : TableProgram → Nat := fun P => (action P).2.1
+  let move : TableProgram → Move := fun P => (action P).2.2
+  have hwrite : Primrec write := Primrec.fst.comp haction
+  have hstate' : Primrec state' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hstartHalt : PrimrecPred (fun P : TableProgram => P.start = P.halt) :=
+    Primrec.eq.comp TableProgram.start_primrec TableProgram.halt_primrec
+  have hmoveLeft : PrimrecPred (fun P : TableProgram => move P = Move.left) :=
+    Primrec.eq.comp hmove (Primrec.const Move.left)
+  refine Primrec.ite hstartHalt tableProgramInitialHeadCell_primrec ?_
+  refine (Primrec.ite hmoveLeft
+    (MachineCell.head_primrec.comp (Primrec.pair hstate' hwrite))
+    (MachineCell.plain_primrec.comp hwrite)).of_eq ?_
+  intro P
+  change
+    (if move P = Move.left then
+      MachineCell.head (state' P) (write P)
+    else
+      MachineCell.plain (write P)) =
+    match move P with
+    | Move.left => MachineCell.head (state' P) (write P)
+    | Move.right => MachineCell.plain (write P)
+  cases move P <;> rfl
 
 def tableProgramInitialNext1 (P : TableProgram) : MachineCell :=
-  tableProgramInitialNextAt P (tableProgramInitialHeadCell P) (tableProgramInitialBlankCell P)
-    (tableProgramInitialBlankCell P)
+  let action := P.toTableMachine.step P.start P.blank
+  let state' := action.2.1
+  let move := action.2.2
+  if P.start = P.halt then
+    MachineCell.plain P.blank
+  else
+    match move with
+    | Move.left => MachineCell.plain P.blank
+    | Move.right => MachineCell.head state' P.blank
 
 theorem tableProgramInitialNext1_primrec : Primrec tableProgramInitialNext1 := by
   unfold tableProgramInitialNext1
-  exact tableProgramInitialNextAt_primrec.comp
-    (Primrec.pair Primrec.id
-      (Primrec.pair tableProgramInitialHeadCell_primrec
-        (Primrec.pair tableProgramInitialBlankCell_primrec
-          tableProgramInitialBlankCell_primrec)))
+  let action : TableProgram → Nat × Nat × Move := fun P =>
+    P.toTableMachine.step P.start P.blank
+  have haction : Primrec action := by
+    exact (TableProgram.step_primrec.comp
+      (Primrec.pair Primrec.id
+        (Primrec.pair TableProgram.start_primrec TableProgram.blank_primrec))).of_eq fun _ => rfl
+  let state' : TableProgram → Nat := fun P => (action P).2.1
+  let move : TableProgram → Move := fun P => (action P).2.2
+  have hstate' : Primrec state' := Primrec.fst.comp (Primrec.snd.comp haction)
+  have hmove : Primrec move := Primrec.snd.comp (Primrec.snd.comp haction)
+  have hstartHalt : PrimrecPred (fun P : TableProgram => P.start = P.halt) :=
+    Primrec.eq.comp TableProgram.start_primrec TableProgram.halt_primrec
+  have hmoveLeft : PrimrecPred (fun P : TableProgram => move P = Move.left) :=
+    Primrec.eq.comp hmove (Primrec.const Move.left)
+  refine Primrec.ite hstartHalt tableProgramInitialBlankCell_primrec ?_
+  refine (Primrec.ite hmoveLeft tableProgramInitialBlankCell_primrec
+    (MachineCell.head_primrec.comp (Primrec.pair hstate' TableProgram.blank_primrec))).of_eq ?_
+  intro P
+  change
+    (if move P = Move.left then
+      tableProgramInitialBlankCell P
+    else
+      MachineCell.head (state' P) P.blank) =
+    match move P with
+    | Move.left => MachineCell.plain P.blank
+    | Move.right => MachineCell.head (state' P) P.blank
+  cases move P <;> rfl
 
 def tableProgramInitialNext2 (P : TableProgram) : MachineCell :=
-  tableProgramInitialNextAt P (tableProgramInitialBlankCell P) (tableProgramInitialBlankCell P)
-    (tableProgramInitialBlankCell P)
+  MachineCell.plain P.blank
 
 theorem tableProgramInitialNext2_primrec : Primrec tableProgramInitialNext2 := by
   unfold tableProgramInitialNext2
-  exact tableProgramInitialNextAt_primrec.comp
-    (Primrec.pair Primrec.id
-      (Primrec.pair tableProgramInitialBlankCell_primrec
-        (Primrec.pair tableProgramInitialBlankCell_primrec
-          tableProgramInitialBlankCell_primrec)))
+  exact tableProgramInitialBlankCell_primrec
 
 def tableProgramInitialHistoryTile1 (P : TableProgram) : MachineHistoryTile where
   prevLeft := tableProgramInitialHeadCell P
@@ -2415,6 +2471,26 @@ def tableProgramSeedData (P : TableProgram) : WangTile :=
 theorem tableProgramSeedHistoryTile_eq_runHistoryTile (P : TableProgram) :
     tableProgramSeedHistoryTile P = runHistoryTile P.toMachine 0 0 := by
   unfold tableProgramSeedHistoryTile
+  have htmBlank : P.toTableMachine.blank = P.blank := rfl
+  have htmStart : P.toTableMachine.start = P.start := rfl
+  have htmHalt : P.toTableMachine.halt = P.halt := rfl
+  by_cases hstart : P.start = P.halt
+  · simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+      Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+      TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+      -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart]
+  · rcases hstep : P.toTableMachine.step P.start P.blank with ⟨write, state', move⟩
+    cases move <;>
+      simp [runHistoryTile, Machine.runCell, Machine.runCellLeft, Machine.runEmpty_zero,
+        Machine.runEmpty_succ, Machine.nextID, Machine.initialID, ID.cellAt, ID.cellAtLeft,
+        TableProgram.toMachine, TableMachine.toMachine, -TableProgram.toTableMachine_step,
+        -TableMachine.toMachine_step, htmBlank, htmStart, htmHalt, hstart, hstep, Move.apply]
+
+theorem tableProgramInitialHistoryTile1_eq_runHistoryTile (P : TableProgram) :
+    tableProgramInitialHistoryTile1 P = runHistoryTile P.toMachine 0 1 := by
+  unfold tableProgramInitialHistoryTile1 tableProgramInitialNext0 tableProgramInitialNext1
+    tableProgramInitialNext2
+    tableProgramInitialHeadCell tableProgramInitialBlankCell
   have htmBlank : P.toTableMachine.blank = P.blank := rfl
   have htmStart : P.toTableMachine.start = P.start := rfl
   have htmHalt : P.toTableMachine.halt = P.halt := rfl
