@@ -200,6 +200,56 @@ def combineWithScaffold (S : Scaffold) (T : TileSet) (seed : WangTile) : TileSet
     ((if b = S.corner then T.filter fun p => p = seed else T).map fun p =>
       WangTile.product b p)
 
+theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
+    {seed tile : WangTile} :
+    tile ∈ combineWithScaffold S T seed ↔
+      ∃ b ∈ S.tiles, ∃ p ∈ T,
+        (b = S.corner → p = seed) ∧ WangTile.product b p = tile := by
+  constructor
+  · intro htile
+    rw [combineWithScaffold, List.mem_flatMap] at htile
+    rcases htile with ⟨b, hb, hpayload⟩
+    by_cases hcorner : b = S.corner
+    · rw [if_pos hcorner, List.mem_map] at hpayload
+      rcases hpayload with ⟨p, hp, htile⟩
+      exact ⟨b, hb, p, (List.mem_filter.1 hp).1,
+        by intro _; exact of_decide_eq_true (List.mem_filter.1 hp).2, htile⟩
+    · rw [if_neg hcorner, List.mem_map] at hpayload
+      rcases hpayload with ⟨p, hp, htile⟩
+      exact ⟨b, hb, p, hp, by intro hbcorner; exact False.elim (hcorner hbcorner), htile⟩
+  · rintro ⟨b, hb, p, hp, hseed, htile⟩
+    rw [combineWithScaffold, List.mem_flatMap]
+    refine ⟨b, hb, ?_⟩
+    by_cases hcorner : b = S.corner
+    · rw [if_pos hcorner, List.mem_map]
+      exact ⟨p, List.mem_filter.2 ⟨hp, decide_eq_true (hseed hcorner)⟩, htile⟩
+    · rw [if_neg hcorner, List.mem_map]
+      exact ⟨p, hp, htile⟩
+
+theorem combineWithScaffold_subset_productTileSet {S : Scaffold} {T : TileSet}
+    {seed tile : WangTile} :
+    tile ∈ combineWithScaffold S T seed → tile ∈ productTileSet S.tiles T := by
+  intro htile
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, hb, p, hp, _hseed, htile⟩
+  rw [mem_productTileSet_iff]
+  exact ⟨b, hb, p, hp, htile⟩
+
+theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
+    {T : TileSet} {seed payload : WangTile}
+    (htile : WangTile.product S.corner payload ∈ combineWithScaffold S T seed) :
+    payload ∈ T := by
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hp, _hseed, hproduct⟩
+  have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
+  simpa [hparts.2] using hp
+
+theorem payload_eq_seed_of_product_corner_mem_combineWithScaffold {S : Scaffold}
+    {T : TileSet} {seed payload : WangTile}
+    (htile : WangTile.product S.corner payload ∈ combineWithScaffold S T seed) :
+    payload = seed := by
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, _hp, hseed, hproduct⟩
+  have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
+  exact hparts.2.symm.trans (hseed hparts.1)
+
 /-- The abstract property required of a scaffold for the Berger/Robinson reduction. -/
 def IsScaffold (S : Scaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
