@@ -215,6 +215,48 @@ end TableTransition
 instance instPrimcodableTableTransition : Primcodable TableTransition :=
   Primcodable.ofEquiv (Nat × Nat × Nat × Nat × Move) TableTransition.equivTuple
 
+namespace TableTransition
+
+theorem toTuple_primrec : Primrec TableTransition.toTuple := by
+  simpa [TableTransition.equivTuple] using
+    (Primrec.of_equiv (e := TableTransition.equivTuple) :
+      Primrec TableTransition.equivTuple)
+
+theorem ofTuple_primrec : Primrec TableTransition.ofTuple := by
+  simpa [TableTransition.equivTuple] using
+    (Primrec.of_equiv_symm (e := TableTransition.equivTuple) :
+      Primrec TableTransition.equivTuple.symm)
+
+theorem state_primrec : Primrec TableTransition.state :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem read_primrec : Primrec TableTransition.read :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem write_primrec : Primrec TableTransition.write :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem next_primrec : Primrec TableTransition.next :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem move_primrec : Primrec TableTransition.move :=
+  Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem mk_primrec :
+    Primrec (fun p : Nat × Nat × Nat × Nat × Move =>
+      ({ state := p.1
+         read := p.2.1
+         write := p.2.2.1
+         next := p.2.2.2.1
+         move := p.2.2.2.2 } : TableTransition)) :=
+  ofTuple_primrec
+
+theorem action_primrec : Primrec TableTransition.action := by
+  unfold action
+  exact Primrec.pair write_primrec (Primrec.pair next_primrec move_primrec)
+
+end TableTransition
+
 /--
 A finite transition-table presentation of the concrete machine model.
 
@@ -505,6 +547,21 @@ namespace TableProgram
 theorem toTuple_primrec : Primrec TableProgram.toTuple := by
   simpa [TableProgram.equivTuple] using
     (Primrec.of_equiv (e := TableProgram.equivTuple) : Primrec TableProgram.equivTuple)
+
+theorem ofTuple_primrec : Primrec TableProgram.ofTuple := by
+  simpa [TableProgram.equivTuple] using
+    (Primrec.of_equiv_symm (e := TableProgram.equivTuple) :
+      Primrec TableProgram.equivTuple.symm)
+
+theorem mk_primrec :
+    Primrec (fun p : List Nat × List Nat × Nat × Nat × Nat × List TableTransition =>
+      ({ symbols := p.1
+         states := p.2.1
+         blank := p.2.2.1
+         start := p.2.2.2.1
+         halt := p.2.2.2.2.1
+         table := p.2.2.2.2.2 } : TableProgram)) :=
+  ofTuple_primrec
 
 theorem supportedSymbols_primrec : Primrec TableProgram.supportedSymbols :=
   Primrec.list_cons.comp
