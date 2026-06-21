@@ -440,6 +440,33 @@ theorem toMachine_step_of_transition?_eq_none {P : TableProgram} {q a : Nat}
     P.toMachine.step q a = (P.blank, P.halt, Move.right) :=
   TableMachine.step_of_transition?_eq_none h
 
+theorem toMachine_nextID_of_transition?_eq_some {P : TableProgram} {c : ID}
+    {e : TableTransition}
+    (hstate : c.state ≠ P.halt)
+    (hfind : P.toTableMachine.transition? c.state (c.tape c.head) = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates) :
+    P.toMachine.nextID c =
+      { tape := fun i => if i = c.head then e.write else c.tape i
+        head := e.move.apply c.head
+        state := e.next } := by
+  rw [Machine.nextID_of_ne_halt (M := P.toMachine) (by simpa using hstate)]
+  simp [toMachine_step_of_transition?_eq_some hfind hwrite hnext,
+    TableTransition.action]
+
+theorem toMachine_runEmpty_one_of_initial_transition {P : TableProgram}
+    {e : TableTransition}
+    (hstart : P.start ≠ P.halt)
+    (hfind : P.toTableMachine.transition? P.start P.blank = some e)
+    (hwrite : e.write ∈ P.supportedSymbols) (hnext : e.next ∈ P.supportedStates) :
+    P.toMachine.runEmpty 1 =
+      { tape := fun i => if i = 0 then e.write else P.blank
+        head := e.move.apply 0
+        state := e.next } := by
+  rw [Machine.runEmpty_succ, Machine.runEmpty_zero]
+  simpa [Machine.initialID] using
+    toMachine_nextID_of_transition?_eq_some
+      (P := P) (c := P.toMachine.initialID) hstart hfind hwrite hnext
+
 theorem toMachine_haltsEmpty_of_initial_transition_to_halt {P : TableProgram}
     {e : TableTransition}
     (hfind : P.toTableMachine.transition? P.start P.blank = some e)
