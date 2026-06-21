@@ -48,6 +48,14 @@ def folded (bs : List Bool) : List TableTransition × Nat :=
 def transitions (bs : List Bool) : List TableTransition :=
   (folded bs).1 ++ [loopTransition (folded bs).2]
 
+def coreTransitionsFrom (halt i : Nat) : List Bool → List TableTransition
+  | [] => []
+  | b :: bs => transition halt i b :: coreTransitionsFrom halt (i + 1) bs
+
+def transitionsFrom (halt i : Nat) : List Bool → List TableTransition
+  | [] => [loopTransition i]
+  | b :: bs => transition halt i b :: transitionsFrom halt (i + 1) bs
+
 def program (bs : List Bool) : TableProgram where
   symbols := []
   states := List.range (bs.length + 1)
@@ -75,6 +83,40 @@ theorem folded_snd (bs : List Bool) :
     (folded bs).2 = bs.length := by
   unfold folded
   simpa using foldl_foldStep₂_snd bs bs (([] : List TableTransition), 0)
+
+theorem foldl_foldStep₂_eq_coreTransitionsFrom (bs : List Bool) :
+    ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
+      xs.foldl (fun acc b => foldStep₂ bs (acc, b)) s =
+        (s.1 ++ coreTransitionsFrom (bs.length + 1) s.2 xs, s.2 + xs.length)
+  | [], s => by
+      simp [coreTransitionsFrom]
+  | b :: xs, s => by
+      rw [List.foldl_cons, foldl_foldStep₂_eq_coreTransitionsFrom bs xs (foldStep₂ bs (s, b))]
+      simp [foldStep₂, foldStep, coreTransitionsFrom, List.append_assoc,
+        Nat.add_comm, Nat.add_left_comm]
+
+theorem folded_eq_coreTransitionsFrom (bs : List Bool) :
+    folded bs = (coreTransitionsFrom (bs.length + 1) 0 bs, bs.length) := by
+  unfold folded
+  simpa using foldl_foldStep₂_eq_coreTransitionsFrom bs bs (([] : List TableTransition), 0)
+
+theorem coreTransitionsFrom_append_loop (halt i : Nat) :
+    ∀ bs : List Bool,
+      coreTransitionsFrom halt i bs ++ [loopTransition (i + bs.length)] =
+        transitionsFrom halt i bs
+  | [] => by
+      rfl
+  | b :: bs => by
+      simp only [coreTransitionsFrom, transitionsFrom]
+      rw [show i + (b :: bs).length = i + 1 + bs.length by
+        simp [Nat.add_comm, Nat.add_left_comm]]
+      exact congrArg (fun table => transition halt i b :: table)
+        (coreTransitionsFrom_append_loop halt (i + 1) bs)
+
+theorem transitions_eq_transitionsFrom (bs : List Bool) :
+    transitions bs = transitionsFrom (bs.length + 1) 0 bs := by
+  rw [transitions, folded_eq_coreTransitionsFrom]
+  simpa using coreTransitionsFrom_append_loop (bs.length + 1) 0 bs
 
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
@@ -171,6 +213,37 @@ theorem program_cons_true_halts (bs : List Bool) :
     simp [e, transition]
   exact TableProgram.toMachine_haltsEmpty_of_initial_transition_to_halt
     hfind hwrite hnext hhalt
+
+theorem program_cons_false_runEmpty_one (bs : List Bool) :
+    (program (false :: bs)).toMachine.runEmpty 1 =
+      { tape := fun _ => 0, head := 1, state := 1 } := by
+  let e := transition ((false :: bs).length + 1) 0 false
+  have htable : (program (false :: bs)).table =
+      e :: transitionsFrom ((false :: bs).length + 1) 1 bs := by
+    change transitions (false :: bs) =
+      transition ((false :: bs).length + 1) 0 false ::
+        transitionsFrom ((false :: bs).length + 1) 1 bs
+    rw [transitions_eq_transitionsFrom]
+    rfl
+  have hfind :
+      (program (false :: bs)).toTableMachine.transition?
+          (program (false :: bs)).start (program (false :: bs)).blank = some e :=
+    TableProgram.transition?_eq_some_of_table_head_matches htable
+      (by simp [e, transition])
+  have hwrite : e.write ∈ (program (false :: bs)).supportedSymbols := by
+    simp [e, transition, TableProgram.supportedSymbols]
+  have hnext : e.next ∈ (program (false :: bs)).supportedStates := by
+    unfold TableProgram.supportedStates
+    right
+    right
+    change 1 ∈ List.range ((false :: bs).length + 1)
+    rw [List.mem_range]
+    simp
+  have hstart : (program (false :: bs)).start ≠ (program (false :: bs)).halt :=
+    program_start_ne_halt (false :: bs)
+  have hrun := TableProgram.toMachine_runEmpty_one_of_initial_transition
+    hstart hfind hwrite hnext
+  simpa [e, transition, Move.apply] using hrun
 
 theorem transition_primrec :
     Primrec (fun p : Nat × Nat × Bool => transition p.1 p.2.1 p.2.2) := by
