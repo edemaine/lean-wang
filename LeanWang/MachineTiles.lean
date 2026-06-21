@@ -388,6 +388,33 @@ def machineHistoryTiles (M : Machine) : List MachineHistoryTile := do
   else
     []
 
+theorem mem_machineHistoryTiles_iff (M : Machine) (t : MachineHistoryTile) :
+    t ∈ machineHistoryTiles M ↔
+      t.prevLeft ∈ machineCells M ∧
+      t.prevCenter ∈ machineCells M ∧
+      t.prevRight ∈ machineCells M ∧
+      t.nextLeft ∈ machineCells M ∧
+      t.nextCenter ∈ machineCells M ∧
+      t.nextRight ∈ machineCells M ∧
+      localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter := by
+  cases t
+  simp [machineHistoryTiles]
+
+theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTile}
+    (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
+    (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
+    (hnextCenter : t.nextCenter.Mem M) (hnextRight : t.nextRight.Mem M)
+    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter) :
+    t ∈ machineHistoryTiles M := by
+  rw [mem_machineHistoryTiles_iff]
+  exact ⟨mem_machineCells_of_mem hprevLeft,
+    mem_machineCells_of_mem hprevCenter,
+    mem_machineCells_of_mem hprevRight,
+    mem_machineCells_of_mem hnextLeft,
+    mem_machineCells_of_mem hnextCenter,
+    mem_machineCells_of_mem hnextRight,
+    hlocal⟩
+
 /-- The Wang tiles produced from a concrete machine by the local-history construction. -/
 def machineTiles (M : Machine) : TileSet :=
   (machineHistoryTiles M).map MachineHistoryTile.toWangTile
