@@ -45,6 +45,11 @@ structure Machine where
   start : Nat
   halt : Nat
   step : Nat → Nat → Nat × Nat × Move
+  blank_mem : blank ∈ symbols
+  start_mem : start ∈ states
+  halt_mem : halt ∈ states
+  step_symbol_mem : ∀ q a, q ∈ states → a ∈ symbols → (step q a).1 ∈ symbols
+  step_state_mem : ∀ q a, q ∈ states → a ∈ symbols → (step q a).2.1 ∈ states
 
 /-- An instantaneous description of a one-tape machine. -/
 structure ID where

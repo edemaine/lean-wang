@@ -28,6 +28,11 @@ def dummyMachine : Machine where
   start := 0
   halt := 1
   step := fun _ _ => (0, 1, Move.right)
+  blank_mem := by simp
+  start_mem := by simp
+  halt_mem := by simp
+  step_symbol_mem := by simp
+  step_state_mem := by simp
 
 /-- Compile a Mathlib partial-recursive code into the concrete one-tape machine model. -/
 def programMachine (_c : Code) : Machine :=
