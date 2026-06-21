@@ -533,6 +533,46 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
   | _, MachineCell.plain b, _ =>
       some (MachineCell.plain b)
 
+def tableProgramLocalNextCell?
+    (P : TableProgram) (left center right : MachineCell) : Option MachineCell :=
+  match left, center, right with
+  | _, MachineCell.boundary, _ => none
+  | _, MachineCell.head q a, _ =>
+      if _h : q = P.toTableMachine.halt then
+        none
+      else
+        let (write, q', move) := P.toTableMachine.step q a
+        match left, move with
+        | MachineCell.boundary, Move.left =>
+            if q' = P.toTableMachine.halt then none else some (MachineCell.head q' write)
+        | _, _ => some (MachineCell.plain write)
+  | MachineCell.head q a, MachineCell.plain b, _ =>
+      if _h : q = P.toTableMachine.halt then
+        none
+      else
+        let (_write, q', move) := P.toTableMachine.step q a
+        match move with
+        | Move.right => if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+        | Move.left => some (MachineCell.plain b)
+  | _, MachineCell.plain b, MachineCell.head q a =>
+      if _h : q = P.toTableMachine.halt then
+        none
+      else
+        let (_write, q', move) := P.toTableMachine.step q a
+        match move with
+        | Move.left => if q' = P.toTableMachine.halt then none else some (MachineCell.head q' b)
+        | Move.right => some (MachineCell.plain b)
+  | MachineCell.boundary, MachineCell.plain b, _ =>
+      some (MachineCell.plain b)
+  | _, MachineCell.plain b, _ =>
+      some (MachineCell.plain b)
+
+theorem tableProgramLocalNextCell?_eq_localNextCell?
+    (P : TableProgram) (left center right : MachineCell) :
+    tableProgramLocalNextCell? P left center right =
+      localNextCell? P.toMachine left center right := by
+  cases left <;> cases center <;> cases right <;> rfl
+
 namespace Machine
 
 theorem localNextCell?_at_head {M : Machine} {c : ID}
