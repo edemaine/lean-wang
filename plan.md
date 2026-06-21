@@ -82,8 +82,7 @@ Next implementation targets:
 
 1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
    implementing the bounded evaluator fuel search in `TableProgram`.
-2. Replace the placeholder `ollingerScaffold` data with the actual
-   Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_fuelCompiler` to those two
    concrete instances to recover the unconditional encoded domino theorem.

@@ -677,8 +677,8 @@ theorem isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
   · intro hsquares
     exact hrealizes T seed hsquares
 
-/-- The concrete Ollinger/Robinson scaffold tileset. -/
-def ollingerScaffold : Scaffold where
+/-- The empty scaffold example; useful only as a minimal data sanity check. -/
+def emptyScaffoldExample : Scaffold where
   tiles := []
   active := fun t => decide (t = monochromeTile)
   corner := monochromeTile
