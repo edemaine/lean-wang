@@ -492,6 +492,25 @@ def initialHistoryTile (M : Machine) : MachineHistoryTile where
   nextCenter := initialNextCenter M
   nextRight := initialNextRight M
 
+theorem initialHistoryTile_eq_runHistoryTile_zero_of_not_halts {M : Machine}
+    (h : ¬ M.HaltsEmpty) :
+    initialHistoryTile M = runHistoryTile M 0 0 := by
+  have hstart : M.start ≠ M.halt := by
+    intro hs
+    exact h ⟨0, by simpa [Machine.runEmpty_zero, Machine.initialID] using hs⟩
+  rcases hstep : M.step M.start M.blank with ⟨write, q', move⟩
+  have hq' : q' ≠ M.halt := by
+    intro hhalt
+    exact h ⟨1, by
+      simp [Machine.runEmpty_succ, Machine.runEmpty_zero, Machine.nextID,
+        Machine.initialID, hstart, hstep, hhalt]⟩
+  cases move <;>
+    simp [initialHistoryTile, runHistoryTile, initialPrevLeft, initialPrevCenter,
+      initialPrevRight, initialNextLeft, initialNextCenter, initialNextRight,
+      Machine.runCell, Machine.runCellLeft, Machine.runEmpty_succ,
+      Machine.runEmpty_zero, Machine.nextID, Machine.initialID, ID.cellAt,
+      localNextCell?, Move.apply, hstart, hstep, hq']
+
 /-- The distinguished lower-left tile forcing the empty-input initial configuration. -/
 def machineSeed (M : Machine) : WangTile :=
   (initialHistoryTile M).toWangTile
