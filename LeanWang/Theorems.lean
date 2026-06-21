@@ -730,6 +730,21 @@ theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S)
   rw [dominoReductionCode, decodeTileSet_encodeTileSet]
   exact dominoReduction_correct hS C c
 
+/-- The domino problem is undecidable for finite Wang tilesets, assuming a scaffold
+and a compiler from partial-recursive codes to table machines. -/
+theorem domino_problem_undecidable_of_scaffold
+    (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  intro h
+  have hdomino : ComputablePred
+      (fun c : Code => TilesPlane (dominoReduction S C c)) :=
+    ComputablePred.computable_of_manyOneReducible
+      (ManyOneReducible.mk (fun T : TileSet => TilesPlane T)
+        (dominoReduction_computable S C)) h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    hdomino.of_eq fun c => dominoReduction_correct hS C c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold
 and a compiler from partial-recursive codes to table machines. -/
 theorem encoded_domino_problem_undecidable_of_scaffold
@@ -753,5 +768,14 @@ theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
+
+/--
+Unencoded domino undecidability from a scaffold and the smaller fuel-search
+compiler obligation.
+-/
+theorem domino_problem_undecidable_of_scaffold_fuelCompiler
+    (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
 
 end LeanWang
