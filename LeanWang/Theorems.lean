@@ -192,10 +192,13 @@ theorem fixed_corner_square_problem_undecidable :
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
   tiles : TileSet
+  corner : WangTile
 
 /-- Combine a scaffold with a fixed-corner square instance. -/
-def combineWithScaffold (S : Scaffold) (T : TileSet) (_seed : WangTile) : TileSet :=
-  productTileSet S.tiles T
+def combineWithScaffold (S : Scaffold) (T : TileSet) (seed : WangTile) : TileSet :=
+  S.tiles.flatMap fun b =>
+    ((if b = S.corner then T.filter fun p => p = seed else T).map fun p =>
+      WangTile.product b p)
 
 /-- The abstract property required of a scaffold for the Berger/Robinson reduction. -/
 def IsScaffold (S : Scaffold) : Prop :=
@@ -206,6 +209,7 @@ def IsScaffold (S : Scaffold) : Prop :=
 /-- The concrete Ollinger/Robinson scaffold tileset. -/
 def ollingerScaffold : Scaffold where
   tiles := []
+  corner := monochromeTile
 
 /-- The Ollinger/Robinson scaffold satisfies the abstract scaffold property. -/
 theorem ollingerScaffold_isScaffold : IsScaffold ollingerScaffold := by
@@ -238,8 +242,7 @@ def dominoReductionCode (c : Code) : Nat :=
 
 /-- Computability target for the encoded final reduction. -/
 theorem dominoReductionCode_computable : Computable dominoReductionCode := by
-  unfold dominoReductionCode dominoReduction combineWithScaffold productTileSet
-    ollingerScaffold encodeTileSet
+  unfold dominoReductionCode dominoReduction combineWithScaffold ollingerScaffold encodeTileSet
   exact Computable.const (Encodable.encode ([] : TileSet))
 
 /-- Correctness target for the encoded final reduction. -/
