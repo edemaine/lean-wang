@@ -305,6 +305,184 @@ theorem payload_eq_seed_of_product_corner_mem_combineWithScaffold {S : Scaffold}
   have hparts : b = S.corner ∧ p = payload := product_eq_iff.1 hproduct
   exact hparts.2.symm.trans ((hactiveMem (by simpa [hparts.1] using hactive)).2 hparts.1)
 
+theorem payload_mem_of_active_product_mem_combineWithScaffold {S : Scaffold}
+    {T : TileSet} {seed base payload : WangTile}
+    (hactive : S.active base = true)
+    (htile : WangTile.product base payload ∈ combineWithScaffold S T seed) :
+    payload ∈ T := by
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hactiveMem, _hinactive, hproduct⟩
+  have hparts : b = base ∧ p = payload := product_eq_iff.1 hproduct
+  simpa [hparts.2] using (hactiveMem (by simpa [hparts.1] using hactive)).1
+
+theorem payload_eq_seed_of_active_corner_product_mem_combineWithScaffold {S : Scaffold}
+    {T : TileSet} {seed base payload : WangTile}
+    (hactive : S.active base = true) (hcorner : base = S.corner)
+    (htile : WangTile.product base payload ∈ combineWithScaffold S T seed) :
+    payload = seed := by
+  rcases mem_combineWithScaffold_iff.1 htile with ⟨b, _hb, p, hactiveMem, _hinactive, hproduct⟩
+  have hparts : b = base ∧ p = payload := product_eq_iff.1 hproduct
+  exact hparts.2.symm.trans
+    ((hactiveMem (by simpa [hparts.1] using hactive)).2 (hparts.1.trans hcorner))
+
+theorem tilesPlane_scaffold_of_tilesPlane_combineWithScaffold {S : Scaffold}
+    {T : TileSet} {seed : WangTile}
+    (h : TilesPlane (combineWithScaffold S T seed)) :
+    TilesPlane S.tiles := by
+  classical
+  rcases h with ⟨x, hx⟩
+  have hdecode : ∀ p : Int × Int,
+      ∃ b : TileIn S.tiles, ∃ payload : WangTile,
+        WangTile.product b.1 payload = (x p).1 := by
+    intro p
+    rcases mem_combineWithScaffold_iff.1 (x p).2 with
+      ⟨b, hb, payload, _hactiveMem, _hinactive, htile⟩
+    exact ⟨⟨b, hb⟩, payload, htile⟩
+  let baseAt : Int × Int → TileIn S.tiles := fun p => Classical.choose (hdecode p)
+  let payloadAt : Int × Int → WangTile := fun p =>
+    Classical.choose (Classical.choose_spec (hdecode p))
+  have hproduct : ∀ p : Int × Int,
+      WangTile.product (baseAt p).1 (payloadAt p) = (x p).1 := by
+    intro p
+    exact Classical.choose_spec (Classical.choose_spec (hdecode p))
+  refine ⟨baseAt, ?_⟩
+  constructor
+  · intro p
+    have hmatch : WangTile.HMatches
+        (WangTile.product (baseAt p).1 (payloadAt p))
+        (WangTile.product (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2))) := by
+      simpa [hproduct p, hproduct (p.1 + 1, p.2)] using hx.1 p
+    exact (WangTile.HMatches_product_iff
+      (baseAt p).1 (payloadAt p)
+      (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2))).1 hmatch |>.1
+  · intro p
+    have hmatch : WangTile.VMatches
+        (WangTile.product (baseAt p).1 (payloadAt p))
+        (WangTile.product (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1))) := by
+      simpa [hproduct p, hproduct (p.1, p.2 + 1)] using hx.2 p
+    exact (WangTile.VMatches_product_iff
+      (baseAt p).1 (payloadAt p)
+      (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1))).1 hmatch |>.1
+
+/-- Decoded layers of a finite rectangle over a scaffold-combined tileset. -/
+def ValidCombinedRectangleLayers (S : Scaffold) (T : TileSet) (seed : WangTile)
+    {w h : Nat} (rect baseRect payloadRect : Rectangle w h) : Prop :=
+  ValidRectangle S.tiles baseRect ∧
+    (∀ i : Fin w, ∀ j : Fin h,
+      WangTile.product (baseRect i j) (payloadRect i j) = rect i j) ∧
+    (∀ i : Fin w, ∀ j : Fin h,
+      S.active (baseRect i j) = true →
+        payloadRect i j ∈ T ∧ (baseRect i j = S.corner → payloadRect i j = seed)) ∧
+    (∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+      WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j)) ∧
+    (∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      WangTile.VMatches (payloadRect i j) (payloadRect i ⟨j.val + 1, hj⟩))
+
+theorem exists_validCombinedRectangleLayers_of_validRectangle_combineWithScaffold
+    {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {w h : Nat} {rect : Rectangle w h}
+    (hrect : ValidRectangle (combineWithScaffold S T seed) rect) :
+    ∃ baseRect payloadRect : Rectangle w h,
+      ValidCombinedRectangleLayers S T seed rect baseRect payloadRect := by
+  classical
+  have hdecode : ∀ i : Fin w, ∀ j : Fin h,
+      ∃ b : TileIn S.tiles, ∃ payload : WangTile,
+        (S.active b.1 = true →
+          payload ∈ T ∧ (b.1 = S.corner → payload = seed)) ∧
+          WangTile.product b.1 payload = rect i j := by
+    intro i j
+    rcases mem_combineWithScaffold_iff.1 (hrect.1 i j) with
+      ⟨b, hb, payload, hactiveMem, _hinactive, htile⟩
+    exact ⟨⟨b, hb⟩, payload, hactiveMem, htile⟩
+  let baseAt : Fin w → Fin h → TileIn S.tiles := fun i j => Classical.choose (hdecode i j)
+  let payloadAt : Rectangle w h := fun i j =>
+    Classical.choose (Classical.choose_spec (hdecode i j))
+  have hactiveMem : ∀ i : Fin w, ∀ j : Fin h,
+      S.active (baseAt i j).1 = true →
+        payloadAt i j ∈ T ∧ ((baseAt i j).1 = S.corner → payloadAt i j = seed) := by
+    intro i j
+    exact (Classical.choose_spec (Classical.choose_spec (hdecode i j))).1
+  have hproduct : ∀ i : Fin w, ∀ j : Fin h,
+      WangTile.product (baseAt i j).1 (payloadAt i j) = rect i j := by
+    intro i j
+    exact (Classical.choose_spec (Classical.choose_spec (hdecode i j))).2
+  refine ⟨fun i j => (baseAt i j).1, payloadAt, ?_⟩
+  unfold ValidCombinedRectangleLayers
+  constructor
+  · constructor
+    · intro i j
+      exact (baseAt i j).2
+    constructor
+    · intro i j hi
+      have hmatch : WangTile.HMatches
+          (WangTile.product (baseAt i j).1 (payloadAt i j))
+          (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
+            (payloadAt ⟨i.val + 1, hi⟩ j)) := by
+        simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
+      exact (WangTile.HMatches_product_iff
+        (baseAt i j).1 (payloadAt i j)
+        (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j)).1 hmatch |>.1
+    · intro i j hj
+      have hmatch : WangTile.VMatches
+          (WangTile.product (baseAt i j).1 (payloadAt i j))
+          (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
+            (payloadAt i ⟨j.val + 1, hj⟩)) := by
+        simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
+      exact (WangTile.VMatches_product_iff
+        (baseAt i j).1 (payloadAt i j)
+        (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩)).1 hmatch |>.1
+  constructor
+  · intro i j
+    exact hproduct i j
+  constructor
+  · intro i j
+    exact hactiveMem i j
+  constructor
+  · intro i j hi
+    have hmatch : WangTile.HMatches
+        (WangTile.product (baseAt i j).1 (payloadAt i j))
+        (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
+          (payloadAt ⟨i.val + 1, hi⟩ j)) := by
+      simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
+    exact (WangTile.HMatches_product_iff
+      (baseAt i j).1 (payloadAt i j)
+      (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j)).1 hmatch |>.2
+  · intro i j hj
+    have hmatch : WangTile.VMatches
+        (WangTile.product (baseAt i j).1 (payloadAt i j))
+        (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
+          (payloadAt i ⟨j.val + 1, hj⟩)) := by
+      simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
+    exact (WangTile.VMatches_product_iff
+      (baseAt i j).1 (payloadAt i j)
+      (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩)).1 hmatch |>.2
+
+theorem validRectangle_payload_of_validCombinedRectangleLayers_of_active
+    {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {w h : Nat} {rect baseRect payloadRect : Rectangle w h}
+    (hlayers : ValidCombinedRectangleLayers S T seed rect baseRect payloadRect)
+    (hactive : ∀ i : Fin w, ∀ j : Fin h, S.active (baseRect i j) = true) :
+    ValidRectangle T payloadRect := by
+  constructor
+  · intro i j
+    exact (hlayers.2.2.1 i j (hactive i j)).1
+  constructor
+  · intro i j hi
+    exact hlayers.2.2.2.1 i j hi
+  · intro i j hj
+    exact hlayers.2.2.2.2 i j hj
+
+theorem tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_active_corner
+    {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {n : Nat} {rect baseRect payloadRect : Rectangle n n}
+    (hn : 0 < n)
+    (hlayers : ValidCombinedRectangleLayers S T seed rect baseRect payloadRect)
+    (hactive : ∀ i : Fin n, ∀ j : Fin n, S.active (baseRect i j) = true)
+    (hcorner : baseRect ⟨0, hn⟩ ⟨0, hn⟩ = S.corner) :
+    TileableFixedCornerSquare T seed n := by
+  refine ⟨hn, payloadRect, ?_, ?_⟩
+  · exact validRectangle_payload_of_validCombinedRectangleLayers_of_active hlayers hactive
+  · exact (hlayers.2.2.1 ⟨0, hn⟩ ⟨0, hn⟩ (hactive ⟨0, hn⟩ ⟨0, hn⟩)).2 hcorner
+
 theorem combineWithScaffold_primrec (S : Scaffold) :
     Primrec (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) := by
   classical
