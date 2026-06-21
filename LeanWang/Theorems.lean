@@ -47,8 +47,9 @@ theorem programMachine_correct (c : Code) :
 theorem machineTiles_correct (M : Machine) :
     TilesQuarterWithSeed (machineTiles M) (machineSeed M) ↔ ¬ Machine.HaltsEmpty M := by
   constructor
-  · intro _htiles
-    sorry
+  · intro htiles hhalts
+    rcases hhalts with ⟨n, hhalt⟩
+    exact not_tilesQuarterWithSeed_machineTiles_of_halts_at n hhalt htiles
   · intro hnonhalts
     exact tilesQuarterWithSeed_machineTiles_of_not_halts hnonhalts
 

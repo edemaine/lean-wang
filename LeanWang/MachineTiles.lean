@@ -1973,6 +1973,33 @@ theorem not_tilesQuarterWithSeed_machineTiles_of_halts_at_one {M : Machine}
         exact not_tilesQuarterWithSeed_machineTiles_of_first_step_right_halt
           hstart (by simpa [hq'] using hstep)
 
+theorem not_tilesQuarterWithSeed_machineTiles_of_halts_at {M : Machine}
+    (n : Nat) (hhalt : (M.runEmpty n).state = M.halt) :
+    ¬ TilesQuarterWithSeed (machineTiles M) (machineSeed M) := by
+  induction n with
+  | zero =>
+      exact not_tilesQuarterWithSeed_machineTiles_of_initial_halt
+        (by simpa [Machine.runEmpty_zero, Machine.initialID] using hhalt)
+  | succ n ih =>
+      by_cases hprev : (M.runEmpty n).state = M.halt
+      · exact ih hprev
+      · cases n with
+        | zero =>
+            exact not_tilesQuarterWithSeed_machineTiles_of_halts_at_one hhalt
+        | succ time =>
+            rintro ⟨x, hvalid, hseed⟩
+            have hprefix : ∀ k : Nat, 1 ≤ k → k ≤ time + 1 →
+                (M.runEmpty k).state ≠ M.halt := by
+              intro k _hk1 hkbound
+              exact Machine.runEmpty_state_ne_halt_of_le
+                (M := M) hkbound hprev
+            have hrow :=
+              seeded_tiling_positive_row_prev_run_cells_of_nonhalting_prefix
+                (M := M) (x := x) hvalid hseed time hprefix
+            exact seeded_tiling_false_of_next_halt_from_decoded_row
+              (M := M) (x := x) hvalid hseed hrow hprev
+              (by simpa using hhalt)
+
 theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
     TilesQuarterWithSeed (rawMachineTiles M) (rawMachineSeed M) := by
