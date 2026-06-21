@@ -1082,6 +1082,22 @@ theorem machineSeed_eq (M : Machine) :
       (initialHistoryTile M).toTaggedWangTile initialRowTag normalRowTag :=
   rfl
 
+theorem initialTaggedWangTile_eq_machineSeed_iff {M : Machine}
+    {t : MachineHistoryTile} :
+    t.toTaggedWangTile initialRowTag normalRowTag = machineSeed M ↔
+      t = initialHistoryTile M := by
+  constructor
+  · intro h
+    exact (MachineHistoryTile.toTaggedWangTile_injective h).2.2
+  · intro h
+    rw [h, machineSeed_eq]
+
+theorem normalTaggedWangTile_ne_machineSeed {M : Machine}
+    {t : MachineHistoryTile} :
+    t.toTaggedWangTile normalRowTag normalRowTag ≠ machineSeed M := by
+  intro h
+  exact initialTagged_ne_normalTagged (t := initialHistoryTile M) (u := t) h.symm
+
 theorem tilesQuarterWithSeed_rawMachineTiles_of_not_halts {M : Machine}
     (h : ¬ M.HaltsEmpty) :
     TilesQuarterWithSeed (rawMachineTiles M) (rawMachineSeed M) := by
