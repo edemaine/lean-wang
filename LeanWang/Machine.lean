@@ -100,6 +100,37 @@ theorem nextID_of_halt (M : Machine) (c : ID) (h : c.state = M.halt) :
     M.nextID c = c := by
   simp [nextID, h]
 
+theorem nextID_of_ne_halt {M : Machine} {c : ID} (h : c.state ≠ M.halt) :
+    M.nextID c =
+      let read := c.tape c.head
+      let (write, state', move) := M.step c.state read
+      { tape := fun i => if i = c.head then write else c.tape i
+        head := move.apply c.head
+        state := state' } := by
+  simp [nextID, h]
+
+theorem nextID_state_of_ne_halt {M : Machine} {c : ID} (h : c.state ≠ M.halt) :
+    (M.nextID c).state = (M.step c.state (c.tape c.head)).2.1 := by
+  rw [nextID_of_ne_halt h]
+
+theorem nextID_head_of_ne_halt {M : Machine} {c : ID} (h : c.state ≠ M.halt) :
+    (M.nextID c).head = (M.step c.state (c.tape c.head)).2.2.apply c.head := by
+  rw [nextID_of_ne_halt h]
+
+theorem nextID_tape_head_of_ne_halt {M : Machine} {c : ID} (h : c.state ≠ M.halt) :
+    (M.nextID c).tape c.head = (M.step c.state (c.tape c.head)).1 := by
+  rw [nextID_of_ne_halt h]
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  simp [hstep]
+
+theorem nextID_tape_of_ne_head {M : Machine} {c : ID} {i : Nat} (hi : i ≠ c.head) :
+    (M.nextID c).tape i = c.tape i := by
+  by_cases h : c.state = M.halt
+  · simp [nextID, h]
+  · rw [nextID_of_ne_halt h]
+    rcases M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+    simp [hi]
+
 end Machine
 
 end LeanWang
