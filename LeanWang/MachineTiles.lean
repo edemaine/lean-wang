@@ -419,6 +419,27 @@ theorem mem_machineHistoryTiles_of_supported {M : Machine} {t : MachineHistoryTi
 def machineTiles (M : Machine) : TileSet :=
   (machineHistoryTiles M).map MachineHistoryTile.toWangTile
 
+theorem mem_machineTiles_iff (M : Machine) (tile : WangTile) :
+    tile ∈ machineTiles M ↔
+      ∃ t : MachineHistoryTile, t ∈ machineHistoryTiles M ∧ t.toWangTile = tile := by
+  simp [machineTiles]
+
+theorem toWangTile_mem_machineTiles {M : Machine} {t : MachineHistoryTile}
+    (ht : t ∈ machineHistoryTiles M) :
+    t.toWangTile ∈ machineTiles M := by
+  rw [mem_machineTiles_iff]
+  exact ⟨t, ht, rfl⟩
+
+theorem toWangTile_mem_machineTiles_of_supported {M : Machine} {t : MachineHistoryTile}
+    (hprevLeft : t.prevLeft.Mem M) (hprevCenter : t.prevCenter.Mem M)
+    (hprevRight : t.prevRight.Mem M) (hnextLeft : t.nextLeft.Mem M)
+    (hnextCenter : t.nextCenter.Mem M) (hnextRight : t.nextRight.Mem M)
+    (hlocal : localNextCell? M t.prevLeft t.prevCenter t.prevRight = some t.nextCenter) :
+    t.toWangTile ∈ machineTiles M :=
+  toWangTile_mem_machineTiles
+    (mem_machineHistoryTiles_of_supported hprevLeft hprevCenter hprevRight
+      hnextLeft hnextCenter hnextRight hlocal)
+
 def initialPrevLeft (M : Machine) : MachineCell :=
   MachineCell.plain M.blank
 
