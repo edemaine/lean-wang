@@ -868,16 +868,21 @@ def taggedMachineTiles (M : Machine) : TileSet :=
 def machineTiles (M : Machine) : TileSet :=
   taggedMachineTiles M
 
+def IsInitialMachineTile (M : Machine) (tile : WangTile) : Prop :=
+  ∃ t : MachineHistoryTile,
+    t ∈ initialRowHistoryTiles M ∧
+      t.toTaggedWangTile initialRowTag normalRowTag = tile
+
+def IsNormalMachineTile (M : Machine) (tile : WangTile) : Prop :=
+  ∃ t : MachineHistoryTile,
+    t ∈ machineHistoryTiles M ∧
+      t.toTaggedWangTile normalRowTag normalRowTag = tile
+
 theorem mem_machineTiles_iff (M : Machine) (tile : WangTile) :
     tile ∈ machineTiles M ↔
-      (∃ t : MachineHistoryTile,
-        t ∈ initialRowHistoryTiles M ∧
-          t.toTaggedWangTile initialRowTag normalRowTag = tile) ∨
-      (∃ t : MachineHistoryTile,
-        t ∈ machineHistoryTiles M ∧
-          t.toTaggedWangTile normalRowTag normalRowTag = tile) := by
-  simp [machineTiles, taggedMachineTiles, initialRowMachineTiles,
-    normalRowMachineTiles]
+      IsInitialMachineTile M tile ∨ IsNormalMachineTile M tile := by
+  simp [IsInitialMachineTile, IsNormalMachineTile, machineTiles,
+    taggedMachineTiles, initialRowMachineTiles, normalRowMachineTiles]
 
 theorem initialTagged_ne_normalTagged {t u : MachineHistoryTile} :
     t.toTaggedWangTile initialRowTag normalRowTag ≠
@@ -885,6 +890,63 @@ theorem initialTagged_ne_normalTagged {t u : MachineHistoryTile} :
   intro h
   exact initialRowTag_ne_normalRowTag
     (MachineHistoryTile.toTaggedWangTile_injective h).1
+
+theorem IsNormalMachineTile.of_hMatches_left {M : Machine}
+    {left right : WangTile}
+    (hleft : IsNormalMachineTile M left)
+    (hmatch : WangTile.HMatches left right)
+    (hright : right ∈ machineTiles M) :
+    IsNormalMachineTile M right := by
+  rcases hleft with ⟨leftHistory, _hleftMem, hleftTile⟩
+  rcases (mem_machineTiles_iff M right).1 hright with hrightInitial | hrightNormal
+  · rcases hrightInitial with ⟨rightHistory, _hrightMem, hrightTile⟩
+    have hmatch' : WangTile.HMatches
+        (leftHistory.toTaggedWangTile normalRowTag normalRowTag)
+        (rightHistory.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [hleftTile, hrightTile] using hmatch
+    have htag := (MachineHistoryTile.hMatches_toTaggedWangTile_iff_cells
+      normalRowTag normalRowTag initialRowTag normalRowTag
+      leftHistory rightHistory).1 hmatch'
+    exact False.elim (initialRowTag_ne_normalRowTag htag.1.symm)
+  · exact hrightNormal
+
+theorem IsNormalMachineTile.of_vMatches_below {M : Machine}
+    {lower upper : WangTile}
+    (hlower : IsNormalMachineTile M lower)
+    (hmatch : WangTile.VMatches lower upper)
+    (hupper : upper ∈ machineTiles M) :
+    IsNormalMachineTile M upper := by
+  rcases hlower with ⟨lowerHistory, _hlowerMem, hlowerTile⟩
+  rcases (mem_machineTiles_iff M upper).1 hupper with hupperInitial | hupperNormal
+  · rcases hupperInitial with ⟨upperHistory, _hupperMem, hupperTile⟩
+    have hmatch' : WangTile.VMatches
+        (lowerHistory.toTaggedWangTile normalRowTag normalRowTag)
+        (upperHistory.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [hlowerTile, hupperTile] using hmatch
+    have htag := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+      normalRowTag normalRowTag initialRowTag normalRowTag
+      lowerHistory upperHistory).1 hmatch'
+    exact False.elim (initialRowTag_ne_normalRowTag htag.1.symm)
+  · exact hupperNormal
+
+theorem IsNormalMachineTile.of_vMatches_initial_below {M : Machine}
+    {lower upper : WangTile}
+    (hlower : IsInitialMachineTile M lower)
+    (hmatch : WangTile.VMatches lower upper)
+    (hupper : upper ∈ machineTiles M) :
+    IsNormalMachineTile M upper := by
+  rcases hlower with ⟨lowerHistory, _hlowerMem, hlowerTile⟩
+  rcases (mem_machineTiles_iff M upper).1 hupper with hupperInitial | hupperNormal
+  · rcases hupperInitial with ⟨upperHistory, _hupperMem, hupperTile⟩
+    have hmatch' : WangTile.VMatches
+        (lowerHistory.toTaggedWangTile initialRowTag normalRowTag)
+        (upperHistory.toTaggedWangTile initialRowTag normalRowTag) := by
+      simpa [hlowerTile, hupperTile] using hmatch
+    have htag := (MachineHistoryTile.vMatches_toTaggedWangTile_iff_cells
+      initialRowTag normalRowTag initialRowTag normalRowTag
+      lowerHistory upperHistory).1 hmatch'
+    exact False.elim (initialRowTag_ne_normalRowTag htag.1.symm)
+  · exact hupperNormal
 
 theorem initialRowHistoryTile_zero_mem (M : Machine) :
     runHistoryTile M 0 0 ∈ initialRowHistoryTiles M := by
