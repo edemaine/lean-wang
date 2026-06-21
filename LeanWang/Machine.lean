@@ -255,6 +255,55 @@ theorem action_primrec : Primrec TableTransition.action := by
   unfold action
   exact Primrec.pair write_primrec (Primrec.pair next_primrec move_primrec)
 
+theorem matchesInput_primrec :
+    Primrec (fun p : TableTransition × Nat × Nat =>
+      p.1.matchesInput p.2.1 p.2.2) := by
+  unfold matchesInput
+  exact Primrec.and.comp
+    (Primrec.beq.comp (state_primrec.comp Primrec.fst)
+      (Primrec.fst.comp Primrec.snd))
+    (Primrec.beq.comp (read_primrec.comp Primrec.fst)
+      (Primrec.snd.comp Primrec.snd))
+
+def lookup? (table : List TableTransition) (q a : Nat) : Option TableTransition :=
+  (table.drop (table.findIdx fun e => e.matchesInput q a)).head?
+
+theorem lookup?_eq_find? (table : List TableTransition) (q a : Nat) :
+    lookup? table q a = table.find? fun e => e.matchesInput q a := by
+  unfold lookup?
+  induction table with
+  | nil => rfl
+  | cons e table ih =>
+      by_cases h : e.matchesInput q a = true
+      · simp [List.findIdx_cons, h]
+      · simp [List.findIdx_cons, h, ih]
+
+theorem lookup?_primrec :
+    Primrec (fun p : List TableTransition × Nat × Nat =>
+      lookup? p.1 p.2.1 p.2.2) := by
+  unfold lookup?
+  have hpred :
+      Primrec₂ (fun p : List TableTransition × Nat × Nat =>
+        fun e : TableTransition => e.matchesInput p.2.1 p.2.2) := by
+    apply Primrec₂.mk
+    exact matchesInput_primrec.comp
+      (Primrec.pair Primrec.snd (Primrec.snd.comp Primrec.fst))
+  have hidx :
+      Primrec (fun p : List TableTransition × Nat × Nat =>
+        p.1.findIdx fun e => e.matchesInput p.2.1 p.2.2) :=
+    Primrec.list_findIdx Primrec.fst hpred
+  exact Primrec.list_head?.comp (Primrec.list_drop.comp hidx Primrec.fst)
+
+theorem find?_primrec :
+    Primrec (fun p : List TableTransition × Nat × Nat =>
+      p.1.find? fun e => e.matchesInput p.2.1 p.2.2) :=
+  lookup?_primrec.of_eq fun p => lookup?_eq_find? p.1 p.2.1 p.2.2
+
+theorem find?_computable :
+    Computable (fun p : List TableTransition × Nat × Nat =>
+      p.1.find? fun e => e.matchesInput p.2.1 p.2.2) :=
+  find?_primrec.to_comp
+
 end TableTransition
 
 /--
@@ -553,6 +602,26 @@ theorem ofTuple_primrec : Primrec TableProgram.ofTuple := by
     (Primrec.of_equiv_symm (e := TableProgram.equivTuple) :
       Primrec TableProgram.equivTuple.symm)
 
+theorem symbols_primrec : Primrec TableProgram.symbols :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem states_primrec : Primrec TableProgram.states :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem blank_primrec : Primrec TableProgram.blank :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem start_primrec : Primrec TableProgram.start :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem halt_primrec : Primrec TableProgram.halt :=
+  Primrec.fst.comp
+    (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))))
+
+theorem table_primrec : Primrec TableProgram.table :=
+  Primrec.snd.comp
+    (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))))
+
 theorem mk_primrec :
     Primrec (fun p : List Nat × List Nat × Nat × Nat × Nat × List TableTransition =>
       ({ symbols := p.1
@@ -582,6 +651,18 @@ theorem supportedSymbols_computable : Computable TableProgram.supportedSymbols :
 
 theorem supportedStates_computable : Computable TableProgram.supportedStates :=
   supportedStates_primrec.to_comp
+
+theorem transition?_primrec :
+    Primrec (fun p : TableProgram × Nat × Nat =>
+      p.1.toTableMachine.transition? p.2.1 p.2.2) := by
+  unfold TableMachine.transition?
+  exact TableTransition.find?_primrec.comp
+    (Primrec.pair (table_primrec.comp Primrec.fst) Primrec.snd)
+
+theorem transition?_computable :
+    Computable (fun p : TableProgram × Nat × Nat =>
+      p.1.toTableMachine.transition? p.2.1 p.2.2) :=
+  transition?_primrec.to_comp
 
 end TableProgram
 
