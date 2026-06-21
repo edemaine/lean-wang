@@ -947,6 +947,22 @@ theorem tableProgramLocalNextCellData?_primrec :
         rcases qa with ⟨q, a⟩
         simp [tableProgramLocalNextCellData?, hhead]
 
+theorem tableProgramLocalNextCellData?_eq_tableProgramLocalNextCell?
+    (P : TableProgram) (left center right : MachineCell) :
+    tableProgramLocalNextCellData? P left center right =
+      tableProgramLocalNextCell? P left center right := by
+  cases left <;> cases center <;> cases right <;>
+    simp only [tableProgramLocalNextCellData?, tableProgramPlainCenterNext?,
+      tableProgramRightHeadOrPlainNext?, tableProgramCenterHeadNext?,
+      tableProgramLeftHeadNext?, tableProgramRightHeadNext?, tableProgramLocalNextCell?,
+      MachineCell.head?, MachineCell.plain?, MachineCell.isBoundary]
+    <;> try
+      (cases hmove : (P.toTableMachine.step _ _).2.2 <;>
+        simp only [Bool.true_and, Bool.false_and, decide_eq_true_eq, reduceCtorEq, if_true,
+          if_false])
+    <;> repeat' split
+    <;> rfl
+
 theorem tableProgramLocalNextCell?_eq_localNextCell?
     (P : TableProgram) (left center right : MachineCell) :
     tableProgramLocalNextCell? P left center right =
