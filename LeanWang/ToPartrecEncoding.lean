@@ -303,6 +303,29 @@ def optionStackSymbolOfCode (n : Nat) : Option Γ' :=
   | 3 => some Γ'.bit0
   | _ => some Γ'.bit1
 
+theorem optionStackSymbolOfCode_primrec : Primrec optionStackSymbolOfCode := by
+  let symbols : List (Option Γ') :=
+    [none, some Γ'.consₗ, some Γ'.cons, some Γ'.bit0, some Γ'.bit1]
+  have hidx : Primrec (fun n : Nat => n % 5) :=
+    Primrec.nat_mod.comp Primrec.id (Primrec.const 5)
+  have hget : Primrec (fun n : Nat => symbols.getD (n % 5) (some Γ'.bit1)) :=
+    Primrec.list_getD (some Γ'.bit1) |>.comp (Primrec.const symbols) hidx
+  exact hget.of_eq fun n => by
+    unfold optionStackSymbolOfCode
+    have hlt : n % 5 < 5 := Nat.mod_lt n (by decide)
+    generalize h : n % 5 = r at hlt ⊢
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    · omega
+
 theorem optionStackSymbolCode_lt_five (s : Option Γ') :
     optionStackSymbolCode s < 5 := by
   cases s with
@@ -352,6 +375,11 @@ def boolCode : Bool → Nat
 def boolOfCode (n : Nat) : Bool :=
   n % 2 = 1
 
+theorem boolOfCode_primrec : Primrec boolOfCode := by
+  unfold boolOfCode
+  exact Primrec.eq.decide.comp
+    (Primrec.nat_mod.comp Primrec.id (Primrec.const 2)) (Primrec.const 1)
+
 theorem boolCode_lt_two (b : Bool) : boolCode b < 2 := by
   cases b <;> decide
 
@@ -379,6 +407,21 @@ def stackPredicateOfCode (n : Nat) : Γ' → Bool
   | Γ'.cons => boolOfCode (n / 2)
   | Γ'.bit0 => boolOfCode (n / 4)
   | Γ'.bit1 => boolOfCode (n / 8)
+
+theorem stackPredicateOfCode_primrec : Primrec stackPredicateOfCode := by
+  have h₂ : Primrec (fun n : Nat => n / 2) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 2)
+  have h₄ : Primrec (fun n : Nat => n / 4) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 4)
+  have h₈ : Primrec (fun n : Nat => n / 8) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 8)
+  have htuple : Primrec fun n : Nat =>
+      stackPredicateEquivTuple (stackPredicateOfCode n) := by
+    exact Primrec.pair (boolOfCode_primrec.comp Primrec.id)
+      (Primrec.pair (boolOfCode_primrec.comp h₂)
+        (Primrec.pair (boolOfCode_primrec.comp h₄) (boolOfCode_primrec.comp h₈)))
+  exact (Primrec.of_equiv_iff (α := Bool × Bool × Bool × Bool)
+    stackPredicateEquivTuple).1 htuple
 
 theorem stackPredicateCode_lt_sixteen (p : Γ' → Bool) :
     stackPredicateCode p < 16 := by
@@ -408,6 +451,11 @@ theorem decodeStackPredicateCode_stackPredicateCode (p : Γ' → Bool) :
   simp [decodeStackPredicateCode, stackPredicateCode_lt_sixteen,
     stackPredicateOfCode_stackPredicateCode]
 
+theorem decodeStackPredicateCode_primrec : Primrec decodeStackPredicateCode := by
+  unfold decodeStackPredicateCode
+  exact Primrec.ite (Primrec.nat_lt.comp Primrec.id (Primrec.const 16))
+    (Primrec.option_some_iff.2 stackPredicateOfCode_primrec) (Primrec.const none)
+
 /-- Dense numeric code for local-store actions used by `Λ'.push`. -/
 def localActionCode (f : Option Γ' → Option Γ') : Nat :=
   optionStackSymbolCode (f none) + 5 * (optionStackSymbolCode (f (some Γ'.consₗ)) +
@@ -422,6 +470,26 @@ def localActionOfCode (n : Nat) : Option Γ' → Option Γ'
   | some Γ'.cons => optionStackSymbolOfCode (n / 25)
   | some Γ'.bit0 => optionStackSymbolOfCode (n / 125)
   | some Γ'.bit1 => optionStackSymbolOfCode (n / 625)
+
+theorem localActionOfCode_primrec : Primrec localActionOfCode := by
+  have h₅ : Primrec (fun n : Nat => n / 5) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 5)
+  have h₂₅ : Primrec (fun n : Nat => n / 25) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 25)
+  have h₁₂₅ : Primrec (fun n : Nat => n / 125) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 125)
+  have h₆₂₅ : Primrec (fun n : Nat => n / 625) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 625)
+  have htuple : Primrec fun n : Nat =>
+      localActionEquivTuple (localActionOfCode n) := by
+    exact Primrec.pair (optionStackSymbolOfCode_primrec.comp Primrec.id)
+      (Primrec.pair (optionStackSymbolOfCode_primrec.comp h₅)
+        (Primrec.pair (optionStackSymbolOfCode_primrec.comp h₂₅)
+          (Primrec.pair (optionStackSymbolOfCode_primrec.comp h₁₂₅)
+            (optionStackSymbolOfCode_primrec.comp h₆₂₅))))
+  exact (Primrec.of_equiv_iff
+    (α := Option Γ' × Option Γ' × Option Γ' × Option Γ' × Option Γ')
+    localActionEquivTuple).1 htuple
 
 theorem localActionCode_lt (f : Option Γ' → Option Γ') :
     localActionCode f < 3125 := by
@@ -474,6 +542,11 @@ def decodeLocalActionCode (n : Nat) : Option (Option Γ' → Option Γ') :=
 theorem decodeLocalActionCode_localActionCode (f : Option Γ' → Option Γ') :
     decodeLocalActionCode (localActionCode f) = some f := by
   simp [decodeLocalActionCode, localActionCode_lt, localActionOfCode_localActionCode]
+
+theorem decodeLocalActionCode_primrec : Primrec decodeLocalActionCode := by
+  unfold decodeLocalActionCode
+  exact Primrec.ite (Primrec.nat_lt.comp Primrec.id (Primrec.const 3125))
+    (Primrec.option_some_iff.2 localActionOfCode_primrec) (Primrec.const none)
 
 theorem stackNameCode_primrec : Primrec stackNameCode :=
   Primrec.dom_finite stackNameCode
