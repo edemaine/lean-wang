@@ -769,9 +769,13 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
     q ∈ partrecStartedTM0LabelSupportList tc := by
   simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
 
+/-- Number of numeric states in the finite one-sided TM0 program extracted from `TM0Route`. -/
+def partrecStartedTM0StateCount (tc : Turing.ToPartrec.Code) : Nat :=
+  (partrecStartedTM0LabelSupportList tc).length
+
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
-  List.range (partrecStartedTM0LabelSupportList tc).length
+  List.range (partrecStartedTM0StateCount tc)
 
 /-- Numeric start state corresponding to the default translated TM0 label. -/
 def partrecStartedTM0Start : Nat :=
@@ -779,7 +783,8 @@ def partrecStartedTM0Start : Nat :=
 
 theorem partrecStartedTM0Start_mem_states (tc : Turing.ToPartrec.Code) :
     partrecStartedTM0Start ∈ partrecStartedTM0States tc := by
-  simp [partrecStartedTM0Start, partrecStartedTM0States, partrecStartedTM0LabelSupportList]
+  simp [partrecStartedTM0Start, partrecStartedTM0States, partrecStartedTM0StateCount,
+    partrecStartedTM0LabelSupportList]
 
 theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelSupportList tc)[0]? =

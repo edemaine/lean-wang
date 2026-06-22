@@ -1017,11 +1017,16 @@ theorem programOfCountAndRows_primrec :
     (Primrec.pair (Primrec.list_range.comp Primrec.fst) Primrec.snd)
 
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
-  programOfParts (TM0Route.partrecStartedTM0States tc) (initRows tc) (simRows tc)
+  programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc) (initRows tc) (simRows tc)
 
 theorem program_eq_programOfParts (tc : Turing.ToPartrec.Code) :
     program tc =
       programOfParts (TM0Route.partrecStartedTM0States tc) (initRows tc) (simRows tc) := rfl
+
+theorem program_eq_programOfCountAndRows (tc : Turing.ToPartrec.Code) :
+    program tc =
+      programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc)
+        (initRows tc) (simRows tc) := rfl
 
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
