@@ -99,6 +99,12 @@ def IsScaffold (S : Scaffold) : Prop :=
 compiler/reduction obligation into a `TableCompiler`, using the proved
 equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
 
+There is also an encoded TM2 factoring of the same obligation:
+`ToPartrecTM2Reduction` records a computable natural-number encoding of the
+Mathlib `Turing.ToPartrec.Code` evaluator corresponding to a unary
+`Nat.Partrec.Code`, and `TM2TableCompiler` compiles those encoded TM2 evaluator
+configurations to `TableProgram`. Together they produce a `TableCompiler`.
+
 Next implementation targets:
 
 1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
