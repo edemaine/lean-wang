@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.PostMachine
 import LeanWang.TM0FiniteCompiler
+import LeanWang.ToPartrecEncoding
 
 /-!
 Executable finite one-sided TM0 program data for a folded simulation of Mathlib's TM0.
@@ -246,6 +247,18 @@ def foldedStartState : Nat :=
 def foldedSimStartState (tc : Turing.ToPartrec.Code) : Nat :=
   foldedSimStateCode tc FoldSide.right default
 
+theorem foldedSimStartState_eq (tc : Turing.ToPartrec.Code) : foldedSimStartState tc =
+    taggedState stateTagSim (Nat.pair FoldSide.right.code TM0Route.partrecStartedTM0Start) := by
+  simp [foldedSimStartState, foldedSimStateCode, TM0FiniteCompiler.stateCode_default]
+
+theorem foldedSimStartState_primrec :
+    Primrec (fun _tc : Turing.ToPartrec.Code => foldedSimStartState _tc) := by
+  refine (Primrec.const
+    (taggedState stateTagSim (Nat.pair FoldSide.right.code
+      TM0Route.partrecStartedTM0Start))).of_eq ?_
+  intro tc
+  exact (foldedSimStartState_eq (tc := tc)).symm
+
 def foldedInitStateList : List Nat :=
   [initWriteOriginState, initReturnState 0] ++
     (List.range TM0Route.partrecStartedTM0Input.length).flatMap fun i =>
@@ -260,6 +273,11 @@ def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
 
 def inputSymbol (i : Nat) : SourceSymbol :=
   TM0Route.partrecStartedTM0Input.getI i
+
+theorem inputSymbol_primrec : Primrec inputSymbol := by
+  unfold inputSymbol
+  exact Primrec.list_getI.comp
+    (Primrec.const TM0Route.partrecStartedTM0Input) Primrec.id
 
 def nextAfterOrigin : Nat :=
   if TM0Route.partrecStartedTM0Input.length ≤ 1 then
@@ -310,19 +328,87 @@ def nextAfterWriteRight (i : Nat) : Nat :=
   else
     initReturnState (i + 1)
 
+theorem nextAfterWriteRight_primrec : Primrec nextAfterWriteRight := by
+  unfold nextAfterWriteRight
+  have hlt : PrimrecPred (fun i : Nat => i + 2 < TM0Route.partrecStartedTM0Input.length) := by
+    exact Primrec.nat_lt.comp
+      (Primrec.nat_add.comp Primrec.id (Primrec.const 2))
+      (Primrec.const TM0Route.partrecStartedTM0Input.length)
+  have hmove : Primrec (fun i : Nat => initMoveRightState (i + 1)) :=
+    initMoveRightState_primrec.comp (Primrec.succ)
+  have hreturn : Primrec (fun i : Nat => initReturnState (i + 1)) :=
+    initReturnState_primrec.comp (Primrec.succ)
+  exact Primrec.ite hlt hmove hreturn
+
 def initWriteRightRow (i : Nat) : PostTransition :=
   mkRow (initWriteRightState i) foldedBlank (nextAfterWriteRight i)
     (PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1))))
 
+theorem initWriteRightRow_primrec : Primrec initWriteRightRow := by
+  unfold initWriteRightRow
+  have hinput : Primrec (fun i : Nat => inputSymbol (i + 1)) :=
+    inputSymbol_primrec.comp Primrec.succ
+  have hwriteSymbol : Primrec (fun i : Nat =>
+      foldedSymbolCode false default (inputSymbol (i + 1))) := by
+    exact foldedSymbolCode_primrec.comp
+      (Primrec.pair (Primrec.const false)
+        (Primrec.pair (Primrec.const default) hinput))
+  have hstmt : Primrec (fun i : Nat =>
+      PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1)))) :=
+    postStmtWrite_primrec.comp hwriteSymbol
+  exact mkRow_primrec.comp
+    (Primrec.pair initWriteRightState_primrec
+      (Primrec.pair (Primrec.const foldedBlank)
+        (Primrec.pair nextAfterWriteRight_primrec hstmt)))
+
 def initWriteRightRows : List PostTransition :=
   (List.range (TM0Route.partrecStartedTM0Input.length - 1)).map fun i =>
     initWriteRightRow i
+
+theorem initWriteRightRows_primrec :
+    Primrec (fun _tc : Turing.ToPartrec.Code => initWriteRightRows) := by
+  exact Primrec.const initWriteRightRows
 
 def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
   if i = 0 then
     mkRow (initReturnState 0) read (foldedSimStartState tc) (PostStmt.write read)
   else
     mkRow (initReturnState i) read (initReturnState (i - 1)) (PostStmt.move Move.left)
+
+theorem initReturnRow_primrec :
+    Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat =>
+      initReturnRow p.1 p.2.1 p.2.2) := by
+  unfold initReturnRow
+  have hiZero : PrimrecPred (fun p : Turing.ToPartrec.Code × Nat × Nat => p.2.1 = 0) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 0)
+  have hread : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat => p.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  have hwriteStmt : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat =>
+      PostStmt.write p.2.2) :=
+    postStmtWrite_primrec.comp hread
+  have hzero : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat =>
+      mkRow (initReturnState 0) p.2.2 (foldedSimStartState p.1)
+        (PostStmt.write p.2.2)) :=
+    mkRow_primrec.comp
+      (Primrec.pair (Primrec.const (initReturnState 0))
+        (Primrec.pair hread
+          (Primrec.pair (foldedSimStartState_primrec.comp Primrec.fst) hwriteStmt)))
+  have hi : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  have hpredState : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat =>
+      initReturnState (p.2.1 - 1)) :=
+    initReturnState_primrec.comp
+      (Primrec.nat_sub.comp hi (Primrec.const 1))
+  have hmoveStmt : Primrec (fun _p : Turing.ToPartrec.Code × Nat × Nat =>
+      PostStmt.move Move.left) :=
+    Primrec.const (PostStmt.move Move.left)
+  have hsucc : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat =>
+      mkRow (initReturnState p.2.1) p.2.2 (initReturnState (p.2.1 - 1))
+        (PostStmt.move Move.left)) :=
+    mkRow_primrec.comp
+      (Primrec.pair (initReturnState_primrec.comp hi)
+        (Primrec.pair hread (Primrec.pair hpredState hmoveStmt)))
+  exact Primrec.ite hiZero hzero hsucc
 
 def initReturnIndexList : List Nat :=
   0 :: List.range TM0Route.partrecStartedTM0Input.length
@@ -331,8 +417,29 @@ def initReturnRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   initReturnIndexList.flatMap fun i =>
     foldedSymbolList.map fun read => initReturnRow tc i read
 
+theorem initReturnRows_primrec : Primrec initReturnRows := by
+  unfold initReturnRows
+  refine Primrec.list_flatMap (Primrec.const initReturnIndexList) ?_
+  apply Primrec₂.mk
+  refine Primrec.list_map (Primrec.const foldedSymbolList) ?_
+  apply Primrec₂.mk
+  exact initReturnRow_primrec.comp
+    (Primrec.pair (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+
 def initRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
-  initWriteOriginRow :: initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc
+  initWriteOriginRow :: (initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc))
+
+theorem initRows_primrec : Primrec initRows := by
+  change Primrec (fun tc : Turing.ToPartrec.Code =>
+    initWriteOriginRow :: (initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc)))
+  have hwriteReturn : Primrec (fun tc : Turing.ToPartrec.Code =>
+      initWriteRightRows ++ initReturnRows tc) :=
+    Primrec.list_append.comp (Primrec.const initWriteRightRows) initReturnRows_primrec
+  have htail : Primrec (fun tc : Turing.ToPartrec.Code =>
+      initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc)) :=
+    Primrec.list_append.comp (Primrec.const initMoveRightRows) hwriteReturn
+  exact Primrec.list_cons.comp (Primrec.const initWriteOriginRow) htail
 
 def foldedMoveNextSide (side : FoldSide) (marked : Bool) (dir : Turing.Dir) : FoldSide :=
   match side, marked, dir with
