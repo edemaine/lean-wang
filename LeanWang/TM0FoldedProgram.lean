@@ -344,6 +344,13 @@ theorem foldedStateListOfCodes_primrec : Primrec foldedStateListOfCodes := by
   exact Primrec.list_append.comp (Primrec.const foldedInitStateList)
     foldedSimStateListOfCodes_primrec
 
+def foldedStateListForCount (stateCount : Nat) : List Nat :=
+  foldedStateListOfCodes (List.range stateCount)
+
+theorem foldedStateListForCount_primrec : Primrec foldedStateListForCount := by
+  unfold foldedStateListForCount
+  exact foldedStateListOfCodes_primrec.comp Primrec.list_range
+
 def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
   foldedStateListOfCodes (TM0Route.partrecStartedTM0States tc)
 
@@ -997,6 +1004,17 @@ theorem programOfParts_primrec :
           (Primrec.pair (Primrec.const foldedStartState)
             (Primrec.list_append.comp (Primrec.fst.comp Primrec.snd)
               (Primrec.snd.comp Primrec.snd))))))
+
+def programOfCountAndRows (stateCount : Nat) (init sim : List PostTransition) :
+    FiniteTM0Program :=
+  programOfParts (List.range stateCount) init sim
+
+theorem programOfCountAndRows_primrec :
+    Primrec (fun p : Nat × List PostTransition × List PostTransition =>
+      programOfCountAndRows p.1 p.2.1 p.2.2) := by
+  unfold programOfCountAndRows
+  exact programOfParts_primrec.comp
+    (Primrec.pair (Primrec.list_range.comp Primrec.fst) Primrec.snd)
 
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
   programOfParts (TM0Route.partrecStartedTM0States tc) (initRows tc) (simRows tc)
