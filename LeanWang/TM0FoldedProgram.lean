@@ -332,8 +332,16 @@ theorem foldedSimStateListOfCodes_primrec : Primrec foldedSimStateListOfCodes :=
 def foldedSimStateList (tc : Turing.ToPartrec.Code) : List Nat :=
   foldedSimStateListOfCodes (TM0Route.partrecStartedTM0States tc)
 
+def foldedStateListOfCodes (qCodes : List Nat) : List Nat :=
+  foldedInitStateList ++ foldedSimStateListOfCodes qCodes
+
+theorem foldedStateListOfCodes_primrec : Primrec foldedStateListOfCodes := by
+  unfold foldedStateListOfCodes
+  exact Primrec.list_append.comp (Primrec.const foldedInitStateList)
+    foldedSimStateListOfCodes_primrec
+
 def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
-  foldedInitStateList ++ foldedSimStateList tc
+  foldedStateListOfCodes (TM0Route.partrecStartedTM0States tc)
 
 def inputSymbol (i : Nat) : SourceSymbol :=
   TM0Route.partrecStartedTM0Input.getI i
