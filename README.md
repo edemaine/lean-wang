@@ -17,6 +17,8 @@ the concrete definitions needed for the Berger/Robinson route:
   well-formed finite supports for the Wang-tile simulation layer.
 - `LeanWang.MachineTiles`: finite local-history Wang-tile data generated from a
   concrete machine.
+- `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
+  `Turing.ToPartrec.Code`.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

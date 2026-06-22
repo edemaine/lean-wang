@@ -110,14 +110,15 @@ predicate families. The fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
 from `PrimrecSearchTableCompiler`.
 
-There is also an encoded TM2 factoring of the same obligation:
-`ToPartrecTM2Reduction` records a computable natural-number encoding of the
-Mathlib `Turing.ToPartrec.Code` evaluator corresponding to a unary
-`Nat.Partrec.Code`, and `TM2TableCompiler` compiles those encoded TM2 evaluator
-configurations to `TableProgram`. Together they produce a `TableCompiler`, and
-the fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded
-scaffolded domino theorem surfaces now have direct corollaries from this
-encoded-TM2 factorization.
+There is also a TM2 factoring of the same obligation. The repository now
+provides a local natural-number encoding, `Denumerable` instance, and hence
+`Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
+`ToPartrecTM2Reduction` records a computable translation from unary
+`Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
+`TM2TableCompiler` compiles those TM2 evaluator configurations to
+`TableProgram`. Together they produce a `TableCompiler`, and the fixed-domino,
+fixed-corner, encoded scaffolded domino, and unencoded scaffolded domino theorem
+surfaces now have direct corollaries from this TM2 factorization.
 
 Next implementation targets:
 

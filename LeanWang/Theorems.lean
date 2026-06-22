@@ -8,6 +8,7 @@ import LeanWang.FiniteSearchProgram
 import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
+import LeanWang.ToPartrecEncoding
 import Mathlib.Computability.Reduce
 import Mathlib.Computability.TuringMachine.ToPartrec
 
@@ -197,41 +198,38 @@ theorem exists_tm2_for_natPartrecCode (c : Code) :
     (Turing.ToPartrec.Code.eval tc [0])).trans (htc 0)
 
 /--
-A computable encoded translation from Mathlib unary `Nat.Partrec.Code` to the
-Mathlib TM2 evaluator configuration used by `PartrecToTM2`.
+A computable translation from Mathlib unary `Nat.Partrec.Code` to the Mathlib
+TM2 evaluator configuration used by `PartrecToTM2`.
 
 Mathlib proves existence of suitable `Turing.ToPartrec.Code` values abstractly
-in `exists_tm2_for_natPartrecCode`, but that type does not currently expose a
-`Primcodable` instance. This structure records the stronger data needed for a
-computable many-one reduction: a natural-number code, a decoder for those codes,
-and the semantic correctness theorem.
+in `exists_tm2_for_natPartrecCode`; this structure records the stronger
+computable data needed for a many-one reduction.
 -/
 structure ToPartrecTM2Reduction where
-  tm2Code : Code → Nat
-  tm2Code_computable : Computable tm2Code
-  decode : Nat → Turing.ToPartrec.Code
+  translate : Code → Turing.ToPartrec.Code
+  translate_computable : Computable translate
   correct : ∀ c : Code,
     (StateTransition.eval
       (Turing.TM2.step Turing.PartrecToTM2.tr)
-      (Turing.PartrecToTM2.init (decode (tm2Code c)) [0])).Dom ↔
+      (Turing.PartrecToTM2.init (translate c) [0])).Dom ↔
         (Nat.Partrec.Code.eval c 0).Dom
 
 /--
-A compiler/reduction from encoded Mathlib TM2 evaluator configurations to
-finite table-machine data.
+A compiler/reduction from Mathlib TM2 evaluator configurations to finite
+table-machine data.
 
 This is another way to factor the remaining `TableCompiler` obligation: first
-translate unary partial-recursive codes to encoded `Turing.ToPartrec.Code`
-values, then compile the corresponding TM2 evaluator run to a `TableProgram`.
+translate unary partial-recursive codes to `Turing.ToPartrec.Code`, then compile
+the corresponding TM2 evaluator run to a `TableProgram`.
 -/
-structure TM2TableCompiler (decode : Nat → Turing.ToPartrec.Code) where
-  compile : Nat → TableProgram
+structure TM2TableCompiler where
+  compile : Turing.ToPartrec.Code → TableProgram
   compile_computable : Computable compile
-  correct : ∀ n : Nat,
-    Machine.HaltsEmpty (compile n).toMachine ↔
+  correct : ∀ tc : Turing.ToPartrec.Code,
+    Machine.HaltsEmpty (compile tc).toMachine ↔
       (StateTransition.eval
         (Turing.TM2.step Turing.PartrecToTM2.tr)
-        (Turing.PartrecToTM2.init (decode n) [0])).Dom
+        (Turing.PartrecToTM2.init tc [0])).Dom
 
 /-- A small sample table program, useful for concrete tests and examples. -/
 def dummyProgram : TableProgram where
@@ -263,12 +261,12 @@ structure TableCompiler where
     Machine.HaltsEmpty (compile c).toMachine ↔ (Nat.Partrec.Code.eval c 0).Dom
 
 def TM2TableCompiler.toTableCompiler
-    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) : TableCompiler where
-  compile := fun c => C.compile (R.tm2Code c)
-  compile_computable := C.compile_computable.comp R.tm2Code_computable
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) : TableCompiler where
+  compile := fun c => C.compile (R.translate c)
+  compile_computable := C.compile_computable.comp R.translate_computable
   correct := by
     intro c
-    exact (C.correct (R.tm2Code c)).trans (R.correct c)
+    exact (C.correct (R.translate c)).trans (R.correct c)
 
 /--
 A smaller compiler/reduction obligation: implement the fuel-search machine for
@@ -531,7 +529,7 @@ Fixed-domino undecidability from an encoded TM2 translation and table-machine
 compiler/reduction.
 -/
 theorem fixed_domino_problem_undecidable_of_tm2Compiler
-    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         TilesQuarterWithSeed
@@ -544,7 +542,7 @@ Fixed-corner square undecidability from an encoded TM2 translation and
 table-machine compiler/reduction.
 -/
 theorem fixed_corner_square_problem_undecidable_of_tm2Compiler
-    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         ∀ n : Nat, 0 < n → TileableFixedCornerSquare
@@ -1197,7 +1195,7 @@ a TM2 table-machine compiler/reduction.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_tm2Compiler
     (S : Scaffold) (hS : IsScaffold S)
-    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
 
@@ -1207,7 +1205,7 @@ a TM2 table-machine compiler/reduction.
 -/
 theorem domino_problem_undecidable_of_scaffold_tm2Compiler
     (S : Scaffold) (hS : IsScaffold S)
-    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
 
