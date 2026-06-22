@@ -79,6 +79,15 @@ structure ID where
   head : Nat
   state : Nat
 
+@[ext]
+theorem ID.ext {x y : ID} (htape : x.tape = y.tape)
+    (hhead : x.head = y.head) (hstate : x.state = y.state) :
+    x = y := by
+  cases x
+  cases y
+  simp at htape hhead hstate
+  simp [htape, hhead, hstate]
+
 namespace Machine
 
 /-- Initial configuration on the empty input. -/

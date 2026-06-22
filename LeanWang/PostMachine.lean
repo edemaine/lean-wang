@@ -1026,6 +1026,179 @@ theorem toTableProgram_step_run (P : PostProgram) (q a : Nat) :
         simp [PostProgram.step, h, hnextPost, firstRowForTransition, haltRow,
           TableTransition.action, tableHalt]
 
+/-- Encode a finite-TM0 instantaneous description as a table-machine ID. -/
+def tableIDOfPostID (c : PostID) : ID where
+  tape := c.tape
+  head := c.head
+  state :=
+    match c.state with
+    | none => tableHalt
+    | some q => tableRunState q
+
+@[simp]
+theorem tableIDOfPostID_state_halt {c : PostID} (h : c.state = none) :
+    (tableIDOfPostID c).state = tableHalt := by
+  cases c with
+  | mk tape head state =>
+    cases state <;> simp [tableIDOfPostID] at h ⊢
+
+@[simp]
+theorem tableIDOfPostID_state_running {c : PostID} {q : Nat} (h : c.state = some q) :
+    (tableIDOfPostID c).state = tableRunState q := by
+  cases c with
+  | mk tape head state =>
+    cases h
+    simp [tableIDOfPostID]
+
+@[simp]
+theorem tableIDOfPostID_head (c : PostID) :
+    (tableIDOfPostID c).head = c.head := rfl
+
+@[simp]
+theorem tableIDOfPostID_tape (c : PostID) :
+    (tableIDOfPostID c).tape = c.tape := rfl
+
+theorem toTableProgram_toMachine_nextID_of_post_halt (P : PostProgram) (c : PostID)
+    (h : c.state = none) :
+    P.toTableProgram.toMachine.nextID (tableIDOfPostID c) = tableIDOfPostID c := by
+  apply Machine.nextID_of_halt
+  simp [tableIDOfPostID_state_halt h, toTableProgram_halt]
+
+theorem toTableProgram_toMachine_nextID_of_post_step_none
+    {P : PostProgram} {c : PostID} {q : Nat}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = none) :
+    P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+      { tape := Function.update c.tape c.head P.blank
+        head := c.head + 1
+        state := tableHalt } := by
+  have hnotHalt : (tableIDOfPostID c).state ≠ P.toTableProgram.halt := by
+    simp [tableIDOfPostID_state_running hstate, toTableProgram_halt,
+      (tableHalt_ne_tableRunState q).symm]
+  rw [Machine.nextID_of_ne_halt (M := P.toTableProgram.toMachine) hnotHalt]
+  have htableStep := toTableProgram_step_run P q (c.tape c.head)
+  have hmachineStep :
+      P.toTableProgram.toMachine.step (tableRunState q) (c.tape c.head) =
+        (P.blank, tableHalt, Move.right) := by
+    rw [TableProgram.toMachine_step]
+    rw [htableStep, hstep]
+  change P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head) =
+    (P.blank, tableHalt, Move.right) at hmachineStep
+  change
+    (match P.toTableProgram.toMachine.step (tableIDOfPostID c).state
+        ((tableIDOfPostID c).tape (tableIDOfPostID c).head) with
+      | (write, state', move) =>
+          (⟨(fun i => if i = (tableIDOfPostID c).head then write
+              else (tableIDOfPostID c).tape i), move.apply c.head, state'⟩ : ID)) =
+      { tape := Function.update c.tape c.head P.blank
+        head := c.head + 1
+        state := tableHalt }
+  rw [tableIDOfPostID_state_running hstate]
+  simp only [tableIDOfPostID_head, tableIDOfPostID_tape]
+  have hwrite :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).1 = P.blank := by
+    simpa using congrArg Prod.fst hmachineStep
+  have hstate' :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.1 = tableHalt := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.1) hmachineStep
+  have hmove :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.2 = Move.right := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.2) hmachineStep
+  ext i <;> simp [Function.update, Move.apply, hwrite, hstate', hmove]
+
+theorem toTableProgram_toMachine_nextID_of_post_move
+    {P : PostProgram} {c : PostID} {q q' : Nat} {m : Move}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = some (q', PostStmt.move m)) :
+    P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+      tableIDOfPostID
+        { tape := c.tape
+          head := m.apply c.head
+          state := some q' } := by
+  have hnotHalt : (tableIDOfPostID c).state ≠ P.toTableProgram.halt := by
+    simp [tableIDOfPostID_state_running hstate, toTableProgram_halt,
+      (tableHalt_ne_tableRunState q).symm]
+  rw [Machine.nextID_of_ne_halt (M := P.toTableProgram.toMachine) hnotHalt]
+  have htableStep := toTableProgram_step_run P q (c.tape c.head)
+  have hmachineStep :
+      P.toTableProgram.toMachine.step (tableRunState q) (c.tape c.head) =
+        (c.tape c.head, tableRunState q', m) := by
+    rw [TableProgram.toMachine_step]
+    rw [htableStep, hstep]
+  change P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head) =
+    (c.tape c.head, tableRunState q', m) at hmachineStep
+  change
+    (match P.toTableProgram.toMachine.step (tableIDOfPostID c).state
+        ((tableIDOfPostID c).tape (tableIDOfPostID c).head) with
+      | (write, state', move) =>
+          (⟨(fun i => if i = (tableIDOfPostID c).head then write
+              else (tableIDOfPostID c).tape i),
+            move.apply (tableIDOfPostID c).head, state'⟩ : ID)) =
+      tableIDOfPostID
+        { tape := c.tape
+          head := m.apply c.head
+          state := some q' }
+  rw [tableIDOfPostID_state_running hstate]
+  simp only [tableIDOfPostID_head, tableIDOfPostID_tape]
+  have hwrite :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).1 = c.tape c.head := by
+    simpa using congrArg Prod.fst hmachineStep
+  have hstate' :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.1 =
+        tableRunState q' := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.1) hmachineStep
+  have hmove :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.2 = m := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.2) hmachineStep
+  ext i
+  · by_cases hi : i = c.head <;> simp [tableIDOfPostID, hi, hwrite]
+  · simp [tableIDOfPostID, hmove]
+  · simp [tableIDOfPostID, hstate']
+
+theorem toTableProgram_toMachine_nextID_of_post_write_start
+    {P : PostProgram} {c : PostID} {q q' b : Nat}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = some (q', PostStmt.write b)) :
+    P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+      { tape := Function.update c.tape c.head b
+        head := c.head + 1
+        state := tableWriteState q' } := by
+  have hnotHalt : (tableIDOfPostID c).state ≠ P.toTableProgram.halt := by
+    simp [tableIDOfPostID_state_running hstate, toTableProgram_halt,
+      (tableHalt_ne_tableRunState q).symm]
+  rw [Machine.nextID_of_ne_halt (M := P.toTableProgram.toMachine) hnotHalt]
+  have htableStep := toTableProgram_step_run P q (c.tape c.head)
+  have hmachineStep :
+      P.toTableProgram.toMachine.step (tableRunState q) (c.tape c.head) =
+        (b, tableWriteState q', Move.right) := by
+    rw [TableProgram.toMachine_step]
+    rw [htableStep, hstep]
+  change P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head) =
+    (b, tableWriteState q', Move.right) at hmachineStep
+  change
+    (match P.toTableProgram.toMachine.step (tableIDOfPostID c).state
+        ((tableIDOfPostID c).tape (tableIDOfPostID c).head) with
+      | (write, state', move) =>
+          (⟨(fun i => if i = (tableIDOfPostID c).head then write
+              else (tableIDOfPostID c).tape i),
+            move.apply (tableIDOfPostID c).head, state'⟩ : ID)) =
+      { tape := Function.update c.tape c.head b
+        head := c.head + 1
+        state := tableWriteState q' }
+  rw [tableIDOfPostID_state_running hstate]
+  simp only [tableIDOfPostID_head, tableIDOfPostID_tape]
+  have hwrite :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).1 = b := by
+    simpa using congrArg Prod.fst hmachineStep
+  have hstate' :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.1 =
+        tableWriteState q' := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.1) hmachineStep
+  have hmove :
+      (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.2 = Move.right := by
+    simpa using congrArg (fun x : Nat × Nat × Move => x.2.2) hmachineStep
+  ext i <;> simp [Function.update, Move.apply, hwrite, hstate', hmove]
+
 end PostProgram
 
 /-- Preferred name for the local one-sided TM0 instruction syntax. -/
