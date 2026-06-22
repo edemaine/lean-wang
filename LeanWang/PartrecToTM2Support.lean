@@ -106,6 +106,16 @@ theorem startLabel_mem_labelList (tc : ToPartrec.Code) :
     startLabel tc ∈ labelList tc :=
   mem_labelList.2 (startLabel_mem_labels tc)
 
+/-- Index of a reachable evaluator label in `labelList tc`. -/
+def labelIndex (tc : ToPartrec.Code) (q : Λ') : Nat :=
+  (labelList tc).findIdx fun r => decide (r = q)
+
+theorem labelIndex_lt_length {tc : ToPartrec.Code} {q : Λ'}
+    (hq : q ∈ labelList tc) :
+    labelIndex tc q < (labelList tc).length := by
+  unfold labelIndex
+  exact List.findIdx_lt_length_of_exists ⟨q, hq, by simp⟩
+
 theorem init_label_mem_labels (tc : ToPartrec.Code) :
     (init tc [0]).l ∈ Finset.insertNone (labels tc) := by
   exact Finset.some_mem_insertNone.2 (startLabel_mem_labels tc)
@@ -146,6 +156,16 @@ theorem statementList_nodup (tc : ToPartrec.Code) :
   classical
   exact Finset.nodup_toList (statements tc)
 
+theorem none_mem_statements (tc : ToPartrec.Code) :
+    none ∈ statements tc := by
+  classical
+  change none ∈ Finset.insertNone ((labels tc).biUnion fun q => TM2.stmts₁ (tr q))
+  exact Finset.none_mem_insertNone
+
+theorem none_mem_statementList (tc : ToPartrec.Code) :
+    none ∈ statementList tc :=
+  mem_statementList.2 (none_mem_statements tc)
+
 theorem label_statement_mem {tc : ToPartrec.Code} {q : Λ'}
     (hq : q ∈ labels tc) :
     some (tr q) ∈ statements tc := by
@@ -157,6 +177,53 @@ theorem label_statement_mem_list {tc : ToPartrec.Code} {q : Λ'}
     (hq : q ∈ labelList tc) :
     some (tr q) ∈ statementList tc :=
   mem_statementList.2 (label_statement_mem (mem_labelList.1 hq))
+
+theorem label_statement_mem_list_of_label_mem {tc : ToPartrec.Code} {q : Λ'}
+    (hq : q ∈ labels tc) :
+    some (tr q) ∈ statementList tc :=
+  label_statement_mem_list (mem_labelList.2 hq)
+
+/-- Index of a TM2 statement substate in `statementList tc`. -/
+noncomputable def statementIndex (tc : ToPartrec.Code) (stmt : Option Stmt') : Nat := by
+  classical
+  exact (statementList tc).findIdx fun s => decide (s = stmt)
+
+theorem statementIndex_lt_length {tc : ToPartrec.Code} {stmt : Option Stmt'}
+    (hstmt : stmt ∈ statementList tc) :
+    statementIndex tc stmt < (statementList tc).length := by
+  unfold statementIndex
+  classical
+  exact List.findIdx_lt_length_of_exists ⟨stmt, hstmt, by simp⟩
+
+/-- Numeric state codes for the finite statement substates. -/
+def controlStates (tc : ToPartrec.Code) : List Nat :=
+  List.range (statementList tc).length
+
+theorem statementIndex_mem_controlStates {tc : ToPartrec.Code} {stmt : Option Stmt'}
+    (hstmt : stmt ∈ statementList tc) :
+    statementIndex tc stmt ∈ controlStates tc := by
+  exact List.mem_range.2 (statementIndex_lt_length hstmt)
+
+/-- Control state for the initial evaluator statement. -/
+noncomputable def startState (tc : ToPartrec.Code) : Nat :=
+  statementIndex tc (some (tr (startLabel tc)))
+
+/-- Control state for the halted TM2 configuration. -/
+noncomputable def haltState (tc : ToPartrec.Code) : Nat :=
+  statementIndex tc none
+
+theorem startState_mem_controlStates (tc : ToPartrec.Code) :
+    startState tc ∈ controlStates tc := by
+  exact statementIndex_mem_controlStates (label_statement_mem_list (startLabel_mem_labelList tc))
+
+theorem haltState_mem_controlStates (tc : ToPartrec.Code) :
+    haltState tc ∈ controlStates tc := by
+  exact statementIndex_mem_controlStates (none_mem_statementList tc)
+
+theorem labelState_mem_controlStates {tc : ToPartrec.Code} {q : Λ'}
+    (hq : q ∈ labels tc) :
+    statementIndex tc (some (tr q)) ∈ controlStates tc := by
+  exact statementIndex_mem_controlStates (label_statement_mem_list_of_label_mem hq)
 
 theorem statement_supports {tc : ToPartrec.Code} {stmt : Stmt'}
     (hstmt : some stmt ∈ statements tc) :

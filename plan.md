@@ -82,8 +82,10 @@ Completed proof layers:
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
-  stack names/symbols, plus one-step/reachable label-closure lemmas for runs
-  starting from `PartrecToTM2.init tc [0]`.
+  stack names/symbols. The statement-substate list now also has finite
+  `Nat`-valued control-state indices for the start, halt, and supported label
+  statements, plus one-step/reachable label-closure lemmas for runs starting
+  from `PartrecToTM2.init tc [0]`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
