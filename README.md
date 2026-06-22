@@ -49,6 +49,9 @@ the concrete definitions needed for the Berger/Robinson route:
   packages finite state support for the started TM2, translated TM1, and
   translated TM0 machines, plus an explicit finite alphabet list for the
   translated TM0 tape symbols and injective numeric codes for those symbols.
+- `LeanWang.TM0FiniteCompiler`: finite one-sided TM0 program data extracted
+  from `TM0Route`, currently including numeric symbol/state headers and support
+  lemmas for the blank and start fields.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

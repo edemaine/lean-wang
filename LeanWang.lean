@@ -11,4 +11,5 @@ import LeanWang.ToPartrecEncoding
 import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.TM0Route
+import LeanWang.TM0FiniteCompiler
 import LeanWang.Theorems

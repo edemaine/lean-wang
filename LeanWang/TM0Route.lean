@@ -309,6 +309,78 @@ theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
     q ∈ partrecStartedTM0LabelList tc ↔ q ∈ partrecStartedTM0Labels tc := by
   simp [partrecStartedTM0LabelList]
 
+/--
+Finite support list for translated TM0 states, with the start/default state
+forced to position `0`.
+-/
+noncomputable def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
+    List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
+  default :: partrecStartedTM0LabelList tc
+
+theorem partrecStartedTM0_default_mem_labelSupportList (tc : Turing.ToPartrec.Code) :
+    (default : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) ∈
+      partrecStartedTM0LabelSupportList tc := by
+  simp [partrecStartedTM0LabelSupportList]
+
+theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
+    {tc : Turing.ToPartrec.Code} {q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)}
+    (hq : q ∈ partrecStartedTM0Labels tc) :
+    q ∈ partrecStartedTM0LabelSupportList tc := by
+  simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
+
+/-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
+noncomputable def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
+  List.range (partrecStartedTM0LabelSupportList tc).length
+
+/-- Numeric start state corresponding to the default translated TM0 label. -/
+def partrecStartedTM0Start : Nat :=
+  0
+
+theorem partrecStartedTM0Start_mem_states (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM0Start ∈ partrecStartedTM0States tc := by
+  simp [partrecStartedTM0Start, partrecStartedTM0States, partrecStartedTM0LabelSupportList]
+
+theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) :
+    (partrecStartedTM0LabelSupportList tc)[0]? =
+      some (default : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
+  simp [partrecStartedTM0LabelSupportList]
+
+/-- Choose an index for a state known to occur in the finite support list. -/
+noncomputable def partrecStartedTM0StateIndexOfMem (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
+    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
+    Fin (partrecStartedTM0LabelSupportList tc).length :=
+  Classical.choose (List.get_of_mem hq)
+
+theorem partrecStartedTM0StateIndexOfMem_get (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
+    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
+    (partrecStartedTM0LabelSupportList tc).get
+      (partrecStartedTM0StateIndexOfMem tc q hq) = q :=
+  Classical.choose_spec (List.get_of_mem hq)
+
+/-- Numeric code for a supported translated TM0 state. -/
+noncomputable def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
+    (hq : q ∈ partrecStartedTM0LabelSupportList tc) : Nat :=
+  (partrecStartedTM0StateIndexOfMem tc q hq).val
+
+theorem partrecStartedTM0StateCodeOfMem_mem_states (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
+    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
+    partrecStartedTM0StateCodeOfMem tc q hq ∈ partrecStartedTM0States tc := by
+  unfold partrecStartedTM0StateCodeOfMem partrecStartedTM0States
+  exact List.mem_range.2 (partrecStartedTM0StateIndexOfMem tc q hq).isLt
+
+theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
+    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
+    (partrecStartedTM0LabelSupportList tc)[partrecStartedTM0StateCodeOfMem tc q hq]? =
+      some q := by
+  unfold partrecStartedTM0StateCodeOfMem
+  rw [List.getElem?_eq_getElem (partrecStartedTM0StateIndexOfMem tc q hq).isLt]
+  exact congrArg some (partrecStartedTM0StateIndexOfMem_get tc q hq)
+
 /-- The finite cell values that can occur in one stack coordinate of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
   none :: (PartrecToTM2Support.stackAlphabetList.map some)

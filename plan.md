@@ -276,6 +276,11 @@ than relying on a global `Fintype` instance. The translated TM0 tape symbols now
 also have injective numeric codes and a numeric symbol list for the eventual
 `FiniteTM0Program`.
 
+`TM0FiniteCompiler` now starts the concrete finite-program construction from
+this route data. It defines numeric state codes for supported translated TM0
+labels and a finite program header with the route symbol list, state range,
+blank symbol, and start state, plus blank/start membership lemmas.
+
 Next implementation targets:
 
 1. Build a concrete `TM0FiniteCompiler`: compile the code-specific Mathlib TM0
