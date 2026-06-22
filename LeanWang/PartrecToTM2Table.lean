@@ -797,6 +797,21 @@ theorem sameWriteMoveTransition_mem_rows {state read next : Nat} {move : Move}
     sameWriteMoveTransition state read next move ∈ sameWriteMoveRows state next move :=
   List.mem_map.2 ⟨read, hread, rfl⟩
 
+theorem sameWriteMoveRows_write_mem_symbols {state next : Nat} {move : Move}
+    {e : TableTransition}
+    (he : e ∈ sameWriteMoveRows state next move) :
+    e.write ∈ symbols := by
+  rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+  exact hread
+
+theorem sameWriteMoveRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {state next : Nat} {move : Move}
+    {e : TableTransition} (he : e ∈ sameWriteMoveRows state next move)
+    (hnext : next ∈ states tc) :
+    e.next ∈ states tc := by
+  rcases List.mem_map.1 he with ⟨_read, _hread, rfl⟩
+  exact hnext
+
 /-- Return state after a `peek` read has moved one step left. -/
 noncomputable def peekReturnState (tc : Turing.ToPartrec.Code)
     (var : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')
@@ -875,6 +890,178 @@ theorem peekReadRows_next_mem_states {tc : Turing.ToPartrec.Code}
     e.next ∈ states tc := by
   rcases List.mem_map.1 he with ⟨s, _hs, rfl⟩
   exact peekReturnState_mem_states hq hoffset
+
+/-- Return rows for one possible decoded `peek` result. -/
+noncomputable def peekReturnMoveRowsForVar (tc : Turing.ToPartrec.Code)
+    (postVar : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')
+    (offset : Nat) : List TableTransition :=
+  sameWriteMoveRows
+    (peekAuxState tc postVar q offset)
+    (peekReturnState tc postVar q offset)
+    Move.left
+
+/-- Return rows for all possible decoded `peek` results. -/
+noncomputable def peekReturnMoveRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt') (offset : Nat) :
+    List TableTransition :=
+  (cellSymbols.map fun s => peekReturnMoveRowsForVar tc (f var s) q offset).flatten
+
+theorem peekReturnMoveRowsForVar_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {postVar : Option Turing.PartrecToTM2.Γ'} {q : Turing.PartrecToTM2.Stmt'}
+    {offset : Nat} {e : TableTransition}
+    (he : e ∈ peekReturnMoveRowsForVar tc postVar q offset) :
+    e.write ∈ symbols :=
+  sameWriteMoveRows_write_mem_symbols he
+
+theorem peekReturnMoveRowsForVar_next_mem_states {tc : Turing.ToPartrec.Code}
+    {postVar : Option Turing.PartrecToTM2.Γ'} {q : Turing.PartrecToTM2.Stmt'}
+    {offset : Nat} {e : TableTransition}
+    (he : e ∈ peekReturnMoveRowsForVar tc postVar q offset)
+    (hq : some q ∈ PartrecToTM2Support.statementList tc) (hoffset : offset < 4) :
+    e.next ∈ states tc :=
+  sameWriteMoveRows_next_mem_states he (peekReturnState_mem_states hq hoffset)
+
+theorem peekReturnMoveRows_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {offset : Nat} {e : TableTransition}
+    (he : e ∈ peekReturnMoveRows tc var f q offset) :
+    e.write ∈ symbols := by
+  unfold peekReturnMoveRows at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨s, _hs, rfl⟩
+  exact peekReturnMoveRowsForVar_write_mem_symbols he
+
+theorem peekReturnMoveRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {offset : Nat} {e : TableTransition}
+    (he : e ∈ peekReturnMoveRows tc var f q offset)
+    (hq : some q ∈ PartrecToTM2Support.statementList tc) (hoffset : offset < 4) :
+    e.next ∈ states tc := by
+  unfold peekReturnMoveRows at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨s, _hs, rfl⟩
+  exact peekReturnMoveRowsForVar_next_mem_states he hq hoffset
+
+/-- Originating TM2 `peek` statement. -/
+def peekStmt (k : Turing.PartrecToTM2.K')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt') : Turing.PartrecToTM2.Stmt' :=
+  Turing.TM2.Stmt.peek k f q
+
+/-- First auxiliary state reached when moving right toward a stack column. -/
+noncomputable def peekMoveState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') (stmt : Turing.PartrecToTM2.Stmt')
+    (offset : Nat) : Nat :=
+  peekAuxState tc var stmt offset
+
+/-- Complete bounded row family for a `peek` stack action. -/
+noncomputable def peekRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') (k : Turing.PartrecToTM2.K')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt') : List TableTransition :=
+  let origin := peekStmt k f q
+  let start := encodedStmtState tc var (some origin)
+  match PartrecToTM2Support.stackNameCode k with
+  | 0 =>
+      peekReadRows tc start var f q 0
+  | 1 =>
+      sameWriteMoveRows start (peekMoveState tc var origin 1) Move.right ++
+      peekReadRows tc (peekMoveState tc var origin 1) var f q 1 ++
+      peekReturnMoveRows tc var f q 0
+  | 2 =>
+      sameWriteMoveRows start (peekMoveState tc var origin 1) Move.right ++
+      sameWriteMoveRows (peekMoveState tc var origin 1)
+        (peekMoveState tc var origin 2) Move.right ++
+      peekReadRows tc (peekMoveState tc var origin 2) var f q 2 ++
+      peekReturnMoveRows tc var f q 1 ++
+      peekReturnMoveRows tc var f q 0
+  | _ =>
+      sameWriteMoveRows start (peekMoveState tc var origin 1) Move.right ++
+      sameWriteMoveRows (peekMoveState tc var origin 1)
+        (peekMoveState tc var origin 2) Move.right ++
+      sameWriteMoveRows (peekMoveState tc var origin 2)
+        (peekMoveState tc var origin 3) Move.right ++
+      peekReadRows tc (peekMoveState tc var origin 3) var f q 3 ++
+      peekReturnMoveRows tc var f q 2 ++
+      peekReturnMoveRows tc var f q 1 ++
+      peekReturnMoveRows tc var f q 0
+
+set_option linter.flexible false in
+theorem peekRows_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {k : Turing.PartrecToTM2.K'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {e : TableTransition}
+    (he : e ∈ peekRows tc var k f q) :
+    e.write ∈ symbols := by
+  cases k <;>
+    simp [peekRows, PartrecToTM2Support.stackNameCode] at he
+  · exact peekReadRows_write_mem_symbols he
+  · rcases he with he | he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact peekReadRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+  · rcases he with he | he | he | he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact peekReadRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+  · rcases he with he | he | he | he | he | he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact peekReadRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+    · exact peekReturnMoveRows_write_mem_symbols he
+
+set_option linter.flexible false in
+theorem peekRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {k : Turing.PartrecToTM2.K'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {e : TableTransition}
+    (he : e ∈ peekRows tc var k f q)
+    (horigin : some (peekStmt k f q) ∈ PartrecToTM2Support.statementList tc)
+    (hq : some q ∈ PartrecToTM2Support.statementList tc) :
+    e.next ∈ states tc := by
+  cases k <;>
+    simp [peekRows, PartrecToTM2Support.stackNameCode] at he
+  · exact peekReadRows_next_mem_states he hq (by decide : 0 < 4)
+  · rcases he with he | he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState1_mem_states horigin
+    · exact peekReadRows_next_mem_states he hq (by decide : 1 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 0 < 4)
+  · rcases he with he | he | he | he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState1_mem_states horigin
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState2_mem_states horigin
+    · exact peekReadRows_next_mem_states he hq (by decide : 2 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 1 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 0 < 4)
+  · rcases he with he | he | he | he | he | he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState1_mem_states horigin
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState2_mem_states horigin
+    · apply sameWriteMoveRows_next_mem_states he
+      simpa [peekMoveState] using peekAuxState3_mem_states horigin
+    · exact peekReadRows_next_mem_states he hq (by decide : 3 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 2 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 1 < 4)
+    · exact peekReturnMoveRows_next_mem_states he hq (by decide : 0 < 4)
 
 /-- Stationary rows for a TM2 `load` microstep. -/
 noncomputable def loadRows (tc : Turing.ToPartrec.Code)

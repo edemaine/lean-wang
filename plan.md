@@ -139,11 +139,11 @@ Completed proof layers:
   the evaluator state block. The first reserved block is for `peek` stack
   actions, indexed by local variable, originating statement substate, and one
   of four stack-column offsets, with membership lemmas for offsets `0..3`.
-- the `peek` construction now has the reusable finite row pieces needed for its
-  bounded motion: same-write move rows over all tape symbols, a decoded
-  `cellSymbols` list matching the encoded tape alphabet, and decoded read rows
-  that update the local variable from the observed top stack cell and enter the
-  appropriate return state.
+- the `peek` construction now assembles the complete bounded row family for
+  stack offsets `0..3`: same-write right moves to the target stack column,
+  decoded read rows that update the local variable from the observed top stack
+  cell, and same-write left return moves. The assembled row family has
+  symbol-write and next-state well-formedness lemmas.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -173,9 +173,10 @@ def IsScaffold (S : Scaffold) : Prop :=
 ```
 
 The names below keep `Compiler` because the maps produce finite program data.
-Mathematically, the notion they package is a computable reduction, implemented
-by compilation to finite machine data. The prose should therefore say reduction
-first, while still mentioning compilation when discussing the implementation.
+Mathematically, each such interface packages a computable reduction; the
+implementation side compiles source instances to finite machine data. The prose
+should therefore say "reduction" for the mathematical notion and mention
+"compiler"/"compilation" for the concrete construction.
 
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
 reduction obligation into a `TableCompiler`, using the proved

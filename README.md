@@ -29,8 +29,8 @@ the concrete definitions needed for the Berger/Robinson route:
   table-machine reduction, including intermediate statement substates and
   stationary row families and preservation lemmas for `load`, `branch`,
   `goto`, and `halt` microsteps, plus representation lemmas for stack
-  push/pop updates, reserved auxiliary states for `peek`, and reusable
-  same-write move/read rows for bounded `peek` motion.
+  push/pop updates, reserved auxiliary states for `peek`, and complete
+  bounded `peek` row families with symbol/state well-formedness lemmas.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
@@ -44,11 +44,10 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TM2TableCompiler`: the TM2-to-table computable reduction, implemented by
-  compiling Mathlib's concrete `PartrecToTM2` evaluator configurations to
-  finite table-machine data with the right halting behavior. The identifier
-  names emphasize the produced program data; their role in the theorem is the
-  reduction.
+- `TM2TableCompiler`: the TM2-to-table computable reduction. It is implemented
+  by compiling Mathlib's concrete `PartrecToTM2` evaluator configurations to
+  finite table-machine data with the right halting behavior, so both
+  "reduction" and "compiler" are intentional terminology here.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
