@@ -8,11 +8,11 @@ import Mathlib.Computability.TuringMachine.ToPartrec
 /-!
 Finite-control support facts for Mathlib's `PartrecToTM2` evaluator.
 
-The eventual TM2-to-table reduction/compiler needs finite state data for the
-TM2 evaluator.
-Mathlib already provides the finite reachable-label set
-`Turing.PartrecToTM2.codeSupp`; this file packages the exact support facts
-needed for the evaluator configuration used by the reduction.
+The current machine-side reduction starts with Mathlib's `PartrecToTM2`
+evaluator, then uses Mathlib's TM2-to-TM1-to-TM0 translations before compiling
+the resulting finite TM0 data. Mathlib already provides the finite
+reachable-label set `Turing.PartrecToTM2.codeSupp`; this file packages the
+exact support facts needed for the evaluator configuration used by that route.
 -/
 
 noncomputable section
