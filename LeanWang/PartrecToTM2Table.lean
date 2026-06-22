@@ -72,18 +72,30 @@ theorem stackCellPos_div_four (k : Turing.PartrecToTM2.K') (i : Nat) :
       Nat.add_mul_div_left _ _ (by decide : 0 < 4)]
 
 /-- One-sided tape encoding of the four `PartrecToTM2` stacks. -/
-def encodedTape (cfg : Turing.PartrecToTM2.Cfg') : Nat → Nat :=
+def encodedStacks (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ') :
+    Nat → Nat :=
   fun p =>
     match stackNameOfCode (p % 4) with
     | none => blankSymbol
-    | some k => PartrecToTM2Support.tapeSymbolCode ((cfg.stk k)[p / 4]?)
+    | some k => PartrecToTM2Support.tapeSymbolCode ((stk k)[p / 4]?)
+
+theorem encodedStacks_stackCell
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (i : Nat) :
+    encodedStacks stk (stackCellPos k i) =
+      PartrecToTM2Support.tapeSymbolCode ((stk k)[i]?) := by
+  simp [encodedStacks, stackCellPos_mod_four, stackCellPos_div_four,
+    stackNameOfCode_stackNameCode]
+
+/-- One-sided tape encoding of a full `PartrecToTM2` configuration. -/
+def encodedTape (cfg : Turing.PartrecToTM2.Cfg') : Nat → Nat :=
+  encodedStacks cfg.stk
 
 theorem encodedTape_stackCell (cfg : Turing.PartrecToTM2.Cfg')
     (k : Turing.PartrecToTM2.K') (i : Nat) :
     encodedTape cfg (stackCellPos k i) =
       PartrecToTM2Support.tapeSymbolCode ((cfg.stk k)[i]?) := by
-  simp [encodedTape, stackCellPos_mod_four, stackCellPos_div_four,
-    stackNameOfCode_stackNameCode]
+  exact encodedStacks_stackCell cfg.stk k i
 
 /-- Reserved table-machine state used to initialize the fixed input `[0]`. -/
 def initState : Nat :=
@@ -174,12 +186,34 @@ theorem statementState_mem_states {tc : Turing.ToPartrec.Code}
   unfold statementState states evaluatorStates evaluatorStateCode
   simp [evaluatorSubstateIndex_lt hstmt]
 
+/-- Encoded control state for a TM2 statement microstate. -/
+noncomputable def encodedStmtState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Option Turing.PartrecToTM2.Stmt') : Nat :=
+  match stmt with
+  | none => haltState tc
+  | some stmt => statementState tc var (some stmt)
+
+theorem encodedStmtState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    encodedStmtState tc var stmt ∈ states tc := by
+  cases stmt with
+  | none =>
+      exact haltState_mem_states tc
+  | some stmt =>
+      exact statementState_mem_states hstmt
+
+/-- The statement substate corresponding to a full TM2 configuration label. -/
+def cfgStmt : Option Turing.PartrecToTM2.Λ' → Option Turing.PartrecToTM2.Stmt'
+  | none => none
+  | some q => some (Turing.PartrecToTM2.tr q)
+
 /-- Encoded table-machine state of a `PartrecToTM2` configuration. -/
 noncomputable def encodedState (tc : Turing.ToPartrec.Code)
     (cfg : Turing.PartrecToTM2.Cfg') : Nat :=
-  match cfg.l with
-  | none => haltState tc
-  | some q => statementState tc cfg.var (some (Turing.PartrecToTM2.tr q))
+  encodedStmtState tc cfg.var (cfgStmt cfg.l)
 
 theorem encodedState_mem_states {tc : Turing.ToPartrec.Code}
     {cfg : Turing.PartrecToTM2.Cfg'}
@@ -187,12 +221,29 @@ theorem encodedState_mem_states {tc : Turing.ToPartrec.Code}
     encodedState tc cfg ∈ states tc := by
   cases hcfg : cfg.l with
   | none =>
-      simpa [encodedState, hcfg] using
+      simpa [encodedState, encodedStmtState, cfgStmt, hcfg] using
         haltState_mem_states tc
   | some q =>
       have hq : q ∈ PartrecToTM2Support.labels tc := by
         exact Finset.some_mem_insertNone.1 (by simpa [hcfg] using hlabel)
-      simpa [encodedState, hcfg] using labelState_mem_states (var := cfg.var) hq
+      simpa [encodedState, encodedStmtState, cfgStmt, hcfg] using
+        labelState_mem_states (var := cfg.var) hq
+
+/--
+Representation invariant connecting a one-tape table-machine ID with a
+`PartrecToTM2` statement microstate.
+
+The state component records both Mathlib's finite local variable and the
+current statement substate. The tape component records the semantically
+meaningful interleaved stack cells.
+-/
+noncomputable def RepresentsSubstate (tc : Turing.ToPartrec.Code) (id : ID)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Option Turing.PartrecToTM2.Stmt')
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ') : Prop :=
+  id.head = 0 ∧
+    id.state = encodedStmtState tc var stmt ∧
+      ∀ k i, id.tape (stackCellPos k i) = encodedStacks stk (stackCellPos k i)
 
 /-- One-tape instantaneous description representing a `PartrecToTM2` configuration. -/
 noncomputable def encodedID (tc : Turing.ToPartrec.Code)
@@ -212,9 +263,13 @@ the stack-cell view of the encoding.
 -/
 noncomputable def RepresentsCfg (tc : Turing.ToPartrec.Code) (id : ID)
     (cfg : Turing.PartrecToTM2.Cfg') : Prop :=
-  id.head = 0 ∧
-    id.state = encodedState tc cfg ∧
-      ∀ k i, id.tape (stackCellPos k i) = encodedTape cfg (stackCellPos k i)
+  RepresentsSubstate tc id cfg.var (cfgStmt cfg.l) cfg.stk
+
+theorem representsCfg_iff_representsSubstate (tc : Turing.ToPartrec.Code)
+    (id : ID) (cfg : Turing.PartrecToTM2.Cfg') :
+    RepresentsCfg tc id cfg ↔
+      RepresentsSubstate tc id cfg.var (cfgStmt cfg.l) cfg.stk := by
+  rfl
 
 @[simp]
 theorem encodedID_tape (tc : Turing.ToPartrec.Code)
@@ -240,7 +295,7 @@ theorem encodedID_representsCfg (tc : Turing.ToPartrec.Code)
   constructor
   · rfl
   constructor
-  · rfl
+  · simp [encodedState]
   · intro k i
     rfl
 
@@ -284,8 +339,8 @@ theorem encodedTape_init_stack (tc : Turing.ToPartrec.Code) (i : Nat) :
 
 theorem encodedState_init (tc : Turing.ToPartrec.Code) :
     encodedState tc (Turing.PartrecToTM2.init tc [0]) = evalStartState tc := by
-  simp [encodedState, evalStartState, statementState, evaluatorSubstateIndex,
-    PartrecToTM2Support.startLabel, Turing.PartrecToTM2.init]
+  simp [encodedState, encodedStmtState, cfgStmt, evalStartState, statementState,
+    evaluatorSubstateIndex, PartrecToTM2Support.startLabel, Turing.PartrecToTM2.init]
 
 /-- Symbol written by the fixed-input initialization row. -/
 def inputZeroSymbol : Nat :=
@@ -293,6 +348,101 @@ def inputZeroSymbol : Nat :=
 
 theorem inputZeroSymbol_mem_symbols : inputZeroSymbol ∈ symbols :=
   stackCellSymbol_mem_symbols (some Turing.PartrecToTM2.Γ'.cons)
+
+/--
+One table row for a statement microstep that does not change the encoded stacks.
+
+The row is parameterized by the symbol it reads so that a finite list of these
+rows can cover all tape symbols while preserving the tape cell by writing the
+same symbol back.
+-/
+def stationaryTransition (state read next : Nat) : TableTransition where
+  state := state
+  read := read
+  write := read
+  next := next
+  move := Move.left
+
+@[simp]
+theorem stationaryTransition_state (state read next : Nat) :
+    (stationaryTransition state read next).state = state :=
+  rfl
+
+@[simp]
+theorem stationaryTransition_read (state read next : Nat) :
+    (stationaryTransition state read next).read = read :=
+  rfl
+
+@[simp]
+theorem stationaryTransition_write (state read next : Nat) :
+    (stationaryTransition state read next).write = read :=
+  rfl
+
+@[simp]
+theorem stationaryTransition_next (state read next : Nat) :
+    (stationaryTransition state read next).next = next :=
+  rfl
+
+@[simp]
+theorem stationaryTransition_move (state read next : Nat) :
+    (stationaryTransition state read next).move = Move.left :=
+  rfl
+
+@[simp]
+theorem stationaryTransition_matchesInput (state read next : Nat) :
+    (stationaryTransition state read next).matchesInput state read = true := by
+  simp [TableTransition.matchesInput]
+
+theorem stationaryTransition_action (state read next : Nat) :
+    (stationaryTransition state read next).action = (read, next, Move.left) :=
+  rfl
+
+theorem stationaryTransition_write_mem_symbols {state read next : Nat}
+    (hread : read ∈ symbols) :
+    (stationaryTransition state read next).write ∈ symbols :=
+  hread
+
+/-- Finite row family covering all possible read symbols for a stationary microstep. -/
+def stationaryRows (state next : Nat) : List TableTransition :=
+  symbols.map fun read => stationaryTransition state read next
+
+theorem stationaryTransition_mem_stationaryRows {state read next : Nat}
+    (hread : read ∈ symbols) :
+    stationaryTransition state read next ∈ stationaryRows state next :=
+  List.mem_map.2 ⟨read, hread, rfl⟩
+
+theorem toMachine_nextID_of_stationaryTransition {P : TableProgram} {id : ID}
+    {next : Nat}
+    (hhead : id.head = 0)
+    (hstate : id.state ≠ P.halt)
+    (hfind :
+      P.toTableMachine.transition? id.state (id.tape id.head) =
+        some (stationaryTransition id.state (id.tape id.head) next))
+    (hread : id.tape id.head ∈ P.supportedSymbols)
+    (hnext : next ∈ P.supportedStates) :
+    P.toMachine.nextID id =
+      { tape := id.tape
+        head := 0
+        state := next } := by
+  have hwrite :
+      (stationaryTransition id.state (id.tape id.head) next).write ∈
+        P.supportedSymbols := by
+    simpa using hread
+  have hnext' :
+      (stationaryTransition id.state (id.tape id.head) next).next ∈
+        P.supportedStates := by
+    simpa using hnext
+  rw [TableProgram.toMachine_nextID_of_transition?_eq_some hstate hfind hwrite hnext']
+  cases id with
+  | mk tape head state =>
+      change head = 0 at hhead
+      subst head
+      simp only [stationaryTransition_write, stationaryTransition_move, stationaryTransition_next,
+        ID.mk.injEq, and_true]
+      constructor
+      · funext i
+        by_cases hi : i = 0 <;> simp [hi]
+      · simp [Move.apply]
 
 /--
 First transition row for the future TM2-to-table reduction/compiler.
@@ -463,7 +613,9 @@ theorem programWithInitTable_runEmpty_one_represents_init
   constructor
   · rw [programWithInitTable_runEmpty_one]
   constructor
-  · rw [programWithInitTable_runEmpty_one, encodedState_init]
+  · rw [programWithInitTable_runEmpty_one]
+    change evalStartState tc = encodedState tc (Turing.PartrecToTM2.init tc [0])
+    exact (encodedState_init tc).symm
   · intro k i
     exact programWithInitTable_runEmpty_one_stackCell tc table k i
 

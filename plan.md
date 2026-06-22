@@ -110,6 +110,16 @@ Completed proof layers:
   `RepresentsCfg` invariant tying a machine ID to the encoded TM2 state and
   interleaved stack cells, plus a proof that the fixed initialization row
   establishes this invariant for `PartrecToTM2.init tc [0]`.
+- the representation has been factored through `RepresentsSubstate`, which
+  covers intermediate Mathlib TM2 statement substates during the recursive
+  execution of `TM2.stepAux`. This is needed because non-stack statements such
+  as `load`, `branch`, `goto`, and `halt` are microsteps inside one TM2 step,
+  while stack actions require additional table-machine motion over the encoded
+  stacks.
+- the table layer now has generic stationary transition rows over all encoded
+  tape symbols. These rows write back the read symbol, keep the one-sided head
+  at `0`, and change only the finite control state, forming the base row family
+  for non-stack statement microsteps.
 
 The remaining construction obligations are explicit Lean interfaces:
 

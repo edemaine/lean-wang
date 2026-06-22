@@ -26,7 +26,8 @@ the concrete definitions needed for the Berger/Robinson route:
   Mathlib's concrete `PartrecToTM2` evaluator.
 - `LeanWang.PartrecToTM2Table`: finite `TableProgram` header data and the
   one-tape configuration representation for the eventual `PartrecToTM2`
-  table-machine reduction.
+  table-machine reduction, including intermediate statement substates and
+  stationary rows for non-stack microsteps.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
