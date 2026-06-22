@@ -1030,6 +1030,11 @@ theorem programOfCountAndSimRows_primrec :
     (Primrec.pair Primrec.fst
       (Primrec.pair (Primrec.const initRowsData) Primrec.snd))
 
+theorem programOfCountAndSimRows_computable :
+    Computable (fun p : Nat × List PostTransition =>
+      programOfCountAndSimRows p.1 p.2) :=
+  programOfCountAndSimRows_primrec.to_comp
+
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
   programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc) (initRows tc) (simRows tc)
 
