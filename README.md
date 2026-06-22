@@ -32,9 +32,10 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TableCompiler` / `FuelTableCompiler`: compile/reduce Mathlib
+- `TableCompiler` / `FuelTableCompiler`: reduce/compile Mathlib
   partial-recursive codes to finite table-machine data with the right halting
-  behavior.
+  behavior. The identifier names emphasize the produced program data; their
+  role in the theorem is the computable reduction.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 

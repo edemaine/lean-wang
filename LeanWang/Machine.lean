@@ -10,8 +10,8 @@ import Mathlib.Logic.Function.Iterate
 Concrete one-tape machines for the Wang-tile simulation layer.
 
 This is intentionally a small target language. A later file can prove that
-Mathlib's partial-recursive codes compile to this model, while the tiling
-construction only has to reason about the local successor relation below.
+Mathlib's partial-recursive codes reduce/compile to this model, while the
+tiling construction only has to reason about the local successor relation below.
 -/
 
 namespace LeanWang
@@ -366,9 +366,9 @@ end TableTransition
 /--
 A finite transition-table presentation of the concrete machine model.
 
-This is the intended target for future computable compilers: it contains only
-finite data plus support proofs. The semantic `Machine` is still used by the
-Wang-tile construction.
+This is the intended target for future computable reductions/compilers: it
+contains only finite data plus support proofs. The semantic `Machine` is still
+used by the Wang-tile construction.
 -/
 structure TableMachine where
   symbols : List Nat
@@ -488,7 +488,7 @@ end TableMachine
 /--
 Raw finite machine data, without support proofs.
 
-The compiler/reduction from computability syntax should ultimately produce this
+The reduction/compiler from computability syntax should ultimately produce this
 kind of finite object. `toTableMachine` adds the distinguished blank/start/halt
 symbols to the supports, and the guarded table semantics keeps all transitions
 inside those finite supports.
