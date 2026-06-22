@@ -861,6 +861,60 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
   hS T seed
 
+/--
+The scaffolded plane-tiling instance associated to the bounded evaluator prefix
+program for a code and a fuel bound.
+-/
+def codeEvalnFuelPrefixDominoReduction (S : Scaffold) (p : Code × Nat) : TileSet :=
+  combineWithScaffold S (codeEvalnFuelPrefixFixedDomino p).1
+    (codeEvalnFuelPrefixFixedDomino p).2
+
+theorem codeEvalnFuelPrefixDominoReduction_computable (S : Scaffold) :
+    Computable (codeEvalnFuelPrefixDominoReduction S) := by
+  unfold codeEvalnFuelPrefixDominoReduction
+  exact (combineWithScaffold_computable S).comp codeEvalnFuelPrefixFixedDomino_computable
+
+theorem codeEvalnFuelPrefixDominoReduction_correct {S : Scaffold} (hS : IsScaffold S)
+    (c : Code) (bound : Nat) :
+    TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound)) ↔
+      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
+  unfold codeEvalnFuelPrefixDominoReduction
+  exact (scaffold_reduction_correct hS
+    (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+    (codeEvalnFuelPrefixFixedDomino (c, bound)).2).trans
+      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).symm.trans
+          (codeEvalnFuelPrefixFixedDomino_correct c bound))
+
+theorem codeEvalnFuelPrefixDominoReduction_all_correct {S : Scaffold}
+    (hS : IsScaffold S) (c : Code) :
+    (∀ bound : Nat, TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound))) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  constructor
+  · intro htiles hdom
+    rcases (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).2 hdom with
+      ⟨bound, hhalts⟩
+    have hnonhalting :=
+      (codeEvalnFuelPrefixDominoReduction_correct hS c bound).1 (htiles bound)
+    exact hnonhalting ((codeEvalnFuelPrefixProgram_correct c bound).1 hhalts)
+  · intro hnonhalting bound
+    rw [codeEvalnFuelPrefixDominoReduction_correct hS]
+    intro hsome
+    apply hnonhalting
+    exact (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).1
+      ⟨bound, (codeEvalnFuelPrefixProgram_correct c bound).2 hsome⟩
+
+theorem codeEvalnFuelPrefixDominoReduction_all_undecidable
+    (S : Scaffold) (hS : IsScaffold S) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ bound : Nat, TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound))) := by
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => codeEvalnFuelPrefixDominoReduction_all_correct hS c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
 def dominoReduction (S : Scaffold) (C : TableCompiler) (c : Code) : TileSet :=
   combineWithScaffold S (fixedDominoReduction C c).1 (fixedDominoReduction C c).2

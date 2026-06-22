@@ -66,6 +66,10 @@ Completed proof layers:
   to quantified fixed-corner square tilings: for all bounds and all positive
   square sizes, tileability is equivalent to the same Mathlib nonhalting
   predicate, and this quantified square-family predicate is undecidable.
+- assuming any verified `IsScaffold S`, the bounded prefix family has also been
+  pushed through the abstract scaffold to ordinary plane tiling: all scaffolded
+  bounded-prefix plane instances tile exactly when the Mathlib code does not
+  halt, and this quantified plane-tiling family is undecidable.
 
 The remaining construction obligations are explicit Lean interfaces:
 
