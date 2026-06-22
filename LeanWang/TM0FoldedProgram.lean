@@ -262,6 +262,9 @@ theorem foldedSimStateCode_eq_ofCode (tc : Turing.ToPartrec.Code)
       foldedSimStateOfCode side (TM0FiniteCompiler.stateCode tc q) := by
   rfl
 
+def foldedSimStartStateCode : Nat :=
+  foldedSimStateOfCode FoldSide.right TM0Route.partrecStartedTM0Start
+
 def initWriteOriginState : Nat :=
   taggedState stateTagInit 0
 
@@ -296,12 +299,13 @@ theorem initReturnState_primrec : Primrec initReturnState := by
 def foldedStartState : Nat :=
   initWriteOriginState
 
-def foldedSimStartState (tc : Turing.ToPartrec.Code) : Nat :=
-  foldedSimStateCode tc FoldSide.right default
+def foldedSimStartState (_tc : Turing.ToPartrec.Code) : Nat :=
+  foldedSimStartStateCode
 
 theorem foldedSimStartState_eq (tc : Turing.ToPartrec.Code) : foldedSimStartState tc =
     taggedState stateTagSim (Nat.pair FoldSide.right.code TM0Route.partrecStartedTM0Start) := by
-  simp [foldedSimStartState, foldedSimStateCode, TM0FiniteCompiler.stateCode_default]
+  simp [foldedSimStartState, foldedSimStartStateCode, foldedSimStateOfCode,
+    taggedState, TM0Route.partrecStartedTM0Start]
 
 theorem foldedSimStartState_primrec :
     Primrec (fun _tc : Turing.ToPartrec.Code => foldedSimStartState _tc) := by
@@ -441,9 +445,9 @@ theorem initWriteRightRows_primrec :
     Primrec (fun _tc : Turing.ToPartrec.Code => initWriteRightRows) := by
   exact Primrec.const initWriteRightRows
 
-def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
+def initReturnRow (_tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
   if i = 0 then
-    mkRow (initReturnState 0) read (foldedSimStartState tc) (PostStmt.write read)
+    mkRow (initReturnState 0) read foldedSimStartStateCode (PostStmt.write read)
   else
     mkRow (initReturnState i) read (initReturnState (i - 1)) (PostStmt.move Move.left)
 
