@@ -202,16 +202,18 @@ def IsScaffold (S : Scaffold) : Prop :=
 
 The names below keep `Compiler` because the maps produce finite program data.
 Mathematically, each such interface packages a computable reduction; the
-implementation side compiles source instances to finite machine data. The prose
-should therefore say "reduction" for the mathematical notion and mention
-"compiler"/"compilation" for the concrete construction.
+implementation side compiles source instances to finite machine data. In prose,
+"reduction" should be the default word for the mathematical notion, with
+"compiler"/"compilation" used when describing the concrete construction of the
+finite program.
 
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
 reduction obligation into a `TableCompiler`, using the proved
 equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
 `PrimrecSearchTableCompiler.toFuelTableCompiler` further factors this obligation
 through a generic unbounded search reduction for primitive-recursive Boolean
-predicate families, implemented by compilation to finite machine data. The
+predicate families. That reduction is implemented by compilation to finite
+machine data. The
 fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
 domino theorem surfaces now have direct corollaries from
 `PrimrecSearchTableCompiler`.
@@ -223,7 +225,8 @@ provides a local natural-number encoding, `Denumerable` instance, and hence
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
 this translation is now concretely proved in `NatPartrecToToPartrec`.
 `TM2TableCompiler` remains the finite-machine reduction obligation: it reduces
-those TM2 evaluator configurations to `TableProgram`. Together they produce a
+those TM2 evaluator configurations to `TableProgram` by compiling them to finite
+machine data. Together they produce a
 `TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
 from this TM2 factorization using the concrete code-to-TM2 reduction.

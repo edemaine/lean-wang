@@ -49,10 +49,11 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TM2TableCompiler`: the TM2-to-table computable reduction. It is implemented
-  by compiling Mathlib's concrete `PartrecToTM2` evaluator configurations to
-  finite table-machine data with the right halting behavior, so both
-  "reduction" and "compiler" are intentional terminology here.
+- `TM2TableCompiler`: the TM2-to-table computable reduction. The Lean name keeps
+  `Compiler` because the reduction is implemented by compiling Mathlib's
+  concrete `PartrecToTM2` evaluator configurations to finite table-machine data
+  with the right halting behavior. In prose, "reduction" is the mathematical
+  notion and "compilation" is the implementation mechanism.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
