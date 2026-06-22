@@ -58,18 +58,52 @@ def code : FoldSide → Nat
 
 end FoldSide
 
-namespace FoldSide
-
-end FoldSide
+instance instPrimcodableFoldSide : Primcodable FoldSide :=
+  Primcodable.ofEquiv Bool FoldSide.equivBool
 
 def foldSideList : List FoldSide :=
   [FoldSide.left, FoldSide.right]
+
+theorem foldSideList_nodup : foldSideList.Nodup := by
+  simp [foldSideList]
+
+theorem mem_foldSideList (s : FoldSide) : s ∈ foldSideList := by
+  cases s <;> simp [foldSideList]
+
+instance instFintypeFoldSide : Fintype FoldSide where
+  elems := ⟨foldSideList, foldSideList_nodup⟩
+  complete := mem_foldSideList
+
+namespace FoldSide
+
+theorem toBool_primrec : Primrec FoldSide.toBool := by
+  simpa [FoldSide.equivBool] using
+    (Primrec.of_equiv (e := FoldSide.equivBool) : Primrec FoldSide.equivBool)
+
+theorem ofBool_primrec : Primrec FoldSide.ofBool := by
+  simpa [FoldSide.equivBool] using
+    (Primrec.of_equiv_symm (e := FoldSide.equivBool) :
+      Primrec FoldSide.equivBool.symm)
+
+theorem code_primrec : Primrec FoldSide.code := by
+  refine (Primrec.cond toBool_primrec (Primrec.const 1) (Primrec.const 0)).of_eq ?_
+  intro side
+  cases side <;> rfl
+
+end FoldSide
 
 def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
     (Nat.pair
       (TM0Route.partrecStartedTM0SymbolCode left)
       (TM0Route.partrecStartedTM0SymbolCode right))
+
+theorem foldedSymbolCode_primrec :
+    Primrec (fun p : Bool × SourceSymbol × SourceSymbol =>
+      foldedSymbolCode p.1 p.2.1 p.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : Bool × SourceSymbol × SourceSymbol =>
+    foldedSymbolCode p.1 p.2.1 p.2.2)
 
 def foldedSymbolList : List Nat :=
   [false, true].flatMap fun marked =>
@@ -83,20 +117,45 @@ def foldedBlank : Nat :=
 def foldedOriginSymbol (a : SourceSymbol) : Nat :=
   foldedSymbolCode true default a
 
+theorem foldedOriginSymbol_primrec : Primrec foldedOriginSymbol := by
+  classical
+  exact Primrec.dom_finite foldedOriginSymbol
+
 def foldedRead (side : FoldSide) (left right : SourceSymbol) : SourceSymbol :=
   match side with
   | FoldSide.left => left
   | FoldSide.right => right
+
+theorem foldedRead_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol =>
+      foldedRead p.1 p.2.1 p.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol =>
+    foldedRead p.1 p.2.1 p.2.2)
 
 def foldedWrite (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   match side with
   | FoldSide.left => foldedSymbolCode false new right
   | FoldSide.right => foldedSymbolCode false left new
 
+theorem foldedWrite_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+    foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2)
+
 def foldedWriteMarked (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   match side with
   | FoldSide.left => foldedSymbolCode true new right
   | FoldSide.right => foldedSymbolCode true left new
+
+theorem foldedWriteMarked_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+    foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2)
 
 def stateTagSim : Nat := 0
 def stateTagInit : Nat := 1

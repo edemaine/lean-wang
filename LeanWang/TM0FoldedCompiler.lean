@@ -28,37 +28,6 @@ theorem code_injective : Function.Injective code := by
 
 end FoldSide
 
-instance instPrimcodableFoldSide : Primcodable FoldSide :=
-  Primcodable.ofEquiv Bool FoldSide.equivBool
-
-namespace FoldSide
-
-theorem toBool_primrec : Primrec FoldSide.toBool := by
-  simpa [FoldSide.equivBool] using
-    (Primrec.of_equiv (e := FoldSide.equivBool) : Primrec FoldSide.equivBool)
-
-theorem ofBool_primrec : Primrec FoldSide.ofBool := by
-  simpa [FoldSide.equivBool] using
-    (Primrec.of_equiv_symm (e := FoldSide.equivBool) :
-      Primrec FoldSide.equivBool.symm)
-
-theorem code_primrec : Primrec FoldSide.code := by
-  refine (Primrec.cond toBool_primrec (Primrec.const 1) (Primrec.const 0)).of_eq ?_
-  intro side
-  cases side <;> rfl
-
-end FoldSide
-
-theorem foldSideList_nodup : foldSideList.Nodup := by
-  simp [foldSideList]
-
-theorem mem_foldSideList (s : FoldSide) : s ∈ foldSideList := by
-  cases s <;> simp [foldSideList]
-
-instance instFintypeFoldSide : Fintype FoldSide where
-  elems := ⟨foldSideList, foldSideList_nodup⟩
-  complete := mem_foldSideList
-
 /--
 Code a folded tape cell.
 
@@ -95,13 +64,6 @@ theorem foldedSymbolCode_eq {marked marked' : Bool} {left right left' right' : S
   cases hp
   exact ⟨rfl, rfl, rfl⟩
 
-theorem foldedSymbolCode_primrec :
-    Primrec (fun p : Bool × SourceSymbol × SourceSymbol =>
-      foldedSymbolCode p.1 p.2.1 p.2.2) := by
-  classical
-  exact Primrec.dom_finite (fun p : Bool × SourceSymbol × SourceSymbol =>
-    foldedSymbolCode p.1 p.2.1 p.2.2)
-
 theorem foldedSymbolCode_mem_symbols
     (marked : Bool) (left right : SourceSymbol) :
     foldedSymbolCode marked left right ∈ foldedSymbolList := by
@@ -115,35 +77,10 @@ theorem foldedBlank_mem_symbols : foldedBlank ∈ foldedSymbolList := by
   exact foldedSymbolCode_mem_symbols false default default
 
 /-- Initial origin cell when the Mathlib input head reads `a`. -/
-theorem foldedOriginSymbol_primrec : Primrec foldedOriginSymbol := by
-  classical
-  exact Primrec.dom_finite foldedOriginSymbol
-
 theorem foldedOriginSymbol_mem_symbols (a : SourceSymbol) :
     foldedOriginSymbol a ∈ foldedSymbolList := by
   unfold foldedOriginSymbol
   exact foldedSymbolCode_mem_symbols true default a
-
-theorem foldedRead_primrec :
-    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol =>
-      foldedRead p.1 p.2.1 p.2.2) := by
-  classical
-  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol =>
-    foldedRead p.1 p.2.1 p.2.2)
-
-theorem foldedWrite_primrec :
-    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
-      foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2) := by
-  classical
-  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
-    foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2)
-
-theorem foldedWriteMarked_primrec :
-    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
-      foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2) := by
-  classical
-  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
-    foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2)
 
 theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
     foldedWrite side new left right ∈ foldedSymbolList := by
