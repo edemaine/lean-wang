@@ -144,6 +144,12 @@ Completed proof layers:
   decoded read rows that update the local variable from the observed top stack
   cell, and same-write left return moves. The assembled row family has
   symbol-write and next-state well-formedness lemmas.
+- the table layer now assembles the currently implemented statement-row
+  fragment across every finite local-variable value and every supported
+  statement substate. This fragment covers `load`, `branch`, `goto`, `halt`,
+  and bounded read-only `peek` actions, with generated-row symbol/state
+  well-formedness. The assembler deliberately leaves `push` and `pop` empty
+  until their unbounded stack-shifting microprograms are added.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -207,10 +213,11 @@ Next implementation targets:
    Mathlib already provides the finite statement support
    `Turing.PartrecToTM2.codeSupp` and correctness theorem
    `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
-   control states and tape alphabet in `TableProgram` header form. The remaining
-   reduction work is generating the transition rows that represent the TM2
-   stacks and step relation in the project's one-tape `TableProgram` model, and
-   proving the simulated halting equivalence.
+   control states, tape alphabet, stationary rows, bounded `peek` rows, and the
+   implemented statement-row fragment in `TableProgram` form. The remaining
+   reduction work is generating the unbounded `push`/`pop` stack-shifting rows,
+   connecting the row fragment to multi-step simulation of the TM2 step
+   relation, and proving the simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

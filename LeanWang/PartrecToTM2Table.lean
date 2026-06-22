@@ -649,6 +649,13 @@ theorem stationaryTransition_mem_stationaryRows {state read next : Nat}
     stationaryTransition state read next ∈ stationaryRows state next :=
   List.mem_map.2 ⟨read, hread, rfl⟩
 
+theorem stationaryRows_write_mem_symbols {state next : Nat}
+    {e : TableTransition}
+    (he : e ∈ stationaryRows state next) :
+    e.write ∈ symbols := by
+  rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+  exact hread
+
 theorem stationaryRows_find?_eq_some {state read next : Nat}
     (hread : read ∈ symbols) :
     (stationaryRows state next).find?
@@ -1171,6 +1178,179 @@ theorem haltRows_next_mem_states (tc : Turing.ToPartrec.Code)
     encodedStmtState tc var none ∈ states tc := by
   exact haltState_mem_states tc
 
+/-- A child statement of a supported statement is also in the finite statement list. -/
+theorem childStmt_mem_statementList {tc : Turing.ToPartrec.Code}
+    {parent child : Turing.PartrecToTM2.Stmt'}
+    (hchild : child ∈ Turing.TM2.stmts₁ parent)
+    (hparent : some parent ∈ PartrecToTM2Support.statementList tc) :
+    some child ∈ PartrecToTM2Support.statementList tc := by
+  exact PartrecToTM2Support.mem_statementList.2
+    (Turing.TM2.stmts_trans hchild
+      (PartrecToTM2Support.mem_statementList.1 hparent))
+
+/--
+Rows currently implemented for one supported statement substate.
+
+The stack-shifting `push` and `pop` microprograms are intentionally left empty
+here; their rows need the unbounded stack-tail shift machinery. The implemented
+fragment covers the stationary statement forms and the bounded read-only
+`peek` action.
+-/
+noncomputable def implementedStatementRowsForStmt (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') :
+    Option Turing.PartrecToTM2.Stmt' → List TableTransition
+  | none => []
+  | some (Turing.TM2.Stmt.push _ _ _) => []
+  | some (Turing.TM2.Stmt.peek k f q) => peekRows tc var k f q
+  | some (Turing.TM2.Stmt.pop _ _ _) => []
+  | some (Turing.TM2.Stmt.load a q) => loadRows tc var a q
+  | some (Turing.TM2.Stmt.branch p q₁ q₂) => branchRows tc var p q₁ q₂
+  | some (Turing.TM2.Stmt.goto f) => gotoRows tc var f
+  | some Turing.TM2.Stmt.halt => haltRows tc var
+
+theorem implementedStatementRowsForStmt_write_mem_symbols
+    {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'} {e : TableTransition}
+    (he : e ∈ implementedStatementRowsForStmt tc var stmt) :
+    e.write ∈ symbols := by
+  cases stmt with
+  | none =>
+      simp [implementedStatementRowsForStmt] at he
+  | some stmt =>
+      cases stmt with
+      | push k f q =>
+          simp [implementedStatementRowsForStmt] at he
+      | peek k f q =>
+          exact peekRows_write_mem_symbols he
+      | pop k f q =>
+          simp [implementedStatementRowsForStmt] at he
+      | load a q =>
+          exact stationaryRows_write_mem_symbols he
+      | branch p q₁ q₂ =>
+          exact stationaryRows_write_mem_symbols he
+      | goto f =>
+          exact stationaryRows_write_mem_symbols he
+      | halt =>
+          exact stationaryRows_write_mem_symbols he
+
+theorem implementedStatementRowsForStmt_next_mem_states
+    {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'} {e : TableTransition}
+    (he : e ∈ implementedStatementRowsForStmt tc var stmt)
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    e.next ∈ states tc := by
+  cases stmt with
+  | none =>
+      simp [implementedStatementRowsForStmt] at he
+  | some stmt =>
+      cases stmt with
+      | push k f q =>
+          simp [implementedStatementRowsForStmt] at he
+      | peek k f q =>
+          have hq : some q ∈ PartrecToTM2Support.statementList tc :=
+            childStmt_mem_statementList
+              (parent := Turing.TM2.Stmt.peek k f q) (child := q)
+              (by
+                classical
+                unfold Turing.TM2.stmts₁
+                exact Finset.mem_insert_of_mem Turing.TM2.stmts₁_self)
+              hstmt
+          exact peekRows_next_mem_states he hstmt hq
+      | pop k f q =>
+          simp [implementedStatementRowsForStmt] at he
+      | load a q =>
+          have hq : some q ∈ PartrecToTM2Support.statementList tc :=
+            childStmt_mem_statementList
+              (parent := Turing.TM2.Stmt.load a q) (child := q)
+              (by
+                classical
+                unfold Turing.TM2.stmts₁
+                exact Finset.mem_insert_of_mem Turing.TM2.stmts₁_self)
+              hstmt
+          rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+          exact loadRows_next_mem_states hq
+      | branch p q₁ q₂ =>
+          have hq₁ : some q₁ ∈ PartrecToTM2Support.statementList tc :=
+            childStmt_mem_statementList
+              (parent := Turing.TM2.Stmt.branch p q₁ q₂) (child := q₁)
+              (by
+                classical
+                unfold Turing.TM2.stmts₁
+                exact Finset.mem_insert_of_mem
+                  (Finset.mem_union_left _ Turing.TM2.stmts₁_self))
+              hstmt
+          have hq₂ : some q₂ ∈ PartrecToTM2Support.statementList tc :=
+            childStmt_mem_statementList
+              (parent := Turing.TM2.Stmt.branch p q₁ q₂) (child := q₂)
+              (by
+                classical
+                unfold Turing.TM2.stmts₁
+                exact Finset.mem_insert_of_mem
+                  (Finset.mem_union_right _ Turing.TM2.stmts₁_self))
+              hstmt
+          rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+          exact branchRows_next_mem_states hq₁ hq₂
+      | goto f =>
+          have hsupport :=
+            PartrecToTM2Support.statement_supports
+              (PartrecToTM2Support.mem_statementList.1 hstmt)
+          rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+          exact gotoRows_next_mem_states (hsupport var)
+      | halt =>
+          rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+          exact haltRows_next_mem_states tc var
+
+/-- Implemented rows for all supported statement substates at one local-variable value. -/
+noncomputable def implementedStatementRowsForVar (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') : List TableTransition :=
+  ((PartrecToTM2Support.statementList tc).map
+    fun stmt => implementedStatementRowsForStmt tc var stmt).flatten
+
+theorem implementedStatementRowsForVar_write_mem_symbols
+    {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {e : TableTransition}
+    (he : e ∈ implementedStatementRowsForVar tc var) :
+    e.write ∈ symbols := by
+  unfold implementedStatementRowsForVar at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨stmt, _hstmt, rfl⟩
+  exact implementedStatementRowsForStmt_write_mem_symbols he
+
+theorem implementedStatementRowsForVar_next_mem_states
+    {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {e : TableTransition}
+    (he : e ∈ implementedStatementRowsForVar tc var) :
+    e.next ∈ states tc := by
+  unfold implementedStatementRowsForVar at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨stmt, hstmt, rfl⟩
+  exact implementedStatementRowsForStmt_next_mem_states he hstmt
+
+/-- Concrete table fragment for all currently implemented `PartrecToTM2` statement rows. -/
+noncomputable def implementedStatementRows (tc : Turing.ToPartrec.Code) :
+    List TableTransition :=
+  (cellSymbols.map fun var => implementedStatementRowsForVar tc var).flatten
+
+theorem implementedStatementRows_write_mem_symbols
+    {tc : Turing.ToPartrec.Code} {e : TableTransition}
+    (he : e ∈ implementedStatementRows tc) :
+    e.write ∈ symbols := by
+  unfold implementedStatementRows at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨var, _hvar, rfl⟩
+  exact implementedStatementRowsForVar_write_mem_symbols he
+
+theorem implementedStatementRows_next_mem_states
+    {tc : Turing.ToPartrec.Code} {e : TableTransition}
+    (he : e ∈ implementedStatementRows tc) :
+    e.next ∈ states tc := by
+  unfold implementedStatementRows at he
+  rcases List.mem_flatten.1 he with ⟨rows, hrows, he⟩
+  rcases List.mem_map.1 hrows with ⟨var, _hvar, rfl⟩
+  exact implementedStatementRowsForVar_next_mem_states he
+
 /--
 First transition row for the future TM2-to-table reduction/compiler.
 
@@ -1422,6 +1602,11 @@ theorem haltRows_nextID_representsSubstate
 noncomputable def programWithInitTable (tc : Turing.ToPartrec.Code)
     (table : List TableTransition) : TableProgram :=
   programWithTable tc (initTransition tc :: table)
+
+/-- Program using the currently implemented `PartrecToTM2` statement-row fragment. -/
+noncomputable def programWithImplementedRows (tc : Turing.ToPartrec.Code) :
+    TableProgram :=
+  programWithInitTable tc (implementedStatementRows tc)
 
 theorem programWithInitTable_first_transition (tc : Turing.ToPartrec.Code)
     (table : List TableTransition) :
