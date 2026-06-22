@@ -72,6 +72,12 @@ theorem codeEvalnHalts_primrec :
   simpa [codeEvalnHalts] using
     Primrec.option_isSome.comp Nat.Partrec.Code.primrec_evaln
 
+theorem codeEvalnHalts_zero_primrec :
+    Primrec fun p : Code × Nat => codeEvalnHalts p.1 0 p.2 :=
+  (codeEvalnHalts_primrec.comp
+    (Primrec.pair (Primrec.pair Primrec.snd Primrec.fst) (Primrec.const 0))).of_eq
+    fun _ => rfl
+
 /--
 The bounded list of evaluator outcomes for a code on input `0`, tested at
 fuels below `bound`.
@@ -277,6 +283,31 @@ structure FuelTableCompiler where
   compile_computable : Computable compile
   correct : ∀ c : Code,
     Machine.HaltsEmpty (compile c).toMachine ↔ FuelMachine.Halts (codeEvalnHalts c 0)
+
+/--
+A generic compiler/reduction for unbounded primitive-recursive Boolean search.
+
+Given a primitive-recursive predicate family `P a k`, it produces one finite
+`TableProgram` for each parameter `a` that halts exactly when some searched fuel
+`k` satisfies `P a k`.
+-/
+structure PrimrecSearchTableCompiler where
+  compile : {α : Type} → [Primcodable α] → (α → Nat → Bool) → α → TableProgram
+  compile_computable :
+    ∀ {α : Type} [Primcodable α] {P : α → Nat → Bool},
+      Primrec (fun p : α × Nat => P p.1 p.2) →
+        Computable (fun a : α => compile P a)
+  correct :
+    ∀ {α : Type} [Primcodable α] (P : α → Nat → Bool) (a : α),
+      Machine.HaltsEmpty (compile P a).toMachine ↔ FuelMachine.Halts (P a)
+
+def PrimrecSearchTableCompiler.toFuelTableCompiler
+    (C : PrimrecSearchTableCompiler) : FuelTableCompiler where
+  compile := C.compile (fun c k => codeEvalnHalts c 0 k)
+  compile_computable := C.compile_computable codeEvalnHalts_zero_primrec
+  correct := by
+    intro c
+    exact C.correct (fun c k => codeEvalnHalts c 0 k) c
 
 def FuelTableCompiler.toTableCompiler (C : FuelTableCompiler) : TableCompiler where
   compile := C.compile

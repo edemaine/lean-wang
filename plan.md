@@ -89,6 +89,12 @@ structure FuelTableCompiler where
   correct : forall c : Code,
     Machine.HaltsEmpty (compile c).toMachine <-> FuelMachine.Halts (codeEvalnHalts c 0)
 
+structure PrimrecSearchTableCompiler where
+  compile : {α : Type} -> [Primcodable α] -> (α -> Nat -> Bool) -> α -> TableProgram
+  compile_computable : ...
+  correct : forall {α : Type} [Primcodable α] (P : α -> Nat -> Bool) (a : α),
+    Machine.HaltsEmpty (compile P a).toMachine <-> FuelMachine.Halts (P a)
+
 def IsScaffold (S : Scaffold) : Prop :=
   forall (T : TileSet) (seed : WangTile),
     TilesPlane (combineWithScaffold S T seed) <->
@@ -98,6 +104,9 @@ def IsScaffold (S : Scaffold) : Prop :=
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
 compiler/reduction obligation into a `TableCompiler`, using the proved
 equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
+`PrimrecSearchTableCompiler.toFuelTableCompiler` further factors this obligation
+through a generic unbounded search compiler for primitive-recursive Boolean
+predicate families.
 
 There is also an encoded TM2 factoring of the same obligation:
 `ToPartrecTM2Reduction` records a computable natural-number encoding of the
@@ -107,10 +116,10 @@ configurations to `TableProgram`. Together they produce a `TableCompiler`.
 
 Next implementation targets:
 
-1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
-   implementing the bounded evaluator fuel search in `TableProgram`. This object
-   is both a compiler from code to finite machine data and the computable
-   reduction component used in the undecidability proof.
+1. Build a concrete `PrimrecSearchTableCompiler`, `FuelTableCompiler`, or
+   directly a `TableCompiler`, by implementing the bounded evaluator fuel search
+   in `TableProgram`. This object is both a compiler from code to finite machine
+   data and the computable reduction component used in the undecidability proof.
    The finite bounded-search fragment is now verified; the remaining compiler/
    reduction work is implementing the unbounded counter/search behavior as one
    finite `TableProgram` rather than an existential family of bounded prefix
