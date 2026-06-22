@@ -37,8 +37,10 @@ theorem stateCode_mem_states (tc : Turing.ToPartrec.Code)
     (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) :
     stateCode tc q ∈ TM0Route.partrecStartedTM0States tc := by
   unfold stateCode TM0Route.partrecStartedTM0States
-  exact List.mem_range.2 (List.idxOf_lt_length_iff.2
-    (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq))
+  exact List.mem_range.2 (by
+    rw [← TM0Route.partrecStartedTM0LabelSupportList_length_eq_stateCount]
+    exact List.idxOf_lt_length_iff.2
+      (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq))
 
 theorem stateCode_ne_start_of_mem_labels_ne_default {tc : Turing.ToPartrec.Code}
     {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}

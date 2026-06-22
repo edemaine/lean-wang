@@ -917,7 +917,13 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
 
 /-- Number of numeric states in the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0StateCount (tc : Turing.ToPartrec.Code) : Nat :=
-  (partrecStartedTM0LabelSupportList tc).length
+  partrecStartedTM0LabelSupportCount tc
+
+theorem partrecStartedTM0LabelSupportList_length_eq_stateCount
+    (tc : Turing.ToPartrec.Code) :
+    (partrecStartedTM0LabelSupportList tc).length =
+      partrecStartedTM0StateCount tc := by
+  rw [partrecStartedTM0LabelSupportList_length, partrecStartedTM0StateCount]
 
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
@@ -930,7 +936,7 @@ def partrecStartedTM0Start : Nat :=
 theorem partrecStartedTM0Start_mem_states (tc : Turing.ToPartrec.Code) :
     partrecStartedTM0Start ∈ partrecStartedTM0States tc := by
   simp [partrecStartedTM0Start, partrecStartedTM0States, partrecStartedTM0StateCount,
-    partrecStartedTM0LabelSupportList]
+    partrecStartedTM0LabelSupportCount]
 
 theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelSupportList tc)[0]? =
@@ -948,7 +954,9 @@ theorem partrecStartedTM0StateCodeOfMem_mem_states (tc : Turing.ToPartrec.Code)
     (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
     partrecStartedTM0StateCodeOfMem tc q hq ∈ partrecStartedTM0States tc := by
   unfold partrecStartedTM0StateCodeOfMem partrecStartedTM0States
-  exact List.mem_range.2 (List.idxOf_lt_length_iff.2 hq)
+  exact List.mem_range.2 (by
+    rw [← partrecStartedTM0LabelSupportList_length_eq_stateCount]
+    exact List.idxOf_lt_length_iff.2 hq)
 
 theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
