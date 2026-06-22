@@ -126,6 +126,10 @@ Completed proof layers:
   preservation theorem showing that a stationary transition preserves
   `RepresentsSubstate` while updating only the encoded local variable and
   statement substate.
+- the non-stack row families now have program-level lookup and one-step
+  preservation lemmas. For a table containing just the corresponding row family,
+  `nextID` preserves `RepresentsSubstate` for `load`, `branch`, `goto`, and
+  `halt`, assuming the usual current-state-not-halt and target support facts.
 
 The remaining construction obligations are explicit Lean interfaces:
 

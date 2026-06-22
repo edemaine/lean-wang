@@ -423,6 +423,43 @@ theorem stationaryTransition_mem_stationaryRows {state read next : Nat}
     stationaryTransition state read next ∈ stationaryRows state next :=
   List.mem_map.2 ⟨read, hread, rfl⟩
 
+theorem stationaryRows_find?_eq_some {state read next : Nat}
+    (hread : read ∈ symbols) :
+    (stationaryRows state next).find?
+        (fun e => e.matchesInput state read) =
+      some (stationaryTransition state read next) := by
+  have hlt : read < 5 := by
+    simpa [symbols, PartrecToTM2Support.tapeSymbols] using hread
+  cases read with
+  | zero =>
+      simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
+        TableTransition.matchesInput]
+  | succ read =>
+      cases read with
+      | zero =>
+          simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
+            TableTransition.matchesInput]
+      | succ read =>
+          cases read with
+          | zero =>
+              simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
+                TableTransition.matchesInput]
+              omega
+          | succ read =>
+              cases read with
+              | zero =>
+                  simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
+                    TableTransition.matchesInput]
+                  omega
+              | succ read =>
+                  cases read with
+                  | zero =>
+                      simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
+                        TableTransition.matchesInput]
+                      omega
+                  | succ read =>
+                      omega
+
 theorem toMachine_nextID_of_stationaryTransition {P : TableProgram} {id : ID}
     {next : Nat}
     (hhead : id.head = 0)
@@ -707,6 +744,130 @@ theorem RepresentsSubstate.tape_head_mem_supportedSymbols {tc : Turing.ToPartrec
     id.tape id.head ∈ (programWithTable tc table).supportedSymbols := by
   change id.tape id.head ∈ blankSymbol :: symbols
   exact List.mem_cons_of_mem blankSymbol h.tape_head_mem_symbols
+
+theorem programWithTable_stationaryRows_transition?
+    (tc : Turing.ToPartrec.Code) (state read next : Nat)
+    (hread : read ∈ symbols) :
+    (programWithTable tc (stationaryRows state next)).toTableMachine.transition?
+        state read =
+      some (stationaryTransition state read next) := by
+  unfold TableMachine.transition?
+  simpa [programWithTable, TableProgram.toTableMachine, TableProgram.supportedSymbols,
+    TableProgram.supportedStates] using
+    stationaryRows_find?_eq_some (state := state) (next := next) hread
+
+theorem encodedStmtState_mem_supportedStates {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    {table : List TableTransition}
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    encodedStmtState tc var stmt ∈ (programWithTable tc table).supportedStates := by
+  change encodedStmtState tc var stmt ∈ initState :: haltState tc :: states tc
+  exact List.mem_cons_of_mem initState
+    (List.mem_cons_of_mem (haltState tc) (encodedStmtState_mem_states hstmt))
+
+theorem loadRows_nextID_representsSubstate
+    {tc : Turing.ToPartrec.Code} {id : ID}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {a : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (hrep : RepresentsSubstate tc id var (some (Turing.TM2.Stmt.load a q)) stk)
+    (hstate : id.state ≠ haltState tc)
+    (hq : some q ∈ PartrecToTM2Support.statementList tc) :
+    RepresentsSubstate tc
+      ((programWithTable tc (loadRows tc var a q)).toMachine.nextID id)
+      (a var) (some q) stk := by
+  refine toMachine_nextID_stationary_representsSubstate
+    (P := programWithTable tc (loadRows tc var a q)) hrep ?_ ?_ ?_ ?_
+  · simpa using hstate
+  · rw [hrep.2.1]
+    exact programWithTable_stationaryRows_transition? tc
+      (encodedStmtState tc var (some (Turing.TM2.Stmt.load a q)))
+      (id.tape id.head)
+      (encodedStmtState tc (a var) (some q))
+      hrep.tape_head_mem_symbols
+  · exact hrep.tape_head_mem_supportedSymbols
+  · exact encodedStmtState_mem_supportedStates hq
+
+theorem branchRows_nextID_representsSubstate
+    {tc : Turing.ToPartrec.Code} {id : ID}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {p : Option Turing.PartrecToTM2.Γ' → Bool}
+    {q₁ q₂ : Turing.PartrecToTM2.Stmt'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (hrep : RepresentsSubstate tc id var (some (Turing.TM2.Stmt.branch p q₁ q₂)) stk)
+    (hstate : id.state ≠ haltState tc)
+    (hq₁ : some q₁ ∈ PartrecToTM2Support.statementList tc)
+    (hq₂ : some q₂ ∈ PartrecToTM2Support.statementList tc) :
+    RepresentsSubstate tc
+      ((programWithTable tc (branchRows tc var p q₁ q₂)).toMachine.nextID id)
+      var (some (cond (p var) q₁ q₂)) stk := by
+  refine toMachine_nextID_stationary_representsSubstate
+    (P := programWithTable tc (branchRows tc var p q₁ q₂)) hrep ?_ ?_ ?_ ?_
+  · simpa using hstate
+  · rw [hrep.2.1]
+    exact programWithTable_stationaryRows_transition? tc
+      (encodedStmtState tc var (some (Turing.TM2.Stmt.branch p q₁ q₂)))
+      (id.tape id.head)
+      (encodedStmtState tc var (some (cond (p var) q₁ q₂)))
+      hrep.tape_head_mem_symbols
+  · exact hrep.tape_head_mem_supportedSymbols
+  · change encodedStmtState tc var (some (cond (p var) q₁ q₂)) ∈
+      initState :: haltState tc :: states tc
+    exact List.mem_cons_of_mem initState
+      (List.mem_cons_of_mem (haltState tc)
+        (branchRows_next_mem_states hq₁ hq₂))
+
+theorem gotoRows_nextID_representsSubstate
+    {tc : Turing.ToPartrec.Code} {id : ID}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Turing.PartrecToTM2.Λ'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (hrep : RepresentsSubstate tc id var (some (Turing.TM2.Stmt.goto f)) stk)
+    (hstate : id.state ≠ haltState tc)
+    (hf : f var ∈ PartrecToTM2Support.labels tc) :
+    RepresentsSubstate tc
+      ((programWithTable tc (gotoRows tc var f)).toMachine.nextID id)
+      var (cfgStmt (some (f var))) stk := by
+  refine toMachine_nextID_stationary_representsSubstate
+    (P := programWithTable tc (gotoRows tc var f)) hrep ?_ ?_ ?_ ?_
+  · simpa using hstate
+  · rw [hrep.2.1]
+    exact programWithTable_stationaryRows_transition? tc
+      (encodedStmtState tc var (some (Turing.TM2.Stmt.goto f)))
+      (id.tape id.head)
+      (encodedStmtState tc var (cfgStmt (some (f var))))
+      hrep.tape_head_mem_symbols
+  · exact hrep.tape_head_mem_supportedSymbols
+  · change encodedStmtState tc var (cfgStmt (some (f var))) ∈
+      initState :: haltState tc :: states tc
+    exact List.mem_cons_of_mem initState
+      (List.mem_cons_of_mem (haltState tc)
+        (gotoRows_next_mem_states hf))
+
+theorem haltRows_nextID_representsSubstate
+    {tc : Turing.ToPartrec.Code} {id : ID}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (hrep : RepresentsSubstate tc id var (some Turing.TM2.Stmt.halt) stk)
+    (hstate : id.state ≠ haltState tc) :
+    RepresentsSubstate tc
+      ((programWithTable tc (haltRows tc var)).toMachine.nextID id)
+      var none stk := by
+  refine toMachine_nextID_stationary_representsSubstate
+    (P := programWithTable tc (haltRows tc var)) hrep ?_ ?_ ?_ ?_
+  · simpa using hstate
+  · rw [hrep.2.1]
+    exact programWithTable_stationaryRows_transition? tc
+      (encodedStmtState tc var (some Turing.TM2.Stmt.halt))
+      (id.tape id.head)
+      (encodedStmtState tc var none)
+      hrep.tape_head_mem_symbols
+  · exact hrep.tape_head_mem_supportedSymbols
+  · change encodedStmtState tc var none ∈ initState :: haltState tc :: states tc
+    exact List.mem_cons_of_mem initState
+      (List.mem_cons_of_mem (haltState tc) (haltRows_next_mem_states tc var))
 
 /-- Header plus the fixed first initialization row. -/
 noncomputable def programWithInitTable (tc : Turing.ToPartrec.Code)
