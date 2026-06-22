@@ -150,6 +150,11 @@ Completed proof layers:
   and bounded read-only `peek` actions, with generated-row symbol/state
   well-formedness. The assembler deliberately leaves `push` and `pop` empty
   until their unbounded stack-shifting microprograms are added.
+- the finite table-machine state space now also reserves an auxiliary block for
+  future `push`/`pop` stack-shifting microprograms, indexed by local variable,
+  originating statement, carried stack-cell symbol, finite phase, and one of
+  four stack-column offsets, with a membership lemma into the declared state
+  support.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -213,11 +218,12 @@ Next implementation targets:
    Mathlib already provides the finite statement support
    `Turing.PartrecToTM2.codeSupp` and correctness theorem
    `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
-   control states, tape alphabet, stationary rows, bounded `peek` rows, and the
-   implemented statement-row fragment in `TableProgram` form. The remaining
-   reduction work is generating the unbounded `push`/`pop` stack-shifting rows,
-   connecting the row fragment to multi-step simulation of the TM2 step
-   relation, and proving the simulated halting equivalence.
+   control states, tape alphabet, stationary rows, bounded `peek` rows, the
+   implemented statement-row fragment, and reserved finite state space for
+   unbounded stack shifts in `TableProgram` form. The remaining reduction work
+   is generating the unbounded `push`/`pop` stack-shifting rows, connecting the
+   row fragment to multi-step simulation of the TM2 step relation, and proving
+   the simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

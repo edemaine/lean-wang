@@ -280,17 +280,28 @@ def evaluatorStateCount (tc : Turing.ToPartrec.Code) : Nat :=
 def peekAuxStateCount (tc : Turing.ToPartrec.Code) : Nat :=
   evaluatorStateCount tc * 4
 
+/-- Number of possible carried cells during stack shifting. -/
+def stackShiftCarryCount : Nat := 5
+
+/-- Reserved finite phase count for future `push`/`pop` stack-shifting microprograms. -/
+def stackShiftPhaseCount : Nat := 8
+
+/-- Finite auxiliary states reserved for future `push`/`pop` stack-shifting actions. -/
+def stackShiftAuxStateCount (tc : Turing.ToPartrec.Code) : Nat :=
+  evaluatorStateCount tc * stackShiftCarryCount * stackShiftPhaseCount * 4
+
 /-- Total number of non-initial table-machine state codes currently reserved. -/
 def stateCount (tc : Turing.ToPartrec.Code) : Nat :=
-  evaluatorStateCount tc + peekAuxStateCount tc
+  evaluatorStateCount tc + peekAuxStateCount tc + stackShiftAuxStateCount tc
 
 theorem evaluatorSubstateIndex_lt_stateCount {tc : Turing.ToPartrec.Code}
     {var : Option Turing.PartrecToTM2.Γ'}
     {stmt : Option Turing.PartrecToTM2.Stmt'}
     (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
     evaluatorSubstateIndex tc var stmt < stateCount tc := by
+  have hindex := evaluatorSubstateIndex_lt (tc := tc) (var := var) hstmt
   unfold stateCount evaluatorStateCount
-  exact lt_of_lt_of_le (evaluatorSubstateIndex_lt hstmt) (Nat.le_add_right _ _)
+  omega
 
 /-- Finite table-machine states for the TM2 evaluator substates. -/
 def evaluatorStates (tc : Turing.ToPartrec.Code) : List Nat :=
@@ -411,6 +422,51 @@ theorem peekAuxState3_mem_states {tc : Turing.ToPartrec.Code}
     (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
     peekAuxState tc var stmt 3 ∈ states tc :=
   peekAuxState_mem_states hstmt (by decide : 3 < 4)
+
+/-- Auxiliary state index for future `push`/`pop` stack-shifting microprograms. -/
+noncomputable def stackShiftAuxIndex (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (phase offset : Nat) : Nat :=
+  (((evaluatorSubstateIndex tc var (some stmt) * stackShiftCarryCount +
+      PartrecToTM2Support.tapeSymbolCode carry) * stackShiftPhaseCount + phase) * 4) +
+    offset
+
+/-- Auxiliary table-machine state reserved for a future stack-shifting microprogram. -/
+noncomputable def stackShiftAuxState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (phase offset : Nat) : Nat :=
+  auxStateCode tc (peekAuxStateCount tc +
+    stackShiftAuxIndex tc var stmt carry phase offset)
+
+theorem stackShiftAuxIndex_lt_count {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {phase offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hphase : phase < stackShiftPhaseCount) (hoffset : offset < 4) :
+    stackShiftAuxIndex tc var stmt carry phase offset < stackShiftAuxStateCount tc := by
+  have hidx : evaluatorSubstateIndex tc var (some stmt) < evaluatorStateCount tc := by
+    simpa [evaluatorStateCount] using evaluatorSubstateIndex_lt hstmt
+  have hcarry : PartrecToTM2Support.tapeSymbolCode carry < stackShiftCarryCount := by
+    simpa [stackShiftCarryCount] using PartrecToTM2Support.tapeSymbolCode_lt_five carry
+  unfold stackShiftAuxIndex stackShiftAuxStateCount stackShiftCarryCount stackShiftPhaseCount at *
+  omega
+
+theorem stackShiftAuxState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {phase offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hphase : phase < stackShiftPhaseCount) (hoffset : offset < 4) :
+    stackShiftAuxState tc var stmt carry phase offset ∈ states tc := by
+  unfold stackShiftAuxState auxStateCode
+  apply evaluatorStateCode_mem_states
+  have hshift := stackShiftAuxIndex_lt_count (tc := tc) (var := var) (stmt := stmt)
+    (carry := carry) (phase := phase) (offset := offset) hstmt hphase hoffset
+  unfold stateCount
+  omega
 
 /-- Encoded control state for a TM2 statement microstate. -/
 noncomputable def encodedStmtState (tc : Turing.ToPartrec.Code)
