@@ -43,10 +43,19 @@ def equivSum : PostStmt ≃ Move ⊕ Nat where
     intro s
     cases s <;> rfl
 
-end PostStmt
-
-instance instPrimcodablePostStmt : Primcodable PostStmt :=
+instance instPrimcodable : Primcodable PostStmt :=
   Primcodable.ofEquiv (Move ⊕ Nat) PostStmt.equivSum
+
+theorem toSum_primrec : Primrec PostStmt.toSum := by
+  simpa [PostStmt.equivSum] using
+    (Primrec.of_equiv (e := PostStmt.equivSum) : Primrec PostStmt.equivSum)
+
+theorem ofSum_primrec : Primrec PostStmt.ofSum := by
+  simpa [PostStmt.equivSum] using
+    (Primrec.of_equiv_symm (e := PostStmt.equivSum) :
+      Primrec PostStmt.equivSum.symm)
+
+end PostStmt
 
 /-- One finite transition row for a Post/TM0-style machine. -/
 structure PostTransition where
@@ -86,10 +95,40 @@ def equivTuple : PostTransition ≃ Nat × Nat × Nat × PostStmt where
         cases rest with
         | mk next stmt => rfl
 
-end PostTransition
-
-instance instPrimcodablePostTransition : Primcodable PostTransition :=
+instance instPrimcodable : Primcodable PostTransition :=
   Primcodable.ofEquiv (Nat × Nat × Nat × PostStmt) PostTransition.equivTuple
+
+theorem toTuple_primrec : Primrec PostTransition.toTuple := by
+  simpa [PostTransition.equivTuple] using
+    (Primrec.of_equiv (e := PostTransition.equivTuple) :
+      Primrec PostTransition.equivTuple)
+
+theorem ofTuple_primrec : Primrec PostTransition.ofTuple := by
+  simpa [PostTransition.equivTuple] using
+    (Primrec.of_equiv_symm (e := PostTransition.equivTuple) :
+      Primrec PostTransition.equivTuple.symm)
+
+theorem state_primrec : Primrec PostTransition.state :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem read_primrec : Primrec PostTransition.read :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem next_primrec : Primrec PostTransition.next :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem stmt_primrec : Primrec PostTransition.stmt :=
+  Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem mk_primrec :
+    Primrec (fun p : Nat × Nat × Nat × PostStmt =>
+      ({ state := p.1
+         read := p.2.1
+         next := p.2.2.1
+         stmt := p.2.2.2 } : PostTransition)) :=
+  ofTuple_primrec
+
+end PostTransition
 
 /-- Raw finite data for a one-sided Post/TM0-style machine. -/
 structure PostProgram where
@@ -130,6 +169,44 @@ def equivTuple : PostProgram ≃ List Nat × List Nat × Nat × Nat × List Post
           cases rest with
           | mk start table => rfl
 
+instance instPrimcodable : Primcodable PostProgram :=
+  Primcodable.ofEquiv
+    (List Nat × List Nat × Nat × Nat × List PostTransition)
+    PostProgram.equivTuple
+
+theorem toTuple_primrec : Primrec PostProgram.toTuple := by
+  simpa [PostProgram.equivTuple] using
+    (Primrec.of_equiv (e := PostProgram.equivTuple) : Primrec PostProgram.equivTuple)
+
+theorem ofTuple_primrec : Primrec PostProgram.ofTuple := by
+  simpa [PostProgram.equivTuple] using
+    (Primrec.of_equiv_symm (e := PostProgram.equivTuple) :
+      Primrec PostProgram.equivTuple.symm)
+
+theorem symbols_primrec : Primrec PostProgram.symbols :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem states_primrec : Primrec PostProgram.states :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem blank_primrec : Primrec PostProgram.blank :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem start_primrec : Primrec PostProgram.start :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem table_primrec : Primrec PostProgram.table :=
+  Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)))
+
+theorem mk_primrec :
+    Primrec (fun p : List Nat × List Nat × Nat × Nat × List PostTransition =>
+      ({ symbols := p.1
+         states := p.2.1
+         blank := p.2.2.1
+         start := p.2.2.2.1
+         table := p.2.2.2.2 } : PostProgram)) :=
+  ofTuple_primrec
+
 def transition? (P : PostProgram) (q a : Nat) : Option PostTransition :=
   P.table.find? fun e => e.matchesInput q a
 
@@ -152,11 +229,6 @@ def step (P : PostProgram) (q a : Nat) : Option (Nat × PostStmt) :=
         none
 
 end PostProgram
-
-instance instPrimcodablePostProgram : Primcodable PostProgram :=
-  Primcodable.ofEquiv
-    (List Nat × List Nat × Nat × Nat × List PostTransition)
-    PostProgram.equivTuple
 
 /-- Instantaneous description for a one-sided Post/TM0-style machine. -/
 structure PostID where
@@ -239,9 +311,19 @@ head.
 def tableRunState (q : Nat) : Nat :=
   2 * q + 1
 
+/-- The running-state encoder is primitive recursive. -/
+theorem tableRunState_primrec : Primrec tableRunState := by
+  exact Primrec.nat_double_succ.of_eq fun q => by
+    simp [tableRunState]
+
 /-- Encoded table state used to return left after simulating a Post write. -/
 def tableWriteState (q : Nat) : Nat :=
   2 * q + 2
+
+/-- The write-return-state encoder is primitive recursive. -/
+theorem tableWriteState_primrec : Primrec tableWriteState := by
+  exact (Primrec.succ.comp Primrec.nat_double_succ).of_eq fun q => by
+    simp [tableWriteState]
 
 /-- Distinguished table halt state. -/
 def tableHalt : Nat :=
@@ -271,9 +353,23 @@ theorem tableRunState_injective : Function.Injective tableRunState := by
 def tableSymbols (P : PostProgram) : List Nat :=
   P.symbols ++ P.table.map PostTransition.read
 
+/-- The explicit table alphabet generated from a Post program is primitive recursive. -/
+theorem tableSymbols_primrec : Primrec tableSymbols := by
+  unfold tableSymbols
+  have hreads : Primrec (fun P : PostProgram => P.table.map PostTransition.read) := by
+    refine Primrec.list_map table_primrec ?_
+    apply Primrec₂.mk
+    exact PostTransition.read_primrec.comp Primrec.snd
+  exact Primrec.list_append.comp symbols_primrec hreads
+
 /-- Supported symbols of the compiled table machine. -/
 def tableSupportedSymbols (P : PostProgram) : List Nat :=
   P.blank :: P.tableSymbols
+
+/-- The supported table-symbol list generated from a Post program is primitive recursive. -/
+theorem tableSupportedSymbols_primrec : Primrec tableSupportedSymbols := by
+  unfold tableSupportedSymbols
+  exact Primrec.list_cons.comp blank_primrec tableSymbols_primrec
 
 /-- A table transition that halts from the encoded running state of `e.state`. -/
 def haltRow (P : PostProgram) (e : PostTransition) : TableTransition where
@@ -283,6 +379,16 @@ def haltRow (P : PostProgram) (e : PostTransition) : TableTransition where
   next := tableHalt
   move := Move.right
 
+/-- The malformed-row halting row generator is primitive recursive. -/
+theorem haltRow_primrec :
+    Primrec (fun p : PostProgram × PostTransition => haltRow p.1 p.2) := by
+  unfold haltRow
+  exact TableTransition.mk_primrec.comp
+    (Primrec.pair (tableRunState_primrec.comp (PostTransition.state_primrec.comp Primrec.snd))
+      (Primrec.pair (PostTransition.read_primrec.comp Primrec.snd)
+        (Primrec.pair (blank_primrec.comp Primrec.fst)
+          (Primrec.pair (Primrec.const tableHalt) (Primrec.const Move.right)))))
+
 /-- Table row for a Post move command. -/
 def moveRow (e : PostTransition) (m : Move) : TableTransition where
   state := tableRunState e.state
@@ -291,6 +397,18 @@ def moveRow (e : PostTransition) (m : Move) : TableTransition where
   next := tableRunState e.next
   move := m
 
+/-- The table row generated by a Post move command is primitive recursive. -/
+theorem moveRow_primrec :
+    Primrec (fun p : PostTransition × Move => moveRow p.1 p.2) := by
+  unfold moveRow
+  exact TableTransition.mk_primrec.comp
+    (Primrec.pair (tableRunState_primrec.comp (PostTransition.state_primrec.comp Primrec.fst))
+      (Primrec.pair (PostTransition.read_primrec.comp Primrec.fst)
+        (Primrec.pair (PostTransition.read_primrec.comp Primrec.fst)
+          (Primrec.pair
+            (tableRunState_primrec.comp (PostTransition.next_primrec.comp Primrec.fst))
+            Primrec.snd))))
+
 /-- First table row for a Post write command. -/
 def writeStartRow (e : PostTransition) (b : Nat) : TableTransition where
   state := tableRunState e.state
@@ -298,6 +416,18 @@ def writeStartRow (e : PostTransition) (b : Nat) : TableTransition where
   write := b
   next := tableWriteState e.next
   move := Move.right
+
+/-- The first table row generated by a Post write command is primitive recursive. -/
+theorem writeStartRow_primrec :
+    Primrec (fun p : PostTransition × Nat => writeStartRow p.1 p.2) := by
+  unfold writeStartRow
+  exact TableTransition.mk_primrec.comp
+    (Primrec.pair (tableRunState_primrec.comp (PostTransition.state_primrec.comp Primrec.fst))
+      (Primrec.pair (PostTransition.read_primrec.comp Primrec.fst)
+        (Primrec.pair Primrec.snd
+          (Primrec.pair
+            (tableWriteState_primrec.comp (PostTransition.next_primrec.comp Primrec.fst))
+            (Primrec.const Move.right)))))
 
 @[simp]
 theorem haltRow_matches_run (P : PostProgram) (e : PostTransition) (q a : Nat) :
@@ -375,6 +505,19 @@ def writeReturnRows (P : PostProgram) (q : Nat) : List TableTransition :=
       next := tableRunState q
       move := Move.left }
 
+/-- The return-left rows generated after a Post write are primitive recursive. -/
+theorem writeReturnRows_primrec :
+    Primrec (fun p : PostProgram × Nat => writeReturnRows p.1 p.2) := by
+  unfold writeReturnRows
+  refine Primrec.list_map (tableSupportedSymbols_primrec.comp Primrec.fst) ?_
+  apply Primrec₂.mk
+  exact TableTransition.mk_primrec.comp
+    (Primrec.pair (tableWriteState_primrec.comp (Primrec.snd.comp Primrec.fst))
+      (Primrec.pair Primrec.snd
+        (Primrec.pair Primrec.snd
+          (Primrec.pair (tableRunState_primrec.comp (Primrec.snd.comp Primrec.fst))
+            (Primrec.const Move.left)))))
+
 theorem writeReturnRows_find?_run (P : PostProgram) (q r a : Nat) :
     (writeReturnRows P r).find? (fun e => e.matchesInput (tableRunState q) a) = none := by
   unfold writeReturnRows
@@ -403,14 +546,107 @@ def rowsForTransition (P : PostProgram) (e : PostTransition) : List TableTransit
   else
     [haltRow P e]
 
+/-- Rows generated by one Post transition are primitive recursive. -/
+theorem rowsForTransition_primrec :
+    Primrec (fun p : PostProgram × PostTransition => rowsForTransition p.1 p.2) := by
+  unfold rowsForTransition
+  let hhalt : Primrec (fun p : PostProgram × PostTransition => [haltRow p.1 p.2]) :=
+    Primrec.list_cons.comp haltRow_primrec (Primrec.const ([] : List TableTransition))
+  have hnext :
+      PrimrecPred (fun p : PostProgram × PostTransition => p.2.next ∈ p.1.states) :=
+    TableProgram.nat_mem_list_primrecPred.comp
+      (Primrec.pair (states_primrec.comp Primrec.fst)
+        (PostTransition.next_primrec.comp Primrec.snd))
+  have hstmt :
+      Primrec (fun p : PostProgram × PostTransition => PostStmt.toSum p.2.stmt) :=
+    PostStmt.toSum_primrec.comp (PostTransition.stmt_primrec.comp Primrec.snd)
+  have hcases :
+      Primrec (fun p : PostProgram × PostTransition =>
+        match p.2.stmt with
+        | PostStmt.move m => [moveRow p.2 m]
+        | PostStmt.write b =>
+            if b ∈ p.1.symbols then
+              [writeStartRow p.2 b] ++ writeReturnRows p.1 p.2.next
+            else
+              [haltRow p.1 p.2]) := by
+    refine (Primrec.sumCasesOn
+      (α := PostProgram × PostTransition) (β := Move) (γ := Nat)
+      (σ := List TableTransition)
+      (f := fun p : PostProgram × PostTransition => PostStmt.toSum p.2.stmt)
+      (g := fun p m => [moveRow p.2 m])
+      (h := fun p b =>
+        if b ∈ p.1.symbols then
+          [writeStartRow p.2 b] ++ writeReturnRows p.1 p.2.next
+        else
+          [haltRow p.1 p.2])
+      hstmt ?_ ?_).of_eq ?_
+    · apply Primrec₂.mk
+      exact Primrec.list_cons.comp
+        (moveRow_primrec.comp (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+        (Primrec.const ([] : List TableTransition))
+    · apply Primrec₂.mk
+      have hsymbol :
+          PrimrecPred (fun p : (PostProgram × PostTransition) × Nat =>
+            p.2 ∈ p.1.1.symbols) :=
+        TableProgram.nat_mem_list_primrecPred.comp
+          (Primrec.pair (symbols_primrec.comp (Primrec.fst.comp Primrec.fst)) Primrec.snd)
+      have hwriteStart :
+          Primrec (fun p : (PostProgram × PostTransition) × Nat =>
+            [writeStartRow p.1.2 p.2]) :=
+        Primrec.list_cons.comp
+          (writeStartRow_primrec.comp (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+          (Primrec.const ([] : List TableTransition))
+      have hreturns :
+          Primrec (fun p : (PostProgram × PostTransition) × Nat =>
+            writeReturnRows p.1.1 p.1.2.next) :=
+        writeReturnRows_primrec.comp
+          (Primrec.pair (Primrec.fst.comp Primrec.fst)
+            (PostTransition.next_primrec.comp (Primrec.snd.comp Primrec.fst)))
+      have hgood :
+          Primrec (fun p : (PostProgram × PostTransition) × Nat =>
+            [writeStartRow p.1.2 p.2] ++ writeReturnRows p.1.1 p.1.2.next) :=
+        Primrec.list_append.comp hwriteStart hreturns
+      have hbad : Primrec (fun p : (PostProgram × PostTransition) × Nat =>
+            [haltRow p.1.1 p.1.2]) :=
+        Primrec.list_cons.comp
+          (haltRow_primrec.comp
+            (Primrec.pair (Primrec.fst.comp Primrec.fst) (Primrec.snd.comp Primrec.fst)))
+          (Primrec.const ([] : List TableTransition))
+      exact Primrec.ite hsymbol hgood hbad
+    · intro p
+      cases p.2.stmt <;> rfl
+  exact (Primrec.ite hnext hcases hhalt).of_eq fun p => by
+    rcases p with ⟨P, e⟩
+    cases e.stmt <;> by_cases h : e.next ∈ P.states <;> simp [h]
+
 /-- Full table row list generated from a Post program. -/
 def tableRows (P : PostProgram) : List TableTransition :=
   P.table.flatMap (rowsForTransition P)
+
+/-- The full table row list generated from a Post program is primitive recursive. -/
+theorem tableRows_primrec : Primrec tableRows := by
+  unfold tableRows
+  refine Primrec.list_flatMap table_primrec ?_
+  apply Primrec₂.mk
+  exact rowsForTransition_primrec.comp (Primrec.pair Primrec.fst Primrec.snd)
 
 /-- Table support states generated from rows, including both sources and targets. -/
 def tableStates (P : PostProgram) : List Nat :=
   (P.tableRows.map TableTransition.state) ++
     (P.tableRows.map TableTransition.next)
+
+/-- The table support-state list generated from a Post program is primitive recursive. -/
+theorem tableStates_primrec : Primrec tableStates := by
+  unfold tableStates
+  have hrowStates : Primrec (fun P : PostProgram => P.tableRows.map TableTransition.state) := by
+    refine Primrec.list_map tableRows_primrec ?_
+    apply Primrec₂.mk
+    exact TableTransition.state_primrec.comp Primrec.snd
+  have hrowNexts : Primrec (fun P : PostProgram => P.tableRows.map TableTransition.next) := by
+    refine Primrec.list_map tableRows_primrec ?_
+    apply Primrec₂.mk
+    exact TableTransition.next_primrec.comp Primrec.snd
+  exact Primrec.list_append.comp hrowStates hrowNexts
 
 /-- Compile a one-sided Post/TM0 program to the older always-write-and-move table model. -/
 def toTableProgram (P : PostProgram) : TableProgram where
@@ -420,6 +656,20 @@ def toTableProgram (P : PostProgram) : TableProgram where
   start := tableRunState P.start
   halt := tableHalt
   table := tableRows P
+
+/-- The finite-TM0-to-table data compiler is primitive recursive. -/
+theorem toTableProgram_primrec : Primrec toTableProgram := by
+  unfold toTableProgram
+  exact TableProgram.mk_primrec.comp
+    (Primrec.pair tableSymbols_primrec
+      (Primrec.pair tableStates_primrec
+        (Primrec.pair blank_primrec
+          (Primrec.pair (tableRunState_primrec.comp start_primrec)
+            (Primrec.pair (Primrec.const tableHalt) tableRows_primrec)))))
+
+/-- The finite-TM0-to-table data compiler is computable. -/
+theorem toTableProgram_computable : Computable toTableProgram :=
+  toTableProgram_primrec.to_comp
 
 @[simp]
 theorem toTableProgram_blank (P : PostProgram) :
