@@ -92,6 +92,41 @@ theorem code_primrec : Primrec FoldSide.code := by
 
 end FoldSide
 
+/-- Boolean code for Mathlib tape directions. -/
+def dirToBool : Turing.Dir → Bool
+  | Turing.Dir.left => false
+  | Turing.Dir.right => true
+
+def dirOfBool : Bool → Turing.Dir
+  | false => Turing.Dir.left
+  | true => Turing.Dir.right
+
+def dirEquivBool : Turing.Dir ≃ Bool where
+  toFun := dirToBool
+  invFun := dirOfBool
+  left_inv := by
+    intro dir
+    cases dir <;> rfl
+  right_inv := by
+    intro bit
+    cases bit <;> rfl
+
+instance instPrimcodableTuringDir : Primcodable Turing.Dir :=
+  Primcodable.ofEquiv Bool dirEquivBool
+
+def dirList : List Turing.Dir :=
+  [Turing.Dir.left, Turing.Dir.right]
+
+theorem dirList_nodup : dirList.Nodup := by
+  simp [dirList]
+
+theorem mem_dirList (dir : Turing.Dir) : dir ∈ dirList := by
+  cases dir <;> simp [dirList]
+
+instance instFintypeTuringDir : Fintype Turing.Dir where
+  elems := ⟨dirList, dirList_nodup⟩
+  complete := mem_dirList
+
 def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
     (Nat.pair
@@ -243,6 +278,12 @@ theorem mkRow_primrec :
       mkRow p.1 p.2.1 p.2.2.1 p.2.2.2) := by
   exact PostTransition.mk_primrec
 
+theorem postStmtMove_primrec : Primrec PostStmt.move := by
+  exact PostStmt.ofSum_primrec.comp Primrec.sumInl
+
+theorem postStmtWrite_primrec : Primrec PostStmt.write := by
+  exact PostStmt.ofSum_primrec.comp Primrec.sumInr
+
 def initWriteOriginRow : PostTransition :=
   mkRow initWriteOriginState foldedBlank nextAfterOrigin
     (PostStmt.write (foldedOriginSymbol (inputSymbol 0)))
@@ -299,6 +340,13 @@ def foldedMoveNextSide (side : FoldSide) (marked : Bool) (dir : Turing.Dir) : Fo
   | FoldSide.left, true, Turing.Dir.right => FoldSide.right
   | _, _, _ => side
 
+theorem foldedMoveNextSide_primrec :
+    Primrec (fun p : FoldSide × Bool × Turing.Dir =>
+      foldedMoveNextSide p.1 p.2.1 p.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × Bool × Turing.Dir =>
+    foldedMoveNextSide p.1 p.2.1 p.2.2)
+
 def foldedMoveStmt (side : FoldSide) (marked : Bool) (cell : Nat)
     (dir : Turing.Dir) : PostStmt :=
   match side, marked, dir with
@@ -325,6 +373,14 @@ def foldedWriteForStmt (side : FoldSide) (marked : Bool)
     foldedWriteMarked side new left right
   else
     foldedWrite side new left right
+
+theorem foldedWriteForStmt_primrec :
+    Primrec (fun p : FoldSide × Bool × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWriteForStmt p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  classical
+  exact Primrec.dom_finite
+    (fun p : FoldSide × Bool × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWriteForStmt p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2)
 
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
