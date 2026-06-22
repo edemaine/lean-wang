@@ -52,27 +52,9 @@ Completed proof layers:
 - the abstract scaffold reduction from any verified `IsScaffold S`;
 - the encoded domino undecidability theorem from a verified reduction to finite
   machine data and verified scaffold.
-- a primitive-recursive finite Boolean search `TableProgram` generator, with
-  a recursive transition-table view, full list-level correctness
-  (`HaltsEmpty` iff the input list contains `true`), a primitive-recursive
-  bounded fuel-prefix generator, and code-indexed bounded evaluator prefix
-  programs whose existential bounded-halting family is equivalent to Mathlib
-  code evaluation being defined.
-- the same bounded evaluator prefix family has been pushed through the
-  fixed-domino machine-to-Wang construction: for a code `c`, all bounded prefix
-  fixed-domino instances tile exactly when `Nat.Partrec.Code.eval c 0` is
-  undefined, and this quantified fixed-domino family is undecidable.
-- via compactness, the bounded prefix fixed-domino family has also been pushed
-  to quantified fixed-corner square tilings: for all bounds and all positive
-  square sizes, tileability is equivalent to the same Mathlib nonhalting
-  predicate, and this quantified square-family predicate is undecidable.
-- assuming any verified `IsScaffold S`, the bounded prefix family has also been
-  pushed through the abstract scaffold to ordinary plane tiling: all scaffolded
-  bounded-prefix plane instances tile exactly when the Mathlib code does not
-  halt, and this quantified plane-tiling family is undecidable.
-- the scaffolded bounded-prefix family also has a canonical natural-number
-  encoding, with correctness and undecidability for the corresponding quantified
-  encoded plane-tiling predicate.
+- a primitive-recursive finite Boolean search `TableProgram` generator remains
+  available as supporting code, but the old bounded-fuel theorem route has been
+  removed from the main theorem surface.
 - a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
   Mathlib list-based `Turing.ToPartrec.Code`, with a concrete correctness
   theorem connecting Mathlib code evaluation to `PartrecToTM2` halting. This
@@ -99,18 +81,6 @@ structure TableCompiler where
   compile_computable : Computable compile
   correct : forall c : Code,
     Machine.HaltsEmpty (compile c).toMachine <-> (Nat.Partrec.Code.eval c 0).Dom
-
-structure FuelTableCompiler where
-  compile : Code -> TableProgram
-  compile_computable : Computable compile
-  correct : forall c : Code,
-    Machine.HaltsEmpty (compile c).toMachine <-> FuelMachine.Halts (codeEvalnHalts c 0)
-
-structure PrimrecSearchTableCompiler where
-  compile : {α : Type} -> [Primcodable α] -> (α -> Nat -> Bool) -> α -> TableProgram
-  compile_computable : ...
-  correct : forall {α : Type} [Primcodable α] (P : α -> Nat -> Bool) (a : α),
-    Machine.HaltsEmpty (compile P a).toMachine <-> FuelMachine.Halts (P a)
 
 structure FiniteTM0TableReduction where
   compile : FiniteTM0Program -> TableProgram
@@ -141,17 +111,6 @@ implementation side compiles source instances to finite machine data. In prose,
 "reduction" should be the default word for the mathematical notion, with
 "compiler"/"compilation" used when describing the concrete construction of the
 finite program.
-
-`FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
-reduction obligation into a `TableCompiler`, using the proved
-equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
-`PrimrecSearchTableCompiler.toFuelTableCompiler` further factors this obligation
-through a generic unbounded search reduction for primitive-recursive Boolean
-predicate families. That reduction is implemented by compilation to finite
-machine data. The
-fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
-domino theorem surfaces now have direct corollaries from
-`PrimrecSearchTableCompiler`.
 
 There is also a TM2/TM0 factoring of the same obligation. The repository now
 provides a local natural-number encoding, `Denumerable` instance, and hence

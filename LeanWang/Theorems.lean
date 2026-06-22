@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Compactness
-import LeanWang.FiniteSearchProgram
-import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
 import LeanWang.NatPartrecToToPartrec
@@ -18,11 +16,11 @@ import Mathlib.Computability.TuringMachine.ToPartrec
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
 
-This file collects the main reduction theorems. The final undecidability theorem
-is currently parameterized by construction obligations: a computable reduction
-from Mathlib partial-recursive codes through the TM0 route, a temporary
-finite-TM0-to-table bridge for the existing Wang-tile layer, and a concrete
-scaffold satisfying the abstract square-forcing property.
+This file collects the main reduction theorems. The final theorem is currently
+parameterized by construction obligations: a computable reduction from Mathlib
+partial-recursive codes through the TM0 route, a temporary finite-TM0-to-table
+bridge for the existing Wang-tile layer, and a concrete scaffold satisfying the
+abstract square-forcing property.
 -/
 
 noncomputable section
@@ -30,136 +28,6 @@ noncomputable section
 namespace LeanWang
 
 open Nat.Partrec (Code)
-
-theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
-    (f <$> p).Dom ↔ p.Dom := by
-  rw [Part.map_eq_map]
-  rfl
-
-/--
-Bounded Mathlib code evaluation succeeds at some fuel exactly when full
-evaluation is defined.
--/
-theorem code_eval_dom_iff_exists_evaln (c : Code) (n : Nat) :
-    (Nat.Partrec.Code.eval c n).Dom ↔
-      ∃ k x : Nat, x ∈ Nat.Partrec.Code.evaln k c n := by
-  constructor
-  · intro hdom
-    rcases Part.dom_iff_mem.1 hdom with ⟨x, hx⟩
-    rcases Nat.Partrec.Code.evaln_complete.1 hx with ⟨k, hk⟩
-    exact ⟨k, x, hk⟩
-  · rintro ⟨k, x, hx⟩
-    exact Part.dom_iff_mem.2 ⟨x, Nat.Partrec.Code.evaln_sound hx⟩
-
-/-- Boolean bounded halting predicate for `Nat.Partrec.Code.evaln`. -/
-def codeEvalnHalts (c : Code) (n k : Nat) : Bool :=
-  (Nat.Partrec.Code.evaln k c n).isSome
-
-theorem code_eval_dom_iff_exists_codeEvalnHalts (c : Code) (n : Nat) :
-    (Nat.Partrec.Code.eval c n).Dom ↔ ∃ k : Nat, codeEvalnHalts c n k = true := by
-  rw [code_eval_dom_iff_exists_evaln]
-  constructor
-  · rintro ⟨k, x, hx⟩
-    refine ⟨k, ?_⟩
-    cases h : Nat.Partrec.Code.evaln k c n with
-    | none =>
-        simp [Option.mem_def, h] at hx
-    | some y =>
-        simp [codeEvalnHalts, h]
-  · rintro ⟨k, hk⟩
-    cases h : Nat.Partrec.Code.evaln k c n with
-    | none =>
-        simp [codeEvalnHalts, h] at hk
-    | some x =>
-        exact ⟨k, x, by simp [Option.mem_def, h]⟩
-
-theorem codeEvalnHalts_primrec :
-    Primrec fun a : (Nat × Code) × Nat => codeEvalnHalts a.1.2 a.2 a.1.1 := by
-  simpa [codeEvalnHalts] using
-    Primrec.option_isSome.comp Nat.Partrec.Code.primrec_evaln
-
-theorem codeEvalnHalts_zero_primrec :
-    Primrec fun p : Code × Nat => codeEvalnHalts p.1 0 p.2 :=
-  (codeEvalnHalts_primrec.comp
-    (Primrec.pair (Primrec.pair Primrec.snd Primrec.fst) (Primrec.const 0))).of_eq
-    fun _ => rfl
-
-/--
-The bounded list of evaluator outcomes for a code on input `0`, tested at
-fuels below `bound`.
--/
-def codeEvalnFuelPrefix (c : Code) (bound : Nat) : List Bool :=
-  FiniteSearchProgram.fuelPrefixParam (fun c k => codeEvalnHalts c 0 k) c bound
-
-theorem codeEvalnFuelPrefix_primrec :
-    Primrec (fun p : Code × Nat => codeEvalnFuelPrefix p.1 p.2) := by
-  unfold codeEvalnFuelPrefix
-  refine FiniteSearchProgram.fuelPrefixParam_primrec ?_
-  exact codeEvalnHalts_primrec.comp
-    (Primrec.pair (Primrec.pair Primrec.snd Primrec.fst) (Primrec.const 0))
-
-/--
-The finite-search table program that tests `codeEvalnHalts c 0 k` for all
-`k < bound`.
--/
-def codeEvalnFuelPrefixProgram (p : Code × Nat) : TableProgram :=
-  FiniteSearchProgram.program (codeEvalnFuelPrefix p.1 p.2)
-
-theorem codeEvalnFuelPrefixProgram_primrec :
-    Primrec codeEvalnFuelPrefixProgram := by
-  unfold codeEvalnFuelPrefixProgram
-  exact FiniteSearchProgram.program_primrec.comp codeEvalnFuelPrefix_primrec
-
-theorem codeEvalnFuelPrefixProgram_computable :
-    Computable codeEvalnFuelPrefixProgram :=
-  codeEvalnFuelPrefixProgram_primrec.to_comp
-
-theorem codeEvalnFuelPrefixProgram_correct (c : Code) (bound : Nat) :
-    Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine ↔
-      ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
-  unfold codeEvalnFuelPrefixProgram codeEvalnFuelPrefix
-  exact FiniteSearchProgram.program_fuelPrefixParam_correct
-    (fun c k => codeEvalnHalts c 0 k) c bound
-
-theorem exists_codeEvalnFuelPrefixProgram_halts_iff_fuelMachine_halts
-    (c : Code) :
-    (∃ bound : Nat,
-      Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine) ↔
-      FuelMachine.Halts (codeEvalnHalts c 0) := by
-  unfold codeEvalnFuelPrefixProgram codeEvalnFuelPrefix
-  exact FiniteSearchProgram.exists_program_fuelPrefixParam_halts_iff_fuelMachine_halts
-    (fun c k => codeEvalnHalts c 0 k) c
-
-theorem exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom
-    (c : Code) :
-    (∃ bound : Nat,
-      Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine) ↔
-      (Nat.Partrec.Code.eval c 0).Dom :=
-  (exists_codeEvalnFuelPrefixProgram_halts_iff_fuelMachine_halts c).trans
-    (by rw [FuelMachine.halts_iff_exists_true, code_eval_dom_iff_exists_codeEvalnHalts])
-
-theorem codeEvaln_nonhalting_undecidable :
-    ¬ ComputablePred (fun c : Code => ¬ ∃ k : Nat, codeEvalnHalts c 0 k = true) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => by
-      rw [code_eval_dom_iff_exists_codeEvalnHalts]
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-theorem codeEvalnFuelPrefixProgram_nonhalting_undecidable :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ¬ ∃ bound : Nat,
-          Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => by
-      rw [exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom]
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-theorem codeEvalnFuelMachine_correct (c : Code) (n : Nat) :
-    FuelMachine.Halts (codeEvalnHalts c n) ↔ (Nat.Partrec.Code.eval c n).Dom := by
-  rw [FuelMachine.halts_iff_exists_true, code_eval_dom_iff_exists_codeEvalnHalts]
 
 /--
 Correctness of the concrete translation into Mathlib's `PartrecToTM2`
@@ -211,21 +79,6 @@ structure TM0FiniteCompiler where
         (TM0Route.partrecStartedTM0Machine tc)
         TM0Route.partrecStartedTM0Input).Dom
 
-/-- A small sample table program, useful for concrete tests and examples. -/
-def dummyProgram : TableProgram where
-  symbols := []
-  states := []
-  blank := 0
-  start := 0
-  halt := 1
-  table := [{
-    state := 0
-    read := 0
-    write := 0
-    next := 1
-    move := Move.right
-  }]
-
 /--
 A computable reduction from Mathlib partial-recursive codes into finite
 table-machine data.
@@ -265,52 +118,6 @@ def TM0FiniteCompiler.toTableCompiler
               (NatPartrecToToPartrec.translate c)).trans
             (natPartrecToTM2Reduction_correct c))))
 
-/--
-A smaller reduction/compilation obligation: implement the fuel-search machine
-for the primitive-recursive bounded evaluator predicate.
-
-This interface packages the computable reduction through the fuel-search
-predicate before `toTableCompiler` turns it into the direct machine-level
-reduction. Its implementation compiles each source code to finite machine data.
--/
-structure FuelTableCompiler where
-  compile : Code → TableProgram
-  compile_computable : Computable compile
-  correct : ∀ c : Code,
-    Machine.HaltsEmpty (compile c).toMachine ↔ FuelMachine.Halts (codeEvalnHalts c 0)
-
-/--
-A generic computable reduction for unbounded primitive-recursive Boolean search.
-
-Given a primitive-recursive predicate family `P a k`, the reduction is
-implemented by compiling one finite `TableProgram` for each parameter `a`; the
-program halts exactly when some searched fuel `k` satisfies `P a k`.
--/
-structure PrimrecSearchTableCompiler where
-  compile : {α : Type} → [Primcodable α] → (α → Nat → Bool) → α → TableProgram
-  compile_computable :
-    ∀ {α : Type} [Primcodable α] {P : α → Nat → Bool},
-      Primrec (fun p : α × Nat => P p.1 p.2) →
-        Computable (fun a : α => compile P a)
-  correct :
-    ∀ {α : Type} [Primcodable α] (P : α → Nat → Bool) (a : α),
-      Machine.HaltsEmpty (compile P a).toMachine ↔ FuelMachine.Halts (P a)
-
-def PrimrecSearchTableCompiler.toFuelTableCompiler
-    (C : PrimrecSearchTableCompiler) : FuelTableCompiler where
-  compile := C.compile (fun c k => codeEvalnHalts c 0 k)
-  compile_computable := C.compile_computable codeEvalnHalts_zero_primrec
-  correct := by
-    intro c
-    exact C.correct (fun c k => codeEvalnHalts c 0 k) c
-
-def FuelTableCompiler.toTableCompiler (C : FuelTableCompiler) : TableCompiler where
-  compile := C.compile
-  compile_computable := C.compile_computable
-  correct := by
-    intro c
-    exact (C.correct c).trans (codeEvalnFuelMachine_correct c 0)
-
 /-- Apply the code-to-machine reduction, producing finite machine data. -/
 def programTable (C : TableCompiler) (c : Code) : TableProgram :=
   C.compile c
@@ -343,94 +150,6 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
       ¬ Machine.HaltsEmpty P.toMachine := by
   unfold tableProgramFixedDomino tableProgramTiles tableProgramSeed
   exact machineTiles_correct P.toMachine
-
-/--
-The fixed-domino instance associated to the bounded evaluator prefix program for
-a code and a fuel bound.
--/
-def codeEvalnFuelPrefixFixedDomino (p : Code × Nat) : TileSet × WangTile :=
-  tableProgramFixedDominoData (codeEvalnFuelPrefixProgram p)
-
-theorem codeEvalnFuelPrefixFixedDomino_computable :
-    Computable codeEvalnFuelPrefixFixedDomino := by
-  exact tableProgramFixedDominoData_computable.comp codeEvalnFuelPrefixProgram_computable
-
-theorem codeEvalnFuelPrefixFixedDomino_correct (c : Code) (bound : Nat) :
-    TilesQuarterWithSeed
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2 ↔
-      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
-  unfold codeEvalnFuelPrefixFixedDomino
-  rw [tableProgramFixedDominoData_seed_eq]
-  rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff (codeEvalnFuelPrefixProgram (c, bound)))]
-  rw [tableProgramFixedDomino_correct]
-  rw [codeEvalnFuelPrefixProgram_correct]
-
-theorem codeEvalnFuelPrefixFixedDomino_all_correct (c : Code) :
-    (∀ bound : Nat,
-      TilesQuarterWithSeed
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  constructor
-  · intro htiles hdom
-    rcases (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).2 hdom with
-      ⟨bound, hhalts⟩
-    have hnonhalting :=
-      (codeEvalnFuelPrefixFixedDomino_correct c bound).1 (htiles bound)
-    exact hnonhalting ((codeEvalnFuelPrefixProgram_correct c bound).1 hhalts)
-  · intro hnonhalting bound
-    rw [codeEvalnFuelPrefixFixedDomino_correct]
-    intro hsome
-    apply hnonhalting
-    exact (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).1
-      ⟨bound, (codeEvalnFuelPrefixProgram_correct c bound).2 hsome⟩
-
-theorem codeEvalnFuelPrefixFixedDomino_all_undecidable :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ bound : Nat,
-          TilesQuarterWithSeed
-            (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-            (codeEvalnFuelPrefixFixedDomino (c, bound)).2) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => codeEvalnFuelPrefixFixedDomino_all_correct c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-theorem codeEvalnFuelPrefixFixedCorner_all_correct (c : Code) :
-    (∀ bound n : Nat, 0 < n →
-      TileableFixedCornerSquare
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2 n) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  constructor
-  · intro hsquares
-    exact (codeEvalnFuelPrefixFixedDomino_all_correct c).1 fun bound =>
-      (tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).2
-        (hsquares bound)
-  · intro hnonhalting bound n hn
-    exact
-      (tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).1
-        ((codeEvalnFuelPrefixFixedDomino_all_correct c).2 hnonhalting bound)
-        n hn
-
-theorem codeEvalnFuelPrefixFixedCorner_all_undecidable :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ bound n : Nat, 0 < n →
-          TileableFixedCornerSquare
-            (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-            (codeEvalnFuelPrefixFixedDomino (c, bound)).2 n) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => codeEvalnFuelPrefixFixedCorner_all_correct c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (C : TableCompiler) (c : Code) : TileSet × WangTile :=
@@ -473,53 +192,6 @@ theorem fixed_corner_square_problem_undecidable (C : TableCompiler) :
   exact h.of_eq fun c =>
     (tilesQuarterWithSeed_iff_all_fixedCornerSquares
       (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
-
-/-- Fixed-domino undecidability from the smaller fuel-search reduction obligation. -/
-theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        TilesQuarterWithSeed
-          (fixedDominoReduction C.toTableCompiler c).1
-          (fixedDominoReduction C.toTableCompiler c).2) :=
-  fixed_domino_problem_undecidable C.toTableCompiler
-
-/--
-Fixed-corner square undecidability from the smaller fuel-search
-reduction obligation.
--/
-theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
-          (fixedDominoReduction C.toTableCompiler c).1
-          (fixedDominoReduction C.toTableCompiler c).2 n) :=
-  fixed_corner_square_problem_undecidable C.toTableCompiler
-
-/--
-Fixed-domino undecidability from a generic primitive-recursive search reduction,
-implemented by compilation to finite machine data.
--/
-theorem fixed_domino_problem_undecidable_of_primrecSearchCompiler
-    (C : PrimrecSearchTableCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        TilesQuarterWithSeed
-          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).1
-          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).2) :=
-  fixed_domino_problem_undecidable C.toFuelTableCompiler.toTableCompiler
-
-/--
-Fixed-corner square undecidability from a generic primitive-recursive search
-reduction, implemented by compilation to finite machine data.
--/
-theorem fixed_corner_square_problem_undecidable_of_primrecSearchCompiler
-    (C : PrimrecSearchTableCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
-          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).1
-          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).2 n) :=
-  fixed_corner_square_problem_undecidable C.toFuelTableCompiler.toTableCompiler
 
 /--
 Fixed-domino undecidability from the concrete Mathlib-code translation, a
@@ -1066,102 +738,6 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
   hS T seed
 
-/--
-The scaffolded plane-tiling instance associated to the bounded evaluator prefix
-program for a code and a fuel bound.
--/
-def codeEvalnFuelPrefixDominoReduction (S : Scaffold) (p : Code × Nat) : TileSet :=
-  combineWithScaffold S (codeEvalnFuelPrefixFixedDomino p).1
-    (codeEvalnFuelPrefixFixedDomino p).2
-
-theorem codeEvalnFuelPrefixDominoReduction_computable (S : Scaffold) :
-    Computable (codeEvalnFuelPrefixDominoReduction S) := by
-  unfold codeEvalnFuelPrefixDominoReduction
-  exact (combineWithScaffold_computable S).comp codeEvalnFuelPrefixFixedDomino_computable
-
-theorem codeEvalnFuelPrefixDominoReduction_correct {S : Scaffold} (hS : IsScaffold S)
-    (c : Code) (bound : Nat) :
-    TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound)) ↔
-      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
-  unfold codeEvalnFuelPrefixDominoReduction
-  exact (scaffold_reduction_correct hS
-    (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-    (codeEvalnFuelPrefixFixedDomino (c, bound)).2).trans
-      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
-        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).symm.trans
-          (codeEvalnFuelPrefixFixedDomino_correct c bound))
-
-theorem codeEvalnFuelPrefixDominoReduction_all_correct {S : Scaffold}
-    (hS : IsScaffold S) (c : Code) :
-    (∀ bound : Nat, TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound))) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  constructor
-  · intro htiles hdom
-    rcases (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).2 hdom with
-      ⟨bound, hhalts⟩
-    have hnonhalting :=
-      (codeEvalnFuelPrefixDominoReduction_correct hS c bound).1 (htiles bound)
-    exact hnonhalting ((codeEvalnFuelPrefixProgram_correct c bound).1 hhalts)
-  · intro hnonhalting bound
-    rw [codeEvalnFuelPrefixDominoReduction_correct hS]
-    intro hsome
-    apply hnonhalting
-    exact (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).1
-      ⟨bound, (codeEvalnFuelPrefixProgram_correct c bound).2 hsome⟩
-
-theorem codeEvalnFuelPrefixDominoReduction_all_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ bound : Nat, TilesPlane (codeEvalnFuelPrefixDominoReduction S (c, bound))) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => codeEvalnFuelPrefixDominoReduction_all_correct hS c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-/-- Encoded version of `codeEvalnFuelPrefixDominoReduction`. -/
-def codeEvalnFuelPrefixDominoReductionCode (S : Scaffold) (p : Code × Nat) : Nat :=
-  encodeTileSet (codeEvalnFuelPrefixDominoReduction S p)
-
-theorem codeEvalnFuelPrefixDominoReductionCode_computable (S : Scaffold) :
-    Computable (codeEvalnFuelPrefixDominoReductionCode S) := by
-  unfold codeEvalnFuelPrefixDominoReductionCode
-  exact encodeTileSet_computable.comp (codeEvalnFuelPrefixDominoReduction_computable S)
-
-theorem codeEvalnFuelPrefixDominoReductionCode_correct {S : Scaffold}
-    (hS : IsScaffold S) (c : Code) (bound : Nat) :
-    TilesPlane (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound))) ↔
-      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
-  rw [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet]
-  exact codeEvalnFuelPrefixDominoReduction_correct hS c bound
-
-theorem codeEvalnFuelPrefixDominoReductionCode_all_correct {S : Scaffold}
-    (hS : IsScaffold S) (c : Code) :
-    (∀ bound : Nat,
-      TilesPlane (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound)))) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  constructor
-  · intro htiles
-    exact (codeEvalnFuelPrefixDominoReduction_all_correct hS c).1 fun bound => by
-      simpa [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet] using
-        htiles bound
-  · intro hnonhalting bound
-    rw [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet]
-    exact (codeEvalnFuelPrefixDominoReduction_all_correct hS c).2 hnonhalting bound
-
-theorem codeEvalnFuelPrefixDominoReductionCode_all_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ bound : Nat,
-          TilesPlane
-            (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound)))) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => codeEvalnFuelPrefixDominoReductionCode_all_correct hS c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
 /-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
 def dominoReduction (S : Scaffold) (C : TableCompiler) (c : Code) : TileSet :=
   combineWithScaffold S (fixedDominoReduction C c).1 (fixedDominoReduction C c).2
@@ -1229,45 +805,6 @@ theorem encoded_domino_problem_undecidable_of_scaffold
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
     hencoded.of_eq fun c => dominoReductionCode_correct hS C c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-/--
-Encoded domino undecidability from a scaffold and the smaller fuel-search
-reduction obligation.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
-    (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
-
-/--
-Unencoded domino undecidability from a scaffold and the smaller fuel-search
-reduction obligation.
--/
-theorem domino_problem_undecidable_of_scaffold_fuelCompiler
-    (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
-
-/--
-Encoded domino undecidability from a scaffold and a generic primitive-recursive
-search reduction, implemented by compilation to finite machine data.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold_primrecSearchCompiler
-    (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
-    S hS C.toFuelTableCompiler
-
-/--
-Unencoded domino undecidability from a scaffold and a generic
-primitive-recursive search reduction, implemented by compilation to finite
-machine data.
--/
-theorem domino_problem_undecidable_of_scaffold_primrecSearchCompiler
-    (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_fuelCompiler
-    S hS C.toFuelTableCompiler
 
 /--
 Encoded domino undecidability from a scaffold, the concrete Mathlib-code
