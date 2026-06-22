@@ -51,8 +51,8 @@ the concrete definitions needed for the Berger/Robinson route:
   translated TM0 tape symbols and injective numeric codes for those symbols.
 - `LeanWang.TM0FiniteCompiler`: finite one-sided TM0 program data extracted
   from `TM0Route`, currently including numeric symbol/state headers and support
-  lemmas for the blank and start fields, plus conversion of one supported
-  Mathlib TM0 transition to one finite-TM0 row.
+  lemmas for the blank and start fields, plus enumeration of supported Mathlib
+  TM0 transitions into finite-TM0 rows.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

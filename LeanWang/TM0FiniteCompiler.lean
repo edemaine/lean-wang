@@ -94,6 +94,82 @@ noncomputable def transitionOfStep (tc : Turing.ToPartrec.Code)
         stmt := stmtOfTM0Stmt stmt
       }
 
+noncomputable def transitionsForState (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
+    (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) : List PostTransition :=
+  TM0Route.partrecStartedTM0SymbolList.filterMap fun a =>
+    transitionOfStep tc q hq a
+
+noncomputable def transitionTable (tc : Turing.ToPartrec.Code) : List PostTransition :=
+  (TM0Route.partrecStartedTM0LabelList tc).attach.flatMap fun q =>
+    transitionsForState tc q.1 ((TM0Route.mem_partrecStartedTM0LabelList tc q.1).1 q.2)
+
+theorem mem_transitionTable_state_mem {tc : Turing.ToPartrec.Code} {e : PostTransition}
+    (he : e ∈ transitionTable tc) :
+    e.state ∈ TM0Route.partrecStartedTM0States tc := by
+  unfold transitionTable transitionsForState at he
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨q, _hqmem, he⟩
+  rw [List.mem_filterMap] at he
+  rcases he with ⟨a, _hamem, hrow⟩
+  unfold transitionOfStep at hrow
+  split at hrow
+  · cases hrow
+  · rename_i q' stmt hstep
+    cases hrow
+    exact stateCode_mem_states tc q.1 ((TM0Route.mem_partrecStartedTM0LabelList tc q.1).1 q.2)
+
+theorem mem_transitionTable_read_mem {tc : Turing.ToPartrec.Code} {e : PostTransition}
+    (he : e ∈ transitionTable tc) :
+    e.read ∈ TM0Route.partrecStartedTM0Symbols := by
+  unfold transitionTable transitionsForState at he
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨q, _hqmem, he⟩
+  rw [List.mem_filterMap] at he
+  rcases he with ⟨a, _hamem, hrow⟩
+  unfold transitionOfStep at hrow
+  split at hrow
+  · cases hrow
+  · cases hrow
+    exact TM0Route.partrecStartedTM0SymbolCode_mem_symbols a
+
+theorem mem_transitionTable_next_mem {tc : Turing.ToPartrec.Code} {e : PostTransition}
+    (he : e ∈ transitionTable tc) :
+    e.next ∈ TM0Route.partrecStartedTM0States tc := by
+  unfold transitionTable transitionsForState at he
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨q, _hqmem, he⟩
+  rw [List.mem_filterMap] at he
+  rcases he with ⟨a, _hamem, hrow⟩
+  unfold transitionOfStep at hrow
+  split at hrow
+  · cases hrow
+  · rename_i q' stmt hstep
+    cases hrow
+    exact stateCode_mem_states tc q' (next_label_mem_of_step
+      ((TM0Route.mem_partrecStartedTM0LabelList tc q.1).1 q.2) hstep)
+
+theorem mem_transitionTable_write_mem {tc : Turing.ToPartrec.Code} {e : PostTransition}
+    (he : e ∈ transitionTable tc) :
+    match e.stmt with
+    | PostStmt.move _ => True
+    | PostStmt.write b => b ∈ TM0Route.partrecStartedTM0Symbols := by
+  unfold transitionTable transitionsForState at he
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨q, _hqmem, he⟩
+  rw [List.mem_filterMap] at he
+  rcases he with ⟨a, _hamem, hrow⟩
+  unfold transitionOfStep at hrow
+  split at hrow
+  · cases hrow
+  · rename_i q' stmt hstep
+    cases hrow
+    cases stmt with
+    | move d =>
+        simp [stmtOfTM0Stmt]
+    | write b =>
+        simp [stmtOfTM0Stmt, TM0Route.partrecStartedTM0SymbolCode_mem_symbols b]
+
 /--
 Finite program header for the TM0 route.
 
@@ -105,7 +181,7 @@ def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   states := TM0Route.partrecStartedTM0States tc
   blank := TM0Route.partrecStartedTM0Blank
   start := TM0Route.partrecStartedTM0Start
-  table := []
+  table := transitionTable tc
 
 @[simp]
 theorem programHeader_symbols (tc : Turing.ToPartrec.Code) :
@@ -125,7 +201,7 @@ theorem programHeader_start (tc : Turing.ToPartrec.Code) :
 
 @[simp]
 theorem programHeader_table (tc : Turing.ToPartrec.Code) :
-    (programHeader tc).table = [] := rfl
+    (programHeader tc).table = transitionTable tc := rfl
 
 theorem programHeader_blank_mem_symbols (tc : Turing.ToPartrec.Code) :
     (programHeader tc).blank ∈ (programHeader tc).symbols := by

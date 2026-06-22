@@ -280,8 +280,9 @@ also have injective numeric codes and a numeric symbol list for the eventual
 this route data. It defines numeric state codes for supported translated TM0
 labels and a finite program header with the route symbol list, state range,
 blank symbol, and start state, plus blank/start membership lemmas. It also
-defines the conversion from one supported Mathlib TM0 transition to one
-finite-TM0 transition row, including next-state support.
+defines the conversion from supported Mathlib TM0 transitions to finite-TM0
+transition rows, enumerates the full generated transition table over supported
+labels and tape symbols, and proves generated row state/read/next/write support.
 
 Next implementation targets:
 
