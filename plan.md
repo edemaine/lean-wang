@@ -58,6 +58,10 @@ Completed proof layers:
   bounded fuel-prefix generator, and code-indexed bounded evaluator prefix
   programs whose existential bounded-halting family is equivalent to Mathlib
   code evaluation being defined.
+- the same bounded evaluator prefix family has been pushed through the
+  fixed-domino machine-to-Wang construction: for a code `c`, all bounded prefix
+  fixed-domino instances tile exactly when `Nat.Partrec.Code.eval c 0` is
+  undefined, and this quantified fixed-domino family is undecidable.
 
 The remaining construction obligations are explicit Lean interfaces:
 

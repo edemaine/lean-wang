@@ -273,6 +273,61 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
   unfold tableProgramFixedDomino tableProgramTiles tableProgramSeed
   exact machineTiles_correct P.toMachine
 
+/--
+The fixed-domino instance associated to the bounded evaluator prefix program for
+a code and a fuel bound.
+-/
+def codeEvalnFuelPrefixFixedDomino (p : Code × Nat) : TileSet × WangTile :=
+  tableProgramFixedDominoData (codeEvalnFuelPrefixProgram p)
+
+theorem codeEvalnFuelPrefixFixedDomino_computable :
+    Computable codeEvalnFuelPrefixFixedDomino := by
+  exact tableProgramFixedDominoData_computable.comp codeEvalnFuelPrefixProgram_computable
+
+theorem codeEvalnFuelPrefixFixedDomino_correct (c : Code) (bound : Nat) :
+    TilesQuarterWithSeed
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2 ↔
+      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
+  unfold codeEvalnFuelPrefixFixedDomino
+  rw [tableProgramFixedDominoData_seed_eq]
+  rw [tilesQuarterWithSeed_congr
+    (tableProgramFixedDominoData_mem_iff (codeEvalnFuelPrefixProgram (c, bound)))]
+  rw [tableProgramFixedDomino_correct]
+  rw [codeEvalnFuelPrefixProgram_correct]
+
+theorem codeEvalnFuelPrefixFixedDomino_all_correct (c : Code) :
+    (∀ bound : Nat,
+      TilesQuarterWithSeed
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  constructor
+  · intro htiles hdom
+    rcases (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).2 hdom with
+      ⟨bound, hhalts⟩
+    have hnonhalting :=
+      (codeEvalnFuelPrefixFixedDomino_correct c bound).1 (htiles bound)
+    exact hnonhalting ((codeEvalnFuelPrefixProgram_correct c bound).1 hhalts)
+  · intro hnonhalting bound
+    rw [codeEvalnFuelPrefixFixedDomino_correct]
+    intro hsome
+    apply hnonhalting
+    exact (exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom c).1
+      ⟨bound, (codeEvalnFuelPrefixProgram_correct c bound).2 hsome⟩
+
+theorem codeEvalnFuelPrefixFixedDomino_all_undecidable :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ bound : Nat,
+          TilesQuarterWithSeed
+            (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+            (codeEvalnFuelPrefixFixedDomino (c, bound)).2) := by
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => codeEvalnFuelPrefixFixedDomino_all_correct c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (C : TableCompiler) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData (programTable C c)
