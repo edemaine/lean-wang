@@ -142,6 +142,11 @@ private theorem part_mem_pure_iff {α : Type} {a b : α} :
     a ∈ (pure b : Part α) ↔ a = b := by
   rw [Part.pure_eq_some, Part.mem_some_iff]
 
+private theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
+    (f <$> p).Dom ↔ p.Dom := by
+  rw [Part.map_eq_map]
+  rfl
+
 theorem Translates.dom {c : Nat.Partrec.Code} {tc : Code}
     (h : Translates c tc) (n : Nat) :
     (tc.eval [n]).Dom ↔ (Nat.Partrec.Code.eval c n).Dom := by
@@ -153,6 +158,15 @@ theorem Translates.dom {c : Nat.Partrec.Code} {tc : Code}
   · intro hc
     rcases Part.dom_iff_mem.1 hc with ⟨x, hx⟩
     exact Part.dom_iff_mem.2 ⟨[x], (h n [x]).2 ⟨x, hx, rfl⟩⟩
+
+theorem Translates.tm2_dom {c : Nat.Partrec.Code} {tc : Code}
+    (h : Translates c tc) :
+    (StateTransition.eval
+      (Turing.TM2.step Turing.PartrecToTM2.tr)
+      (Turing.PartrecToTM2.init tc [0])).Dom ↔
+        (Nat.Partrec.Code.eval c 0).Dom := by
+  rw [Turing.PartrecToTM2.tr_eval tc [0]]
+  exact (part_dom_map_iff Turing.PartrecToTM2.halt (tc.eval [0])).trans (h.dom 0)
 
 theorem translates_zero : Translates .zero (translate .zero) := by
   intro n v
