@@ -238,6 +238,54 @@ theorem decodeStackNameCode_stackNameCode (k : K') :
     decodeStackNameCode (stackNameCode k) = some k := by
   cases k <;> rfl
 
+theorem decodeStackNameCode_primrec : Primrec decodeStackNameCode := by
+  let tail₃ : Nat → Option K' := fun
+    | 0 => some K'.rev
+    | 1 => some K'.aux
+    | 2 => some K'.stack
+    | _ => none
+  have htail₃ : Primrec tail₃ := by
+    let tail₂ : Nat → Option K' := fun
+      | 0 => some K'.aux
+      | 1 => some K'.stack
+      | _ => none
+    have htail₂ : Primrec tail₂ := by
+      let tail₁ : Nat → Option K' := fun
+        | 0 => some K'.stack
+        | _ => none
+      have htail₁ : Primrec tail₁ := by
+        refine (Primrec.nat_casesOn Primrec.id (Primrec.const (some K'.stack))
+          ((Primrec.const none).to₂)).of_eq ?_
+        intro n
+        cases n <;> rfl
+      refine (Primrec.nat_casesOn Primrec.id (Primrec.const (some K'.aux))
+        (htail₁.comp Primrec.snd).to₂).of_eq ?_
+      intro n
+      cases n with
+      | zero => rfl
+      | succ n => cases n <;> rfl
+    refine (Primrec.nat_casesOn Primrec.id (Primrec.const (some K'.rev))
+      (htail₂.comp Primrec.snd).to₂).of_eq ?_
+    intro n
+    cases n with
+    | zero => rfl
+    | succ n =>
+        cases n with
+        | zero => rfl
+        | succ n => cases n <;> rfl
+  refine (Primrec.nat_casesOn Primrec.id (Primrec.const (some K'.main))
+    (htail₃.comp Primrec.snd).to₂).of_eq ?_
+  intro n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      cases n with
+      | zero => rfl
+      | succ n =>
+          cases n with
+          | zero => rfl
+          | succ n => cases n <;> rfl
+
 /-- Dense numeric code for `Option Γ'`, using zero for blank and one through four for symbols. -/
 def optionStackSymbolCode : Option Γ' → Nat
   | none => 0
@@ -685,6 +733,33 @@ def decodePredPayload (m : Nat) : Nat × Nat :=
 theorem decodePredPayload_predPayloadCode (q₁ q₂ : Nat) :
     decodePredPayload (predPayloadCode q₁ q₂) = (q₁, q₂) := by
   simp [decodePredPayload, predPayloadCode]
+
+theorem decodeReadPayload_primrec : Primrec decodeReadPayload := by
+  let tail₁ : Nat → Nat := fun m => m.unpair.2
+  let tail₂ : Nat → Nat := fun m => m.unpair.2.unpair.2
+  let tail₃ : Nat → Nat := fun m => m.unpair.2.unpair.2.unpair.2
+  have h₀ : Primrec (fun m : Nat => m.unpair.1) :=
+    Primrec.fst.comp Primrec.unpair
+  have htail₁ : Primrec tail₁ :=
+    Primrec.snd.comp Primrec.unpair
+  have htail₂ : Primrec tail₂ :=
+    (Primrec.snd.comp Primrec.unpair).comp htail₁
+  have htail₃ : Primrec tail₃ :=
+    (Primrec.snd.comp Primrec.unpair).comp htail₂
+  have h₁ : Primrec (fun m : Nat => m.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp htail₁
+  have h₂ : Primrec (fun m : Nat => m.unpair.2.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp htail₂
+  have h₃ : Primrec (fun m : Nat => m.unpair.2.unpair.2.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp htail₃
+  have h₄ : Primrec (fun m : Nat => m.unpair.2.unpair.2.unpair.2.unpair.2) :=
+    (Primrec.snd.comp Primrec.unpair).comp htail₃
+  exact (Primrec.pair h₀ (Primrec.pair h₁ (Primrec.pair h₂ (Primrec.pair h₃ h₄)))).of_eq
+    fun _ => rfl
+
+theorem decodePredPayload_primrec : Primrec decodePredPayload := by
+  exact (Primrec.pair (Primrec.fst.comp Primrec.unpair)
+    (Primrec.snd.comp Primrec.unpair)).of_eq fun _ => rfl
 
 theorem movePayloadCode_primrec :
     Primrec (fun p : (Γ' → Bool) × K' × K' × Nat =>
