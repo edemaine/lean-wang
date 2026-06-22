@@ -129,6 +129,8 @@ structure FiniteTM0TableReduction where
   correct : forall P : FiniteTM0Program,
     Machine.HaltsEmpty (compile P).toMachine <-> P.HaltsEmpty
 
+def finiteTM0TableReduction : FiniteTM0TableReduction
+
 structure TM0FiniteCompiler where
   compile : Turing.ToPartrec.Code -> FiniteTM0Program
   compile_computable : Computable compile
@@ -186,7 +188,19 @@ The data-level compiler `PostProgram.toTableProgram` is now in place for the
 temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
 table row. A finite-TM0 `write` compiles to a write-and-move-right row followed
 by finite return-left rows. Generated row targets and written symbols are proved
-to lie in the compiled table supports.
+to lie in the compiled table supports. The table simulation is now proved both
+ways at the halting level:
+
+```lean
+PostProgram.toTableProgram_toMachine_haltsEmpty_iff :
+  P.toTableProgram.toMachine.HaltsEmpty <-> P.HaltsEmpty
+```
+
+so the finite-TM0-to-table bridge is concrete:
+
+```lean
+finiteTM0TableReduction : FiniteTM0TableReduction
+```
 
 `TM0Route` now also packages finite state support for the code-specific started
 TM2 evaluator and for the translated TM1 and TM0 machines. It also has an
@@ -203,22 +217,47 @@ local finite TM0 model is one-sided. The preferred bridge is now
 `TM0FoldedCompiler`: one local tape cell stores the pair of Mathlib symbols at
 positions `-i-1` and `i`, plus an origin marker, and the finite control stores
 which folded side is active. This makes the two-sided-to-one-sided reduction
-explicit instead of hiding it inside a table-machine construction.
+explicit instead of hiding it inside a table-machine construction. The semantic
+halting equivalence for this folded program is now proved:
+
+```lean
+TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
+  (TM0FoldedCompiler.program tc).HaltsEmpty <->
+    (Turing.TM0.eval
+      (TM0Route.partrecStartedTM0Machine tc)
+      TM0Route.partrecStartedTM0Input).Dom
+```
+
+The remaining blocker to packaging this as a `TM0FiniteCompiler` is
+computability of `TM0FoldedCompiler.program`. The hard part is not the folded
+tape simulation but the currently noncomputable finite support enumeration in
+`TM0Route.partrecStartedTM0LabelList` and the dependent numeric state coding
+built from that list. A clean finish should replace or supplement this support
+view with computable finite code-generated state data.
 
 Next implementation targets:
 
-1. Complete `TM0FoldedCompiler`: reduce the code-specific two-sided Mathlib TM0
-   machine/input to the finite one-sided TM0 model by explicit tape folding, and
-   prove the halting equivalence.
-2. Replace the current table-machine tiles by direct finite-TM0 tiles. The TM0
+1. Prove computability of the folded finite-TM0 compiler, or refactor the
+   support enumeration so the folded program can be packaged as:
+
+   ```lean
+   TM0FiniteCompiler
+   ```
+
+   with `compile := TM0FoldedCompiler.program` and correctness supplied by
+   `TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom`.
+2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+3. Specialize the concrete TM0/scaffold corollaries, in particular
+   `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction_concrete` and
+   `domino_problem_undecidable_of_scaffold_tm0Reduction_concrete`, to those
+   concrete instances to recover the unconditional encoded and unencoded domino
+   theorems.
+4. Optionally replace the current table-machine tiles by direct finite-TM0
+   tiles. The TM0
    instruction set is already close to the Wang-tile space-time simulation, so
    this should remove the `PostProgram.toTableProgram` detour from the final
-   theorem. Until then, the legacy `FiniteTM0TableReduction` route remains only
-   a compatibility bridge for existing tile code.
-3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-4. Specialize
-   `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those
-   concrete instances to recover the unconditional encoded domino theorem.
+   theorem. Until then, the concrete `FiniteTM0TableReduction` route is a
+   verified compatibility bridge for existing tile code.
 
 ### 1. Define Wang Tiles
 
