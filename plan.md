@@ -87,6 +87,9 @@ Completed proof layers:
   `Nat`-valued control-state indices for the start, halt, and supported label
   statements, plus one-step/reachable label-closure lemmas for runs starting
   from `PartrecToTM2.init tc [0]`.
+- finite `TableProgram` header data for the future `PartrecToTM2` table-machine
+  reduction: the raw symbol list, raw state list, blank/start/halt codes, and a
+  `programWithTable` constructor whose transition table remains to be filled.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -148,9 +151,11 @@ Next implementation targets:
    `PartrecToTM2` stack-machine evaluator configurations to `TableProgram`.
    Mathlib already provides the finite statement support
    `Turing.PartrecToTM2.codeSupp` and correctness theorem
-   `Turing.PartrecToTM2.tr_eval`; the remaining reduction work is representing
-   the TM2 stacks, labels, and step relation in the project's one-tape
-   `TableProgram` model.
+   `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
+   control states and tape alphabet in `TableProgram` header form. The remaining
+   reduction work is generating the transition rows that represent the TM2
+   stacks and step relation in the project's one-tape `TableProgram` model, and
+   proving the simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

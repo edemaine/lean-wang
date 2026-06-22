@@ -24,6 +24,8 @@ the concrete definitions needed for the Berger/Robinson route:
   `Turing.ToPartrec.Code`, with correctness for the TM2 evaluator.
 - `LeanWang.PartrecToTM2Support`: finite reachable-label support facts for
   Mathlib's concrete `PartrecToTM2` evaluator.
+- `LeanWang.PartrecToTM2Table`: finite `TableProgram` header data for the
+  eventual `PartrecToTM2` table-machine reduction.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
