@@ -143,6 +143,18 @@ theorem wrap_injective (tc : Turing.ToPartrec.Code) :
 instance (tc : Turing.ToPartrec.Code) : Inhabited (StartedLabel tc) :=
   ⟨wrap tc (PartrecToTM2Support.startLabel tc)⟩
 
+instance (tc : Turing.ToPartrec.Code) : DecidableEq (StartedLabel tc) := by
+  intro q r
+  exact decidable_of_iff (q.val = r.val) (by
+    constructor
+    · intro h
+      cases q
+      cases r
+      cases h
+      rfl
+    · intro h
+      exact congrArg StartedLabel.val h)
+
 end StartedLabel
 
 /--
@@ -514,7 +526,7 @@ theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
 Finite support list for translated TM0 states, with the start/default state
 forced to position `0`.
 -/
-noncomputable def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   default :: partrecStartedTM0LabelList tc
 
@@ -530,7 +542,7 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
   simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
 
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
-noncomputable def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
+def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
   List.range (partrecStartedTM0LabelSupportList tc).length
 
 /-- Numeric start state corresponding to the default translated TM0 label. -/
