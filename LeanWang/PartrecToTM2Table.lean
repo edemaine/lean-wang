@@ -45,6 +45,46 @@ theorem stackCellSymbol_mem_symbols (s : Option Turing.PartrecToTM2.Γ') :
     PartrecToTM2Support.tapeSymbolCode s ∈ symbols :=
   PartrecToTM2Support.tapeSymbolCode_mem_tapeSymbols s
 
+/-- Decode the low two bits of an interleaved tape position as a stack name. -/
+def stackNameOfCode : Nat → Option Turing.PartrecToTM2.K'
+  | 0 => some Turing.PartrecToTM2.K'.main
+  | 1 => some Turing.PartrecToTM2.K'.rev
+  | 2 => some Turing.PartrecToTM2.K'.aux
+  | 3 => some Turing.PartrecToTM2.K'.stack
+  | _ => none
+
+theorem stackNameOfCode_stackNameCode (k : Turing.PartrecToTM2.K') :
+    stackNameOfCode (PartrecToTM2Support.stackNameCode k) = some k := by
+  cases k <;> rfl
+
+/-- Position of stack cell `i` for stack `k` in the interleaved one-tape layout. -/
+def stackCellPos (k : Turing.PartrecToTM2.K') (i : Nat) : Nat :=
+  4 * i + PartrecToTM2Support.stackNameCode k
+
+theorem stackCellPos_mod_four (k : Turing.PartrecToTM2.K') (i : Nat) :
+    stackCellPos k i % 4 = PartrecToTM2Support.stackNameCode k := by
+  cases k <;> simp [stackCellPos, PartrecToTM2Support.stackNameCode]
+
+theorem stackCellPos_div_four (k : Turing.PartrecToTM2.K') (i : Nat) :
+    stackCellPos k i / 4 = i := by
+  cases k <;>
+    simp [stackCellPos, PartrecToTM2Support.stackNameCode, Nat.add_comm,
+      Nat.add_mul_div_left _ _ (by decide : 0 < 4)]
+
+/-- One-sided tape encoding of the four `PartrecToTM2` stacks. -/
+def encodedTape (cfg : Turing.PartrecToTM2.Cfg') : Nat → Nat :=
+  fun p =>
+    match stackNameOfCode (p % 4) with
+    | none => blankSymbol
+    | some k => PartrecToTM2Support.tapeSymbolCode ((cfg.stk k)[p / 4]?)
+
+theorem encodedTape_stackCell (cfg : Turing.PartrecToTM2.Cfg')
+    (k : Turing.PartrecToTM2.K') (i : Nat) :
+    encodedTape cfg (stackCellPos k i) =
+      PartrecToTM2Support.tapeSymbolCode ((cfg.stk k)[i]?) := by
+  simp [encodedTape, stackCellPos_mod_four, stackCellPos_div_four,
+    stackNameOfCode_stackNameCode]
+
 /-- Raw finite table-machine state list for the evaluator control substates. -/
 def states (tc : Turing.ToPartrec.Code) : List Nat :=
   PartrecToTM2Support.controlStates tc
@@ -73,6 +113,54 @@ theorem statementState_mem_states {tc : Turing.ToPartrec.Code}
     (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
     PartrecToTM2Support.statementIndex tc stmt ∈ states tc :=
   PartrecToTM2Support.statementIndex_mem_controlStates hstmt
+
+/-- The statement substate corresponding to a TM2 configuration label. -/
+def cfgStatement : Option Turing.PartrecToTM2.Λ' → Option Turing.PartrecToTM2.Stmt'
+  | none => none
+  | some q => some (Turing.PartrecToTM2.tr q)
+
+/-- Encoded table-machine state of a `PartrecToTM2` configuration. -/
+noncomputable def encodedState (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') : Nat :=
+  PartrecToTM2Support.statementIndex tc (cfgStatement cfg.l)
+
+theorem encodedState_mem_states {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.PartrecToTM2.Cfg'}
+    (hlabel : cfg.l ∈ Finset.insertNone (PartrecToTM2Support.labels tc)) :
+    encodedState tc cfg ∈ states tc := by
+  cases hcfg : cfg.l with
+  | none =>
+      simpa [encodedState, cfgStatement, hcfg, PartrecToTM2Support.haltState] using
+        haltState_mem_states tc
+  | some q =>
+      have hq : q ∈ PartrecToTM2Support.labels tc := by
+        exact Finset.some_mem_insertNone.1 (by simpa [hcfg] using hlabel)
+      simpa [encodedState, cfgStatement, hcfg] using labelState_mem_states hq
+
+/-- One-tape instantaneous description representing a `PartrecToTM2` configuration. -/
+noncomputable def encodedID (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') : ID where
+  tape := encodedTape cfg
+  head := 0
+  state := encodedState tc cfg
+
+@[simp]
+theorem encodedID_tape (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') :
+    (encodedID tc cfg).tape = encodedTape cfg :=
+  rfl
+
+@[simp]
+theorem encodedID_head (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') :
+    (encodedID tc cfg).head = 0 :=
+  rfl
+
+@[simp]
+theorem encodedID_state (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') :
+    (encodedID tc cfg).state = encodedState tc cfg :=
+  rfl
 
 /--
 `TableProgram` header for a future `PartrecToTM2` table-machine reduction.

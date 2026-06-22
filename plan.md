@@ -90,6 +90,10 @@ Completed proof layers:
 - finite `TableProgram` header data for the future `PartrecToTM2` table-machine
   reduction: the raw symbol list, raw state list, blank/start/halt codes, and a
   `programWithTable` constructor whose transition table remains to be filled.
+- a concrete one-tape representation for `PartrecToTM2` configurations:
+  the four stacks are interleaved at positions `4 * i + stackNameCode k`, with
+  readback lemmas for each stack cell, and each supported TM2 configuration is
+  mapped to a `Machine.ID` using the finite control-state indices.
 
 The remaining construction obligations are explicit Lean interfaces:
 
