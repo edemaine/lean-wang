@@ -965,6 +965,31 @@ def foldedMoveStmt (side : FoldSide) (marked : Bool) (cell : Nat)
   | FoldSide.left, _, Turing.Dir.left => PostStmt.move Move.right
   | FoldSide.left, _, Turing.Dir.right => PostStmt.move Move.left
 
+def foldedMoveHead (side : FoldSide) (marked : Bool) (head : Nat)
+    (dir : Turing.Dir) : Nat :=
+  match side, marked, dir with
+  | FoldSide.right, true, Turing.Dir.left => head
+  | FoldSide.left, true, Turing.Dir.right => head
+  | FoldSide.right, _, Turing.Dir.right => head + 1
+  | FoldSide.right, _, Turing.Dir.left => head.pred
+  | FoldSide.left, _, Turing.Dir.left => head + 1
+  | FoldSide.left, _, Turing.Dir.right => head.pred
+
+theorem foldedMoveStmt_applyStmt_head
+    (side : FoldSide) (marked : Bool) (cell : Nat) (dir : Turing.Dir)
+    (tape : Nat → Nat) (head : Nat) :
+    (PostProgram.applyStmt (foldedMoveStmt side marked cell dir) tape head).2 =
+      foldedMoveHead side marked head dir := by
+  cases side <;> cases marked <;> cases dir <;>
+    simp [foldedMoveStmt, foldedMoveHead, PostProgram.applyStmt, Move.apply]
+
+theorem foldedMoveStmt_applyStmt_tape
+    (side : FoldSide) (marked : Bool) (cell : Nat) (dir : Turing.Dir)
+    {tape : Nat → Nat} {head : Nat} (hcell : tape head = cell) :
+    (PostProgram.applyStmt (foldedMoveStmt side marked cell dir) tape head).1 = tape := by
+  cases side <;> cases marked <;> cases dir <;>
+    simp [foldedMoveStmt, PostProgram.applyStmt, hcell]
+
 def foldedWriteForStmt (side : FoldSide) (marked : Bool)
     (new left right : SourceSymbol) : Nat :=
   if marked then
@@ -2424,6 +2449,19 @@ theorem activeAbs_move_left_right {head : Nat} (h : head ≠ 0) :
   | zero => exact False.elim (h rfl)
   | succ n =>
       simp [activeAbs, rightAbs]
+
+theorem activeAbs_foldedMoveHead
+    (side : FoldSide) (head : Nat) (dir : Turing.Dir) :
+    activeAbs (foldedMoveNextSide side (decide (head = 0)) dir)
+        (foldedMoveHead side (decide (head = 0)) head dir) =
+      activeAbs side head + match dir with
+        | Turing.Dir.left => -1
+        | Turing.Dir.right => 1 := by
+  cases side <;> cases dir <;> by_cases h : head = 0
+  all_goals
+    subst_vars
+    simp_all [foldedMoveNextSide, foldedMoveHead, activeAbs, leftAbs, rightAbs]
+    try omega
 
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
