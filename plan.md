@@ -164,6 +164,10 @@ Completed proof layers:
   carried cell, expose the displaced cell to a next-state continuation, and
   move one position right, with generated-row symbol-write and next-state
   support lemmas.
+- stack-shift write/stride phases are now explicit. After a carry-write row
+  moves one position right, a three-row same-write stride advances through the
+  interleaved non-target columns and returns to the next cell of the same stack
+  in a finite write state carrying the displaced value.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -230,10 +234,10 @@ Next implementation targets:
    control states, tape alphabet, stationary rows, bounded `peek` rows, the
    implemented statement-row fragment, reserved finite state space for unbounded
    stack shifts, the bounded stack-column travel prefix, and the generic
-   carry-write row primitive in `TableProgram` form. The remaining reduction
-   work is specializing those pieces into the unbounded `push`/`pop` shift
-   loops, connecting the row fragment to multi-step simulation of the TM2 step
-   relation, and proving the simulated halting equivalence.
+   carry-write/stride row primitives in `TableProgram` form. The remaining
+   reduction work is specializing those pieces into the unbounded `push`/`pop`
+   shift loops, connecting the row fragment to multi-step simulation of the TM2
+   step relation, and proving the simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

@@ -34,7 +34,8 @@ the concrete definitions needed for the Berger/Robinson route:
   assembles the implemented statement-row fragment for all supported substates;
   finite auxiliary states are also reserved for the remaining unbounded
   stack-shifting rows for `push` and `pop`, with bounded travel rows to the
-  selected stack column and generic carry-write rows for the shift loop.
+  selected stack column, generic carry-write rows, and stride rows for the shift
+  loop.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

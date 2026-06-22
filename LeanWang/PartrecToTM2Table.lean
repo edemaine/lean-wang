@@ -1087,6 +1087,132 @@ theorem stackShiftCarryRows_next_mem_states {tc : Turing.ToPartrec.Code}
   rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
   exact hnext read hread
 
+/-- Stack-column offset after moving `delta` cells to the right. -/
+def stackShiftOffset (offset delta : Nat) : Nat :=
+  (offset + delta) % 4
+
+theorem stackShiftOffset_lt_four (offset delta : Nat) :
+    stackShiftOffset offset delta < 4 :=
+  Nat.mod_lt _ (by decide : 0 < 4)
+
+/-- Phase used when positioned at the stack column and ready to write the carry. -/
+def stackShiftWritePhase : Nat := 1
+
+/-- First stride phase after the carry-write row has moved right once. -/
+def stackShiftStridePhase1 : Nat := 2
+
+/-- Second stride phase while advancing to the next cell of the same stack. -/
+def stackShiftStridePhase2 : Nat := 3
+
+/-- Third stride phase while advancing to the next cell of the same stack. -/
+def stackShiftStridePhase3 : Nat := 4
+
+theorem stackShiftWritePhase_lt_count :
+    stackShiftWritePhase < stackShiftPhaseCount := by
+  decide
+
+theorem stackShiftStridePhase1_lt_count :
+    stackShiftStridePhase1 < stackShiftPhaseCount := by
+  decide
+
+theorem stackShiftStridePhase2_lt_count :
+    stackShiftStridePhase2 < stackShiftPhaseCount := by
+  decide
+
+theorem stackShiftStridePhase3_lt_count :
+    stackShiftStridePhase3 < stackShiftPhaseCount := by
+  decide
+
+/-- State at a stack column, ready to write the carried cell. -/
+noncomputable def stackShiftWriteState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (offset : Nat) : Nat :=
+  stackShiftAuxState tc var stmt carry stackShiftWritePhase offset
+
+theorem stackShiftWriteState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    stackShiftWriteState tc var stmt carry offset ∈ states tc :=
+  stackShiftAuxState_mem_states hstmt stackShiftWritePhase_lt_count hoffset
+
+/-- Stride state used between adjacent cells of the same interleaved stack. -/
+noncomputable def stackShiftStrideState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (phase offset : Nat) : Nat :=
+  stackShiftAuxState tc var stmt carry phase offset
+
+theorem stackShiftStrideState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {phase offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hphase : phase < stackShiftPhaseCount) (hoffset : offset < 4) :
+    stackShiftStrideState tc var stmt carry phase offset ∈ states tc :=
+  stackShiftAuxState_mem_states hstmt hphase hoffset
+
+/--
+Three same-write moves that advance from just after a carry-write row to the
+next cell of the same stack, preserving the displaced carry in finite control.
+-/
+noncomputable def stackShiftStrideRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (offset : Nat) :
+    List TableTransition :=
+  sameWriteMoveRows
+      (stackShiftStrideState tc var stmt carry stackShiftStridePhase1
+        (stackShiftOffset offset 1))
+      (stackShiftStrideState tc var stmt carry stackShiftStridePhase2
+        (stackShiftOffset offset 2))
+      Move.right ++
+    sameWriteMoveRows
+      (stackShiftStrideState tc var stmt carry stackShiftStridePhase2
+        (stackShiftOffset offset 2))
+      (stackShiftStrideState tc var stmt carry stackShiftStridePhase3
+        (stackShiftOffset offset 3))
+      Move.right ++
+    sameWriteMoveRows
+      (stackShiftStrideState tc var stmt carry stackShiftStridePhase3
+        (stackShiftOffset offset 3))
+      (stackShiftWriteState tc var stmt carry offset)
+      Move.right
+
+theorem stackShiftStrideRows_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {offset : Nat} {e : TableTransition}
+    (he : e ∈ stackShiftStrideRows tc var stmt carry offset) :
+    e.write ∈ symbols := by
+  rcases List.mem_append.1 he with he | he
+  · rcases List.mem_append.1 he with he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+  · exact sameWriteMoveRows_write_mem_symbols he
+
+theorem stackShiftStrideRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {offset : Nat} {e : TableTransition}
+    (he : e ∈ stackShiftStrideRows tc var stmt carry offset)
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    e.next ∈ states tc := by
+  rcases List.mem_append.1 he with he | he
+  · rcases List.mem_append.1 he with he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftStrideState_mem_states hstmt stackShiftStridePhase2_lt_count
+        (stackShiftOffset_lt_four offset 2)
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftStrideState_mem_states hstmt stackShiftStridePhase3_lt_count
+        (stackShiftOffset_lt_four offset 3)
+  · apply sameWriteMoveRows_next_mem_states he
+    exact stackShiftWriteState_mem_states hstmt hoffset
+
 /-- Return state after a `peek` read has moved one step left. -/
 noncomputable def peekReturnState (tc : Turing.ToPartrec.Code)
     (var : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')
