@@ -250,12 +250,15 @@ provides a local natural-number encoding, `Denumerable` instance, and hence
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
 this translation is now concretely proved in `NatPartrecToToPartrec`.
 `TM2TableCompiler` remains the older direct finite-machine reduction obligation.
-The preferred route now factors through `TM0FiniteCompiler`: first use
-`TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
-compile the resulting finite TM0 machine/input to the local finite one-sided
-TM0 model. A separate legacy `FiniteTM0TableReduction` bridge feeds the current
-table-machine Wang-tile layer until that layer is replaced by direct finite-TM0
-tiles. Together these pieces produce a
+The preferred route now factors through a finite one-sided TM0 reduction: first
+use `TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
+reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
+one-sided TM0 model by folding the two tape directions into one tape. This is
+implemented in the current code as concrete program construction, but the proof
+should treat it as the mathematical reduction. A separate legacy
+`FiniteTM0TableReduction` bridge feeds the current table-machine Wang-tile layer
+until that layer is replaced by direct finite-TM0 tiles. Together these pieces
+produce a
 `TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
 from both the direct TM2 factorization and the finite-TM0 factorization using the
@@ -276,31 +279,25 @@ than relying on a global `Fintype` instance. The translated TM0 tape symbols now
 also have injective numeric codes and a numeric symbol list for the eventual
 `FiniteTM0Program`.
 
-`TM0FiniteCompiler` now starts the concrete finite-program construction from
-this route data. It defines numeric state codes for supported translated TM0
-labels and a finite program header with the route symbol list, state range,
-blank symbol, and start state, plus blank/start membership lemmas. It also
-defines the conversion from supported Mathlib TM0 transitions to finite-TM0
-transition rows, enumerates the full generated transition table over supported
-labels and tape symbols, and proves generated row state/read/next/write support.
-The row construction now uses proof-free total state codes, and there are
-existence/shape lemmas showing that each Mathlib TM0 step contributes a generated
-row with the correct `(state, read)` key, next-state support, and finite-TM0
-statement.
-There are also same-source-state row-key lemmas for `transitionOfStep`: generated
-rows expose their state/read fields, match their own `(state, read)` key, and
-cannot match a different input symbol for the same source state.
+`TM0FiniteCompiler` contains the older direct finite-program construction from
+this route data. It is useful for state/symbol coding lemmas, but it is not the
+right final semantic bridge because Mathlib TM0 has a two-sided tape while the
+local finite TM0 model is one-sided. The preferred bridge is now
+`TM0FoldedCompiler`: one local tape cell stores the pair of Mathlib symbols at
+positions `-i-1` and `i`, plus an origin marker, and the finite control stores
+which folded side is active. This makes the two-sided-to-one-sided reduction
+explicit instead of hiding it inside a table-machine construction.
 
 Next implementation targets:
 
-1. Build a concrete `TM0FiniteCompiler`: compile the code-specific Mathlib TM0
-   machine/input into the finite one-sided TM0 model. The main semantic issue is
-   the two-sided Mathlib TM0 tape versus the one-sided local model; handle this
-   by an explicit folding reduction to one-sided TM0.
-2. Replace the current table-machine tiles by direct finite-TM0 tiles. Until
-   then, the legacy `FiniteTM0TableReduction` route can be completed via
-   `PostProgram.toTableProgram`; the remaining bridge work is the
-   halting-equivalence proof.
+1. Complete `TM0FoldedCompiler`: reduce the code-specific two-sided Mathlib TM0
+   machine/input to the finite one-sided TM0 model by explicit tape folding, and
+   prove the halting equivalence.
+2. Replace the current table-machine tiles by direct finite-TM0 tiles. The TM0
+   instruction set is already close to the Wang-tile space-time simulation, so
+   this should remove the `PostProgram.toTableProgram` detour from the final
+   theorem. Until then, the legacy `FiniteTM0TableReduction` route remains only
+   a compatibility bridge for existing tile code.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 4. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those
