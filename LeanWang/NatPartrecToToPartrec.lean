@@ -70,6 +70,22 @@ def rfindFrom (test : Code) : Code :=
   Code.addFirstSecond.comp
     ((Code.fix (rfindBody test)).comp (Code.zero'.comp Code.unpairListSwap))
 
+theorem rfindFrom_mem_of_fix_state {test : Code} {a m n : Nat}
+    (hfix : [n, m, a] ∈ (Code.fix (rfindBody test)).eval [0, m, a]) :
+    [n + m] ∈ (rfindFrom test).eval [Nat.pair a m] := by
+  have hstart :
+      [0, m, a] ∈ (Code.zero'.comp Code.unpairListSwap).eval [Nat.pair a m] := by
+    simp [Part.bind_eq_bind]
+  have hinner :
+      [n, m, a] ∈ ((Code.fix (rfindBody test)).comp
+        (Code.zero'.comp Code.unpairListSwap)).eval [Nat.pair a m] := by
+    rw [Turing.ToPartrec.Code.comp_eval]
+    simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+    exact ⟨[0, m, a], hstart, hfix⟩
+  rw [rfindFrom, Turing.ToPartrec.Code.comp_eval]
+  simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+  exact ⟨[n, m, a], hinner, by simp⟩
+
 end TCode
 
 open Turing.ToPartrec
