@@ -349,6 +349,11 @@ theorem tableRunState_injective : Function.Injective tableRunState := by
   unfold tableRunState at h
   omega
 
+theorem tableWriteState_injective : Function.Injective tableWriteState := by
+  intro q r h
+  unfold tableWriteState at h
+  omega
+
 /-- Explicit finite table alphabet: Post write symbols plus all transition read symbols. -/
 def tableSymbols (P : PostProgram) : List Nat :=
   P.symbols ++ P.table.map PostTransition.read
@@ -489,21 +494,17 @@ theorem writeStartRow_matches_run (e : PostTransition) (b q a : Nat) :
     simp [writeStartRow, PostTransition.matchesInput, TableTransition.matchesInput,
       hrunBool, hstateBool]
 
-theorem writeReturnRow_matches_run (q r a s : Nat) :
-    ({ state := tableWriteState r, read := s, write := s, next := tableRunState r,
-       move := Move.left } : TableTransition).matchesInput (tableRunState q) a = false := by
-  have hstate : tableWriteState r ≠ tableRunState q := by
-    exact (tableRunState_ne_tableWriteState q r).symm
-  simp [TableTransition.matchesInput, hstate]
+/-- Return-left rows used after a simulated Post write to next state `q`. -/
+def writeReturnRow (q a : Nat) : TableTransition where
+  state := tableWriteState q
+  read := a
+  write := a
+  next := tableRunState q
+  move := Move.left
 
 /-- Return-left rows used after a simulated Post write to next state `q`. -/
 def writeReturnRows (P : PostProgram) (q : Nat) : List TableTransition :=
-  (tableSupportedSymbols P).map fun a =>
-    { state := tableWriteState q
-      read := a
-      write := a
-      next := tableRunState q
-      move := Move.left }
+  (tableSupportedSymbols P).map fun a => writeReturnRow q a
 
 /-- The return-left rows generated after a Post write are primitive recursive. -/
 theorem writeReturnRows_primrec :
@@ -518,6 +519,55 @@ theorem writeReturnRows_primrec :
           (Primrec.pair (tableRunState_primrec.comp (Primrec.snd.comp Primrec.fst))
             (Primrec.const Move.left)))))
 
+@[simp]
+theorem writeReturnRow_matches_self (q a : Nat) :
+    (writeReturnRow q a).matchesInput (tableWriteState q) a = true := by
+  simp [writeReturnRow, TableTransition.matchesInput]
+
+theorem writeReturnRow_matches_run (q r a s : Nat) :
+    (writeReturnRow r s).matchesInput (tableRunState q) a = false := by
+  have hstate : tableWriteState r ≠ tableRunState q := by
+    exact (tableRunState_ne_tableWriteState q r).symm
+  simp [writeReturnRow, TableTransition.matchesInput, hstate]
+
+theorem haltRow_matches_write (P : PostProgram) (e : PostTransition) (q a : Nat) :
+    (haltRow P e).matchesInput (tableWriteState q) a = false := by
+  rcases e with ⟨state, read, next, stmt⟩
+  have hstate : tableRunState state ≠ tableWriteState q :=
+    tableRunState_ne_tableWriteState state q
+  simp [haltRow, TableTransition.matchesInput, hstate]
+
+theorem moveRow_matches_write (e : PostTransition) (m : Move) (q a : Nat) :
+    (moveRow e m).matchesInput (tableWriteState q) a = false := by
+  rcases e with ⟨state, read, next, stmt⟩
+  have hstate : tableRunState state ≠ tableWriteState q :=
+    tableRunState_ne_tableWriteState state q
+  simp [moveRow, TableTransition.matchesInput, hstate]
+
+theorem writeStartRow_matches_write (e : PostTransition) (b q a : Nat) :
+    (writeStartRow e b).matchesInput (tableWriteState q) a = false := by
+  rcases e with ⟨state, read, next, stmt⟩
+  have hstate : tableRunState state ≠ tableWriteState q :=
+    tableRunState_ne_tableWriteState state q
+  simp [writeStartRow, TableTransition.matchesInput, hstate]
+
+theorem writeReturnRow_matchesInput_eq_true {q r a b : Nat}
+    (h : (writeReturnRow r b).matchesInput (tableWriteState q) a = true) :
+    r = q ∧ b = a := by
+  have hparts :
+      tableWriteState r = tableWriteState q ∧ b = a := by
+    simpa [writeReturnRow, TableTransition.matchesInput] using h
+  have hstate : tableWriteState r = tableWriteState q := hparts.1
+  unfold tableWriteState at hstate
+  have hrq : r = q := by omega
+  exact ⟨hrq, hparts.2⟩
+
+theorem writeReturnRow_action_of_matchesInput {q r a b : Nat}
+    (h : (writeReturnRow r b).matchesInput (tableWriteState q) a = true) :
+    (writeReturnRow r b).action = (a, tableRunState q, Move.left) := by
+  rcases writeReturnRow_matchesInput_eq_true h with ⟨rfl, rfl⟩
+  simp [writeReturnRow, TableTransition.action]
+
 theorem writeReturnRows_find?_run (P : PostProgram) (q r a : Nat) :
     (writeReturnRows P r).find? (fun e => e.matchesInput (tableRunState q) a) = none := by
   unfold writeReturnRows
@@ -525,6 +575,51 @@ theorem writeReturnRows_find?_run (P : PostProgram) (q r a : Nat) :
   | nil => rfl
   | cons s rest ih =>
       simp [writeReturnRow_matches_run q r a s, ih]
+
+private theorem writeReturnRows_find?_write_aux (symbols : List Nat) {q a : Nat}
+    (ha : a ∈ symbols) :
+    (symbols.map (fun s => writeReturnRow q s)).find?
+        (fun e => e.matchesInput (tableWriteState q) a) =
+      some (writeReturnRow q a) := by
+  induction symbols generalizing a with
+  | nil =>
+      cases ha
+  | cons s rest ih =>
+      have hcases : a = s ∨ a ∈ rest := by
+        simpa using ha
+      rcases hcases with has | haTail
+      · subst a
+        simp [writeReturnRow_matches_self]
+      · by_cases hs : s = a
+        · subst a
+          simp [writeReturnRow_matches_self]
+        · have hhead :
+              (writeReturnRow q s).matchesInput (tableWriteState q) a = false := by
+            simp [writeReturnRow, TableTransition.matchesInput, hs]
+          simp [hhead, ih haTail]
+
+theorem writeReturnRows_find?_write {P : PostProgram} {q a : Nat}
+    (ha : a ∈ tableSupportedSymbols P) :
+    (writeReturnRows P q).find? (fun e => e.matchesInput (tableWriteState q) a) =
+      some (writeReturnRow q a) := by
+  unfold writeReturnRows
+  exact writeReturnRows_find?_write_aux (tableSupportedSymbols P) ha
+
+theorem writeReturnRow_mem_writeReturnRows {P : PostProgram} {q a : Nat}
+    (ha : a ∈ tableSupportedSymbols P) :
+    writeReturnRow q a ∈ writeReturnRows P q := by
+  unfold writeReturnRows
+  exact List.mem_map_of_mem ha
+
+theorem mem_writeReturnRows_matches_write_eq
+    {P : PostProgram} {q r a : Nat} {row : TableTransition}
+    (hmem : row ∈ writeReturnRows P r)
+    (hmatch : row.matchesInput (tableWriteState q) a = true) :
+    row = writeReturnRow q a := by
+  rw [writeReturnRows, List.mem_map] at hmem
+  rcases hmem with ⟨b, _hb, rfl⟩
+  rcases writeReturnRow_matchesInput_eq_true hmatch with ⟨rfl, rfl⟩
+  rfl
 
 /--
 Rows generated by one Post transition.
@@ -762,6 +857,50 @@ theorem tableRows_find?_run_eq_none_of_transition?_eq_none {P : PostProgram} {q 
   unfold tableRows
   exact find?_flatMap_rowsForTransition_eq_none_of_find?_eq_none P P.table h
 
+theorem writeReturnRow_mem_rowsForTransition_of_write
+    {P : PostProgram} {e : PostTransition} {b a : Nat}
+    (hnext : e.next ∈ P.states) (hstmt : e.stmt = PostStmt.write b)
+    (hb : b ∈ P.symbols) (ha : a ∈ tableSupportedSymbols P) :
+    writeReturnRow e.next a ∈ rowsForTransition P e := by
+  unfold rowsForTransition
+  rw [hstmt]
+  simp [hnext, hb, writeReturnRow_mem_writeReturnRows ha]
+
+set_option linter.flexible false in
+theorem mem_rowsForTransition_matches_write_eq
+    {P : PostProgram} {e : PostTransition} {q a : Nat} {row : TableTransition}
+    (hmem : row ∈ rowsForTransition P e)
+    (hmatch : row.matchesInput (tableWriteState q) a = true) :
+    row = writeReturnRow q a := by
+  unfold rowsForTransition at hmem
+  by_cases hnext : e.next ∈ P.states
+  · cases hstmt : e.stmt with
+    | move m =>
+        simp [hnext, hstmt] at hmem
+        rcases hmem with rfl
+        simp [moveRow_matches_write] at hmatch
+    | write b =>
+        by_cases hb : b ∈ P.symbols
+        · simp [hnext, hstmt, hb] at hmem
+          rcases hmem with rfl | hret
+          · simp [writeStartRow_matches_write] at hmatch
+          · exact mem_writeReturnRows_matches_write_eq hret hmatch
+        · simp [hnext, hstmt, hb] at hmem
+          rcases hmem with rfl
+          simp [haltRow_matches_write] at hmatch
+  · simp [hnext] at hmem
+    rcases hmem with rfl
+    simp [haltRow_matches_write] at hmatch
+
+theorem mem_tableRows_matches_write_eq
+    {P : PostProgram} {q a : Nat} {row : TableTransition}
+    (hmem : row ∈ tableRows P)
+    (hmatch : row.matchesInput (tableWriteState q) a = true) :
+    row = writeReturnRow q a := by
+  rw [tableRows, List.mem_flatMap] at hmem
+  rcases hmem with ⟨e, _he, hrow⟩
+  exact mem_rowsForTransition_matches_write_eq hrow hmatch
+
 /-- The full table row list generated from a Post program is primitive recursive. -/
 theorem tableRows_primrec : Primrec tableRows := by
   unfold tableRows
@@ -922,6 +1061,31 @@ private theorem find?_eq_some_pred {α : Type} {xs : List α} {p : α → Bool} 
         have htail : xs.find? p = some a := by
           simpa [hxFalse] using h
         exact ih htail
+
+private theorem find?_eq_some_of_mem_unique {α : Type} {xs : List α} {p : α → Bool}
+    {a : α} (hmem : a ∈ xs) (hpred : p a = true)
+    (huniq : ∀ b, b ∈ xs → p b = true → b = a) :
+    xs.find? p = some a := by
+  induction xs with
+  | nil =>
+      cases hmem
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · have hxa : x = a := huniq x (by simp) hx
+        subst x
+        simp [hpred]
+      · have hxFalse : p x = false := Bool.eq_false_iff.2 hx
+        have hmemTail : a ∈ xs := by
+          have hcases : a = x ∨ a ∈ xs := by
+            simpa using hmem
+          rcases hcases with hax | htail
+          · subst a
+            exact False.elim (hx hpred)
+          · exact htail
+        have huniqTail : ∀ b, b ∈ xs → p b = true → b = a := by
+          intro b hb hpb
+          exact huniq b (List.mem_cons_of_mem x hb) hpb
+        simpa [hxFalse] using ih hmemTail huniqTail
 
 theorem transition?_eq_some_mem {P : PostProgram} {q a : Nat} {e : PostTransition}
     (h : P.transition? q a = some e) :
@@ -1198,6 +1362,107 @@ theorem toTableProgram_toMachine_nextID_of_post_write_start
       (P.toTableProgram.toMachine.6 (tableRunState q) (c.tape c.head)).2.2 = Move.right := by
     simpa using congrArg (fun x : Nat × Nat × Move => x.2.2) hmachineStep
   ext i <;> simp [Function.update, Move.apply, hwrite, hstate', hmove]
+
+theorem step_eq_some_write_exists_transition {P : PostProgram} {q a q' b : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b)) :
+    ∃ e : PostTransition,
+      P.transition? q a = some e ∧
+        e.next = q' ∧ e.stmt = PostStmt.write b ∧
+        e.next ∈ P.states ∧ b ∈ P.symbols := by
+  unfold PostProgram.step at hstep
+  cases hfind : P.transition? q a with
+  | none =>
+      simp [hfind] at hstep
+  | some e =>
+      by_cases hnext : e.next ∈ P.states
+      · cases hstmt : e.stmt with
+        | move m =>
+            simp [hfind, hnext, hstmt] at hstep
+        | write b' =>
+            by_cases hb : b' ∈ P.symbols
+            · have hpair : (e.next, PostStmt.write b') = (q', PostStmt.write b) := by
+                simpa [hfind, hnext, hstmt, hb] using hstep
+              rcases hpair with ⟨rfl, rfl⟩
+              exact ⟨e, by simp, rfl, hstmt, hnext, hb⟩
+            · simp [hfind, hnext, hstmt, hb] at hstep
+      · simp [hfind, hnext] at hstep
+
+theorem writeReturnRow_mem_tableRows_of_post_write
+    {P : PostProgram} {q a q' b ret : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b))
+    (hret : ret ∈ tableSupportedSymbols P) :
+    writeReturnRow q' ret ∈ tableRows P := by
+  rcases step_eq_some_write_exists_transition hstep with
+    ⟨e, hfind, hnext, hstmt, hstate, hb⟩
+  have hmem : e ∈ P.table := transition?_eq_some_mem hfind
+  have hrow : writeReturnRow e.next ret ∈ rowsForTransition P e :=
+    writeReturnRow_mem_rowsForTransition_of_write hstate hstmt hb hret
+  unfold tableRows
+  rw [List.mem_flatMap]
+  exact ⟨e, hmem, by simpa [hnext] using hrow⟩
+
+theorem tableRows_find?_write_of_post_write
+    {P : PostProgram} {q a q' b ret : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b))
+    (hret : ret ∈ tableSupportedSymbols P) :
+    (tableRows P).find? (fun row => row.matchesInput (tableWriteState q') ret) =
+      some (writeReturnRow q' ret) := by
+  have hmem := writeReturnRow_mem_tableRows_of_post_write hstep hret
+  exact find?_eq_some_of_mem_unique hmem (writeReturnRow_matches_self q' ret)
+    (fun row hrow hmatch => mem_tableRows_matches_write_eq hrow hmatch)
+
+theorem toTableProgram_transition?_write_of_post_write
+    {P : PostProgram} {q a q' b ret : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b))
+    (hret : ret ∈ tableSupportedSymbols P) :
+    P.toTableProgram.toTableMachine.transition? (tableWriteState q') ret =
+      some (writeReturnRow q' ret) := by
+  unfold TableMachine.transition?
+  simpa [TableProgram.toTableMachine, toTableProgram] using
+    tableRows_find?_write_of_post_write hstep hret
+
+theorem toTableProgram_step_writeReturn_of_post_write
+    {P : PostProgram} {q a q' b ret : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b))
+    (hret : ret ∈ tableSupportedSymbols P) :
+    P.toTableProgram.toTableMachine.step (tableWriteState q') ret =
+      (ret, tableRunState q', Move.left) := by
+  have hfind := toTableProgram_transition?_write_of_post_write hstep hret
+  have hmem := writeReturnRow_mem_tableRows_of_post_write hstep hret
+  have hwrite := row_write_mem_toTableProgram_supportedSymbols hmem
+  have hnext := row_next_mem_toTableProgram_supportedStates hmem
+  have hstepTable := TableMachine.step_of_transition?_eq_some
+    (M := P.toTableProgram.toTableMachine) hfind hwrite hnext
+  rw [hstepTable]
+  simp [writeReturnRow, TableTransition.action]
+
+theorem toTableProgram_toMachine_nextID_of_post_write_return
+    {P : PostProgram} {tape : Nat → Nat} {head q q' a b : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b))
+    (hret : tape (head + 1) ∈ tableSupportedSymbols P) :
+    P.toTableProgram.toMachine.nextID
+        { tape := tape, head := head + 1, state := tableWriteState q' } =
+      { tape := tape, head := head, state := tableRunState q' } := by
+  let c : ID := { tape := tape, head := head + 1, state := tableWriteState q' }
+  have hnotHalt : c.state ≠ P.toTableProgram.halt := by
+    simp [c, toTableProgram_halt, (tableHalt_ne_tableWriteState q').symm]
+  rw [Machine.nextID_of_ne_halt (M := P.toTableProgram.toMachine) (c := c) hnotHalt]
+  have hmachineStep :
+      P.toTableProgram.toMachine.step (tableWriteState q') (tape (head + 1)) =
+        (tape (head + 1), tableRunState q', Move.left) := by
+    rw [TableProgram.toMachine_step]
+    exact toTableProgram_step_writeReturn_of_post_write hstep hret
+  change
+    (match P.toTableProgram.toMachine.step (tableWriteState q') (tape (head + 1)) with
+      | (write, state', move) =>
+          (⟨(fun i => if i = head + 1 then write else tape i),
+            move.apply (head + 1), state'⟩ : ID)) =
+      { tape := tape, head := head, state := tableRunState q' }
+  rw [hmachineStep]
+  ext i
+  · by_cases hi : i = head + 1 <;> simp [hi]
+  · simp [Move.apply]
+  · rfl
 
 end PostProgram
 
