@@ -226,6 +226,18 @@ theorem stackNameCode_ofCode (n : Nat) : stackNameCode (stackNameOfCode n) = n %
 theorem stackNameOfCode_stackNameCode (k : K') : stackNameOfCode (stackNameCode k) = k := by
   cases k <;> rfl
 
+/-- Partial decoder for dense stack-name codes. -/
+def decodeStackNameCode : Nat → Option K'
+  | 0 => some K'.main
+  | 1 => some K'.rev
+  | 2 => some K'.aux
+  | 3 => some K'.stack
+  | _ => none
+
+theorem decodeStackNameCode_stackNameCode (k : K') :
+    decodeStackNameCode (stackNameCode k) = some k := by
+  cases k <;> rfl
+
 /-- Dense numeric code for `Option Γ'`, using zero for blank and one through four for symbols. -/
 def optionStackSymbolCode : Option Γ' → Nat
   | none => 0
@@ -339,6 +351,15 @@ theorem stackPredicateOfCode_stackPredicateCode (p : Γ' → Bool) :
     cases h₂ : p Γ'.bit0 <;> cases h₃ : p Γ'.bit1 <;>
     simp [stackPredicateOfCode, stackPredicateCode, boolOfCode, boolCode, h₀, h₁, h₂, h₃]
 
+/-- Partial decoder for dense stack-predicate codes. -/
+def decodeStackPredicateCode (n : Nat) : Option (Γ' → Bool) :=
+  if n < 16 then some (stackPredicateOfCode n) else none
+
+theorem decodeStackPredicateCode_stackPredicateCode (p : Γ' → Bool) :
+    decodeStackPredicateCode (stackPredicateCode p) = some p := by
+  simp [decodeStackPredicateCode, stackPredicateCode_lt_sixteen,
+    stackPredicateOfCode_stackPredicateCode]
+
 /-- Dense numeric code for local-store actions used by `Λ'.push`. -/
 def localActionCode (f : Option Γ' → Option Γ') : Nat :=
   optionStackSymbolCode (f none) + 5 * (optionStackSymbolCode (f (some Γ'.consₗ)) +
@@ -397,6 +418,14 @@ theorem localActionOfCode_localActionCode (f : Option Γ' → Option Γ') :
       · apply optionStackSymbolOfCode_eq_of_mod
         unfold localActionCode
         omega
+
+/-- Partial decoder for dense local-store action codes. -/
+def decodeLocalActionCode (n : Nat) : Option (Option Γ' → Option Γ') :=
+  if n < 3125 then some (localActionOfCode n) else none
+
+theorem decodeLocalActionCode_localActionCode (f : Option Γ' → Option Γ') :
+    decodeLocalActionCode (localActionCode f) = some f := by
+  simp [decodeLocalActionCode, localActionCode_lt, localActionOfCode_localActionCode]
 
 namespace Λ'
 
@@ -543,6 +572,30 @@ theorem primrec₂_fix : Primrec₂ Cont'.fix :=
             (encode_iff.2 <| (Primrec.ofNat Cont').comp snd)
 
 end Cont'
+
+namespace Λ'
+
+/-- Encode the eight `PartrecToTM2` label constructors by a tag and a payload. -/
+def encodeLabel : Λ' → Nat
+  | move p k₁ k₂ q =>
+      8 * (Nat.pair (stackPredicateCode p)
+        (Nat.pair (stackNameCode k₁) (Nat.pair (stackNameCode k₂) (encodeLabel q)))) + 1
+  | clear p k q =>
+      8 * (Nat.pair (stackPredicateCode p)
+        (Nat.pair (stackNameCode k) (encodeLabel q))) + 2
+  | copy q => 8 * encodeLabel q + 3
+  | push k f q =>
+      8 * (Nat.pair (stackNameCode k) (Nat.pair (localActionCode f) (encodeLabel q))) + 4
+  | read f =>
+      8 * (Nat.pair (encodeLabel (f none))
+        (Nat.pair (encodeLabel (f (some Γ'.consₗ)))
+          (Nat.pair (encodeLabel (f (some Γ'.cons)))
+            (Nat.pair (encodeLabel (f (some Γ'.bit0))) (encodeLabel (f (some Γ'.bit1))))))) + 5
+  | succ q => 8 * encodeLabel q + 6
+  | pred q₁ q₂ => 8 * Nat.pair (encodeLabel q₁) (encodeLabel q₂) + 7
+  | ret k => 8 * Cont'.encodeCont k + 8
+
+end Λ'
 
 end PartrecToTM2
 
