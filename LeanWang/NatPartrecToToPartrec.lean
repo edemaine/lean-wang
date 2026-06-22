@@ -376,6 +376,18 @@ theorem rfindFrom_mem_of_nat_rfind {cf : Nat.Partrec.Code}
           (hf (Nat.pair a (i + m)) [k.succ]).2 ⟨k.succ, hx, rfl⟩
         exact Part.eq_some_iff.2 htest_mem
 
+theorem translate_rfind'_mem_of_nat_eval {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) {a m x : Nat}
+    (hx : x ∈ Nat.Partrec.Code.eval (.rfind' cf) (Nat.pair a m)) :
+    [x] ∈ (translate (.rfind' cf)).eval [Nat.pair a m] := by
+  rw [Nat.Partrec.Code.eval, Nat.unpaired, Nat.unpair_pair] at hx
+  change x ∈ (Nat.rfind (fun n =>
+    (fun z : Nat => z = 0) <$> Nat.Partrec.Code.eval cf (Nat.pair a (n + m)))).map
+      (fun n => n + m) at hx
+  rw [Part.mem_map_iff] at hx
+  rcases hx with ⟨n, hn, rfl⟩
+  exact rfindFrom_mem_of_nat_rfind hf hn
+
 end NatPartrecToToPartrec
 
 end LeanWang
