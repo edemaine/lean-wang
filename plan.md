@@ -199,15 +199,16 @@ than relying on a global `Fintype` instance. The translated TM0 tape symbols now
 also have injective numeric codes and a numeric symbol list for the eventual
 `FiniteTM0Program`.
 
-`TM0FiniteCompiler` contains the older direct finite-program construction from
-this route data. It is useful for state/symbol coding lemmas, but it is not the
-right final semantic bridge because Mathlib TM0 has a two-sided tape while the
-local finite TM0 model is one-sided. The preferred bridge is now
-`TM0FoldedCompiler`: one local tape cell stores the pair of Mathlib symbols at
-positions `-i-1` and `i`, plus an origin marker, and the finite control stores
-which folded side is active. This makes the two-sided-to-one-sided reduction
-explicit instead of hiding it inside a table-machine construction. The semantic
-halting equivalence for this folded program is now proved:
+The old direct finite-program construction from this route data has been
+removed because it was not the right semantic bridge: Mathlib TM0 has a
+two-sided tape while the local finite TM0 model is one-sided. The remaining
+`TM0FiniteCompiler` module now only keeps state-code and label-closure helpers
+used by `TM0FoldedCompiler`. The preferred bridge is the folded construction:
+one local tape cell stores the pair of Mathlib symbols at positions `-i-1` and
+`i`, plus an origin marker, and the finite control stores which folded side is
+active. This makes the two-sided-to-one-sided reduction explicit instead of
+hiding it inside a table-machine construction. The semantic halting equivalence
+for this folded program is now proved:
 
 ```lean
 TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
@@ -219,10 +220,10 @@ TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
 
 The remaining blocker to packaging this as a `TM0FiniteCompiler` is
 computability of `TM0FoldedCompiler.program`. The hard part is not the folded
-tape simulation but the currently noncomputable finite support enumeration in
-`TM0Route.partrecStartedTM0LabelList` and the dependent numeric state coding
-built from that list. A clean finish should replace or supplement this support
-view with computable finite code-generated state data.
+tape simulation but the currently noncomputable numeric state code derived from
+the support list for translated Mathlib TM0 labels. A clean finish should
+replace or supplement this support view with computable finite code-generated
+state data.
 
 Next implementation targets:
 
