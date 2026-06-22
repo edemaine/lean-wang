@@ -595,6 +595,120 @@ def encodeLabel : Λ' → Nat
   | pred q₁ q₂ => 8 * Nat.pair (encodeLabel q₁) (encodeLabel q₂) + 7
   | ret k => 8 * Cont'.encodeCont k + 8
 
+/-- Payload code for `Λ'.move`, keeping the recursive target as an already encoded label. -/
+def movePayloadCode (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) : Nat :=
+  Nat.pair (stackPredicateCode p)
+    (Nat.pair (stackNameCode k₁) (Nat.pair (stackNameCode k₂) qCode))
+
+/-- Decode the nonrecursive fields of a `Λ'.move` payload. -/
+def decodeMovePayload (m : Nat) : Option ((Γ' → Bool) × K' × K' × Nat) :=
+  match decodeStackPredicateCode m.unpair.1,
+      decodeStackNameCode m.unpair.2.unpair.1,
+      decodeStackNameCode m.unpair.2.unpair.2.unpair.1 with
+  | some p, some k₁, some k₂ => some (p, k₁, k₂, m.unpair.2.unpair.2.unpair.2)
+  | _, _, _ => none
+
+theorem decodeMovePayload_movePayloadCode
+    (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) :
+    decodeMovePayload (movePayloadCode p k₁ k₂ qCode) = some (p, k₁, k₂, qCode) := by
+  simp [decodeMovePayload, movePayloadCode, decodeStackPredicateCode_stackPredicateCode,
+    decodeStackNameCode_stackNameCode]
+
+/-- Payload code for `Λ'.clear`, keeping the recursive target as an already encoded label. -/
+def clearPayloadCode (p : Γ' → Bool) (k : K') (qCode : Nat) : Nat :=
+  Nat.pair (stackPredicateCode p) (Nat.pair (stackNameCode k) qCode)
+
+/-- Decode the nonrecursive fields of a `Λ'.clear` payload. -/
+def decodeClearPayload (m : Nat) : Option ((Γ' → Bool) × K' × Nat) :=
+  match decodeStackPredicateCode m.unpair.1, decodeStackNameCode m.unpair.2.unpair.1 with
+  | some p, some k => some (p, k, m.unpair.2.unpair.2)
+  | _, _ => none
+
+theorem decodeClearPayload_clearPayloadCode
+    (p : Γ' → Bool) (k : K') (qCode : Nat) :
+    decodeClearPayload (clearPayloadCode p k qCode) = some (p, k, qCode) := by
+  simp [decodeClearPayload, clearPayloadCode, decodeStackPredicateCode_stackPredicateCode,
+    decodeStackNameCode_stackNameCode]
+
+/-- Payload code for `Λ'.push`, keeping the recursive target as an already encoded label. -/
+def pushPayloadCode (k : K') (f : Option Γ' → Option Γ') (qCode : Nat) : Nat :=
+  Nat.pair (stackNameCode k) (Nat.pair (localActionCode f) qCode)
+
+/-- Decode the nonrecursive fields of a `Λ'.push` payload. -/
+def decodePushPayload (m : Nat) : Option (K' × (Option Γ' → Option Γ') × Nat) :=
+  match decodeStackNameCode m.unpair.1, decodeLocalActionCode m.unpair.2.unpair.1 with
+  | some k, some f => some (k, f, m.unpair.2.unpair.2)
+  | _, _ => none
+
+theorem decodePushPayload_pushPayloadCode
+    (k : K') (f : Option Γ' → Option Γ') (qCode : Nat) :
+    decodePushPayload (pushPayloadCode k f qCode) = some (k, f, qCode) := by
+  simp [decodePushPayload, pushPayloadCode, decodeStackNameCode_stackNameCode,
+    decodeLocalActionCode_localActionCode]
+
+/-- Payload code for `Λ'.read`, storing the five branch labels as encoded labels. -/
+def readPayloadCode (q₀ q₁ q₂ q₃ q₄ : Nat) : Nat :=
+  Nat.pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+
+/-- Decode a `Λ'.read` payload into the five encoded branch labels. -/
+def decodeReadPayload (m : Nat) : Nat × Nat × Nat × Nat × Nat :=
+  (m.unpair.1, m.unpair.2.unpair.1, m.unpair.2.unpair.2.unpair.1,
+    m.unpair.2.unpair.2.unpair.2.unpair.1, m.unpair.2.unpair.2.unpair.2.unpair.2)
+
+theorem decodeReadPayload_readPayloadCode (q₀ q₁ q₂ q₃ q₄ : Nat) :
+    decodeReadPayload (readPayloadCode q₀ q₁ q₂ q₃ q₄) = (q₀, q₁, q₂, q₃, q₄) := by
+  simp [decodeReadPayload, readPayloadCode]
+
+/-- Payload code for `Λ'.pred`, storing the two branch labels as encoded labels. -/
+def predPayloadCode (q₁ q₂ : Nat) : Nat :=
+  Nat.pair q₁ q₂
+
+/-- Decode a `Λ'.pred` payload into the two encoded branch labels. -/
+def decodePredPayload (m : Nat) : Nat × Nat :=
+  (m.unpair.1, m.unpair.2)
+
+theorem decodePredPayload_predPayloadCode (q₁ q₂ : Nat) :
+    decodePredPayload (predPayloadCode q₁ q₂) = (q₁, q₂) := by
+  simp [decodePredPayload, predPayloadCode]
+
+theorem ofNatCont_encodeCont (k : Cont') : Cont'.ofNatCont (Cont'.encodeCont k) = k := by
+  simpa [Cont'.encodeCont_eq, Cont'.ofNatCont_eq] using Denumerable.ofNat_encode k
+
+theorem encodeLabel_move (p : Γ' → Bool) (k₁ k₂ : K') (q : Λ') :
+    encodeLabel (move p k₁ k₂ q) = 8 * movePayloadCode p k₁ k₂ (encodeLabel q) + 1 :=
+  rfl
+
+theorem encodeLabel_clear (p : Γ' → Bool) (k : K') (q : Λ') :
+    encodeLabel (clear p k q) = 8 * clearPayloadCode p k (encodeLabel q) + 2 :=
+  rfl
+
+theorem encodeLabel_copy (q : Λ') :
+    encodeLabel (copy q) = 8 * encodeLabel q + 3 :=
+  rfl
+
+theorem encodeLabel_push (k : K') (f : Option Γ' → Option Γ') (q : Λ') :
+    encodeLabel (push k f q) = 8 * pushPayloadCode k f (encodeLabel q) + 4 :=
+  rfl
+
+theorem encodeLabel_read (f : Option Γ' → Λ') :
+    encodeLabel (read f) =
+      8 * readPayloadCode (encodeLabel (f none)) (encodeLabel (f (some Γ'.consₗ)))
+        (encodeLabel (f (some Γ'.cons))) (encodeLabel (f (some Γ'.bit0)))
+        (encodeLabel (f (some Γ'.bit1))) + 5 :=
+  rfl
+
+theorem encodeLabel_succ (q : Λ') :
+    encodeLabel (succ q) = 8 * encodeLabel q + 6 :=
+  rfl
+
+theorem encodeLabel_pred (q₁ q₂ : Λ') :
+    encodeLabel (pred q₁ q₂) = 8 * predPayloadCode (encodeLabel q₁) (encodeLabel q₂) + 7 :=
+  rfl
+
+theorem encodeLabel_ret (k : Cont') :
+    encodeLabel (ret k) = 8 * Cont'.encodeCont k + 8 :=
+  rfl
+
 end Λ'
 
 end PartrecToTM2
