@@ -48,7 +48,8 @@ Completed proof layers:
 - the machine-to-Wang fixed-domino construction;
 - computable table-tile data decoding, including the initial-row and normal-row
   tile membership bridges;
-- the fixed-domino reduction from any verified `TableCompiler`;
+- the fixed-domino reduction from the verified finite-TM0 route plus the
+  temporary finite-TM0-to-table bridge;
 - the abstract scaffold reduction from any verified `IsScaffold S`;
 - the encoded domino undecidability theorem from a verified reduction to finite
   machine data and verified scaffold.
@@ -76,12 +77,6 @@ Completed proof layers:
 The remaining construction obligations are explicit Lean interfaces:
 
 ```lean
-structure TableCompiler where
-  compile : Code -> TableProgram
-  compile_computable : Computable compile
-  correct : forall c : Code,
-    Machine.HaltsEmpty (compile c).toMachine <-> (Nat.Partrec.Code.eval c 0).Dom
-
 structure FiniteTM0TableReduction where
   compile : FiniteTM0Program -> TableProgram
   compile_computable : Computable compile
@@ -126,10 +121,11 @@ implemented in the current code as concrete program construction, but the proof
 should treat it as the mathematical reduction. A separate compatibility
 `FiniteTM0TableReduction` bridge feeds the current table-machine Wang-tile layer
 until that layer is replaced by direct finite-TM0 tiles. Together these pieces
-produce a `TableCompiler`, and the fixed-domino, fixed-corner, encoded
-scaffolded domino, and unencoded scaffolded domino theorem surfaces now have
-direct corollaries from the finite-TM0 factorization using the concrete
-code-to-TM2 reduction. The started-TM2 bridge is a direct theorem in `TM0Route`
+feed the fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded
+scaffolded domino theorem surfaces directly from the finite-TM0 factorization
+using the concrete code-to-TM2 reduction. The old code-to-table `TableCompiler`
+surface has been removed so the theorem statements do not look like a direct
+TM2-to-table route. The started-TM2 bridge is a direct theorem in `TM0Route`
 rather than a separate reduction structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
