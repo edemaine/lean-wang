@@ -168,6 +168,10 @@ Completed proof layers:
   moves one position right, a three-row same-write stride advances through the
   interleaved non-target columns and returns to the next cell of the same stack
   in a finite write state carrying the displaced value.
+- the table alphabet now reserves a distinct boundary symbol in addition to the
+  five stack-cell symbols. This is needed for the unbounded `push`/`pop`
+  shifters: after scanning an arbitrary stack tail, the table machine needs a
+  detectable left boundary to return to the evaluator head at position `0`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -231,13 +235,15 @@ Next implementation targets:
    Mathlib already provides the finite statement support
    `Turing.PartrecToTM2.codeSupp` and correctness theorem
    `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
-   control states, tape alphabet, stationary rows, bounded `peek` rows, the
-   implemented statement-row fragment, reserved finite state space for unbounded
-   stack shifts, the bounded stack-column travel prefix, and the generic
-   carry-write/stride row primitives in `TableProgram` form. The remaining
-   reduction work is specializing those pieces into the unbounded `push`/`pop`
-   shift loops, connecting the row fragment to multi-step simulation of the TM2
-   step relation, and proving the simulated halting equivalence.
+   control states, tape alphabet with a reserved boundary marker, stationary
+   rows, bounded `peek` rows, the implemented statement-row fragment, reserved
+   finite state space for unbounded stack shifts, the bounded stack-column
+   travel prefix, and the generic carry-write/stride row primitives in
+   `TableProgram` form. The remaining reduction work is migrating the tape
+   layout and initialization to use the boundary marker, specializing the row
+   pieces into the unbounded `push`/`pop` shift loops, connecting the row
+   fragment to multi-step simulation of the TM2 step relation, and proving the
+   simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

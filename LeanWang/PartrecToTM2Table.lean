@@ -31,19 +31,26 @@ def blankSymbol : Nat :=
 theorem blankSymbol_eq_zero : blankSymbol = 0 :=
   rfl
 
+/-- Extra symbol reserved for a detectable left boundary marker. -/
+def boundarySymbol : Nat := 5
+
 /-- Raw finite table-machine symbol list for encoded `PartrecToTM2` stacks. -/
 def symbols : List Nat :=
-  PartrecToTM2Support.tapeSymbols
+  List.range 6
 
 theorem symbols_nodup : symbols.Nodup :=
-  PartrecToTM2Support.tapeSymbols_nodup
+  List.nodup_range
 
 theorem blankSymbol_mem_symbols : blankSymbol ∈ symbols := by
-  exact PartrecToTM2Support.tapeSymbolCode_mem_tapeSymbols none
+  exact List.mem_range.2 (by decide : blankSymbol < 6)
+
+theorem boundarySymbol_mem_symbols : boundarySymbol ∈ symbols := by
+  exact List.mem_range.2 (by decide : boundarySymbol < 6)
 
 theorem stackCellSymbol_mem_symbols (s : Option Turing.PartrecToTM2.Γ') :
     PartrecToTM2Support.tapeSymbolCode s ∈ symbols :=
-  PartrecToTM2Support.tapeSymbolCode_mem_tapeSymbols s
+  List.mem_range.2 (lt_trans (PartrecToTM2Support.tapeSymbolCode_lt_five s)
+    (by decide : 5 < 6))
 
 /-- Finite list of decoded table-machine stack-cell symbols. -/
 def cellSymbols : List (Option Turing.PartrecToTM2.Γ') :=
@@ -60,8 +67,9 @@ theorem tapeSymbolCode_mem_symbols (s : Option Turing.PartrecToTM2.Γ') :
     PartrecToTM2Support.tapeSymbolCode s ∈ symbols :=
   stackCellSymbol_mem_symbols s
 
-theorem tapeSymbolCode_cellSymbols_eq_symbols :
-    cellSymbols.map PartrecToTM2Support.tapeSymbolCode = symbols := by
+theorem tapeSymbolCode_cellSymbols_eq_tapeSymbols :
+    cellSymbols.map PartrecToTM2Support.tapeSymbolCode =
+      PartrecToTM2Support.tapeSymbols := by
   rfl
 
 /-- Decode the low two bits of an interleaved tape position as a stack name. -/
@@ -717,37 +725,37 @@ theorem stationaryRows_find?_eq_some {state read next : Nat}
     (stationaryRows state next).find?
         (fun e => e.matchesInput state read) =
       some (stationaryTransition state read next) := by
-  have hlt : read < 5 := by
-    simpa [symbols, PartrecToTM2Support.tapeSymbols] using hread
+  have hlt : read < 6 := by
+    simpa [symbols] using hread
   cases read with
   | zero =>
-      simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
-        TableTransition.matchesInput]
+      simp [stationaryRows, symbols, TableTransition.matchesInput]
   | succ read =>
       cases read with
       | zero =>
-          simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
-            TableTransition.matchesInput]
+          simp [stationaryRows, symbols, TableTransition.matchesInput]
       | succ read =>
           cases read with
           | zero =>
-              simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
-                TableTransition.matchesInput]
+              simp [stationaryRows, symbols, TableTransition.matchesInput]
               omega
           | succ read =>
               cases read with
               | zero =>
-                  simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
-                    TableTransition.matchesInput]
+                  simp [stationaryRows, symbols, TableTransition.matchesInput]
                   omega
               | succ read =>
                   cases read with
                   | zero =>
-                      simp [stationaryRows, symbols, PartrecToTM2Support.tapeSymbols,
-                        TableTransition.matchesInput]
+                      simp [stationaryRows, symbols, TableTransition.matchesInput]
                       omega
                   | succ read =>
-                      omega
+                      cases read with
+                      | zero =>
+                          simp [stationaryRows, symbols, TableTransition.matchesInput]
+                          omega
+                      | succ read =>
+                          omega
 
 theorem toMachine_nextID_of_stationaryTransition {P : TableProgram} {id : ID}
     {next : Nat}
