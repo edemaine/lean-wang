@@ -1213,6 +1213,17 @@ theorem translate_correct (c : Nat.Partrec.Code) : Translates c (translate c) :=
   | prec _ _ ihf ihg => exact translates_prec ihf ihg
   | rfind' _ ih => exact translates_rfind' ih
 
+/--
+The source-code translation preserves the halting domain of Mathlib's
+`PartrecToTM2` evaluator.
+-/
+theorem translate_tm2_dom (c : Nat.Partrec.Code) :
+    (StateTransition.eval
+      (Turing.TM2.step Turing.PartrecToTM2.tr)
+      (Turing.PartrecToTM2.init (translate c) [0])).Dom ↔
+        (Nat.Partrec.Code.eval c 0).Dom := by
+  exact (translate_correct c).tm2_dom
+
 end NatPartrecToToPartrec
 
 end LeanWang

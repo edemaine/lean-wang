@@ -59,8 +59,8 @@ Completed proof layers:
 - a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
   Mathlib list-based `Turing.ToPartrec.Code`, with a concrete correctness
   theorem connecting Mathlib code evaluation to `PartrecToTM2` halting. This
-  remains the semantic entry point into Mathlib's machine translations; the
-  obsolete direct TM2-to-table reduction surface has been removed.
+  remains only the semantic entry point into Mathlib's machine translations;
+  the obsolete direct TM2-to-table reduction surface has been removed.
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
@@ -123,10 +123,11 @@ should treat it as the mathematical reduction. A separate compatibility
 until that layer is replaced by direct finite-TM0 tiles. Together these pieces
 feed the fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded
 scaffolded domino theorem surfaces directly from the finite-TM0 factorization
-using the concrete code-to-TM2 reduction. The old code-to-table `TableCompiler`
-surface has been removed so the theorem statements do not look like a direct
-TM2-to-table route. The started-TM2 bridge is a direct theorem in `TM0Route`
-rather than a separate reduction structure.
+using the concrete source-code translation into Mathlib's `PartrecToTM2`
+evaluator. The old code-to-table `TableCompiler` surface has been removed so
+the theorem statements do not look like a direct TM2-to-table route. The
+started-TM2 bridge is a theorem in `TM0Route` rather than a separate reduction
+structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
 temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one

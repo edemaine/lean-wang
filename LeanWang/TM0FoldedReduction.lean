@@ -68,7 +68,7 @@ def Obligations.toSource (h : Obligations) : SourceObligations where
           (NatPartrecToToPartrec.translate c)).trans
         ((TM0Route.partrecStartedTM2_eval_dom_iff_partrec
             (NatPartrecToToPartrec.translate c)).trans
-          (natPartrecToTM2Reduction_correct c)))
+          (NatPartrecToToPartrec.translate_tm2_dom c)))
 
 /-- Apply the folded source-code reduction and then the current table bridge. -/
 def sourceTableProgram (_h : SourceObligations) (c : Code) : TableProgram :=

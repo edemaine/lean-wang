@@ -19,7 +19,7 @@ Main theorem surface for the Wang-tile undecidability proof.
 This file collects the main reduction theorems. The final theorem is currently
 parameterized by construction obligations: a computable reduction from Mathlib
 partial-recursive codes through the TM0 route into finite one-sided TM0 programs,
-a temporary finite-TM0-to-table bridge for the existing Wang-tile layer, and a
+a temporary finite-TM0-to-table backend bridge for the existing Wang-tile layer, and a
 concrete scaffold satisfying the abstract square-forcing property.
 -/
 
@@ -28,18 +28,6 @@ noncomputable section
 namespace LeanWang
 
 open Nat.Partrec (Code)
-
-/--
-Correctness of the concrete translation into Mathlib's `PartrecToTM2`
-evaluator. This is a semantic bridge into Mathlib's machine reductions, not a
-direct TM2-to-table construction.
--/
-theorem natPartrecToTM2Reduction_correct (c : Code) :
-    (StateTransition.eval
-      (Turing.TM2.step Turing.PartrecToTM2.tr)
-      (Turing.PartrecToTM2.init (NatPartrecToToPartrec.translate c) [0])).Dom ↔
-        (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (NatPartrecToToPartrec.translate_correct c).tm2_dom
 
 /--
 A computable reduction from finite one-sided TM0 programs to the older finite
@@ -101,7 +89,7 @@ theorem tm0Program_correct (C : TM0FiniteCompiler) (c : Code) :
         (NatPartrecToToPartrec.translate c)).trans
       ((TM0Route.partrecStartedTM2_eval_dom_iff_partrec
           (NatPartrecToToPartrec.translate c)).trans
-        (natPartrecToTM2Reduction_correct c)))
+        (NatPartrecToToPartrec.translate_tm2_dom c)))
 
 /--
 Temporary adapter from the finite-TM0 route into the existing table-machine
