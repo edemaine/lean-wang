@@ -279,7 +279,9 @@ also have injective numeric codes and a numeric symbol list for the eventual
 `TM0FiniteCompiler` now starts the concrete finite-program construction from
 this route data. It defines numeric state codes for supported translated TM0
 labels and a finite program header with the route symbol list, state range,
-blank symbol, and start state, plus blank/start membership lemmas.
+blank symbol, and start state, plus blank/start membership lemmas. It also
+defines the conversion from one supported Mathlib TM0 transition to one
+finite-TM0 transition row, including next-state support.
 
 Next implementation targets:
 

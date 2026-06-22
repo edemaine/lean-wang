@@ -26,17 +26,73 @@ open TM0Route
 /-- Numeric code for a supported translated TM0 state. -/
 def stateCode (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
-    (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) : Nat :=
-  TM0Route.partrecStartedTM0StateCodeOfMem tc q
-    (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)
+    (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) : Nat := by
+  classical
+  exact
+    if q = (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) then
+      TM0Route.partrecStartedTM0Start
+    else
+      TM0Route.partrecStartedTM0StateCodeOfMem tc q
+        (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)
+
+theorem stateCode_default (tc : Turing.ToPartrec.Code)
+    (hq : (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) ∈
+      TM0Route.partrecStartedTM0Labels tc) :
+    stateCode tc (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) hq =
+      TM0Route.partrecStartedTM0Start := by
+  classical
+  simp [stateCode]
 
 theorem stateCode_mem_states (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
     (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) :
     stateCode tc q hq ∈ TM0Route.partrecStartedTM0States tc := by
-  unfold stateCode
-  exact TM0Route.partrecStartedTM0StateCodeOfMem_mem_states tc q
-    (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)
+  classical
+  by_cases h : q = (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
+  · simp [stateCode, h, TM0Route.partrecStartedTM0Start_mem_states]
+  · simp [stateCode, h, TM0Route.partrecStartedTM0StateCodeOfMem_mem_states tc q
+      (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)
+    ]
+
+theorem next_label_mem_of_step {tc : Turing.ToPartrec.Code}
+    {q q' : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    {stmt : Turing.TM0.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)}
+    (hq : q ∈ TM0Route.partrecStartedTM0Labels tc)
+    (hstep : TM0Route.partrecStartedTM0Machine tc q a = some (q', stmt)) :
+    q' ∈ TM0Route.partrecStartedTM0Labels tc := by
+  exact (TM0Route.partrecStartedTM0_supports tc).2
+    (show (q', stmt) ∈ TM0Route.partrecStartedTM0Machine tc q a by
+      rw [hstep]
+      simp)
+    hq
+
+def moveOfDir : Turing.Dir → Move
+  | Turing.Dir.left => Move.left
+  | Turing.Dir.right => Move.right
+
+def stmtOfTM0Stmt :
+    Turing.TM0.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol) →
+      PostStmt
+  | Turing.TM0.Stmt.move d => PostStmt.move (moveOfDir d)
+  | Turing.TM0.Stmt.write a => PostStmt.write (TM0Route.partrecStartedTM0SymbolCode a)
+
+noncomputable def transitionOfStep (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
+    (hq : q ∈ TM0Route.partrecStartedTM0Labels tc)
+    (a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol) :
+    Option PostTransition :=
+  match hstep : TM0Route.partrecStartedTM0Machine tc q a with
+  | none => none
+  | some (q', stmt) =>
+      some {
+        state := stateCode tc q hq
+        read := TM0Route.partrecStartedTM0SymbolCode a
+        next := stateCode tc q' (next_label_mem_of_step hq hstep)
+        stmt := stmtOfTM0Stmt stmt
+      }
 
 /--
 Finite program header for the TM0 route.
