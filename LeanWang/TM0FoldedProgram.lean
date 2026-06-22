@@ -250,6 +250,15 @@ def initWriteOriginRow : PostTransition :=
 def initMoveRightRow (i read : Nat) : PostTransition :=
   mkRow (initMoveRightState i) read (initWriteRightState i) (PostStmt.move Move.right)
 
+theorem initMoveRightRow_primrec :
+    Primrec (fun p : Nat × Nat => initMoveRightRow p.1 p.2) := by
+  unfold initMoveRightRow
+  exact mkRow_primrec.comp
+    (Primrec.pair (initMoveRightState_primrec.comp Primrec.fst)
+      (Primrec.pair Primrec.snd
+        (Primrec.pair (initWriteRightState_primrec.comp Primrec.fst)
+          (Primrec.const (PostStmt.move Move.right)))))
+
 def initMoveRightRows : List PostTransition :=
   (List.range (TM0Route.partrecStartedTM0Input.length - 1)).flatMap fun i =>
     foldedSymbolList.map fun read => initMoveRightRow i read
