@@ -191,6 +191,213 @@ instance instPrimcodableLocalAction : Primcodable (Option Γ' → Option Γ') :=
     (Option Γ' × Option Γ' × Option Γ' × Option Γ' × Option Γ')
     localActionEquivTuple
 
+/-- Dense numeric code for the four `PartrecToTM2` stack names. -/
+def stackNameCode : K' → Nat
+  | K'.main => 0
+  | K'.rev => 1
+  | K'.aux => 2
+  | K'.stack => 3
+
+/-- Decode a natural number modulo four into a `PartrecToTM2` stack name. -/
+def stackNameOfCode (n : Nat) : K' :=
+  match n % 4 with
+  | 0 => K'.main
+  | 1 => K'.rev
+  | 2 => K'.aux
+  | _ => K'.stack
+
+theorem stackNameCode_lt_four (k : K') : stackNameCode k < 4 := by
+  cases k <;> decide
+
+theorem stackNameCode_ofCode (n : Nat) : stackNameCode (stackNameOfCode n) = n % 4 := by
+  unfold stackNameOfCode
+  have hlt : n % 4 < 4 := Nat.mod_lt n (by decide)
+  generalize h : n % 4 = r at hlt ⊢
+  rcases r with _ | r
+  · simp [stackNameCode]
+  rcases r with _ | r
+  · simp [stackNameCode]
+  rcases r with _ | r
+  · simp [stackNameCode]
+  rcases r with _ | r
+  · simp [stackNameCode]
+  · omega
+
+theorem stackNameOfCode_stackNameCode (k : K') : stackNameOfCode (stackNameCode k) = k := by
+  cases k <;> rfl
+
+/-- Dense numeric code for `Option Γ'`, using zero for blank and one through four for symbols. -/
+def optionStackSymbolCode : Option Γ' → Nat
+  | none => 0
+  | some Γ'.consₗ => 1
+  | some Γ'.cons => 2
+  | some Γ'.bit0 => 3
+  | some Γ'.bit1 => 4
+
+/-- Decode a natural number modulo five into an optional stack symbol. -/
+def optionStackSymbolOfCode (n : Nat) : Option Γ' :=
+  match n % 5 with
+  | 0 => none
+  | 1 => some Γ'.consₗ
+  | 2 => some Γ'.cons
+  | 3 => some Γ'.bit0
+  | _ => some Γ'.bit1
+
+theorem optionStackSymbolCode_lt_five (s : Option Γ') :
+    optionStackSymbolCode s < 5 := by
+  cases s with
+  | none => decide
+  | some a => cases a <;> decide
+
+theorem optionStackSymbolCode_ofCode (n : Nat) :
+    optionStackSymbolCode (optionStackSymbolOfCode n) = n % 5 := by
+  unfold optionStackSymbolOfCode
+  have hlt : n % 5 < 5 := Nat.mod_lt n (by decide)
+  generalize h : n % 5 = r at hlt ⊢
+  rcases r with _ | r
+  · simp [optionStackSymbolCode]
+  rcases r with _ | r
+  · simp [optionStackSymbolCode]
+  rcases r with _ | r
+  · simp [optionStackSymbolCode]
+  rcases r with _ | r
+  · simp [optionStackSymbolCode]
+  rcases r with _ | r
+  · simp [optionStackSymbolCode]
+  · omega
+
+theorem optionStackSymbolOfCode_optionStackSymbolCode (s : Option Γ') :
+    optionStackSymbolOfCode (optionStackSymbolCode s) = s := by
+  cases s with
+  | none => rfl
+  | some a => cases a <;> rfl
+
+theorem optionStackSymbolOfCode_eq_of_mod {n : Nat} {s : Option Γ'}
+    (h : n % 5 = optionStackSymbolCode s) :
+    optionStackSymbolOfCode n = s := by
+  cases s with
+  | none =>
+      unfold optionStackSymbolOfCode
+      simp [h, optionStackSymbolCode]
+  | some a =>
+      cases a <;> unfold optionStackSymbolOfCode <;>
+        simp [h, optionStackSymbolCode]
+
+/-- Dense numeric code for booleans, used as binary digits in finite fields. -/
+def boolCode : Bool → Nat
+  | false => 0
+  | true => 1
+
+/-- Decode a natural number modulo two as a boolean. -/
+def boolOfCode (n : Nat) : Bool :=
+  n % 2 = 1
+
+theorem boolCode_lt_two (b : Bool) : boolCode b < 2 := by
+  cases b <;> decide
+
+theorem boolCode_ofCode (n : Nat) : boolCode (boolOfCode n) = n % 2 := by
+  unfold boolOfCode
+  have hlt : n % 2 < 2 := Nat.mod_lt n (by decide)
+  generalize h : n % 2 = r at hlt ⊢
+  rcases r with _ | r
+  · simp [boolCode]
+  rcases r with _ | r
+  · simp [boolCode]
+  · omega
+
+theorem boolOfCode_boolCode (b : Bool) : boolOfCode (boolCode b) = b := by
+  cases b <;> rfl
+
+/-- Dense numeric code for Boolean predicates on the four stack symbols. -/
+def stackPredicateCode (p : Γ' → Bool) : Nat :=
+  boolCode (p Γ'.consₗ) + 2 * (boolCode (p Γ'.cons) +
+    2 * (boolCode (p Γ'.bit0) + 2 * boolCode (p Γ'.bit1)))
+
+/-- Decode a natural number modulo sixteen into a Boolean predicate on stack symbols. -/
+def stackPredicateOfCode (n : Nat) : Γ' → Bool
+  | Γ'.consₗ => boolOfCode n
+  | Γ'.cons => boolOfCode (n / 2)
+  | Γ'.bit0 => boolOfCode (n / 4)
+  | Γ'.bit1 => boolOfCode (n / 8)
+
+theorem stackPredicateCode_lt_sixteen (p : Γ' → Bool) :
+    stackPredicateCode p < 16 := by
+  cases h₀ : p Γ'.consₗ <;> cases h₁ : p Γ'.cons <;>
+    cases h₂ : p Γ'.bit0 <;> cases h₃ : p Γ'.bit1 <;>
+    simp [stackPredicateCode, boolCode, h₀, h₁, h₂, h₃]
+
+theorem stackPredicateCode_ofCode (n : Nat) :
+    stackPredicateCode (stackPredicateOfCode n) = n % 16 := by
+  unfold stackPredicateCode stackPredicateOfCode
+  simp [boolCode_ofCode]
+  omega
+
+theorem stackPredicateOfCode_stackPredicateCode (p : Γ' → Bool) :
+    stackPredicateOfCode (stackPredicateCode p) = p := by
+  funext a
+  cases a <;> cases h₀ : p Γ'.consₗ <;> cases h₁ : p Γ'.cons <;>
+    cases h₂ : p Γ'.bit0 <;> cases h₃ : p Γ'.bit1 <;>
+    simp [stackPredicateOfCode, stackPredicateCode, boolOfCode, boolCode, h₀, h₁, h₂, h₃]
+
+/-- Dense numeric code for local-store actions used by `Λ'.push`. -/
+def localActionCode (f : Option Γ' → Option Γ') : Nat :=
+  optionStackSymbolCode (f none) + 5 * (optionStackSymbolCode (f (some Γ'.consₗ)) +
+    5 * (optionStackSymbolCode (f (some Γ'.cons)) +
+      5 * (optionStackSymbolCode (f (some Γ'.bit0)) +
+        5 * optionStackSymbolCode (f (some Γ'.bit1)))))
+
+/-- Decode a natural number modulo `5^5` into a local-store action. -/
+def localActionOfCode (n : Nat) : Option Γ' → Option Γ'
+  | none => optionStackSymbolOfCode n
+  | some Γ'.consₗ => optionStackSymbolOfCode (n / 5)
+  | some Γ'.cons => optionStackSymbolOfCode (n / 25)
+  | some Γ'.bit0 => optionStackSymbolOfCode (n / 125)
+  | some Γ'.bit1 => optionStackSymbolOfCode (n / 625)
+
+theorem localActionCode_lt (f : Option Γ' → Option Γ') :
+    localActionCode f < 3125 := by
+  unfold localActionCode
+  have h₀ := optionStackSymbolCode_lt_five (f none)
+  have h₁ := optionStackSymbolCode_lt_five (f (some Γ'.consₗ))
+  have h₂ := optionStackSymbolCode_lt_five (f (some Γ'.cons))
+  have h₃ := optionStackSymbolCode_lt_five (f (some Γ'.bit0))
+  have h₄ := optionStackSymbolCode_lt_five (f (some Γ'.bit1))
+  omega
+
+theorem localActionCode_ofCode (n : Nat) :
+    localActionCode (localActionOfCode n) = n % 3125 := by
+  unfold localActionCode localActionOfCode
+  simp [optionStackSymbolCode_ofCode]
+  omega
+
+theorem localActionOfCode_localActionCode (f : Option Γ' → Option Γ') :
+    localActionOfCode (localActionCode f) = f := by
+  funext s
+  have h₀ := optionStackSymbolCode_lt_five (f none)
+  have h₁ := optionStackSymbolCode_lt_five (f (some Γ'.consₗ))
+  have h₂ := optionStackSymbolCode_lt_five (f (some Γ'.cons))
+  have h₃ := optionStackSymbolCode_lt_five (f (some Γ'.bit0))
+  have h₄ := optionStackSymbolCode_lt_five (f (some Γ'.bit1))
+  cases s with
+  | none =>
+      apply optionStackSymbolOfCode_eq_of_mod
+      unfold localActionCode
+      omega
+  | some a =>
+      cases a
+      · apply optionStackSymbolOfCode_eq_of_mod
+        unfold localActionCode
+        omega
+      · apply optionStackSymbolOfCode_eq_of_mod
+        unfold localActionCode
+        omega
+      · apply optionStackSymbolOfCode_eq_of_mod
+        unfold localActionCode
+        omega
+      · apply optionStackSymbolOfCode_eq_of_mod
+        unfold localActionCode
+        omega
+
 namespace Λ'
 
 /--
