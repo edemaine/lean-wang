@@ -998,12 +998,12 @@ theorem programOfParts_primrec :
             (Primrec.list_append.comp (Primrec.fst.comp Primrec.snd)
               (Primrec.snd.comp Primrec.snd))))))
 
-def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
-  symbols := foldedSymbolList
-  states := foldedStateList tc
-  blank := foldedBlank
-  start := foldedStartState
-  table := initRows tc ++ simRows tc
+def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
+  programOfParts (TM0Route.partrecStartedTM0States tc) (initRows tc) (simRows tc)
+
+theorem program_eq_programOfParts (tc : Turing.ToPartrec.Code) :
+    program tc =
+      programOfParts (TM0Route.partrecStartedTM0States tc) (initRows tc) (simRows tc) := rfl
 
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
