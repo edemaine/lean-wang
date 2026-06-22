@@ -37,6 +37,29 @@ def relabelTM2Stmt {K : Type u} {Γ : K → Type v} {Λ : Type w} {Λ' : Type x}
   | Turing.TM2.Stmt.goto g => Turing.TM2.Stmt.goto fun s => f (g s)
   | Turing.TM2.Stmt.halt => Turing.TM2.Stmt.halt
 
+theorem relabelTM2Stmt_supportsStmt {K : Type u} {Γ : K → Type v}
+    {Λ : Type w} {Λ' : Type x} {σ : Type y} {S : Finset Λ} {S' : Finset Λ'}
+    (f : Λ → Λ') (hf : ∀ q, q ∈ S → f q ∈ S') :
+    ∀ q : Turing.TM2.Stmt Γ Λ σ,
+      Turing.TM2.SupportsStmt S q →
+        Turing.TM2.SupportsStmt S' (relabelTM2Stmt f q) := by
+  intro q
+  induction q with
+  | push k g q IH =>
+      exact fun h => IH h
+  | peek k g q IH =>
+      exact fun h => IH h
+  | pop k g q IH =>
+      exact fun h => IH h
+  | load g q IH =>
+      exact fun h => IH h
+  | branch g q₁ q₂ IH₁ IH₂ =>
+      exact fun h => ⟨IH₁ h.1, IH₂ h.2⟩
+  | goto g =>
+      exact fun h v => hf (g v) (h v)
+  | halt =>
+      exact fun _ => trivial
+
 /-- Relabel a TM2 configuration. -/
 def relabelTM2Cfg {K : Type u} {Γ : K → Type v} {Λ : Type w} {Λ' : Type x}
     {σ : Type y} (f : Λ → Λ') :
@@ -98,6 +121,12 @@ namespace StartedLabel
 def wrap (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') : StartedLabel tc :=
   ⟨q⟩
 
+theorem wrap_injective (tc : Turing.ToPartrec.Code) :
+    Function.Injective (wrap tc) := by
+  intro q r h
+  cases h
+  rfl
+
 instance (tc : Turing.ToPartrec.Code) : Inhabited (StartedLabel tc) :=
   ⟨wrap tc (PartrecToTM2Support.startLabel tc)⟩
 
@@ -111,6 +140,39 @@ def partrecStartedTM2 (tc : Turing.ToPartrec.Code) :
     StartedLabel tc →
       Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar :=
   fun q => relabelTM2Stmt (StartedLabel.wrap tc) (partrecTM2 q.val)
+
+noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
+    Finset (StartedLabel tc) :=
+  (PartrecToTM2Support.labels tc).map
+    ⟨StartedLabel.wrap tc, StartedLabel.wrap_injective tc⟩
+
+theorem mem_partrecStartedTM2Labels (tc : Turing.ToPartrec.Code)
+    (q : StartedLabel tc) :
+    q ∈ partrecStartedTM2Labels tc ↔ q.val ∈ PartrecToTM2Support.labels tc := by
+  constructor
+  · intro h
+    rcases Finset.mem_map.1 h with ⟨r, hr, hq⟩
+    cases hq
+    exact hr
+  · intro h
+    refine Finset.mem_map.2 ⟨q.val, h, ?_⟩
+    cases q
+    rfl
+
+theorem partrecStartedTM2_supports (tc : Turing.ToPartrec.Code) :
+    Turing.TM2.Supports (partrecStartedTM2 tc) (partrecStartedTM2Labels tc) := by
+  constructor
+  · change StartedLabel.wrap tc (PartrecToTM2Support.startLabel tc) ∈
+      partrecStartedTM2Labels tc
+    exact Finset.mem_map.2
+      ⟨PartrecToTM2Support.startLabel tc,
+        PartrecToTM2Support.startLabel_mem_labels tc, rfl⟩
+  · intro q hq
+    exact relabelTM2Stmt_supportsStmt (StartedLabel.wrap tc)
+      (fun r hr => (mem_partrecStartedTM2Labels tc (StartedLabel.wrap tc r)).2 hr)
+      (partrecTM2 q.val)
+      ((PartrecToTM2Support.tr_supports_labels tc).2 q.val
+        ((mem_partrecStartedTM2Labels tc q).1 hq))
 
 theorem partrecStartedTM2_step_eq_map (tc : Turing.ToPartrec.Code)
     (c : Turing.TM2.Cfg PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar) :
@@ -212,6 +274,17 @@ theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
 def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.tr (partrecStartedTM2 tc)
 
+noncomputable def partrecStartedTM1Labels (tc : Turing.ToPartrec.Code) :=
+  Turing.TM2to1.trSupp (partrecStartedTM2 tc) (partrecStartedTM2Labels tc)
+
+theorem partrecStartedTM1_supports (tc : Turing.ToPartrec.Code) :
+    Turing.TM1.Supports (partrecStartedTM1Machine tc)
+      (partrecStartedTM1Labels tc) := by
+  exact Turing.TM2to1.tr_supports
+    (M := partrecStartedTM2 tc)
+    (S := partrecStartedTM2Labels tc)
+    (partrecStartedTM2_supports tc)
+
 /-- The TM1/TM0 input list obtained from the started TM2 input stack. -/
 def partrecStartedTM0Input :
     List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
@@ -221,6 +294,27 @@ def partrecStartedTM0Input :
 /-- The TM0 machine obtained by composing Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions. -/
 def partrecStartedTM0Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM1to0.tr (partrecStartedTM1Machine tc)
+
+noncomputable def partrecStartedTM0Labels (tc : Turing.ToPartrec.Code) :=
+  Turing.TM1to0.trStmts (partrecStartedTM1Machine tc)
+    (partrecStartedTM1Labels tc)
+
+noncomputable def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+    List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
+  (partrecStartedTM0Labels tc).toList
+
+theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :
+    q ∈ partrecStartedTM0LabelList tc ↔ q ∈ partrecStartedTM0Labels tc := by
+  simp [partrecStartedTM0LabelList]
+
+theorem partrecStartedTM0_supports (tc : Turing.ToPartrec.Code) :
+    Turing.TM0.Supports (partrecStartedTM0Machine tc)
+      (partrecStartedTM0Labels tc : Set _) := by
+  exact Turing.TM1to0.tr_supports
+    (M := partrecStartedTM1Machine tc)
+    (S := partrecStartedTM1Labels tc)
+    (partrecStartedTM1_supports tc)
 
 /--
 Correctness of the composed Mathlib TM0 route for the code-specific started

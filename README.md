@@ -45,7 +45,9 @@ the concrete definitions needed for the Berger/Robinson route:
 - `LeanWang.TM0Route`: a Mathlib TM0 route that wraps the code-dependent
   `PartrecToTM2` start label as the default TM2 label, composes Mathlib's
   TM2-to-TM1 and TM1-to-TM0 translations, and proves the composed TM0 evaluator
-  has the same domain as the corresponding started TM2 evaluator.
+  has the same domain as the corresponding started TM2 evaluator. It also
+  packages finite state support for the started TM2, translated TM1, and
+  translated TM0 machines.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

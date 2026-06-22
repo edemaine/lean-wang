@@ -268,6 +268,12 @@ table row. A finite-TM0 `write` compiles to a write-and-move-right row followed
 by finite return-left rows. Generated row targets and written symbols are proved
 to lie in the compiled table supports.
 
+`TM0Route` now also packages finite state support for the code-specific started
+TM2 evaluator and for the translated TM1 and TM0 machines. This is the state
+support data needed by the concrete `TM0FiniteCompiler`; the remaining finite
+alphabet list should be built directly from the concrete `PartrecToTM2` stack
+symbols rather than relying on a global `Fintype` instance.
+
 Next implementation targets:
 
 1. Build a concrete `TM0FiniteCompiler`: compile the code-specific Mathlib TM0
