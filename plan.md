@@ -94,6 +94,11 @@ Completed proof layers:
   the four stacks are interleaved at positions `4 * i + stackNameCode k`, with
   readback lemmas for each stack cell, and each supported TM2 configuration is
   mapped to a `Machine.ID` using the finite control-state indices.
+- the table-machine header now reserves a separate blank-tape initialization
+  state, shifts TM2 evaluator substates by `+1`, and includes the first
+  initialization transition row that writes the fixed input `[0]` before
+  entering the evaluator start state, with a proved one-step `runEmpty`
+  theorem for any table beginning with this initialization row.
 
 The remaining construction obligations are explicit Lean interfaces:
 
