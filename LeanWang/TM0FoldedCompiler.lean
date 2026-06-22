@@ -2197,6 +2197,129 @@ theorem program_step_sim_of_step
         simpa [hstmt] using hwrite
       simp [hb]
 
+/-!
+## Folded semantic relation
+
+Mathlib's `TM0.Cfg.Tape` is centered at the simulated head, while the local
+one-sided program keeps a fixed folded origin. The local head and folded side
+therefore determine the simulated head's absolute position in the fixed folded
+coordinate system.
+-/
+
+def rightAbs (i : Nat) : Int :=
+  i
+
+def leftAbs (i : Nat) : Int :=
+  -((i : Int) + 1)
+
+def activeAbs : FoldSide → Nat → Int
+  | FoldSide.right, h => rightAbs h
+  | FoldSide.left, h => leftAbs h
+
+def sourceOffset (side : FoldSide) (head : Nat) (abs : Int) : Int :=
+  abs - activeAbs side head
+
+def foldedCellOfTapeAt (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) (head i : Nat) : Nat :=
+  foldedSymbolCode (decide (i = 0))
+    (T.nth (sourceOffset side head (leftAbs i)))
+    (T.nth (sourceOffset side head (rightAbs i)))
+
+def FoldedTapeRel (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) (head : Nat) (tape : Nat → Nat) : Prop :=
+  ∀ i : Nat, tape i = foldedCellOfTapeAt T side head i
+
+def FoldedConfigRel (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)) (id : PostID) : Prop :=
+  ∃ side : FoldSide,
+    cfg.q ∈ TM0Route.partrecStartedTM0LabelList tc ∧
+      id.state = some (foldedSimStateCode tc side cfg.q) ∧
+      FoldedTapeRel cfg.Tape side id.head id.tape
+
+@[simp]
+theorem sourceOffset_right_head (h : Nat) :
+    sourceOffset FoldSide.right h (rightAbs h) = 0 := by
+  simp [sourceOffset, activeAbs, rightAbs]
+
+@[simp]
+theorem sourceOffset_left_head (h : Nat) :
+    sourceOffset FoldSide.left h (leftAbs h) = 0 := by
+  simp [sourceOffset, activeAbs, leftAbs]
+
+theorem foldedRead_active_cell (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) (head : Nat) :
+    foldedRead side
+        (T.nth (sourceOffset side head (leftAbs head)))
+        (T.nth (sourceOffset side head (rightAbs head))) =
+      T.head := by
+  cases side <;> simp [foldedRead, Turing.Tape.nth_zero]
+
+theorem activeAbs_move_right_regular {head : Nat} (h : head ≠ 0) :
+    activeAbs FoldSide.left (head - 1) =
+      activeAbs FoldSide.left head + 1 := by
+  cases head with
+  | zero => exact False.elim (h rfl)
+  | succ n =>
+      simp [activeAbs, leftAbs]
+
+theorem activeAbs_move_left_regular (head : Nat) :
+    activeAbs FoldSide.left (head + 1) =
+      activeAbs FoldSide.left head - 1 := by
+  simp [activeAbs, leftAbs]
+  omega
+
+theorem activeAbs_move_right_from_origin :
+    activeAbs FoldSide.right 0 =
+      activeAbs FoldSide.left 0 + 1 := by
+  simp [activeAbs, leftAbs, rightAbs]
+
+theorem activeAbs_move_left_from_origin :
+    activeAbs FoldSide.left 0 =
+      activeAbs FoldSide.right 0 - 1 := by
+  simp [activeAbs, leftAbs, rightAbs]
+
+theorem activeAbs_move_right_right (head : Nat) :
+    activeAbs FoldSide.right (head + 1) =
+      activeAbs FoldSide.right head + 1 := by
+  simp [activeAbs, rightAbs]
+
+theorem activeAbs_move_left_right {head : Nat} (h : head ≠ 0) :
+    activeAbs FoldSide.right (head - 1) =
+      activeAbs FoldSide.right head - 1 := by
+  cases head with
+  | zero => exact False.elim (h rfl)
+  | succ n =>
+      simp [activeAbs, rightAbs]
+
+theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id) :
+    ∃ side : FoldSide,
+      id.state = some (foldedSimStateCode tc side cfg.q) := by
+  rcases hrel with ⟨side, _hq, hstate, _htape⟩
+  exact ⟨side, hstate⟩
+
+theorem FoldedConfigRel_label_mem {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id) :
+    cfg.q ∈ TM0Route.partrecStartedTM0LabelList tc := by
+  rcases hrel with ⟨_side, hq, _hstate, _htape⟩
+  exact hq
+
+theorem FoldedConfigRel_read_head {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id) :
+    ∃ side : FoldSide,
+      id.state = some (foldedSimStateCode tc side cfg.q) ∧
+        id.tape id.head =
+          foldedCellOfTapeAt cfg.Tape side id.head id.head ∧
+        foldedRead side
+          (cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head)))
+          (cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))) =
+            cfg.Tape.head := by
+  rcases hrel with ⟨side, _hq, hstate, htape⟩
+  exact ⟨side, hstate, htape id.head, foldedRead_active_cell cfg.Tape side id.head⟩
+
 end TM0FoldedCompiler
 
 end LeanWang
