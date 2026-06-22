@@ -164,6 +164,10 @@ def stateTagReturn : Nat := 2
 def taggedState (tag payload : Nat) : Nat :=
   Nat.pair tag payload
 
+theorem taggedState_primrec :
+    Primrec (fun p : Nat × Nat => taggedState p.1 p.2) := by
+  exact Primrec₂.natPair.comp Primrec.fst Primrec.snd
+
 /-- State used while simulating a Mathlib TM0 label on one side of the folded tape. -/
 def foldedSimStateCode (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (q : SourceLabel tc) : Nat :=
@@ -177,13 +181,29 @@ def initWriteOriginState : Nat :=
 def initMoveRightState (i : Nat) : Nat :=
   taggedState stateTagInit (2 * i + 1)
 
+theorem initMoveRightState_primrec : Primrec initMoveRightState := by
+  unfold initMoveRightState taggedState stateTagInit
+  have hpayload : Primrec (fun i : Nat => 2 * i + 1) :=
+    Primrec.succ.comp ((Primrec.nat_mul).comp (Primrec.const 2) Primrec.id)
+  exact Primrec₂.natPair.comp (Primrec.const 1) hpayload
+
 /-- Prelude state that writes right-side input cell `i + 1`. -/
 def initWriteRightState (i : Nat) : Nat :=
   taggedState stateTagInit (2 * i + 2)
 
+theorem initWriteRightState_primrec : Primrec initWriteRightState := by
+  unfold initWriteRightState taggedState stateTagInit
+  have hpayload : Primrec (fun i : Nat => 2 * i + 2) :=
+    Primrec.succ.comp (Primrec.succ.comp ((Primrec.nat_mul).comp (Primrec.const 2) Primrec.id))
+  exact Primrec₂.natPair.comp (Primrec.const 1) hpayload
+
 /-- Prelude state with `i` left moves remaining before simulation starts. -/
 def initReturnState (i : Nat) : Nat :=
   taggedState stateTagReturn i
+
+theorem initReturnState_primrec : Primrec initReturnState := by
+  unfold initReturnState taggedState stateTagReturn
+  exact Primrec₂.natPair.comp (Primrec.const 2) Primrec.id
 
 def foldedStartState : Nat :=
   initWriteOriginState
@@ -217,6 +237,11 @@ def mkRow (state read next : Nat) (stmt : PostStmt) : PostTransition where
   read := read
   next := next
   stmt := stmt
+
+theorem mkRow_primrec :
+    Primrec (fun p : Nat × Nat × Nat × PostStmt =>
+      mkRow p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  exact PostTransition.mk_primrec
 
 def initWriteOriginRow : PostTransition :=
   mkRow initWriteOriginState foldedBlank nextAfterOrigin
