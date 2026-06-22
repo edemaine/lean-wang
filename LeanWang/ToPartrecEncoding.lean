@@ -1018,6 +1018,204 @@ theorem encodeLabel_eq : Encodable.encode = encodeLabel :=
 theorem decodeLabel_eq : Encodable.decode = decodeLabel :=
   rfl
 
+theorem encode_some_move (p : Γ' → Bool) (k₁ k₂ : K') (q : Λ') :
+    Encodable.encode (some (move p k₁ k₂ q)) =
+      8 * movePayloadCode p k₁ k₂ (encodeLabel q) + 2 := by
+  rw [show Encodable.encode (some (move p k₁ k₂ q)) =
+      Encodable.encode (move p k₁ k₂ q) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_clear (p : Γ' → Bool) (k : K') (q : Λ') :
+    Encodable.encode (some (clear p k q)) =
+      8 * clearPayloadCode p k (encodeLabel q) + 3 := by
+  rw [show Encodable.encode (some (clear p k q)) =
+      Encodable.encode (clear p k q) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_copy (q : Λ') :
+    Encodable.encode (some (copy q)) = 8 * encodeLabel q + 4 := by
+  rw [show Encodable.encode (some (copy q)) = Encodable.encode (copy q) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_push (k : K') (f : Option Γ' → Option Γ') (q : Λ') :
+    Encodable.encode (some (push k f q)) =
+      8 * pushPayloadCode k f (encodeLabel q) + 5 := by
+  rw [show Encodable.encode (some (push k f q)) =
+      Encodable.encode (push k f q) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_read (f : Option Γ' → Λ') :
+    Encodable.encode (some (read f)) =
+      8 * readPayloadCode (encodeLabel (f none)) (encodeLabel (f (some Γ'.consₗ)))
+        (encodeLabel (f (some Γ'.cons))) (encodeLabel (f (some Γ'.bit0)))
+        (encodeLabel (f (some Γ'.bit1))) + 6 := by
+  rw [show Encodable.encode (some (read f)) = Encodable.encode (read f) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_succ (q : Λ') :
+    Encodable.encode (some (succ q)) = 8 * encodeLabel q + 7 := by
+  rw [show Encodable.encode (some (succ q)) = Encodable.encode (succ q) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_pred (q₁ q₂ : Λ') :
+    Encodable.encode (some (pred q₁ q₂)) =
+      8 * predPayloadCode (encodeLabel q₁) (encodeLabel q₂) + 8 := by
+  rw [show Encodable.encode (some (pred q₁ q₂)) =
+      Encodable.encode (pred q₁ q₂) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+theorem encode_some_ret (k : Cont') :
+    Encodable.encode (some (ret k)) = 8 * Cont'.encodeCont k + 9 := by
+  rw [show Encodable.encode (some (ret k)) = Encodable.encode (ret k) + 1 by rfl]
+  rw [encodeLabel_eq]
+  rfl
+
+/--
+Numeric mirror of `decodeLabelFuel`.
+
+It returns the encoding of the optional decoded label: `0` means decoding
+failed, while `m + 1` means decoding succeeded with label code `m`. This is the
+natural-number function needed for the eventual `Primcodable Λ'` instance.
+-/
+def normalizeLabelFuel : Nat → Nat → Nat
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | fuel + 1, n + 1 =>
+      let payload := n / 8
+      match n % 8 with
+      | 0 =>
+          match decodeMovePayload payload with
+          | none => 0
+          | some fields =>
+              match normalizeLabelFuel fuel fields.2.2.2 with
+              | 0 => 0
+              | qCode + 1 => 8 * movePayloadCode fields.1 fields.2.1 fields.2.2.1 qCode + 2
+      | 1 =>
+          match decodeClearPayload payload with
+          | none => 0
+          | some fields =>
+              match normalizeLabelFuel fuel fields.2.2 with
+              | 0 => 0
+              | qCode + 1 => 8 * clearPayloadCode fields.1 fields.2.1 qCode + 3
+      | 2 =>
+          match normalizeLabelFuel fuel payload with
+          | 0 => 0
+          | qCode + 1 => 8 * qCode + 4
+      | 3 =>
+          match decodePushPayload payload with
+          | none => 0
+          | some fields =>
+              match normalizeLabelFuel fuel fields.2.2 with
+              | 0 => 0
+              | qCode + 1 => 8 * pushPayloadCode fields.1 fields.2.1 qCode + 5
+      | 4 =>
+          let fields := decodeReadPayload payload
+          match normalizeLabelFuel fuel fields.1 with
+          | 0 => 0
+          | q₀Code + 1 =>
+            match normalizeLabelFuel fuel fields.2.1 with
+            | 0 => 0
+            | q₁Code + 1 =>
+              match normalizeLabelFuel fuel fields.2.2.1 with
+              | 0 => 0
+              | q₂Code + 1 =>
+                match normalizeLabelFuel fuel fields.2.2.2.1 with
+                | 0 => 0
+                | q₃Code + 1 =>
+                  match normalizeLabelFuel fuel fields.2.2.2.2 with
+                  | 0 => 0
+                  | q₄Code + 1 =>
+                      8 * readPayloadCode q₀Code q₁Code q₂Code q₃Code q₄Code + 6
+      | 5 =>
+          match normalizeLabelFuel fuel payload with
+          | 0 => 0
+          | qCode + 1 => 8 * qCode + 7
+      | 6 =>
+          let fields := decodePredPayload payload
+          match normalizeLabelFuel fuel fields.1 with
+          | 0 => 0
+          | q₁Code + 1 =>
+            match normalizeLabelFuel fuel fields.2 with
+            | 0 => 0
+            | q₂Code + 1 => 8 * predPayloadCode q₁Code q₂Code + 8
+      | _ => 8 * Cont'.encodeCont (Cont'.ofNatCont payload) + 9
+
+def normalizeLabel (n : Nat) : Nat :=
+  normalizeLabelFuel n n
+
+theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
+    normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
+  induction fuel generalizing n with
+  | zero =>
+      cases n <;> rfl
+  | succ fuel ih =>
+      cases n with
+      | zero => rfl
+      | succ n =>
+          unfold normalizeLabelFuel decodeLabelFuel
+          split
+          · cases hfields : decodeMovePayload (n / 8) with
+            | none => simp [hfields]
+            | some fields =>
+                cases hq : decodeLabelFuel fuel fields.2.2.2 with
+                | none => simp [ih, hfields, hq]
+                | some q => simp [ih, hfields, hq, encodeLabel_eq, encodeLabel_move]
+          · cases hfields : decodeClearPayload (n / 8) with
+            | none => simp [hfields]
+            | some fields =>
+                cases hq : decodeLabelFuel fuel fields.2.2 with
+                | none => simp [ih, hfields, hq]
+                | some q => simp [ih, hfields, hq, encodeLabel_eq, encodeLabel_clear]
+          · cases hq : decodeLabelFuel fuel (n / 8) with
+            | none => simp [ih, hq]
+            | some q => simp [ih, hq, encodeLabel_eq, encodeLabel_copy]
+          · cases hfields : decodePushPayload (n / 8) with
+            | none => simp [hfields]
+            | some fields =>
+                cases hq : decodeLabelFuel fuel fields.2.2 with
+                | none => simp [ih, hfields, hq]
+                | some q => simp [ih, hfields, hq, encodeLabel_eq, encodeLabel_push]
+          · cases hq₀ : decodeLabelFuel fuel (decodeReadPayload (n / 8)).1 with
+            | none => simp [ih, hq₀]
+            | some q₀ =>
+                cases hq₁ : decodeLabelFuel fuel (decodeReadPayload (n / 8)).2.1 with
+                | none => simp [ih, hq₀, hq₁]
+                | some q₁ =>
+                    cases hq₂ : decodeLabelFuel fuel (decodeReadPayload (n / 8)).2.2.1 with
+                    | none => simp [ih, hq₀, hq₁, hq₂]
+                    | some q₂ =>
+                        cases hq₃ :
+                            decodeLabelFuel fuel (decodeReadPayload (n / 8)).2.2.2.1 with
+                        | none => simp [ih, hq₀, hq₁, hq₂, hq₃]
+                        | some q₃ =>
+                            cases hq₄ :
+                                decodeLabelFuel fuel (decodeReadPayload (n / 8)).2.2.2.2 with
+                            | none => simp [ih, hq₀, hq₁, hq₂, hq₃, hq₄]
+                            | some q₄ =>
+                                simp [ih, hq₀, hq₁, hq₂, hq₃, hq₄, encodeLabel_eq,
+                                  encodeLabel_read]
+          · cases hq : decodeLabelFuel fuel (n / 8) with
+            | none => simp [ih, hq]
+            | some q => simp [ih, hq, encodeLabel_eq, encodeLabel_succ]
+          · cases hq₁ : decodeLabelFuel fuel (decodePredPayload (n / 8)).1 with
+            | none => simp [ih, hq₁]
+            | some q₁ =>
+                cases hq₂ : decodeLabelFuel fuel (decodePredPayload (n / 8)).2 with
+                | none => simp [ih, hq₁, hq₂]
+                | some q₂ => simp [ih, hq₁, hq₂, encodeLabel_eq, encodeLabel_pred]
+          · simp [encodeLabel_eq, encodeLabel_ret]
+
+theorem normalizeLabel_eq_encode_decodeLabel (n : Nat) :
+    normalizeLabel n = Encodable.encode (decodeLabel n) := by
+  exact normalizeLabelFuel_eq_encode_decodeLabelFuel n n
+
 end Λ'
 
 end PartrecToTM2
