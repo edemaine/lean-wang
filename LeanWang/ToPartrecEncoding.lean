@@ -427,6 +427,21 @@ theorem decodeLocalActionCode_localActionCode (f : Option Γ' → Option Γ') :
     decodeLocalActionCode (localActionCode f) = some f := by
   simp [decodeLocalActionCode, localActionCode_lt, localActionOfCode_localActionCode]
 
+theorem stackNameCode_primrec : Primrec stackNameCode :=
+  Primrec.dom_finite stackNameCode
+
+theorem optionStackSymbolCode_primrec : Primrec optionStackSymbolCode :=
+  Primrec.dom_finite optionStackSymbolCode
+
+theorem boolCode_primrec : Primrec boolCode :=
+  Primrec.dom_finite boolCode
+
+theorem stackPredicateCode_primrec : Primrec stackPredicateCode :=
+  Primrec.dom_finite stackPredicateCode
+
+theorem localActionCode_primrec : Primrec localActionCode :=
+  Primrec.dom_finite localActionCode
+
 namespace Λ'
 
 /--
@@ -670,6 +685,56 @@ def decodePredPayload (m : Nat) : Nat × Nat :=
 theorem decodePredPayload_predPayloadCode (q₁ q₂ : Nat) :
     decodePredPayload (predPayloadCode q₁ q₂) = (q₁, q₂) := by
   simp [decodePredPayload, predPayloadCode]
+
+theorem movePayloadCode_primrec :
+    Primrec (fun p : (Γ' → Bool) × K' × K' × Nat =>
+      movePayloadCode p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  unfold movePayloadCode
+  exact Primrec₂.natPair.comp
+    (stackPredicateCode_primrec.comp Primrec.fst)
+    (Primrec₂.natPair.comp
+      (stackNameCode_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec₂.natPair.comp
+        (stackNameCode_primrec.comp (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)))
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+
+theorem clearPayloadCode_primrec :
+    Primrec (fun p : (Γ' → Bool) × K' × Nat =>
+      clearPayloadCode p.1 p.2.1 p.2.2) := by
+  unfold clearPayloadCode
+  exact Primrec₂.natPair.comp
+    (stackPredicateCode_primrec.comp Primrec.fst)
+    (Primrec₂.natPair.comp
+      (stackNameCode_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec.snd.comp Primrec.snd))
+
+theorem pushPayloadCode_primrec :
+    Primrec (fun p : K' × (Option Γ' → Option Γ') × Nat =>
+      pushPayloadCode p.1 p.2.1 p.2.2) := by
+  unfold pushPayloadCode
+  exact Primrec₂.natPair.comp
+    (stackNameCode_primrec.comp Primrec.fst)
+    (Primrec₂.natPair.comp
+      (localActionCode_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec.snd.comp Primrec.snd))
+
+theorem readPayloadCode_primrec :
+    Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      readPayloadCode p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  unfold readPayloadCode
+  exact Primrec₂.natPair.comp Primrec.fst
+    (Primrec₂.natPair.comp
+      (Primrec.fst.comp Primrec.snd)
+      (Primrec₂.natPair.comp
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (Primrec₂.natPair.comp
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))))
+
+theorem predPayloadCode_primrec :
+    Primrec (fun p : Nat × Nat => predPayloadCode p.1 p.2) := by
+  unfold predPayloadCode
+  exact Primrec₂.natPair.comp Primrec.fst Primrec.snd
 
 theorem ofNatCont_encodeCont (k : Cont') : Cont'.ofNatCont (Cont'.encodeCont k) = k := by
   simpa [Cont'.encodeCont_eq, Cont'.ofNatCont_eq] using Denumerable.ofNat_encode k
