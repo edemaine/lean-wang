@@ -288,7 +288,7 @@ def dummyProgram : TableProgram where
 
 /--
 A computable reduction from Mathlib partial-recursive codes into finite
-table-machine data, implemented as a compiler to finite programs.
+table-machine data, implemented by compilation to finite programs.
 
 The `Compiler` name emphasizes the produced finite machine program. In the
 undecidability proof, the same computable map is the many-one reduction

@@ -101,6 +101,10 @@ Completed proof layers:
   theorem for any table beginning with this initialization row. The first-step
   theorem is now connected to the stack-cell tape representation by readback
   lemmas for all four initial stacks.
+- the one-tape `PartrecToTM2` representation now has an explicit
+  `RepresentsCfg` invariant tying a machine ID to the encoded TM2 state and
+  interleaved stack cells, plus a proof that the fixed initialization row
+  establishes this invariant for `PartrecToTM2.init tc [0]`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -129,10 +133,10 @@ def IsScaffold (S : Scaffold) : Prop :=
       forall n : Nat, 0 < n -> TileableFixedCornerSquare T seed n
 ```
 
-The names below keep `Compiler` because the maps produce finite program data,
-but the mathematical notion they package is a computable reduction. The prose
-therefore says reduction first, and mentions compilation when discussing the
-implementation as finite machine data.
+The names below keep `Compiler` because the maps produce finite program data.
+Mathematically, the notion they package is a computable reduction, implemented
+by compilation to finite machine data. The prose should therefore say reduction
+first, while still mentioning compilation when discussing the implementation.
 
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
 reduction obligation into a `TableCompiler`, using the proved

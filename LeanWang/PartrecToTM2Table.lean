@@ -173,6 +173,21 @@ noncomputable def encodedID (tc : Turing.ToPartrec.Code)
   head := 0
   state := encodedState tc cfg
 
+/--
+Representation invariant connecting a one-tape table-machine ID with a
+`PartrecToTM2` configuration.
+
+The invariant records the head convention, the encoded control state, and the
+semantically meaningful interleaved stack cells. It intentionally avoids full
+tape extensional equality, because later transition rows only need to preserve
+the stack-cell view of the encoding.
+-/
+noncomputable def RepresentsCfg (tc : Turing.ToPartrec.Code) (id : ID)
+    (cfg : Turing.PartrecToTM2.Cfg') : Prop :=
+  id.head = 0 ∧
+    id.state = encodedState tc cfg ∧
+      ∀ k i, id.tape (stackCellPos k i) = encodedTape cfg (stackCellPos k i)
+
 @[simp]
 theorem encodedID_tape (tc : Turing.ToPartrec.Code)
     (cfg : Turing.PartrecToTM2.Cfg') :
@@ -190,6 +205,24 @@ theorem encodedID_state (tc : Turing.ToPartrec.Code)
     (cfg : Turing.PartrecToTM2.Cfg') :
     (encodedID tc cfg).state = encodedState tc cfg :=
   rfl
+
+theorem encodedID_representsCfg (tc : Turing.ToPartrec.Code)
+    (cfg : Turing.PartrecToTM2.Cfg') :
+    RepresentsCfg tc (encodedID tc cfg) cfg := by
+  constructor
+  · rfl
+  constructor
+  · rfl
+  · intro k i
+    rfl
+
+theorem RepresentsCfg.state_mem_states {tc : Turing.ToPartrec.Code}
+    {id : ID} {cfg : Turing.PartrecToTM2.Cfg'}
+    (h : RepresentsCfg tc id cfg)
+    (hlabel : cfg.l ∈ Finset.insertNone (PartrecToTM2Support.labels tc)) :
+    id.state ∈ states tc := by
+  rw [h.2.1]
+  exact encodedState_mem_states hlabel
 
 theorem encodedTape_init_main_zero (tc : Turing.ToPartrec.Code) :
     encodedTape (Turing.PartrecToTM2.init tc [0])
@@ -234,7 +267,7 @@ theorem inputZeroSymbol_mem_symbols : inputZeroSymbol ∈ symbols :=
   stackCellSymbol_mem_symbols (some Turing.PartrecToTM2.Γ'.cons)
 
 /--
-First transition row for the future compiler.
+First transition row for the future TM2-to-table reduction/compiler.
 
 On the blank empty-input tape, it writes the encoding of `[0]` to the main
 stack's first cell and enters the TM2 evaluator start state. The left move keeps
@@ -394,6 +427,17 @@ theorem programWithInitTable_runEmpty_one_stackCell (tc : Turing.ToPartrec.Code)
     simp [stackCellPos, PartrecToTM2Support.stackNameCode,
       Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim, inputZeroSymbol,
       blankSymbol]
+
+theorem programWithInitTable_runEmpty_one_represents_init
+    (tc : Turing.ToPartrec.Code) (table : List TableTransition) :
+    RepresentsCfg tc ((programWithInitTable tc table).toMachine.runEmpty 1)
+      (Turing.PartrecToTM2.init tc [0]) := by
+  constructor
+  · rw [programWithInitTable_runEmpty_one]
+  constructor
+  · rw [programWithInitTable_runEmpty_one, encodedState_init]
+  · intro k i
+    exact programWithInitTable_runEmpty_one_stackCell tc table k i
 
 end PartrecToTM2Table
 

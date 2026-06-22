@@ -39,12 +39,11 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TM2TableCompiler`: reduce Mathlib's concrete `PartrecToTM2` evaluator
-  configurations to finite table-machine data with the right halting behavior.
-  The Mathlib-code-to-TM2 reduction is already proved. The identifier names
-  emphasize the produced program data; their role in the theorem is the
-  computable reduction, implemented by compilation to finite machine
-  descriptions.
+- `TM2TableCompiler`: the TM2-to-table computable reduction, implemented by
+  compiling Mathlib's concrete `PartrecToTM2` evaluator configurations to
+  finite table-machine data with the right halting behavior. The identifier
+  names emphasize the produced program data; their role in the theorem is the
+  reduction.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
