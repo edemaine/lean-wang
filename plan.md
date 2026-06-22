@@ -62,6 +62,10 @@ Completed proof layers:
   fixed-domino machine-to-Wang construction: for a code `c`, all bounded prefix
   fixed-domino instances tile exactly when `Nat.Partrec.Code.eval c 0` is
   undefined, and this quantified fixed-domino family is undecidable.
+- via compactness, the bounded prefix fixed-domino family has also been pushed
+  to quantified fixed-corner square tilings: for all bounds and all positive
+  square sizes, tileability is equivalent to the same Mathlib nonhalting
+  predicate, and this quantified square-family predicate is undecidable.
 
 The remaining construction obligations are explicit Lean interfaces:
 

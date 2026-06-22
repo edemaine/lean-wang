@@ -328,6 +328,39 @@ theorem codeEvalnFuelPrefixFixedDomino_all_undecidable :
     h.of_eq fun c => codeEvalnFuelPrefixFixedDomino_all_correct c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
+theorem codeEvalnFuelPrefixFixedCorner_all_correct (c : Code) :
+    (∀ bound n : Nat, 0 < n →
+      TileableFixedCornerSquare
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2 n) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  constructor
+  · intro hsquares
+    exact (codeEvalnFuelPrefixFixedDomino_all_correct c).1 fun bound =>
+      (tilesQuarterWithSeed_iff_all_fixedCornerSquares
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).2
+        (hsquares bound)
+  · intro hnonhalting bound n hn
+    exact
+      (tilesQuarterWithSeed_iff_all_fixedCornerSquares
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+        (codeEvalnFuelPrefixFixedDomino (c, bound)).2).1
+        ((codeEvalnFuelPrefixFixedDomino_all_correct c).2 hnonhalting bound)
+        n hn
+
+theorem codeEvalnFuelPrefixFixedCorner_all_undecidable :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ bound n : Nat, 0 < n →
+          TileableFixedCornerSquare
+            (codeEvalnFuelPrefixFixedDomino (c, bound)).1
+            (codeEvalnFuelPrefixFixedDomino (c, bound)).2 n) := by
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => codeEvalnFuelPrefixFixedCorner_all_correct c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (C : TableCompiler) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData (programTable C c)
