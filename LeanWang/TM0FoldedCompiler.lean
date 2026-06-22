@@ -2463,6 +2463,91 @@ theorem activeAbs_foldedMoveHead
     simp_all [foldedMoveNextSide, foldedMoveHead, activeAbs, leftAbs, rightAbs]
     try omega
 
+theorem sourceOffset_foldedMoveHead
+    (side : FoldSide) (head : Nat) (dir : Turing.Dir) (abs : Int) :
+    sourceOffset (foldedMoveNextSide side (decide (head = 0)) dir)
+        (foldedMoveHead side (decide (head = 0)) head dir) abs =
+      sourceOffset side head abs -
+        match dir with
+        | Turing.Dir.left => -1
+        | Turing.Dir.right => 1 := by
+  unfold sourceOffset
+  rw [activeAbs_foldedMoveHead]
+  cases dir <;> omega
+
+theorem foldedCellOfTapeAt_move (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) (head i : Nat) (dir : Turing.Dir) :
+    foldedCellOfTapeAt (T.move dir)
+        (foldedMoveNextSide side (decide (head = 0)) dir)
+        (foldedMoveHead side (decide (head = 0)) head dir) i =
+      foldedCellOfTapeAt T side head i := by
+  cases dir
+  · simp [foldedCellOfTapeAt, sourceOffset_foldedMoveHead]
+  · simp [foldedCellOfTapeAt, sourceOffset_foldedMoveHead]
+
+theorem FoldedTapeRel_move
+    {T : Turing.Tape SourceSymbol} {side : FoldSide} {head : Nat} {tape : Nat → Nat}
+    (dir : Turing.Dir)
+    (hrel : FoldedTapeRel T side head tape) :
+    FoldedTapeRel (T.move dir)
+      (foldedMoveNextSide side (decide (head = 0)) dir)
+      (foldedMoveHead side (decide (head = 0)) head dir) tape := by
+  intro i
+  rw [hrel i, foldedCellOfTapeAt_move]
+
+set_option linter.flexible false in
+theorem FoldedConfigRel_move_step
+    {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    {q' : SourceLabel tc} {dir : Turing.Dir}
+    (hrel : FoldedConfigRel tc cfg id)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc cfg.q cfg.Tape.head =
+        some (q', Turing.TM0.Stmt.move dir)) :
+    FoldedConfigRel tc
+      { q := q', Tape := cfg.Tape.move dir }
+      ((program tc).nextID id) := by
+  rcases hrel with ⟨side, hq, hstate, htape⟩
+  let marked := decide (id.head = 0)
+  let left := cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head))
+  let right := cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))
+  let read := foldedSymbolCode marked left right
+  have hread :
+      foldedRead side left right = cfg.Tape.head := by
+    unfold left right
+    exact foldedRead_active_cell cfg.Tape side id.head
+  have hstep' :
+      TM0Route.partrecStartedTM0Machine tc cfg.q (foldedRead side left right) =
+        some (q', Turing.TM0.Stmt.move dir) := by
+    simpa [hread] using hstep
+  have hcell : id.tape id.head = read := by
+    rw [htape id.head]
+    simp [foldedCellOfTapeAt, marked, left, right, read]
+  have hprogramStep := program_step_sim_of_step
+    (tc := tc) (q := cfg.q) (q' := q') (side := side)
+    (marked := marked) (left := left) (right := right)
+    (stmt := Turing.TM0.Stmt.move dir) hq hstep'
+  have hq'list : q' ∈ TM0Route.partrecStartedTM0LabelList tc := by
+    have hqset : cfg.q ∈ TM0Route.partrecStartedTM0Labels tc :=
+      (TM0Route.mem_partrecStartedTM0LabelList tc cfg.q).1 hq
+    have hq'set : q' ∈ TM0Route.partrecStartedTM0Labels tc :=
+      TM0FiniteCompiler.next_label_mem_of_step hqset hstep
+    exact (TM0Route.mem_partrecStartedTM0LabelList tc q').2 hq'set
+  have htapeApply :
+      (PostProgram.applyStmt (foldedMoveStmt side marked read dir) id.tape id.head).1 =
+        id.tape := by
+    exact foldedMoveStmt_applyStmt_tape side marked read dir hcell
+  have hheadApply :
+      (PostProgram.applyStmt (foldedMoveStmt side marked read dir) id.tape id.head).2 =
+        foldedMoveHead side marked id.head dir := by
+    exact foldedMoveStmt_applyStmt_head side marked read dir id.tape id.head
+  simp [PostProgram.nextID, hstate, hcell, hprogramStep, simRowOfStep, marked, read]
+  refine ⟨foldedMoveNextSide side marked dir, hq'list, ?_, ?_⟩
+  · simp [mkRow, marked]
+  · simpa [mkRow, marked, read, htapeApply, hheadApply]
+      using FoldedTapeRel_move (T := cfg.Tape) (side := side)
+      (head := id.head) (tape := id.tape) dir htape
+
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
     (hrel : FoldedConfigRel tc cfg id) :
