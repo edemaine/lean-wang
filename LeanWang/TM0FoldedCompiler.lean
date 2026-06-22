@@ -254,15 +254,27 @@ theorem mkRow_matchesInput (state read next : Nat) (stmt : PostStmt) :
     (mkRow state read next stmt).matchesInput state read = true := by
   simp [mkRow, PostTransition.matchesInput]
 
+theorem mkRow_matchesInput_of_state_ne {state state' read read' next : Nat}
+    {stmt : PostStmt} (h : state ≠ state') :
+    (mkRow state read next stmt).matchesInput state' read' = false := by
+  simp [mkRow, PostTransition.matchesInput, h]
+
+theorem mkRow_matchesInput_of_read_ne {state read read' next : Nat}
+    {stmt : PostStmt} (h : read ≠ read') :
+    (mkRow state read next stmt).matchesInput state read' = false := by
+  simp [mkRow, PostTransition.matchesInput, h]
+
 /-- First initialization row: mark the origin and write the first input symbol. -/
 def initWriteOriginRow : PostTransition :=
   mkRow initWriteOriginState foldedBlank nextAfterOrigin
     (PostStmt.write (foldedOriginSymbol (inputSymbol 0)))
 
+def initMoveRightRow (i read : Nat) : PostTransition :=
+  mkRow (initMoveRightState i) read (initWriteRightState i) (PostStmt.move Move.right)
+
 def initMoveRightRows : List PostTransition :=
   (List.range (TM0Route.partrecStartedTM0Input.length - 1)).flatMap fun i =>
-    foldedSymbolList.map fun read =>
-      mkRow (initMoveRightState i) read (initWriteRightState i) (PostStmt.move Move.right)
+    foldedSymbolList.map fun read => initMoveRightRow i read
 
 def nextAfterWriteRight (i : Nat) : Nat :=
   if i + 2 < TM0Route.partrecStartedTM0Input.length then
@@ -270,10 +282,13 @@ def nextAfterWriteRight (i : Nat) : Nat :=
   else
     initReturnState (i + 1)
 
+def initWriteRightRow (i : Nat) : PostTransition :=
+  mkRow (initWriteRightState i) foldedBlank (nextAfterWriteRight i)
+    (PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1))))
+
 def initWriteRightRows : List PostTransition :=
   (List.range (TM0Route.partrecStartedTM0Input.length - 1)).map fun i =>
-    mkRow (initWriteRightState i) foldedBlank (nextAfterWriteRight i)
-      (PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1))))
+    initWriteRightRow i
 
 def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
   if i = 0 then
@@ -290,6 +305,79 @@ def initReturnRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
 
 def initRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   initWriteOriginRow :: initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc
+
+theorem initWriteOriginRow_mem_initRows (tc : Turing.ToPartrec.Code) :
+    initWriteOriginRow ∈ initRows tc := by
+  simp [initRows]
+
+theorem initMoveRightRow_mem_initMoveRightRows {i read : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1)
+    (hread : read ∈ foldedSymbolList) :
+    initMoveRightRow i read ∈ initMoveRightRows := by
+  unfold initMoveRightRows
+  rw [List.mem_flatMap]
+  refine ⟨i, List.mem_range.2 hi, ?_⟩
+  exact List.mem_map_of_mem hread
+
+theorem initMoveRightRow_mem_initRows (tc : Turing.ToPartrec.Code) {i read : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1)
+    (hread : read ∈ foldedSymbolList) :
+    initMoveRightRow i read ∈ initRows tc := by
+  unfold initRows
+  simp [initMoveRightRow_mem_initMoveRightRows hi hread]
+
+theorem nextAfterWriteRight_mem_states (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    nextAfterWriteRight i ∈ foldedStateList tc := by
+  unfold nextAfterWriteRight
+  by_cases hnext : i + 2 < TM0Route.partrecStartedTM0Input.length
+  · rw [if_pos hnext]
+    exact initMoveRightState_mem_states (tc := tc) (by omega)
+  · rw [if_neg hnext]
+    exact initReturnState_mem_states (tc := tc) (by omega)
+
+theorem initWriteRightRow_mem_initWriteRightRows {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    initWriteRightRow i ∈ initWriteRightRows := by
+  unfold initWriteRightRows
+  exact List.mem_map_of_mem (List.mem_range.2 hi)
+
+theorem initWriteRightRow_mem_initRows (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    initWriteRightRow i ∈ initRows tc := by
+  unfold initRows
+  simp [initWriteRightRow_mem_initWriteRightRows hi]
+
+theorem initWriteRightRow_write_mem_symbols (i : Nat) :
+    foldedSymbolCode false default (inputSymbol (i + 1)) ∈ foldedSymbolList := by
+  exact foldedSymbolCode_mem_symbols false default (inputSymbol (i + 1))
+
+theorem initReturnRow_mem_initReturnRows (tc : Turing.ToPartrec.Code) {i read : Nat}
+    (hi : i ∈ initReturnIndexList)
+    (hread : read ∈ foldedSymbolList) :
+    initReturnRow tc i read ∈ initReturnRows tc := by
+  unfold initReturnRows
+  rw [List.mem_flatMap]
+  refine ⟨i, hi, ?_⟩
+  exact List.mem_map_of_mem hread
+
+theorem initReturnRow_zero_mem_initRows (tc : Turing.ToPartrec.Code) {read : Nat}
+    (hread : read ∈ foldedSymbolList) :
+    initReturnRow tc 0 read ∈ initRows tc := by
+  unfold initRows
+  apply List.mem_cons_of_mem
+  apply List.mem_append_right
+  exact initReturnRow_mem_initReturnRows tc (by simp [initReturnIndexList]) hread
+
+theorem initReturnRow_mem_initRows_of_lt (tc : Turing.ToPartrec.Code) {i read : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length)
+    (hread : read ∈ foldedSymbolList) :
+    initReturnRow tc i read ∈ initRows tc := by
+  unfold initRows
+  apply List.mem_cons_of_mem
+  apply List.mem_append_right
+  exact initReturnRow_mem_initReturnRows tc
+    (by simp [initReturnIndexList, List.mem_range.2 hi]) hread
 
 /--
 Folded finite one-sided TM0 program header.
