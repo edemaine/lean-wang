@@ -243,8 +243,7 @@ theorem evaluatorSubstateIndex_lt {tc : Turing.ToPartrec.Code}
     {var : Option Turing.PartrecToTM2.Γ'}
     {stmt : Option Turing.PartrecToTM2.Stmt'}
     (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
-    evaluatorSubstateIndex tc var stmt <
-      5 * (PartrecToTM2Support.statementList tc).length := by
+    evaluatorSubstateIndex tc var stmt < 5 * (PartrecToTM2Support.statementList tc).length := by
   have hvar := PartrecToTM2Support.tapeSymbolCode_lt_five var
   have hstmtlt := PartrecToTM2Support.statementIndex_lt_length hstmt
   unfold evaluatorSubstateIndex
@@ -254,18 +253,52 @@ theorem evaluatorSubstateIndex_lt {tc : Turing.ToPartrec.Code}
       rw [← Nat.succ_mul]
       exact Nat.mul_le_mul_right _ (Nat.succ_le_of_lt hvar))
 
+/-- Number of finite evaluator substates before auxiliary stack-action states. -/
+def evaluatorStateCount (tc : Turing.ToPartrec.Code) : Nat :=
+  5 * (PartrecToTM2Support.statementList tc).length
+
+/-- Finite auxiliary states currently reserved for `peek` stack actions. -/
+def peekAuxStateCount (tc : Turing.ToPartrec.Code) : Nat :=
+  evaluatorStateCount tc * 4
+
+/-- Total number of non-initial table-machine state codes currently reserved. -/
+def stateCount (tc : Turing.ToPartrec.Code) : Nat :=
+  evaluatorStateCount tc + peekAuxStateCount tc
+
+theorem evaluatorSubstateIndex_lt_stateCount {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    evaluatorSubstateIndex tc var stmt < stateCount tc := by
+  unfold stateCount evaluatorStateCount
+  exact lt_of_lt_of_le (evaluatorSubstateIndex_lt hstmt) (Nat.le_add_right _ _)
+
 /-- Finite table-machine states for the TM2 evaluator substates. -/
 def evaluatorStates (tc : Turing.ToPartrec.Code) : List Nat :=
-  (List.range (5 * (PartrecToTM2Support.statementList tc).length)).map evaluatorStateCode
+  (List.range (evaluatorStateCount tc)).map evaluatorStateCode
 
-/-- Raw finite table-machine state list, including the initialization state. -/
+/-- Raw finite table-machine state list, including initialization and auxiliary states. -/
 def states (tc : Turing.ToPartrec.Code) : List Nat :=
-  initState :: evaluatorStates tc
+  initState :: (List.range (stateCount tc)).map evaluatorStateCode
 
 theorem states_nodup (tc : Turing.ToPartrec.Code) :
     (states tc).Nodup := by
-  unfold states evaluatorStates evaluatorStateCode initState
+  unfold states evaluatorStateCode initState
   simp [List.nodup_range.map (by intro a b h; exact Nat.succ.inj h)]
+
+theorem evaluatorStateCode_mem_states {tc : Turing.ToPartrec.Code} {n : Nat}
+    (hn : n < stateCount tc) :
+    evaluatorStateCode n ∈ states tc := by
+  unfold states evaluatorStateCode
+  simp [hn]
+
+theorem statementState_mem_states {tc : Turing.ToPartrec.Code}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    statementState tc var stmt ∈ states tc := by
+  unfold statementState
+  exact evaluatorStateCode_mem_states (evaluatorSubstateIndex_lt_stateCount hstmt)
 
 /-- Table-machine state that starts the TM2 evaluator after initialization. -/
 noncomputable def evalStartState (tc : Turing.ToPartrec.Code) : Nat :=
@@ -281,31 +314,84 @@ theorem initState_mem_states (tc : Turing.ToPartrec.Code) :
 
 theorem evalStartState_mem_states (tc : Turing.ToPartrec.Code) :
     evalStartState tc ∈ states tc := by
-  unfold evalStartState statementState states evaluatorStates evaluatorStateCode
-  simp [evaluatorSubstateIndex_lt
+  exact statementState_mem_states
     (PartrecToTM2Support.label_statement_mem_list
-      (PartrecToTM2Support.startLabel_mem_labelList tc))]
+      (PartrecToTM2Support.startLabel_mem_labelList tc))
 
 theorem haltState_mem_states (tc : Turing.ToPartrec.Code) :
     haltState tc ∈ states tc := by
-  unfold haltState statementState states evaluatorStates evaluatorStateCode
-  simp [evaluatorSubstateIndex_lt (PartrecToTM2Support.none_mem_statementList tc)]
+  exact statementState_mem_states (PartrecToTM2Support.none_mem_statementList tc)
 
 theorem labelState_mem_states {tc : Turing.ToPartrec.Code}
     {q : Turing.PartrecToTM2.Λ'}
     {var : Option Turing.PartrecToTM2.Γ'}
     (hq : q ∈ PartrecToTM2Support.labels tc) :
     statementState tc var (some (Turing.PartrecToTM2.tr q)) ∈ states tc := by
-  unfold statementState states evaluatorStates evaluatorStateCode
-  simp [evaluatorSubstateIndex_lt (PartrecToTM2Support.label_statement_mem_list_of_label_mem hq)]
+  exact statementState_mem_states (PartrecToTM2Support.label_statement_mem_list_of_label_mem hq)
 
-theorem statementState_mem_states {tc : Turing.ToPartrec.Code}
-    {stmt : Option Turing.PartrecToTM2.Stmt'}
+/-- Shift an auxiliary substate index into the table-machine state namespace. -/
+noncomputable def auxStateCode (tc : Turing.ToPartrec.Code) (n : Nat) : Nat :=
+  evaluatorStateCode (evaluatorStateCount tc + n)
+
+/-- Auxiliary state index for moving to or from a stack's top cell during `peek`. -/
+noncomputable def peekAuxIndex (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt') (offset : Nat) : Nat :=
+  evaluatorSubstateIndex tc var (some stmt) * 4 + offset
+
+/-- Auxiliary table-machine state reserved for a `peek` microprogram. -/
+noncomputable def peekAuxState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt') (offset : Nat) : Nat :=
+  auxStateCode tc (peekAuxIndex tc var stmt offset)
+
+theorem peekAuxIndex_lt_count {tc : Turing.ToPartrec.Code}
     {var : Option Turing.PartrecToTM2.Γ'}
-    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
-    statementState tc var stmt ∈ states tc := by
-  unfold statementState states evaluatorStates evaluatorStateCode
-  simp [evaluatorSubstateIndex_lt hstmt]
+    {stmt : Turing.PartrecToTM2.Stmt'} {offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    peekAuxIndex tc var stmt offset < peekAuxStateCount tc := by
+  have hidx : evaluatorSubstateIndex tc var (some stmt) < evaluatorStateCount tc := by
+    simpa [evaluatorStateCount] using evaluatorSubstateIndex_lt hstmt
+  unfold peekAuxIndex peekAuxStateCount
+  omega
+
+theorem peekAuxState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    peekAuxState tc var stmt offset ∈ states tc := by
+  unfold peekAuxState auxStateCode
+  apply evaluatorStateCode_mem_states
+  have hpeek := peekAuxIndex_lt_count (tc := tc) (var := var) (stmt := stmt)
+    (offset := offset) hstmt hoffset
+  unfold stateCount
+  omega
+
+theorem peekAuxState0_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {stmt : Turing.PartrecToTM2.Stmt'}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    peekAuxState tc var stmt 0 ∈ states tc :=
+  peekAuxState_mem_states hstmt (by decide : 0 < 4)
+
+theorem peekAuxState1_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {stmt : Turing.PartrecToTM2.Stmt'}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    peekAuxState tc var stmt 1 ∈ states tc :=
+  peekAuxState_mem_states hstmt (by decide : 1 < 4)
+
+theorem peekAuxState2_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {stmt : Turing.PartrecToTM2.Stmt'}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    peekAuxState tc var stmt 2 ∈ states tc :=
+  peekAuxState_mem_states hstmt (by decide : 2 < 4)
+
+theorem peekAuxState3_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {stmt : Turing.PartrecToTM2.Stmt'}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    peekAuxState tc var stmt 3 ∈ states tc :=
+  peekAuxState_mem_states hstmt (by decide : 3 < 4)
 
 /-- Encoded control state for a TM2 statement microstate. -/
 noncomputable def encodedStmtState (tc : Turing.ToPartrec.Code)

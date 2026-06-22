@@ -135,6 +135,10 @@ Completed proof layers:
   for the affected interleaved stack column and the untouched columns. These
   are the stack-shift specifications that the future moving transition rows
   must realize.
+- the finite table-machine state space now reserves auxiliary state codes after
+  the evaluator state block. The first reserved block is for `peek` stack
+  actions, indexed by local variable, originating statement substate, and one
+  of four stack-column offsets, with membership lemmas for offsets `0..3`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
