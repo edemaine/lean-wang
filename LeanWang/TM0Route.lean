@@ -391,6 +391,27 @@ theorem mem_partrecStartedTM2Labels (tc : Turing.ToPartrec.Code)
     cases q
     rfl
 
+/-- Executable list-valued support for the code-specific started TM2 labels. -/
+def partrecStartedTM2LabelList (tc : Turing.ToPartrec.Code) : List (StartedLabel tc) :=
+  (PartrecToTM2SupportList.labelList tc).map (StartedLabel.wrap tc)
+
+theorem mem_partrecStartedTM2LabelList (tc : Turing.ToPartrec.Code)
+    (q : StartedLabel tc) :
+    q ∈ partrecStartedTM2LabelList tc ↔ q ∈ partrecStartedTM2Labels tc := by
+  constructor
+  · intro h
+    rw [partrecStartedTM2LabelList, List.mem_map] at h
+    rcases h with ⟨r, hr, hq⟩
+    cases hq
+    exact (mem_partrecStartedTM2Labels tc (StartedLabel.wrap tc r)).2
+      (PartrecToTM2SupportList.mem_labelList_iff.1 hr)
+  · intro h
+    refine List.mem_map.2 ⟨q.val, ?_, ?_⟩
+    · exact PartrecToTM2SupportList.mem_labelList_iff.2
+        ((mem_partrecStartedTM2Labels tc q).1 h)
+    · cases q
+      rfl
+
 theorem partrecStartedTM2_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM2.Supports (partrecStartedTM2 tc) (partrecStartedTM2Labels tc) := by
   constructor
@@ -558,9 +579,8 @@ theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
 /-- List-valued support for the started TM1 machine obtained from the TM2-to-TM1 translation. -/
 def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
-  (PartrecToTM2SupportList.labelList tc).flatMap fun q =>
-    let q' := StartedLabel.wrap tc q
-    Turing.TM2to1.Λ'.normal q' :: tm2to1StmtSupportList (partrecStartedTM2 tc q')
+  (partrecStartedTM2LabelList tc).flatMap fun q =>
+    Turing.TM2to1.Λ'.normal q :: tm2to1StmtSupportList (partrecStartedTM2 tc q)
 
 theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     (q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :
@@ -574,11 +594,10 @@ theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     unfold partrecStartedTM1Labels
     rw [List.mem_flatMap] at h
     rcases h with ⟨r, hr, hq⟩
-    have hrlabels : StartedLabel.wrap tc r ∈ partrecStartedTM2Labels tc :=
-      (mem_partrecStartedTM2Labels tc (StartedLabel.wrap tc r)).2
-        (PartrecToTM2SupportList.mem_labelList_iff.1 hr)
+    have hrlabels : r ∈ partrecStartedTM2Labels tc :=
+      (mem_partrecStartedTM2LabelList tc r).1 hr
     simp only [Turing.TM2to1.trSupp, Finset.mem_biUnion]
-    refine ⟨StartedLabel.wrap tc r, hrlabels, ?_⟩
+    refine ⟨r, hrlabels, ?_⟩
     simp only [List.mem_cons] at hq
     rcases hq with hq | hq
     · exact Finset.mem_insert.2 (Or.inl hq)
@@ -588,13 +607,8 @@ theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     unfold partrecStartedTM1LabelList partrecStartedTM1Labels at *
     simp only [Turing.TM2to1.trSupp, Finset.mem_biUnion] at h
     rcases h with ⟨r, hr, hq⟩
-    rcases (mem_partrecStartedTM2Labels tc r).1 hr with hrlabels
     refine List.mem_flatMap.2
-      ⟨r.val, PartrecToTM2SupportList.mem_labelList_iff.2 hrlabels, ?_⟩
-    have hwrap : StartedLabel.wrap tc r.val = r := by
-      cases r
-      rfl
-    rw [← hwrap] at hq
+      ⟨r, (mem_partrecStartedTM2LabelList tc r).2 hr, ?_⟩
     simp only [List.mem_cons]
     rcases Finset.mem_insert.1 hq with hq | hq
     · exact Or.inl hq

@@ -201,12 +201,12 @@ also have injective numeric codes and a numeric symbol list for the eventual
 
 `PartrecToTM2SupportList` now provides executable list mirrors of Mathlib's
 `trStmts₁`, `codeSupp'`, `contSupp`, and `codeSupp` finsets, with membership
-equivalence to the current support sets. The TM0 route's code-dependent
-downstream label enumeration now uses this explicit recursive support list
-instead of `Finset.toList`; the resulting translated TM0 label list, support
-list, numeric state list, and state code are executable. This isolates the next
-computability step: prove or package computability of the folded program
-compiler itself.
+equivalence to the current support sets. The TM0 route now has an executable
+started-TM2 label list and uses this explicit recursive support list instead
+of `Finset.toList` for downstream label enumeration; the resulting translated
+TM0 label list, support list, numeric state list, and state code are
+executable. This isolates the next computability step: prove or package
+computability of the folded program compiler itself.
 
 The old direct finite-program construction from this route data has been
 removed because it was not the right semantic bridge: Mathlib TM0 has a
