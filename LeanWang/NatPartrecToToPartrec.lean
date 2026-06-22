@@ -73,6 +73,36 @@ theorem rfindBody_fix_fwd {test : Code} {n m a k : Nat} {v : List Nat}
   refine PFun.mem_fix_iff.2 (Or.inr ⟨[n.succ, m, a], ?_, hnext⟩)
   simp [rfindBody_eval_succ htest]
 
+theorem rfindBody_fix_of_first_zeroFrom {test : Code} {a m : Nat}
+    (start len : Nat)
+    (hzero : test.eval [Nat.pair a ((start + len) + m)] = pure [0])
+    (hprev : ∀ i : Nat, i < len →
+      ∃ k : Nat, test.eval [Nat.pair a ((start + i) + m)] = pure [k.succ]) :
+    [start + len, m, a] ∈ (Code.fix (rfindBody test)).eval [start, m, a] := by
+  induction len generalizing start with
+  | zero =>
+      simpa using rfindBody_fix_stop (test := test) (n := start) (m := m) (a := a)
+        (by simpa using hzero)
+  | succ len IH =>
+      rcases hprev 0 (Nat.zero_lt_succ len) with ⟨k, hstart⟩
+      have hnext :
+          [start.succ + len, m, a] ∈
+            (Code.fix (rfindBody test)).eval [start.succ, m, a] := by
+        refine IH start.succ ?_ ?_
+        · simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+            using hzero
+        · intro i hi
+          rcases hprev (i.succ) (Nat.succ_lt_succ hi) with ⟨k', hk'⟩
+          refine ⟨k', ?_⟩
+          simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+            using hk'
+      have hstep :
+          [start.succ + len, m, a] ∈
+            (Code.fix (rfindBody test)).eval [start, m, a] :=
+        rfindBody_fix_fwd (test := test) (n := start) (m := m) (a := a) (k := k)
+          (by simpa [Nat.add_assoc] using hstart) hnext
+      simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstep
+
 /--
 Implementation of the `Nat.Partrec.Code.rfind'` constructor from a translated
 predicate.
