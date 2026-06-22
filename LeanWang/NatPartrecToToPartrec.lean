@@ -493,6 +493,37 @@ theorem precRun_of_precG_fix_mem {g : Code} {a i b ih x : Nat}
         have hrun : precRun g a i.succ b y x := IH (i := i.succ) (ih := y) hnext'
         exact ⟨y, hy, hrun⟩
 
+theorem precG_fix_mem_trace {g : Code} {a i b ih : Nat} {out : List Nat}
+    (hsingle : ∀ i ih, ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hfix : out ∈ (Code.fix (precG g)).eval [i, b, ih, a]) :
+    ∃ x : Nat, out = [i + b.succ, 0, x, a] ∧ precRun g a i b ih x := by
+  induction b generalizing i ih with
+  | zero =>
+      rw [Turing.ToPartrec.Code.fix_eval] at hfix
+      change out ∈ PFun.fix (precGStep g) [i, 0, ih, a] at hfix
+      rcases PFun.mem_fix_iff.1 hfix with hstop | ⟨next, hfwd, _hnext⟩
+      · rcases precGStep_stop_shape (g := g) (i := i) (ih := ih) (a := a)
+            (hsingle i ih) hstop with ⟨x, hout, hx⟩
+        exact ⟨x, by simpa using hout, by simpa [precRun] using hx⟩
+      · exact (precGStep_no_fwd_zero (g := g) (i := i) (ih := ih) (a := a)
+          (hsingle i ih) hfwd).elim
+  | succ b IH =>
+      rw [Turing.ToPartrec.Code.fix_eval] at hfix
+      change out ∈ PFun.fix (precGStep g) [i, b.succ, ih, a] at hfix
+      rcases PFun.mem_fix_iff.1 hfix with hstop | ⟨next, hfwd, hnext⟩
+      · exact (precGStep_no_stop_succ (g := g) (i := i) (b := b) (ih := ih) (a := a)
+          (hsingle i ih) hstop).elim
+      · rcases precGStep_fwd_shape (g := g) (i := i) (b := b) (ih := ih) (a := a)
+            (hsingle i ih) hfwd with ⟨y, hnext_eq, hy⟩
+        have hnext' : out ∈ (Code.fix (precG g)).eval [i.succ, b, y, a] := by
+          rw [Turing.ToPartrec.Code.fix_eval]
+          change out ∈ PFun.fix (precGStep g) [i.succ, b, y, a]
+          simpa [hnext_eq] using hnext
+        rcases IH (i := i.succ) (ih := y) hnext' with ⟨x, hout, hrun⟩
+        refine ⟨x, ?_, ⟨y, hy, hrun⟩⟩
+        simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+          using hout
+
 set_option linter.flexible false in
 theorem precRun_snoc {g : Code} {a i b ih y x : Nat}
     (hrun : precRun g a i b ih y)
@@ -520,6 +551,26 @@ theorem prec_mem_of_precRun {f g : Code} {a k base x : Nat}
   rw [prec_eq]
   simp [hbase]
   exact ⟨[k.succ, 0, x, a], hfix, by simp⟩
+
+set_option linter.flexible false in
+theorem precRun_of_prec_mem {f g : Code} {a k x : Nat}
+    (hsingleF : ∀ v : List Nat, v ∈ f.eval [a] → ∃ base : Nat, v = [base])
+    (hsingleG : ∀ i ih, ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hv : [x] ∈ (Code.prec f g).eval [k.succ, a]) :
+    ∃ base : Nat, [base] ∈ f.eval [a] ∧ precRun g a 0 k base x := by
+  rw [prec_eq] at hv
+  simp at hv
+  rcases hv with ⟨baseOut, final, ⟨hbaseOut, hfix⟩, hx⟩
+  rcases hsingleF baseOut hbaseOut with ⟨base, rfl⟩
+  have hfix' : final ∈ (Code.fix (precG g)).eval [0, k, base, a] := by
+    rw [Turing.ToPartrec.Code.fix_eval]
+    change final ∈ PFun.fix (precGStep g) [0, k, base, a]
+    exact hfix
+  rcases precG_fix_mem_trace (g := g) (a := a) (i := 0) (b := k) (ih := base)
+      hsingleG hfix' with ⟨y, hfinal, hrun⟩
+  have hxy : x = y := by
+    simpa [hfinal] using hx
+  exact ⟨base, hbaseOut, by simpa [hxy] using hrun⟩
 
 end TCode
 
