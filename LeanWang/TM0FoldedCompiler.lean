@@ -156,7 +156,7 @@ def foldedSimStartState (tc : Turing.ToPartrec.Code) : Nat :=
   foldedSimStateCode tc FoldSide.right default
 
 def foldedInitStateList : List Nat :=
-  [initWriteOriginState] ++
+  [initWriteOriginState, initReturnState 0] ++
     (List.range TM0Route.partrecStartedTM0Input.length).flatMap fun i =>
       [initMoveRightState i, initWriteRightState i, initReturnState i]
 
@@ -170,6 +170,40 @@ def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
 theorem foldedStartState_mem_states (tc : Turing.ToPartrec.Code) :
     foldedStartState ∈ foldedStateList tc := by
   simp [foldedStateList, foldedInitStateList, foldedStartState, initWriteOriginState]
+
+theorem initReturnState_zero_mem_states (tc : Turing.ToPartrec.Code) :
+    initReturnState 0 ∈ foldedStateList tc := by
+  simp [foldedStateList, foldedInitStateList]
+
+theorem initMoveRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length) :
+    initMoveRightState i ∈ foldedStateList tc := by
+  unfold foldedStateList foldedInitStateList
+  apply List.mem_append_left
+  apply List.mem_append_right
+  rw [List.mem_flatMap]
+  refine ⟨i, List.mem_range.2 hi, ?_⟩
+  simp
+
+theorem initWriteRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length) :
+    initWriteRightState i ∈ foldedStateList tc := by
+  unfold foldedStateList foldedInitStateList
+  apply List.mem_append_left
+  apply List.mem_append_right
+  rw [List.mem_flatMap]
+  refine ⟨i, List.mem_range.2 hi, ?_⟩
+  simp
+
+theorem initReturnState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length) :
+    initReturnState i ∈ foldedStateList tc := by
+  unfold foldedStateList foldedInitStateList
+  apply List.mem_append_left
+  apply List.mem_append_right
+  rw [List.mem_flatMap]
+  refine ⟨i, List.mem_range.2 hi, ?_⟩
+  simp
 
 theorem default_mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
     (default : SourceLabel tc) ∈ TM0Route.partrecStartedTM0LabelList tc := by
@@ -192,19 +226,84 @@ theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
   exact foldedSimStateCode_mem_states tc FoldSide.right
     (default_mem_partrecStartedTM0LabelList tc)
 
+def inputSymbol (i : Nat) : SourceSymbol :=
+  TM0Route.partrecStartedTM0Input.getI i
+
+def nextAfterOrigin : Nat :=
+  if TM0Route.partrecStartedTM0Input.length ≤ 1 then
+    initReturnState 0
+  else
+    initMoveRightState 0
+
+theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
+    nextAfterOrigin ∈ foldedStateList tc := by
+  unfold nextAfterOrigin
+  by_cases h : TM0Route.partrecStartedTM0Input.length ≤ 1
+  · simp [h, initReturnState_zero_mem_states tc]
+  · have hlen : 0 < TM0Route.partrecStartedTM0Input.length := by omega
+    simp [h, initMoveRightState_mem_states (tc := tc) hlen]
+
+def mkRow (state read next : Nat) (stmt : PostStmt) : PostTransition where
+  state := state
+  read := read
+  next := next
+  stmt := stmt
+
+@[simp]
+theorem mkRow_matchesInput (state read next : Nat) (stmt : PostStmt) :
+    (mkRow state read next stmt).matchesInput state read = true := by
+  simp [mkRow, PostTransition.matchesInput]
+
+/-- First initialization row: mark the origin and write the first input symbol. -/
+def initWriteOriginRow : PostTransition :=
+  mkRow initWriteOriginState foldedBlank nextAfterOrigin
+    (PostStmt.write (foldedOriginSymbol (inputSymbol 0)))
+
+def initMoveRightRows : List PostTransition :=
+  (List.range (TM0Route.partrecStartedTM0Input.length - 1)).flatMap fun i =>
+    foldedSymbolList.map fun read =>
+      mkRow (initMoveRightState i) read (initWriteRightState i) (PostStmt.move Move.right)
+
+def nextAfterWriteRight (i : Nat) : Nat :=
+  if i + 2 < TM0Route.partrecStartedTM0Input.length then
+    initMoveRightState (i + 1)
+  else
+    initReturnState (i + 1)
+
+def initWriteRightRows : List PostTransition :=
+  (List.range (TM0Route.partrecStartedTM0Input.length - 1)).map fun i =>
+    mkRow (initWriteRightState i) foldedBlank (nextAfterWriteRight i)
+      (PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1))))
+
+def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
+  if i = 0 then
+    mkRow (initReturnState 0) read (foldedSimStartState tc) (PostStmt.write read)
+  else
+    mkRow (initReturnState i) read (initReturnState (i - 1)) (PostStmt.move Move.left)
+
+def initReturnIndexList : List Nat :=
+  0 :: List.range TM0Route.partrecStartedTM0Input.length
+
+def initReturnRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
+  initReturnIndexList.flatMap fun i =>
+    foldedSymbolList.map fun read => initReturnRow tc i read
+
+def initRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
+  initWriteOriginRow :: initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc
+
 /--
 Folded finite one-sided TM0 program header.
 
-The transition table is intentionally empty in this chunk. The next layer will
-add the initialization rows and the folded simulation rows over
-`foldedSymbolList` and `foldedStateList`.
+The transition table currently contains the initialization prelude. The next
+layer will append folded simulation rows over `foldedSymbolList` and
+`foldedStateList`.
 -/
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
   states := foldedStateList tc
   blank := foldedBlank
   start := foldedStartState
-  table := []
+  table := initRows tc
 
 @[simp]
 theorem programHeader_symbols (tc : Turing.ToPartrec.Code) :
@@ -224,7 +323,7 @@ theorem programHeader_start (tc : Turing.ToPartrec.Code) :
 
 @[simp]
 theorem programHeader_table (tc : Turing.ToPartrec.Code) :
-    (programHeader tc).table = [] := rfl
+    (programHeader tc).table = initRows tc := rfl
 
 theorem programHeader_blank_mem_symbols (tc : Turing.ToPartrec.Code) :
     (programHeader tc).blank ∈ (programHeader tc).symbols := by
@@ -233,6 +332,21 @@ theorem programHeader_blank_mem_symbols (tc : Turing.ToPartrec.Code) :
 theorem programHeader_start_mem_states (tc : Turing.ToPartrec.Code) :
     (programHeader tc).start ∈ (programHeader tc).states := by
   simp [foldedStartState_mem_states tc]
+
+theorem programHeader_transition?_start_blank (tc : Turing.ToPartrec.Code) :
+    (programHeader tc).transition? foldedStartState foldedBlank =
+      some initWriteOriginRow := by
+  simp [PostProgram.transition?, initRows, initWriteOriginRow, foldedStartState]
+
+theorem programHeader_step_start_blank (tc : Turing.ToPartrec.Code) :
+    (programHeader tc).step foldedStartState foldedBlank =
+      some (nextAfterOrigin, PostStmt.write (foldedOriginSymbol (inputSymbol 0))) := by
+  have hfind := programHeader_transition?_start_blank tc
+  have hnext : nextAfterOrigin ∈ foldedStateList tc :=
+    nextAfterOrigin_mem_states tc
+  have hwrite : foldedOriginSymbol (inputSymbol 0) ∈ foldedSymbolList :=
+    foldedOriginSymbol_mem_symbols (inputSymbol 0)
+  simp [PostProgram.step, hfind, initWriteOriginRow, mkRow, hnext, hwrite]
 
 end TM0FoldedCompiler
 
