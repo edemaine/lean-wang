@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Compactness
+import LeanWang.FiniteSearchProgram
 import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
@@ -70,6 +71,43 @@ theorem codeEvalnHalts_primrec :
     Primrec fun a : (Nat × Code) × Nat => codeEvalnHalts a.1.2 a.2 a.1.1 := by
   simpa [codeEvalnHalts] using
     Primrec.option_isSome.comp Nat.Partrec.Code.primrec_evaln
+
+/--
+The bounded list of evaluator outcomes for a code on input `0`, tested at
+fuels below `bound`.
+-/
+def codeEvalnFuelPrefix (c : Code) (bound : Nat) : List Bool :=
+  FiniteSearchProgram.fuelPrefixParam (fun c k => codeEvalnHalts c 0 k) c bound
+
+theorem codeEvalnFuelPrefix_primrec :
+    Primrec (fun p : Code × Nat => codeEvalnFuelPrefix p.1 p.2) := by
+  unfold codeEvalnFuelPrefix
+  refine FiniteSearchProgram.fuelPrefixParam_primrec ?_
+  exact codeEvalnHalts_primrec.comp
+    (Primrec.pair (Primrec.pair Primrec.snd Primrec.fst) (Primrec.const 0))
+
+/--
+The finite-search table program that tests `codeEvalnHalts c 0 k` for all
+`k < bound`.
+-/
+def codeEvalnFuelPrefixProgram (p : Code × Nat) : TableProgram :=
+  FiniteSearchProgram.program (codeEvalnFuelPrefix p.1 p.2)
+
+theorem codeEvalnFuelPrefixProgram_primrec :
+    Primrec codeEvalnFuelPrefixProgram := by
+  unfold codeEvalnFuelPrefixProgram
+  exact FiniteSearchProgram.program_primrec.comp codeEvalnFuelPrefix_primrec
+
+theorem codeEvalnFuelPrefixProgram_computable :
+    Computable codeEvalnFuelPrefixProgram :=
+  codeEvalnFuelPrefixProgram_primrec.to_comp
+
+theorem codeEvalnFuelPrefixProgram_correct (c : Code) (bound : Nat) :
+    Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine ↔
+      ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
+  unfold codeEvalnFuelPrefixProgram codeEvalnFuelPrefix
+  exact FiniteSearchProgram.program_fuelPrefixParam_correct
+    (fun c k => codeEvalnHalts c 0 k) c bound
 
 theorem codeEvaln_nonhalting_undecidable :
     ¬ ComputablePred (fun c : Code => ¬ ∃ k : Nat, codeEvalnHalts c 0 k = true) := by

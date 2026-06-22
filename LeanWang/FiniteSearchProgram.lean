@@ -367,6 +367,26 @@ theorem program_fuelPrefix_correct (P : Nat → Bool) (bound : Nat) :
       ∃ k : Nat, k < bound ∧ P k = true := by
   rw [program_correct, true_mem_fuelPrefix_iff]
 
+/-- A bounded fuel-search prefix for a parameterized Boolean predicate. -/
+def fuelPrefixParam {α : Type} (P : α → Nat → Bool) (a : α) (bound : Nat) :
+    List Bool :=
+  fuelPrefix (P a) bound
+
+theorem fuelPrefixParam_primrec {α : Type} [Primcodable α] {P : α → Nat → Bool}
+    (hP : Primrec fun p : α × Nat => P p.1 p.2) :
+    Primrec (fun p : α × Nat => fuelPrefixParam P p.1 p.2) := by
+  unfold fuelPrefixParam fuelPrefix
+  have hmap : Primrec₂ fun p : α × Nat => fun k : Nat => P p.1 k := by
+    apply Primrec₂.mk
+    exact hP.comp (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)
+  exact Primrec.list_map (Primrec.list_range.comp Primrec.snd) hmap
+
+theorem program_fuelPrefixParam_correct {α : Type} (P : α → Nat → Bool)
+    (a : α) (bound : Nat) :
+    (program (fuelPrefixParam P a bound)).toMachine.HaltsEmpty ↔
+      ∃ k : Nat, k < bound ∧ P a k = true := by
+  exact program_fuelPrefix_correct (P a) bound
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
