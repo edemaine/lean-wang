@@ -262,6 +262,12 @@ from both the direct TM2 factorization and the TM0/Post factorization using the
 concrete code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is
 now proved concretely by `startedTM2ToPartrecReduction`.
 
+The data-level compiler `PostProgram.toTableProgram` is now in place for the
+temporary `PostTableReduction` route. A Post `move` compiles to one table row.
+A Post `write` compiles to a write-and-move-right row followed by finite
+return-left rows. Generated row targets and written symbols are proved to lie in
+the compiled table supports.
+
 Next implementation targets:
 
 1. Build a concrete `TM0PostCompiler`: compile the finite portion of the
@@ -269,9 +275,10 @@ Next implementation targets:
    The main semantic issue is the two-sided Mathlib TM0 tape versus the
    one-sided local model; handle this either by a folding reduction to one-sided
    Post/TM0 or by replacing the tile layer with a two-sided Post/TM0 simulation.
-2. Either prove the small `PostTableReduction` bridge to reuse the existing
-   table-machine tiles, or replace the current machine tiles by direct
-   Post-machine tiles.
+2. Prove the `PostTableReduction` correctness theorem for
+   `PostProgram.toTableProgram`, or replace the current machine tiles by direct
+   Post-machine tiles. The data-level compiler is in place; the remaining
+   bridge work is the halting-equivalence proof.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 4. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those

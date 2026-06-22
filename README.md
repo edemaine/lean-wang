@@ -19,7 +19,8 @@ the concrete definitions needed for the Berger/Robinson route:
   concrete machine.
 - `LeanWang.PostMachine`: a one-sided Post/TM0-style finite program model whose
   instructions either move or write, matching Mathlib TM0 more closely than the
-  older table model.
+  older table model. It also contains the data-level compiler to `TableProgram`
+  used by the temporary bridge to the existing Wang-tile layer.
 - `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
   `Turing.ToPartrec.Code`.
 - `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
