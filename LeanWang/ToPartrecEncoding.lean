@@ -191,6 +191,35 @@ instance instPrimcodableLocalAction : Primcodable (Option Γ' → Option Γ') :=
     (Option Γ' × Option Γ' × Option Γ' × Option Γ' × Option Γ')
     localActionEquivTuple
 
+namespace Λ'
+
+/--
+Finite branch tables for `Λ'.read`, encoded by their five target labels on
+`none` and the four stack symbols.
+-/
+def readBranchEquivTuple :
+    (Option Γ' → Λ') ≃ Λ' × Λ' × Λ' × Λ' × Λ' where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+end Λ'
+
 namespace Cont'
 
 /-- An encoding of `Turing.PartrecToTM2.Cont'` as a natural number. -/
