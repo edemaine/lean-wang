@@ -350,6 +350,11 @@ theorem precG_eval {g : Code} {i b ih a x : Nat}
     (precG g).eval [i, b, ih, a] = pure [b, i.succ, b.pred, x, a] := by
   simp [precG, hg]
 
+/-- The partial step function used by `Code.fix (precG g)`. -/
+def precGStep (g : Code) (v : List Nat) : Part (List Nat ⊕ List Nat) :=
+  ((precG g).eval v).map fun out =>
+    if out.headI = 0 then Sum.inl out.tail else Sum.inr out.tail
+
 theorem precG_fix_stop {g : Code} {i ih a x : Nat}
     (hg : g.eval [i, ih, a] = pure [x]) :
     [i.succ, 0, x, a] ∈ (Code.fix (precG g)).eval [i, 0, ih, a] := by
@@ -364,6 +369,38 @@ theorem precG_fix_fwd {g : Code} {i b ih a x : Nat} {v : List Nat}
   rw [Turing.ToPartrec.Code.fix_eval] at hnext ⊢
   refine PFun.mem_fix_iff.2 (Or.inr ⟨[i.succ, b, x, a], ?_, hnext⟩)
   simp [precG_eval hg]
+
+set_option linter.flexible false in
+theorem precGStep_stop_shape {g : Code} {i ih a : Nat} {out : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hstop : Sum.inl out ∈ precGStep g [i, 0, ih, a]) :
+    ∃ x : Nat, out = [i.succ, 0, x, a] ∧ [x] ∈ g.eval [i, ih, a] := by
+  unfold precGStep at hstop
+  rw [Part.mem_map_iff] at hstop
+  rcases hstop with ⟨w, hw, hwmap⟩
+  simp [precG] at hw
+  rcases hw with ⟨gv, hgv, hw⟩
+  rcases hsingle gv hgv with ⟨x, rfl⟩
+  simp at hw
+  subst w
+  simp at hwmap
+  exact ⟨x, by simpa using hwmap.symm, hgv⟩
+
+set_option linter.flexible false in
+theorem precGStep_fwd_shape {g : Code} {i b ih a : Nat} {next : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hfwd : Sum.inr next ∈ precGStep g [i, b.succ, ih, a]) :
+    ∃ x : Nat, next = [i.succ, b, x, a] ∧ [x] ∈ g.eval [i, ih, a] := by
+  unfold precGStep at hfwd
+  rw [Part.mem_map_iff] at hfwd
+  rcases hfwd with ⟨w, hw, hwmap⟩
+  simp [precG] at hw
+  rcases hw with ⟨gv, hgv, hw⟩
+  rcases hsingle gv hgv with ⟨x, rfl⟩
+  simp at hw
+  subst w
+  simp at hwmap
+  exact ⟨x, by simpa using hwmap.symm, hgv⟩
 
 /-- Successful traces through the internal loop used by `Code.prec`. -/
 def precRun (g : Code) (a : Nat) : Nat → Nat → Nat → Nat → Prop
