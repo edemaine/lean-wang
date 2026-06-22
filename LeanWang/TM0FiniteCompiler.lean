@@ -211,6 +211,38 @@ theorem programHeader_start_mem_states (tc : Turing.ToPartrec.Code) :
     (programHeader tc).start ∈ (programHeader tc).states := by
   simp [TM0Route.partrecStartedTM0Start_mem_states]
 
+/-- Candidate finite one-sided TM0 program produced by the Mathlib TM0 route. -/
+def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
+  programHeader tc
+
+@[simp]
+theorem program_symbols (tc : Turing.ToPartrec.Code) :
+    (program tc).symbols = TM0Route.partrecStartedTM0Symbols := rfl
+
+@[simp]
+theorem program_states (tc : Turing.ToPartrec.Code) :
+    (program tc).states = TM0Route.partrecStartedTM0States tc := rfl
+
+@[simp]
+theorem program_blank (tc : Turing.ToPartrec.Code) :
+    (program tc).blank = TM0Route.partrecStartedTM0Blank := rfl
+
+@[simp]
+theorem program_start (tc : Turing.ToPartrec.Code) :
+    (program tc).start = TM0Route.partrecStartedTM0Start := rfl
+
+@[simp]
+theorem program_table (tc : Turing.ToPartrec.Code) :
+    (program tc).table = transitionTable tc := rfl
+
+theorem program_blank_mem_symbols (tc : Turing.ToPartrec.Code) :
+    (program tc).blank ∈ (program tc).symbols := by
+  exact programHeader_blank_mem_symbols tc
+
+theorem program_start_mem_states (tc : Turing.ToPartrec.Code) :
+    (program tc).start ∈ (program tc).states := by
+  exact programHeader_start_mem_states tc
+
 end TM0FiniteCompiler
 
 end LeanWang
