@@ -5,4 +5,5 @@ import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
 import LeanWang.ToPartrecEncoding
+import LeanWang.ToPartrecHelpers
 import LeanWang.Theorems
