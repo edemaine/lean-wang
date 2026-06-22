@@ -891,6 +891,141 @@ theorem row_write_mem_toTableProgram_supportedSymbols {P : PostProgram} {e : Tab
   rcases h with ⟨pe, _hpe, he⟩
   exact write_mem_supportedSymbols_of_mem_rowsForTransition _hpe he
 
+private theorem find?_eq_some_mem {α : Type} {xs : List α} {p : α → Bool} {a : α}
+    (h : xs.find? p = some a) :
+    a ∈ xs := by
+  induction xs with
+  | nil =>
+      simp at h
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · have hxa : x = a := by
+          simpa [hx] using h
+        simp [hxa]
+      · have hxFalse : p x = false := Bool.eq_false_iff.2 hx
+        have htail : xs.find? p = some a := by
+          simpa [hxFalse] using h
+        exact List.mem_cons_of_mem x (ih htail)
+
+private theorem find?_eq_some_pred {α : Type} {xs : List α} {p : α → Bool} {a : α}
+    (h : xs.find? p = some a) :
+    p a = true := by
+  induction xs with
+  | nil =>
+      simp at h
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · have hxa : x = a := by
+          simpa [hx] using h
+        simpa [← hxa] using hx
+      · have hxFalse : p x = false := Bool.eq_false_iff.2 hx
+        have htail : xs.find? p = some a := by
+          simpa [hxFalse] using h
+        exact ih htail
+
+theorem transition?_eq_some_mem {P : PostProgram} {q a : Nat} {e : PostTransition}
+    (h : P.transition? q a = some e) :
+    e ∈ P.table := by
+  unfold transition? at h
+  exact find?_eq_some_mem h
+
+theorem transition?_eq_some_matchesInput {P : PostProgram} {q a : Nat} {e : PostTransition}
+    (h : P.transition? q a = some e) :
+    e.matchesInput q a = true := by
+  unfold transition? at h
+  exact find?_eq_some_pred (xs := P.table) (p := fun e => e.matchesInput q a) h
+
+theorem toTableProgram_transition?_run_of_transition?_eq_some
+    {P : PostProgram} {q a : Nat} {e : PostTransition}
+    (h : P.transition? q a = some e) :
+    P.toTableProgram.toTableMachine.transition? (tableRunState q) a =
+      some (firstRowForTransition P e) := by
+  unfold TableMachine.transition?
+  simp [TableProgram.toTableMachine, toTableProgram,
+    tableRows_find?_run_of_transition?_eq_some h]
+
+theorem toTableProgram_transition?_run_eq_none_of_transition?_eq_none
+    {P : PostProgram} {q a : Nat}
+    (h : P.transition? q a = none) :
+    P.toTableProgram.toTableMachine.transition? (tableRunState q) a = none := by
+  unfold TableMachine.transition?
+  simp [TableProgram.toTableMachine, toTableProgram,
+    tableRows_find?_run_eq_none_of_transition?_eq_none h]
+
+theorem firstRowForTransition_mem_rowsForTransition
+    (P : PostProgram) (e : PostTransition) :
+    firstRowForTransition P e ∈ rowsForTransition P e := by
+  rcases e with ⟨state, read, next, stmt⟩
+  unfold firstRowForTransition rowsForTransition
+  by_cases hnext : next ∈ P.states
+  · cases stmt with
+    | move m =>
+        simp [hnext]
+    | write b =>
+        by_cases hb : b ∈ P.symbols <;> simp [hnext, hb]
+  · simp [hnext]
+
+theorem firstRowForTransition_mem_tableRows {P : PostProgram} {e : PostTransition}
+    (hmem : e ∈ P.table) :
+    firstRowForTransition P e ∈ tableRows P := by
+  unfold tableRows
+  rw [List.mem_flatMap]
+  exact ⟨e, hmem, firstRowForTransition_mem_rowsForTransition P e⟩
+
+theorem firstRowForTransition_write_mem_supportedSymbols
+    {P : PostProgram} {e : PostTransition} (hmem : e ∈ P.table) :
+    (firstRowForTransition P e).write ∈ P.toTableProgram.supportedSymbols := by
+  exact row_write_mem_toTableProgram_supportedSymbols
+    (firstRowForTransition_mem_tableRows hmem)
+
+theorem firstRowForTransition_next_mem_supportedStates
+    {P : PostProgram} {e : PostTransition} (hmem : e ∈ P.table) :
+    (firstRowForTransition P e).next ∈ P.toTableProgram.supportedStates := by
+  exact row_next_mem_toTableProgram_supportedStates
+    (firstRowForTransition_mem_tableRows hmem)
+
+theorem toTableProgram_step_run (P : PostProgram) (q a : Nat) :
+    P.toTableProgram.toTableMachine.step (tableRunState q) a =
+      match P.step q a with
+      | none => (P.blank, tableHalt, Move.right)
+      | some (q', PostStmt.move m) => (a, tableRunState q', m)
+      | some (q', PostStmt.write b) => (b, tableWriteState q', Move.right) := by
+  cases h : P.transition? q a with
+  | none =>
+      have hfind := toTableProgram_transition?_run_eq_none_of_transition?_eq_none h
+      have hstep := TableMachine.step_of_transition?_eq_none (M := P.toTableProgram.toTableMachine)
+        (q := tableRunState q) (a := a) hfind
+      rw [hstep]
+      simp [PostProgram.step, h, TableProgram.toTableMachine, toTableProgram, tableHalt]
+  | some e =>
+      have hmatch := transition?_eq_some_matchesInput h
+      have hfind := toTableProgram_transition?_run_of_transition?_eq_some h
+      have hmem : e ∈ P.table := transition?_eq_some_mem h
+      have hwrite := firstRowForTransition_write_mem_supportedSymbols hmem
+      have hnext := firstRowForTransition_next_mem_supportedStates hmem
+      have hstep := TableMachine.step_of_transition?_eq_some
+        (M := P.toTableProgram.toTableMachine) hfind hwrite hnext
+      rcases e with ⟨state, read, next, stmt⟩
+      have hstateRead : state = q ∧ read = a := by
+        simpa [PostTransition.matchesInput] using hmatch
+      by_cases hnextPost : next ∈ P.states
+      · cases stmt with
+        | move m =>
+            rw [hstep]
+            simp [PostProgram.step, h, hnextPost, firstRowForTransition, moveRow,
+              TableTransition.action, hstateRead.2]
+        | write b =>
+            by_cases hb : b ∈ P.symbols
+            · rw [hstep]
+              simp [PostProgram.step, h, hnextPost, hb, firstRowForTransition,
+                writeStartRow, TableTransition.action]
+            · rw [hstep]
+              simp [PostProgram.step, h, hnextPost, hb, firstRowForTransition,
+                haltRow, TableTransition.action, tableHalt]
+      · rw [hstep]
+        simp [PostProgram.step, h, hnextPost, firstRowForTransition, haltRow,
+          TableTransition.action, tableHalt]
+
 end PostProgram
 
 /-- Preferred name for the local one-sided TM0 instruction syntax. -/
