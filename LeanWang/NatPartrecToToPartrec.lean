@@ -388,6 +388,18 @@ theorem translate_rfind'_mem_of_nat_eval {cf : Nat.Partrec.Code}
   rcases hx with ⟨n, hn, rfl⟩
   exact rfindFrom_mem_of_nat_rfind hf hn
 
+theorem translates_rfind'_mpr {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (n : Nat) (v : List Nat) :
+    (∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.rfind' cf) n ∧ v = [x]) →
+      v ∈ (translate (.rfind' cf)).eval [n] := by
+  rintro ⟨x, hx, rfl⟩
+  let a := n.unpair.1
+  let m := n.unpair.2
+  have hn : Nat.pair a m = n := by
+    simp [a, m, Nat.pair_unpair]
+  rw [← hn] at hx ⊢
+  exact translate_rfind'_mem_of_nat_eval hf hx
+
 end NatPartrecToToPartrec
 
 end LeanWang
