@@ -287,8 +287,12 @@ structure StartedTM2ToPartrecReduction where
     (Turing.TM2.eval (TM0Route.partrecStartedTM2 tc)
       Turing.PartrecToTM2.K'.main TM0Route.partrecStartedTM2Input).Dom ↔
       (StateTransition.eval
-        (Turing.TM2.step Turing.PartrecToTM2.tr)
-        (Turing.PartrecToTM2.init tc [0])).Dom
+        (Turing.TM2.step TM0Route.partrecTM2)
+        (TM0Route.partrecInit tc)).Dom
+
+/-- Concrete started-TM2 bridge used by the Mathlib TM0/Post route. -/
+def startedTM2ToPartrecReduction : StartedTM2ToPartrecReduction where
+  correct := TM0Route.partrecStartedTM2_eval_dom_iff_partrec
 
 /--
 A computable reduction from one-sided Post/TM0 programs to the older finite
@@ -736,17 +740,16 @@ started-TM2 bridge, a one-sided Post/TM0 reduction, and the bridge from Post
 programs to the current table-machine tile layer.
 -/
 theorem fixed_domino_problem_undecidable_of_tm0Reduction
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (C : TM0PostCompiler) :
+    (B : PostTableReduction) (C : TM0PostCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         TilesQuarterWithSeed
           (fixedDominoReduction
-            (C.toTableCompiler B R₀ natPartrecToTM2Reduction) c).1
+            (C.toTableCompiler B startedTM2ToPartrecReduction natPartrecToTM2Reduction) c).1
           (fixedDominoReduction
-            (C.toTableCompiler B R₀ natPartrecToTM2Reduction) c).2) :=
+            (C.toTableCompiler B startedTM2ToPartrecReduction natPartrecToTM2Reduction) c).2) :=
   fixed_domino_problem_undecidable_of_tm0Compiler
-    B R₀ natPartrecToTM2Reduction C
+    B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
 
 /--
 Fixed-corner square undecidability from the concrete Mathlib-code-to-TM2
@@ -754,17 +757,16 @@ reduction, a started-TM2 bridge, a one-sided Post/TM0 reduction, and the bridge
 from Post programs to the current table-machine tile layer.
 -/
 theorem fixed_corner_square_problem_undecidable_of_tm0Reduction
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (C : TM0PostCompiler) :
+    (B : PostTableReduction) (C : TM0PostCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         ∀ n : Nat, 0 < n → TileableFixedCornerSquare
           (fixedDominoReduction
-            (C.toTableCompiler B R₀ natPartrecToTM2Reduction) c).1
+            (C.toTableCompiler B startedTM2ToPartrecReduction natPartrecToTM2Reduction) c).1
           (fixedDominoReduction
-            (C.toTableCompiler B R₀ natPartrecToTM2Reduction) c).2 n) :=
+            (C.toTableCompiler B startedTM2ToPartrecReduction natPartrecToTM2Reduction) c).2 n) :=
   fixed_corner_square_problem_undecidable_of_tm0Compiler
-    B R₀ natPartrecToTM2Reduction C
+    B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -1481,11 +1483,10 @@ from Post programs to the current table-machine tile layer.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_tm0Reduction
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (C : TM0PostCompiler) :
+    (B : PostTableReduction) (C : TM0PostCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
-    S hS B R₀ natPartrecToTM2Reduction C
+    S hS B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
 
 /--
 Unencoded domino undecidability from a scaffold, the concrete
@@ -1495,11 +1496,10 @@ layer.
 -/
 theorem domino_problem_undecidable_of_scaffold_tm0Reduction
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (C : TM0PostCompiler) :
+    (B : PostTableReduction) (C : TM0PostCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_tm0Compiler
-    S hS B R₀ natPartrecToTM2Reduction C
+    S hS B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
 
 end LeanWang
 

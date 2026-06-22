@@ -62,7 +62,7 @@ interfaces:
 - `PostTableReduction`: a temporary bridge from one-sided Post/TM0 programs to
   the existing table-machine Wang-tile layer. This can be replaced by direct
   Post-machine tiles later.
-- `StartedTM2ToPartrecReduction`: the remaining semantic bridge between the
+- `startedTM2ToPartrecReduction`: the proved semantic bridge between the
   code-specific started TM2 evaluator used by `TM0Route` and Mathlib's original
   `PartrecToTM2.init` evaluator.
 - `TM2TableCompiler`: the older direct TM2-to-table reduction interface remains

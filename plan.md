@@ -199,8 +199,10 @@ structure StartedTM2ToPartrecReduction where
     (Turing.TM2.eval (TM0Route.partrecStartedTM2 tc)
       Turing.PartrecToTM2.K'.main TM0Route.partrecStartedTM2Input).Dom <->
       (StateTransition.eval
-        (Turing.TM2.step Turing.PartrecToTM2.tr)
-        (Turing.PartrecToTM2.init tc [0])).Dom
+        (Turing.TM2.step TM0Route.partrecTM2)
+        (TM0Route.partrecInit tc)).Dom
+
+def startedTM2ToPartrecReduction : StartedTM2ToPartrecReduction
 
 structure PostTableReduction where
   compile : PostProgram -> TableProgram
@@ -257,23 +259,21 @@ produce a
 `TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
 from both the direct TM2 factorization and the TM0/Post factorization using the
-concrete code-to-TM2 reduction.
+concrete code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is
+now proved concretely by `startedTM2ToPartrecReduction`.
 
 Next implementation targets:
 
-1. Prove `StartedTM2ToPartrecReduction`: the code-specific started TM2 machine
-   used by `TM0Route` is semantically equivalent, on input `[0]`, to Mathlib's
-   original `PartrecToTM2.init tc [0]` evaluator configuration.
-2. Build a concrete `TM0PostCompiler`: compile the finite portion of the
+1. Build a concrete `TM0PostCompiler`: compile the finite portion of the
    code-specific Mathlib TM0 machine/input into the one-sided Post/TM0 model.
    The main semantic issue is the two-sided Mathlib TM0 tape versus the
    one-sided local model; handle this either by a folding reduction to one-sided
    Post/TM0 or by replacing the tile layer with a two-sided Post/TM0 simulation.
-3. Either prove the small `PostTableReduction` bridge to reuse the existing
+2. Either prove the small `PostTableReduction` bridge to reuse the existing
    table-machine tiles, or replace the current machine tiles by direct
    Post-machine tiles.
-4. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-5. Specialize
+3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+4. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those
    concrete instances to recover the unconditional encoded domino theorem.
 
