@@ -12,5 +12,6 @@ import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.TM0Route
 import LeanWang.TM0FiniteCompiler
+import LeanWang.TM0FoldedProgram
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems

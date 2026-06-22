@@ -3,63 +3,24 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.PostMachine
-import LeanWang.TM0FiniteCompiler
+import LeanWang.TM0FoldedProgram
 
 /-!
-Finite one-sided TM0 program data for a folded simulation of Mathlib's TM0.
+Semantic correctness for the folded finite one-sided TM0 program.
 
-Mathlib's `Turing.TM0` configurations use a two-sided tape. The local
-`FiniteTM0Program` model used by the current Wang-tile layer has a one-sided
-`Nat`-indexed tape. This file starts the cleaner bridge between the two models:
-one local tape cell stores the pair of Mathlib symbols at positions `-i-1` and
-`i`, plus an origin marker. The finite control stores which side of the folded
-cell is currently active.
+The executable finite program data lives in TM0FoldedProgram; this file proves
+that the folded program halts exactly when Mathlib's translated TM0 evaluator
+halts.
 -/
 
 noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedCompiler
 
 open TM0Route
 
-abbrev SourceSymbol : Type :=
-  Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol
-
-abbrev SourceLabel (tc : Turing.ToPartrec.Code) : Type :=
-  Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)
-
-/-- Which half of a folded one-sided cell is the simulated two-sided head reading? -/
-inductive FoldSide where
-  | left
-  | right
-deriving DecidableEq, Repr
-
 namespace FoldSide
-
-def toBool : FoldSide → Bool
-  | left => false
-  | right => true
-
-def ofBool : Bool → FoldSide
-  | false => left
-  | true => right
-
-def equivBool : FoldSide ≃ Bool where
-  toFun := toBool
-  invFun := ofBool
-  left_inv := by
-    intro side
-    cases side <;> rfl
-  right_inv := by
-    intro bit
-    cases bit <;> rfl
-
-def code : FoldSide → Nat
-  | left => 0
-  | right => 1
 
 theorem code_injective : Function.Injective code := by
   intro s t h
@@ -88,9 +49,6 @@ theorem code_primrec : Primrec FoldSide.code := by
 
 end FoldSide
 
-def foldSideList : List FoldSide :=
-  [FoldSide.left, FoldSide.right]
-
 theorem foldSideList_nodup : foldSideList.Nodup := by
   simp [foldSideList]
 
@@ -108,12 +66,6 @@ The Boolean marker distinguishes the origin cell, which is the only place where
 a simulated left/right move can cross between the two folded sides without
 moving the local one-sided head.
 -/
-def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
-  Nat.pair (if marked then 1 else 0)
-    (Nat.pair
-      (TM0Route.partrecStartedTM0SymbolCode left)
-      (TM0Route.partrecStartedTM0SymbolCode right))
-
 theorem foldedSymbolCode_injective :
     Function.Injective (fun p : Bool × SourceSymbol × SourceSymbol =>
       foldedSymbolCode p.1 p.2.1 p.2.2) := by
@@ -150,12 +102,6 @@ theorem foldedSymbolCode_primrec :
   exact Primrec.dom_finite (fun p : Bool × SourceSymbol × SourceSymbol =>
     foldedSymbolCode p.1 p.2.1 p.2.2)
 
-def foldedSymbolList : List Nat :=
-  [false, true].flatMap fun marked =>
-    TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
-      TM0Route.partrecStartedTM0SymbolList.map fun right =>
-        foldedSymbolCode marked left right
-
 theorem foldedSymbolCode_mem_symbols
     (marked : Bool) (left right : SourceSymbol) :
     foldedSymbolCode marked left right ∈ foldedSymbolList := by
@@ -164,17 +110,11 @@ theorem foldedSymbolCode_mem_symbols
     simp [TM0Route.mem_partrecStartedTM0SymbolList]
 
 /-- Blank folded cell away from the origin. -/
-def foldedBlank : Nat :=
-  foldedSymbolCode false default default
-
 theorem foldedBlank_mem_symbols : foldedBlank ∈ foldedSymbolList := by
   unfold foldedBlank
   exact foldedSymbolCode_mem_symbols false default default
 
 /-- Initial origin cell when the Mathlib input head reads `a`. -/
-def foldedOriginSymbol (a : SourceSymbol) : Nat :=
-  foldedSymbolCode true default a
-
 theorem foldedOriginSymbol_primrec : Primrec foldedOriginSymbol := by
   classical
   exact Primrec.dom_finite foldedOriginSymbol
@@ -184,11 +124,6 @@ theorem foldedOriginSymbol_mem_symbols (a : SourceSymbol) :
   unfold foldedOriginSymbol
   exact foldedSymbolCode_mem_symbols true default a
 
-def foldedRead (side : FoldSide) (left right : SourceSymbol) : SourceSymbol :=
-  match side with
-  | FoldSide.left => left
-  | FoldSide.right => right
-
 theorem foldedRead_primrec :
     Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol =>
       foldedRead p.1 p.2.1 p.2.2) := by
@@ -196,22 +131,12 @@ theorem foldedRead_primrec :
   exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol =>
     foldedRead p.1 p.2.1 p.2.2)
 
-def foldedWrite (side : FoldSide) (new left right : SourceSymbol) : Nat :=
-  match side with
-  | FoldSide.left => foldedSymbolCode false new right
-  | FoldSide.right => foldedSymbolCode false left new
-
 theorem foldedWrite_primrec :
     Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
       foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2) := by
   classical
   exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
     foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2)
-
-def foldedWriteMarked (side : FoldSide) (new left right : SourceSymbol) : Nat :=
-  match side with
-  | FoldSide.left => foldedSymbolCode true new right
-  | FoldSide.right => foldedSymbolCode true left new
 
 theorem foldedWriteMarked_primrec :
     Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
@@ -227,19 +152,6 @@ theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol
 theorem foldedWriteMarked_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
     foldedWriteMarked side new left right ∈ foldedSymbolList := by
   cases side <;> simp [foldedWriteMarked, foldedSymbolCode_mem_symbols]
-
-def stateTagSim : Nat := 0
-def stateTagInit : Nat := 1
-def stateTagReturn : Nat := 2
-
-def taggedState (tag payload : Nat) : Nat :=
-  Nat.pair tag payload
-
-/-- State used while simulating a Mathlib TM0 label on one side of the folded tape. -/
-def foldedSimStateCode (tc : Turing.ToPartrec.Code)
-    (side : FoldSide) (q : SourceLabel tc) : Nat :=
-  taggedState stateTagSim
-    (Nat.pair side.code (TM0FiniteCompiler.stateCode tc q))
 
 theorem foldedSimStateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
     {side side' : FoldSide} {q q' : SourceLabel tc}
@@ -261,39 +173,6 @@ theorem foldedSimStateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
   exact ⟨hside, hqeq⟩
 
 /-- First prelude state: write the marked origin cell. -/
-def initWriteOriginState : Nat :=
-  taggedState stateTagInit 0
-
-/-- Prelude state that moves from an initialized right-side input cell to the next cell. -/
-def initMoveRightState (i : Nat) : Nat :=
-  taggedState stateTagInit (2 * i + 1)
-
-/-- Prelude state that writes right-side input cell `i + 1`. -/
-def initWriteRightState (i : Nat) : Nat :=
-  taggedState stateTagInit (2 * i + 2)
-
-/-- Prelude state with `i` left moves remaining before simulation starts. -/
-def initReturnState (i : Nat) : Nat :=
-  taggedState stateTagReturn i
-
-def foldedStartState : Nat :=
-  initWriteOriginState
-
-def foldedSimStartState (tc : Turing.ToPartrec.Code) : Nat :=
-  foldedSimStateCode tc FoldSide.right default
-
-def foldedInitStateList : List Nat :=
-  [initWriteOriginState, initReturnState 0] ++
-    (List.range TM0Route.partrecStartedTM0Input.length).flatMap fun i =>
-      [initMoveRightState i, initWriteRightState i, initReturnState i]
-
-def foldedSimStateList (tc : Turing.ToPartrec.Code) : List Nat :=
-  (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q =>
-    foldSideList.map fun side => foldedSimStateCode tc side q
-
-def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
-  foldedInitStateList ++ foldedSimStateList tc
-
 theorem foldedStartState_mem_states (tc : Turing.ToPartrec.Code) :
     foldedStartState ∈ foldedStateList tc := by
   simp [foldedStateList, foldedInitStateList, foldedStartState, initWriteOriginState]
@@ -353,19 +232,10 @@ theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
   exact foldedSimStateCode_mem_states tc FoldSide.right
     (default_mem_partrecStartedTM0LabelList tc)
 
-def inputSymbol (i : Nat) : SourceSymbol :=
-  TM0Route.partrecStartedTM0Input.getI i
-
 theorem partrecStartedTM0Input_length :
     TM0Route.partrecStartedTM0Input.length = 1 := by
   simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
     Turing.TM2to1.trInit, Turing.PartrecToTM2.trList]
-
-def nextAfterOrigin : Nat :=
-  if TM0Route.partrecStartedTM0Input.length ≤ 1 then
-    initReturnState 0
-  else
-    initMoveRightState 0
 
 theorem nextAfterOrigin_eq_initReturnState_zero :
     nextAfterOrigin = initReturnState 0 := by
@@ -380,12 +250,6 @@ theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
   · simp [h, initReturnState_zero_mem_states tc]
   · have hlen : 0 < TM0Route.partrecStartedTM0Input.length := by omega
     simp [h, initMoveRightState_mem_states (tc := tc) hlen]
-
-def mkRow (state read next : Nat) (stmt : PostStmt) : PostTransition where
-  state := state
-  read := read
-  next := next
-  stmt := stmt
 
 @[simp]
 theorem mkRow_matchesInput (state read next : Nat) (stmt : PostStmt) :
@@ -476,13 +340,6 @@ theorem initWriteOriginState_ne_foldedSimStateCode
   omega
 
 /-- First initialization row: mark the origin and write the first input symbol. -/
-def initWriteOriginRow : PostTransition :=
-  mkRow initWriteOriginState foldedBlank nextAfterOrigin
-    (PostStmt.write (foldedOriginSymbol (inputSymbol 0)))
-
-def initMoveRightRow (i read : Nat) : PostTransition :=
-  mkRow (initMoveRightState i) read (initWriteRightState i) (PostStmt.move Move.right)
-
 theorem initMoveRightState_injective :
     Function.Injective initMoveRightState := by
   intro i j h
@@ -511,10 +368,6 @@ theorem initMoveRightState_ne_foldedSimStateCode
   unfold initMoveRightState foldedSimStateCode taggedState stateTagInit stateTagSim at h
   have htag := (Nat.pair_eq_pair.mp h).1
   omega
-
-def initMoveRightRows : List PostTransition :=
-  (List.range (TM0Route.partrecStartedTM0Input.length - 1)).flatMap fun i =>
-    foldedSymbolList.map fun read => initMoveRightRow i read
 
 private theorem find?_map_initMoveRightRow_of_read
     (i read : Nat) (reads : List Nat) (hread : read ∈ reads) :
@@ -592,16 +445,6 @@ theorem initMoveRightRows_find?_of_mem {i read : Nat}
   exact find?_flatMap_initMoveRightRows_aux i read
     (List.range (TM0Route.partrecStartedTM0Input.length - 1)) (List.mem_range.2 hi) hread
 
-def nextAfterWriteRight (i : Nat) : Nat :=
-  if i + 2 < TM0Route.partrecStartedTM0Input.length then
-    initMoveRightState (i + 1)
-  else
-    initReturnState (i + 1)
-
-def initWriteRightRow (i : Nat) : PostTransition :=
-  mkRow (initWriteRightState i) foldedBlank (nextAfterWriteRight i)
-    (PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1))))
-
 theorem initWriteRightState_injective :
     Function.Injective initWriteRightState := by
   intro i j h
@@ -623,10 +466,6 @@ theorem initWriteRightState_ne_foldedSimStateCode
   unfold initWriteRightState foldedSimStateCode taggedState stateTagInit stateTagSim at h
   have htag := (Nat.pair_eq_pair.mp h).1
   omega
-
-def initWriteRightRows : List PostTransition :=
-  (List.range (TM0Route.partrecStartedTM0Input.length - 1)).map fun i =>
-    initWriteRightRow i
 
 private theorem find?_map_initWriteRightRows_aux
     (i : Nat) (indices : List Nat) (hi : i ∈ indices) :
@@ -716,15 +555,6 @@ theorem initMoveRightRows_find?_eq_none_of_foldedSimStateCode
       rw [find?_append_of_eq_none hhead]
       exact ih
 
-def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
-  if i = 0 then
-    mkRow (initReturnState 0) read (foldedSimStartState tc) (PostStmt.write read)
-  else
-    mkRow (initReturnState i) read (initReturnState (i - 1)) (PostStmt.move Move.left)
-
-def initReturnIndexList : List Nat :=
-  0 :: List.range TM0Route.partrecStartedTM0Input.length
-
 theorem initReturnState_injective :
     Function.Injective initReturnState := by
   intro i j h
@@ -738,10 +568,6 @@ theorem initReturnState_ne_foldedSimStateCode
   unfold initReturnState foldedSimStateCode taggedState stateTagReturn stateTagSim at h
   have htag := (Nat.pair_eq_pair.mp h).1
   omega
-
-def initReturnRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
-  initReturnIndexList.flatMap fun i =>
-    foldedSymbolList.map fun read => initReturnRow tc i read
 
 private theorem find?_map_initReturnRow_of_read
     (tc : Turing.ToPartrec.Code) (i read : Nat) (reads : List Nat)
@@ -925,9 +751,6 @@ theorem initWriteRightRows_find?_eq_none_of_foldedSimStateCode
         mkRow_matchesInput_of_state_ne hstate
       simp [hmiss, ih]
 
-def initRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
-  initWriteOriginRow :: initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc
-
 theorem initRows_find?_eq_none_of_foldedSimStateCode
     (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) (read : Nat) :
     (initRows tc).find?
@@ -1028,12 +851,6 @@ theorem initReturnRow_mem_initRows_of_lt (tc : Turing.ToPartrec.Code) {i read : 
     (by simp [initReturnIndexList, List.mem_range.2 hi]) hread
 
 /-- Side of the folded tape after a simulated TM0 move. -/
-def foldedMoveNextSide (side : FoldSide) (marked : Bool) (dir : Turing.Dir) : FoldSide :=
-  match side, marked, dir with
-  | FoldSide.right, true, Turing.Dir.left => FoldSide.left
-  | FoldSide.left, true, Turing.Dir.right => FoldSide.right
-  | _, _, _ => side
-
 theorem foldedMoveNextSide_mem_foldSideList
     (side : FoldSide) (marked : Bool) (dir : Turing.Dir) :
     foldedMoveNextSide side marked dir ∈ foldSideList := by
@@ -1045,26 +862,6 @@ Local one-sided command for a simulated TM0 move.
 Moving across the origin changes the folded side without moving the local head,
 implemented as a no-op write of the current folded cell.
 -/
-def foldedMoveStmt (side : FoldSide) (marked : Bool) (cell : Nat)
-    (dir : Turing.Dir) : PostStmt :=
-  match side, marked, dir with
-  | FoldSide.right, true, Turing.Dir.left => PostStmt.write cell
-  | FoldSide.left, true, Turing.Dir.right => PostStmt.write cell
-  | FoldSide.right, _, Turing.Dir.right => PostStmt.move Move.right
-  | FoldSide.right, _, Turing.Dir.left => PostStmt.move Move.left
-  | FoldSide.left, _, Turing.Dir.left => PostStmt.move Move.right
-  | FoldSide.left, _, Turing.Dir.right => PostStmt.move Move.left
-
-def foldedMoveHead (side : FoldSide) (marked : Bool) (head : Nat)
-    (dir : Turing.Dir) : Nat :=
-  match side, marked, dir with
-  | FoldSide.right, true, Turing.Dir.left => head
-  | FoldSide.left, true, Turing.Dir.right => head
-  | FoldSide.right, _, Turing.Dir.right => head + 1
-  | FoldSide.right, _, Turing.Dir.left => head.pred
-  | FoldSide.left, _, Turing.Dir.left => head + 1
-  | FoldSide.left, _, Turing.Dir.right => head.pred
-
 theorem foldedMoveStmt_applyStmt_head
     (side : FoldSide) (marked : Bool) (cell : Nat) (dir : Turing.Dir)
     (tape : Nat → Nat) (head : Nat) :
@@ -1080,13 +877,6 @@ theorem foldedMoveStmt_applyStmt_tape
   cases side <;> cases marked <;> cases dir <;>
     simp [foldedMoveStmt, PostProgram.applyStmt, hcell]
 
-def foldedWriteForStmt (side : FoldSide) (marked : Bool)
-    (new left right : SourceSymbol) : Nat :=
-  if marked then
-    foldedWriteMarked side new left right
-  else
-    foldedWrite side new left right
-
 theorem foldedWriteForStmt_mem_symbols
     (side : FoldSide) (marked : Bool) (new left right : SourceSymbol) :
     foldedWriteForStmt side marked new left right ∈ foldedSymbolList := by
@@ -1094,21 +884,6 @@ theorem foldedWriteForStmt_mem_symbols
   by_cases h : marked
   · simp [h, foldedWriteMarked_mem_symbols]
   · simp [h, foldedWrite_mem_symbols]
-
-def simRowOfStep (tc : Turing.ToPartrec.Code)
-    (side : FoldSide) (marked : Bool)
-    (q q' : SourceLabel tc) (left right : SourceSymbol)
-    (stmt : Turing.TM0.Stmt SourceSymbol) : PostTransition :=
-  let read := foldedSymbolCode marked left right
-  match stmt with
-  | Turing.TM0.Stmt.write new =>
-      mkRow (foldedSimStateCode tc side q) read
-        (foldedSimStateCode tc side q')
-        (PostStmt.write (foldedWriteForStmt side marked new left right))
-  | Turing.TM0.Stmt.move dir =>
-      mkRow (foldedSimStateCode tc side q) read
-        (foldedSimStateCode tc (foldedMoveNextSide side marked dir) q')
-        (foldedMoveStmt side marked read dir)
 
 @[simp]
 theorem simRowOfStep_matchesInput (tc : Turing.ToPartrec.Code)
@@ -1229,13 +1004,6 @@ theorem simRowOfStep_write_mem_symbols (tc : Turing.ToPartrec.Code)
         (foldedSymbolCode_mem_symbols marked left right)
   | write new =>
       exact foldedWriteForStmt_mem_symbols side marked new left right
-
-def simTransitionOfStep (tc : Turing.ToPartrec.Code)
-    (q : SourceLabel tc) (side : FoldSide)
-    (marked : Bool) (left right : SourceSymbol) : Option PostTransition :=
-  match TM0Route.partrecStartedTM0Machine tc q (foldedRead side left right) with
-  | none => none
-  | some (q', stmt) => some (simRowOfStep tc side marked q q' left right stmt)
 
 theorem simTransitionOfStep_eq_some_of_step {tc : Turing.ToPartrec.Code}
     {q q' : SourceLabel tc} {side : FoldSide} {marked : Bool}
@@ -1702,14 +1470,6 @@ private theorem find?_flatMap_simTransition_side_of_step_aux
         rw [find?_append_of_eq_none hhead]
         exact htail
 
-def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
-    List PostTransition :=
-  foldSideList.flatMap fun side =>
-    [false, true].flatMap fun marked =>
-      TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
-        TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
-          simTransitionOfStep tc q side marked left right
-
 theorem simRowsForLabel_find?_of_step
     {tc : Turing.ToPartrec.Code}
     {q q' : SourceLabel tc} {side : FoldSide} {marked : Bool}
@@ -1797,9 +1557,6 @@ theorem simRowsForLabel_find?_eq_none_of_label_ne
     (tc := tc) (q := q) (r := r) (side := side) (side' := s)
     (marked := marked) (marked' := m) (left := left) (right := right)
     (left' := l) (right' := a) hq hr hne hrow
-
-def simRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
-  (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q => simRowsForLabel tc q
 
 private theorem find?_flatMap_simRowsForLabel_of_step_aux
     {tc : Turing.ToPartrec.Code}
@@ -2014,13 +1771,6 @@ theorem mem_simRows_write_mem {tc : Turing.ToPartrec.Code} {e : PostTransition}
     cases hrow
     exact simRowOfStep_write_mem_symbols tc side marked q q' left right stmt
 
-def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
-  symbols := foldedSymbolList
-  states := foldedStateList tc
-  blank := foldedBlank
-  start := foldedStartState
-  table := initRows tc ++ simRows tc
-
 @[simp]
 theorem program_symbols (tc : Turing.ToPartrec.Code) :
     (program tc).symbols = foldedSymbolList := rfl
@@ -2055,13 +1805,6 @@ Initialization-only folded finite one-sided TM0 program header.
 The full folded program above appends the simulation rows. This smaller header
 is retained for the initialization transition lemmas.
 -/
-def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
-  symbols := foldedSymbolList
-  states := foldedStateList tc
-  blank := foldedBlank
-  start := foldedStartState
-  table := initRows tc
-
 @[simp]
 theorem programHeader_symbols (tc : Turing.ToPartrec.Code) :
     (programHeader tc).symbols = foldedSymbolList := rfl
@@ -2483,7 +2226,6 @@ one-sided program keeps a fixed folded origin. The local head and folded side
 therefore determine the simulated head's absolute position in the fixed folded
 coordinate system.
 -/
-
 def rightAbs (i : Nat) : Int :=
   i
 
