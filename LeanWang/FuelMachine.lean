@@ -8,10 +8,10 @@ import LeanWang.Basic
 /-!
 A minimal fuel-enumerating machine model.
 
-This is an intermediate compiler target: it repeatedly tests a decidable
+This is an intermediate compiler/reduction target: it repeatedly tests a decidable
 predicate at fuel values `0, 1, 2, ...` and halts at the first successful fuel.
-The remaining compiler bridge is to implement this counter/search behavior in
-the concrete one-tape `Machine` model.
+The remaining compiler/reduction bridge is to implement this counter/search
+behavior in the concrete one-tape `Machine` model.
 -/
 
 namespace LeanWang

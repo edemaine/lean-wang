@@ -50,7 +50,7 @@ Completed proof layers:
   tile membership bridges;
 - the fixed-domino reduction from any verified `TableCompiler`;
 - the abstract scaffold reduction from any verified `IsScaffold S`;
-- the encoded domino undecidability theorem from a verified compiler and
+- the encoded domino undecidability theorem from a verified compiler/reduction and
   verified scaffold.
 - a primitive-recursive finite Boolean search `TableProgram` generator, with
   a recursive transition-table view, verified empty-loop and first-true halting
@@ -78,13 +78,15 @@ def IsScaffold (S : Scaffold) : Prop :=
 ```
 
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
-compiler obligation into a `TableCompiler`, using the proved equivalence between
-`codeEvalnHalts` and `Nat.Partrec.Code.eval`.
+compiler/reduction obligation into a `TableCompiler`, using the proved
+equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
 
 Next implementation targets:
 
 1. Build a concrete `FuelTableCompiler`, or directly a `TableCompiler`, by
-   implementing the bounded evaluator fuel search in `TableProgram`.
+   implementing the bounded evaluator fuel search in `TableProgram`. This object
+   is both a compiler from code to finite machine data and the computable
+   reduction component used in the undecidability proof.
    The next local step is proving full correctness of
    `FiniteSearchProgram.program`: it should halt iff its input Boolean list
    contains `true`. The remaining induction step is lifting the verified
@@ -228,6 +230,6 @@ or the corresponding version over encoded natural-number inputs.
 
 ## Main Risks
 
-The largest risk is not the machine-to-Wang-tile encoding itself, which should be manageable, but choosing the right bridge from Mathlib's computability theorem to the machine model used in the tiling construction.
+The largest risk is not the machine-to-Wang-tile encoding itself, which should be manageable, but choosing the right compiler/reduction bridge from Mathlib's computability theorem to the machine model used in the tiling construction.
 
 The second largest risk is the concrete scaffold verification. This can be controlled by isolating it behind an abstract scaffold interface and using mechanical finite checks.

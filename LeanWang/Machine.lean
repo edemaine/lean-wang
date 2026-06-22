@@ -488,10 +488,10 @@ end TableMachine
 /--
 Raw finite machine data, without support proofs.
 
-The compiler from computability syntax should ultimately produce this kind of
-finite object. `toTableMachine` adds the distinguished blank/start/halt symbols
-to the supports, and the guarded table semantics keeps all transitions inside
-those finite supports.
+The compiler/reduction from computability syntax should ultimately produce this
+kind of finite object. `toTableMachine` adds the distinguished blank/start/halt
+symbols to the supports, and the guarded table semantics keeps all transitions
+inside those finite supports.
 -/
 structure TableProgram where
   symbols : List Nat

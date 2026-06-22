@@ -12,7 +12,7 @@ This file builds a small generated `TableProgram` that scans a finite list of
 Boolean markers. At state `i`, a `true` marker jumps to halt and a `false`
 marker advances to state `i + 1`; after the list is exhausted, the machine loops
 right forever on blank tape. This is a finite control-flow fragment of the
-eventual fuel-search compiler.
+eventual fuel-search compiler/reduction.
 -/
 
 namespace LeanWang

@@ -15,8 +15,9 @@ Main theorem surface for the Wang-tile undecidability proof.
 
 This file collects the main reduction theorems. The final undecidability theorem
 is currently parameterized by the two external construction obligations: a
-compiler from Mathlib partial-recursive codes to finite table machines, and a
-concrete scaffold satisfying the abstract square-forcing property.
+compiler/reduction from Mathlib partial-recursive codes to finite table
+machines, and a concrete scaffold satisfying the abstract square-forcing
+property.
 -/
 
 namespace LeanWang
@@ -138,7 +139,14 @@ def dummyProgram : TableProgram where
     move := Move.right
   }]
 
-/-- A compiler from Mathlib partial-recursive codes into finite table-machine data. -/
+/--
+A compiler/reduction from Mathlib partial-recursive codes into finite
+table-machine data.
+
+The name emphasizes the produced finite machine program. In the undecidability
+proof, the same computable map is also the reduction component from code
+halting/nonhalting to the finite domino instances built from that program.
+-/
 structure TableCompiler where
   compile : Code → TableProgram
   compile_computable : Computable compile
@@ -146,8 +154,12 @@ structure TableCompiler where
     Machine.HaltsEmpty (compile c).toMachine ↔ (Nat.Partrec.Code.eval c 0).Dom
 
 /--
-A smaller compiler obligation: implement the fuel-search machine for the
-primitive-recursive bounded evaluator predicate.
+A smaller compiler/reduction obligation: implement the fuel-search machine for
+the primitive-recursive bounded evaluator predicate.
+
+This interface packages the computable reduction through the fuel-search
+predicate before `toTableCompiler` turns it into the direct machine-level
+compiler/reduction.
 -/
 structure FuelTableCompiler where
   compile : Code → TableProgram
@@ -173,7 +185,7 @@ theorem programTable_computable (C : TableCompiler) : Computable (programTable C
 def programMachine (C : TableCompiler) (c : Code) : Machine :=
   (programTable C c).toMachine
 
-/-- Correctness of a compiler from partial-recursive codes to concrete machines. -/
+/-- Correctness of the compiler/reduction from partial-recursive codes to concrete machines. -/
 theorem programMachine_correct (C : TableCompiler) (c : Code) :
     Machine.HaltsEmpty (programMachine C c) ↔ (Nat.Partrec.Code.eval c 0).Dom :=
   C.correct c
@@ -237,7 +249,7 @@ theorem fixed_corner_square_problem_undecidable (C : TableCompiler) :
     (tilesQuarterWithSeed_iff_all_fixedCornerSquares
       (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
 
-/-- Fixed-domino undecidability from the smaller fuel-search compiler obligation. -/
+/-- Fixed-domino undecidability from the smaller fuel-search compiler/reduction obligation. -/
 theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
@@ -246,7 +258,10 @@ theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler)
           (fixedDominoReduction C.toTableCompiler c).2) :=
   fixed_domino_problem_undecidable C.toTableCompiler
 
-/-- Fixed-corner square undecidability from the smaller fuel-search compiler obligation. -/
+/--
+Fixed-corner square undecidability from the smaller fuel-search
+compiler/reduction obligation.
+-/
 theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
@@ -731,7 +746,7 @@ theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S)
   exact dominoReduction_correct hS C c
 
 /-- The domino problem is undecidable for finite Wang tilesets, assuming a scaffold
-and a compiler from partial-recursive codes to table machines. -/
+and a compiler/reduction from partial-recursive codes to table machines. -/
 theorem domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
@@ -746,7 +761,7 @@ theorem domino_problem_undecidable_of_scaffold
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold
-and a compiler from partial-recursive codes to table machines. -/
+and a compiler/reduction from partial-recursive codes to table machines. -/
 theorem encoded_domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
@@ -762,7 +777,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold
 
 /--
 Encoded domino undecidability from a scaffold and the smaller fuel-search
-compiler obligation.
+compiler/reduction obligation.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
@@ -771,7 +786,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
 
 /--
 Unencoded domino undecidability from a scaffold and the smaller fuel-search
-compiler obligation.
+compiler/reduction obligation.
 -/
 theorem domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :

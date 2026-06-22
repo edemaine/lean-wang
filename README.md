@@ -25,17 +25,16 @@ Current build:
 lake build
 ```
 
-The build succeeds. All compactness theorems are proved.
+The build succeeds.
 
-The remaining `sorry`s in `LeanWang.Theorems` are the three core construction
-placeholders:
+The main theorem surface is currently conditional on two construction
+interfaces:
 
-- `programMachine_correct`: compile Mathlib partial-recursive codes to the
-  concrete machine model.
-- `machineTiles_correct`: prove correctness of the local-history
-  machine-to-Wang-tile fixed domino construction.
-- `ollingerScaffold_isScaffold`: prove the scaffold converts fixed-corner
-  finite-square instances to ordinary plane tiling.
+- `TableCompiler` / `FuelTableCompiler`: compile/reduce Mathlib
+  partial-recursive codes to finite table-machine data with the right halting
+  behavior.
+- `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
+  instances to ordinary plane tiling.
 
 The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
 undecidability reductions are now proved from those construction interfaces.
