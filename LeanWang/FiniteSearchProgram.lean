@@ -338,6 +338,35 @@ theorem program_correct (bs : List Bool) :
       ⟨n, rest, rfl⟩
     exact program_replicate_false_cons_true_halts n rest
 
+/-- The finite list of fuel-search predicate values tested below `bound`. -/
+def fuelPrefix (P : Nat → Bool) (bound : Nat) : List Bool :=
+  (List.range bound).map P
+
+theorem fuelPrefix_primrec {P : Nat → Bool} (hP : Primrec P) :
+    Primrec (fuelPrefix P) := by
+  unfold fuelPrefix
+  have hmap : Primrec₂ fun _bound k : Nat => P k := by
+    apply Primrec₂.mk
+    exact hP.comp Primrec.snd
+  exact Primrec.list_map Primrec.list_range hmap
+
+theorem true_mem_fuelPrefix_iff (P : Nat → Bool) (bound : Nat) :
+    true ∈ fuelPrefix P bound ↔ ∃ k : Nat, k < bound ∧ P k = true := by
+  unfold fuelPrefix
+  constructor
+  · intro h
+    rw [List.mem_map] at h
+    rcases h with ⟨k, hk, htrue⟩
+    exact ⟨k, by simpa using hk, htrue⟩
+  · rintro ⟨k, hk, htrue⟩
+    rw [List.mem_map]
+    exact ⟨k, by simpa using hk, htrue⟩
+
+theorem program_fuelPrefix_correct (P : Nat → Bool) (bound : Nat) :
+    (program (fuelPrefix P bound)).toMachine.HaltsEmpty ↔
+      ∃ k : Nat, k < bound ∧ P k = true := by
+  rw [program_correct, true_mem_fuelPrefix_iff]
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
