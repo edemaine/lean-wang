@@ -526,6 +526,32 @@ theorem fixed_corner_square_problem_undecidable_of_primrecSearchCompiler
           (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).2 n) :=
   fixed_corner_square_problem_undecidable C.toFuelTableCompiler.toTableCompiler
 
+/--
+Fixed-domino undecidability from an encoded TM2 translation and table-machine
+compiler/reduction.
+-/
+theorem fixed_domino_problem_undecidable_of_tm2Compiler
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        TilesQuarterWithSeed
+          (fixedDominoReduction (C.toTableCompiler R) c).1
+          (fixedDominoReduction (C.toTableCompiler R) c).2) :=
+  fixed_domino_problem_undecidable (C.toTableCompiler R)
+
+/--
+Fixed-corner square undecidability from an encoded TM2 translation and
+table-machine compiler/reduction.
+-/
+theorem fixed_corner_square_problem_undecidable_of_tm2Compiler
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
+          (fixedDominoReduction (C.toTableCompiler R) c).1
+          (fixedDominoReduction (C.toTableCompiler R) c).2 n) :=
+  fixed_corner_square_problem_undecidable (C.toTableCompiler R)
+
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
   tiles : TileSet
@@ -1164,5 +1190,25 @@ theorem domino_problem_undecidable_of_scaffold_primrecSearchCompiler
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_fuelCompiler
     S hS C.toFuelTableCompiler
+
+/--
+Encoded domino undecidability from a scaffold, an encoded TM2 translation, and
+a TM2 table-machine compiler/reduction.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_tm2Compiler
+    (S : Scaffold) (hS : IsScaffold S)
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
+
+/--
+Unencoded domino undecidability from a scaffold, an encoded TM2 translation, and
+a TM2 table-machine compiler/reduction.
+-/
+theorem domino_problem_undecidable_of_scaffold_tm2Compiler
+    (S : Scaffold) (hS : IsScaffold S)
+    (R : ToPartrecTM2Reduction) (C : TM2TableCompiler R.decode) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
 
 end LeanWang
