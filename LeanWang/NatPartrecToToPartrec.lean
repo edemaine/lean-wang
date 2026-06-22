@@ -123,6 +123,28 @@ theorem rfindBodyStep_fwd_shape {test : Code} {i m a : Nat} {next : List Nat}
       simp at hwmap
       exact ⟨by simpa using hwmap.symm, ⟨k, hcond⟩⟩
 
+set_option linter.flexible false in
+theorem rfindBodyStep_stop_shape_any {test : Code} {i m a : Nat} {out : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ test.eval [Nat.pair a (i + m)] → ∃ x : Nat, v = [x])
+    (hstop : Sum.inl out ∈ rfindBodyStep test [i, m, a]) :
+    out = [i, m, a] ∧ [0] ∈ test.eval [Nat.pair a (i + m)] := by
+  unfold rfindBodyStep at hstop
+  rw [Part.mem_map_iff] at hstop
+  rcases hstop with ⟨w, hw, hwmap⟩
+  simp [rfindBody] at hw
+  rcases hw with ⟨cond, hcond, hwcase⟩
+  rcases hsingle cond hcond with ⟨x, rfl⟩
+  cases x with
+  | zero =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+      exact ⟨by simpa using hwmap.symm, hcond⟩
+  | succ _ =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+
 theorem rfindBody_fix_of_first_zeroFrom {test : Code} {a m : Nat}
     (start len : Nat)
     (hzero : test.eval [Nat.pair a ((start + len) + m)] = pure [0])
@@ -194,6 +216,48 @@ theorem rfindBody_first_zeroFrom_of_fix_mem {test : Code} {start n m a : Nat}
       · exact hprev j (by omega) hjn
   exact hC start rfl
 
+theorem rfindBody_fix_mem_trace {test : Code} {start m a : Nat} {out : List Nat}
+    (hsingle : ∀ t : Nat, ∀ v : List Nat,
+      v ∈ test.eval [Nat.pair a (t + m)] → ∃ x : Nat, v = [x])
+    (hfix : out ∈ (Code.fix (rfindBody test)).eval [start, m, a]) :
+    ∃ n : Nat, out = [n, m, a] ∧ start ≤ n ∧
+      [0] ∈ test.eval [Nat.pair a (n + m)] ∧
+      ∀ i : Nat, start ≤ i → i < n →
+        ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (i + m)] := by
+  rw [Turing.ToPartrec.Code.fix_eval] at hfix
+  change out ∈ PFun.fix (rfindBodyStep test) [start, m, a] at hfix
+  let C : List Nat → Prop := fun state =>
+    ∀ i : Nat, state = [i, m, a] →
+      ∃ n : Nat, out = [n, m, a] ∧ i ≤ n ∧
+        [0] ∈ test.eval [Nat.pair a (n + m)] ∧
+        ∀ j : Nat, i ≤ j → j < n →
+          ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (j + m)]
+  have hC : C [start, m, a] := by
+    refine PFun.fixInduction' (f := rfindBodyStep test) hfix ?_ ?_
+    · intro final hstop i hstate
+      subst final
+      have hstop' : Sum.inl out ∈ rfindBodyStep test [i, m, a] := by
+        simpa using hstop
+      rcases rfindBodyStep_stop_shape_any (test := test) (i := i) (m := m)
+          (a := a) (hsingle i) hstop' with ⟨hout, hzero⟩
+      refine ⟨i, hout, by omega, hzero, ?_⟩
+      intro j hij hji
+      omega
+    · intro state next _hnext hfwd ih i hstate
+      subst state
+      have hfwd' : Sum.inr next ∈ rfindBodyStep test [i, m, a] := by
+        simpa using hfwd
+      rcases rfindBodyStep_fwd_shape (test := test) (i := i) (m := m)
+          (a := a) (hsingle i) hfwd' with ⟨hnext_eq, hnonzero⟩
+      rcases ih i.succ hnext_eq with ⟨n, hout, hin_le, hzero, hprev⟩
+      refine ⟨n, hout, by omega, hzero, ?_⟩
+      intro j hij hjn
+      by_cases hji : j = i
+      · subst j
+        simpa using hnonzero
+      · exact hprev j (by omega) hjn
+  exact hC start rfl
+
 /--
 Implementation of the `Nat.Partrec.Code.rfind'` constructor from a translated
 predicate.
@@ -231,6 +295,32 @@ theorem rfindFrom_mem_of_first_zero {test : Code} {a m n : Nat}
   simpa using
     rfindBody_fix_of_first_zeroFrom (test := test) (a := a) (m := m)
       0 n (by simpa using hzero) (by simpa using hprev)
+
+theorem rfindFrom_mem_trace {test : Code} {a m : Nat} {v : List Nat}
+    (hsingle : ∀ t : Nat, ∀ v : List Nat,
+      v ∈ test.eval [Nat.pair a (t + m)] → ∃ x : Nat, v = [x])
+    (hv : v ∈ (rfindFrom test).eval [Nat.pair a m]) :
+    ∃ n : Nat, v = [n + m] ∧
+      [0] ∈ test.eval [Nat.pair a (n + m)] ∧
+      ∀ i : Nat, i < n →
+        ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (i + m)] := by
+  rw [rfindFrom, Turing.ToPartrec.Code.comp_eval] at hv
+  simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hv
+  rcases hv with ⟨state, hinner, hout⟩
+  rw [Turing.ToPartrec.Code.comp_eval] at hinner
+  simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hinner
+  rcases hinner with ⟨start, hstart, hfix⟩
+  have hstart_eq : start = [0, m, a] := by
+    simpa [Part.bind_eq_bind] using hstart
+  subst start
+  rcases rfindBody_fix_mem_trace (test := test) (start := 0) (m := m) (a := a)
+      hsingle hfix with ⟨n, hstate, _h0n, hzero, hprev⟩
+  subst state
+  have hv_eq : v = [n + m] := by
+    simpa using hout
+  refine ⟨n, hv_eq, hzero, ?_⟩
+  intro i hi
+  exact hprev i (Nat.zero_le i) hi
 
 end TCode
 
@@ -479,6 +569,60 @@ theorem translate_rfind'_mem_of_nat_eval {cf : Nat.Partrec.Code}
   rcases hx with ⟨n, hn, rfl⟩
   exact rfindFrom_mem_of_nat_rfind hf hn
 
+theorem nat_eval_mem_of_translate_rfind'_mem {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) {a m : Nat} {v : List Nat}
+    (hv : v ∈ (translate (.rfind' cf)).eval [Nat.pair a m]) :
+    ∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.rfind' cf) (Nat.pair a m) ∧ v = [x] := by
+  rw [translate_rfind'] at hv
+  have hsingle : ∀ t : Nat, ∀ v : List Nat,
+      v ∈ (translate cf).eval [Nat.pair a (t + m)] → ∃ x : Nat, v = [x] := by
+    intro t v hvtest
+    rcases (hf (Nat.pair a (t + m)) v).1 hvtest with ⟨x, _hx, hv⟩
+    exact ⟨x, hv⟩
+  rcases TCode.rfindFrom_mem_trace (test := translate cf) (a := a) (m := m)
+      hsingle hv with ⟨n, rfl, hzero, hprev⟩
+  have hzeroNat : 0 ∈ Nat.Partrec.Code.eval cf (Nat.pair a (n + m)) := by
+    rcases (hf (Nat.pair a (n + m)) [0]).1 hzero with ⟨x, hx, hxv⟩
+    have hx0 : x = 0 := by
+      simpa using hxv.symm
+    simpa [hx0] using hx
+  have htrue : true ∈ (fun z : Nat => decide (z = 0)) <$>
+      Nat.Partrec.Code.eval cf (Nat.pair a (n + m)) := by
+    rw [Part.map_eq_map, Part.mem_map_iff]
+    exact ⟨0, hzeroNat, by simp⟩
+  have hfalse : ∀ {i : Nat}, i < n → false ∈ (fun z : Nat => decide (z = 0)) <$>
+      Nat.Partrec.Code.eval cf (Nat.pair a (i + m)) := by
+    intro i hi
+    rcases hprev i hi with ⟨k, hk⟩
+    rcases (hf (Nat.pair a (i + m)) [k.succ]).1 hk with ⟨x, hx, hxv⟩
+    have hxk : x = k.succ := by
+      simpa using hxv.symm
+    rw [Part.map_eq_map, Part.mem_map_iff]
+    exact ⟨k.succ, by simpa [hxk] using hx, by simp⟩
+  have hn : n ∈ Nat.rfind fun i =>
+      (fun z : Nat => decide (z = 0)) <$> Nat.Partrec.Code.eval cf (Nat.pair a (i + m)) := by
+    exact Nat.mem_rfind.2 ⟨htrue, hfalse⟩
+  have hnat : n + m ∈ Nat.Partrec.Code.eval (.rfind' cf) (Nat.pair a m) := by
+    rw [Nat.Partrec.Code.eval, Nat.unpaired, Nat.unpair_pair]
+    change n + m ∈ (Nat.rfind (fun i =>
+      (fun z : Nat => decide (z = 0)) <$>
+        Nat.Partrec.Code.eval cf (Nat.pair a (i + m)))).map (fun i => i + m)
+    rw [Part.mem_map_iff]
+    exact ⟨n, hn, rfl⟩
+  exact ⟨n + m, hnat, rfl⟩
+
+theorem translates_rfind'_mp {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (n : Nat) (v : List Nat) :
+    v ∈ (translate (.rfind' cf)).eval [n] →
+      ∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.rfind' cf) n ∧ v = [x] := by
+  intro hv
+  let a := n.unpair.1
+  let m := n.unpair.2
+  have hn : Nat.pair a m = n := by
+    simp [a, m, Nat.pair_unpair]
+  rw [← hn] at hv ⊢
+  exact nat_eval_mem_of_translate_rfind'_mem hf hv
+
 theorem translates_rfind'_mpr {cf : Nat.Partrec.Code}
     (hf : Translates cf (translate cf)) (n : Nat) (v : List Nat) :
     (∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.rfind' cf) n ∧ v = [x]) →
@@ -490,6 +634,14 @@ theorem translates_rfind'_mpr {cf : Nat.Partrec.Code}
     simp [a, m, Nat.pair_unpair]
   rw [← hn] at hx ⊢
   exact translate_rfind'_mem_of_nat_eval hf hx
+
+theorem translates_rfind' {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) :
+    Translates (.rfind' cf) (translate (.rfind' cf)) := by
+  intro n v
+  constructor
+  · exact translates_rfind'_mp hf n v
+  · exact translates_rfind'_mpr hf n v
 
 end NatPartrecToToPartrec
 
