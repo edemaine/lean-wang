@@ -102,6 +102,18 @@ abbrev PartrecStackSymbol (_k : PartrecStack) : Type :=
 abbrev PartrecVar : Type :=
   Option Turing.PartrecToTM2.Γ'
 
+/-- Explicit finite list of possible `PartrecToTM2` local variable values. -/
+def partrecVarList : List PartrecVar :=
+  none :: (PartrecToTM2Support.stackAlphabetList.map some)
+
+theorem mem_partrecVarList (v : PartrecVar) :
+    v ∈ partrecVarList := by
+  cases v with
+  | none =>
+      simp [partrecVarList]
+  | some a =>
+      simp [partrecVarList, PartrecToTM2Support.mem_stackAlphabetList a]
+
 /-- Mathlib's `PartrecToTM2` evaluator at the local constant stack-alphabet type. -/
 def partrecTM2 :
     Turing.PartrecToTM2.Λ' →
@@ -362,6 +374,70 @@ theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     · exact Or.inl hq
     · exact Or.inr ((mem_tm2to1StmtSupportList_iff).2 hq)
 
+/-- List-valued substatement closure for a TM1 statement. This mirrors
+`Turing.TM1.stmts₁` without using `Finset`. -/
+def tm1StmtSupportList {Γ Λ σ : Type}
+    (stmt : Turing.TM1.Stmt Γ Λ σ) : List (Turing.TM1.Stmt Γ Λ σ) :=
+  match stmt with
+  | Turing.TM1.Stmt.move _ q => stmt :: tm1StmtSupportList q
+  | Turing.TM1.Stmt.write _ q => stmt :: tm1StmtSupportList q
+  | Turing.TM1.Stmt.load _ q => stmt :: tm1StmtSupportList q
+  | Turing.TM1.Stmt.branch _ q₁ q₂ =>
+      stmt :: (tm1StmtSupportList q₁ ++ tm1StmtSupportList q₂)
+  | Turing.TM1.Stmt.goto _ => [stmt]
+  | Turing.TM1.Stmt.halt => [stmt]
+
+theorem mem_tm1StmtSupportList_iff {Γ Λ σ : Type}
+    {stmt q : Turing.TM1.Stmt Γ Λ σ} :
+    q ∈ tm1StmtSupportList stmt ↔ q ∈ Turing.TM1.stmts₁ stmt := by
+  induction stmt with
+  | move d stmt IH =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁, IH]
+  | write f stmt IH =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁, IH]
+  | load f stmt IH =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁, IH]
+  | branch f stmt₁ stmt₂ IH₁ IH₂ =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁, IH₁, IH₂]
+  | goto f =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁]
+  | halt =>
+      simp [tm1StmtSupportList, Turing.TM1.stmts₁]
+
+/-- List-valued statement support for a TM1 machine over a finite label list. -/
+def tm1StatementSupportList {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) :
+    List (Option (Turing.TM1.Stmt Γ Λ σ)) :=
+  none :: labels.flatMap fun q => (tm1StmtSupportList (M q)).map some
+
+theorem mem_tm1StatementSupportList_iff {Γ Λ σ : Type}
+    {labels : List Λ} {M : Λ → Turing.TM1.Stmt Γ Λ σ} {S : Finset Λ}
+    (hlabels : ∀ q : Λ, q ∈ labels ↔ q ∈ S)
+    (stmt : Option (Turing.TM1.Stmt Γ Λ σ)) :
+    stmt ∈ tm1StatementSupportList labels M ↔ stmt ∈ Turing.TM1.stmts M S := by
+  classical
+  cases stmt with
+  | none =>
+      simp [tm1StatementSupportList, Turing.TM1.stmts]
+  | some stmt =>
+      constructor
+      · intro h
+        unfold tm1StatementSupportList at h
+        simp only [List.mem_cons, Option.some.injEq, List.mem_flatMap, List.mem_map] at h
+        rcases h with hnone | ⟨q, hq, stmt', hstmt', hsome⟩
+        · cases hnone
+        · cases hsome
+          rw [Turing.TM1.stmts, Finset.some_mem_insertNone]
+          exact Finset.mem_biUnion.2
+            ⟨q, (hlabels q).1 hq, (mem_tm1StmtSupportList_iff).1 hstmt'⟩
+      · intro h
+        rw [Turing.TM1.stmts, Finset.some_mem_insertNone] at h
+        rcases Finset.mem_biUnion.1 h with ⟨q, hq, hstmt⟩
+        unfold tm1StatementSupportList
+        simp only [List.mem_cons, Option.some.injEq, List.mem_flatMap, List.mem_map]
+        exact Or.inr
+          ⟨q, (hlabels q).2 hq, stmt, (mem_tm1StmtSupportList_iff).2 hstmt, rfl⟩
+
 theorem partrecStartedTM1_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM1.Supports (partrecStartedTM1Machine tc)
       (partrecStartedTM1Labels tc) := by
@@ -384,14 +460,55 @@ noncomputable def partrecStartedTM0Labels (tc : Turing.ToPartrec.Code) :=
   Turing.TM1to0.trStmts (partrecStartedTM1Machine tc)
     (partrecStartedTM1Labels tc)
 
-noncomputable def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
+    List (Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)) :=
+  tm1StatementSupportList (partrecStartedTM1LabelList tc) (partrecStartedTM1Machine tc)
+
+theorem mem_partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code)
+    (stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)) :
+    stmt ∈ partrecStartedTM0StatementList tc ↔
+      stmt ∈ Turing.TM1.stmts (partrecStartedTM1Machine tc)
+        (partrecStartedTM1Labels tc) := by
+  unfold partrecStartedTM0StatementList
+  exact mem_tm1StatementSupportList_iff (mem_partrecStartedTM1LabelList tc) stmt
+
+def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
-  (partrecStartedTM0Labels tc).toList
+  (partrecStartedTM0StatementList tc).flatMap fun stmt =>
+    partrecVarList.map fun v => (stmt, v)
 
 theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :
     q ∈ partrecStartedTM0LabelList tc ↔ q ∈ partrecStartedTM0Labels tc := by
-  simp [partrecStartedTM0LabelList]
+  classical
+  rcases q with ⟨stmt, v⟩
+  unfold partrecStartedTM0LabelList partrecStartedTM0Labels Turing.TM1to0.trStmts
+  constructor
+  · intro h
+    rw [List.mem_flatMap] at h
+    rcases h with ⟨stmt', hstmt', hp⟩
+    rw [List.mem_map] at hp
+    rcases hp with ⟨v', hv', hq⟩
+    cases hq
+    change (stmt, v) ∈
+      (Turing.TM1.stmts (partrecStartedTM1Machine tc) (partrecStartedTM1Labels tc) ×ˢ
+        (Finset.univ : Finset PartrecVar))
+    rw [Finset.mem_product]
+    exact ⟨(mem_partrecStartedTM0StatementList tc stmt).1 hstmt', Finset.mem_univ v⟩
+  · intro h
+    change (stmt, v) ∈
+      (Turing.TM1.stmts (partrecStartedTM1Machine tc) (partrecStartedTM1Labels tc) ×ˢ
+        (Finset.univ : Finset PartrecVar)) at h
+    rw [Finset.mem_product] at h
+    exact List.mem_flatMap.2
+      ⟨stmt, (mem_partrecStartedTM0StatementList tc stmt).2 h.1,
+        List.mem_map.2 ⟨v, mem_partrecVarList v, rfl⟩⟩
 
 /--
 Finite support list for translated TM0 states, with the start/default state
@@ -467,15 +584,16 @@ theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
 
 /-- The finite cell values that can occur in one stack coordinate of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
-  none :: (PartrecToTM2Support.stackAlphabetList.map some)
+  partrecVarList
 
 theorem mem_partrecStartedTM0CellValues (a : Option Turing.PartrecToTM2.Γ') :
     a ∈ partrecStartedTM0CellValues := by
   cases a with
   | none =>
-      simp [partrecStartedTM0CellValues]
+      simp [partrecStartedTM0CellValues, partrecVarList]
   | some a =>
-      simp [partrecStartedTM0CellValues, PartrecToTM2Support.mem_stackAlphabetList a]
+      simp [partrecStartedTM0CellValues, partrecVarList,
+        PartrecToTM2Support.mem_stackAlphabetList a]
 
 /-- Build the four-stack vector component of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVector
