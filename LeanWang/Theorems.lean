@@ -241,6 +241,20 @@ theorem exists_natPartrecToTM2Reduction :
       rfl⟩
 
 /--
+The concrete `ToPartrecTM2Reduction` witness.
+
+This is noncomputable only because it is selected from an existence theorem; its
+`translate` field is the primitive-recursive translator proved in
+`NatPartrecToToPartrec`.
+-/
+noncomputable def natPartrecToTM2Reduction : ToPartrecTM2Reduction :=
+  Classical.choose exists_natPartrecToTM2Reduction
+
+theorem natPartrecToTM2Reduction_translate :
+    natPartrecToTM2Reduction.translate = NatPartrecToToPartrec.translate :=
+  Classical.choose_spec exists_natPartrecToTM2Reduction
+
+/--
 A computable reduction, implemented by compiling Mathlib TM2 evaluator
 configurations to finite table-machine data.
 
@@ -576,6 +590,34 @@ theorem fixed_corner_square_problem_undecidable_of_tm2Compiler
           (fixedDominoReduction (C.toTableCompiler R) c).1
           (fixedDominoReduction (C.toTableCompiler R) c).2 n) :=
   fixed_corner_square_problem_undecidable (C.toTableCompiler R)
+
+/--
+Fixed-domino undecidability from the concrete Mathlib-code-to-TM2 reduction and
+a TM2 table-machine reduction, implemented by compiling TM2 evaluator
+configurations to finite machine data.
+-/
+theorem fixed_domino_problem_undecidable_of_tm2Reduction
+    (C : TM2TableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        TilesQuarterWithSeed
+          (fixedDominoReduction (C.toTableCompiler natPartrecToTM2Reduction) c).1
+          (fixedDominoReduction (C.toTableCompiler natPartrecToTM2Reduction) c).2) :=
+  fixed_domino_problem_undecidable_of_tm2Compiler natPartrecToTM2Reduction C
+
+/--
+Fixed-corner square undecidability from the concrete Mathlib-code-to-TM2
+reduction and a TM2 table-machine reduction, implemented by compiling TM2
+evaluator configurations to finite machine data.
+-/
+theorem fixed_corner_square_problem_undecidable_of_tm2Reduction
+    (C : TM2TableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
+          (fixedDominoReduction (C.toTableCompiler natPartrecToTM2Reduction) c).1
+          (fixedDominoReduction (C.toTableCompiler natPartrecToTM2Reduction) c).2 n) :=
+  fixed_corner_square_problem_undecidable_of_tm2Compiler natPartrecToTM2Reduction C
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -1235,6 +1277,26 @@ theorem domino_problem_undecidable_of_scaffold_tm2Compiler
     (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
+
+/--
+Encoded domino undecidability from a scaffold, the concrete
+Mathlib-code-to-TM2 reduction, and a TM2 table-machine reduction.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_tm2Reduction
+    (S : Scaffold) (hS : IsScaffold S) (C : TM2TableCompiler) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_tm2Compiler
+    S hS natPartrecToTM2Reduction C
+
+/--
+Unencoded domino undecidability from a scaffold, the concrete
+Mathlib-code-to-TM2 reduction, and a TM2 table-machine reduction.
+-/
+theorem domino_problem_undecidable_of_scaffold_tm2Reduction
+    (S : Scaffold) (hS : IsScaffold S) (C : TM2TableCompiler) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_tm2Compiler
+    S hS natPartrecToTM2Reduction C
 
 end LeanWang
 
