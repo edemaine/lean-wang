@@ -35,19 +35,76 @@ def labels (tc : ToPartrec.Code) : Finset Λ' :=
 def stackNames : List K' :=
   [K'.main, K'.rev, K'.aux, K'.stack]
 
+theorem stackNames_nodup : stackNames.Nodup := by
+  simp [stackNames]
+
 theorem mem_stackNames (k : K') : k ∈ stackNames := by
   cases k <;> simp [stackNames]
+
+/-- Numeric code for a `PartrecToTM2` stack name. -/
+def stackNameCode : K' → Nat
+  | K'.main => 0
+  | K'.rev => 1
+  | K'.aux => 2
+  | K'.stack => 3
+
+theorem stackNameCode_lt_four (k : K') : stackNameCode k < 4 := by
+  cases k <;> decide
+
+theorem stackNameCode_injective : Function.Injective stackNameCode := by
+  intro a b h
+  cases a <;> cases b <;> simp [stackNameCode] at h ⊢
 
 /-- The finite stack alphabet used by Mathlib's `PartrecToTM2` evaluator. -/
 def stackAlphabet : Finset Γ' :=
   Finset.univ
 
+/-- List form of the finite stack alphabet. -/
+def stackAlphabetList : List Γ' :=
+  stackAlphabet.toList
+
 theorem mem_stackAlphabet (a : Γ') : a ∈ stackAlphabet := by
   simp [stackAlphabet]
+
+theorem mem_stackAlphabetList (a : Γ') : a ∈ stackAlphabetList := by
+  simp [stackAlphabetList, mem_stackAlphabet]
+
+theorem stackAlphabetList_nodup : stackAlphabetList.Nodup := by
+  exact Finset.nodup_toList stackAlphabet
+
+/-- Numeric code for a `PartrecToTM2` stack symbol. -/
+def stackSymbolCode : Γ' → Nat
+  | Γ'.consₗ => 0
+  | Γ'.cons => 1
+  | Γ'.bit0 => 2
+  | Γ'.bit1 => 3
+
+theorem stackSymbolCode_lt_four (a : Γ') : stackSymbolCode a < 4 := by
+  cases a <;> decide
+
+theorem stackSymbolCode_injective : Function.Injective stackSymbolCode := by
+  intro a b h
+  cases a <;> cases b <;> simp [stackSymbolCode] at h ⊢
 
 theorem startLabel_mem_labels (tc : ToPartrec.Code) :
     startLabel tc ∈ labels tc :=
   codeSupp_self tc Cont'.halt (trStmts₁_self _)
+
+/-- List form of the finite evaluator label set. -/
+def labelList (tc : ToPartrec.Code) : List Λ' :=
+  (labels tc).toList
+
+theorem mem_labelList {tc : ToPartrec.Code} {q : Λ'} :
+    q ∈ labelList tc ↔ q ∈ labels tc := by
+  simp [labelList]
+
+theorem labelList_nodup (tc : ToPartrec.Code) :
+    (labelList tc).Nodup := by
+  exact Finset.nodup_toList (labels tc)
+
+theorem startLabel_mem_labelList (tc : ToPartrec.Code) :
+    startLabel tc ∈ labelList tc :=
+  mem_labelList.2 (startLabel_mem_labels tc)
 
 theorem init_label_mem_labels (tc : ToPartrec.Code) :
     (init tc [0]).l ∈ Finset.insertNone (labels tc) := by
@@ -73,12 +130,33 @@ def statements (tc : ToPartrec.Code) : Finset (Option Stmt') :=
     classical
     exact TM2.stmts tr (labels tc)
 
+/-- List form of the finite statement-substate set. -/
+def statementList (tc : ToPartrec.Code) : List (Option Stmt') :=
+  by
+    classical
+    exact (statements tc).toList
+
+theorem mem_statementList {tc : ToPartrec.Code} {stmt : Option Stmt'} :
+    stmt ∈ statementList tc ↔ stmt ∈ statements tc := by
+  classical
+  simp [statementList]
+
+theorem statementList_nodup (tc : ToPartrec.Code) :
+    (statementList tc).Nodup := by
+  classical
+  exact Finset.nodup_toList (statements tc)
+
 theorem label_statement_mem {tc : ToPartrec.Code} {q : Λ'}
     (hq : q ∈ labels tc) :
     some (tr q) ∈ statements tc := by
   classical
   exact Finset.some_mem_insertNone.2
     (Finset.mem_biUnion.2 ⟨q, hq, TM2.stmts₁_self⟩)
+
+theorem label_statement_mem_list {tc : ToPartrec.Code} {q : Λ'}
+    (hq : q ∈ labelList tc) :
+    some (tr q) ∈ statementList tc :=
+  mem_statementList.2 (label_statement_mem (mem_labelList.1 hq))
 
 theorem statement_supports {tc : ToPartrec.Code} {stmt : Stmt'}
     (hstmt : some stmt ∈ statements tc) :
