@@ -93,9 +93,37 @@ def initState : Nat :=
 def evaluatorStateCode (n : Nat) : Nat :=
   n + 1
 
+/-- Numeric index for a TM2 evaluator substate, including the finite local variable. -/
+noncomputable def evaluatorSubstateIndex (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Option Turing.PartrecToTM2.Stmt') : Nat :=
+  PartrecToTM2Support.tapeSymbolCode var * (PartrecToTM2Support.statementList tc).length +
+    PartrecToTM2Support.statementIndex tc stmt
+
+/-- Table-machine state for a TM2 evaluator substate. -/
+noncomputable def statementState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Option Turing.PartrecToTM2.Stmt') : Nat :=
+  evaluatorStateCode (evaluatorSubstateIndex tc var stmt)
+
+theorem evaluatorSubstateIndex_lt {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
+    evaluatorSubstateIndex tc var stmt <
+      5 * (PartrecToTM2Support.statementList tc).length := by
+  have hvar := PartrecToTM2Support.tapeSymbolCode_lt_five var
+  have hstmtlt := PartrecToTM2Support.statementIndex_lt_length hstmt
+  unfold evaluatorSubstateIndex
+  exact lt_of_lt_of_le
+    (Nat.add_lt_add_left hstmtlt _)
+    (by
+      rw [← Nat.succ_mul]
+      exact Nat.mul_le_mul_right _ (Nat.succ_le_of_lt hvar))
+
 /-- Finite table-machine states for the TM2 evaluator substates. -/
 def evaluatorStates (tc : Turing.ToPartrec.Code) : List Nat :=
-  (PartrecToTM2Support.controlStates tc).map evaluatorStateCode
+  (List.range (5 * (PartrecToTM2Support.statementList tc).length)).map evaluatorStateCode
 
 /-- Raw finite table-machine state list, including the initialization state. -/
 def states (tc : Turing.ToPartrec.Code) : List Nat :=
@@ -103,16 +131,16 @@ def states (tc : Turing.ToPartrec.Code) : List Nat :=
 
 theorem states_nodup (tc : Turing.ToPartrec.Code) :
     (states tc).Nodup := by
-  unfold states evaluatorStates evaluatorStateCode PartrecToTM2Support.controlStates initState
+  unfold states evaluatorStates evaluatorStateCode initState
   simp [List.nodup_range.map (by intro a b h; exact Nat.succ.inj h)]
 
 /-- Table-machine state that starts the TM2 evaluator after initialization. -/
 noncomputable def evalStartState (tc : Turing.ToPartrec.Code) : Nat :=
-  evaluatorStateCode (PartrecToTM2Support.startState tc)
+  statementState tc none (some (Turing.PartrecToTM2.tr (PartrecToTM2Support.startLabel tc)))
 
 /-- Table-machine halting state corresponding to the halted TM2 configuration. -/
 noncomputable def haltState (tc : Turing.ToPartrec.Code) : Nat :=
-  evaluatorStateCode (PartrecToTM2Support.haltState tc)
+  statementState tc none none
 
 theorem initState_mem_states (tc : Turing.ToPartrec.Code) :
     initState ∈ states tc := by
@@ -120,38 +148,38 @@ theorem initState_mem_states (tc : Turing.ToPartrec.Code) :
 
 theorem evalStartState_mem_states (tc : Turing.ToPartrec.Code) :
     evalStartState tc ∈ states tc := by
-  unfold evalStartState states evaluatorStates evaluatorStateCode
-  simp [PartrecToTM2Support.startState_mem_controlStates tc]
+  unfold evalStartState statementState states evaluatorStates evaluatorStateCode
+  simp [evaluatorSubstateIndex_lt
+    (PartrecToTM2Support.label_statement_mem_list
+      (PartrecToTM2Support.startLabel_mem_labelList tc))]
 
 theorem haltState_mem_states (tc : Turing.ToPartrec.Code) :
     haltState tc ∈ states tc := by
-  unfold haltState states evaluatorStates evaluatorStateCode
-  simp [PartrecToTM2Support.haltState_mem_controlStates tc]
+  unfold haltState statementState states evaluatorStates evaluatorStateCode
+  simp [evaluatorSubstateIndex_lt (PartrecToTM2Support.none_mem_statementList tc)]
 
 theorem labelState_mem_states {tc : Turing.ToPartrec.Code}
     {q : Turing.PartrecToTM2.Λ'}
+    {var : Option Turing.PartrecToTM2.Γ'}
     (hq : q ∈ PartrecToTM2Support.labels tc) :
-    evaluatorStateCode
-      (PartrecToTM2Support.statementIndex tc (some (Turing.PartrecToTM2.tr q))) ∈ states tc := by
-  unfold states evaluatorStates evaluatorStateCode
-  simp [PartrecToTM2Support.labelState_mem_controlStates hq]
+    statementState tc var (some (Turing.PartrecToTM2.tr q)) ∈ states tc := by
+  unfold statementState states evaluatorStates evaluatorStateCode
+  simp [evaluatorSubstateIndex_lt (PartrecToTM2Support.label_statement_mem_list_of_label_mem hq)]
 
 theorem statementState_mem_states {tc : Turing.ToPartrec.Code}
     {stmt : Option Turing.PartrecToTM2.Stmt'}
+    {var : Option Turing.PartrecToTM2.Γ'}
     (hstmt : stmt ∈ PartrecToTM2Support.statementList tc) :
-    evaluatorStateCode (PartrecToTM2Support.statementIndex tc stmt) ∈ states tc := by
-  unfold states evaluatorStates evaluatorStateCode
-  simp [PartrecToTM2Support.statementIndex_mem_controlStates hstmt]
-
-/-- The statement substate corresponding to a TM2 configuration label. -/
-def cfgStatement : Option Turing.PartrecToTM2.Λ' → Option Turing.PartrecToTM2.Stmt'
-  | none => none
-  | some q => some (Turing.PartrecToTM2.tr q)
+    statementState tc var stmt ∈ states tc := by
+  unfold statementState states evaluatorStates evaluatorStateCode
+  simp [evaluatorSubstateIndex_lt hstmt]
 
 /-- Encoded table-machine state of a `PartrecToTM2` configuration. -/
 noncomputable def encodedState (tc : Turing.ToPartrec.Code)
     (cfg : Turing.PartrecToTM2.Cfg') : Nat :=
-  evaluatorStateCode (PartrecToTM2Support.statementIndex tc (cfgStatement cfg.l))
+  match cfg.l with
+  | none => haltState tc
+  | some q => statementState tc cfg.var (some (Turing.PartrecToTM2.tr q))
 
 theorem encodedState_mem_states {tc : Turing.ToPartrec.Code}
     {cfg : Turing.PartrecToTM2.Cfg'}
@@ -159,12 +187,12 @@ theorem encodedState_mem_states {tc : Turing.ToPartrec.Code}
     encodedState tc cfg ∈ states tc := by
   cases hcfg : cfg.l with
   | none =>
-      simpa [encodedState, cfgStatement, hcfg, haltState, PartrecToTM2Support.haltState] using
+      simpa [encodedState, hcfg] using
         haltState_mem_states tc
   | some q =>
       have hq : q ∈ PartrecToTM2Support.labels tc := by
         exact Finset.some_mem_insertNone.1 (by simpa [hcfg] using hlabel)
-      simpa [encodedState, cfgStatement, hcfg] using labelState_mem_states hq
+      simpa [encodedState, hcfg] using labelState_mem_states (var := cfg.var) hq
 
 /-- One-tape instantaneous description representing a `PartrecToTM2` configuration. -/
 noncomputable def encodedID (tc : Turing.ToPartrec.Code)
@@ -256,7 +284,7 @@ theorem encodedTape_init_stack (tc : Turing.ToPartrec.Code) (i : Nat) :
 
 theorem encodedState_init (tc : Turing.ToPartrec.Code) :
     encodedState tc (Turing.PartrecToTM2.init tc [0]) = evalStartState tc := by
-  simp [encodedState, evalStartState, cfgStatement, PartrecToTM2Support.startState,
+  simp [encodedState, evalStartState, statementState, evaluatorSubstateIndex,
     PartrecToTM2Support.startLabel, Turing.PartrecToTM2.init]
 
 /-- Symbol written by the fixed-input initialization row. -/
@@ -410,7 +438,7 @@ theorem programWithInitTable_runEmpty_one (tc : Turing.ToPartrec.Code)
     exact List.mem_cons_of_mem initState
       (List.mem_cons_of_mem (haltState tc) (evalStartState_mem_states tc))
   have hstart : (programWithInitTable tc table).start ≠ (programWithInitTable tc table).halt := by
-    simp [programWithInitTable, initState, haltState, evaluatorStateCode]
+    simp [programWithInitTable, initState, haltState, statementState, evaluatorStateCode]
   have hrun := TableProgram.toMachine_runEmpty_one_of_initial_transition
     (P := programWithInitTable tc table) (e := initTransition tc)
     hstart hfind hwrite hnext

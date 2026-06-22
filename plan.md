@@ -90,10 +90,15 @@ Completed proof layers:
 - finite `TableProgram` header data for the future `PartrecToTM2` table-machine
   reduction: the raw symbol list, raw state list, blank/start/halt codes, and a
   `programWithTable` constructor whose transition table remains to be filled.
+  The evaluator state space now pairs each statement substate with the finite
+  local variable `Option Γ'`, because Mathlib TM2 branches and stack reads
+  update or inspect this local variable; halted configurations still collapse
+  to the single table-machine halt state.
 - a concrete one-tape representation for `PartrecToTM2` configurations:
   the four stacks are interleaved at positions `4 * i + stackNameCode k`, with
   readback lemmas for each stack cell, and each supported TM2 configuration is
-  mapped to a `Machine.ID` using the finite control-state indices.
+  mapped to a `Machine.ID` using the finite control-state indices, including
+  the local variable in nonhalting evaluator states.
 - the table-machine header now reserves a separate blank-tape initialization
   state, shifts TM2 evaluator substates by `+1`, and includes the first
   initialization transition row that writes the fixed input `[0]` before
