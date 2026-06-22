@@ -98,7 +98,9 @@ Completed proof layers:
   state, shifts TM2 evaluator substates by `+1`, and includes the first
   initialization transition row that writes the fixed input `[0]` before
   entering the evaluator start state, with a proved one-step `runEmpty`
-  theorem for any table beginning with this initialization row.
+  theorem for any table beginning with this initialization row. The first-step
+  theorem is now connected to the stack-cell tape representation by readback
+  lemmas for all four initial stacks.
 
 The remaining construction obligations are explicit Lean interfaces:
 

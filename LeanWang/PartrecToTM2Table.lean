@@ -197,6 +197,30 @@ theorem encodedTape_init_main_zero (tc : Turing.ToPartrec.Code) :
         PartrecToTM2Support.tapeSymbolCode (some Turing.PartrecToTM2.Γ'.cons) := by
   simp [encodedTape_stackCell, Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim]
 
+theorem encodedTape_init_main_succ (tc : Turing.ToPartrec.Code) (i : Nat) :
+    encodedTape (Turing.PartrecToTM2.init tc [0])
+      (stackCellPos Turing.PartrecToTM2.K'.main (i + 1)) = blankSymbol := by
+  simp [encodedTape_stackCell, Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim,
+    blankSymbol]
+
+theorem encodedTape_init_rev (tc : Turing.ToPartrec.Code) (i : Nat) :
+    encodedTape (Turing.PartrecToTM2.init tc [0])
+      (stackCellPos Turing.PartrecToTM2.K'.rev i) = blankSymbol := by
+  simp [encodedTape_stackCell, Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim,
+    blankSymbol]
+
+theorem encodedTape_init_aux (tc : Turing.ToPartrec.Code) (i : Nat) :
+    encodedTape (Turing.PartrecToTM2.init tc [0])
+      (stackCellPos Turing.PartrecToTM2.K'.aux i) = blankSymbol := by
+  simp [encodedTape_stackCell, Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim,
+    blankSymbol]
+
+theorem encodedTape_init_stack (tc : Turing.ToPartrec.Code) (i : Nat) :
+    encodedTape (Turing.PartrecToTM2.init tc [0])
+      (stackCellPos Turing.PartrecToTM2.K'.stack i) = blankSymbol := by
+  simp [encodedTape_stackCell, Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim,
+    blankSymbol]
+
 theorem encodedState_init (tc : Turing.ToPartrec.Code) :
     encodedState tc (Turing.PartrecToTM2.init tc [0]) = evalStartState tc := by
   simp [encodedState, evalStartState, cfgStatement, PartrecToTM2Support.startState,
@@ -358,6 +382,18 @@ theorem programWithInitTable_runEmpty_one (tc : Turing.ToPartrec.Code)
     (P := programWithInitTable tc table) (e := initTransition tc)
     hstart hfind hwrite hnext
   simpa [programWithInitTable, Move.apply, inputZeroSymbol] using hrun
+
+theorem programWithInitTable_runEmpty_one_stackCell (tc : Turing.ToPartrec.Code)
+    (table : List TableTransition)
+    (k : Turing.PartrecToTM2.K') (i : Nat) :
+    ((programWithInitTable tc table).toMachine.runEmpty 1).tape (stackCellPos k i) =
+      encodedTape (Turing.PartrecToTM2.init tc [0]) (stackCellPos k i) := by
+  rw [programWithInitTable_runEmpty_one]
+  rw [encodedTape_stackCell]
+  cases k <;> cases i <;>
+    simp [stackCellPos, PartrecToTM2Support.stackNameCode,
+      Turing.PartrecToTM2.init, Turing.PartrecToTM2.K'.elim, inputZeroSymbol,
+      blankSymbol]
 
 end PartrecToTM2Table
 
