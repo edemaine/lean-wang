@@ -130,6 +130,11 @@ Completed proof layers:
   preservation lemmas. For a table containing just the corresponding row family,
   `nextID` preserves `RepresentsSubstate` for `load`, `branch`, `goto`, and
   `halt`, assuming the usual current-state-not-halt and target support facts.
+- the stack side now has representation-level `pushStack` and `popStack`
+  helpers matching Mathlib's `TM2.stepAux` stack updates, with readback lemmas
+  for the affected interleaved stack column and the untouched columns. These
+  are the stack-shift specifications that the future moving transition rows
+  must realize.
 
 The remaining construction obligations are explicit Lean interfaces:
 

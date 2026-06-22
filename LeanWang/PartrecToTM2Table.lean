@@ -87,6 +87,127 @@ theorem encodedStacks_stackCell
   simp [encodedStacks, stackCellPos_mod_four, stackCellPos_div_four,
     stackNameOfCode_stackNameCode]
 
+/-- Push one symbol onto stack `k`. -/
+def pushStack
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (a : Turing.PartrecToTM2.Γ') :
+    ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ' :=
+  Function.update stk k (a :: stk k)
+
+/-- Pop one symbol from stack `k`, if present. -/
+def popStack
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') :
+    ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ' :=
+  Function.update stk k (stk k).tail
+
+@[simp]
+theorem pushStack_self
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (a : Turing.PartrecToTM2.Γ') :
+    pushStack stk k a k = a :: stk k := by
+  simp [pushStack]
+
+theorem pushStack_of_ne
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    {k k' : Turing.PartrecToTM2.K'} (a : Turing.PartrecToTM2.Γ')
+    (h : k' ≠ k) :
+    pushStack stk k a k' = stk k' := by
+  simp [pushStack, Function.update_of_ne h]
+
+@[simp]
+theorem popStack_self
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') :
+    popStack stk k k = (stk k).tail := by
+  simp [popStack]
+
+theorem popStack_of_ne
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    {k k' : Turing.PartrecToTM2.K'} (h : k' ≠ k) :
+    popStack stk k k' = stk k' := by
+  simp [popStack, Function.update_of_ne h]
+
+theorem encodedStacks_pushStack_target_zero
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (a : Turing.PartrecToTM2.Γ') :
+    encodedStacks (pushStack stk k a) (stackCellPos k 0) =
+      PartrecToTM2Support.tapeSymbolCode (some a) := by
+  simp [encodedStacks_stackCell]
+
+theorem encodedStacks_pushStack_target_succ
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (a : Turing.PartrecToTM2.Γ') (i : Nat) :
+    encodedStacks (pushStack stk k a) (stackCellPos k (i + 1)) =
+      encodedStacks stk (stackCellPos k i) := by
+  simp [encodedStacks_stackCell]
+
+theorem encodedStacks_pushStack_other
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    {k k' : Turing.PartrecToTM2.K'} (a : Turing.PartrecToTM2.Γ') (i : Nat)
+    (h : k' ≠ k) :
+    encodedStacks (pushStack stk k a) (stackCellPos k' i) =
+      encodedStacks stk (stackCellPos k' i) := by
+  simp [encodedStacks_stackCell, pushStack_of_ne stk a h]
+
+theorem encodedStacks_popStack_target
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (i : Nat) :
+    encodedStacks (popStack stk k) (stackCellPos k i) =
+      encodedStacks stk (stackCellPos k (i + 1)) := by
+  cases stk k <;> cases i <;> simp [encodedStacks_stackCell]
+
+theorem encodedStacks_popStack_other
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    {k k' : Turing.PartrecToTM2.K'} (i : Nat) (h : k' ≠ k) :
+    encodedStacks (popStack stk k) (stackCellPos k' i) =
+      encodedStacks stk (stackCellPos k' i) := by
+  simp [encodedStacks_stackCell, popStack_of_ne stk h]
+
+theorem pushStack_eq_tm2_update
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') (a : Turing.PartrecToTM2.Γ') :
+    pushStack stk k a = Function.update stk k (a :: stk k) :=
+  rfl
+
+theorem popStack_eq_tm2_update
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ')
+    (k : Turing.PartrecToTM2.K') :
+    popStack stk k = Function.update stk k (stk k).tail :=
+  rfl
+
+theorem tm2_stepAux_push
+    (k : Turing.PartrecToTM2.K')
+    (f : Option Turing.PartrecToTM2.Γ' → Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt')
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ') :
+    Turing.TM2.stepAux (Turing.TM2.Stmt.push k f q) var stk =
+      Turing.TM2.stepAux q var (pushStack stk k (f var)) := by
+  rfl
+
+theorem tm2_stepAux_peek_var
+    (k : Turing.PartrecToTM2.K')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt')
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ') :
+    Turing.TM2.stepAux (Turing.TM2.Stmt.peek k f q) var stk =
+      Turing.TM2.stepAux q (f var (stk k).head?) stk := by
+  rfl
+
+theorem tm2_stepAux_pop
+    (k : Turing.PartrecToTM2.K')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt')
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ') :
+    Turing.TM2.stepAux (Turing.TM2.Stmt.pop k f q) var stk =
+      Turing.TM2.stepAux q (f var (stk k).head?) (popStack stk k) := by
+  rfl
+
 /-- One-sided tape encoding of a full `PartrecToTM2` configuration. -/
 def encodedTape (cfg : Turing.PartrecToTM2.Cfg') : Nat → Nat :=
   encodedStacks cfg.stk

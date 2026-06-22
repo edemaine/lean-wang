@@ -28,7 +28,8 @@ the concrete definitions needed for the Berger/Robinson route:
   one-tape configuration representation for the eventual `PartrecToTM2`
   table-machine reduction, including intermediate statement substates and
   stationary row families and preservation lemmas for `load`, `branch`,
-  `goto`, and `halt` microsteps.
+  `goto`, and `halt` microsteps, plus representation lemmas for stack
+  push/pop updates.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
