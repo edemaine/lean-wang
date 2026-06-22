@@ -128,6 +128,43 @@ instance instFintypeTuringDir : Fintype Turing.Dir where
   elems := ⟨dirList, dirList_nodup⟩
   complete := mem_dirList
 
+def tm0StmtToSum : Turing.TM0.Stmt SourceSymbol → Turing.Dir ⊕ SourceSymbol
+  | Turing.TM0.Stmt.move dir => Sum.inl dir
+  | Turing.TM0.Stmt.write a => Sum.inr a
+
+def tm0StmtOfSum : Turing.Dir ⊕ SourceSymbol → Turing.TM0.Stmt SourceSymbol
+  | Sum.inl dir => Turing.TM0.Stmt.move dir
+  | Sum.inr a => Turing.TM0.Stmt.write a
+
+def tm0StmtEquivSum : Turing.TM0.Stmt SourceSymbol ≃ Turing.Dir ⊕ SourceSymbol where
+  toFun := tm0StmtToSum
+  invFun := tm0StmtOfSum
+  left_inv := by
+    intro stmt
+    cases stmt <;> rfl
+  right_inv := by
+    intro s
+    cases s <;> rfl
+
+instance instPrimcodableSourceTM0Stmt :
+    Primcodable (Turing.TM0.Stmt SourceSymbol) :=
+  Primcodable.ofEquiv (Turing.Dir ⊕ SourceSymbol) tm0StmtEquivSum
+
+theorem tm0StmtToSum_primrec : Primrec tm0StmtToSum := by
+  simpa [tm0StmtEquivSum] using
+    (Primrec.of_equiv (e := tm0StmtEquivSum) : Primrec tm0StmtEquivSum)
+
+theorem tm0StmtOfSum_primrec : Primrec tm0StmtOfSum := by
+  simpa [tm0StmtEquivSum] using
+    (Primrec.of_equiv_symm (e := tm0StmtEquivSum) :
+      Primrec tm0StmtEquivSum.symm)
+
+theorem tm0StmtMove_primrec : Primrec (Turing.TM0.Stmt.move (Γ := SourceSymbol)) := by
+  exact tm0StmtOfSum_primrec.comp Primrec.sumInl
+
+theorem tm0StmtWrite_primrec : Primrec (Turing.TM0.Stmt.write (Γ := SourceSymbol)) := by
+  exact tm0StmtOfSum_primrec.comp Primrec.sumInr
+
 def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
     (Nat.pair
@@ -209,6 +246,21 @@ def foldedSimStateCode (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (q : SourceLabel tc) : Nat :=
   taggedState stateTagSim
     (Nat.pair side.code (TM0FiniteCompiler.stateCode tc q))
+
+def foldedSimStateOfCode (side : FoldSide) (qCode : Nat) : Nat :=
+  taggedState stateTagSim (Nat.pair side.code qCode)
+
+theorem foldedSimStateOfCode_primrec :
+    Primrec (fun p : FoldSide × Nat => foldedSimStateOfCode p.1 p.2) := by
+  unfold foldedSimStateOfCode taggedState
+  exact Primrec₂.natPair.comp (Primrec.const stateTagSim)
+    (Primrec₂.natPair.comp (FoldSide.code_primrec.comp Primrec.fst) Primrec.snd)
+
+theorem foldedSimStateCode_eq_ofCode (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (q : SourceLabel tc) :
+    foldedSimStateCode tc side q =
+      foldedSimStateOfCode side (TM0FiniteCompiler.stateCode tc q) := by
+  rfl
 
 def initWriteOriginState : Nat :=
   taggedState stateTagInit 0
@@ -690,6 +742,21 @@ theorem foldedWriteForStmt_primrec :
     (fun p : FoldSide × Bool × SourceSymbol × SourceSymbol × SourceSymbol =>
       foldedWriteForStmt p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2)
 
+def simRowOfStepCode
+    (side : FoldSide) (marked : Bool)
+    (qCode q'Code : Nat) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) : PostTransition :=
+  let read := foldedSymbolCode marked left right
+  match stmt with
+  | Turing.TM0.Stmt.write new =>
+      mkRow (foldedSimStateOfCode side qCode) read
+        (foldedSimStateOfCode side q'Code)
+        (PostStmt.write (foldedWriteForStmt side marked new left right))
+  | Turing.TM0.Stmt.move dir =>
+      mkRow (foldedSimStateOfCode side qCode) read
+        (foldedSimStateOfCode (foldedMoveNextSide side marked dir) q'Code)
+        (foldedMoveStmt side marked read dir)
+
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
     (q q' : SourceLabel tc) (left right : SourceSymbol)
@@ -704,6 +771,16 @@ def simRowOfStep (tc : Turing.ToPartrec.Code)
       mkRow (foldedSimStateCode tc side q) read
         (foldedSimStateCode tc (foldedMoveNextSide side marked dir) q')
         (foldedMoveStmt side marked read dir)
+
+theorem simRowOfStep_eq_code (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q q' : SourceLabel tc) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) :
+    simRowOfStep tc side marked q q' left right stmt =
+      simRowOfStepCode side marked
+        (TM0FiniteCompiler.stateCode tc q) (TM0FiniteCompiler.stateCode tc q')
+        left right stmt := by
+  cases stmt <;> rfl
 
 def simTransitionOfStep (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
