@@ -101,7 +101,7 @@ abbrev PartrecVar : Type :=
   Option Turing.PartrecToTM2.Γ'
 
 /-- Explicit finite list of possible `PartrecToTM2` local variable values. -/
-noncomputable def partrecVarList : List PartrecVar :=
+def partrecVarList : List PartrecVar :=
   none :: (PartrecToTM2Support.stackAlphabetList.map some)
 
 theorem mem_partrecVarList (v : PartrecVar) :
@@ -794,7 +794,7 @@ theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
   exact List.getElem?_idxOf hq
 
 /-- The finite cell values that can occur in one stack coordinate of the TM2-to-TM1 alphabet. -/
-noncomputable def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
+def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
   partrecVarList
 
 theorem mem_partrecStartedTM0CellValues (a : Option Turing.PartrecToTM2.Γ') :
@@ -865,7 +865,7 @@ instance instPrimcodablePartrecStartedTM0Symbol :
     (Bool × (∀ k : PartrecStack, Option (PartrecStackSymbol k))))
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
-noncomputable def partrecStartedTM0StackVectors :
+def partrecStartedTM0StackVectors :
     List (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
   partrecStartedTM0CellValues.flatMap fun main =>
     partrecStartedTM0CellValues.flatMap fun rev =>
@@ -891,7 +891,7 @@ theorem mem_partrecStartedTM0StackVectors
       rfl⟩
 
 /-- Explicit finite list of all symbols in the TM0 machine produced by `TM0Route`. -/
-noncomputable def partrecStartedTM0SymbolList :
+def partrecStartedTM0SymbolList :
     List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
   [false, true].flatMap fun bottom =>
     partrecStartedTM0StackVectors.map fun cells =>
@@ -910,7 +910,7 @@ theorem partrecStartedTM0Input_symbols (a : Turing.TM2to1.Γ' PartrecStack Partr
   mem_partrecStartedTM0SymbolList a
 
 /-- Numeric code for the four-stack vector component of a translated TM0 tape symbol. -/
-noncomputable def partrecStartedTM0StackVectorCode
+def partrecStartedTM0StackVectorCode
     (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) : Nat :=
   Nat.pair
     (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.main))
@@ -955,7 +955,7 @@ theorem partrecStartedTM0StackVectorCode_primrec :
   exact Primrec.dom_finite partrecStartedTM0StackVectorCode
 
 /-- Numeric code for a translated TM0 tape symbol. -/
-noncomputable def partrecStartedTM0SymbolCode
+def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
   Nat.pair (if a.1 then 1 else 0) (partrecStartedTM0StackVectorCode a.2)
 
@@ -980,7 +980,7 @@ theorem partrecStartedTM0SymbolCode_primrec :
   exact Primrec.dom_finite partrecStartedTM0SymbolCode
 
 /-- Numeric alphabet for the translated TM0 route, suitable for `FiniteTM0Program`. -/
-noncomputable def partrecStartedTM0Symbols : List Nat :=
+def partrecStartedTM0Symbols : List Nat :=
   partrecStartedTM0SymbolList.map partrecStartedTM0SymbolCode
 
 theorem partrecStartedTM0SymbolCode_mem_symbols
@@ -989,7 +989,7 @@ theorem partrecStartedTM0SymbolCode_mem_symbols
   List.mem_map_of_mem (f := partrecStartedTM0SymbolCode) (mem_partrecStartedTM0SymbolList a)
 
 /-- Numeric code of the translated TM0 blank symbol. -/
-noncomputable def partrecStartedTM0Blank : Nat :=
+def partrecStartedTM0Blank : Nat :=
   partrecStartedTM0SymbolCode default
 
 theorem partrecStartedTM0Blank_mem_symbols :
