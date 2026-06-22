@@ -188,10 +188,42 @@ state-code path is now executable; the next step is to remove or localize the
 file-wide noncomputable section in `TM0FoldedCompiler` and prove the resulting
 program map computable.
 
+There is now also a lighter source-level folded route in
+`TM0FoldedReduction`. It records the exact obligations needed for the final
+undecidability reduction from `Nat.Partrec.Code`:
+
+```lean
+structure TM0FoldedReduction.SourceObligations where
+  program_computable :
+    Computable (fun c : Nat.Partrec.Code =>
+      TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+  correct : forall c : Nat.Partrec.Code,
+    (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
+      (Nat.Partrec.Code.eval c 0).Dom
+```
+
+The semantic half follows from the already-proved folded correctness theorem in
+`TM0FoldedCompiler` together with the `NatPartrecToToPartrec.translate`
+correctness chain. Keeping it as an explicit source-level obligation avoids
+forcing the lightweight reduction file to import the very large folded semantic
+proof.  The remaining computational target can therefore be narrowed to
+computability of `TM0FoldedCompiler.program ∘ NatPartrecToToPartrec.translate`,
+rather than computability on arbitrary `Turing.ToPartrec.Code`.
+
 Next implementation targets:
 
-1. Prove computability of the folded finite-TM0 compiler, or refactor the
-   support enumeration so the folded program can be packaged as:
+1. Prove source-level computability of the folded finite-TM0 reduction:
+
+   ```lean
+   Computable (fun c : Nat.Partrec.Code =>
+     TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+   ```
+
+   This can use Mathlib's existing recursion theorem for `Nat.Partrec.Code`
+   instead of first proving a general recursion theorem for
+   `Turing.ToPartrec.Code`.
+2. Optionally strengthen the result to computability on all
+   `Turing.ToPartrec.Code` so the folded program can be packaged as:
 
    ```lean
    TM0FiniteCompiler
@@ -199,13 +231,13 @@ Next implementation targets:
 
    with `compile := TM0FoldedCompiler.program` and correctness supplied by
    `TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom`.
-2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-3. Specialize the concrete TM0/scaffold corollaries, in particular
+3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+4. Specialize the concrete TM0/scaffold corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction_concrete` and
    `domino_problem_undecidable_of_scaffold_tm0Reduction_concrete`, to those
    concrete instances to recover the unconditional encoded and unencoded domino
    theorems.
-4. Optionally replace the current table-machine tiles by direct finite-TM0
+5. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0
    instruction set is already close to the Wang-tile space-time simulation, so
    this should remove the `PostProgram.toTableProgram` detour from the final
