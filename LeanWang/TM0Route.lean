@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.PartrecToTM2Support
+import LeanWang.PartrecToTM2SupportList
 import Mathlib.Data.Nat.Pairing
 
 /-!
@@ -556,9 +556,9 @@ theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
       simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁]
 
 /-- List-valued support for the started TM1 machine obtained from the TM2-to-TM1 translation. -/
-noncomputable def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
-  (PartrecToTM2Support.labelList tc).flatMap fun q =>
+  (PartrecToTM2SupportList.labelList tc).flatMap fun q =>
     let q' := StartedLabel.wrap tc q
     Turing.TM2to1.Λ'.normal q' :: tm2to1StmtSupportList (partrecStartedTM2 tc q')
 
@@ -576,7 +576,7 @@ theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     rcases h with ⟨r, hr, hq⟩
     have hrlabels : StartedLabel.wrap tc r ∈ partrecStartedTM2Labels tc :=
       (mem_partrecStartedTM2Labels tc (StartedLabel.wrap tc r)).2
-        ((PartrecToTM2Support.mem_labelList).1 hr)
+        (PartrecToTM2SupportList.mem_labelList_iff.1 hr)
     simp only [Turing.TM2to1.trSupp, Finset.mem_biUnion]
     refine ⟨StartedLabel.wrap tc r, hrlabels, ?_⟩
     simp only [List.mem_cons] at hq
@@ -590,7 +590,7 @@ theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     rcases h with ⟨r, hr, hq⟩
     rcases (mem_partrecStartedTM2Labels tc r).1 hr with hrlabels
     refine List.mem_flatMap.2
-      ⟨r.val, (PartrecToTM2Support.mem_labelList).2 hrlabels, ?_⟩
+      ⟨r.val, PartrecToTM2SupportList.mem_labelList_iff.2 hrlabels, ?_⟩
     have hwrap : StartedLabel.wrap tc r.val = r := by
       cases r
       rfl
@@ -686,7 +686,7 @@ noncomputable def partrecStartedTM0Labels (tc : Turing.ToPartrec.Code) :=
   Turing.TM1to0.trStmts (partrecStartedTM1Machine tc)
     (partrecStartedTM1Labels tc)
 
-noncomputable def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
     List (Option (Turing.TM1.Stmt
       (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
       (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
@@ -704,7 +704,7 @@ theorem mem_partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code)
   unfold partrecStartedTM0StatementList
   exact mem_tm1StatementSupportList_iff (mem_partrecStartedTM1LabelList tc) stmt
 
-noncomputable def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   (partrecStartedTM0StatementList tc).flatMap fun stmt =>
     partrecVarList.map fun v => (stmt, v)
@@ -740,7 +740,7 @@ theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
 Finite support list for translated TM0 states, with the start/default state
 forced to position `0`.
 -/
-noncomputable def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
+def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   default :: partrecStartedTM0LabelList tc
 
@@ -756,7 +756,7 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
   simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
 
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
-noncomputable def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
+def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
   List.range (partrecStartedTM0LabelSupportList tc).length
 
 /-- Numeric start state corresponding to the default translated TM0 label. -/
@@ -773,7 +773,7 @@ theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) 
   simp [partrecStartedTM0LabelSupportList]
 
 /-- Numeric code for a supported translated TM0 state. -/
-noncomputable def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
+def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
     (_hq : q ∈ partrecStartedTM0LabelSupportList tc) : Nat :=
   (partrecStartedTM0LabelSupportList tc).idxOf q

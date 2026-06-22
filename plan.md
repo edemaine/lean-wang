@@ -201,10 +201,12 @@ also have injective numeric codes and a numeric symbol list for the eventual
 
 `PartrecToTM2SupportList` now provides executable list mirrors of Mathlib's
 `trStmts₁`, `codeSupp'`, `contSupp`, and `codeSupp` finsets, with membership
-equivalence to the current support sets. This isolates the next computability
-step: switch the TM0 route's code-dependent label enumeration away from
-`Finset.toList` and onto this explicit recursive support list, then prove the
-folded program compiler computable.
+equivalence to the current support sets. The TM0 route's code-dependent
+downstream label enumeration now uses this explicit recursive support list
+instead of `Finset.toList`; the resulting translated TM0 label list, support
+list, numeric state list, and state code are executable. This isolates the next
+computability step: prove or package computability of the folded program
+compiler itself.
 
 The old direct finite-program construction from this route data has been
 removed because it was not the right semantic bridge: Mathlib TM0 has a
@@ -226,11 +228,10 @@ TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
 ```
 
 The remaining blocker to packaging this as a `TM0FiniteCompiler` is
-computability of `TM0FoldedCompiler.program`. The hard part is not the folded
-tape simulation but the currently noncomputable numeric state code derived from
-the support list for translated Mathlib TM0 labels. A clean finish should
-replace or supplement this support view with computable finite code-generated
-state data.
+computability of `TM0FoldedCompiler.program`. The support-list and numeric
+state-code path is now executable; the next step is to remove or localize the
+file-wide noncomputable section in `TM0FoldedCompiler` and prove the resulting
+program map computable.
 
 Next implementation targets:
 

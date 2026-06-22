@@ -32,8 +32,8 @@ the concrete definitions needed for the Berger/Robinson route:
   Mathlib's concrete `PartrecToTM2` evaluator.
 - `LeanWang.PartrecToTM2SupportList`: executable list mirrors of Mathlib's
   `PartrecToTM2` support finsets, with membership equivalence to the current
-  finite support sets. This is intended to replace the remaining
-  `Finset.toList`-based support enumeration in the TM0 route.
+  finite support sets. The TM0 route uses this executable list for its concrete
+  downstream label and state enumeration.
 - `LeanWang.TM0Route`: a Mathlib TM0 route that wraps the code-dependent
   `PartrecToTM2` start label as the default TM2 label, composes Mathlib's
   TM2-to-TM1 and TM1-to-TM0 translations, and proves the composed TM0 evaluator

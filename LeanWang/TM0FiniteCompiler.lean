@@ -22,7 +22,7 @@ namespace TM0FiniteCompiler
 open TM0Route
 
 /-- Numeric code for a supported translated TM0 state. -/
-noncomputable def stateCode (tc : Turing.ToPartrec.Code)
+def stateCode (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) : Nat :=
   (TM0Route.partrecStartedTM0LabelSupportList tc).idxOf q
 
