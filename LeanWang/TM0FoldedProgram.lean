@@ -1018,6 +1018,18 @@ theorem programOfCountAndRows_primrec :
   exact programOfParts_primrec.comp
     (Primrec.pair (Primrec.list_range.comp Primrec.fst) Primrec.snd)
 
+def programOfCountAndSimRows (stateCount : Nat) (sim : List PostTransition) :
+    FiniteTM0Program :=
+  programOfCountAndRows stateCount initRowsData sim
+
+theorem programOfCountAndSimRows_primrec :
+    Primrec (fun p : Nat × List PostTransition =>
+      programOfCountAndSimRows p.1 p.2) := by
+  unfold programOfCountAndSimRows
+  exact programOfCountAndRows_primrec.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.const initRowsData) Primrec.snd))
+
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
   programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc) (initRows tc) (simRows tc)
 
@@ -1029,6 +1041,11 @@ theorem program_eq_programOfCountAndRows (tc : Turing.ToPartrec.Code) :
     program tc =
       programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc)
         (initRows tc) (simRows tc) := rfl
+
+theorem program_eq_programOfCountAndSimRows (tc : Turing.ToPartrec.Code) :
+    program tc =
+      programOfCountAndSimRows (TM0Route.partrecStartedTM0StateCount tc) (simRows tc) := by
+  rw [program_eq_programOfCountAndRows, programOfCountAndSimRows, initRows_eq_data]
 
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
