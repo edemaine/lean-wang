@@ -278,6 +278,90 @@ def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
 noncomputable def partrecStartedTM1Labels (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.trSupp (partrecStartedTM2 tc) (partrecStartedTM2Labels tc)
 
+/-- List-valued support states introduced by Mathlib's TM2-to-TM1 translation for one TM2
+statement. This mirrors `Turing.TM2to1.trStmts₁` without using `Finset`. -/
+def tm2to1StmtSupportList {Λ : Type}
+    (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
+    List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Λ PartrecVar) :=
+  match stmt with
+  | Turing.TM2.Stmt.push k f q =>
+      [Turing.TM2to1.Λ'.go k (Turing.TM2to1.StAct.push f) q,
+        Turing.TM2to1.Λ'.ret q] ++ tm2to1StmtSupportList q
+  | Turing.TM2.Stmt.peek k f q =>
+      [Turing.TM2to1.Λ'.go k (Turing.TM2to1.StAct.peek f) q,
+        Turing.TM2to1.Λ'.ret q] ++ tm2to1StmtSupportList q
+  | Turing.TM2.Stmt.pop k f q =>
+      [Turing.TM2to1.Λ'.go k (Turing.TM2to1.StAct.pop f) q,
+        Turing.TM2to1.Λ'.ret q] ++ tm2to1StmtSupportList q
+  | Turing.TM2.Stmt.load _ q => tm2to1StmtSupportList q
+  | Turing.TM2.Stmt.branch _ q₁ q₂ =>
+      tm2to1StmtSupportList q₁ ++ tm2to1StmtSupportList q₂
+  | Turing.TM2.Stmt.goto _ => []
+  | Turing.TM2.Stmt.halt => []
+
+theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
+    {stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar}
+    {q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Λ PartrecVar} :
+    q ∈ tm2to1StmtSupportList stmt ↔ q ∈ Turing.TM2to1.trStmts₁ stmt := by
+  induction stmt with
+  | push k f stmt IH =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁, IH]
+  | peek k f stmt IH =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁, IH]
+  | pop k f stmt IH =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁, IH]
+  | load f stmt IH =>
+      simpa [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁] using IH
+  | branch f stmt₁ stmt₂ IH₁ IH₂ =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁, IH₁, IH₂]
+  | goto f =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁]
+  | halt =>
+      simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁]
+
+/-- List-valued support for the started TM1 machine obtained from the TM2-to-TM1 translation. -/
+def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
+    List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
+  (PartrecToTM2Support.labelList tc).flatMap fun q =>
+    let q' := StartedLabel.wrap tc q
+    Turing.TM2to1.Λ'.normal q' :: tm2to1StmtSupportList (partrecStartedTM2 tc q')
+
+theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :
+    q ∈ partrecStartedTM1LabelList tc ↔ q ∈ partrecStartedTM1Labels tc := by
+  classical
+  constructor
+  · intro h
+    unfold partrecStartedTM1LabelList at h
+    unfold partrecStartedTM1Labels
+    rw [List.mem_flatMap] at h
+    rcases h with ⟨r, hr, hq⟩
+    have hrlabels : StartedLabel.wrap tc r ∈ partrecStartedTM2Labels tc :=
+      (mem_partrecStartedTM2Labels tc (StartedLabel.wrap tc r)).2
+        ((PartrecToTM2Support.mem_labelList).1 hr)
+    simp only [Turing.TM2to1.trSupp, Finset.mem_biUnion]
+    refine ⟨StartedLabel.wrap tc r, hrlabels, ?_⟩
+    simp only [List.mem_cons] at hq
+    rcases hq with hq | hq
+    · exact Finset.mem_insert.2 (Or.inl hq)
+    · exact Finset.mem_insert.2
+        (Or.inr ((mem_tm2to1StmtSupportList_iff).1 hq))
+  · intro h
+    unfold partrecStartedTM1LabelList partrecStartedTM1Labels at *
+    simp only [Turing.TM2to1.trSupp, Finset.mem_biUnion] at h
+    rcases h with ⟨r, hr, hq⟩
+    rcases (mem_partrecStartedTM2Labels tc r).1 hr with hrlabels
+    refine List.mem_flatMap.2
+      ⟨r.val, (PartrecToTM2Support.mem_labelList).2 hrlabels, ?_⟩
+    have hwrap : StartedLabel.wrap tc r.val = r := by
+      cases r
+      rfl
+    rw [← hwrap] at hq
+    simp only [List.mem_cons]
+    rcases Finset.mem_insert.1 hq with hq | hq
+    · exact Or.inl hq
+    · exact Or.inr ((mem_tm2to1StmtSupportList_iff).2 hq)
+
 theorem partrecStartedTM1_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM1.Supports (partrecStartedTM1Machine tc)
       (partrecStartedTM1Labels tc) := by
