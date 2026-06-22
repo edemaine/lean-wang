@@ -10,7 +10,8 @@ import Mathlib.Logic.Function.Iterate
 Concrete one-tape machines for the Wang-tile simulation layer.
 
 This is intentionally a small target language. A later file can prove that
-Mathlib's partial-recursive codes reduce/compile to this model, while the
+Mathlib's partial-recursive codes reduce to this model, by compiling them to
+finite machine data, while the
 tiling construction only has to reason about the local successor relation below.
 -/
 
@@ -366,7 +367,8 @@ end TableTransition
 /--
 A finite transition-table presentation of the concrete machine model.
 
-This is the intended target for future computable reductions/compilers: it
+This is the intended target for future computable reductions, implemented as
+compilers to finite transition tables: it
 contains only finite data plus support proofs. The semantic `Machine` is still
 used by the Wang-tile construction.
 -/
@@ -390,7 +392,7 @@ def transition? (M : TableMachine) (q a : Nat) : Option TableTransition :=
 The guarded transition function induced by a finite table.
 
 Malformed table entries fall back to a supported halting transition. This keeps
-the semantic `Machine` support obligations unconditional while later compiler
+the semantic `Machine` support obligations unconditional while later reduction
 proofs can use `step_of_transition?_eq_some` for well-formed entries.
 -/
 def step (M : TableMachine) (q a : Nat) : Nat × Nat × Move :=
@@ -488,8 +490,9 @@ end TableMachine
 /--
 Raw finite machine data, without support proofs.
 
-The reduction/compiler from computability syntax should ultimately produce this
-kind of finite object. `toTableMachine` adds the distinguished blank/start/halt
+The computability reduction should ultimately produce this kind of finite
+object, by compiling syntax to explicit machine data. `toTableMachine` adds the
+distinguished blank/start/halt
 symbols to the supports, and the guarded table semantics keeps all transitions
 inside those finite supports.
 -/

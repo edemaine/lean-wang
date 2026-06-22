@@ -10,8 +10,8 @@ Natural-number encoding for Mathlib's `Turing.ToPartrec.Code` syntax.
 
 Mathlib gives `Nat.Partrec.Code` a `Denumerable` instance, but
 `Turing.ToPartrec.Code` currently only has the syntax and evaluator. The
-reduction/compiler interfaces in this project need `Computable` maps into this
-type, so we provide the same kind of explicit tree encoding here.
+reduction interfaces in this project need `Computable` maps into this type, so
+we provide the same kind of explicit tree encoding here.
 -/
 
 namespace Turing

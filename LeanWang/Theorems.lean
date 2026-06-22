@@ -17,7 +17,8 @@ Main theorem surface for the Wang-tile undecidability proof.
 
 This file collects the main reduction theorems. The final undecidability theorem
 is currently parameterized by the two external construction obligations: a
-reduction/compiler from Mathlib partial-recursive codes to finite table
+computable reduction, implemented as a compiler from Mathlib
+partial-recursive codes to finite table
 machines, and a concrete scaffold satisfying the abstract square-forcing
 property.
 -/
@@ -215,11 +216,11 @@ structure ToPartrecTM2Reduction where
         (Nat.Partrec.Code.eval c 0).Dom
 
 /--
-A reduction/compiler from Mathlib TM2 evaluator configurations to finite
-table-machine data.
+A computable reduction, implemented by compiling Mathlib TM2 evaluator
+configurations to finite table-machine data.
 
 This is another way to factor the remaining `TableCompiler` obligation: first
-translate unary partial-recursive codes to `Turing.ToPartrec.Code`, then compile
+translate unary partial-recursive codes to `Turing.ToPartrec.Code`, then reduce
 the corresponding TM2 evaluator run to a `TableProgram`.
 -/
 structure TM2TableCompiler where
@@ -247,8 +248,8 @@ def dummyProgram : TableProgram where
   }]
 
 /--
-A reduction/compiler from Mathlib partial-recursive codes into finite
-table-machine data.
+A computable reduction from Mathlib partial-recursive codes into finite
+table-machine data, implemented as a compiler to finite programs.
 
 The `Compiler` name emphasizes the produced finite machine program. In the
 undecidability proof, the same computable map is the many-one reduction
@@ -270,12 +271,12 @@ def TM2TableCompiler.toTableCompiler
     exact (C.correct (R.translate c)).trans (R.correct c)
 
 /--
-A smaller reduction/compiler obligation: implement the fuel-search machine for
+A smaller reduction obligation: implement the fuel-search machine for
 the primitive-recursive bounded evaluator predicate.
 
 This interface packages the computable reduction through the fuel-search
 predicate before `toTableCompiler` turns it into the direct machine-level
-reduction/compiler.
+reduction, implemented by compiling to finite machine data.
 -/
 structure FuelTableCompiler where
   compile : Code → TableProgram
@@ -284,7 +285,7 @@ structure FuelTableCompiler where
     Machine.HaltsEmpty (compile c).toMachine ↔ FuelMachine.Halts (codeEvalnHalts c 0)
 
 /--
-A generic reduction/compiler for unbounded primitive-recursive Boolean search.
+A generic computable reduction for unbounded primitive-recursive Boolean search.
 
 Given a primitive-recursive predicate family `P a k`, it produces one finite
 `TableProgram` for each parameter `a` that halts exactly when some searched fuel
@@ -315,18 +316,18 @@ def FuelTableCompiler.toTableCompiler (C : FuelTableCompiler) : TableCompiler wh
     intro c
     exact (C.correct c).trans (codeEvalnFuelMachine_correct c 0)
 
-/-- Compile a Mathlib partial-recursive code into finite machine data. -/
+/-- Apply the code-to-machine reduction, producing finite machine data. -/
 def programTable (C : TableCompiler) (c : Code) : TableProgram :=
   C.compile c
 
 theorem programTable_computable (C : TableCompiler) : Computable (programTable C) := by
   exact C.compile_computable
 
-/-- Compile a Mathlib partial-recursive code into the concrete one-tape machine model. -/
+/-- Apply the code-to-machine reduction and view the result as a concrete machine. -/
 def programMachine (C : TableCompiler) (c : Code) : Machine :=
   (programTable C c).toMachine
 
-/-- Correctness of the reduction/compiler from partial-recursive codes to concrete machines. -/
+/-- Correctness of the reduction from partial-recursive codes to concrete machines. -/
 theorem programMachine_correct (C : TableCompiler) (c : Code) :
     Machine.HaltsEmpty (programMachine C c) ↔ (Nat.Partrec.Code.eval c 0).Dom :=
   C.correct c
@@ -478,7 +479,7 @@ theorem fixed_corner_square_problem_undecidable (C : TableCompiler) :
     (tilesQuarterWithSeed_iff_all_fixedCornerSquares
       (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
 
-/-- Fixed-domino undecidability from the smaller fuel-search reduction/compiler obligation. -/
+/-- Fixed-domino undecidability from the smaller fuel-search reduction obligation. -/
 theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
@@ -489,7 +490,7 @@ theorem fixed_domino_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler)
 
 /--
 Fixed-corner square undecidability from the smaller fuel-search
-reduction/compiler obligation.
+reduction obligation.
 -/
 theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCompiler) :
     ¬ ComputablePred
@@ -501,7 +502,7 @@ theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCo
 
 /--
 Fixed-domino undecidability from a generic primitive-recursive search
-reduction/compiler.
+reduction/compiler to finite machine data.
 -/
 theorem fixed_domino_problem_undecidable_of_primrecSearchCompiler
     (C : PrimrecSearchTableCompiler) :
@@ -514,7 +515,7 @@ theorem fixed_domino_problem_undecidable_of_primrecSearchCompiler
 
 /--
 Fixed-corner square undecidability from a generic primitive-recursive search
-reduction/compiler.
+reduction/compiler to finite machine data.
 -/
 theorem fixed_corner_square_problem_undecidable_of_primrecSearchCompiler
     (C : PrimrecSearchTableCompiler) :
@@ -527,7 +528,7 @@ theorem fixed_corner_square_problem_undecidable_of_primrecSearchCompiler
 
 /--
 Fixed-domino undecidability from an encoded TM2 translation and table-machine
-reduction/compiler.
+reduction/compiler to finite machine data.
 -/
 theorem fixed_domino_problem_undecidable_of_tm2Compiler
     (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
@@ -540,7 +541,7 @@ theorem fixed_domino_problem_undecidable_of_tm2Compiler
 
 /--
 Fixed-corner square undecidability from an encoded TM2 translation and
-table-machine reduction/compiler.
+table-machine reduction/compiler to finite machine data.
 -/
 theorem fixed_corner_square_problem_undecidable_of_tm2Compiler
     (R : ToPartrecTM2Reduction) (C : TM2TableCompiler) :
@@ -1123,7 +1124,7 @@ theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S)
   exact dominoReduction_correct hS C c
 
 /-- The domino problem is undecidable for finite Wang tilesets, assuming a scaffold
-and a reduction/compiler from partial-recursive codes to table machines. -/
+and a computable reduction from partial-recursive codes to table machines. -/
 theorem domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
@@ -1138,7 +1139,7 @@ theorem domino_problem_undecidable_of_scaffold
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold
-and a reduction/compiler from partial-recursive codes to table machines. -/
+and a computable reduction from partial-recursive codes to table machines. -/
 theorem encoded_domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (C : TableCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
@@ -1154,7 +1155,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold
 
 /--
 Encoded domino undecidability from a scaffold and the smaller fuel-search
-reduction/compiler obligation.
+reduction obligation.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
@@ -1163,7 +1164,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
 
 /--
 Unencoded domino undecidability from a scaffold and the smaller fuel-search
-reduction/compiler obligation.
+reduction obligation.
 -/
 theorem domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
@@ -1172,7 +1173,7 @@ theorem domino_problem_undecidable_of_scaffold_fuelCompiler
 
 /--
 Encoded domino undecidability from a scaffold and a generic primitive-recursive
-search reduction/compiler.
+search reduction/compiler to finite machine data.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_primrecSearchCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
@@ -1182,7 +1183,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold_primrecSearchCompiler
 
 /--
 Unencoded domino undecidability from a scaffold and a generic
-primitive-recursive search reduction/compiler.
+primitive-recursive search reduction/compiler to finite machine data.
 -/
 theorem domino_problem_undecidable_of_scaffold_primrecSearchCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
@@ -1192,7 +1193,7 @@ theorem domino_problem_undecidable_of_scaffold_primrecSearchCompiler
 
 /--
 Encoded domino undecidability from a scaffold, an encoded TM2 translation, and
-a TM2 table-machine reduction/compiler.
+a TM2 table-machine reduction/compiler to finite machine data.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_tm2Compiler
     (S : Scaffold) (hS : IsScaffold S)
@@ -1202,7 +1203,7 @@ theorem encoded_domino_problem_undecidable_of_scaffold_tm2Compiler
 
 /--
 Unencoded domino undecidability from a scaffold, an encoded TM2 translation, and
-a TM2 table-machine reduction/compiler.
+a TM2 table-machine reduction/compiler to finite machine data.
 -/
 theorem domino_problem_undecidable_of_scaffold_tm2Compiler
     (S : Scaffold) (hS : IsScaffold S)

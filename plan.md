@@ -50,8 +50,8 @@ Completed proof layers:
   tile membership bridges;
 - the fixed-domino reduction from any verified `TableCompiler`;
 - the abstract scaffold reduction from any verified `IsScaffold S`;
-- the encoded domino undecidability theorem from a verified reduction/compiler and
-  verified scaffold.
+- the encoded domino undecidability theorem from a verified reduction to finite
+  machine data and verified scaffold.
 - a primitive-recursive finite Boolean search `TableProgram` generator, with
   a recursive transition-table view, full list-level correctness
   (`HaltsEmpty` iff the input list contains `true`), a primitive-recursive
@@ -102,36 +102,38 @@ def IsScaffold (S : Scaffold) : Prop :=
 ```
 
 The names below keep `Compiler` because the maps produce finite program data,
-but the mathematical notion they package is a computable reduction; the prose
-therefore uses reduction/compiler for this layer.
+but the mathematical notion they package is a computable reduction. The prose
+therefore says reduction first, and mentions compilation when discussing the
+implementation as finite machine data.
 
 `FuelTableCompiler.toTableCompiler` already turns the smaller fuel-search
-reduction/compiler obligation into a `TableCompiler`, using the proved
+reduction obligation into a `TableCompiler`, using the proved
 equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
 `PrimrecSearchTableCompiler.toFuelTableCompiler` further factors this obligation
-through a generic unbounded search reduction/compiler for primitive-recursive Boolean
-predicate families. The fixed-domino, fixed-corner, encoded scaffolded domino,
-and unencoded scaffolded domino theorem surfaces now have direct corollaries
-from `PrimrecSearchTableCompiler`.
+through a generic unbounded search reduction for primitive-recursive Boolean
+predicate families, implemented by compilation to finite machine data. The
+fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
+domino theorem surfaces now have direct corollaries from
+`PrimrecSearchTableCompiler`.
 
 There is also a TM2 factoring of the same obligation. The repository now
 provides a local natural-number encoding, `Denumerable` instance, and hence
 `Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
 `ToPartrecTM2Reduction` records a computable translation from unary
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
-`TM2TableCompiler` reduces/compiles those TM2 evaluator configurations to
+`TM2TableCompiler` reduces those TM2 evaluator configurations to
 `TableProgram`. Together they produce a `TableCompiler`, and the fixed-domino,
 fixed-corner, encoded scaffolded domino, and unencoded scaffolded domino theorem
 surfaces now have direct corollaries from this TM2 factorization.
 
 Next implementation targets:
 
-1. Build a concrete reduction/compiler instance, either as
+1. Build a concrete reduction instance, either as
    `PrimrecSearchTableCompiler`, `FuelTableCompiler`, or
    directly a `TableCompiler`, by implementing the bounded evaluator fuel search
    in `TableProgram`. This object is both a reduction from codes to finite
    machine instances and a compiler from code to finite machine data. The finite
-   bounded-search fragment is now verified; the remaining reduction/compiler
+   bounded-search fragment is now verified; the remaining reduction
    work is implementing the unbounded counter/search behavior as one finite
    `TableProgram` rather than an existential family of bounded prefix programs.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
@@ -273,6 +275,6 @@ or the corresponding version over encoded natural-number inputs.
 
 ## Main Risks
 
-The largest risk is not the machine-to-Wang-tile encoding itself, which should be manageable, but choosing the right reduction/compiler bridge from Mathlib's computability theorem to the machine model used in the tiling construction.
+The largest risk is not the machine-to-Wang-tile encoding itself, which should be manageable, but choosing the right reduction bridge from Mathlib's computability theorem to the machine model used in the tiling construction. That bridge is implemented by compiling codes to finite machine data, so both terms remain useful.
 
 The second largest risk is the concrete scaffold verification. This can be controlled by isolating it behind an abstract scaffold interface and using mechanical finite checks.
