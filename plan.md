@@ -194,6 +194,29 @@ structure PrimrecSearchTableCompiler where
   correct : forall {α : Type} [Primcodable α] (P : α -> Nat -> Bool) (a : α),
     Machine.HaltsEmpty (compile P a).toMachine <-> FuelMachine.Halts (P a)
 
+structure StartedTM2ToPartrecReduction where
+  correct : forall tc : Turing.ToPartrec.Code,
+    (Turing.TM2.eval (TM0Route.partrecStartedTM2 tc)
+      Turing.PartrecToTM2.K'.main TM0Route.partrecStartedTM2Input).Dom <->
+      (StateTransition.eval
+        (Turing.TM2.step Turing.PartrecToTM2.tr)
+        (Turing.PartrecToTM2.init tc [0])).Dom
+
+structure PostTableReduction where
+  compile : PostProgram -> TableProgram
+  compile_computable : Computable compile
+  correct : forall P : PostProgram,
+    Machine.HaltsEmpty (compile P).toMachine <-> P.HaltsEmpty
+
+structure TM0PostCompiler where
+  compile : Turing.ToPartrec.Code -> PostProgram
+  compile_computable : Computable compile
+  correct : forall tc : Turing.ToPartrec.Code,
+    (compile tc).HaltsEmpty <->
+      (Turing.TM0.eval
+        (TM0Route.partrecStartedTM0Machine tc)
+        TM0Route.partrecStartedTM0Input).Dom
+
 def IsScaffold (S : Scaffold) : Prop :=
   forall (T : TileSet) (seed : WangTile),
     TilesPlane (combineWithScaffold S T seed) <->
@@ -218,38 +241,40 @@ fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
 domino theorem surfaces now have direct corollaries from
 `PrimrecSearchTableCompiler`.
 
-There is also a TM2 factoring of the same obligation. The repository now
+There is also a TM2/TM0 factoring of the same obligation. The repository now
 provides a local natural-number encoding, `Denumerable` instance, and hence
 `Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
 `ToPartrecTM2Reduction` records a computable translation from unary
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
 this translation is now concretely proved in `NatPartrecToToPartrec`.
-`TM2TableCompiler` remains the finite-machine reduction obligation: it reduces
-those TM2 evaluator configurations to `TableProgram` by compiling them to finite
-machine data. Together they produce a
+`TM2TableCompiler` remains the older direct finite-machine reduction obligation.
+The preferred route now factors through `TM0PostCompiler`: first use `TM0Route`
+to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then compile the
+resulting finite TM0 machine/input to the one-sided Post/TM0 model. A separate
+`PostTableReduction` bridge feeds the current table-machine Wang-tile layer
+until that layer is replaced by direct Post-machine tiles. Together these pieces
+produce a
 `TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
-from this TM2 factorization using the concrete code-to-TM2 reduction.
+from both the direct TM2 factorization and the TM0/Post factorization using the
+concrete code-to-TM2 reduction.
 
 Next implementation targets:
 
-1. Build a concrete `TM2TableCompiler`, by reducing Mathlib's
-   `PartrecToTM2` stack-machine evaluator configurations to `TableProgram`.
-   Mathlib already provides the finite statement support
-   `Turing.PartrecToTM2.codeSupp` and correctness theorem
-   `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
-   control states, tape alphabet with a reserved boundary marker, stationary
-   rows, bounded `peek` rows, the implemented statement-row fragment, reserved
-   finite state space for unbounded stack shifts, the bounded stack-column
-   travel prefix, and the generic carry-write/stride row primitives in
-   `TableProgram` form. The remaining reduction work is migrating the tape
-   layout and initialization to use the boundary marker, specializing the row
-   pieces into the unbounded `push`/`pop` shift loops, connecting the row
-   fragment to multi-step simulation of the TM2 step relation, and proving the
-   simulated halting equivalence.
-2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-3. Specialize
-   `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two
+1. Prove `StartedTM2ToPartrecReduction`: the code-specific started TM2 machine
+   used by `TM0Route` is semantically equivalent, on input `[0]`, to Mathlib's
+   original `PartrecToTM2.init tc [0]` evaluator configuration.
+2. Build a concrete `TM0PostCompiler`: compile the finite portion of the
+   code-specific Mathlib TM0 machine/input into the one-sided Post/TM0 model.
+   The main semantic issue is the two-sided Mathlib TM0 tape versus the
+   one-sided local model; handle this either by a folding reduction to one-sided
+   Post/TM0 or by replacing the tile layer with a two-sided Post/TM0 simulation.
+3. Either prove the small `PostTableReduction` bridge to reuse the existing
+   table-machine tiles, or replace the current machine tiles by direct
+   Post-machine tiles.
+4. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
+5. Specialize
+   `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those
    concrete instances to recover the unconditional encoded domino theorem.
 
 ### 1. Define Wang Tiles
