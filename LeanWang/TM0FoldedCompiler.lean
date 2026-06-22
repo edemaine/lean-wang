@@ -2784,6 +2784,39 @@ theorem FoldedConfigRel_halt_step
     (left := left) (right := right) hq hmachine'
   simp [PostProgram.nextID, hstate, hcell, hprogramStep, read]
 
+theorem FoldedConfigRel_reaches
+    {tc : Turing.ToPartrec.Code}
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id)
+    (hreach :
+      StateTransition.Reaches
+        (Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc)) cfg cfg') :
+    ∃ n : Nat,
+      FoldedConfigRel tc cfg' (Nat.iterate (program tc).nextID n id) := by
+  induction hreach with
+  | refl =>
+      exact ⟨0, hrel⟩
+  | tail _ hstep ih =>
+      rcases ih with ⟨n, hn⟩
+      refine ⟨n + 1, ?_⟩
+      rw [Function.iterate_succ_apply']
+      exact FoldedConfigRel_step hn (by simpa using hstep)
+
+theorem FoldedConfigRel_reaches_halt
+    {tc : Turing.ToPartrec.Code}
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id)
+    (hreach :
+      StateTransition.Reaches
+        (Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc)) cfg cfg')
+    (hhalt :
+      Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc) cfg' = none) :
+    ∃ n : Nat, (Nat.iterate (program tc).nextID n id).state = none := by
+  rcases FoldedConfigRel_reaches (tc := tc) hrel hreach with ⟨n, hn⟩
+  refine ⟨n + 1, ?_⟩
+  rw [Function.iterate_succ_apply']
+  exact FoldedConfigRel_halt_step hn hhalt
+
 theorem foldedCellOfTapeAt_init_right_zero (tc : Turing.ToPartrec.Code) (i : Nat) :
     foldedCellOfTapeAt
         (Turing.TM0.init (Λ := SourceLabel tc) TM0Route.partrecStartedTM0Input).Tape
@@ -2839,6 +2872,42 @@ theorem FoldedConfigRel_runEmpty_two (tc : Turing.ToPartrec.Code) :
   · simpa [Turing.TM0.init] using default_mem_partrecStartedTM0LabelList tc
   · simp [foldedSimStartState, Turing.TM0.init]
   · exact FoldedTapeRel_init_right_zero tc
+
+theorem program_runEmpty_add_two (tc : Turing.ToPartrec.Code) (n : Nat) :
+    (program tc).runEmpty (n + 2) =
+      Nat.iterate (program tc).nextID n ((program tc).runEmpty 2) := by
+  unfold PostProgram.runEmpty
+  rw [Function.iterate_add_apply]
+
+theorem program_haltsEmpty_of_tm0_eval_dom (tc : Turing.ToPartrec.Code) :
+    (Turing.TM0.eval (TM0Route.partrecStartedTM0Machine tc)
+      TM0Route.partrecStartedTM0Input).Dom →
+      (program tc).HaltsEmpty := by
+  intro hdomEval
+  let step :=
+    Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc)
+  let initCfg :=
+    Turing.TM0.init (Λ := SourceLabel tc) TM0Route.partrecStartedTM0Input
+  have hdomState : (StateTransition.eval step initCfg).Dom := by
+    dsimp [step, initCfg] at *
+    rw [Turing.TM0.eval] at hdomEval
+    exact (TM0Route.part_dom_map_iff (fun c => c.Tape.right₀)
+      (StateTransition.eval
+        (Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc))
+        (Turing.TM0.init (Λ := SourceLabel tc)
+          TM0Route.partrecStartedTM0Input))).1 hdomEval
+  let haltCfg := (StateTransition.eval step initCfg).get hdomState
+  have hmem : haltCfg ∈ StateTransition.eval step initCfg :=
+    Part.get_mem hdomState
+  rcases StateTransition.mem_eval.1 hmem with ⟨hreach, hhalt⟩
+  rcases FoldedConfigRel_reaches_halt
+      (tc := tc) (cfg := initCfg) (cfg' := haltCfg)
+      (id := (program tc).runEmpty 2)
+      (FoldedConfigRel_runEmpty_two tc) hreach hhalt with
+    ⟨n, hn⟩
+  refine ⟨n + 2, ?_⟩
+  rw [program_runEmpty_add_two]
+  exact hn
 
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
