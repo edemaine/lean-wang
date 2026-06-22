@@ -395,6 +395,15 @@ theorem mem_partrecStartedTM2Labels (tc : Turing.ToPartrec.Code)
 def partrecStartedTM2LabelList (tc : Turing.ToPartrec.Code) : List (StartedLabel tc) :=
   (PartrecToTM2SupportList.labelList tc).map (StartedLabel.wrap tc)
 
+/-- Numeric count of started TM2 labels generated for code `tc`. -/
+def partrecStartedTM2LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
+  PartrecToTM2SupportList.labelCount tc
+
+theorem partrecStartedTM2LabelList_length (tc : Turing.ToPartrec.Code) :
+    (partrecStartedTM2LabelList tc).length = partrecStartedTM2LabelCount tc := by
+  simp [partrecStartedTM2LabelList, partrecStartedTM2LabelCount,
+    PartrecToTM2SupportList.labelList_length]
+
 theorem mem_partrecStartedTM2LabelList (tc : Turing.ToPartrec.Code)
     (q : StartedLabel tc) :
     q ∈ partrecStartedTM2LabelList tc ↔ q ∈ partrecStartedTM2Labels tc := by
