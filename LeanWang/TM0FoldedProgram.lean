@@ -496,33 +496,35 @@ theorem initReturnRow_primrec :
 def initReturnIndexList : List Nat :=
   0 :: List.range TM0Route.partrecStartedTM0Input.length
 
+def initReturnRowsData : List PostTransition :=
+  initReturnIndexList.flatMap fun i =>
+    foldedSymbolList.map fun read => initReturnRow default i read
+
 def initReturnRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   initReturnIndexList.flatMap fun i =>
     foldedSymbolList.map fun read => initReturnRow tc i read
 
+theorem initReturnRows_eq_data (tc : Turing.ToPartrec.Code) :
+    initReturnRows tc = initReturnRowsData := rfl
+
 theorem initReturnRows_primrec : Primrec initReturnRows := by
-  unfold initReturnRows
-  refine Primrec.list_flatMap (Primrec.const initReturnIndexList) ?_
-  apply Primrec₂.mk
-  refine Primrec.list_map (Primrec.const foldedSymbolList) ?_
-  apply Primrec₂.mk
-  exact initReturnRow_primrec.comp
-    (Primrec.pair (Primrec.fst.comp Primrec.fst)
-      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+  refine (Primrec.const initReturnRowsData).of_eq ?_
+  intro tc
+  exact (initReturnRows_eq_data tc).symm
+
+def initRowsData : List PostTransition :=
+  initWriteOriginRow :: (initMoveRightRows ++ (initWriteRightRows ++ initReturnRowsData))
 
 def initRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   initWriteOriginRow :: (initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc))
 
+theorem initRows_eq_data (tc : Turing.ToPartrec.Code) :
+    initRows tc = initRowsData := rfl
+
 theorem initRows_primrec : Primrec initRows := by
-  change Primrec (fun tc : Turing.ToPartrec.Code =>
-    initWriteOriginRow :: (initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc)))
-  have hwriteReturn : Primrec (fun tc : Turing.ToPartrec.Code =>
-      initWriteRightRows ++ initReturnRows tc) :=
-    Primrec.list_append.comp (Primrec.const initWriteRightRows) initReturnRows_primrec
-  have htail : Primrec (fun tc : Turing.ToPartrec.Code =>
-      initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc)) :=
-    Primrec.list_append.comp (Primrec.const initMoveRightRows) hwriteReturn
-  exact Primrec.list_cons.comp (Primrec.const initWriteOriginRow) htail
+  refine (Primrec.const initRowsData).of_eq ?_
+  intro tc
+  exact (initRows_eq_data tc).symm
 
 def foldedMoveNextSide (side : FoldSide) (marked : Bool) (dir : Turing.Dir) : FoldSide :=
   match side, marked, dir with
