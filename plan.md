@@ -204,14 +204,14 @@ structure StartedTM2ToPartrecReduction where
 
 def startedTM2ToPartrecReduction : StartedTM2ToPartrecReduction
 
-structure PostTableReduction where
-  compile : PostProgram -> TableProgram
+structure FiniteTM0TableReduction where
+  compile : FiniteTM0Program -> TableProgram
   compile_computable : Computable compile
-  correct : forall P : PostProgram,
+  correct : forall P : FiniteTM0Program,
     Machine.HaltsEmpty (compile P).toMachine <-> P.HaltsEmpty
 
-structure TM0PostCompiler where
-  compile : Turing.ToPartrec.Code -> PostProgram
+structure TM0FiniteCompiler where
+  compile : Turing.ToPartrec.Code -> FiniteTM0Program
   compile_computable : Computable compile
   correct : forall tc : Turing.ToPartrec.Code,
     (compile tc).HaltsEmpty <->
@@ -250,35 +250,34 @@ provides a local natural-number encoding, `Denumerable` instance, and hence
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
 this translation is now concretely proved in `NatPartrecToToPartrec`.
 `TM2TableCompiler` remains the older direct finite-machine reduction obligation.
-The preferred route now factors through `TM0PostCompiler`: first use `TM0Route`
-to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then compile the
-resulting finite TM0 machine/input to the one-sided Post/TM0 model. A separate
-`PostTableReduction` bridge feeds the current table-machine Wang-tile layer
-until that layer is replaced by direct Post-machine tiles. Together these pieces
-produce a
+The preferred route now factors through `TM0FiniteCompiler`: first use
+`TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
+compile the resulting finite TM0 machine/input to the local finite one-sided
+TM0 model. A separate legacy `FiniteTM0TableReduction` bridge feeds the current
+table-machine Wang-tile layer until that layer is replaced by direct finite-TM0
+tiles. Together these pieces produce a
 `TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
 and unencoded scaffolded domino theorem surfaces now have direct corollaries
-from both the direct TM2 factorization and the TM0/Post factorization using the
+from both the direct TM2 factorization and the finite-TM0 factorization using the
 concrete code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is
 now proved concretely by `startedTM2ToPartrecReduction`.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
-temporary `PostTableReduction` route. A Post `move` compiles to one table row.
-A Post `write` compiles to a write-and-move-right row followed by finite
-return-left rows. Generated row targets and written symbols are proved to lie in
-the compiled table supports.
+temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
+table row. A finite-TM0 `write` compiles to a write-and-move-right row followed
+by finite return-left rows. Generated row targets and written symbols are proved
+to lie in the compiled table supports.
 
 Next implementation targets:
 
-1. Build a concrete `TM0PostCompiler`: compile the finite portion of the
-   code-specific Mathlib TM0 machine/input into the one-sided Post/TM0 model.
-   The main semantic issue is the two-sided Mathlib TM0 tape versus the
-   one-sided local model; handle this either by a folding reduction to one-sided
-   Post/TM0 or by replacing the tile layer with a two-sided Post/TM0 simulation.
-2. Prove the `PostTableReduction` correctness theorem for
-   `PostProgram.toTableProgram`, or replace the current machine tiles by direct
-   Post-machine tiles. The data-level compiler is in place; the remaining
-   bridge work is the halting-equivalence proof.
+1. Build a concrete `TM0FiniteCompiler`: compile the code-specific Mathlib TM0
+   machine/input into the finite one-sided TM0 model. The main semantic issue is
+   the two-sided Mathlib TM0 tape versus the one-sided local model; handle this
+   by an explicit folding reduction to one-sided TM0.
+2. Replace the current table-machine tiles by direct finite-TM0 tiles. Until
+   then, the legacy `FiniteTM0TableReduction` route can be completed via
+   `PostProgram.toTableProgram`; the remaining bridge work is the
+   halting-equivalence proof.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 4. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction` to those

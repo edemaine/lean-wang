@@ -6,13 +6,13 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Machine
 
 /-!
-One-sided Post/TM0-style machines.
+Finite one-sided TM0-style machines.
 
 This is deliberately closer to Mathlib's `TM0` than the older `TableProgram`
 target: each transition either moves the head or writes one symbol, and halting
-is represented by absence of a transition. The only deliberate difference from
-Mathlib TM0 is that the tape is one-sided, matching the current quarter-plane
-computation geometry.
+is represented by absence of a transition. The original Post-style names remain
+for existing proofs; the preferred public name for the program type is
+`FiniteTM0Program`.
 -/
 
 namespace LeanWang
@@ -262,6 +262,11 @@ theorem tableRunState_ne_tableWriteState (q r : Nat) :
   unfold tableRunState tableWriteState
   omega
 
+theorem tableRunState_injective : Function.Injective tableRunState := by
+  intro q r h
+  unfold tableRunState at h
+  omega
+
 /-- Explicit finite table alphabet: Post write symbols plus all transition read symbols. -/
 def tableSymbols (P : PostProgram) : List Nat :=
   P.symbols ++ P.table.map PostTransition.read
@@ -278,6 +283,89 @@ def haltRow (P : PostProgram) (e : PostTransition) : TableTransition where
   next := tableHalt
   move := Move.right
 
+/-- Table row for a Post move command. -/
+def moveRow (e : PostTransition) (m : Move) : TableTransition where
+  state := tableRunState e.state
+  read := e.read
+  write := e.read
+  next := tableRunState e.next
+  move := m
+
+/-- First table row for a Post write command. -/
+def writeStartRow (e : PostTransition) (b : Nat) : TableTransition where
+  state := tableRunState e.state
+  read := e.read
+  write := b
+  next := tableWriteState e.next
+  move := Move.right
+
+@[simp]
+theorem haltRow_matches_run (P : PostProgram) (e : PostTransition) (q a : Nat) :
+    (haltRow P e).matchesInput (tableRunState q) a = e.matchesInput q a := by
+  rcases e with ⟨state, read, next, stmt⟩
+  by_cases hstate : state = q
+  · subst q
+    simp [haltRow, PostTransition.matchesInput, TableTransition.matchesInput]
+  · have hrun : tableRunState state ≠ tableRunState q := fun h =>
+      hstate (tableRunState_injective h)
+    have hrunBool : (tableRunState state == tableRunState q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hrun (beq_iff_eq.mp h)
+    have hstateBool : (state == q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hstate (beq_iff_eq.mp h)
+    simp [haltRow, PostTransition.matchesInput, TableTransition.matchesInput,
+      hrunBool, hstateBool]
+
+@[simp]
+theorem moveRow_matches_run (e : PostTransition) (m : Move) (q a : Nat) :
+    (moveRow e m).matchesInput (tableRunState q) a = e.matchesInput q a := by
+  rcases e with ⟨state, read, next, stmt⟩
+  by_cases hstate : state = q
+  · subst q
+    simp [moveRow, PostTransition.matchesInput, TableTransition.matchesInput]
+  · have hrun : tableRunState state ≠ tableRunState q := fun h =>
+      hstate (tableRunState_injective h)
+    have hrunBool : (tableRunState state == tableRunState q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hrun (beq_iff_eq.mp h)
+    have hstateBool : (state == q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hstate (beq_iff_eq.mp h)
+    simp [moveRow, PostTransition.matchesInput, TableTransition.matchesInput,
+      hrunBool, hstateBool]
+
+@[simp]
+theorem writeStartRow_matches_run (e : PostTransition) (b q a : Nat) :
+    (writeStartRow e b).matchesInput (tableRunState q) a = e.matchesInput q a := by
+  rcases e with ⟨state, read, next, stmt⟩
+  by_cases hstate : state = q
+  · subst q
+    simp [writeStartRow, PostTransition.matchesInput, TableTransition.matchesInput]
+  · have hrun : tableRunState state ≠ tableRunState q := fun h =>
+      hstate (tableRunState_injective h)
+    have hrunBool : (tableRunState state == tableRunState q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hrun (beq_iff_eq.mp h)
+    have hstateBool : (state == q) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      exact hstate (beq_iff_eq.mp h)
+    simp [writeStartRow, PostTransition.matchesInput, TableTransition.matchesInput,
+      hrunBool, hstateBool]
+
+theorem writeReturnRow_matches_run (q r a s : Nat) :
+    ({ state := tableWriteState r, read := s, write := s, next := tableRunState r,
+       move := Move.left } : TableTransition).matchesInput (tableRunState q) a = false := by
+  have hstate : tableWriteState r ≠ tableRunState q := by
+    exact (tableRunState_ne_tableWriteState q r).symm
+  simp [TableTransition.matchesInput, hstate]
+
 /-- Return-left rows used after a simulated Post write to next state `q`. -/
 def writeReturnRows (P : PostProgram) (q : Nat) : List TableTransition :=
   (tableSupportedSymbols P).map fun a =>
@@ -286,6 +374,14 @@ def writeReturnRows (P : PostProgram) (q : Nat) : List TableTransition :=
       write := a
       next := tableRunState q
       move := Move.left }
+
+theorem writeReturnRows_find?_run (P : PostProgram) (q r a : Nat) :
+    (writeReturnRows P r).find? (fun e => e.matchesInput (tableRunState q) a) = none := by
+  unfold writeReturnRows
+  induction tableSupportedSymbols P with
+  | nil => rfl
+  | cons s rest ih =>
+      simp [writeReturnRow_matches_run q r a s, ih]
 
 /--
 Rows generated by one Post transition.
@@ -298,22 +394,10 @@ def rowsForTransition (P : PostProgram) (e : PostTransition) : List TableTransit
   if e.next ∈ P.states then
     match e.stmt with
     | PostStmt.move m =>
-        [{
-          state := tableRunState e.state
-          read := e.read
-          write := e.read
-          next := tableRunState e.next
-          move := m
-        }]
+        [moveRow e m]
     | PostStmt.write b =>
         if b ∈ P.symbols then
-          [{
-            state := tableRunState e.state
-            read := e.read
-            write := b
-            next := tableWriteState e.next
-            move := Move.right
-          }] ++ writeReturnRows P e.next
+          [writeStartRow e b] ++ writeReturnRows P e.next
         else
           [haltRow P e]
   else
@@ -401,7 +485,7 @@ theorem write_mem_supportedSymbols_of_mem_rowsForTransition
         by_cases hb : b ∈ P.symbols
         · simp [rowsForTransition, hnext, hb] at h
           rcases h with (rfl | hret)
-          · simp [tableSupportedSymbols, tableSymbols, hb]
+          · simp [writeStartRow, tableSupportedSymbols, tableSymbols, hb]
           · exact write_mem_supportedSymbols_of_mem_writeReturnRows hret
         · simp [rowsForTransition, hnext, hb] at h
           rcases h with rfl
@@ -419,5 +503,28 @@ theorem row_write_mem_toTableProgram_supportedSymbols {P : PostProgram} {e : Tab
   exact write_mem_supportedSymbols_of_mem_rowsForTransition _hpe he
 
 end PostProgram
+
+/-- Preferred name for the local one-sided TM0 instruction syntax. -/
+abbrev FiniteTM0Stmt : Type :=
+  PostStmt
+
+/-- Preferred name for one finite transition row in the local one-sided TM0 model. -/
+abbrev FiniteTM0Transition : Type :=
+  PostTransition
+
+/--
+Preferred name for the local finite one-sided TM0 program model.
+
+The older `PostProgram` name is kept for existing proofs. Semantically this is
+the finite data version of Mathlib's `Turing.TM0.Machine`, with natural-number
+codes for the finite alphabet and state set, a one-sided tape, and halting by
+absence of a matching transition.
+-/
+abbrev FiniteTM0Program : Type :=
+  PostProgram
+
+/-- Preferred name for instantaneous descriptions of local one-sided TM0 runs. -/
+abbrev FiniteTM0ID : Type :=
+  PostID
 
 end LeanWang

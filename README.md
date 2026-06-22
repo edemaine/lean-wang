@@ -17,10 +17,12 @@ the concrete definitions needed for the Berger/Robinson route:
   well-formed finite supports for the Wang-tile simulation layer.
 - `LeanWang.MachineTiles`: finite local-history Wang-tile data generated from a
   concrete machine.
-- `LeanWang.PostMachine`: a one-sided Post/TM0-style finite program model whose
-  instructions either move or write, matching Mathlib TM0 more closely than the
-  older table model. It also contains the data-level compiler to `TableProgram`
-  used by the temporary bridge to the existing Wang-tile layer.
+- `LeanWang.PostMachine`: the finite one-sided TM0 program model. The original
+  Post-style names are still present, but the preferred public terminology is
+  `FiniteTM0Program`: transitions either move or write, matching Mathlib TM0
+  more closely than the older table model. The file also contains the legacy
+  data-level compiler to `TableProgram` used by the temporary bridge to the
+  existing Wang-tile layer.
 - `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
   `Turing.ToPartrec.Code`.
 - `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
@@ -57,22 +59,21 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TM0PostCompiler`: the preferred machine-side route. It reduces Mathlib's
-  code-specific started TM0 evaluator to finite one-sided Post/TM0 program
-  data.
-- `PostTableReduction`: a temporary bridge from one-sided Post/TM0 programs to
-  the existing table-machine Wang-tile layer. This can be replaced by direct
-  Post-machine tiles later.
+- `TM0FiniteCompiler`: the preferred machine-side route. It reduces Mathlib's
+  code-specific started TM0 evaluator to finite one-sided TM0 program data.
+- `FiniteTM0TableReduction`: a legacy bridge from finite one-sided TM0 programs
+  to the existing table-machine Wang-tile layer. This should be replaced by
+  direct finite-TM0 tiles later.
 - `startedTM2ToPartrecReduction`: the proved semantic bridge between the
   code-specific started TM2 evaluator used by `TM0Route` and Mathlib's original
   `PartrecToTM2.init` evaluator.
 - `TM2TableCompiler`: the older direct TM2-to-table reduction interface remains
-  available, and `TM0PostCompiler` can feed it through `toTM2TableCompiler`
-  using a `PostTableReduction`.
+  available, and `TM0FiniteCompiler` can feed it through `toTM2TableCompiler`
+  using a `FiniteTM0TableReduction`.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
 The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
 undecidability reductions are now proved from those construction interfaces.
 There are also more general theorem variants from `TableCompiler`,
-`FuelTableCompiler`, `PrimrecSearchTableCompiler`, and `TM0PostCompiler`.
+`FuelTableCompiler`, `PrimrecSearchTableCompiler`, and `TM0FiniteCompiler`.

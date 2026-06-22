@@ -290,34 +290,34 @@ structure StartedTM2ToPartrecReduction where
         (Turing.TM2.step TM0Route.partrecTM2)
         (TM0Route.partrecInit tc)).Dom
 
-/-- Concrete started-TM2 bridge used by the Mathlib TM0/Post route. -/
+/-- Concrete started-TM2 bridge used by the Mathlib TM0 route. -/
 def startedTM2ToPartrecReduction : StartedTM2ToPartrecReduction where
   correct := TM0Route.partrecStartedTM2_eval_dom_iff_partrec
 
 /--
-A computable reduction from one-sided Post/TM0 programs to the older finite
+A computable reduction from finite one-sided TM0 programs to the older finite
 table-machine data used by the current Wang-tile layer.
 
 This bridge is intentionally separated from the Mathlib TM0 reduction. The clean
-end-state can either prove this small mechanical bridge or replace the
-table-machine Wang tiles by direct Post-machine tiles.
+end-state should replace the table-machine Wang tiles by direct finite-TM0
+tiles; until then, this is a legacy compatibility adapter.
 -/
-structure PostTableReduction where
-  compile : PostProgram → TableProgram
+structure FiniteTM0TableReduction where
+  compile : FiniteTM0Program → TableProgram
   compile_computable : Computable compile
-  correct : ∀ P : PostProgram,
+  correct : ∀ P : FiniteTM0Program,
     Machine.HaltsEmpty (compile P).toMachine ↔ P.HaltsEmpty
 
 /--
 A computable reduction from Mathlib's code-specific started TM0 evaluator to
-finite one-sided Post/TM0 program data.
+finite one-sided TM0 program data.
 
 This is the preferred machine-side obligation: compile the finite TM0
 machine/input produced by Mathlib's TM2-to-TM1-to-TM0 reductions into the local
-Post model with the same halting behavior.
+one-sided finite TM0 model with the same halting behavior.
 -/
-structure TM0PostCompiler where
-  compile : Turing.ToPartrec.Code → PostProgram
+structure TM0FiniteCompiler where
+  compile : Turing.ToPartrec.Code → FiniteTM0Program
   compile_computable : Computable compile
   correct : ∀ tc : Turing.ToPartrec.Code,
     (compile tc).HaltsEmpty ↔
@@ -325,9 +325,9 @@ structure TM0PostCompiler where
         (TM0Route.partrecStartedTM0Machine tc)
         TM0Route.partrecStartedTM0Input).Dom
 
-def TM0PostCompiler.toTM2TableCompiler
-    (B : PostTableReduction)
-    (R : StartedTM2ToPartrecReduction) (C : TM0PostCompiler) :
+def TM0FiniteCompiler.toTM2TableCompiler
+    (B : FiniteTM0TableReduction)
+    (R : StartedTM2ToPartrecReduction) (C : TM0FiniteCompiler) :
     TM2TableCompiler where
   compile := fun tc => B.compile (C.compile tc)
   compile_computable := B.compile_computable.comp C.compile_computable
@@ -376,14 +376,15 @@ def TM2TableCompiler.toTableCompiler
     exact (C.correct (R.translate c)).trans (R.correct c)
 
 /--
-Adapter from the preferred TM0/Post route into the existing table-machine theorem
-surface. The extra `PostTableReduction` parameter isolates the temporary bridge
-from Post programs to the older table model used by the current Wang tiles.
+Adapter from the preferred finite-TM0 route into the existing table-machine theorem
+surface. The extra `FiniteTM0TableReduction` parameter isolates the temporary bridge
+from finite one-sided TM0 programs to the older table model used by the current
+Wang tiles.
 -/
-def TM0PostCompiler.toTableCompiler
-    (B : PostTableReduction)
+def TM0FiniteCompiler.toTableCompiler
+    (B : FiniteTM0TableReduction)
     (R₀ : StartedTM2ToPartrecReduction)
-    (R : ToPartrecTM2Reduction) (C : TM0PostCompiler) :
+    (R : ToPartrecTM2Reduction) (C : TM0FiniteCompiler) :
     TableCompiler where
   compile := fun c => B.compile (C.compile (R.translate c))
   compile_computable := B.compile_computable.comp (C.compile_computable.comp R.translate_computable)
@@ -677,13 +678,13 @@ theorem fixed_corner_square_problem_undecidable_of_tm2Compiler
   fixed_corner_square_problem_undecidable (C.toTableCompiler R)
 
 /--
-Fixed-domino undecidability from a started-TM2 bridge, a one-sided Post/TM0
-reduction, and the bridge from Post programs to the current table-machine tile
-layer.
+Fixed-domino undecidability from a started-TM2 bridge, a finite one-sided TM0
+reduction, and the legacy bridge from finite TM0 programs to the current
+table-machine tile layer.
 -/
 theorem fixed_domino_problem_undecidable_of_tm0Compiler
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (R : ToPartrecTM2Reduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (R₀ : StartedTM2ToPartrecReduction)
+    (R : ToPartrecTM2Reduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         TilesQuarterWithSeed
@@ -692,13 +693,13 @@ theorem fixed_domino_problem_undecidable_of_tm0Compiler
   fixed_domino_problem_undecidable (C.toTableCompiler B R₀ R)
 
 /--
-Fixed-corner square undecidability from a started-TM2 bridge, a one-sided
-Post/TM0 reduction, and the bridge from Post programs to the current
+Fixed-corner square undecidability from a started-TM2 bridge, a finite one-sided
+TM0 reduction, and the legacy bridge from finite TM0 programs to the current
 table-machine tile layer.
 -/
 theorem fixed_corner_square_problem_undecidable_of_tm0Compiler
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (R : ToPartrecTM2Reduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (R₀ : StartedTM2ToPartrecReduction)
+    (R : ToPartrecTM2Reduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         ∀ n : Nat, 0 < n → TileableFixedCornerSquare
@@ -736,11 +737,11 @@ theorem fixed_corner_square_problem_undecidable_of_tm2Reduction
 
 /--
 Fixed-domino undecidability from the concrete Mathlib-code-to-TM2 reduction, a
-started-TM2 bridge, a one-sided Post/TM0 reduction, and the bridge from Post
-programs to the current table-machine tile layer.
+started-TM2 bridge, a finite one-sided TM0 reduction, and the legacy bridge from
+finite TM0 programs to the current table-machine tile layer.
 -/
 theorem fixed_domino_problem_undecidable_of_tm0Reduction
-    (B : PostTableReduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         TilesQuarterWithSeed
@@ -753,11 +754,11 @@ theorem fixed_domino_problem_undecidable_of_tm0Reduction
 
 /--
 Fixed-corner square undecidability from the concrete Mathlib-code-to-TM2
-reduction, a started-TM2 bridge, a one-sided Post/TM0 reduction, and the bridge
-from Post programs to the current table-machine tile layer.
+reduction, a started-TM2 bridge, a finite one-sided TM0 reduction, and the
+legacy bridge from finite TM0 programs to the current table-machine tile layer.
 -/
 theorem fixed_corner_square_problem_undecidable_of_tm0Reduction
-    (B : PostTableReduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred
       (fun c : Code =>
         ∀ n : Nat, 0 < n → TileableFixedCornerSquare
@@ -1432,26 +1433,26 @@ theorem domino_problem_undecidable_of_scaffold_tm2Compiler
 
 /--
 Encoded domino undecidability from a scaffold, a started-TM2 bridge, an encoded
-TM2 translation, a one-sided Post/TM0 reduction, and the bridge from Post
-programs to the current table-machine tile layer.
+TM2 translation, a finite one-sided TM0 reduction, and the legacy bridge from
+finite TM0 programs to the current table-machine tile layer.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (R : ToPartrecTM2Reduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (R₀ : StartedTM2ToPartrecReduction)
+    (R : ToPartrecTM2Reduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold
     S hS (C.toTableCompiler B R₀ R)
 
 /--
 Unencoded domino undecidability from a scaffold, a started-TM2 bridge, an
-encoded TM2 translation, a one-sided Post/TM0 reduction, and the bridge from
-Post programs to the current table-machine tile layer.
+encoded TM2 translation, a finite one-sided TM0 reduction, and the legacy bridge
+from finite TM0 programs to the current table-machine tile layer.
 -/
 theorem domino_problem_undecidable_of_scaffold_tm0Compiler
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (R₀ : StartedTM2ToPartrecReduction)
-    (R : ToPartrecTM2Reduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (R₀ : StartedTM2ToPartrecReduction)
+    (R : ToPartrecTM2Reduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold
     S hS (C.toTableCompiler B R₀ R)
@@ -1478,25 +1479,25 @@ theorem domino_problem_undecidable_of_scaffold_tm2Reduction
 
 /--
 Encoded domino undecidability from a scaffold, the concrete Mathlib-code-to-TM2
-reduction, a started-TM2 bridge, a one-sided Post/TM0 reduction, and the bridge
-from Post programs to the current table-machine tile layer.
+reduction, a started-TM2 bridge, a finite one-sided TM0 reduction, and the
+legacy bridge from finite TM0 programs to the current table-machine tile layer.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_tm0Reduction
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
     S hS B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
 
 /--
 Unencoded domino undecidability from a scaffold, the concrete
-Mathlib-code-to-TM2 reduction, a started-TM2 bridge, a one-sided Post/TM0
-reduction, and the bridge from Post programs to the current table-machine tile
-layer.
+Mathlib-code-to-TM2 reduction, a started-TM2 bridge, a finite one-sided TM0
+reduction, and the legacy bridge from finite TM0 programs to the current
+table-machine tile layer.
 -/
 theorem domino_problem_undecidable_of_scaffold_tm0Reduction
     (S : Scaffold) (hS : IsScaffold S)
-    (B : PostTableReduction) (C : TM0PostCompiler) :
+    (B : FiniteTM0TableReduction) (C : TM0FiniteCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_tm0Compiler
     S hS B startedTM2ToPartrecReduction natPartrecToTM2Reduction C
