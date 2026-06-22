@@ -199,6 +199,13 @@ than relying on a global `Fintype` instance. The translated TM0 tape symbols now
 also have injective numeric codes and a numeric symbol list for the eventual
 `FiniteTM0Program`.
 
+`PartrecToTM2SupportList` now provides executable list mirrors of Mathlib's
+`trStmts₁`, `codeSupp'`, `contSupp`, and `codeSupp` finsets, with membership
+equivalence to the current support sets. This isolates the next computability
+step: switch the TM0 route's code-dependent label enumeration away from
+`Finset.toList` and onto this explicit recursive support list, then prove the
+folded program compiler computable.
+
 The old direct finite-program construction from this route data has been
 removed because it was not the right semantic bridge: Mathlib TM0 has a
 two-sided tape while the local finite TM0 model is one-sided. The remaining

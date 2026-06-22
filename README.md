@@ -30,6 +30,10 @@ the concrete definitions needed for the Berger/Robinson route:
   `Turing.ToPartrec.Code`, with correctness for the TM2 evaluator.
 - `LeanWang.PartrecToTM2Support`: finite reachable-label support facts for
   Mathlib's concrete `PartrecToTM2` evaluator.
+- `LeanWang.PartrecToTM2SupportList`: executable list mirrors of Mathlib's
+  `PartrecToTM2` support finsets, with membership equivalence to the current
+  finite support sets. This is intended to replace the remaining
+  `Finset.toList`-based support enumeration in the TM0 route.
 - `LeanWang.TM0Route`: a Mathlib TM0 route that wraps the code-dependent
   `PartrecToTM2` start label as the default TM2 label, composes Mathlib's
   TM2-to-TM1 and TM1-to-TM0 translations, and proves the composed TM0 evaluator

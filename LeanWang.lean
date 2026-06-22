@@ -6,6 +6,7 @@ import LeanWang.Machine
 import LeanWang.MachineTiles
 import LeanWang.PostMachine
 import LeanWang.PartrecToTM2Support
+import LeanWang.PartrecToTM2SupportList
 import LeanWang.ToPartrecEncoding
 import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
