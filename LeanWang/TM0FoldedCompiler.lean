@@ -277,11 +277,22 @@ theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
 def inputSymbol (i : Nat) : SourceSymbol :=
   TM0Route.partrecStartedTM0Input.getI i
 
+theorem partrecStartedTM0Input_length :
+    TM0Route.partrecStartedTM0Input.length = 1 := by
+  simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
+    Turing.TM2to1.trInit, Turing.PartrecToTM2.trList]
+
 def nextAfterOrigin : Nat :=
   if TM0Route.partrecStartedTM0Input.length ≤ 1 then
     initReturnState 0
   else
     initMoveRightState 0
+
+theorem nextAfterOrigin_eq_initReturnState_zero :
+    nextAfterOrigin = initReturnState 0 := by
+  unfold nextAfterOrigin
+  rw [partrecStartedTM0Input_length]
+  simp
 
 theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
     nextAfterOrigin ∈ foldedStateList tc := by
@@ -2260,6 +2271,30 @@ theorem program_step_initReturn_succ
     initReturnState_mem_states (tc := tc) (by omega)
   simp [PostProgram.step, hfind, initReturnRow, mkRow, hnext]
 
+theorem program_runEmpty_one (tc : Turing.ToPartrec.Code) :
+    (program tc).runEmpty 1 =
+      { tape := Function.update (fun _ => foldedBlank) 0
+          (foldedOriginSymbol (inputSymbol 0)),
+        head := 0,
+        state := some (initReturnState 0) } := by
+  rw [show 1 = 0 + 1 by rfl, PostProgram.runEmpty_succ, PostProgram.runEmpty_zero]
+  simp [PostProgram.nextID, PostProgram.initialID, program_step_start_blank,
+    PostProgram.applyStmt, nextAfterOrigin_eq_initReturnState_zero]
+
+theorem program_runEmpty_two (tc : Turing.ToPartrec.Code) :
+    (program tc).runEmpty 2 =
+      { tape := Function.update (fun _ => foldedBlank) 0
+          (foldedOriginSymbol (inputSymbol 0)),
+        head := 0,
+        state := some (foldedSimStartState tc) } := by
+  rw [show 2 = 1 + 1 by rfl, PostProgram.runEmpty_succ, program_runEmpty_one]
+  have hread :
+      foldedOriginSymbol (inputSymbol 0) ∈ foldedSymbolList :=
+    foldedOriginSymbol_mem_symbols (inputSymbol 0)
+  have hstep := program_step_initReturn_zero (tc := tc)
+    (read := foldedOriginSymbol (inputSymbol 0)) hread
+  simp [PostProgram.nextID, hstep, PostProgram.applyStmt]
+
 theorem program_transition?_sim_of_step
     {tc : Turing.ToPartrec.Code}
     {q q' : SourceLabel tc} {side : FoldSide} {marked : Bool}
@@ -2748,6 +2783,62 @@ theorem FoldedConfigRel_halt_step
     (tc := tc) (q := cfg.q) (side := side) (marked := marked)
     (left := left) (right := right) hq hmachine'
   simp [PostProgram.nextID, hstate, hcell, hprogramStep, read]
+
+theorem foldedCellOfTapeAt_init_right_zero (tc : Turing.ToPartrec.Code) (i : Nat) :
+    foldedCellOfTapeAt
+        (Turing.TM0.init (Λ := SourceLabel tc) TM0Route.partrecStartedTM0Input).Tape
+        FoldSide.right 0 i =
+      (Function.update (fun _ => foldedBlank) 0
+        (foldedOriginSymbol (inputSymbol 0))) i := by
+  cases i with
+  | zero =>
+      have hleft : sourceOffset FoldSide.right 0 (leftAbs 0) = Int.negSucc 0 := by
+        simp [sourceOffset, activeAbs, leftAbs, rightAbs]
+      have hright : sourceOffset FoldSide.right 0 (rightAbs 0) = 0 := by
+        simp [sourceOffset, activeAbs, rightAbs]
+      simp only [foldedCellOfTapeAt]
+      rw [hleft, hright]
+      simp [foldedOriginSymbol, inputSymbol,
+        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
+        Turing.TM2to1.trInit, Turing.PartrecToTM2.trList,
+        Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk',
+        Turing.Tape.nth]
+  | succ i =>
+      have hleft :
+          sourceOffset FoldSide.right 0 (leftAbs (Nat.succ i)) =
+            Int.negSucc (i + 1) := by
+        simp [sourceOffset, activeAbs, leftAbs, rightAbs]
+        omega
+      have hright :
+          sourceOffset FoldSide.right 0 (rightAbs (Nat.succ i)) =
+            Int.ofNat (i + 1) := by
+        simp [sourceOffset, activeAbs, rightAbs]
+      simp only [foldedCellOfTapeAt]
+      rw [hleft, hright]
+      simp [foldedBlank, inputSymbol,
+        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
+        Turing.TM2to1.trInit, Turing.PartrecToTM2.trList,
+        Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk',
+        Turing.Tape.nth]
+
+theorem FoldedTapeRel_init_right_zero (tc : Turing.ToPartrec.Code) :
+    FoldedTapeRel
+      (Turing.TM0.init (Λ := SourceLabel tc) TM0Route.partrecStartedTM0Input).Tape
+      FoldSide.right 0
+      (Function.update (fun _ => foldedBlank) 0
+        (foldedOriginSymbol (inputSymbol 0))) := by
+  intro i
+  exact (foldedCellOfTapeAt_init_right_zero tc i).symm
+
+theorem FoldedConfigRel_runEmpty_two (tc : Turing.ToPartrec.Code) :
+    FoldedConfigRel tc
+      (Turing.TM0.init (Λ := SourceLabel tc) TM0Route.partrecStartedTM0Input)
+      ((program tc).runEmpty 2) := by
+  rw [program_runEmpty_two]
+  refine ⟨FoldSide.right, ?_, ?_, ?_⟩
+  · simpa [Turing.TM0.init] using default_mem_partrecStartedTM0LabelList tc
+  · simp [foldedSimStartState, Turing.TM0.init]
+  · exact FoldedTapeRel_init_right_zero tc
 
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
