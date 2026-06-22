@@ -86,6 +86,47 @@ theorem stackSymbolCode_injective : Function.Injective stackSymbolCode := by
   intro a b h
   cases a <;> cases b <;> simp [stackSymbolCode] at h ⊢
 
+/--
+Numeric tape symbol code for a `PartrecToTM2` stack cell.
+
+`none` is the blank cell and `some a` stores one of the four stack symbols.
+-/
+def tapeSymbolCode : Option Γ' → Nat
+  | none => 0
+  | some a => stackSymbolCode a + 1
+
+theorem tapeSymbolCode_lt_five (s : Option Γ') : tapeSymbolCode s < 5 := by
+  cases s with
+  | none => decide
+  | some a => cases a <;> decide
+
+theorem tapeSymbolCode_injective : Function.Injective tapeSymbolCode := by
+  intro a b h
+  cases a with
+  | none =>
+      cases b <;> simp [tapeSymbolCode, stackSymbolCode] at h ⊢
+  | some a =>
+      cases b with
+      | none =>
+          cases a <;> simp [tapeSymbolCode, stackSymbolCode] at h
+      | some b =>
+          have hcode : stackSymbolCode a = stackSymbolCode b := by
+            have h' : stackSymbolCode a + 1 = stackSymbolCode b + 1 := by
+              simpa [tapeSymbolCode] using h
+            omega
+          exact congrArg some (stackSymbolCode_injective hcode)
+
+/-- Finite tape alphabet needed to store blank cells and stack symbols. -/
+def tapeSymbols : List Nat :=
+  List.range 5
+
+theorem tapeSymbolCode_mem_tapeSymbols (s : Option Γ') :
+    tapeSymbolCode s ∈ tapeSymbols :=
+  List.mem_range.2 (tapeSymbolCode_lt_five s)
+
+theorem tapeSymbols_nodup : tapeSymbols.Nodup := by
+  exact List.nodup_range
+
 theorem startLabel_mem_labels (tc : ToPartrec.Code) :
     startLabel tc ∈ labels tc :=
   codeSupp_self tc Cont'.halt (trStmts₁_self _)

@@ -82,7 +82,8 @@ Completed proof layers:
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
-  stack names/symbols. The statement-substate list now also has finite
+  stack names/symbols, plus an injective blank-or-stack-symbol tape alphabet
+  code into `List.range 5`. The statement-substate list now also has finite
   `Nat`-valued control-state indices for the start, halt, and supported label
   statements, plus one-step/reachable label-closure lemmas for runs starting
   from `PartrecToTM2.init tc [0]`.
