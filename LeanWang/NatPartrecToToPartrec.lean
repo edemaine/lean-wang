@@ -572,6 +572,25 @@ theorem precRun_of_prec_mem {f g : Code} {a k x : Nat}
     simpa [hfinal] using hx
   exact ⟨base, hbaseOut, by simpa [hxy] using hrun⟩
 
+set_option linter.flexible false in
+theorem prec_mem_trace {f g : Code} {a k : Nat} {v : List Nat}
+    (hsingleF : ∀ v : List Nat, v ∈ f.eval [a] → ∃ base : Nat, v = [base])
+    (hsingleG : ∀ i ih, ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hv : v ∈ (Code.prec f g).eval [k.succ, a]) :
+    ∃ base x : Nat, v = [x] ∧ [base] ∈ f.eval [a] ∧ precRun g a 0 k base x := by
+  rw [prec_eq] at hv
+  simp at hv
+  rcases hv with ⟨baseOut, final, ⟨hbaseOut, hfix⟩, hv⟩
+  rcases hsingleF baseOut hbaseOut with ⟨base, rfl⟩
+  have hfix' : final ∈ (Code.fix (precG g)).eval [0, k, base, a] := by
+    rw [Turing.ToPartrec.Code.fix_eval]
+    change final ∈ PFun.fix (precGStep g) [0, k, base, a]
+    exact hfix
+  rcases precG_fix_mem_trace (g := g) (a := a) (i := 0) (b := k) (ih := base)
+      hsingleG hfix' with ⟨x, hfinal, hrun⟩
+  refine ⟨base, x, ?_, hbaseOut, hrun⟩
+  simpa [hfinal] using hv
+
 end TCode
 
 open Turing.ToPartrec
@@ -847,6 +866,112 @@ theorem translate_prec_mem_of_nat_eval {cf cg : Nat.Partrec.Code}
       simp only [Part.bind_eq_bind, Part.mem_bind_iff]
       exact ⟨[k.succ, a], by simp, hprec⟩
 
+set_option linter.flexible false in
+theorem nat_eval_mem_of_precRun {cf cg : Nat.Partrec.Code}
+    (hg : Translates cg (translate cg)) {a i b ih x : Nat}
+    (hih : ih ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a i))
+    (hrun : TCode.precRun ((translate cg).comp Code.precStepArg) a i b ih x) :
+    x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a (i + b.succ)) := by
+  induction b generalizing i ih with
+  | zero =>
+      rw [show i + Nat.succ 0 = i.succ by omega]
+      rw [Nat.Partrec.Code.eval_prec_succ]
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+      change [x] ∈ (((translate cg).comp Code.precStepArg).eval [i, ih, a]) at hrun
+      rcases (translates_precStepArg hg i ih a [x]).1 hrun with ⟨x', hxg, hxv⟩
+      have hx' : x' = x := by
+        simpa using hxv.symm
+      exact ⟨ih, hih, by simpa [hx'] using hxg⟩
+  | succ b IH =>
+      simp [TCode.precRun] at hrun
+      rcases hrun with ⟨y, hy, hrest⟩
+      have hyNat : y ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a i.succ) := by
+        rw [Nat.Partrec.Code.eval_prec_succ]
+        simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+        rcases (hg (Nat.pair a (Nat.pair i ih)) [y]).1 hy with ⟨y', hyg, hyv⟩
+        have hy' : y' = y := by
+          simpa using hyv.symm
+        exact ⟨ih, hih, by simpa [hy'] using hyg⟩
+      have hxNat : x ∈ Nat.Partrec.Code.eval (.prec cf cg)
+          (Nat.pair a (i.succ + b.succ)) :=
+        IH hyNat hrest
+      simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hxNat
+
+theorem nat_eval_mem_of_translate_prec_mem {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg))
+    {a n : Nat} {v : List Nat}
+    (hv : v ∈ (translate (.prec cf cg)).eval [Nat.pair a n]) :
+    ∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a n) ∧ v = [x] := by
+  cases n with
+  | zero =>
+      rcases (translates_prec_zero hf hg a v).1 hv with ⟨x, hx, hvx⟩
+      exact ⟨x, by simpa [Nat.Partrec.Code.eval_prec_zero] using hx, hvx⟩
+  | succ k =>
+      rw [translate_prec, Turing.ToPartrec.Code.comp_eval] at hv
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hv
+      rcases hv with ⟨arg, harg, hprec⟩
+      have harg_eq : arg = [k.succ, a] := by
+        simpa [Part.bind_eq_bind] using harg
+      subst arg
+      have hsingleF :
+          ∀ v : List Nat, v ∈ (translate cf).eval [a] → ∃ base : Nat, v = [base] := by
+        intro v hvf
+        rcases (hf a v).1 hvf with ⟨base, _hbase, hv⟩
+        exact ⟨base, hv⟩
+      have hsingleG : ∀ i ih, ∀ v : List Nat,
+          v ∈ (((translate cg).comp Code.precStepArg).eval [i, ih, a]) → ∃ x : Nat, v = [x] := by
+        intro i ih v hvg
+        rcases (translates_precStepArg hg i ih a v).1 hvg with ⟨x, _hx, hv⟩
+        exact ⟨x, hv⟩
+      rcases TCode.prec_mem_trace (f := translate cf)
+          (g := (translate cg).comp Code.precStepArg) (a := a) (k := k)
+          hsingleF hsingleG hprec with ⟨base, x, hvx, hbaseTrans, hrun⟩
+      rcases (hf a [base]).1 hbaseTrans with ⟨base', hbase, hbasev⟩
+      have hbase' : base' = base := by
+        simpa using hbasev.symm
+      have hbaseNat : base ∈ Nat.Partrec.Code.eval cf a := by
+        simpa [hbase'] using hbase
+      have hbasePrec : base ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a 0) := by
+        simpa [Nat.Partrec.Code.eval_prec_zero] using hbaseNat
+      have hxNat : x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a (0 + k.succ)) :=
+        nat_eval_mem_of_precRun (cf := cf) (cg := cg) hg hbasePrec hrun
+      refine ⟨x, ?_, hvx⟩
+      simpa using hxNat
+
+theorem translates_prec_mp {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg))
+    (n : Nat) (v : List Nat) :
+    v ∈ (translate (.prec cf cg)).eval [n] →
+      ∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.prec cf cg) n ∧ v = [x] := by
+  intro hv
+  let a := n.unpair.1
+  let k := n.unpair.2
+  have hn : Nat.pair a k = n := by
+    simp [a, k, Nat.pair_unpair]
+  rw [← hn] at hv ⊢
+  exact nat_eval_mem_of_translate_prec_mem hf hg hv
+
+theorem translates_prec_mpr {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg))
+    (n : Nat) (v : List Nat) :
+    (∃ x : Nat, x ∈ Nat.Partrec.Code.eval (.prec cf cg) n ∧ v = [x]) →
+      v ∈ (translate (.prec cf cg)).eval [n] := by
+  rintro ⟨x, hx, rfl⟩
+  let a := n.unpair.1
+  let k := n.unpair.2
+  have hn : Nat.pair a k = n := by
+    simp [a, k, Nat.pair_unpair]
+  rw [← hn] at hx ⊢
+  exact translate_prec_mem_of_nat_eval hf hg hx
+
+theorem translates_prec {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg)) :
+    Translates (.prec cf cg) (translate (.prec cf cg)) := by
+  intro n v
+  constructor
+  · exact translates_prec_mp hf hg n v
+  · exact translates_prec_mpr hf hg n v
+
 theorem rfindFrom_mem_of_nat_rfind {cf : Nat.Partrec.Code}
     (hf : Translates cf (translate cf)) {a m n : Nat}
     (hrfind : n ∈ Nat.rfind fun i =>
@@ -967,6 +1092,17 @@ theorem translates_rfind' {cf : Nat.Partrec.Code}
   constructor
   · exact translates_rfind'_mp hf n v
   · exact translates_rfind'_mpr hf n v
+
+theorem translate_correct (c : Nat.Partrec.Code) : Translates c (translate c) := by
+  induction c with
+  | zero => exact translates_zero
+  | succ => exact translates_succ
+  | left => exact translates_left
+  | right => exact translates_right
+  | pair _ _ ihf ihg => exact translates_pair ihf ihg
+  | comp _ _ ihf ihg => exact translates_comp ihf ihg
+  | prec _ _ ihf ihg => exact translates_prec ihf ihg
+  | rfind' _ ih => exact translates_rfind' ih
 
 end NatPartrecToToPartrec
 
