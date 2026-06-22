@@ -376,6 +376,24 @@ theorem tableSupportedSymbols_primrec : Primrec tableSupportedSymbols := by
   unfold tableSupportedSymbols
   exact Primrec.list_cons.comp blank_primrec tableSymbols_primrec
 
+theorem blank_mem_tableSupportedSymbols (P : PostProgram) :
+    P.blank ∈ tableSupportedSymbols P := by
+  simp [tableSupportedSymbols]
+
+theorem symbol_mem_tableSupportedSymbols {P : PostProgram} {a : Nat}
+    (ha : a ∈ P.symbols) :
+    a ∈ tableSupportedSymbols P := by
+  simp [tableSupportedSymbols, tableSymbols, ha]
+
+/-- Every cell of a Post/TM0 instantaneous description lies in the compiled table alphabet. -/
+def TapeSupported (P : PostProgram) (c : PostID) : Prop :=
+  ∀ i : Nat, c.tape i ∈ tableSupportedSymbols P
+
+theorem initialID_tapeSupported (P : PostProgram) :
+    TapeSupported P P.initialID := by
+  intro i
+  exact blank_mem_tableSupportedSymbols P
+
 /-- A table transition that halts from the encoded running state of `e.state`. -/
 def haltRow (P : PostProgram) (e : PostTransition) : TableTransition where
   state := tableRunState e.state
@@ -1387,6 +1405,53 @@ theorem step_eq_some_write_exists_transition {P : PostProgram} {q a q' b : Nat}
             · simp [hfind, hnext, hstmt, hb] at hstep
       · simp [hfind, hnext] at hstep
 
+theorem symbol_mem_of_step_eq_some_write {P : PostProgram} {q a q' b : Nat}
+    (hstep : P.step q a = some (q', PostStmt.write b)) :
+    b ∈ P.symbols := by
+  rcases step_eq_some_write_exists_transition hstep with
+    ⟨_e, _hfind, _hnext, _hstmt, _hstate, hb⟩
+  exact hb
+
+theorem tapeSupported_update {P : PostProgram} {tape : Nat → Nat} {head b : Nat}
+    (hsupp : ∀ i : Nat, tape i ∈ tableSupportedSymbols P)
+    (hb : b ∈ tableSupportedSymbols P) :
+    ∀ i : Nat, (Function.update tape head b) i ∈ tableSupportedSymbols P := by
+  intro i
+  by_cases hi : i = head
+  · simp [Function.update, hi, hb]
+  · simp [Function.update, hi, hsupp i]
+
+theorem tapeSupported_nextID {P : PostProgram} {c : PostID}
+    (hsupp : TapeSupported P c) :
+    TapeSupported P (P.nextID c) := by
+  intro i
+  cases hstate : c.state with
+  | none =>
+      simpa [PostProgram.nextID, hstate] using hsupp i
+  | some q =>
+      rw [nextID_of_running hstate]
+      cases hstep : P.step q (c.tape c.head) with
+      | none =>
+          simpa [hstep] using hsupp i
+      | some step =>
+          rcases step with ⟨q', stmt⟩
+          cases stmt with
+          | move m =>
+              simpa [hstep, applyStmt] using hsupp i
+          | write b =>
+              have hb : b ∈ tableSupportedSymbols P :=
+                symbol_mem_tableSupportedSymbols (symbol_mem_of_step_eq_some_write hstep)
+              exact tapeSupported_update hsupp hb i
+
+theorem runEmpty_tapeSupported (P : PostProgram) (n : Nat) :
+    TapeSupported P (P.runEmpty n) := by
+  induction n with
+  | zero =>
+      simpa using initialID_tapeSupported P
+  | succ n ih =>
+      rw [runEmpty_succ]
+      exact tapeSupported_nextID ih
+
 theorem writeReturnRow_mem_tableRows_of_post_write
     {P : PostProgram} {q a q' b ret : Nat}
     (hstep : P.step q a = some (q', PostStmt.write b))
@@ -1463,6 +1528,43 @@ theorem toTableProgram_toMachine_nextID_of_post_write_return
   · by_cases hi : i = head + 1 <;> simp [hi]
   · simp [Move.apply]
   · rfl
+
+theorem toTableProgram_toMachine_nextID_of_post_move_exact
+    {P : PostProgram} {c : PostID} {q q' : Nat} {m : Move}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = some (q', PostStmt.move m)) :
+    P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+      tableIDOfPostID (P.nextID c) := by
+  rw [toTableProgram_toMachine_nextID_of_post_move hstate hstep]
+  rw [nextID_of_running hstate]
+  simp [hstep, applyStmt, tableIDOfPostID]
+
+theorem toTableProgram_toMachine_nextID_two_of_post_write_exact
+    {P : PostProgram} {c : PostID} {q q' b : Nat}
+    (hsupp : TapeSupported P c)
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = some (q', PostStmt.write b)) :
+    P.toTableProgram.toMachine.nextID
+        (P.toTableProgram.toMachine.nextID (tableIDOfPostID c)) =
+      tableIDOfPostID (P.nextID c) := by
+  rw [toTableProgram_toMachine_nextID_of_post_write_start hstate hstep]
+  have hb : b ∈ tableSupportedSymbols P :=
+    symbol_mem_tableSupportedSymbols (symbol_mem_of_step_eq_some_write hstep)
+  have hret :
+      (Function.update c.tape c.head b) (c.head + 1) ∈ tableSupportedSymbols P :=
+    tapeSupported_update hsupp hb (c.head + 1)
+  rw [toTableProgram_toMachine_nextID_of_post_write_return
+    (P := P) (q := q) (a := c.tape c.head) (b := b) hstep hret]
+  rw [nextID_of_running hstate]
+  simp [hstep, applyStmt, tableIDOfPostID]
+
+theorem toTableProgram_toMachine_nextID_state_of_post_step_none
+    {P : PostProgram} {c : PostID} {q : Nat}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = none) :
+    (P.toTableProgram.toMachine.nextID (tableIDOfPostID c)).state =
+      tableHalt := by
+  rw [toTableProgram_toMachine_nextID_of_post_step_none hstate hstep]
 
 end PostProgram
 
