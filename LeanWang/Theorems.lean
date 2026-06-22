@@ -291,6 +291,12 @@ structure FiniteTM0TableReduction where
   correct : ∀ P : FiniteTM0Program,
     Machine.HaltsEmpty (compile P).toMachine ↔ P.HaltsEmpty
 
+/-- Concrete finite-TM0-to-table reduction used by the current Wang-tile layer. -/
+def finiteTM0TableReduction : FiniteTM0TableReduction where
+  compile := PostProgram.toTableProgram
+  compile_computable := PostProgram.toTableProgram_computable
+  correct := PostProgram.toTableProgram_toMachine_haltsEmpty_iff
+
 /--
 A computable reduction from Mathlib's code-specific started TM0 evaluator to
 finite one-sided TM0 program data.
