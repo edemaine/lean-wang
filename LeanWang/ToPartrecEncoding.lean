@@ -226,6 +226,26 @@ theorem stackNameCode_ofCode (n : Nat) : stackNameCode (stackNameOfCode n) = n %
 theorem stackNameOfCode_stackNameCode (k : K') : stackNameOfCode (stackNameCode k) = k := by
   cases k <;> rfl
 
+theorem stackNameOfCode_primrec : Primrec stackNameOfCode := by
+  let names : List K' := [K'.main, K'.rev, K'.aux, K'.stack]
+  have hidx : Primrec (fun n : Nat => n % 4) :=
+    Primrec.nat_mod.comp Primrec.id (Primrec.const 4)
+  have hget : Primrec (fun n : Nat => names.getD (n % 4) K'.stack) :=
+    Primrec.list_getD K'.stack |>.comp (Primrec.const names) hidx
+  exact hget.of_eq fun n => by
+    unfold stackNameOfCode
+    have hlt : n % 4 < 4 := Nat.mod_lt n (by decide)
+    generalize h : n % 4 = r at hlt ⊢
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    rcases r with _ | r
+    · rfl
+    · omega
+
 /-- Partial decoder for dense stack-name codes. -/
 def decodeStackNameCode : Nat → Option K'
   | 0 => some K'.main
@@ -237,6 +257,30 @@ def decodeStackNameCode : Nat → Option K'
 theorem decodeStackNameCode_stackNameCode (k : K') :
     decodeStackNameCode (stackNameCode k) = some k := by
   cases k <;> rfl
+
+theorem decodeStackNameCode_eq_some_stackNameOfCode_of_lt {n : Nat} (h : n < 4) :
+    decodeStackNameCode n = some (stackNameOfCode n) := by
+  rcases n with _ | n
+  · rfl
+  rcases n with _ | n
+  · rfl
+  rcases n with _ | n
+  · rfl
+  rcases n with _ | n
+  · rfl
+  · omega
+
+theorem decodeStackNameCode_eq_none_of_not_lt {n : Nat} (h : ¬ n < 4) :
+    decodeStackNameCode n = none := by
+  rcases n with _ | n
+  · omega
+  rcases n with _ | n
+  · omega
+  rcases n with _ | n
+  · omega
+  rcases n with _ | n
+  · omega
+  · rfl
 
 theorem decodeStackNameCode_primrec : Primrec decodeStackNameCode := by
   let tail₃ : Nat → Option K' := fun
@@ -750,6 +794,53 @@ theorem decodeMovePayload_movePayloadCode
   simp [decodeMovePayload, movePayloadCode, decodeStackPredicateCode_stackPredicateCode,
     decodeStackNameCode_stackNameCode]
 
+theorem decodeMovePayload_primrec : Primrec decodeMovePayload := by
+  have hpayload₀ : Primrec (fun m : Nat => m.unpair.1) :=
+    Primrec.fst.comp Primrec.unpair
+  have hpayload₁ : Primrec (fun m : Nat => m.unpair.2) :=
+    Primrec.snd.comp Primrec.unpair
+  have hpayload₁₀ : Primrec (fun m : Nat => m.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp hpayload₁
+  have hpayload₁₁ : Primrec (fun m : Nat => m.unpair.2.unpair.2) :=
+    (Primrec.snd.comp Primrec.unpair).comp hpayload₁
+  have hpayload₁₁₀ : Primrec (fun m : Nat => m.unpair.2.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp hpayload₁₁
+  have hpayload₁₁₁ : Primrec (fun m : Nat => m.unpair.2.unpair.2.unpair.2) :=
+    (Primrec.snd.comp Primrec.unpair).comp hpayload₁₁
+  have hcond : PrimrecPred (fun m : Nat =>
+      m.unpair.1 < 16 ∧ m.unpair.2.unpair.1 < 4 ∧
+        m.unpair.2.unpair.2.unpair.1 < 4) :=
+    (PrimrecPred.and (Primrec.nat_lt.comp hpayload₀ (Primrec.const 16))
+      (PrimrecPred.and (Primrec.nat_lt.comp hpayload₁₀ (Primrec.const 4))
+        (Primrec.nat_lt.comp hpayload₁₁₀ (Primrec.const 4))))
+  have htuple : Primrec (fun m : Nat =>
+      (stackPredicateOfCode m.unpair.1, stackNameOfCode m.unpair.2.unpair.1,
+        stackNameOfCode m.unpair.2.unpair.2.unpair.1,
+        m.unpair.2.unpair.2.unpair.2)) := by
+    exact Primrec.pair (stackPredicateOfCode_primrec.comp hpayload₀)
+      (Primrec.pair (stackNameOfCode_primrec.comp hpayload₁₀)
+        (Primrec.pair (stackNameOfCode_primrec.comp hpayload₁₁₀) hpayload₁₁₁))
+  refine (Primrec.ite hcond (Primrec.option_some_iff.2 htuple)
+    (Primrec.const none)).of_eq ?_
+  intro m
+  by_cases hp : m.unpair.1 < 16
+  · by_cases hk₁ : m.unpair.2.unpair.1 < 4
+    · by_cases hk₂ : m.unpair.2.unpair.2.unpair.1 < 4
+      · have hdk₁ :=
+          decodeStackNameCode_eq_some_stackNameOfCode_of_lt (n := m.unpair.2.unpair.1) hk₁
+        have hdk₂ :=
+          decodeStackNameCode_eq_some_stackNameOfCode_of_lt
+            (n := m.unpair.2.unpair.2.unpair.1) hk₂
+        simp [decodeMovePayload, decodeStackPredicateCode, hp, hdk₁, hdk₂]; omega
+      · have hdk₁ :=
+          decodeStackNameCode_eq_some_stackNameOfCode_of_lt (n := m.unpair.2.unpair.1) hk₁
+        have hdk₂ :=
+          decodeStackNameCode_eq_none_of_not_lt (n := m.unpair.2.unpair.2.unpair.1) hk₂
+        simp [decodeMovePayload, decodeStackPredicateCode, hp, hdk₁, hdk₂]; omega
+    · have hdk₁ := decodeStackNameCode_eq_none_of_not_lt (n := m.unpair.2.unpair.1) hk₁
+      simp [decodeMovePayload, decodeStackPredicateCode, hp, hdk₁]; omega
+  · simp [decodeMovePayload, decodeStackPredicateCode, hp]
+
 /-- Payload code for `Λ'.clear`, keeping the recursive target as an already encoded label. -/
 def clearPayloadCode (p : Γ' → Bool) (k : K') (qCode : Nat) : Nat :=
   Nat.pair (stackPredicateCode p) (Nat.pair (stackNameCode k) qCode)
@@ -766,6 +857,36 @@ theorem decodeClearPayload_clearPayloadCode
   simp [decodeClearPayload, clearPayloadCode, decodeStackPredicateCode_stackPredicateCode,
     decodeStackNameCode_stackNameCode]
 
+theorem decodeClearPayload_primrec : Primrec decodeClearPayload := by
+  have hpayload₀ : Primrec (fun m : Nat => m.unpair.1) :=
+    Primrec.fst.comp Primrec.unpair
+  have hpayload₁ : Primrec (fun m : Nat => m.unpair.2) :=
+    Primrec.snd.comp Primrec.unpair
+  have hpayload₁₀ : Primrec (fun m : Nat => m.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp hpayload₁
+  have hpayload₁₁ : Primrec (fun m : Nat => m.unpair.2.unpair.2) :=
+    (Primrec.snd.comp Primrec.unpair).comp hpayload₁
+  have hcond : PrimrecPred (fun m : Nat =>
+      m.unpair.1 < 16 ∧ m.unpair.2.unpair.1 < 4) :=
+    PrimrecPred.and (Primrec.nat_lt.comp hpayload₀ (Primrec.const 16))
+      (Primrec.nat_lt.comp hpayload₁₀ (Primrec.const 4))
+  have htuple : Primrec (fun m : Nat =>
+      (stackPredicateOfCode m.unpair.1, stackNameOfCode m.unpair.2.unpair.1,
+        m.unpair.2.unpair.2)) := by
+    exact Primrec.pair (stackPredicateOfCode_primrec.comp hpayload₀)
+      (Primrec.pair (stackNameOfCode_primrec.comp hpayload₁₀) hpayload₁₁)
+  refine (Primrec.ite hcond (Primrec.option_some_iff.2 htuple)
+    (Primrec.const none)).of_eq ?_
+  intro m
+  by_cases hp : m.unpair.1 < 16
+  · by_cases hk : m.unpair.2.unpair.1 < 4
+    · have hdk := decodeStackNameCode_eq_some_stackNameOfCode_of_lt
+        (n := m.unpair.2.unpair.1) hk
+      simp [decodeClearPayload, decodeStackPredicateCode, hp, hdk]; omega
+    · have hdk := decodeStackNameCode_eq_none_of_not_lt (n := m.unpair.2.unpair.1) hk
+      simp [decodeClearPayload, decodeStackPredicateCode, hp, hdk]; omega
+  · simp [decodeClearPayload, decodeStackPredicateCode, hp]
+
 /-- Payload code for `Λ'.push`, keeping the recursive target as an already encoded label. -/
 def pushPayloadCode (k : K') (f : Option Γ' → Option Γ') (qCode : Nat) : Nat :=
   Nat.pair (stackNameCode k) (Nat.pair (localActionCode f) qCode)
@@ -781,6 +902,36 @@ theorem decodePushPayload_pushPayloadCode
     decodePushPayload (pushPayloadCode k f qCode) = some (k, f, qCode) := by
   simp [decodePushPayload, pushPayloadCode, decodeStackNameCode_stackNameCode,
     decodeLocalActionCode_localActionCode]
+
+theorem decodePushPayload_primrec : Primrec decodePushPayload := by
+  have hpayload₀ : Primrec (fun m : Nat => m.unpair.1) :=
+    Primrec.fst.comp Primrec.unpair
+  have hpayload₁ : Primrec (fun m : Nat => m.unpair.2) :=
+    Primrec.snd.comp Primrec.unpair
+  have hpayload₁₀ : Primrec (fun m : Nat => m.unpair.2.unpair.1) :=
+    (Primrec.fst.comp Primrec.unpair).comp hpayload₁
+  have hpayload₁₁ : Primrec (fun m : Nat => m.unpair.2.unpair.2) :=
+    (Primrec.snd.comp Primrec.unpair).comp hpayload₁
+  have hcond : PrimrecPred (fun m : Nat =>
+      m.unpair.1 < 4 ∧ m.unpair.2.unpair.1 < 3125) :=
+    PrimrecPred.and (Primrec.nat_lt.comp hpayload₀ (Primrec.const 4))
+      (Primrec.nat_lt.comp hpayload₁₀ (Primrec.const 3125))
+  have htuple : Primrec (fun m : Nat =>
+      (stackNameOfCode m.unpair.1, localActionOfCode m.unpair.2.unpair.1,
+        m.unpair.2.unpair.2)) := by
+    exact Primrec.pair (stackNameOfCode_primrec.comp hpayload₀)
+      (Primrec.pair (localActionOfCode_primrec.comp hpayload₁₀) hpayload₁₁)
+  refine (Primrec.ite hcond (Primrec.option_some_iff.2 htuple)
+    (Primrec.const none)).of_eq ?_
+  intro m
+  by_cases hk : m.unpair.1 < 4
+  · by_cases hf : m.unpair.2.unpair.1 < 3125
+    · have hdk := decodeStackNameCode_eq_some_stackNameOfCode_of_lt (n := m.unpair.1) hk
+      simp [decodePushPayload, hdk, decodeLocalActionCode, hf]; omega
+    · have hdk := decodeStackNameCode_eq_some_stackNameOfCode_of_lt (n := m.unpair.1) hk
+      simp [decodePushPayload, hdk, decodeLocalActionCode, hf]
+  · have hdk := decodeStackNameCode_eq_none_of_not_lt (n := m.unpair.1) hk
+    simp [decodePushPayload, hdk]; omega
 
 /-- Payload code for `Λ'.read`, storing the five branch labels as encoded labels. -/
 def readPayloadCode (q₀ q₁ q₂ q₃ q₄ : Nat) : Nat :=
