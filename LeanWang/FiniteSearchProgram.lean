@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.FuelMachine
 import LeanWang.Machine
 
 /-!
@@ -367,6 +368,20 @@ theorem program_fuelPrefix_correct (P : Nat → Bool) (bound : Nat) :
       ∃ k : Nat, k < bound ∧ P k = true := by
   rw [program_correct, true_mem_fuelPrefix_iff]
 
+theorem exists_program_fuelPrefix_halts_iff_fuelMachine_halts
+    (P : Nat → Bool) :
+    (∃ bound : Nat, (program (fuelPrefix P bound)).toMachine.HaltsEmpty) ↔
+      FuelMachine.Halts P := by
+  rw [FuelMachine.halts_iff_exists_true]
+  constructor
+  · rintro ⟨bound, hhalts⟩
+    rcases (program_fuelPrefix_correct P bound).1 hhalts with ⟨k, _hk, hk⟩
+    exact ⟨k, hk⟩
+  · rintro ⟨k, hk⟩
+    refine ⟨k + 1, ?_⟩
+    exact (program_fuelPrefix_correct P (k + 1)).2
+      ⟨k, Nat.lt_succ_self k, hk⟩
+
 /-- A bounded fuel-search prefix for a parameterized Boolean predicate. -/
 def fuelPrefixParam {α : Type} (P : α → Nat → Bool) (a : α) (bound : Nat) :
     List Bool :=
@@ -386,6 +401,12 @@ theorem program_fuelPrefixParam_correct {α : Type} (P : α → Nat → Bool)
     (program (fuelPrefixParam P a bound)).toMachine.HaltsEmpty ↔
       ∃ k : Nat, k < bound ∧ P a k = true := by
   exact program_fuelPrefix_correct (P a) bound
+
+theorem exists_program_fuelPrefixParam_halts_iff_fuelMachine_halts
+    {α : Type} (P : α → Nat → Bool) (a : α) :
+    (∃ bound : Nat, (program (fuelPrefixParam P a bound)).toMachine.HaltsEmpty) ↔
+      FuelMachine.Halts (P a) := by
+  exact exists_program_fuelPrefix_halts_iff_fuelMachine_halts (P a)
 
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,

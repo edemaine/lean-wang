@@ -109,6 +109,23 @@ theorem codeEvalnFuelPrefixProgram_correct (c : Code) (bound : Nat) :
   exact FiniteSearchProgram.program_fuelPrefixParam_correct
     (fun c k => codeEvalnHalts c 0 k) c bound
 
+theorem exists_codeEvalnFuelPrefixProgram_halts_iff_fuelMachine_halts
+    (c : Code) :
+    (∃ bound : Nat,
+      Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine) ↔
+      FuelMachine.Halts (codeEvalnHalts c 0) := by
+  unfold codeEvalnFuelPrefixProgram codeEvalnFuelPrefix
+  exact FiniteSearchProgram.exists_program_fuelPrefixParam_halts_iff_fuelMachine_halts
+    (fun c k => codeEvalnHalts c 0 k) c
+
+theorem exists_codeEvalnFuelPrefixProgram_halts_iff_eval_dom
+    (c : Code) :
+    (∃ bound : Nat,
+      Machine.HaltsEmpty (codeEvalnFuelPrefixProgram (c, bound)).toMachine) ↔
+      (Nat.Partrec.Code.eval c 0).Dom :=
+  (exists_codeEvalnFuelPrefixProgram_halts_iff_fuelMachine_halts c).trans
+    (by rw [FuelMachine.halts_iff_exists_true, code_eval_dom_iff_exists_codeEvalnHalts])
+
 theorem codeEvaln_nonhalting_undecidable :
     ¬ ComputablePred (fun c : Code => ¬ ∃ k : Nat, codeEvalnHalts c 0 k = true) := by
   intro h
