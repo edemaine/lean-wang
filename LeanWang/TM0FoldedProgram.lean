@@ -316,9 +316,21 @@ def foldedInitStateList : List Nat :=
     (List.range TM0Route.partrecStartedTM0Input.length).flatMap fun i =>
       [initMoveRightState i, initWriteRightState i, initReturnState i]
 
-def foldedSimStateList (tc : Turing.ToPartrec.Code) : List Nat :=
-  (TM0Route.partrecStartedTM0States tc).flatMap fun qCode =>
+def foldedSimStateListOfCodes (qCodes : List Nat) : List Nat :=
+  qCodes.flatMap fun qCode =>
     foldSideList.map fun side => foldedSimStateOfCode side qCode
+
+theorem foldedSimStateListOfCodes_primrec : Primrec foldedSimStateListOfCodes := by
+  unfold foldedSimStateListOfCodes
+  refine Primrec.list_flatMap Primrec.id ?_
+  apply Primrec₂.mk
+  refine Primrec.list_map (Primrec.const foldSideList) ?_
+  apply Primrec₂.mk
+  exact foldedSimStateOfCode_primrec.comp
+    (Primrec.pair Primrec.snd (Primrec.snd.comp Primrec.fst))
+
+def foldedSimStateList (tc : Turing.ToPartrec.Code) : List Nat :=
+  foldedSimStateListOfCodes (TM0Route.partrecStartedTM0States tc)
 
 def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
   foldedInitStateList ++ foldedSimStateList tc
