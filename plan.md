@@ -283,6 +283,10 @@ blank symbol, and start state, plus blank/start membership lemmas. It also
 defines the conversion from supported Mathlib TM0 transitions to finite-TM0
 transition rows, enumerates the full generated transition table over supported
 labels and tape symbols, and proves generated row state/read/next/write support.
+The row construction now uses proof-free total state codes, and there are
+existence/shape lemmas showing that each Mathlib TM0 step contributes a generated
+row with the correct `(state, read)` key, next-state support, and finite-TM0
+statement.
 
 Next implementation targets:
 
