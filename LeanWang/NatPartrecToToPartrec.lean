@@ -341,6 +341,41 @@ theorem translates_precStepArg {cg : Nat.Partrec.Code}
   rw [Turing.ToPartrec.Code.comp_eval]
   simpa [Part.bind_eq_bind] using hg (Nat.pair a (Nat.pair y ih)) v
 
+theorem rfindFrom_mem_of_nat_rfind {cf : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) {a m n : Nat}
+    (hrfind : n ∈ Nat.rfind fun i =>
+      (fun x : Nat => x = 0) <$> Nat.Partrec.Code.eval cf (Nat.pair a (i + m))) :
+    [n + m] ∈ (translate (.rfind' cf)).eval [Nat.pair a m] := by
+  rw [translate_rfind']
+  refine TCode.rfindFrom_mem_of_first_zero (test := translate cf) (a := a) (m := m)
+    (n := n) ?_ ?_
+  · have hzero_mem :
+        0 ∈ Nat.Partrec.Code.eval cf (Nat.pair a (n + m)) := by
+      have htrue := (Nat.mem_rfind.1 hrfind).1
+      rw [Part.map_eq_map, Part.mem_map_iff] at htrue
+      rcases htrue with ⟨x, hx, hxtrue⟩
+      have hx0 : x = 0 := by
+        simpa using hxtrue.symm
+      simpa [hx0] using hx
+    have htest_mem : [0] ∈ (translate cf).eval [Nat.pair a (n + m)] :=
+      (hf (Nat.pair a (n + m)) [0]).2 ⟨0, hzero_mem, rfl⟩
+    exact Part.eq_some_iff.2 htest_mem
+  · intro i hi
+    have hfalse := (Nat.mem_rfind.1 hrfind).2 hi
+    rw [Part.map_eq_map, Part.mem_map_iff] at hfalse
+    rcases hfalse with ⟨x, hx, hxfalse⟩
+    have hxne : x ≠ 0 := by
+      intro hx0
+      subst x
+      cases hxfalse
+    cases x with
+    | zero => exact (hxne rfl).elim
+    | succ k =>
+        refine ⟨k, ?_⟩
+        have htest_mem : [k.succ] ∈ (translate cf).eval [Nat.pair a (i + m)] :=
+          (hf (Nat.pair a (i + m)) [k.succ]).2 ⟨k.succ, hx, rfl⟩
+        exact Part.eq_some_iff.2 htest_mem
+
 end NatPartrecToToPartrec
 
 end LeanWang
