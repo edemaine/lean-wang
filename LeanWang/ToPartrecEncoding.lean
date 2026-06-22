@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.PartrecToTM2Support
 import Mathlib.Computability.TuringMachine.ToPartrec
 
 /-!
@@ -138,6 +139,57 @@ end Code
 end ToPartrec
 
 namespace PartrecToTM2
+
+/-- Finite Boolean predicates on the stack alphabet, encoded by their four values. -/
+def stackPredicateEquivTuple : (Γ' → Bool) ≃ Bool × Bool × Bool × Bool where
+  toFun f := (f Γ'.consₗ, f Γ'.cons, f Γ'.bit0, f Γ'.bit1)
+  invFun t
+    | Γ'.consₗ => t.1
+    | Γ'.cons => t.2.1
+    | Γ'.bit0 => t.2.2.1
+    | Γ'.bit1 => t.2.2.2
+  left_inv := by
+    intro f
+    funext a
+    cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d⟩
+    rfl
+
+instance instPrimcodableStackPredicate : Primcodable (Γ' → Bool) :=
+  Primcodable.ofEquiv (Bool × Bool × Bool × Bool) stackPredicateEquivTuple
+
+/--
+Finite local-store actions used by `Λ'.push`, encoded by their five values on
+`none` and the four stack symbols.
+-/
+def localActionEquivTuple :
+    (Option Γ' → Option Γ') ≃
+      Option Γ' × Option Γ' × Option Γ' × Option Γ' × Option Γ' where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodableLocalAction : Primcodable (Option Γ' → Option Γ') :=
+  Primcodable.ofEquiv
+    (Option Γ' × Option Γ' × Option Γ' × Option Γ' × Option Γ')
+    localActionEquivTuple
 
 namespace Cont'
 
