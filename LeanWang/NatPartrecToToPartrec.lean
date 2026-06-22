@@ -128,6 +128,119 @@ theorem translate_rfind' (cf : Nat.Partrec.Code) :
     translate (.rfind' cf) = TCode.rfindFrom (translate cf) :=
   rfl
 
+/--
+Semantic correctness predicate for a translated unary partial-recursive code.
+
+`Translates c tc` says that every translated output is a singleton list `[x]`,
+and those singleton outputs are exactly the values of `Nat.Partrec.Code.eval c`.
+-/
+def Translates (c : Nat.Partrec.Code) (tc : Code) : Prop :=
+  ∀ n : Nat, ∀ v : List Nat, v ∈ tc.eval [n] ↔
+    ∃ x : Nat, x ∈ Nat.Partrec.Code.eval c n ∧ v = [x]
+
+private theorem part_mem_pure_iff {α : Type} {a b : α} :
+    a ∈ (pure b : Part α) ↔ a = b := by
+  rw [Part.pure_eq_some, Part.mem_some_iff]
+
+theorem Translates.dom {c : Nat.Partrec.Code} {tc : Code}
+    (h : Translates c tc) (n : Nat) :
+    (tc.eval [n]).Dom ↔ (Nat.Partrec.Code.eval c n).Dom := by
+  constructor
+  · intro htc
+    rcases Part.dom_iff_mem.1 htc with ⟨v, hv⟩
+    rcases (h n v).1 hv with ⟨x, hx, _⟩
+    exact Part.dom_iff_mem.2 ⟨x, hx⟩
+  · intro hc
+    rcases Part.dom_iff_mem.1 hc with ⟨x, hx⟩
+    exact Part.dom_iff_mem.2 ⟨[x], (h n [x]).2 ⟨x, hx, rfl⟩⟩
+
+theorem translates_zero : Translates .zero (translate .zero) := by
+  intro n v
+  rw [translate_zero]
+  simp only [Turing.ToPartrec.Code.zero_eval]
+  constructor
+  · intro hv
+    exact ⟨0, by simp [Nat.Partrec.Code.eval, pure, PFun.pure], part_mem_pure_iff.1 hv⟩
+  · rintro ⟨x, hx, hv⟩
+    have hx0 : x = 0 := by
+      simpa [Nat.Partrec.Code.eval, pure, PFun.pure] using hx
+    simpa [hx0] using hv
+
+theorem translates_succ : Translates .succ (translate .succ) := by
+  intro n v
+  rw [translate_succ]
+  simp only [Turing.ToPartrec.Code.succ_eval, List.headI_cons]
+  constructor
+  · intro hv
+    exact ⟨n.succ, by simp [Nat.Partrec.Code.eval], part_mem_pure_iff.1 hv⟩
+  · rintro ⟨x, hx, hv⟩
+    have hx0 : x = n.succ := by
+      simpa [Nat.Partrec.Code.eval] using hx
+    simpa [hx0] using hv
+
+theorem translates_left : Translates .left (translate .left) := by
+  intro n v
+  rw [translate_left]
+  simp only [Code.unpairLeft_eval]
+  constructor
+  · intro hv
+    exact ⟨n.unpair.1, by simp [Nat.Partrec.Code.eval], part_mem_pure_iff.1 hv⟩
+  · rintro ⟨x, hx, hv⟩
+    have hx0 : x = n.unpair.1 := by
+      simpa [Nat.Partrec.Code.eval] using hx
+    simpa [hx0] using hv
+
+theorem translates_right : Translates .right (translate .right) := by
+  intro n v
+  rw [translate_right]
+  simp only [Code.unpairRight_eval]
+  constructor
+  · intro hv
+    exact ⟨n.unpair.2, by simp [Nat.Partrec.Code.eval], part_mem_pure_iff.1 hv⟩
+  · rintro ⟨x, hx, hv⟩
+    have hx0 : x = n.unpair.2 := by
+      simpa [Nat.Partrec.Code.eval] using hx
+    simpa [hx0] using hv
+
+set_option linter.flexible false in
+theorem translates_pair {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg)) :
+    Translates (.pair cf cg) (translate (.pair cf cg)) := by
+  intro n v
+  simp [Nat.Partrec.Code.eval, Code.singletonPair, Code.listPair,
+    hf n, hg n, Seq.seq, Part.mem_bind_iff, Part.mem_map_iff]
+  constructor
+  · rintro ⟨x, y, ⟨hx, hy⟩, hv⟩
+    exact ⟨x, hx, y, hy, hv⟩
+  · rintro ⟨x, hx, y, hy, hv⟩
+    exact ⟨x, y, ⟨hx, hy⟩, hv⟩
+
+theorem translates_comp {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg)) :
+    Translates (.comp cf cg) (translate (.comp cf cg)) := by
+  intro n v
+  constructor
+  · intro hv
+    rw [translate_comp, Turing.ToPartrec.Code.comp_eval] at hv
+    change v ∈ ((translate cg).eval [n] >>= (translate cf).eval) at hv
+    simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hv
+    rcases hv with ⟨w, hwg, hvf⟩
+    rcases (hg n w).1 hwg with ⟨y, hyg, rfl⟩
+    rcases (hf y v).1 hvf with ⟨x, hxf, hv⟩
+    refine ⟨x, ?_, hv⟩
+    change x ∈ (Nat.Partrec.Code.eval cg n >>= fun a => Nat.Partrec.Code.eval cf a)
+    simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+    exact ⟨y, hyg, hxf⟩
+  · rintro ⟨x, hx, rfl⟩
+    change x ∈ (Nat.Partrec.Code.eval cg n >>= fun a => Nat.Partrec.Code.eval cf a) at hx
+    simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hx
+    rcases hx with ⟨y, hyg, hxf⟩
+    rw [translate_comp, Turing.ToPartrec.Code.comp_eval]
+    change [x] ∈ ((translate cg).eval [n] >>= (translate cf).eval)
+    simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+    exact ⟨[y], (hg n [y]).2 ⟨y, hyg, rfl⟩,
+      (hf y [x]).2 ⟨x, hxf, rfl⟩⟩
+
 end NatPartrecToToPartrec
 
 end LeanWang
