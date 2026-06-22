@@ -269,10 +269,10 @@ by finite return-left rows. Generated row targets and written symbols are proved
 to lie in the compiled table supports.
 
 `TM0Route` now also packages finite state support for the code-specific started
-TM2 evaluator and for the translated TM1 and TM0 machines. This is the state
-support data needed by the concrete `TM0FiniteCompiler`; the remaining finite
-alphabet list should be built directly from the concrete `PartrecToTM2` stack
-symbols rather than relying on a global `Fintype` instance.
+TM2 evaluator and for the translated TM1 and TM0 machines. It also has an
+explicit finite alphabet list for the translated TM0 tape symbols, built from
+the concrete four `PartrecToTM2` stacks and their finite stack alphabet rather
+than relying on a global `Fintype` instance.
 
 Next implementation targets:
 

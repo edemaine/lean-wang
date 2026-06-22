@@ -308,6 +308,82 @@ theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
     q ∈ partrecStartedTM0LabelList tc ↔ q ∈ partrecStartedTM0Labels tc := by
   simp [partrecStartedTM0LabelList]
 
+/-- The finite cell values that can occur in one stack coordinate of the TM2-to-TM1 alphabet. -/
+def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
+  none :: (PartrecToTM2Support.stackAlphabetList.map some)
+
+theorem mem_partrecStartedTM0CellValues (a : Option Turing.PartrecToTM2.Γ') :
+    a ∈ partrecStartedTM0CellValues := by
+  cases a with
+  | none =>
+      simp [partrecStartedTM0CellValues]
+  | some a =>
+      simp [partrecStartedTM0CellValues, PartrecToTM2Support.mem_stackAlphabetList a]
+
+/-- Build the four-stack vector component of the TM2-to-TM1 alphabet. -/
+def partrecStartedTM0StackVector
+    (main rev aux stack : Option Turing.PartrecToTM2.Γ') :
+    ∀ k : PartrecStack, Option (PartrecStackSymbol k)
+  | Turing.PartrecToTM2.K'.main => main
+  | Turing.PartrecToTM2.K'.rev => rev
+  | Turing.PartrecToTM2.K'.aux => aux
+  | Turing.PartrecToTM2.K'.stack => stack
+
+theorem partrecStartedTM0StackVector_ext
+    (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) :
+    partrecStartedTM0StackVector
+      (v Turing.PartrecToTM2.K'.main)
+      (v Turing.PartrecToTM2.K'.rev)
+      (v Turing.PartrecToTM2.K'.aux)
+      (v Turing.PartrecToTM2.K'.stack) = v := by
+  funext k
+  cases k <;> rfl
+
+/-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
+def partrecStartedTM0StackVectors :
+    List (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
+  partrecStartedTM0CellValues.flatMap fun main =>
+    partrecStartedTM0CellValues.flatMap fun rev =>
+      partrecStartedTM0CellValues.flatMap fun aux =>
+        partrecStartedTM0CellValues.map fun stack =>
+          partrecStartedTM0StackVector main rev aux stack
+
+theorem mem_partrecStartedTM0StackVectors
+    (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) :
+    v ∈ partrecStartedTM0StackVectors := by
+  rw [← partrecStartedTM0StackVector_ext v]
+  unfold partrecStartedTM0StackVectors
+  simp only [List.mem_flatMap, List.mem_map]
+  exact
+    ⟨v Turing.PartrecToTM2.K'.main,
+      mem_partrecStartedTM0CellValues _,
+      v Turing.PartrecToTM2.K'.rev,
+      mem_partrecStartedTM0CellValues _,
+      v Turing.PartrecToTM2.K'.aux,
+      mem_partrecStartedTM0CellValues _,
+      v Turing.PartrecToTM2.K'.stack,
+      mem_partrecStartedTM0CellValues _,
+      rfl⟩
+
+/-- Explicit finite list of all symbols in the TM0 machine produced by `TM0Route`. -/
+def partrecStartedTM0SymbolList :
+    List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
+  [false, true].flatMap fun bottom =>
+    partrecStartedTM0StackVectors.map fun cells =>
+      (bottom, cells)
+
+theorem mem_partrecStartedTM0SymbolList
+    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :
+    a ∈ partrecStartedTM0SymbolList := by
+  rcases a with ⟨bottom, cells⟩
+  cases bottom <;>
+    simp [partrecStartedTM0SymbolList, mem_partrecStartedTM0StackVectors]
+
+theorem partrecStartedTM0Input_symbols (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+    (_ha : a ∈ partrecStartedTM0Input) :
+    a ∈ partrecStartedTM0SymbolList :=
+  mem_partrecStartedTM0SymbolList a
+
 theorem partrecStartedTM0_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM0.Supports (partrecStartedTM0Machine tc)
       (partrecStartedTM0Labels tc : Set _) := by
