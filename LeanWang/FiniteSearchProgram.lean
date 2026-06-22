@@ -295,6 +295,49 @@ theorem program_all_false_not_halts (n : Nat) :
     rw [hrun] at ht
     simp [program, List.length_replicate] at ht
 
+theorem eq_replicate_false_of_true_not_mem :
+    ∀ bs : List Bool, true ∉ bs → bs = List.replicate bs.length false
+  | [], _ => by
+      rfl
+  | b :: bs, hmem => by
+      cases b
+      · have htail : true ∉ bs := by
+          intro h
+          exact hmem (by simp [h])
+        have ih := eq_replicate_false_of_true_not_mem bs htail
+        change false :: bs = false :: List.replicate bs.length false
+        rw [ih]
+        simp
+      · exact False.elim (hmem (by simp))
+
+theorem exists_replicate_false_cons_true_of_true_mem :
+    ∀ bs : List Bool, true ∈ bs →
+      ∃ n : Nat, ∃ rest : List Bool, bs = List.replicate n false ++ true :: rest
+  | [], hmem => by
+      simp at hmem
+  | b :: bs, hmem => by
+      cases b
+      · have htail : true ∈ bs := by
+          simpa using hmem
+        rcases exists_replicate_false_cons_true_of_true_mem bs htail with
+          ⟨n, rest, hbs⟩
+        refine ⟨n + 1, rest, ?_⟩
+        simp [List.replicate_succ, hbs]
+      · exact ⟨0, bs, by rfl⟩
+
+theorem program_correct (bs : List Bool) :
+    (program bs).toMachine.HaltsEmpty ↔ true ∈ bs := by
+  constructor
+  · intro hhalts
+    by_contra hmem
+    have hfalse := eq_replicate_false_of_true_not_mem bs hmem
+    rw [hfalse] at hhalts
+    exact program_all_false_not_halts bs.length hhalts
+  · intro hmem
+    rcases exists_replicate_false_cons_true_of_true_mem bs hmem with
+      ⟨n, rest, rfl⟩
+    exact program_replicate_false_cons_true_halts n rest
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
