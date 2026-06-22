@@ -19,10 +19,10 @@ import Mathlib.Computability.TuringMachine.ToPartrec
 Main theorem surface for the Wang-tile undecidability proof.
 
 This file collects the main reduction theorems. The final undecidability theorem
-is currently parameterized by the external construction obligations: a
-computable reduction from Mathlib partial-recursive codes through the TM0 route
-to finite table-machine data, and a concrete scaffold satisfying the abstract
-square-forcing property.
+is currently parameterized by construction obligations: a computable reduction
+from Mathlib partial-recursive codes through the TM0 route, a temporary
+finite-TM0-to-table bridge for the existing Wang-tile layer, and a concrete
+scaffold satisfying the abstract square-forcing property.
 -/
 
 noncomputable section
@@ -162,47 +162,10 @@ theorem codeEvalnFuelMachine_correct (c : Code) (n : Nat) :
   rw [FuelMachine.halts_iff_exists_true, code_eval_dom_iff_exists_codeEvalnHalts]
 
 /--
-Every Mathlib `Nat.Partrec.Code` has a corresponding `Turing.ToPartrec.Code`
-whose singleton-list output is defined exactly when the original unary code is
-defined.
+Correctness of the concrete translation into Mathlib's `PartrecToTM2`
+evaluator. This is a semantic bridge into Mathlib's machine reductions, not a
+direct TM2-to-table construction.
 -/
-theorem exists_toPartrecCode_for_natPartrecCode (c : Code) :
-    ∃ tc : Turing.ToPartrec.Code,
-      ∀ n : Nat,
-        (Turing.ToPartrec.Code.eval tc [n]).Dom ↔
-          (Nat.Partrec.Code.eval c n).Dom := by
-  have hpart : Partrec (Nat.Partrec.Code.eval c) :=
-    (Nat.Partrec.Code.eval_part.comp (Computable.const c) Computable.id).of_eq
-      fun n => by rfl
-  rcases Turing.ToPartrec.Code.exists_code (Nat.Partrec'.part_iff₁.2 hpart) with
-    ⟨tc, htc⟩
-  refine ⟨tc, fun n => ?_⟩
-  let v : List.Vector Nat 1 := ⟨[n], by simp⟩
-  have hv : v.head = n := rfl
-  have htc' :
-      Turing.ToPartrec.Code.eval tc [n] =
-        pure <$> Nat.Partrec.Code.eval c n := by
-    simpa [v, hv] using htc v
-  rw [htc']
-  exact part_dom_map_iff pure (Nat.Partrec.Code.eval c n)
-
-/--
-Mathlib's TM2 evaluator for the translated `ToPartrec.Code` halts exactly when
-the original `Nat.Partrec.Code` halts on input `0`.
--/
-theorem exists_tm2_for_natPartrecCode (c : Code) :
-    ∃ tc : Turing.ToPartrec.Code,
-      (StateTransition.eval
-          (Turing.TM2.step Turing.PartrecToTM2.tr)
-          (Turing.PartrecToTM2.init tc [0])).Dom ↔
-        (Nat.Partrec.Code.eval c 0).Dom := by
-  rcases exists_toPartrecCode_for_natPartrecCode c with ⟨tc, htc⟩
-  refine ⟨tc, ?_⟩
-  rw [Turing.PartrecToTM2.tr_eval tc [0]]
-  exact (part_dom_map_iff Turing.PartrecToTM2.halt
-    (Turing.ToPartrec.Code.eval tc [0])).trans (htc 0)
-
-/-- Correctness of the concrete reduction to Mathlib's `PartrecToTM2` evaluator. -/
 theorem natPartrecToTM2Reduction_correct (c : Code) :
     (StateTransition.eval
       (Turing.TM2.step Turing.PartrecToTM2.tr)
