@@ -64,6 +64,29 @@ theorem tr_supports_labels (tc : ToPartrec.Code) :
   change @TM2.Supports _ _ _ _ ⟨trNormal tc Cont'.halt⟩ tr (codeSupp tc Cont'.halt)
   exact tr_supports tc Cont'.halt
 
+/--
+Finite set of TM2 statement substates needed to execute all evaluator labels in
+`labels tc`.
+-/
+def statements (tc : ToPartrec.Code) : Finset (Option Stmt') :=
+  by
+    classical
+    exact TM2.stmts tr (labels tc)
+
+theorem label_statement_mem {tc : ToPartrec.Code} {q : Λ'}
+    (hq : q ∈ labels tc) :
+    some (tr q) ∈ statements tc := by
+  classical
+  exact Finset.some_mem_insertNone.2
+    (Finset.mem_biUnion.2 ⟨q, hq, TM2.stmts₁_self⟩)
+
+theorem statement_supports {tc : ToPartrec.Code} {stmt : Stmt'}
+    (hstmt : some stmt ∈ statements tc) :
+    TM2.SupportsStmt (labels tc) stmt := by
+  classical
+  letI : Inhabited Λ' := ⟨startLabel tc⟩
+  exact TM2.stmts_supportsStmt (tr_supports_labels tc) hstmt
+
 theorem labels_step_closed {tc : ToPartrec.Code}
     {cfg cfg' : Cfg'}
     (hstep : cfg' ∈ TM2.step tr cfg)

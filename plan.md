@@ -81,8 +81,8 @@ Completed proof layers:
   reduction as an explicit parameter.
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
-  one-step/reachable label-closure lemmas for runs starting from
-  `PartrecToTM2.init tc [0]`.
+  finite statement-substate set, plus one-step/reachable label-closure lemmas
+  for runs starting from `PartrecToTM2.init tc [0]`.
 
 The remaining construction obligations are explicit Lean interfaces:
 
