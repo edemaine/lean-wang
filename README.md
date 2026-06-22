@@ -48,7 +48,7 @@ the concrete definitions needed for the Berger/Robinson route:
   has the same domain as the corresponding started TM2 evaluator. It also
   packages finite state support for the started TM2, translated TM1, and
   translated TM0 machines, plus an explicit finite alphabet list for the
-  translated TM0 tape symbols.
+  translated TM0 tape symbols and injective numeric codes for those symbols.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

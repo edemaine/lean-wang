@@ -272,7 +272,9 @@ to lie in the compiled table supports.
 TM2 evaluator and for the translated TM1 and TM0 machines. It also has an
 explicit finite alphabet list for the translated TM0 tape symbols, built from
 the concrete four `PartrecToTM2` stacks and their finite stack alphabet rather
-than relying on a global `Fintype` instance.
+than relying on a global `Fintype` instance. The translated TM0 tape symbols now
+also have injective numeric codes and a numeric symbol list for the eventual
+`FiniteTM0Program`.
 
 Next implementation targets:
 

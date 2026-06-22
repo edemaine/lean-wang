@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.PartrecToTM2Support
+import Mathlib.Data.Nat.Pairing
 
 /-!
 The Mathlib TM0 route for the machine side of the reduction.
@@ -383,6 +384,84 @@ theorem partrecStartedTM0Input_symbols (a : Turing.TM2to1.Γ' PartrecStack Partr
     (_ha : a ∈ partrecStartedTM0Input) :
     a ∈ partrecStartedTM0SymbolList :=
   mem_partrecStartedTM0SymbolList a
+
+/-- Numeric code for the four-stack vector component of a translated TM0 tape symbol. -/
+def partrecStartedTM0StackVectorCode
+    (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) : Nat :=
+  Nat.pair
+    (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.main))
+    (Nat.pair
+      (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.rev))
+      (Nat.pair
+        (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.aux))
+        (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.stack))))
+
+theorem partrecStartedTM0StackVectorCode_injective :
+    Function.Injective partrecStartedTM0StackVectorCode := by
+  intro v w h
+  unfold partrecStartedTM0StackVectorCode at h
+  have hmain :
+      PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.main) =
+        PartrecToTM2Support.tapeSymbolCode (w Turing.PartrecToTM2.K'.main) :=
+    (Nat.pair_eq_pair.mp h).1
+  have htail := (Nat.pair_eq_pair.mp h).2
+  have hrev :
+      PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.rev) =
+        PartrecToTM2Support.tapeSymbolCode (w Turing.PartrecToTM2.K'.rev) :=
+    (Nat.pair_eq_pair.mp htail).1
+  have htail' := (Nat.pair_eq_pair.mp htail).2
+  have haux :
+      PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.aux) =
+        PartrecToTM2Support.tapeSymbolCode (w Turing.PartrecToTM2.K'.aux) :=
+    (Nat.pair_eq_pair.mp htail').1
+  have hstack :
+      PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.stack) =
+        PartrecToTM2Support.tapeSymbolCode (w Turing.PartrecToTM2.K'.stack) :=
+    (Nat.pair_eq_pair.mp htail').2
+  funext k
+  cases k
+  · exact PartrecToTM2Support.tapeSymbolCode_injective hmain
+  · exact PartrecToTM2Support.tapeSymbolCode_injective hrev
+  · exact PartrecToTM2Support.tapeSymbolCode_injective haux
+  · exact PartrecToTM2Support.tapeSymbolCode_injective hstack
+
+/-- Numeric code for a translated TM0 tape symbol. -/
+def partrecStartedTM0SymbolCode
+    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
+  Nat.pair (if a.1 then 1 else 0) (partrecStartedTM0StackVectorCode a.2)
+
+theorem partrecStartedTM0SymbolCode_injective :
+    Function.Injective partrecStartedTM0SymbolCode := by
+  intro a b h
+  rcases a with ⟨ba, va⟩
+  rcases b with ⟨bb, vb⟩
+  unfold partrecStartedTM0SymbolCode at h
+  have hpair := Nat.pair_eq_pair.mp h
+  have hbool : ba = bb := by
+    cases ba <;> cases bb <;> simp at hpair ⊢
+  have hvec : va = vb :=
+    partrecStartedTM0StackVectorCode_injective hpair.2
+  cases hbool
+  cases hvec
+  rfl
+
+/-- Numeric alphabet for the translated TM0 route, suitable for `FiniteTM0Program`. -/
+def partrecStartedTM0Symbols : List Nat :=
+  partrecStartedTM0SymbolList.map partrecStartedTM0SymbolCode
+
+theorem partrecStartedTM0SymbolCode_mem_symbols
+    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :
+    partrecStartedTM0SymbolCode a ∈ partrecStartedTM0Symbols :=
+  List.mem_map_of_mem (f := partrecStartedTM0SymbolCode) (mem_partrecStartedTM0SymbolList a)
+
+/-- Numeric code of the translated TM0 blank symbol. -/
+def partrecStartedTM0Blank : Nat :=
+  partrecStartedTM0SymbolCode default
+
+theorem partrecStartedTM0Blank_mem_symbols :
+    partrecStartedTM0Blank ∈ partrecStartedTM0Symbols := by
+  unfold partrecStartedTM0Blank
+  exact partrecStartedTM0SymbolCode_mem_symbols default
 
 theorem partrecStartedTM0_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM0.Supports (partrecStartedTM0Machine tc)
