@@ -8,6 +8,7 @@ import LeanWang.FiniteSearchProgram
 import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
+import LeanWang.NatPartrecToToPartrec
 import LeanWang.ToPartrecEncoding
 import Mathlib.Computability.Reduce
 import Mathlib.Computability.TuringMachine.ToPartrec
@@ -17,11 +18,13 @@ Main theorem surface for the Wang-tile undecidability proof.
 
 This file collects the main reduction theorems. The final undecidability theorem
 is currently parameterized by the two external construction obligations: a
-computable reduction, implemented as a compiler from Mathlib
-partial-recursive codes to finite table
-machines, and a concrete scaffold satisfying the abstract square-forcing
+computable reduction from Mathlib partial-recursive codes to finite table
+machines, implemented by compiling those codes to finite machine data, and a
+concrete scaffold satisfying the abstract square-forcing
 property.
 -/
+
+noncomputable section
 
 namespace LeanWang
 
@@ -214,6 +217,28 @@ structure ToPartrecTM2Reduction where
       (Turing.TM2.step Turing.PartrecToTM2.tr)
       (Turing.PartrecToTM2.init (translate c) [0])).Dom ↔
         (Nat.Partrec.Code.eval c 0).Dom
+
+/-- Correctness of the concrete reduction to Mathlib's `PartrecToTM2` evaluator. -/
+theorem natPartrecToTM2Reduction_correct (c : Code) :
+    (StateTransition.eval
+      (Turing.TM2.step Turing.PartrecToTM2.tr)
+      (Turing.PartrecToTM2.init (NatPartrecToToPartrec.translate c) [0])).Dom ↔
+        (Nat.Partrec.Code.eval c 0).Dom := by
+  exact (NatPartrecToToPartrec.translate_correct c).tm2_dom
+
+/--
+Concrete reduction from Mathlib unary partial-recursive codes to the TM2
+configuration used by Mathlib's `PartrecToTM2` evaluator.
+-/
+theorem exists_natPartrecToTM2Reduction :
+    ∃ R : ToPartrecTM2Reduction, R.translate = NatPartrecToToPartrec.translate := by
+  refine
+    ⟨{ translate := NatPartrecToToPartrec.translate
+       translate_computable := NatPartrecToToPartrec.translate_computable
+       correct := by
+         intro c
+         exact natPartrecToTM2Reduction_correct c },
+      rfl⟩
 
 /--
 A computable reduction, implemented by compiling Mathlib TM2 evaluator
@@ -1212,3 +1237,5 @@ theorem domino_problem_undecidable_of_scaffold_tm2Compiler
   domino_problem_undecidable_of_scaffold S hS (C.toTableCompiler R)
 
 end LeanWang
+
+end

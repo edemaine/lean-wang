@@ -90,6 +90,46 @@ theorem encodeCode_eq : Encodable.encode = encodeCode :=
 theorem ofNatCode_eq : Denumerable.ofNat Code = ofNatCode :=
   rfl
 
+open Primrec
+
+theorem primrec₂_cons : Primrec₂ Code.cons :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      nat_add.comp
+        (nat_double.comp <|
+          nat_double.comp <|
+            Primrec₂.natPair.comp (encode_iff.2 <| (Primrec.ofNat Code).comp fst)
+              (encode_iff.2 <| (Primrec.ofNat Code).comp snd))
+        (Primrec₂.const 3)
+
+theorem primrec₂_comp : Primrec₂ Code.comp :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      nat_add.comp
+        (nat_double.comp <|
+          nat_double_succ.comp <|
+            Primrec₂.natPair.comp (encode_iff.2 <| (Primrec.ofNat Code).comp fst)
+              (encode_iff.2 <| (Primrec.ofNat Code).comp snd))
+        (Primrec₂.const 3)
+
+theorem primrec₂_case : Primrec₂ Code.case :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      nat_add.comp
+        (nat_double_succ.comp <|
+          nat_double.comp <|
+            Primrec₂.natPair.comp (encode_iff.2 <| (Primrec.ofNat Code).comp fst)
+              (encode_iff.2 <| (Primrec.ofNat Code).comp snd))
+        (Primrec₂.const 3)
+
+theorem primrec_fix : Primrec Code.fix :=
+  ofNat_iff.2 <|
+    encode_iff.1 <|
+      nat_add.comp
+        (nat_double_succ.comp <| nat_double_succ.comp <|
+          encode_iff.2 <| Primrec.ofNat Code)
+        (const 3)
+
 end Code
 
 end ToPartrec
