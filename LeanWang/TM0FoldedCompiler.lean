@@ -451,6 +451,66 @@ def initWriteRightRows : List PostTransition :=
   (List.range (TM0Route.partrecStartedTM0Input.length - 1)).map fun i =>
     initWriteRightRow i
 
+private theorem find?_map_initWriteRightRows_aux
+    (i : Nat) (indices : List Nat) (hi : i ∈ indices) :
+    (indices.map fun j => initWriteRightRow j).find?
+        (fun e => e.matchesInput (initWriteRightState i) foldedBlank) =
+      some (initWriteRightRow i) := by
+  induction indices with
+  | nil =>
+      cases hi
+  | cons j indices ih =>
+      simp only [List.mem_cons] at hi
+      by_cases hji : j = i
+      · subst j
+        simp [initWriteRightRow, mkRow, PostTransition.matchesInput]
+      · have hi_tail : i ∈ indices := by
+          rcases hi with h | h
+          · exact False.elim (hji h.symm)
+          · exact h
+        have hstate : initWriteRightState j ≠ initWriteRightState i := by
+          intro h
+          exact hji (initWriteRightState_injective h)
+        have hmiss :
+            (initWriteRightRow j).matchesInput (initWriteRightState i) foldedBlank = false :=
+          mkRow_matchesInput_of_state_ne hstate
+        simp [hmiss, ih hi_tail]
+
+theorem initWriteRightRows_find?_of_mem {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    initWriteRightRows.find?
+        (fun e => e.matchesInput (initWriteRightState i) foldedBlank) =
+      some (initWriteRightRow i) := by
+  unfold initWriteRightRows
+  exact find?_map_initWriteRightRows_aux i
+    (List.range (TM0Route.partrecStartedTM0Input.length - 1)) (List.mem_range.2 hi)
+
+theorem initMoveRightRows_find?_eq_none_of_initWriteRightState (i read : Nat) :
+    initMoveRightRows.find?
+        (fun e => e.matchesInput (initWriteRightState i) read) =
+      none := by
+  unfold initMoveRightRows
+  induction List.range (TM0Route.partrecStartedTM0Input.length - 1) with
+  | nil =>
+      simp
+  | cons j indices ih =>
+      have hhead :
+          (foldedSymbolList.map fun r => initMoveRightRow j r).find?
+              (fun e => e.matchesInput (initWriteRightState i) read) = none := by
+        have hstate : initMoveRightState j ≠ initWriteRightState i :=
+          initMoveRightState_ne_initWriteRightState j i
+        induction foldedSymbolList with
+        | nil =>
+            simp
+        | cons r reads ihReads =>
+            have hmiss :
+                (initMoveRightRow j r).matchesInput (initWriteRightState i) read = false :=
+              mkRow_matchesInput_of_state_ne hstate
+            simp [hmiss, ihReads]
+      simp only [List.flatMap_cons]
+      rw [find?_append_of_eq_none hhead]
+      exact ih
+
 def initReturnRow (tc : Turing.ToPartrec.Code) (i read : Nat) : PostTransition :=
   if i = 0 then
     mkRow (initReturnState 0) read (foldedSimStartState tc) (PostStmt.write read)
@@ -635,6 +695,46 @@ theorem programHeader_step_initMoveRight
   have hnext : initWriteRightState i ∈ foldedStateList tc :=
     initWriteRightState_mem_states (tc := tc) (by omega)
   simp [PostProgram.step, hfind, initMoveRightRow, mkRow, hnext]
+
+theorem programHeader_transition?_initWriteRight
+    (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    (programHeader tc).transition? (initWriteRightState i) foldedBlank =
+      some (initWriteRightRow i) := by
+  have horigin :
+      initWriteOriginRow.matchesInput (initWriteRightState i) foldedBlank = false := by
+    unfold initWriteOriginRow
+    exact mkRow_matchesInput_of_state_ne (initWriteOriginState_ne_initWriteRightState i)
+  have hmove := initMoveRightRows_find?_eq_none_of_initWriteRightState i foldedBlank
+  have hwrite := initWriteRightRows_find?_of_mem hi
+  unfold PostProgram.transition?
+  change (initRows tc).find?
+      (fun e => e.matchesInput (initWriteRightState i) foldedBlank) =
+    some (initWriteRightRow i)
+  unfold initRows
+  have htail :
+      (initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc).find?
+          (fun e => e.matchesInput (initWriteRightState i) foldedBlank) =
+        some (initWriteRightRow i) := by
+    rw [show initMoveRightRows ++ initWriteRightRows ++ initReturnRows tc =
+        initMoveRightRows ++ (initWriteRightRows ++ initReturnRows tc) by
+      rw [List.append_assoc]]
+    rw [find?_append_of_eq_none hmove]
+    exact find?_append_of_eq_some (ys := initReturnRows tc) hwrite
+  simpa [horigin] using htail
+
+theorem programHeader_step_initWriteRight
+    (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hi : i < TM0Route.partrecStartedTM0Input.length - 1) :
+    (programHeader tc).step (initWriteRightState i) foldedBlank =
+      some (nextAfterWriteRight i,
+        PostStmt.write (foldedSymbolCode false default (inputSymbol (i + 1)))) := by
+  have hfind := programHeader_transition?_initWriteRight tc hi
+  have hnext : nextAfterWriteRight i ∈ foldedStateList tc :=
+    nextAfterWriteRight_mem_states tc hi
+  have hwrite : foldedSymbolCode false default (inputSymbol (i + 1)) ∈ foldedSymbolList :=
+    initWriteRightRow_write_mem_symbols i
+  simp [PostProgram.step, hfind, initWriteRightRow, mkRow, hnext, hwrite]
 
 end TM0FoldedCompiler
 
