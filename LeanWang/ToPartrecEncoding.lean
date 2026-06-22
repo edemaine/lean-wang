@@ -768,6 +768,138 @@ def decodeLabelFuel : Nat → Nat → Option Λ'
 def decodeLabel (n : Nat) : Option Λ' :=
   decodeLabelFuel n n
 
+/-- Division ignores a base-eight tag smaller than the base. -/
+theorem div_eight_mul_add_of_lt (m t : Nat) (h : t < 8) : (8 * m + t) / 8 = m := by
+  omega
+
+/-- Modulo recovers a base-eight tag smaller than the base. -/
+theorem mod_eight_mul_add_of_lt (m t : Nat) (h : t < 8) : (8 * m + t) % 8 = t := by
+  omega
+
+/-- Structural depth of a `PartrecToTM2` label, used as sufficient decoder fuel. -/
+def labelDepth : Λ' → Nat
+  | move _ _ _ q => labelDepth q + 1
+  | clear _ _ q => labelDepth q + 1
+  | copy q => labelDepth q + 1
+  | push _ _ q => labelDepth q + 1
+  | read f =>
+      (max (labelDepth (f none)) <|
+        max (labelDepth (f (some Γ'.consₗ))) <|
+          max (labelDepth (f (some Γ'.cons))) <|
+            max (labelDepth (f (some Γ'.bit0))) (labelDepth (f (some Γ'.bit1)))) + 1
+  | succ q => labelDepth q + 1
+  | pred q₁ q₂ => max (labelDepth q₁) (labelDepth q₂) + 1
+  | ret _ => 1
+
+set_option linter.flexible false in
+theorem decodeLabelFuel_encodeLabel_of_depth :
+    ∀ (q : Λ') (fuel : Nat), labelDepth q ≤ fuel →
+      decodeLabelFuel fuel (encodeLabel q) = some q := by
+  intro q
+  induction q with
+  | move p k₁ k₂ q ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq : labelDepth q ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_move, decodeLabelFuel, decodeMovePayload_movePayloadCode, ih fuel hq]
+  | clear p k q ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq : labelDepth q ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_clear, decodeLabelFuel, div_eight_mul_add_of_lt,
+            decodeClearPayload_clearPayloadCode, ih fuel hq]
+  | copy q ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq : labelDepth q ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_copy, decodeLabelFuel, div_eight_mul_add_of_lt, ih fuel hq]
+  | push k f q ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq : labelDepth q ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_push, decodeLabelFuel, div_eight_mul_add_of_lt,
+            decodePushPayload_pushPayloadCode, ih fuel hq]
+  | read f ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have h₀ : labelDepth (f none) ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          have h₁ : labelDepth (f (some Γ'.consₗ)) ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          have h₂ : labelDepth (f (some Γ'.cons)) ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          have h₃ : labelDepth (f (some Γ'.bit0)) ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          have h₄ : labelDepth (f (some Γ'.bit1)) ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_read, decodeLabelFuel, div_eight_mul_add_of_lt,
+            decodeReadPayload_readPayloadCode, ih none fuel h₀,
+            ih (some Γ'.consₗ) fuel h₁, ih (some Γ'.cons) fuel h₂,
+            ih (some Γ'.bit0) fuel h₃, ih (some Γ'.bit1) fuel h₄]
+          funext s
+          cases s with
+          | none => rfl
+          | some a => cases a <;> rfl
+  | succ q ih =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq : labelDepth q ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_succ, decodeLabelFuel, div_eight_mul_add_of_lt, ih fuel hq]
+  | pred q₁ q₂ ih₁ ih₂ =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          have hq₁ : labelDepth q₁ ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          have hq₂ : labelDepth q₂ ≤ fuel := by
+            simp [labelDepth] at hfuel
+            omega
+          simp [encodeLabel_pred, decodeLabelFuel, div_eight_mul_add_of_lt,
+            decodePredPayload_predPayloadCode, ih₁ fuel hq₁, ih₂ fuel hq₂]
+  | ret k =>
+      intro fuel hfuel
+      cases fuel with
+      | zero =>
+          simp [labelDepth] at hfuel
+      | succ fuel =>
+          simp [encodeLabel_ret, decodeLabelFuel, div_eight_mul_add_of_lt, ofNatCont_encodeCont]
+
 end Λ'
 
 end PartrecToTM2
