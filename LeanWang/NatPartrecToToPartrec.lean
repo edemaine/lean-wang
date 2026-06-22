@@ -131,6 +131,16 @@ theorem rfindFrom_mem_of_fix_state {test : Code} {a m n : Nat}
   simp only [Part.bind_eq_bind, Part.mem_bind_iff]
   exact ⟨[n, m, a], hinner, by simp⟩
 
+theorem rfindFrom_mem_of_first_zero {test : Code} {a m n : Nat}
+    (hzero : test.eval [Nat.pair a (n + m)] = pure [0])
+    (hprev : ∀ i : Nat, i < n →
+      ∃ k : Nat, test.eval [Nat.pair a (i + m)] = pure [k.succ]) :
+    [n + m] ∈ (rfindFrom test).eval [Nat.pair a m] := by
+  refine rfindFrom_mem_of_fix_state (test := test) (a := a) (m := m) (n := n) ?_
+  simpa using
+    rfindBody_fix_of_first_zeroFrom (test := test) (a := a) (m := m)
+      0 n (by simpa using hzero) (by simpa using hprev)
+
 end TCode
 
 open Turing.ToPartrec
