@@ -73,6 +73,12 @@ Completed proof layers:
 - the scaffolded bounded-prefix family also has a canonical natural-number
   encoding, with correctness and undecidability for the corresponding quantified
   encoded plane-tiling predicate.
+- a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
+  Mathlib list-based `Turing.ToPartrec.Code`, with a concrete
+  `ToPartrecTM2Reduction` witness connecting Mathlib code evaluation to
+  `PartrecToTM2` halting. The TM2 theorem surfaces now have variants using this
+  concrete reduction, so they no longer require passing the code-to-TM2
+  reduction as an explicit parameter.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -121,24 +127,25 @@ provides a local natural-number encoding, `Denumerable` instance, and hence
 `Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
 `ToPartrecTM2Reduction` records a computable translation from unary
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
-`TM2TableCompiler` reduces those TM2 evaluator configurations to
-`TableProgram`. Together they produce a `TableCompiler`, and the fixed-domino,
-fixed-corner, encoded scaffolded domino, and unencoded scaffolded domino theorem
-surfaces now have direct corollaries from this TM2 factorization.
+this translation is now concretely proved in `NatPartrecToToPartrec`.
+`TM2TableCompiler` remains the finite-machine reduction obligation: it reduces
+those TM2 evaluator configurations to `TableProgram`. Together they produce a
+`TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
+and unencoded scaffolded domino theorem surfaces now have direct corollaries
+from this TM2 factorization using the concrete code-to-TM2 reduction.
 
 Next implementation targets:
 
-1. Build a concrete reduction instance, either as
-   `PrimrecSearchTableCompiler`, `FuelTableCompiler`, or
-   directly a `TableCompiler`, by implementing the bounded evaluator fuel search
-   in `TableProgram`. This object is both a reduction from codes to finite
-   machine instances and a compiler from code to finite machine data. The finite
-   bounded-search fragment is now verified; the remaining reduction
-   work is implementing the unbounded counter/search behavior as one finite
-   `TableProgram` rather than an existential family of bounded prefix programs.
+1. Build a concrete `TM2TableCompiler`, by reducing Mathlib's
+   `PartrecToTM2` stack-machine evaluator configurations to `TableProgram`.
+   Mathlib already provides the finite statement support
+   `Turing.PartrecToTM2.codeSupp` and correctness theorem
+   `Turing.PartrecToTM2.tr_eval`; the remaining reduction work is representing
+   the TM2 stacks, labels, and step relation in the project's one-tape
+   `TableProgram` model.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
-   `encoded_domino_problem_undecidable_of_scaffold_fuelCompiler` to those two
+   `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two
    concrete instances to recover the unconditional encoded domino theorem.
 
 ### 1. Define Wang Tiles

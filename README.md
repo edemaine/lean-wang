@@ -19,6 +19,9 @@ the concrete definitions needed for the Berger/Robinson route:
   concrete machine.
 - `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
   `Turing.ToPartrec.Code`.
+- `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
+  Mathlib unary `Nat.Partrec.Code` to Mathlib list-based
+  `Turing.ToPartrec.Code`, with correctness for the TM2 evaluator.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
@@ -32,13 +35,16 @@ The build succeeds.
 The main theorem surface is currently conditional on two construction
 interfaces:
 
-- `TableCompiler` / `FuelTableCompiler`: reduce Mathlib
-  partial-recursive codes to finite table-machine data with the right halting
-  behavior. The identifier names emphasize the produced program data; their
-  role in the theorem is the computable reduction, implemented by compilation
-  to finite machine descriptions.
+- `TM2TableCompiler`: reduce Mathlib's concrete `PartrecToTM2` evaluator
+  configurations to finite table-machine data with the right halting behavior.
+  The Mathlib-code-to-TM2 reduction is already proved. The identifier names
+  emphasize the produced program data; their role in the theorem is the
+  computable reduction, implemented by compilation to finite machine
+  descriptions.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
 The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
 undecidability reductions are now proved from those construction interfaces.
+There are also more general theorem variants from `TableCompiler`,
+`FuelTableCompiler`, and `PrimrecSearchTableCompiler`.
