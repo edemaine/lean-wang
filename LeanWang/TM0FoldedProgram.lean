@@ -357,6 +357,114 @@ def foldedMoveStmt (side : FoldSide) (marked : Bool) (cell : Nat)
   | FoldSide.left, _, Turing.Dir.left => PostStmt.move Move.right
   | FoldSide.left, _, Turing.Dir.right => PostStmt.move Move.left
 
+theorem foldedMoveStmt_primrec :
+    Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      foldedMoveStmt p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let f : FoldSide × Bool × Nat × Turing.Dir → PostStmt := fun p =>
+    if p.1 = FoldSide.right then
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.left then
+          PostStmt.write p.2.2.1
+        else
+          PostStmt.move Move.right
+      else
+        if p.2.2.2 = Turing.Dir.right then
+          PostStmt.move Move.right
+        else
+          PostStmt.move Move.left
+    else
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.right then
+          PostStmt.write p.2.2.1
+        else
+          PostStmt.move Move.right
+      else
+        if p.2.2.2 = Turing.Dir.left then
+          PostStmt.move Move.right
+        else
+          PostStmt.move Move.left
+  have hsideRight : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.1 = FoldSide.right) :=
+    Primrec.eq.comp Primrec.fst (Primrec.const FoldSide.right)
+  have hmarked : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.1 = true) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const true)
+  have htail : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2) :=
+    Primrec.snd.comp
+      (Primrec.snd : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2))
+  have hcellSel : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.1) :=
+    Primrec.fst.comp htail
+  have hdirSel : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.2) :=
+    Primrec.snd.comp htail
+  have hdirLeft : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.2.2 = Turing.Dir.left) :=
+    Primrec.eq.comp hdirSel (Primrec.const Turing.Dir.left)
+  have hdirRight : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.2.2 = Turing.Dir.right) :=
+    Primrec.eq.comp hdirSel (Primrec.const Turing.Dir.right)
+  have hwrite : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      PostStmt.write p.2.2.1) :=
+    postStmtWrite_primrec.comp hcellSel
+  have hmoveLeft : Primrec (fun _ : FoldSide × Bool × Nat × Turing.Dir =>
+      PostStmt.move Move.left) :=
+    Primrec.const (PostStmt.move Move.left)
+  have hmoveRight : Primrec (fun _ : FoldSide × Bool × Nat × Turing.Dir =>
+      PostStmt.move Move.right) :=
+    Primrec.const (PostStmt.move Move.right)
+  have hrightMarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.left then
+        PostStmt.write p.2.2.1
+      else
+        PostStmt.move Move.right) :=
+    Primrec.ite hdirLeft hwrite hmoveRight
+  have hrightUnmarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.right then
+        PostStmt.move Move.right
+      else
+        PostStmt.move Move.left) :=
+    Primrec.ite hdirRight hmoveRight hmoveLeft
+  have hleftMarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.right then
+        PostStmt.write p.2.2.1
+      else
+        PostStmt.move Move.right) :=
+    Primrec.ite hdirRight hwrite hmoveRight
+  have hleftUnmarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.left then
+        PostStmt.move Move.right
+      else
+        PostStmt.move Move.left) :=
+    Primrec.ite hdirLeft hmoveRight hmoveLeft
+  have hright : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.left then
+          PostStmt.write p.2.2.1
+        else
+          PostStmt.move Move.right
+      else
+        if p.2.2.2 = Turing.Dir.right then
+          PostStmt.move Move.right
+        else
+          PostStmt.move Move.left) :=
+    Primrec.ite hmarked hrightMarked hrightUnmarked
+  have hleft : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.right then
+          PostStmt.write p.2.2.1
+        else
+          PostStmt.move Move.right
+      else
+        if p.2.2.2 = Turing.Dir.left then
+          PostStmt.move Move.right
+        else
+          PostStmt.move Move.left) :=
+    Primrec.ite hmarked hleftMarked hleftUnmarked
+  have hf : Primrec f :=
+    Primrec.ite hsideRight hright hleft
+  exact hf.of_eq fun p => by
+    rcases p with ⟨side, marked, cell, dir⟩
+    cases side <;> cases marked <;> cases dir <;> rfl
+
 def foldedMoveHead (side : FoldSide) (marked : Bool) (head : Nat)
     (dir : Turing.Dir) : Nat :=
   match side, marked, dir with
@@ -366,6 +474,99 @@ def foldedMoveHead (side : FoldSide) (marked : Bool) (head : Nat)
   | FoldSide.right, _, Turing.Dir.left => head.pred
   | FoldSide.left, _, Turing.Dir.left => head + 1
   | FoldSide.left, _, Turing.Dir.right => head.pred
+
+theorem foldedMoveHead_primrec :
+    Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      foldedMoveHead p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let f : FoldSide × Bool × Nat × Turing.Dir → Nat := fun p =>
+    if p.1 = FoldSide.right then
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.left then
+          p.2.2.1
+        else
+          p.2.2.1 + 1
+      else
+        if p.2.2.2 = Turing.Dir.right then
+          p.2.2.1 + 1
+        else
+          p.2.2.1.pred
+    else
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.right then
+          p.2.2.1
+        else
+          p.2.2.1 + 1
+      else
+        if p.2.2.2 = Turing.Dir.left then
+          p.2.2.1 + 1
+        else
+          p.2.2.1.pred
+  have hsideRight : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.1 = FoldSide.right) :=
+    Primrec.eq.comp Primrec.fst (Primrec.const FoldSide.right)
+  have hmarked : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.1 = true) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const true)
+  have htail : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2) :=
+    Primrec.snd.comp
+      (Primrec.snd : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2))
+  have hheadSel : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.1) :=
+    Primrec.fst.comp htail
+  have hdirSel : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.2) :=
+    Primrec.snd.comp htail
+  have hdirLeft : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.2.2 = Turing.Dir.left) :=
+    Primrec.eq.comp hdirSel (Primrec.const Turing.Dir.left)
+  have hdirRight : PrimrecPred (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      p.2.2.2 = Turing.Dir.right) :=
+    Primrec.eq.comp hdirSel (Primrec.const Turing.Dir.right)
+  have hstay : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.1) :=
+    hheadSel
+  have hsucc : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.1 + 1) :=
+    Primrec.succ.comp hheadSel
+  have hpred : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir => p.2.2.1.pred) :=
+    Primrec.pred.comp hheadSel
+  have hrightMarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.left then p.2.2.1 else p.2.2.1 + 1) :=
+    Primrec.ite hdirLeft hstay hsucc
+  have hrightUnmarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.right then p.2.2.1 + 1 else p.2.2.1.pred) :=
+    Primrec.ite hdirRight hsucc hpred
+  have hleftMarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.right then p.2.2.1 else p.2.2.1 + 1) :=
+    Primrec.ite hdirRight hstay hsucc
+  have hleftUnmarked : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.2.2 = Turing.Dir.left then p.2.2.1 + 1 else p.2.2.1.pred) :=
+    Primrec.ite hdirLeft hsucc hpred
+  have hright : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.left then
+          p.2.2.1
+        else
+          p.2.2.1 + 1
+      else
+        if p.2.2.2 = Turing.Dir.right then
+          p.2.2.1 + 1
+        else
+          p.2.2.1.pred) :=
+    Primrec.ite hmarked hrightMarked hrightUnmarked
+  have hleft : Primrec (fun p : FoldSide × Bool × Nat × Turing.Dir =>
+      if p.2.1 = true then
+        if p.2.2.2 = Turing.Dir.right then
+          p.2.2.1
+        else
+          p.2.2.1 + 1
+      else
+        if p.2.2.2 = Turing.Dir.left then
+          p.2.2.1 + 1
+        else
+          p.2.2.1.pred) :=
+    Primrec.ite hmarked hleftMarked hleftUnmarked
+  have hf : Primrec f :=
+    Primrec.ite hsideRight hright hleft
+  exact hf.of_eq fun p => by
+    rcases p with ⟨side, marked, head, dir⟩
+    cases side <;> cases marked <;> cases dir <;> rfl
 
 def foldedWriteForStmt (side : FoldSide) (marked : Bool)
     (new left right : SourceSymbol) : Nat :=
