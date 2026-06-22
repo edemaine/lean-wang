@@ -29,7 +29,8 @@ the concrete definitions needed for the Berger/Robinson route:
   table-machine reduction, including intermediate statement substates and
   stationary row families and preservation lemmas for `load`, `branch`,
   `goto`, and `halt` microsteps, plus representation lemmas for stack
-  push/pop updates and reserved auxiliary states for `peek`.
+  push/pop updates, reserved auxiliary states for `peek`, and reusable
+  same-write move/read rows for bounded `peek` motion.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

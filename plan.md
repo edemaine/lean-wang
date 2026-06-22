@@ -139,6 +139,11 @@ Completed proof layers:
   the evaluator state block. The first reserved block is for `peek` stack
   actions, indexed by local variable, originating statement substate, and one
   of four stack-column offsets, with membership lemmas for offsets `0..3`.
+- the `peek` construction now has the reusable finite row pieces needed for its
+  bounded motion: same-write move rows over all tape symbols, a decoded
+  `cellSymbols` list matching the encoded tape alphabet, and decoded read rows
+  that update the local variable from the observed top stack cell and enter the
+  appropriate return state.
 
 The remaining construction obligations are explicit Lean interfaces:
 

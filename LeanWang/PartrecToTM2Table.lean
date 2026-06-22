@@ -45,6 +45,25 @@ theorem stackCellSymbol_mem_symbols (s : Option Turing.PartrecToTM2.Γ') :
     PartrecToTM2Support.tapeSymbolCode s ∈ symbols :=
   PartrecToTM2Support.tapeSymbolCode_mem_tapeSymbols s
 
+/-- Finite list of decoded table-machine stack-cell symbols. -/
+def cellSymbols : List (Option Turing.PartrecToTM2.Γ') :=
+  [none,
+    some Turing.PartrecToTM2.Γ'.consₗ,
+    some Turing.PartrecToTM2.Γ'.cons,
+    some Turing.PartrecToTM2.Γ'.bit0,
+    some Turing.PartrecToTM2.Γ'.bit1]
+
+theorem cellSymbols_nodup : cellSymbols.Nodup := by
+  decide
+
+theorem tapeSymbolCode_mem_symbols (s : Option Turing.PartrecToTM2.Γ') :
+    PartrecToTM2Support.tapeSymbolCode s ∈ symbols :=
+  stackCellSymbol_mem_symbols s
+
+theorem tapeSymbolCode_cellSymbols_eq_symbols :
+    cellSymbols.map PartrecToTM2Support.tapeSymbolCode = symbols := by
+  rfl
+
 /-- Decode the low two bits of an interleaved tape position as a stack name. -/
 def stackNameOfCode : Nat → Option Turing.PartrecToTM2.K'
   | 0 => some Turing.PartrecToTM2.K'.main
@@ -720,6 +739,142 @@ theorem toMachine_nextID_stationary_representsSubstate
   constructor
   · rfl
   · exact hrep.2.2
+
+/--
+One table row that writes back the read symbol and moves in the given direction.
+
+This is used by bounded `peek` travel and return fragments, where the tape
+contents should not change while the head moves between stack columns.
+-/
+def sameWriteMoveTransition (state read next : Nat) (move : Move) : TableTransition where
+  state := state
+  read := read
+  write := read
+  next := next
+  move := move
+
+@[simp]
+theorem sameWriteMoveTransition_state (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).state = state :=
+  rfl
+
+@[simp]
+theorem sameWriteMoveTransition_read (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).read = read :=
+  rfl
+
+@[simp]
+theorem sameWriteMoveTransition_write (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).write = read :=
+  rfl
+
+@[simp]
+theorem sameWriteMoveTransition_next (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).next = next :=
+  rfl
+
+@[simp]
+theorem sameWriteMoveTransition_move (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).move = move :=
+  rfl
+
+@[simp]
+theorem sameWriteMoveTransition_matchesInput (state read next : Nat) (move : Move) :
+    (sameWriteMoveTransition state read next move).matchesInput state read = true := by
+  simp [TableTransition.matchesInput]
+
+theorem sameWriteMoveTransition_write_mem_symbols {state read next : Nat} {move : Move}
+    (hread : read ∈ symbols) :
+    (sameWriteMoveTransition state read next move).write ∈ symbols :=
+  hread
+
+/-- Finite row family covering all possible read symbols for a same-write move. -/
+def sameWriteMoveRows (state next : Nat) (move : Move) : List TableTransition :=
+  symbols.map fun read => sameWriteMoveTransition state read next move
+
+theorem sameWriteMoveTransition_mem_rows {state read next : Nat} {move : Move}
+    (hread : read ∈ symbols) :
+    sameWriteMoveTransition state read next move ∈ sameWriteMoveRows state next move :=
+  List.mem_map.2 ⟨read, hread, rfl⟩
+
+/-- Return state after a `peek` read has moved one step left. -/
+noncomputable def peekReturnState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')
+    (offset : Nat) : Nat :=
+  match offset with
+  | 0 => encodedStmtState tc var (some q)
+  | offset + 1 => peekAuxState tc var q offset
+
+theorem peekReturnState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {q : Turing.PartrecToTM2.Stmt'}
+    {offset : Nat}
+    (hq : some q ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    peekReturnState tc var q offset ∈ states tc := by
+  cases offset with
+  | zero =>
+      exact encodedStmtState_mem_states hq
+  | succ offset =>
+      apply peekAuxState_mem_states hq
+      omega
+
+/--
+Rows that read a decoded top-of-stack symbol during `peek`.
+
+The row writes the same symbol back, moves left, and enters the state determined
+by applying the TM2 local-variable update to the decoded symbol.
+-/
+noncomputable def peekReadRows (tc : Turing.ToPartrec.Code)
+    (readState : Nat)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt') (returnOffset : Nat) :
+    List TableTransition :=
+  cellSymbols.map fun s =>
+    { state := readState
+      read := PartrecToTM2Support.tapeSymbolCode s
+      write := PartrecToTM2Support.tapeSymbolCode s
+      next := peekReturnState tc (f var s) q returnOffset
+      move := Move.left }
+
+theorem peekReadTransition_mem_rows {tc : Turing.ToPartrec.Code}
+    {readState : Nat} {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {returnOffset : Nat}
+    {s : Option Turing.PartrecToTM2.Γ'} (hs : s ∈ cellSymbols) :
+    ({ state := readState
+       read := PartrecToTM2Support.tapeSymbolCode s
+       write := PartrecToTM2Support.tapeSymbolCode s
+       next := peekReturnState tc (f var s) q returnOffset
+       move := Move.left } : TableTransition) ∈
+      peekReadRows tc readState var f q returnOffset :=
+  List.mem_map.2 ⟨s, hs, rfl⟩
+
+theorem peekReadRows_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {readState : Nat} {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {returnOffset : Nat}
+    {e : TableTransition}
+    (he : e ∈ peekReadRows tc readState var f q returnOffset) :
+    e.write ∈ symbols := by
+  rcases List.mem_map.1 he with ⟨s, hs, rfl⟩
+  exact tapeSymbolCode_mem_symbols s
+
+theorem peekReadRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {readState : Nat} {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ' →
+      Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {returnOffset : Nat}
+    {e : TableTransition}
+    (he : e ∈ peekReadRows tc readState var f q returnOffset)
+    (hq : some q ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : returnOffset < 4) :
+    e.next ∈ states tc := by
+  rcases List.mem_map.1 he with ⟨s, _hs, rfl⟩
+  exact peekReturnState_mem_states hq hoffset
 
 /-- Stationary rows for a TM2 `load` microstep. -/
 noncomputable def loadRows (tc : Turing.ToPartrec.Code)
