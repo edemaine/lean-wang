@@ -709,6 +709,65 @@ theorem encodeLabel_ret (k : Cont') :
     encodeLabel (ret k) = 8 * Cont'.encodeCont k + 8 :=
   rfl
 
+/-- Fuelled partial decoder for `PartrecToTM2` labels. -/
+def decodeLabelFuel : Nat → Nat → Option Λ'
+  | 0, _ => none
+  | _ + 1, 0 => none
+  | fuel + 1, n + 1 =>
+      let payload := n / 8
+      match n % 8 with
+      | 0 => do
+          let fields ← decodeMovePayload payload
+          let q ← decodeLabelFuel fuel fields.2.2.2
+          some (move fields.1 fields.2.1 fields.2.2.1 q)
+      | 1 => do
+          let fields ← decodeClearPayload payload
+          let q ← decodeLabelFuel fuel fields.2.2
+          some (clear fields.1 fields.2.1 q)
+      | 2 => do
+          let q ← decodeLabelFuel fuel payload
+          some (copy q)
+      | 3 => do
+          let fields ← decodePushPayload payload
+          let q ← decodeLabelFuel fuel fields.2.2
+          some (push fields.1 fields.2.1 q)
+      | 4 =>
+          let fields := decodeReadPayload payload
+          match decodeLabelFuel fuel fields.1 with
+          | none => none
+          | some q₀ =>
+            match decodeLabelFuel fuel fields.2.1 with
+            | none => none
+            | some q₁ =>
+              match decodeLabelFuel fuel fields.2.2.1 with
+              | none => none
+              | some q₂ =>
+                match decodeLabelFuel fuel fields.2.2.2.1 with
+                | none => none
+                | some q₃ =>
+                  match decodeLabelFuel fuel fields.2.2.2.2 with
+                  | none => none
+                  | some q₄ =>
+                      some (read fun
+                        | none => q₀
+                        | some Γ'.consₗ => q₁
+                        | some Γ'.cons => q₂
+                        | some Γ'.bit0 => q₃
+                        | some Γ'.bit1 => q₄)
+      | 5 => do
+          let q ← decodeLabelFuel fuel payload
+          some (succ q)
+      | 6 => do
+          let fields := decodePredPayload payload
+          let q₁ ← decodeLabelFuel fuel fields.1
+          let q₂ ← decodeLabelFuel fuel fields.2
+          some (pred q₁ q₂)
+      | _ => some (ret (Cont'.ofNatCont payload))
+
+/-- Partial decoder for `PartrecToTM2` labels, using the code itself as fuel. -/
+def decodeLabel (n : Nat) : Option Λ' :=
+  decodeLabelFuel n n
+
 end Λ'
 
 end PartrecToTM2
