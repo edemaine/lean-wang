@@ -1566,6 +1566,77 @@ theorem toTableProgram_toMachine_nextID_state_of_post_step_none
       tableHalt := by
   rw [toTableProgram_toMachine_nextID_of_post_step_none hstate hstep]
 
+theorem toTableProgram_toMachine_runEmpty_sync_or_halts
+    (P : PostProgram) (n : Nat) :
+    (∃ t : Nat,
+        P.toTableProgram.toMachine.runEmpty t =
+          tableIDOfPostID (P.runEmpty n)) ∨
+      P.toTableProgram.toMachine.HaltsEmpty := by
+  induction n with
+  | zero =>
+      left
+      refine ⟨0, ?_⟩
+      ext i <;> simp [Machine.runEmpty_zero, Machine.initialID,
+        PostProgram.runEmpty_zero, PostProgram.initialID, tableIDOfPostID]
+  | succ n ih =>
+      rcases ih with ⟨t, hsync⟩ | hhalts
+      · let c := P.runEmpty n
+        cases hstate : c.state with
+        | none =>
+            right
+            have hstateRun : (P.runEmpty n).state = none := by
+              simpa [c] using hstate
+            exact ⟨t, by
+              rw [hsync]
+              simp [tableIDOfPostID_state_halt hstateRun, toTableProgram_halt]⟩
+        | some q =>
+            cases hstep : P.step q (c.tape c.head) with
+            | none =>
+                right
+                refine ⟨t + 1, ?_⟩
+                rw [Machine.runEmpty_succ, hsync]
+                have hhalt :=
+                  toTableProgram_toMachine_nextID_state_of_post_step_none
+                    (P := P) (c := c) hstate hstep
+                simpa [toTableProgram_halt] using hhalt
+            | some step =>
+                rcases step with ⟨q', stmt⟩
+                cases stmt with
+                | move m =>
+                    left
+                    refine ⟨t + 1, ?_⟩
+                    rw [Machine.runEmpty_succ, hsync, PostProgram.runEmpty_succ]
+                    change
+                      P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+                        tableIDOfPostID (P.nextID c)
+                    exact toTableProgram_toMachine_nextID_of_post_move_exact
+                      (P := P) (c := c) hstate hstep
+                | write b =>
+                    left
+                    refine ⟨t + 2, ?_⟩
+                    rw [show t + 2 = t + 1 + 1 by omega]
+                    rw [Machine.runEmpty_succ, Machine.runEmpty_succ, hsync,
+                      PostProgram.runEmpty_succ]
+                    change
+                      P.toTableProgram.toMachine.nextID
+                          (P.toTableProgram.toMachine.nextID (tableIDOfPostID c)) =
+                        tableIDOfPostID (P.nextID c)
+                    have hsupp : TapeSupported P c := by
+                      simpa [c] using runEmpty_tapeSupported P n
+                    exact toTableProgram_toMachine_nextID_two_of_post_write_exact
+                      (P := P) (c := c) hsupp hstate hstep
+      · exact Or.inr hhalts
+
+theorem toTableProgram_toMachine_haltsEmpty_of_haltsEmpty
+    {P : PostProgram} (h : P.HaltsEmpty) :
+    P.toTableProgram.toMachine.HaltsEmpty := by
+  rcases h with ⟨n, hhalt⟩
+  rcases toTableProgram_toMachine_runEmpty_sync_or_halts P n with ⟨t, hsync⟩ | hhalts
+  · exact ⟨t, by
+      rw [hsync]
+      simp [tableIDOfPostID_state_halt hhalt, toTableProgram_halt]⟩
+  · exact hhalts
+
 end PostProgram
 
 /-- Preferred name for the local one-sided TM0 instruction syntax. -/
