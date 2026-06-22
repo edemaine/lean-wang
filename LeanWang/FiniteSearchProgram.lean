@@ -231,6 +231,70 @@ theorem program_runEmpty_false_prefix (n : Nat) (bs : List Bool) :
       { tape := fun _ => 0, head := n, state := n } :=
   program_runEmpty_false_prefix_aux n bs n (by rfl)
 
+theorem program_replicate_false_cons_true_halts (n : Nat) (bs : List Bool) :
+    (program (List.replicate n false ++ true :: bs)).toMachine.HaltsEmpty := by
+  let P := program (List.replicate n false ++ true :: bs)
+  let e := transition ((List.replicate n false ++ true :: bs).length + 1) n true
+  refine ⟨n + 1, ?_⟩
+  rw [Machine.runEmpty_succ, program_runEmpty_false_prefix n (true :: bs)]
+  have hfind : P.toTableMachine.transition? n 0 = some e := by
+    simpa [P, e] using program_transition?_after_false_prefix n (true :: bs)
+  have hstate : n ≠ P.halt := by
+    simp [P, program, List.length_replicate]
+    omega
+  have hwrite : e.write ∈ P.supportedSymbols := by
+    simp [P, e, transition, TableProgram.supportedSymbols, program]
+  have hnext : e.next ∈ P.supportedStates := by
+    simp [P, e, transition, TableProgram.supportedStates, program]
+  have hnextID :=
+    TableProgram.toMachine_nextID_of_transition?_eq_some
+      (P := P) (c := { tape := fun _ => 0, head := n, state := n })
+      hstate hfind hwrite hnext
+  simpa [P, e, transition, program, List.length_replicate] using
+    congrArg ID.state hnextID
+
+theorem program_runEmpty_all_false_from_loop (n : Nat) :
+    ∀ m : Nat,
+      (program (List.replicate n false)).toMachine.runEmpty (n + m) =
+        { tape := fun _ => 0, head := n + m, state := n }
+  | 0 => by
+      simpa using program_runEmpty_false_prefix n []
+  | m + 1 => by
+      let P := program (List.replicate n false)
+      let e := loopTransition n
+      rw [show n + (m + 1) = n + m + 1 by omega]
+      rw [Machine.runEmpty_succ, program_runEmpty_all_false_from_loop n m]
+      have hfind : P.toTableMachine.transition? n 0 = some e := by
+        simpa [P, e] using program_transition?_after_false_prefix n []
+      have hstate : n ≠ P.halt := by
+        simp [P, program, List.length_replicate]
+      have hwrite : e.write ∈ P.supportedSymbols := by
+        simp [P, e, loopTransition, TableProgram.supportedSymbols, program]
+      have hnext : e.next ∈ P.supportedStates := by
+        simp [P, e, loopTransition, TableProgram.supportedStates, program,
+          List.length_replicate]
+      simpa [P, e, loopTransition, Move.apply, Nat.add_assoc] using
+        TableProgram.toMachine_nextID_of_transition?_eq_some
+          (P := P) (c := { tape := fun _ => 0, head := n + m, state := n })
+          hstate hfind hwrite hnext
+
+theorem program_all_false_not_halts (n : Nat) :
+    ¬ (program (List.replicate n false)).toMachine.HaltsEmpty := by
+  rintro ⟨t, ht⟩
+  by_cases htn : t ≤ n
+  · have hrun :
+        (program (List.replicate n false)).toMachine.runEmpty t =
+          { tape := fun _ => 0, head := t, state := t } := by
+        simpa using program_runEmpty_false_prefix_aux n [] t htn
+    rw [hrun] at ht
+    simp [program, List.length_replicate] at ht
+    omega
+  · have hnt : n ≤ t := by omega
+    rcases Nat.exists_eq_add_of_le hnt with ⟨m, rfl⟩
+    have hrun := program_runEmpty_all_false_from_loop n m
+    rw [hrun] at ht
+    simp [program, List.length_replicate] at ht
+
 theorem foldl_foldStep₂_fst_append (bs : List Bool) :
     ∀ xs : List Bool, ∀ s : List TableTransition × Nat,
       ∃ rest : List TableTransition,
