@@ -79,6 +79,10 @@ Completed proof layers:
   `PartrecToTM2` halting. The TM2 theorem surfaces now have variants using this
   concrete reduction, so they no longer require passing the code-to-TM2
   reduction as an explicit parameter.
+- finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
+  the start label, finite reachable label set, stack names, stack alphabet, and
+  one-step/reachable label-closure lemmas for runs starting from
+  `PartrecToTM2.init tc [0]`.
 
 The remaining construction obligations are explicit Lean interfaces:
 

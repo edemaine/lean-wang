@@ -22,6 +22,8 @@ the concrete definitions needed for the Berger/Robinson route:
 - `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
   Mathlib unary `Nat.Partrec.Code` to Mathlib list-based
   `Turing.ToPartrec.Code`, with correctness for the TM2 evaluator.
+- `LeanWang.PartrecToTM2Support`: finite reachable-label support facts for
+  Mathlib's concrete `PartrecToTM2` evaluator.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

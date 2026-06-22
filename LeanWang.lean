@@ -4,6 +4,7 @@ import LeanWang.FiniteSearchProgram
 import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
+import LeanWang.PartrecToTM2Support
 import LeanWang.ToPartrecEncoding
 import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
