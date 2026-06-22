@@ -93,17 +93,17 @@ def stackAlphabet : Finset Γ' :=
   Finset.univ
 
 /-- List form of the finite stack alphabet. -/
-noncomputable def stackAlphabetList : List Γ' :=
-  stackAlphabet.toList
+def stackAlphabetList : List Γ' :=
+  [Γ'.consₗ, Γ'.cons, Γ'.bit0, Γ'.bit1]
 
 theorem mem_stackAlphabet (a : Γ') : a ∈ stackAlphabet := by
   simp [stackAlphabet]
 
 theorem mem_stackAlphabetList (a : Γ') : a ∈ stackAlphabetList := by
-  simp [stackAlphabetList, mem_stackAlphabet]
+  cases a <;> simp [stackAlphabetList]
 
 theorem stackAlphabetList_nodup : stackAlphabetList.Nodup := by
-  exact Finset.nodup_toList stackAlphabet
+  simp [stackAlphabetList]
 
 def stackSymbolToBits : Γ' → Bool × Bool
   | Γ'.consₗ => (false, false)
