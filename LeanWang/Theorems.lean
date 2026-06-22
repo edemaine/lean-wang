@@ -500,6 +500,32 @@ theorem fixed_corner_square_problem_undecidable_of_fuelCompiler (C : FuelTableCo
           (fixedDominoReduction C.toTableCompiler c).2 n) :=
   fixed_corner_square_problem_undecidable C.toTableCompiler
 
+/--
+Fixed-domino undecidability from a generic primitive-recursive search
+compiler/reduction.
+-/
+theorem fixed_domino_problem_undecidable_of_primrecSearchCompiler
+    (C : PrimrecSearchTableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        TilesQuarterWithSeed
+          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).1
+          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).2) :=
+  fixed_domino_problem_undecidable C.toFuelTableCompiler.toTableCompiler
+
+/--
+Fixed-corner square undecidability from a generic primitive-recursive search
+compiler/reduction.
+-/
+theorem fixed_corner_square_problem_undecidable_of_primrecSearchCompiler
+    (C : PrimrecSearchTableCompiler) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
+          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).1
+          (fixedDominoReduction C.toFuelTableCompiler.toTableCompiler c).2 n) :=
+  fixed_corner_square_problem_undecidable C.toFuelTableCompiler.toTableCompiler
+
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
   tiles : TileSet
@@ -1118,5 +1144,25 @@ theorem domino_problem_undecidable_of_scaffold_fuelCompiler
     (S : Scaffold) (hS : IsScaffold S) (C : FuelTableCompiler) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold S hS C.toTableCompiler
+
+/--
+Encoded domino undecidability from a scaffold and a generic primitive-recursive
+search compiler/reduction.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_primrecSearchCompiler
+    (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_fuelCompiler
+    S hS C.toFuelTableCompiler
+
+/--
+Unencoded domino undecidability from a scaffold and a generic
+primitive-recursive search compiler/reduction.
+-/
+theorem domino_problem_undecidable_of_scaffold_primrecSearchCompiler
+    (S : Scaffold) (hS : IsScaffold S) (C : PrimrecSearchTableCompiler) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_fuelCompiler
+    S hS C.toFuelTableCompiler
 
 end LeanWang

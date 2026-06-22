@@ -106,7 +106,9 @@ compiler/reduction obligation into a `TableCompiler`, using the proved
 equivalence between `codeEvalnHalts` and `Nat.Partrec.Code.eval`.
 `PrimrecSearchTableCompiler.toFuelTableCompiler` further factors this obligation
 through a generic unbounded search compiler for primitive-recursive Boolean
-predicate families.
+predicate families. The fixed-domino, fixed-corner, encoded scaffolded domino,
+and unencoded scaffolded domino theorem surfaces now have direct corollaries
+from `PrimrecSearchTableCompiler`.
 
 There is also an encoded TM2 factoring of the same obligation:
 `ToPartrecTM2Reduction` records a computable natural-number encoding of the
