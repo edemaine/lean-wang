@@ -29,6 +29,11 @@ open Turing.ToPartrec
 def one : Code :=
   Code.succ.comp Code.zero
 
+@[simp]
+theorem one_eval (v : List Nat) :
+    one.eval v = pure [1] := by
+  simp [one]
+
 /--
 The body used to implement `Nat.Partrec.Code.rfind'`.
 
@@ -42,6 +47,16 @@ def rfindBody (test : Code) : Code :=
   let nextState := Code.cons (Code.succ.comp Code.second) (Code.tail.comp Code.tail)
   let step := Code.cons one nextState
   (Code.case found step).comp (Code.cons condition Code.id)
+
+theorem rfindBody_eval_zero {test : Code} {n m a : Nat}
+    (htest : test.eval [Nat.pair a (n + m)] = pure [0]) :
+    (rfindBody test).eval [n, m, a] = pure [0, n, m, a] := by
+  simp [rfindBody, htest]
+
+theorem rfindBody_eval_succ {test : Code} {n m a k : Nat}
+    (htest : test.eval [Nat.pair a (n + m)] = pure [k.succ]) :
+    (rfindBody test).eval [n, m, a] = pure [1, n.succ, m, a] := by
+  simp [rfindBody, htest]
 
 /--
 Implementation of the `Nat.Partrec.Code.rfind'` constructor from a translated
