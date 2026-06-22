@@ -38,6 +38,24 @@ deriving DecidableEq, Repr
 
 namespace FoldSide
 
+def toBool : FoldSide → Bool
+  | left => false
+  | right => true
+
+def ofBool : Bool → FoldSide
+  | false => left
+  | true => right
+
+def equivBool : FoldSide ≃ Bool where
+  toFun := toBool
+  invFun := ofBool
+  left_inv := by
+    intro side
+    cases side <;> rfl
+  right_inv := by
+    intro bit
+    cases bit <;> rfl
+
 def code : FoldSide → Nat
   | left => 0
   | right => 1
@@ -45,6 +63,27 @@ def code : FoldSide → Nat
 theorem code_injective : Function.Injective code := by
   intro s t h
   cases s <;> cases t <;> simp [code] at h ⊢
+
+end FoldSide
+
+instance instPrimcodableFoldSide : Primcodable FoldSide :=
+  Primcodable.ofEquiv Bool FoldSide.equivBool
+
+namespace FoldSide
+
+theorem toBool_primrec : Primrec FoldSide.toBool := by
+  simpa [FoldSide.equivBool] using
+    (Primrec.of_equiv (e := FoldSide.equivBool) : Primrec FoldSide.equivBool)
+
+theorem ofBool_primrec : Primrec FoldSide.ofBool := by
+  simpa [FoldSide.equivBool] using
+    (Primrec.of_equiv_symm (e := FoldSide.equivBool) :
+      Primrec FoldSide.equivBool.symm)
+
+theorem code_primrec : Primrec FoldSide.code := by
+  refine (Primrec.cond toBool_primrec (Primrec.const 1) (Primrec.const 0)).of_eq ?_
+  intro side
+  cases side <;> rfl
 
 end FoldSide
 
