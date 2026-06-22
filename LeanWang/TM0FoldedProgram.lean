@@ -979,6 +979,25 @@ def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
 def simRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q => simRowsForLabel tc q
 
+def programOfParts (qCodes : List Nat) (init sim : List PostTransition) : FiniteTM0Program where
+  symbols := foldedSymbolList
+  states := foldedStateListOfCodes qCodes
+  blank := foldedBlank
+  start := foldedStartState
+  table := init ++ sim
+
+theorem programOfParts_primrec :
+    Primrec (fun p : List Nat × List PostTransition × List PostTransition =>
+      programOfParts p.1 p.2.1 p.2.2) := by
+  unfold programOfParts
+  exact PostProgram.mk_primrec.comp
+    (Primrec.pair (Primrec.const foldedSymbolList)
+      (Primrec.pair (foldedStateListOfCodes_primrec.comp Primrec.fst)
+        (Primrec.pair (Primrec.const foldedBlank)
+          (Primrec.pair (Primrec.const foldedStartState)
+            (Primrec.list_append.comp (Primrec.fst.comp Primrec.snd)
+              (Primrec.snd.comp Primrec.snd))))))
+
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
   states := foldedStateList tc
