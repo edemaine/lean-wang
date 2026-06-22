@@ -15,8 +15,6 @@ reachable-label set `Turing.PartrecToTM2.codeSupp`; this file packages the
 exact support facts needed for the evaluator configuration used by that route.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace PartrecToTM2Support
@@ -95,7 +93,7 @@ def stackAlphabet : Finset Γ' :=
   Finset.univ
 
 /-- List form of the finite stack alphabet. -/
-def stackAlphabetList : List Γ' :=
+noncomputable def stackAlphabetList : List Γ' :=
   stackAlphabet.toList
 
 theorem mem_stackAlphabet (a : Γ') : a ∈ stackAlphabet := by
@@ -201,7 +199,7 @@ theorem startLabel_mem_labels (tc : ToPartrec.Code) :
   codeSupp_self tc Cont'.halt (trStmts₁_self _)
 
 /-- List form of the finite evaluator label set. -/
-def labelList (tc : ToPartrec.Code) : List Λ' :=
+noncomputable def labelList (tc : ToPartrec.Code) : List Λ' :=
   (labels tc).toList
 
 theorem mem_labelList {tc : ToPartrec.Code} {q : Λ'} :
@@ -217,7 +215,7 @@ theorem startLabel_mem_labelList (tc : ToPartrec.Code) :
   mem_labelList.2 (startLabel_mem_labels tc)
 
 /-- Index of a reachable evaluator label in `labelList tc`. -/
-def labelIndex (tc : ToPartrec.Code) (q : Λ') : Nat :=
+noncomputable def labelIndex (tc : ToPartrec.Code) (q : Λ') : Nat :=
   (labelList tc).findIdx fun r => decide (r = q)
 
 theorem labelIndex_lt_length {tc : ToPartrec.Code} {q : Λ'}
@@ -245,13 +243,13 @@ theorem tr_supports_labels (tc : ToPartrec.Code) :
 Finite set of TM2 statement substates needed to execute all evaluator labels in
 `labels tc`.
 -/
-def statements (tc : ToPartrec.Code) : Finset (Option Stmt') :=
+noncomputable def statements (tc : ToPartrec.Code) : Finset (Option Stmt') :=
   by
     classical
     exact TM2.stmts tr (labels tc)
 
 /-- List form of the finite statement-substate set. -/
-def statementList (tc : ToPartrec.Code) : List (Option Stmt') :=
+noncomputable def statementList (tc : ToPartrec.Code) : List (Option Stmt') :=
   by
     classical
     exact (statements tc).toList
@@ -306,7 +304,7 @@ theorem statementIndex_lt_length {tc : ToPartrec.Code} {stmt : Option Stmt'}
   exact List.findIdx_lt_length_of_exists ⟨stmt, hstmt, by simp⟩
 
 /-- Numeric state codes for the finite statement substates. -/
-def controlStates (tc : ToPartrec.Code) : List Nat :=
+noncomputable def controlStates (tc : ToPartrec.Code) : List Nat :=
   List.range (statementList tc).length
 
 theorem statementIndex_mem_controlStates {tc : ToPartrec.Code} {stmt : Option Stmt'}
@@ -370,5 +368,3 @@ theorem init_reaches_label_mem {tc : ToPartrec.Code}
 end PartrecToTM2Support
 
 end LeanWang
-
-end

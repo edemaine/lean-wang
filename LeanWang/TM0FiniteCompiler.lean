@@ -15,8 +15,6 @@ the finite support. This file keeps only those shared helpers; it deliberately
 does not build a direct table for the two-sided Mathlib TM0 machine.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FiniteCompiler
@@ -25,44 +23,32 @@ open TM0Route
 
 /-- Numeric code for a supported translated TM0 state. -/
 noncomputable def stateCode (tc : Turing.ToPartrec.Code)
-    (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) : Nat := by
-  classical
-  exact
-    if q = (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) then
-      TM0Route.partrecStartedTM0Start
-    else
-      if hq : q ∈ TM0Route.partrecStartedTM0Labels tc then
-        TM0Route.partrecStartedTM0StateCodeOfMem tc q
-          (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)
-      else
-        TM0Route.partrecStartedTM0Start
+    (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) : Nat :=
+  (TM0Route.partrecStartedTM0LabelSupportList tc).idxOf q
 
 theorem stateCode_default (tc : Turing.ToPartrec.Code)
     : stateCode tc (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) =
       TM0Route.partrecStartedTM0Start := by
-  classical
-  simp [stateCode]
+  simp [stateCode, TM0Route.partrecStartedTM0LabelSupportList,
+    TM0Route.partrecStartedTM0Start]
 
 theorem stateCode_mem_states (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
     (hq : q ∈ TM0Route.partrecStartedTM0Labels tc) :
     stateCode tc q ∈ TM0Route.partrecStartedTM0States tc := by
-  classical
-  by_cases h : q = (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
-  · simp [stateCode, h, TM0Route.partrecStartedTM0Start_mem_states]
-  · simp [stateCode, h, hq, TM0Route.partrecStartedTM0StateCodeOfMem_mem_states tc q
-      (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq)]
+  unfold stateCode TM0Route.partrecStartedTM0States
+  exact List.mem_range.2 (List.idxOf_lt_length_iff.2
+    (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq))
 
 theorem stateCode_ne_start_of_mem_labels_ne_default {tc : Turing.ToPartrec.Code}
     {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
     (hq : q ∈ TM0Route.partrecStartedTM0Labels tc)
     (hneq : q ≠ (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))) :
     stateCode tc q ≠ TM0Route.partrecStartedTM0Start := by
-  classical
   let hqsupport := TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq
   have hcode :
       stateCode tc q = TM0Route.partrecStartedTM0StateCodeOfMem tc q hqsupport := by
-    simp [stateCode, hneq, hq]
+    rfl
   intro hstart
   have hindexStart :
       TM0Route.partrecStartedTM0StateCodeOfMem tc q hqsupport =
@@ -81,7 +67,6 @@ theorem stateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
     (hr : r ∈ TM0Route.partrecStartedTM0Labels tc)
     (hcode : stateCode tc q = stateCode tc r) :
     q = r := by
-  classical
   by_cases hqdef :
       q = (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
   · subst q
@@ -103,10 +88,10 @@ theorem stateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
       let hrsupport := TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hr
       have hqcode :
           stateCode tc q = TM0Route.partrecStartedTM0StateCodeOfMem tc q hqsupport := by
-        simp [stateCode, hqdef, hq]
+        rfl
       have hrcode :
           stateCode tc r = TM0Route.partrecStartedTM0StateCodeOfMem tc r hrsupport := by
-        simp [stateCode, hrdef, hr]
+        rfl
       have hindex :
           TM0Route.partrecStartedTM0StateCodeOfMem tc q hqsupport =
             TM0Route.partrecStartedTM0StateCodeOfMem tc r hrsupport := by

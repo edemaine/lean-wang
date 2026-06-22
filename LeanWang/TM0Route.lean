@@ -16,8 +16,6 @@ code-specific relabeling where that evaluator label is the default start label,
 so the standard Mathlib translation theorems apply.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0Route
@@ -103,7 +101,7 @@ abbrev PartrecVar : Type :=
   Option Turing.PartrecToTM2.Γ'
 
 /-- Explicit finite list of possible `PartrecToTM2` local variable values. -/
-def partrecVarList : List PartrecVar :=
+noncomputable def partrecVarList : List PartrecVar :=
   none :: (PartrecToTM2Support.stackAlphabetList.map some)
 
 theorem mem_partrecVarList (v : PartrecVar) :
@@ -156,6 +154,215 @@ instance (tc : Turing.ToPartrec.Code) : DecidableEq (StartedLabel tc) := by
       exact congrArg StartedLabel.val h)
 
 end StartedLabel
+
+instance instDecidableEqPartrecStartedTM0Symbol :
+    DecidableEq (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
+  inferInstanceAs (DecidableEq (Bool × (∀ k : PartrecStack, Option (PartrecStackSymbol k))))
+
+instance instDecidableEqPartrecStAct {k : PartrecStack} :
+    DecidableEq (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k) := fun a b => by
+  cases a <;> cases b
+  case push.push f g =>
+    exact decidable_of_iff' (f = g) (by simp)
+  case peek.peek f g =>
+    exact decidable_of_iff' (f = g) (by simp)
+  case pop.pop f g =>
+    exact decidable_of_iff' (f = g) (by simp)
+  all_goals exact .isFalse (by intro h; cases h)
+
+def decEqPartrecStartedTM2Stmt (tc : Turing.ToPartrec.Code) :
+    (a b : Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar) →
+      Decidable (a = b)
+  | Turing.TM2.Stmt.push k f q, b =>
+      match b with
+      | Turing.TM2.Stmt.push k' f' q' =>
+          if hk : k = k' then by
+            subst k'
+            letI : Decidable (q = q') := decEqPartrecStartedTM2Stmt tc q q'
+            exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+          else
+            .isFalse (by intro h; cases h; exact hk rfl)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.peek k f q, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek k' f' q' =>
+          if hk : k = k' then by
+            subst k'
+            letI : Decidable (q = q') := decEqPartrecStartedTM2Stmt tc q q'
+            exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+          else
+            .isFalse (by intro h; cases h; exact hk rfl)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.pop k f q, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop k' f' q' =>
+          if hk : k = k' then by
+            subst k'
+            letI : Decidable (q = q') := decEqPartrecStartedTM2Stmt tc q q'
+            exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+          else
+            .isFalse (by intro h; cases h; exact hk rfl)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.load f q, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load f' q' => by
+          letI : Decidable (q = q') := decEqPartrecStartedTM2Stmt tc q q'
+          exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.branch f q1 q2, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch f' q1' q2' => by
+          letI : Decidable (q1 = q1') := decEqPartrecStartedTM2Stmt tc q1 q1'
+          letI : Decidable (q2 = q2') := decEqPartrecStartedTM2Stmt tc q2 q2'
+          exact decidable_of_iff' (f = f' ∧ q1 = q1' ∧ q2 = q2') (by simp)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.goto f, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto f' => decidable_of_iff' (f = f') (by simp)
+      | Turing.TM2.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM2.Stmt.halt, b =>
+      match b with
+      | Turing.TM2.Stmt.push .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.peek .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.pop .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM2.Stmt.halt => .isTrue rfl
+
+instance instDecidableEqPartrecStartedTM2Stmt (tc : Turing.ToPartrec.Code) :
+    DecidableEq (Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
+  decEqPartrecStartedTM2Stmt tc
+
+def decEqPartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
+    (a b : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) →
+      Decidable (a = b)
+  | Turing.TM2to1.Λ'.normal q, b =>
+      match b with
+      | Turing.TM2to1.Λ'.normal q' => decidable_of_iff' (q = q') (by simp)
+      | Turing.TM2to1.Λ'.go .. => .isFalse (by intro h; cases h)
+      | Turing.TM2to1.Λ'.ret .. => .isFalse (by intro h; cases h)
+  | Turing.TM2to1.Λ'.go k s q, b =>
+      match b with
+      | Turing.TM2to1.Λ'.normal .. => .isFalse (by intro h; cases h)
+      | Turing.TM2to1.Λ'.go k' s' q' =>
+          if hk : k = k' then by
+            subst k'
+            exact decidable_of_iff' (s = s' ∧ q = q') (by simp)
+          else
+            .isFalse (by intro h; cases h; exact hk rfl)
+      | Turing.TM2to1.Λ'.ret .. => .isFalse (by intro h; cases h)
+  | Turing.TM2to1.Λ'.ret q, b =>
+      match b with
+      | Turing.TM2to1.Λ'.normal .. => .isFalse (by intro h; cases h)
+      | Turing.TM2to1.Λ'.go .. => .isFalse (by intro h; cases h)
+      | Turing.TM2to1.Λ'.ret q' => decidable_of_iff' (q = q') (by simp)
+
+instance instDecidableEqPartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
+    DecidableEq
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
+  decEqPartrecStartedTM1Label tc
+
+def decEqPartrecStartedTM1Stmt (tc : Turing.ToPartrec.Code) :
+    (a b : Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar) → Decidable (a = b)
+  | Turing.TM1.Stmt.move d q, b =>
+      match b with
+      | Turing.TM1.Stmt.move d' q' => by
+          letI : Decidable (q = q') := decEqPartrecStartedTM1Stmt tc q q'
+          exact decidable_of_iff' (d = d' ∧ q = q') (by simp)
+      | Turing.TM1.Stmt.write .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM1.Stmt.write f q, b =>
+      match b with
+      | Turing.TM1.Stmt.move .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.write f' q' => by
+          letI : Decidable (q = q') := decEqPartrecStartedTM1Stmt tc q q'
+          exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+      | Turing.TM1.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM1.Stmt.load f q, b =>
+      match b with
+      | Turing.TM1.Stmt.move .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.write .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.load f' q' => by
+          letI : Decidable (q = q') := decEqPartrecStartedTM1Stmt tc q q'
+          exact decidable_of_iff' (f = f' ∧ q = q') (by simp)
+      | Turing.TM1.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM1.Stmt.branch f q1 q2, b =>
+      match b with
+      | Turing.TM1.Stmt.move .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.write .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.branch f' q1' q2' => by
+          letI : Decidable (q1 = q1') := decEqPartrecStartedTM1Stmt tc q1 q1'
+          letI : Decidable (q2 = q2') := decEqPartrecStartedTM1Stmt tc q2 q2'
+          exact decidable_of_iff' (f = f' ∧ q1 = q1' ∧ q2 = q2') (by simp)
+      | Turing.TM1.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM1.Stmt.goto f, b =>
+      match b with
+      | Turing.TM1.Stmt.move .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.write .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.goto f' => decidable_of_iff' (f = f') (by simp)
+      | Turing.TM1.Stmt.halt => .isFalse (by intro h; cases h)
+  | Turing.TM1.Stmt.halt, b =>
+      match b with
+      | Turing.TM1.Stmt.move .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.write .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.load .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.branch .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.goto .. => .isFalse (by intro h; cases h)
+      | Turing.TM1.Stmt.halt => .isTrue rfl
+
+instance instDecidableEqPartrecStartedTM1Stmt (tc : Turing.ToPartrec.Code) :
+    DecidableEq
+      (Turing.TM1.Stmt
+        (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+        (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+        PartrecVar) :=
+  decEqPartrecStartedTM1Stmt tc
 
 /--
 The code-dependent TM2 evaluator whose default label is the evaluator start
@@ -299,6 +506,11 @@ theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
 def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.tr (partrecStartedTM2 tc)
 
+instance instDecidableEqPartrecStartedTM0Label (tc : Turing.ToPartrec.Code) :
+    DecidableEq (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
+  unfold Turing.TM1to0.Λ'
+  infer_instance
+
 noncomputable def partrecStartedTM1Labels (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.trSupp (partrecStartedTM2 tc) (partrecStartedTM2Labels tc)
 
@@ -344,7 +556,7 @@ theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
       simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁]
 
 /-- List-valued support for the started TM1 machine obtained from the TM2-to-TM1 translation. -/
-def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
+noncomputable def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
   (PartrecToTM2Support.labelList tc).flatMap fun q =>
     let q' := StartedLabel.wrap tc q
@@ -353,7 +565,9 @@ def partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code) :
 theorem mem_partrecStartedTM1LabelList (tc : Turing.ToPartrec.Code)
     (q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :
     q ∈ partrecStartedTM1LabelList tc ↔ q ∈ partrecStartedTM1Labels tc := by
-  classical
+  letI : DecidableEq
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
+    Classical.decEq _
   constructor
   · intro h
     unfold partrecStartedTM1LabelList at h
@@ -472,7 +686,7 @@ noncomputable def partrecStartedTM0Labels (tc : Turing.ToPartrec.Code) :=
   Turing.TM1to0.trStmts (partrecStartedTM1Machine tc)
     (partrecStartedTM1Labels tc)
 
-def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
+noncomputable def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
     List (Option (Turing.TM1.Stmt
       (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
       (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
@@ -490,7 +704,7 @@ theorem mem_partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code)
   unfold partrecStartedTM0StatementList
   exact mem_tm1StatementSupportList_iff (mem_partrecStartedTM1LabelList tc) stmt
 
-def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+noncomputable def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   (partrecStartedTM0StatementList tc).flatMap fun stmt =>
     partrecVarList.map fun v => (stmt, v)
@@ -526,7 +740,7 @@ theorem mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code)
 Finite support list for translated TM0 states, with the start/default state
 forced to position `0`.
 -/
-def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
+noncomputable def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
     List (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   default :: partrecStartedTM0LabelList tc
 
@@ -542,7 +756,7 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
   simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
 
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
-def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
+noncomputable def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
   List.range (partrecStartedTM0LabelSupportList tc).length
 
 /-- Numeric start state corresponding to the default translated TM0 label. -/
@@ -558,32 +772,18 @@ theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) 
       some (default : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
   simp [partrecStartedTM0LabelSupportList]
 
-/-- Choose an index for a state known to occur in the finite support list. -/
-noncomputable def partrecStartedTM0StateIndexOfMem (tc : Turing.ToPartrec.Code)
-    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
-    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
-    Fin (partrecStartedTM0LabelSupportList tc).length :=
-  Classical.choose (List.get_of_mem hq)
-
-theorem partrecStartedTM0StateIndexOfMem_get (tc : Turing.ToPartrec.Code)
-    (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
-    (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
-    (partrecStartedTM0LabelSupportList tc).get
-      (partrecStartedTM0StateIndexOfMem tc q hq) = q :=
-  Classical.choose_spec (List.get_of_mem hq)
-
 /-- Numeric code for a supported translated TM0 state. -/
 noncomputable def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
-    (hq : q ∈ partrecStartedTM0LabelSupportList tc) : Nat :=
-  (partrecStartedTM0StateIndexOfMem tc q hq).val
+    (_hq : q ∈ partrecStartedTM0LabelSupportList tc) : Nat :=
+  (partrecStartedTM0LabelSupportList tc).idxOf q
 
 theorem partrecStartedTM0StateCodeOfMem_mem_states (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
     (hq : q ∈ partrecStartedTM0LabelSupportList tc) :
     partrecStartedTM0StateCodeOfMem tc q hq ∈ partrecStartedTM0States tc := by
   unfold partrecStartedTM0StateCodeOfMem partrecStartedTM0States
-  exact List.mem_range.2 (partrecStartedTM0StateIndexOfMem tc q hq).isLt
+  exact List.mem_range.2 (List.idxOf_lt_length_iff.2 hq)
 
 theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))
@@ -591,11 +791,10 @@ theorem partrecStartedTM0StateCodeOfMem_get? (tc : Turing.ToPartrec.Code)
     (partrecStartedTM0LabelSupportList tc)[partrecStartedTM0StateCodeOfMem tc q hq]? =
       some q := by
   unfold partrecStartedTM0StateCodeOfMem
-  rw [List.getElem?_eq_getElem (partrecStartedTM0StateIndexOfMem tc q hq).isLt]
-  exact congrArg some (partrecStartedTM0StateIndexOfMem_get tc q hq)
+  exact List.getElem?_idxOf hq
 
 /-- The finite cell values that can occur in one stack coordinate of the TM2-to-TM1 alphabet. -/
-def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
+noncomputable def partrecStartedTM0CellValues : List (Option Turing.PartrecToTM2.Γ') :=
   partrecVarList
 
 theorem mem_partrecStartedTM0CellValues (a : Option Turing.PartrecToTM2.Γ') :
@@ -666,7 +865,7 @@ instance instPrimcodablePartrecStartedTM0Symbol :
     (Bool × (∀ k : PartrecStack, Option (PartrecStackSymbol k))))
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
-def partrecStartedTM0StackVectors :
+noncomputable def partrecStartedTM0StackVectors :
     List (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
   partrecStartedTM0CellValues.flatMap fun main =>
     partrecStartedTM0CellValues.flatMap fun rev =>
@@ -692,7 +891,7 @@ theorem mem_partrecStartedTM0StackVectors
       rfl⟩
 
 /-- Explicit finite list of all symbols in the TM0 machine produced by `TM0Route`. -/
-def partrecStartedTM0SymbolList :
+noncomputable def partrecStartedTM0SymbolList :
     List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
   [false, true].flatMap fun bottom =>
     partrecStartedTM0StackVectors.map fun cells =>
@@ -711,7 +910,7 @@ theorem partrecStartedTM0Input_symbols (a : Turing.TM2to1.Γ' PartrecStack Partr
   mem_partrecStartedTM0SymbolList a
 
 /-- Numeric code for the four-stack vector component of a translated TM0 tape symbol. -/
-def partrecStartedTM0StackVectorCode
+noncomputable def partrecStartedTM0StackVectorCode
     (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) : Nat :=
   Nat.pair
     (PartrecToTM2Support.tapeSymbolCode (v Turing.PartrecToTM2.K'.main))
@@ -756,7 +955,7 @@ theorem partrecStartedTM0StackVectorCode_primrec :
   exact Primrec.dom_finite partrecStartedTM0StackVectorCode
 
 /-- Numeric code for a translated TM0 tape symbol. -/
-def partrecStartedTM0SymbolCode
+noncomputable def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
   Nat.pair (if a.1 then 1 else 0) (partrecStartedTM0StackVectorCode a.2)
 
@@ -781,7 +980,7 @@ theorem partrecStartedTM0SymbolCode_primrec :
   exact Primrec.dom_finite partrecStartedTM0SymbolCode
 
 /-- Numeric alphabet for the translated TM0 route, suitable for `FiniteTM0Program`. -/
-def partrecStartedTM0Symbols : List Nat :=
+noncomputable def partrecStartedTM0Symbols : List Nat :=
   partrecStartedTM0SymbolList.map partrecStartedTM0SymbolCode
 
 theorem partrecStartedTM0SymbolCode_mem_symbols
@@ -790,7 +989,7 @@ theorem partrecStartedTM0SymbolCode_mem_symbols
   List.mem_map_of_mem (f := partrecStartedTM0SymbolCode) (mem_partrecStartedTM0SymbolList a)
 
 /-- Numeric code of the translated TM0 blank symbol. -/
-def partrecStartedTM0Blank : Nat :=
+noncomputable def partrecStartedTM0Blank : Nat :=
   partrecStartedTM0SymbolCode default
 
 theorem partrecStartedTM0Blank_mem_symbols :
