@@ -944,7 +944,10 @@ theorem tableStates_primrec : Primrec tableStates := by
     exact TableTransition.next_primrec.comp Primrec.snd
   exact Primrec.list_append.comp hrowStates hrowNexts
 
-/-- Compile a one-sided Post/TM0 program to the older always-write-and-move table model. -/
+/--
+Reduce a one-sided Post/TM0 program to the older always-write-and-move table
+model consumed by the current Wang-tile layer.
+-/
 def toTableProgram (P : PostProgram) : TableProgram where
   symbols := P.tableSymbols
   states := tableStates P

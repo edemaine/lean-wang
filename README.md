@@ -20,9 +20,9 @@ the concrete definitions needed for the Berger/Robinson route:
 - `LeanWang.PostMachine`: the finite one-sided TM0 program model. The original
   Post-style names are still present, but the preferred public terminology is
   `FiniteTM0Program`: transitions either move or write, matching Mathlib TM0
-  more closely than the older table model. The file also contains the legacy
-  data-level compiler to `TableProgram` used by the temporary bridge to the
-  existing Wang-tile layer.
+  more closely than the older table model. The file also contains the temporary
+  data-level reduction to `TableProgram` used only to feed the existing
+  Wang-tile layer.
 - `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
   `Turing.ToPartrec.Code`.
 - `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
@@ -60,9 +60,10 @@ interfaces, plus the scaffold construction:
 
 - `TM0FiniteCompiler`: the preferred machine-side route. It reduces Mathlib's
   code-specific started TM0 evaluator to finite one-sided TM0 program data.
-- `FiniteTM0TableReduction`: a legacy bridge from finite one-sided TM0 programs
-  to the existing table-machine Wang-tile layer. This should be replaced by
-  direct finite-TM0 tiles later.
+- `FiniteTM0TableReduction`: a temporary backend bridge from finite one-sided
+  TM0 programs to the existing table-machine Wang-tile layer. This should be
+  replaced by direct finite-TM0 tiles later; it is not a direct TM2-to-table
+  reduction.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
@@ -70,6 +71,4 @@ The abandoned direct `PartrecToTM2`/TM2-to-table reduction has been removed.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0.
 
 The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
-undecidability reductions are now proved from those construction interfaces.
-There are also more general theorem variants from `TableCompiler`,
-`FuelTableCompiler`, `PrimrecSearchTableCompiler`, and `TM0FiniteCompiler`.
+undecidability reductions are now proved from the TM0 construction interfaces.

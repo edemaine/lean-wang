@@ -120,14 +120,15 @@ one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
 should treat it as the mathematical reduction. A separate compatibility
 `FiniteTM0TableReduction` bridge feeds the current table-machine Wang-tile layer
-until that layer is replaced by direct finite-TM0 tiles. Together these pieces
-feed the fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded
-scaffolded domino theorem surfaces directly from the finite-TM0 factorization
-using the concrete source-code translation into Mathlib's `PartrecToTM2`
-evaluator. The old code-to-table `TableCompiler` surface has been removed so
-the theorem statements do not look like a direct TM2-to-table route. The
-started-TM2 bridge is a theorem in `TM0Route` rather than a separate reduction
-structure.
+until that layer is replaced by direct finite-TM0 tiles. This bridge starts only
+after the source machine has already been reduced to finite one-sided TM0 data;
+it is not a direct TM2-to-table reduction. Together these pieces feed the
+fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
+domino theorem surfaces directly from the finite-TM0 factorization using the
+concrete source-code translation into Mathlib's `PartrecToTM2` evaluator. The
+old code-to-table `TableCompiler` surface has been removed so the theorem
+statements do not look like a direct TM2-to-table route. The started-TM2 bridge
+is a theorem in `TM0Route` rather than a separate reduction structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
 temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
@@ -243,7 +244,8 @@ Next implementation targets:
    instruction set is already close to the Wang-tile space-time simulation, so
    this should remove the `PostProgram.toTableProgram` detour from the final
    theorem. Until then, the concrete `FiniteTM0TableReduction` route is a
-   verified compatibility bridge for existing tile code.
+   verified compatibility bridge for existing tile code, not part of the source
+   TM2-to-TM0 reduction.
 
 ### 1. Define Wang Tiles
 
