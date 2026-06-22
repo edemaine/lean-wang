@@ -48,6 +48,11 @@ def rfindBody (test : Code) : Code :=
   let step := Code.cons one nextState
   (Code.case found step).comp (Code.cons condition Code.id)
 
+/-- The partial step function used by `Code.fix (rfindBody test)`. -/
+def rfindBodyStep (test : Code) (v : List Nat) : Part (List Nat ⊕ List Nat) :=
+  ((rfindBody test).eval v).map fun out =>
+    if out.headI = 0 then Sum.inl out.tail else Sum.inr out.tail
+
 theorem rfindBody_eval_zero {test : Code} {n m a : Nat}
     (htest : test.eval [Nat.pair a (n + m)] = pure [0]) :
     (rfindBody test).eval [n, m, a] = pure [0, n, m, a] := by
@@ -72,6 +77,51 @@ theorem rfindBody_fix_fwd {test : Code} {n m a k : Nat} {v : List Nat}
   rw [Turing.ToPartrec.Code.fix_eval] at hnext ⊢
   refine PFun.mem_fix_iff.2 (Or.inr ⟨[n.succ, m, a], ?_, hnext⟩)
   simp [rfindBody_eval_succ htest]
+
+set_option linter.flexible false in
+theorem rfindBodyStep_stop_shape {test : Code} {i n m a : Nat}
+    (hsingle : ∀ v : List Nat, v ∈ test.eval [Nat.pair a (i + m)] → ∃ x : Nat, v = [x])
+    (hstop : Sum.inl [n, m, a] ∈ rfindBodyStep test [i, m, a]) :
+    i = n ∧ [0] ∈ test.eval [Nat.pair a (i + m)] := by
+  unfold rfindBodyStep at hstop
+  rw [Part.mem_map_iff] at hstop
+  rcases hstop with ⟨w, hw, hwmap⟩
+  simp [rfindBody] at hw
+  rcases hw with ⟨cond, hcond, hwcase⟩
+  rcases hsingle cond hcond with ⟨x, rfl⟩
+  cases x with
+  | zero =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+      exact ⟨by simpa using hwmap, hcond⟩
+  | succ _ =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+
+set_option linter.flexible false in
+theorem rfindBodyStep_fwd_shape {test : Code} {i m a : Nat} {next : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ test.eval [Nat.pair a (i + m)] → ∃ x : Nat, v = [x])
+    (hfwd : Sum.inr next ∈ rfindBodyStep test [i, m, a]) :
+    next = [i.succ, m, a] ∧
+      ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (i + m)] := by
+  unfold rfindBodyStep at hfwd
+  rw [Part.mem_map_iff] at hfwd
+  rcases hfwd with ⟨w, hw, hwmap⟩
+  simp [rfindBody] at hw
+  rcases hw with ⟨cond, hcond, hwcase⟩
+  rcases hsingle cond hcond with ⟨x, rfl⟩
+  cases x with
+  | zero =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+  | succ k =>
+      simp at hwcase
+      subst w
+      simp at hwmap
+      exact ⟨by simpa using hwmap.symm, ⟨k, hcond⟩⟩
 
 theorem rfindBody_fix_of_first_zeroFrom {test : Code} {a m : Nat}
     (start len : Nat)
@@ -102,6 +152,47 @@ theorem rfindBody_fix_of_first_zeroFrom {test : Code} {a m : Nat}
         rfindBody_fix_fwd (test := test) (n := start) (m := m) (a := a) (k := k)
           (by simpa [Nat.add_assoc] using hstart) hnext
       simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstep
+
+theorem rfindBody_first_zeroFrom_of_fix_mem {test : Code} {start n m a : Nat}
+    (hsingle : ∀ t : Nat, ∀ v : List Nat,
+      v ∈ test.eval [Nat.pair a (t + m)] → ∃ x : Nat, v = [x])
+    (hfix : [n, m, a] ∈ (Code.fix (rfindBody test)).eval [start, m, a]) :
+    start ≤ n ∧ [0] ∈ test.eval [Nat.pair a (n + m)] ∧
+      ∀ i : Nat, start ≤ i → i < n →
+        ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (i + m)] := by
+  rw [Turing.ToPartrec.Code.fix_eval] at hfix
+  change [n, m, a] ∈ PFun.fix (rfindBodyStep test) [start, m, a] at hfix
+  let C : List Nat → Prop := fun state =>
+    ∀ i : Nat, state = [i, m, a] →
+      i ≤ n ∧ [0] ∈ test.eval [Nat.pair a (n + m)] ∧
+        ∀ j : Nat, i ≤ j → j < n →
+          ∃ k : Nat, [k.succ] ∈ test.eval [Nat.pair a (j + m)]
+  have hC : C [start, m, a] := by
+    refine PFun.fixInduction' (f := rfindBodyStep test) hfix ?_ ?_
+    · intro final hstop i hstate
+      subst final
+      have hstop' : Sum.inl [n, m, a] ∈ rfindBodyStep test [i, m, a] := by
+        simpa using hstop
+      rcases rfindBodyStep_stop_shape (test := test) (i := i) (n := n)
+          (m := m) (a := a) (hsingle i) hstop' with ⟨hin, hzero⟩
+      refine ⟨by omega, ?_, ?_⟩
+      · simpa [hin] using hzero
+      · intro j hij hjn
+        omega
+    · intro state next _hnext hfwd ih i hstate
+      subst state
+      have hfwd' : Sum.inr next ∈ rfindBodyStep test [i, m, a] := by
+        simpa using hfwd
+      rcases rfindBodyStep_fwd_shape (test := test) (i := i) (m := m)
+          (a := a) (hsingle i) hfwd' with ⟨hnext_eq, hnonzero⟩
+      rcases ih i.succ hnext_eq with ⟨hin_le, hzero, hprev⟩
+      refine ⟨by omega, hzero, ?_⟩
+      intro j hij hjn
+      by_cases hji : j = i
+      · subst j
+        simpa using hnonzero
+      · exact hprev j (by omega) hjn
+  exact hC start rfl
 
 /--
 Implementation of the `Nat.Partrec.Code.rfind'` constructor from a translated
