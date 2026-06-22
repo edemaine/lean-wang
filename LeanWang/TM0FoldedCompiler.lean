@@ -160,8 +160,11 @@ theorem foldedSimStateCode_mem_states (tc : Turing.ToPartrec.Code)
   unfold foldedStateList foldedSimStateList
   apply List.mem_append_right
   rw [List.mem_flatMap]
-  refine ⟨q, hq, ?_⟩
-  exact List.mem_map_of_mem (mem_foldSideList side)
+  have hqLabels : q ∈ TM0Route.partrecStartedTM0Labels tc :=
+    (TM0Route.mem_partrecStartedTM0LabelList tc q).1 hq
+  refine ⟨TM0FiniteCompiler.stateCode tc q,
+    TM0FiniteCompiler.stateCode_mem_states tc q hqLabels, ?_⟩
+  simpa [foldedSimStateCode_eq_ofCode] using List.mem_map_of_mem (mem_foldSideList side)
 
 theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
     foldedSimStartState tc ∈ foldedStateList tc := by

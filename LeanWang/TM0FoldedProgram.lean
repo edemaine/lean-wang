@@ -317,8 +317,8 @@ def foldedInitStateList : List Nat :=
       [initMoveRightState i, initWriteRightState i, initReturnState i]
 
 def foldedSimStateList (tc : Turing.ToPartrec.Code) : List Nat :=
-  (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q =>
-    foldSideList.map fun side => foldedSimStateCode tc side q
+  (TM0Route.partrecStartedTM0States tc).flatMap fun qCode =>
+    foldSideList.map fun side => foldedSimStateOfCode side qCode
 
 def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
   foldedInitStateList ++ foldedSimStateList tc
