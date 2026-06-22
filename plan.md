@@ -159,6 +159,11 @@ Completed proof layers:
   same-write travel rows move from head `0` to the selected stack column while
   carrying a stack-cell value in finite control, with generated-row
   symbol-write and next-state support lemmas.
+- the stack-shift loop now has a generic finite carry-write row primitive: at a
+  chosen control state, rows over every decoded stack-cell symbol write the
+  carried cell, expose the displaced cell to a next-state continuation, and
+  move one position right, with generated-row symbol-write and next-state
+  support lemmas.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -224,10 +229,11 @@ Next implementation targets:
    `Turing.PartrecToTM2.tr_eval`; the local code now packages the finite
    control states, tape alphabet, stationary rows, bounded `peek` rows, the
    implemented statement-row fragment, reserved finite state space for unbounded
-   stack shifts, and the bounded stack-column travel prefix in `TableProgram`
-   form. The remaining reduction work is generating the unbounded `push`/`pop`
-   carry/write loops, connecting the row fragment to multi-step simulation of
-   the TM2 step relation, and proving the simulated halting equivalence.
+   stack shifts, the bounded stack-column travel prefix, and the generic
+   carry-write row primitive in `TableProgram` form. The remaining reduction
+   work is specializing those pieces into the unbounded `push`/`pop` shift
+   loops, connecting the row fragment to multi-step simulation of the TM2 step
+   relation, and proving the simulated halting equivalence.
 2. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 3. Specialize
    `encoded_domino_problem_undecidable_of_scaffold_tm2Reduction` to those two

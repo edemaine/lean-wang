@@ -991,6 +991,102 @@ theorem stackShiftTravelRows_next_mem_states {tc : Turing.ToPartrec.Code}
     · apply sameWriteMoveRows_next_mem_states he
       exact stackShiftTravelState_mem_states hstmt (by decide : 3 < 4)
 
+/--
+One stack-shift row that writes the carried cell, reads the displaced cell, and
+moves one position to the right.
+
+The `next` continuation receives the displaced cell. This keeps the primitive
+usable both for the continuing carry loop and for the blank-cell terminal case.
+-/
+def stackShiftCarryTransition (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) : TableTransition where
+  state := state
+  read := PartrecToTM2Support.tapeSymbolCode read
+  write := PartrecToTM2Support.tapeSymbolCode carry
+  next := next read
+  move := Move.right
+
+@[simp]
+theorem stackShiftCarryTransition_state (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) :
+    (stackShiftCarryTransition state carry read next).state = state :=
+  rfl
+
+@[simp]
+theorem stackShiftCarryTransition_read (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) :
+    (stackShiftCarryTransition state carry read next).read =
+      PartrecToTM2Support.tapeSymbolCode read :=
+  rfl
+
+@[simp]
+theorem stackShiftCarryTransition_write (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) :
+    (stackShiftCarryTransition state carry read next).write =
+      PartrecToTM2Support.tapeSymbolCode carry :=
+  rfl
+
+@[simp]
+theorem stackShiftCarryTransition_next (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) :
+    (stackShiftCarryTransition state carry read next).next = next read :=
+  rfl
+
+@[simp]
+theorem stackShiftCarryTransition_move (state : Nat)
+    (carry read : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) :
+    (stackShiftCarryTransition state carry read next).move = Move.right :=
+  rfl
+
+theorem stackShiftCarryTransition_write_mem_symbols {state : Nat}
+    {carry read : Option Turing.PartrecToTM2.Γ'}
+    {next : Option Turing.PartrecToTM2.Γ' → Nat} :
+    (stackShiftCarryTransition state carry read next).write ∈ symbols :=
+  tapeSymbolCode_mem_symbols carry
+
+/--
+Finite carry-write row family over all decoded stack-cell symbols.
+
+Each row writes the current carry and passes the displaced cell to `next`.
+-/
+def stackShiftCarryRows (state : Nat)
+    (carry : Option Turing.PartrecToTM2.Γ')
+    (next : Option Turing.PartrecToTM2.Γ' → Nat) : List TableTransition :=
+  cellSymbols.map fun read => stackShiftCarryTransition state carry read next
+
+theorem stackShiftCarryTransition_mem_rows {state : Nat}
+    {carry read : Option Turing.PartrecToTM2.Γ'}
+    {next : Option Turing.PartrecToTM2.Γ' → Nat}
+    (hread : read ∈ cellSymbols) :
+    stackShiftCarryTransition state carry read next ∈
+      stackShiftCarryRows state carry next :=
+  List.mem_map.2 ⟨read, hread, rfl⟩
+
+theorem stackShiftCarryRows_write_mem_symbols {state : Nat}
+    {carry : Option Turing.PartrecToTM2.Γ'}
+    {next : Option Turing.PartrecToTM2.Γ' → Nat}
+    {e : TableTransition}
+    (he : e ∈ stackShiftCarryRows state carry next) :
+    e.write ∈ symbols := by
+  rcases List.mem_map.1 he with ⟨read, _hread, rfl⟩
+  exact stackShiftCarryTransition_write_mem_symbols
+
+theorem stackShiftCarryRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {state : Nat} {carry : Option Turing.PartrecToTM2.Γ'}
+    {next : Option Turing.PartrecToTM2.Γ' → Nat}
+    {e : TableTransition}
+    (he : e ∈ stackShiftCarryRows state carry next)
+    (hnext : ∀ read, read ∈ cellSymbols → next read ∈ states tc) :
+    e.next ∈ states tc := by
+  rcases List.mem_map.1 he with ⟨read, hread, rfl⟩
+  exact hnext read hread
+
 /-- Return state after a `peek` read has moved one step left. -/
 noncomputable def peekReturnState (tc : Turing.ToPartrec.Code)
     (var : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')
