@@ -263,6 +263,13 @@ theorem translates_prec_zero {cf cg : Nat.Partrec.Code}
   simp [translate_prec, Turing.ToPartrec.Code.prec, hf a, Part.bind_eq_bind,
     Part.mem_bind_iff]
 
+theorem translates_precStepArg {cg : Nat.Partrec.Code}
+    (hg : Translates cg (translate cg)) (y ih a : Nat) (v : List Nat) :
+    v ∈ (((translate cg).comp Code.precStepArg).eval [y, ih, a]) ↔
+      ∃ x : Nat, x ∈ Nat.Partrec.Code.eval cg (Nat.pair a (Nat.pair y ih)) ∧ v = [x] := by
+  rw [Turing.ToPartrec.Code.comp_eval]
+  simpa [Part.bind_eq_bind] using hg (Nat.pair a (Nat.pair y ih)) v
+
 end NatPartrecToToPartrec
 
 end LeanWang
