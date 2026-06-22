@@ -90,6 +90,9 @@ theorem encodeCode_eq : Encodable.encode = encodeCode :=
 theorem ofNatCode_eq : Denumerable.ofNat Code = ofNatCode :=
   rfl
 
+theorem ofNatCode_encodeCode (c : Code) : ofNatCode (encodeCode c) = c := by
+  simpa [encodeCode_eq, ofNatCode_eq] using Denumerable.ofNat_encode c
+
 open Primrec
 
 theorem primrec₂_cons : Primrec₂ Code.cons :=
@@ -133,5 +136,126 @@ theorem primrec_fix : Primrec Code.fix :=
 end Code
 
 end ToPartrec
+
+namespace PartrecToTM2
+
+namespace Cont'
+
+/-- An encoding of `Turing.PartrecToTM2.Cont'` as a natural number. -/
+def encodeCont : Cont' → Nat
+  | halt => 0
+  | cons₁ c k =>
+      Nat.bit false (Nat.bit false (Nat.pair (ToPartrec.Code.encodeCode c) (encodeCont k))) + 1
+  | cons₂ k => Nat.bit true (Nat.bit false (encodeCont k)) + 1
+  | comp c k =>
+      Nat.bit false (Nat.bit true (Nat.pair (ToPartrec.Code.encodeCode c) (encodeCont k))) + 1
+  | fix c k =>
+      Nat.bit true (Nat.bit true (Nat.pair (ToPartrec.Code.encodeCode c) (encodeCont k))) + 1
+
+/-- Decode a natural number into `Turing.PartrecToTM2.Cont'`. -/
+def ofNatCont : Nat → Cont'
+  | 0 => halt
+  | n + 1 =>
+    let m := n.div2.div2
+    have hm : m < n + 1 := by
+      simp only [m, Nat.div2_val]
+      exact lt_of_le_of_lt
+        (le_trans (Nat.div_le_self _ _) (Nat.div_le_self _ _))
+        (Nat.lt_succ_self _)
+    have hm1 : m.unpair.1 < n + 1 := lt_of_le_of_lt m.unpair_left_le hm
+    have hm2 : m.unpair.2 < n + 1 := lt_of_le_of_lt m.unpair_right_le hm
+    match n.bodd, n.div2.bodd with
+    | false, false => cons₁ (ToPartrec.Code.ofNatCode m.unpair.1) (ofNatCont m.unpair.2)
+    | true, false => cons₂ (ofNatCont m)
+    | false, true => comp (ToPartrec.Code.ofNatCode m.unpair.1) (ofNatCont m.unpair.2)
+    | true, true => fix (ToPartrec.Code.ofNatCode m.unpair.1) (ofNatCont m.unpair.2)
+
+set_option backward.privateInPublic true in
+/-- `ofNatCont` is a right inverse for `encodeCont`. -/
+private theorem encode_ofNatCont : ∀ n, encodeCont (ofNatCont n) = n
+  | 0 => by
+      simp [ofNatCont, encodeCont]
+  | n + 1 => by
+      let m := n.div2.div2
+      have hm : m < n + 1 := by
+        simp only [m, Nat.div2_val]
+        exact lt_of_le_of_lt
+          (le_trans (Nat.div_le_self _ _) (Nat.div_le_self _ _))
+          (Nat.lt_succ_self _)
+      have hm1 : m.unpair.1 < n + 1 := lt_of_le_of_lt m.unpair_left_le hm
+      have hm2 : m.unpair.2 < n + 1 := lt_of_le_of_lt m.unpair_right_le hm
+      have IH := encode_ofNatCont m
+      have IH2 := encode_ofNatCont m.unpair.2
+      conv_rhs => rw [← Nat.bit_bodd_div2 n, ← Nat.bit_bodd_div2 n.div2]
+      simp only [ofNatCont.eq_2]
+      cases n.bodd <;> cases n.div2.bodd <;>
+        simp [m, encodeCont, IH, IH2, ToPartrec.Code.encode_ofNatCode,
+          Nat.bit_val]
+
+set_option backward.privateInPublic true in
+set_option backward.privateInPublic.warn false in
+instance instDenumerable : Denumerable Cont' :=
+  Denumerable.mk'
+    ⟨encodeCont, ofNatCont, fun k => by
+        induction k with
+        | halt =>
+            simp [encodeCont, ofNatCont]
+        | cons₁ c k ih =>
+            simp [encodeCont, ofNatCont, ih, ToPartrec.Code.ofNatCode_encodeCode,
+              Nat.div2_val, Nat.bit_val]
+        | cons₂ k ih =>
+            simp [encodeCont, ofNatCont, ih, Nat.div2_val, Nat.bit_val]
+        | comp c k ih =>
+            simp [encodeCont, ofNatCont, ih, ToPartrec.Code.ofNatCode_encodeCode,
+              Nat.div2_val, Nat.bit_val]
+        | fix c k ih =>
+            simp [encodeCont, ofNatCont, ih, ToPartrec.Code.ofNatCode_encodeCode,
+              Nat.div2_val, Nat.bit_val],
+      encode_ofNatCont⟩
+
+theorem encodeCont_eq : Encodable.encode = encodeCont :=
+  rfl
+
+theorem ofNatCont_eq : Denumerable.ofNat Cont' = ofNatCont :=
+  rfl
+
+open Primrec
+
+theorem primrec₂_cons₁ : Primrec₂ Cont'.cons₁ :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      nat_double_succ.comp <|
+        nat_double.comp <|
+          Primrec₂.natPair.comp
+            (encode_iff.2 <| (Primrec.ofNat ToPartrec.Code).comp fst)
+            (encode_iff.2 <| (Primrec.ofNat Cont').comp snd)
+
+theorem primrec_cons₂ : Primrec Cont'.cons₂ :=
+  ofNat_iff.2 <|
+    encode_iff.1 <|
+      succ.comp <| nat_double_succ.comp <| nat_double.comp <|
+        encode_iff.2 <| Primrec.ofNat Cont'
+
+theorem primrec₂_comp : Primrec₂ Cont'.comp :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      nat_double_succ.comp <|
+        nat_double_succ.comp <|
+          Primrec₂.natPair.comp
+            (encode_iff.2 <| (Primrec.ofNat ToPartrec.Code).comp fst)
+            (encode_iff.2 <| (Primrec.ofNat Cont').comp snd)
+
+theorem primrec₂_fix : Primrec₂ Cont'.fix :=
+  Primrec₂.ofNat_iff.2 <|
+    Primrec₂.encode_iff.1 <|
+      succ.comp <| nat_double_succ.comp <|
+        nat_double_succ.comp <|
+          Primrec₂.natPair.comp
+            (encode_iff.2 <| (Primrec.ofNat ToPartrec.Code).comp fst)
+            (encode_iff.2 <| (Primrec.ofNat Cont').comp snd)
+
+end Cont'
+
+end PartrecToTM2
 
 end Turing
