@@ -255,6 +255,14 @@ theorem translates_comp {cf cg : Nat.Partrec.Code}
     exact ⟨[y], (hg n [y]).2 ⟨y, hyg, rfl⟩,
       (hf y [x]).2 ⟨x, hxf, rfl⟩⟩
 
+theorem translates_prec_zero {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (_hg : Translates cg (translate cg))
+    (a : Nat) (v : List Nat) :
+    v ∈ (translate (.prec cf cg)).eval [Nat.pair a 0] ↔
+      ∃ x : Nat, x ∈ Nat.Partrec.Code.eval cf a ∧ v = [x] := by
+  simp [translate_prec, Turing.ToPartrec.Code.prec, hf a, Part.bind_eq_bind,
+    Part.mem_bind_iff]
+
 end NatPartrecToToPartrec
 
 end LeanWang
