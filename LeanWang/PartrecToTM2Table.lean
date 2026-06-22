@@ -875,6 +875,122 @@ theorem sameWriteMoveRows_next_mem_states {tc : Turing.ToPartrec.Code}
   rcases List.mem_map.1 he with ⟨_read, _hread, rfl⟩
   exact hnext
 
+/-- Phase used while moving from head `0` to the selected stack column. -/
+def stackShiftTravelPhase : Nat := 0
+
+theorem stackShiftTravelPhase_lt_count :
+    stackShiftTravelPhase < stackShiftPhaseCount := by
+  decide
+
+/-- Auxiliary state used while traveling to a stack column with a carried cell. -/
+noncomputable def stackShiftTravelState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (offset : Nat) : Nat :=
+  stackShiftAuxState tc var stmt carry stackShiftTravelPhase offset
+
+theorem stackShiftTravelState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {offset : Nat}
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc)
+    (hoffset : offset < 4) :
+    stackShiftTravelState tc var stmt carry offset ∈ states tc :=
+  stackShiftAuxState_mem_states hstmt stackShiftTravelPhase_lt_count hoffset
+
+/-- State reached once the bounded travel prefix is positioned at stack column `k`. -/
+noncomputable def stackShiftTargetState (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (k : Turing.PartrecToTM2.K') :
+    Nat :=
+  match PartrecToTM2Support.stackNameCode k with
+  | 0 => encodedStmtState tc var (some stmt)
+  | offset => stackShiftTravelState tc var stmt carry offset
+
+set_option linter.flexible false in
+theorem stackShiftTargetState_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    (k : Turing.PartrecToTM2.K')
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    stackShiftTargetState tc var stmt carry k ∈ states tc := by
+  cases k <;>
+    simp [stackShiftTargetState, PartrecToTM2Support.stackNameCode]
+  · exact encodedStmtState_mem_states hstmt
+  · exact stackShiftTravelState_mem_states hstmt (by decide : 1 < 4)
+  · exact stackShiftTravelState_mem_states hstmt (by decide : 2 < 4)
+  · exact stackShiftTravelState_mem_states hstmt (by decide : 3 < 4)
+
+/--
+Bounded prefix rows that move from head `0` to the selected stack column while
+preserving all traversed cells and remembering the carried stack cell in the
+control state.
+-/
+noncomputable def stackShiftTravelRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (stmt : Turing.PartrecToTM2.Stmt')
+    (carry : Option Turing.PartrecToTM2.Γ') (k : Turing.PartrecToTM2.K') :
+    List TableTransition :=
+  let start := encodedStmtState tc var (some stmt)
+  match PartrecToTM2Support.stackNameCode k with
+  | 0 => []
+  | 1 =>
+      sameWriteMoveRows start (stackShiftTravelState tc var stmt carry 1) Move.right
+  | 2 =>
+      sameWriteMoveRows start (stackShiftTravelState tc var stmt carry 1) Move.right ++
+      sameWriteMoveRows (stackShiftTravelState tc var stmt carry 1)
+        (stackShiftTravelState tc var stmt carry 2) Move.right
+  | _ =>
+      sameWriteMoveRows start (stackShiftTravelState tc var stmt carry 1) Move.right ++
+      sameWriteMoveRows (stackShiftTravelState tc var stmt carry 1)
+        (stackShiftTravelState tc var stmt carry 2) Move.right ++
+      sameWriteMoveRows (stackShiftTravelState tc var stmt carry 2)
+        (stackShiftTravelState tc var stmt carry 3) Move.right
+
+set_option linter.flexible false in
+theorem stackShiftTravelRows_write_mem_symbols {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {k : Turing.PartrecToTM2.K'} {e : TableTransition}
+    (he : e ∈ stackShiftTravelRows tc var stmt carry k) :
+    e.write ∈ symbols := by
+  cases k <;>
+    simp [stackShiftTravelRows, PartrecToTM2Support.stackNameCode] at he
+  · exact sameWriteMoveRows_write_mem_symbols he
+  · rcases he with he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+  · rcases he with he | he | he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+    · exact sameWriteMoveRows_write_mem_symbols he
+
+set_option linter.flexible false in
+theorem stackShiftTravelRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Turing.PartrecToTM2.Stmt'} {carry : Option Turing.PartrecToTM2.Γ'}
+    {k : Turing.PartrecToTM2.K'} {e : TableTransition}
+    (he : e ∈ stackShiftTravelRows tc var stmt carry k)
+    (hstmt : some stmt ∈ PartrecToTM2Support.statementList tc) :
+    e.next ∈ states tc := by
+  cases k <;>
+    simp [stackShiftTravelRows, PartrecToTM2Support.stackNameCode] at he
+  · apply sameWriteMoveRows_next_mem_states he
+    exact stackShiftTravelState_mem_states hstmt (by decide : 1 < 4)
+  · rcases he with he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftTravelState_mem_states hstmt (by decide : 1 < 4)
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftTravelState_mem_states hstmt (by decide : 2 < 4)
+  · rcases he with he | he | he
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftTravelState_mem_states hstmt (by decide : 1 < 4)
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftTravelState_mem_states hstmt (by decide : 2 < 4)
+    · apply sameWriteMoveRows_next_mem_states he
+      exact stackShiftTravelState_mem_states hstmt (by decide : 3 < 4)
+
 /-- Return state after a `peek` read has moved one step left. -/
 noncomputable def peekReturnState (tc : Turing.ToPartrec.Code)
     (var : Option Turing.PartrecToTM2.Γ') (q : Turing.PartrecToTM2.Stmt')

@@ -33,7 +33,8 @@ the concrete definitions needed for the Berger/Robinson route:
   bounded `peek` row families with symbol/state well-formedness lemmas. It now
   assembles the implemented statement-row fragment for all supported substates;
   finite auxiliary states are also reserved for the remaining unbounded
-  stack-shifting rows for `push` and `pop`.
+  stack-shifting rows for `push` and `pop`, with bounded travel rows to the
+  selected stack column.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:
