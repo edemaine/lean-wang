@@ -76,9 +76,9 @@ Completed proof layers:
 - a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
   Mathlib list-based `Turing.ToPartrec.Code`, with a concrete
   `ToPartrecTM2Reduction` witness connecting Mathlib code evaluation to
-  `PartrecToTM2` halting. The TM2 theorem surfaces now have variants using this
-  concrete reduction, so they no longer require passing the code-to-TM2
-  reduction as an explicit parameter.
+  `PartrecToTM2` halting. This remains the semantic entry point into Mathlib's
+  machine translations; the obsolete direct TM2-to-table reduction surface has
+  been removed.
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
@@ -87,91 +87,10 @@ Completed proof layers:
   `Nat`-valued control-state indices for the start, halt, and supported label
   statements, plus one-step/reachable label-closure lemmas for runs starting
   from `PartrecToTM2.init tc [0]`.
-- finite `TableProgram` header data for the future `PartrecToTM2` table-machine
-  reduction: the raw symbol list, raw state list, blank/start/halt codes, and a
-  `programWithTable` constructor whose transition table remains to be filled.
-  The evaluator state space now pairs each statement substate with the finite
-  local variable `Option Γ'`, because Mathlib TM2 branches and stack reads
-  update or inspect this local variable; halted configurations still collapse
-  to the single table-machine halt state.
-- a concrete one-tape representation for `PartrecToTM2` configurations:
-  the four stacks are interleaved at positions `4 * i + stackNameCode k`, with
-  readback lemmas for each stack cell, and each supported TM2 configuration is
-  mapped to a `Machine.ID` using the finite control-state indices, including
-  the local variable in nonhalting evaluator states.
-- the table-machine header now reserves a separate blank-tape initialization
-  state, shifts TM2 evaluator substates by `+1`, and includes the first
-  initialization transition row that writes the fixed input `[0]` before
-  entering the evaluator start state, with a proved one-step `runEmpty`
-  theorem for any table beginning with this initialization row. The first-step
-  theorem is now connected to the stack-cell tape representation by readback
-  lemmas for all four initial stacks.
-- the one-tape `PartrecToTM2` representation now has an explicit
-  `RepresentsCfg` invariant tying a machine ID to the encoded TM2 state and
-  interleaved stack cells, plus a proof that the fixed initialization row
-  establishes this invariant for `PartrecToTM2.init tc [0]`.
-- the representation has been factored through `RepresentsSubstate`, which
-  covers intermediate Mathlib TM2 statement substates during the recursive
-  execution of `TM2.stepAux`. This is needed because non-stack statements such
-  as `load`, `branch`, `goto`, and `halt` are microsteps inside one TM2 step,
-  while stack actions require additional table-machine motion over the encoded
-  stacks.
-- the table layer now has generic stationary transition rows over all encoded
-  tape symbols. These rows write back the read symbol, keep the one-sided head
-  at `0`, and change only the finite control state, forming the base row family
-  for non-stack statement microsteps.
-- the stationary-row layer is now specialized to the four non-stack TM2
-  statement forms: `load`, `branch`, `goto`, and `halt`. Each row family has
-  finite row-membership lemmas and next-state support lemmas, plus a generic
-  preservation theorem showing that a stationary transition preserves
-  `RepresentsSubstate` while updating only the encoded local variable and
-  statement substate.
-- the non-stack row families now have program-level lookup and one-step
-  preservation lemmas. For a table containing just the corresponding row family,
-  `nextID` preserves `RepresentsSubstate` for `load`, `branch`, `goto`, and
-  `halt`, assuming the usual current-state-not-halt and target support facts.
-- the stack side now has representation-level `pushStack` and `popStack`
-  helpers matching Mathlib's `TM2.stepAux` stack updates, with readback lemmas
-  for the affected interleaved stack column and the untouched columns. These
-  are the stack-shift specifications that the future moving transition rows
-  must realize.
-- the finite table-machine state space now reserves auxiliary state codes after
-  the evaluator state block. The first reserved block is for `peek` stack
-  actions, indexed by local variable, originating statement substate, and one
-  of four stack-column offsets, with membership lemmas for offsets `0..3`.
-- the `peek` construction now assembles the complete bounded row family for
-  stack offsets `0..3`: same-write right moves to the target stack column,
-  decoded read rows that update the local variable from the observed top stack
-  cell, and same-write left return moves. The assembled row family has
-  symbol-write and next-state well-formedness lemmas.
-- the table layer now assembles the currently implemented statement-row
-  fragment across every finite local-variable value and every supported
-  statement substate. This fragment covers `load`, `branch`, `goto`, `halt`,
-  and bounded read-only `peek` actions, with generated-row symbol/state
-  well-formedness. The assembler deliberately leaves `push` and `pop` empty
-  until their unbounded stack-shifting microprograms are added.
-- the finite table-machine state space now also reserves an auxiliary block for
-  future `push`/`pop` stack-shifting microprograms, indexed by local variable,
-  originating statement, carried stack-cell symbol, finite phase, and one of
-  four stack-column offsets, with a membership lemma into the declared state
-  support.
-- the first reusable `push`/`pop` stack-shift row piece is in place: bounded
-  same-write travel rows move from head `0` to the selected stack column while
-  carrying a stack-cell value in finite control, with generated-row
-  symbol-write and next-state support lemmas.
-- the stack-shift loop now has a generic finite carry-write row primitive: at a
-  chosen control state, rows over every decoded stack-cell symbol write the
-  carried cell, expose the displaced cell to a next-state continuation, and
-  move one position right, with generated-row symbol-write and next-state
-  support lemmas.
-- stack-shift write/stride phases are now explicit. After a carry-write row
-  moves one position right, a three-row same-write stride advances through the
-  interleaved non-target columns and returns to the next cell of the same stack
-  in a finite write state carrying the displaced value.
-- the table alphabet now reserves a distinct boundary symbol in addition to the
-  five stack-cell symbols. This is needed for the unbounded `push`/`pop`
-  shifters: after scanning an arbitrary stack tail, the table machine needs a
-  detectable left boundary to return to the evaluator head at position `0`.
+- the abandoned direct `PartrecToTM2` table-machine construction has been
+  removed. The preferred machine-side proof now has one semantic route:
+  Mathlib code, to `ToPartrec.Code`, through Mathlib's TM2-to-TM1-to-TM0
+  translations, then into the local folded finite one-sided TM0 model.
 
 The remaining construction obligations are explicit Lean interfaces:
 
@@ -249,21 +168,19 @@ provides a local natural-number encoding, `Denumerable` instance, and hence
 `ToPartrecTM2Reduction` records a computable translation from unary
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
 this translation is now concretely proved in `NatPartrecToToPartrec`.
-`TM2TableCompiler` remains the older direct finite-machine reduction obligation.
-The preferred route now factors through a finite one-sided TM0 reduction: first
-use `TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
+The live route now factors through a finite one-sided TM0 reduction: first use
+`TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
 one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
-should treat it as the mathematical reduction. A separate legacy
+should treat it as the mathematical reduction. A separate compatibility
 `FiniteTM0TableReduction` bridge feeds the current table-machine Wang-tile layer
 until that layer is replaced by direct finite-TM0 tiles. Together these pieces
-produce a
-`TableCompiler`, and the fixed-domino, fixed-corner, encoded scaffolded domino,
-and unencoded scaffolded domino theorem surfaces now have direct corollaries
-from both the direct TM2 factorization and the finite-TM0 factorization using the
-concrete code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is
-now proved concretely by `startedTM2ToPartrecReduction`.
+produce a `TableCompiler`, and the fixed-domino, fixed-corner, encoded
+scaffolded domino, and unencoded scaffolded domino theorem surfaces now have
+direct corollaries from the finite-TM0 factorization using the concrete
+code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is now proved
+concretely by `startedTM2ToPartrecReduction`.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
 temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
