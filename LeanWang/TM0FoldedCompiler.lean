@@ -2548,6 +2548,33 @@ theorem FoldedConfigRel_move_step
       using FoldedTapeRel_move (T := cfg.Tape) (side := side)
       (head := id.head) (tape := id.tape) dir htape
 
+theorem FoldedConfigRel_step
+    {tc : Turing.ToPartrec.Code}
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    (hrel : FoldedConfigRel tc cfg id)
+    (hstep :
+      Turing.TM0.step (TM0Route.partrecStartedTM0Machine tc) cfg = some cfg') :
+    FoldedConfigRel tc cfg' ((program tc).nextID id) := by
+  cases hM :
+      TM0Route.partrecStartedTM0Machine tc cfg.q cfg.Tape.head with
+  | none =>
+      simp [Turing.TM0.step, hM] at hstep
+  | some next =>
+      rcases next with ⟨q', stmt⟩
+      cases stmt with
+      | move dir =>
+          have hcfg' : cfg' = { q := q', Tape := cfg.Tape.move dir } := by
+            simpa [Turing.TM0.step, hM] using hstep.symm
+          subst cfg'
+          exact FoldedConfigRel_move_step (tc := tc) (cfg := cfg) (id := id)
+            (q' := q') (dir := dir) hrel hM
+      | write new =>
+          have hcfg' : cfg' = { q := q', Tape := cfg.Tape.write new } := by
+            simpa [Turing.TM0.step, hM] using hstep.symm
+          subst cfg'
+          exact FoldedConfigRel_write_step (tc := tc) (cfg := cfg) (id := id)
+            (q' := q') (new := new) hrel hM
+
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
     (hrel : FoldedConfigRel tc cfg id) :
