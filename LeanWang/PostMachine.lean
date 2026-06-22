@@ -1637,6 +1637,127 @@ theorem toTableProgram_toMachine_haltsEmpty_of_haltsEmpty
       simp [tableIDOfPostID_state_halt hhalt, toTableProgram_halt]⟩
   · exact hhalts
 
+/-- Table configurations reachable while simulating a nonhalting Post run. -/
+def TableRunRel (P : PostProgram) (id : ID) : Prop :=
+  (∃ n : Nat, id = tableIDOfPostID (P.runEmpty n)) ∨
+    ∃ n q q' b : Nat,
+      (P.runEmpty n).state = some q ∧
+        P.step q ((P.runEmpty n).tape (P.runEmpty n).head) =
+          some (q', PostStmt.write b) ∧
+        id =
+          { tape := Function.update (P.runEmpty n).tape (P.runEmpty n).head b
+            head := (P.runEmpty n).head + 1
+            state := tableWriteState q' }
+
+theorem tableRunRel_initial (P : PostProgram) :
+    TableRunRel P P.toTableProgram.toMachine.initialID := by
+  left
+  refine ⟨0, ?_⟩
+  ext i <;> simp [Machine.initialID, PostProgram.runEmpty_zero,
+    PostProgram.initialID, tableIDOfPostID]
+
+theorem tableRunRel_state_ne_halt_of_not_halts
+    {P : PostProgram} {id : ID}
+    (hnot : ¬ P.HaltsEmpty) (hrel : TableRunRel P id) :
+    id.state ≠ P.toTableProgram.toMachine.halt := by
+  rcases hrel with ⟨n, hid⟩ | ⟨n, q, q', b, hstate, hstep, hid⟩
+  · have hnotState : (P.runEmpty n).state ≠ none := by
+      intro hhalt
+      exact hnot ⟨n, hhalt⟩
+    cases hrun : (P.runEmpty n).state with
+    | none =>
+        exact False.elim (hnotState hrun)
+    | some q =>
+        rw [hid]
+        simp [tableIDOfPostID_state_running hrun, toTableProgram_halt,
+          (tableHalt_ne_tableRunState q).symm]
+  · rw [hid]
+    simp [toTableProgram_halt, (tableHalt_ne_tableWriteState q').symm]
+
+theorem tableRunRel_next_of_not_halts
+    {P : PostProgram} {id : ID}
+    (hnot : ¬ P.HaltsEmpty) (hrel : TableRunRel P id) :
+    TableRunRel P (P.toTableProgram.toMachine.nextID id) := by
+  rcases hrel with ⟨n, hid⟩ | ⟨n, q, q', b, hstate, hstep, hid⟩
+  · let c := P.runEmpty n
+    have hnotState : c.state ≠ none := by
+      intro hhalt
+      exact hnot ⟨n, by simpa [c] using hhalt⟩
+    cases hstate : c.state with
+    | none =>
+        exact False.elim (hnotState hstate)
+    | some q =>
+        cases hstep : P.step q (c.tape c.head) with
+        | none =>
+            have hnextHalt : (P.runEmpty (n + 1)).state = none := by
+              rw [runEmpty_succ]
+              change (P.nextID c).state = none
+              rw [nextID_of_running hstate]
+              simp [hstep]
+            exact False.elim (hnot ⟨n + 1, hnextHalt⟩)
+        | some step =>
+            rcases step with ⟨q', stmt⟩
+            cases stmt with
+            | move m =>
+                left
+                refine ⟨n + 1, ?_⟩
+                rw [hid, runEmpty_succ]
+                change
+                  P.toTableProgram.toMachine.nextID (tableIDOfPostID c) =
+                    tableIDOfPostID (P.nextID c)
+                exact toTableProgram_toMachine_nextID_of_post_move_exact
+                  (P := P) (c := c) hstate hstep
+            | write b =>
+                right
+                refine ⟨n, q, q', b, ?_, ?_, ?_⟩
+                · simpa [c] using hstate
+                · simpa [c] using hstep
+                · rw [hid]
+                  exact toTableProgram_toMachine_nextID_of_post_write_start
+                    (P := P) (c := c) hstate hstep
+  · left
+    refine ⟨n + 1, ?_⟩
+    rw [hid, runEmpty_succ]
+    have hb : b ∈ tableSupportedSymbols P :=
+      symbol_mem_tableSupportedSymbols (symbol_mem_of_step_eq_some_write hstep)
+    have hret :
+        (Function.update (P.runEmpty n).tape (P.runEmpty n).head b)
+            ((P.runEmpty n).head + 1) ∈ tableSupportedSymbols P :=
+      tapeSupported_update (runEmpty_tapeSupported P n) hb ((P.runEmpty n).head + 1)
+    rw [toTableProgram_toMachine_nextID_of_post_write_return
+      (P := P) (q := q) (a := (P.runEmpty n).tape (P.runEmpty n).head)
+      (b := b) hstep hret]
+    rw [nextID_of_running hstate]
+    simp [hstep, applyStmt, tableIDOfPostID]
+
+theorem tableRunRel_runEmpty_of_not_halts
+    {P : PostProgram} (hnot : ¬ P.HaltsEmpty) (t : Nat) :
+    TableRunRel P (P.toTableProgram.toMachine.runEmpty t) := by
+  induction t with
+  | zero =>
+      simpa [Machine.runEmpty_zero] using tableRunRel_initial P
+  | succ t ih =>
+      rw [Machine.runEmpty_succ]
+      exact tableRunRel_next_of_not_halts hnot ih
+
+theorem not_toTableProgram_toMachine_haltsEmpty_of_not_haltsEmpty
+    {P : PostProgram} (hnot : ¬ P.HaltsEmpty) :
+    ¬ P.toTableProgram.toMachine.HaltsEmpty := by
+  rintro ⟨t, hhalt⟩
+  have hrel := tableRunRel_runEmpty_of_not_halts hnot t
+  exact tableRunRel_state_ne_halt_of_not_halts hnot hrel hhalt
+
+theorem haltsEmpty_of_toTableProgram_toMachine_haltsEmpty
+    {P : PostProgram} (h : P.toTableProgram.toMachine.HaltsEmpty) :
+    P.HaltsEmpty := by
+  by_contra hnot
+  exact not_toTableProgram_toMachine_haltsEmpty_of_not_haltsEmpty hnot h
+
+theorem toTableProgram_toMachine_haltsEmpty_iff (P : PostProgram) :
+    P.toTableProgram.toMachine.HaltsEmpty ↔ P.HaltsEmpty :=
+  ⟨haltsEmpty_of_toTableProgram_toMachine_haltsEmpty,
+    toTableProgram_toMachine_haltsEmpty_of_haltsEmpty⟩
+
 end PostProgram
 
 /-- Preferred name for the local one-sided TM0 instruction syntax. -/
