@@ -90,8 +90,15 @@ end FoldSide
 def foldSideList : List FoldSide :=
   [FoldSide.left, FoldSide.right]
 
+theorem foldSideList_nodup : foldSideList.Nodup := by
+  simp [foldSideList]
+
 theorem mem_foldSideList (s : FoldSide) : s ∈ foldSideList := by
   cases s <;> simp [foldSideList]
+
+instance instFintypeFoldSide : Fintype FoldSide where
+  elems := ⟨foldSideList, foldSideList_nodup⟩
+  complete := mem_foldSideList
 
 /--
 Code a folded tape cell.
@@ -135,6 +142,13 @@ theorem foldedSymbolCode_eq {marked marked' : Bool} {left right left' right' : S
   cases hp
   exact ⟨rfl, rfl, rfl⟩
 
+theorem foldedSymbolCode_primrec :
+    Primrec (fun p : Bool × SourceSymbol × SourceSymbol =>
+      foldedSymbolCode p.1 p.2.1 p.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : Bool × SourceSymbol × SourceSymbol =>
+    foldedSymbolCode p.1 p.2.1 p.2.2)
+
 def foldedSymbolList : List Nat :=
   [false, true].flatMap fun marked =>
     TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
@@ -160,6 +174,10 @@ theorem foldedBlank_mem_symbols : foldedBlank ∈ foldedSymbolList := by
 def foldedOriginSymbol (a : SourceSymbol) : Nat :=
   foldedSymbolCode true default a
 
+theorem foldedOriginSymbol_primrec : Primrec foldedOriginSymbol := by
+  classical
+  exact Primrec.dom_finite foldedOriginSymbol
+
 theorem foldedOriginSymbol_mem_symbols (a : SourceSymbol) :
     foldedOriginSymbol a ∈ foldedSymbolList := by
   unfold foldedOriginSymbol
@@ -170,15 +188,36 @@ def foldedRead (side : FoldSide) (left right : SourceSymbol) : SourceSymbol :=
   | FoldSide.left => left
   | FoldSide.right => right
 
+theorem foldedRead_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol =>
+      foldedRead p.1 p.2.1 p.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol =>
+    foldedRead p.1 p.2.1 p.2.2)
+
 def foldedWrite (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   match side with
   | FoldSide.left => foldedSymbolCode false new right
   | FoldSide.right => foldedSymbolCode false left new
 
+theorem foldedWrite_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+    foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2)
+
 def foldedWriteMarked (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   match side with
   | FoldSide.left => foldedSymbolCode true new right
   | FoldSide.right => foldedSymbolCode true left new
+
+theorem foldedWriteMarked_primrec :
+    Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+      foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  classical
+  exact Primrec.dom_finite (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
+    foldedWriteMarked p.1 p.2.1 p.2.2.1 p.2.2.2)
 
 theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
     foldedWrite side new left right ∈ foldedSymbolList := by

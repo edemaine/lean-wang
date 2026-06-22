@@ -412,6 +412,45 @@ theorem partrecStartedTM0StackVector_ext
   funext k
   cases k <;> rfl
 
+def partrecStartedTM0StackVectorToTuple
+    (v : ∀ k : PartrecStack, Option (PartrecStackSymbol k)) :
+    Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' ×
+      Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' :=
+  (v Turing.PartrecToTM2.K'.main, v Turing.PartrecToTM2.K'.rev,
+    v Turing.PartrecToTM2.K'.aux, v Turing.PartrecToTM2.K'.stack)
+
+def partrecStartedTM0StackVectorOfTuple
+    (p : Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' ×
+      Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ') :
+    ∀ k : PartrecStack, Option (PartrecStackSymbol k) :=
+  partrecStartedTM0StackVector p.1 p.2.1 p.2.2.1 p.2.2.2
+
+def partrecStartedTM0StackVectorEquivTuple :
+    (∀ k : PartrecStack, Option (PartrecStackSymbol k)) ≃
+      Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' ×
+        Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' where
+  toFun := partrecStartedTM0StackVectorToTuple
+  invFun := partrecStartedTM0StackVectorOfTuple
+  left_inv := by
+    intro v
+    exact partrecStartedTM0StackVector_ext v
+  right_inv := by
+    intro p
+    rcases p with ⟨main, rev, aux, stack⟩
+    rfl
+
+instance instPrimcodablePartrecStartedTM0StackVector :
+    Primcodable (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
+  Primcodable.ofEquiv
+    (Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' ×
+      Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ')
+    partrecStartedTM0StackVectorEquivTuple
+
+instance instPrimcodablePartrecStartedTM0Symbol :
+    Primcodable (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
+  inferInstanceAs (Primcodable
+    (Bool × (∀ k : PartrecStack, Option (PartrecStackSymbol k))))
+
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVectors :
     List (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
@@ -497,6 +536,11 @@ theorem partrecStartedTM0StackVectorCode_injective :
   · exact PartrecToTM2Support.tapeSymbolCode_injective haux
   · exact PartrecToTM2Support.tapeSymbolCode_injective hstack
 
+theorem partrecStartedTM0StackVectorCode_primrec :
+    Primrec partrecStartedTM0StackVectorCode := by
+  classical
+  exact Primrec.dom_finite partrecStartedTM0StackVectorCode
+
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
@@ -516,6 +560,11 @@ theorem partrecStartedTM0SymbolCode_injective :
   cases hbool
   cases hvec
   rfl
+
+theorem partrecStartedTM0SymbolCode_primrec :
+    Primrec partrecStartedTM0SymbolCode := by
+  classical
+  exact Primrec.dom_finite partrecStartedTM0SymbolCode
 
 /-- Numeric alphabet for the translated TM0 route, suitable for `FiniteTM0Program`. -/
 def partrecStartedTM0Symbols : List Nat :=

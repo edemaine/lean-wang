@@ -42,6 +42,36 @@ theorem stackNames_nodup : stackNames.Nodup := by
 theorem mem_stackNames (k : K') : k ∈ stackNames := by
   cases k <;> simp [stackNames]
 
+instance instFintypePartrecToTM2StackName : Fintype K' where
+  elems := ⟨stackNames, stackNames_nodup⟩
+  complete := mem_stackNames
+
+def stackNameToBits : K' → Bool × Bool
+  | K'.main => (false, false)
+  | K'.rev => (false, true)
+  | K'.aux => (true, false)
+  | K'.stack => (true, true)
+
+def stackNameOfBits : Bool × Bool → K'
+  | (false, false) => K'.main
+  | (false, true) => K'.rev
+  | (true, false) => K'.aux
+  | (true, true) => K'.stack
+
+def stackNameEquivBits : K' ≃ Bool × Bool where
+  toFun := stackNameToBits
+  invFun := stackNameOfBits
+  left_inv := by
+    intro k
+    cases k <;> rfl
+  right_inv := by
+    intro bits
+    rcases bits with ⟨b₀, b₁⟩
+    cases b₀ <;> cases b₁ <;> rfl
+
+instance instPrimcodablePartrecToTM2StackName : Primcodable K' :=
+  Primcodable.ofEquiv (Bool × Bool) stackNameEquivBits
+
 /-- Numeric code for a `PartrecToTM2` stack name. -/
 def stackNameCode : K' → Nat
   | K'.main => 0
@@ -55,6 +85,10 @@ theorem stackNameCode_lt_four (k : K') : stackNameCode k < 4 := by
 theorem stackNameCode_injective : Function.Injective stackNameCode := by
   intro a b h
   cases a <;> cases b <;> simp [stackNameCode] at h ⊢
+
+theorem stackNameCode_primrec : Primrec stackNameCode := by
+  classical
+  exact Primrec.dom_finite stackNameCode
 
 /-- The finite stack alphabet used by Mathlib's `PartrecToTM2` evaluator. -/
 def stackAlphabet : Finset Γ' :=
@@ -73,6 +107,32 @@ theorem mem_stackAlphabetList (a : Γ') : a ∈ stackAlphabetList := by
 theorem stackAlphabetList_nodup : stackAlphabetList.Nodup := by
   exact Finset.nodup_toList stackAlphabet
 
+def stackSymbolToBits : Γ' → Bool × Bool
+  | Γ'.consₗ => (false, false)
+  | Γ'.cons => (false, true)
+  | Γ'.bit0 => (true, false)
+  | Γ'.bit1 => (true, true)
+
+def stackSymbolOfBits : Bool × Bool → Γ'
+  | (false, false) => Γ'.consₗ
+  | (false, true) => Γ'.cons
+  | (true, false) => Γ'.bit0
+  | (true, true) => Γ'.bit1
+
+def stackSymbolEquivBits : Γ' ≃ Bool × Bool where
+  toFun := stackSymbolToBits
+  invFun := stackSymbolOfBits
+  left_inv := by
+    intro a
+    cases a <;> rfl
+  right_inv := by
+    intro bits
+    rcases bits with ⟨b₀, b₁⟩
+    cases b₀ <;> cases b₁ <;> rfl
+
+instance instPrimcodablePartrecToTM2StackSymbol : Primcodable Γ' :=
+  Primcodable.ofEquiv (Bool × Bool) stackSymbolEquivBits
+
 /-- Numeric code for a `PartrecToTM2` stack symbol. -/
 def stackSymbolCode : Γ' → Nat
   | Γ'.consₗ => 0
@@ -86,6 +146,10 @@ theorem stackSymbolCode_lt_four (a : Γ') : stackSymbolCode a < 4 := by
 theorem stackSymbolCode_injective : Function.Injective stackSymbolCode := by
   intro a b h
   cases a <;> cases b <;> simp [stackSymbolCode] at h ⊢
+
+theorem stackSymbolCode_primrec : Primrec stackSymbolCode := by
+  classical
+  exact Primrec.dom_finite stackSymbolCode
 
 /--
 Numeric tape symbol code for a `PartrecToTM2` stack cell.
@@ -116,6 +180,10 @@ theorem tapeSymbolCode_injective : Function.Injective tapeSymbolCode := by
               simpa [tapeSymbolCode] using h
             omega
           exact congrArg some (stackSymbolCode_injective hcode)
+
+theorem tapeSymbolCode_primrec : Primrec tapeSymbolCode := by
+  classical
+  exact Primrec.dom_finite tapeSymbolCode
 
 /-- Finite tape alphabet needed to store blank cells and stack symbols. -/
 def tapeSymbols : List Nat :=
