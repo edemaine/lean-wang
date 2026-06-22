@@ -27,7 +27,7 @@ the concrete definitions needed for the Berger/Robinson route:
 - `LeanWang.PartrecToTM2Table`: finite `TableProgram` header data and the
   one-tape configuration representation for the eventual `PartrecToTM2`
   table-machine reduction, including intermediate statement substates and
-  stationary rows for non-stack microsteps.
+  stationary row families for `load`, `branch`, `goto`, and `halt` microsteps.
 - `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
 
 Current build:

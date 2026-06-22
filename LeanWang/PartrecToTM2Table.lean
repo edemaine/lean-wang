@@ -307,6 +307,18 @@ theorem RepresentsCfg.state_mem_states {tc : Turing.ToPartrec.Code}
   rw [h.2.1]
   exact encodedState_mem_states hlabel
 
+theorem RepresentsSubstate.tape_head_mem_symbols {tc : Turing.ToPartrec.Code}
+    {id : ID} {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (h : RepresentsSubstate tc id var stmt stk) :
+    id.tape id.head ∈ symbols := by
+  have htape := h.2.2 Turing.PartrecToTM2.K'.main 0
+  rw [h.1]
+  rw [show (0 : Nat) = stackCellPos Turing.PartrecToTM2.K'.main 0 by rfl]
+  rw [htape]
+  exact stackCellSymbol_mem_symbols ((stk Turing.PartrecToTM2.K'.main)[0]?)
+
 theorem encodedTape_init_main_zero (tc : Turing.ToPartrec.Code) :
     encodedTape (Turing.PartrecToTM2.init tc [0])
       (stackCellPos Turing.PartrecToTM2.K'.main 0) =
@@ -444,6 +456,135 @@ theorem toMachine_nextID_of_stationaryTransition {P : TableProgram} {id : ID}
         by_cases hi : i = 0 <;> simp [hi]
       · simp [Move.apply]
 
+theorem toMachine_nextID_stationary_representsSubstate
+    {P : TableProgram} {tc : Turing.ToPartrec.Code} {id : ID}
+    {var nextVar : Option Turing.PartrecToTM2.Γ'}
+    {stmt nextStmt : Option Turing.PartrecToTM2.Stmt'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    (hrep : RepresentsSubstate tc id var stmt stk)
+    (hstate : id.state ≠ P.halt)
+    (hfind :
+      P.toTableMachine.transition? id.state (id.tape id.head) =
+        some (stationaryTransition id.state (id.tape id.head)
+          (encodedStmtState tc nextVar nextStmt)))
+    (hread : id.tape id.head ∈ P.supportedSymbols)
+    (hnext : encodedStmtState tc nextVar nextStmt ∈ P.supportedStates) :
+    RepresentsSubstate tc (P.toMachine.nextID id) nextVar nextStmt stk := by
+  rw [toMachine_nextID_of_stationaryTransition hrep.1 hstate hfind hread hnext]
+  constructor
+  · rfl
+  constructor
+  · rfl
+  · exact hrep.2.2
+
+/-- Stationary rows for a TM2 `load` microstep. -/
+noncomputable def loadRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (a : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ')
+    (q : Turing.PartrecToTM2.Stmt') : List TableTransition :=
+  stationaryRows
+    (encodedStmtState tc var (some (Turing.TM2.Stmt.load a q)))
+    (encodedStmtState tc (a var) (some q))
+
+theorem loadTransition_mem_loadRows {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {a : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'} {read : Nat}
+    (hread : read ∈ symbols) :
+    stationaryTransition
+        (encodedStmtState tc var (some (Turing.TM2.Stmt.load a q))) read
+        (encodedStmtState tc (a var) (some q)) ∈
+      loadRows tc var a q :=
+  stationaryTransition_mem_stationaryRows hread
+
+theorem loadRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {a : Option Turing.PartrecToTM2.Γ' → Option Turing.PartrecToTM2.Γ'}
+    {q : Turing.PartrecToTM2.Stmt'}
+    (hq : some q ∈ PartrecToTM2Support.statementList tc) :
+    encodedStmtState tc (a var) (some q) ∈ states tc :=
+  encodedStmtState_mem_states hq
+
+/-- Stationary rows for a TM2 `branch` microstep. -/
+noncomputable def branchRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (p : Option Turing.PartrecToTM2.Γ' → Bool)
+    (q₁ q₂ : Turing.PartrecToTM2.Stmt') : List TableTransition :=
+  stationaryRows
+    (encodedStmtState tc var (some (Turing.TM2.Stmt.branch p q₁ q₂)))
+    (encodedStmtState tc var (some (cond (p var) q₁ q₂)))
+
+theorem branchTransition_mem_branchRows {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {p : Option Turing.PartrecToTM2.Γ' → Bool}
+    {q₁ q₂ : Turing.PartrecToTM2.Stmt'} {read : Nat}
+    (hread : read ∈ symbols) :
+    stationaryTransition
+        (encodedStmtState tc var (some (Turing.TM2.Stmt.branch p q₁ q₂))) read
+        (encodedStmtState tc var (some (cond (p var) q₁ q₂))) ∈
+      branchRows tc var p q₁ q₂ :=
+  stationaryTransition_mem_stationaryRows hread
+
+theorem branchRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {p : Option Turing.PartrecToTM2.Γ' → Bool}
+    {q₁ q₂ : Turing.PartrecToTM2.Stmt'}
+    (hq₁ : some q₁ ∈ PartrecToTM2Support.statementList tc)
+    (hq₂ : some q₂ ∈ PartrecToTM2Support.statementList tc) :
+    encodedStmtState tc var (some (cond (p var) q₁ q₂)) ∈ states tc := by
+  by_cases hp : p var = true
+  · simpa [hp] using encodedStmtState_mem_states (tc := tc) (var := var) hq₁
+  · have hpfalse : p var = false := by
+      cases h : p var <;> simp [h] at hp ⊢
+    simpa [hpfalse] using encodedStmtState_mem_states (tc := tc) (var := var) hq₂
+
+/-- Stationary rows for a TM2 `goto` microstep. -/
+noncomputable def gotoRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ')
+    (f : Option Turing.PartrecToTM2.Γ' → Turing.PartrecToTM2.Λ') :
+    List TableTransition :=
+  stationaryRows
+    (encodedStmtState tc var (some (Turing.TM2.Stmt.goto f)))
+    (encodedStmtState tc var (cfgStmt (some (f var))))
+
+theorem gotoTransition_mem_gotoRows {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Turing.PartrecToTM2.Λ'} {read : Nat}
+    (hread : read ∈ symbols) :
+    stationaryTransition
+        (encodedStmtState tc var (some (Turing.TM2.Stmt.goto f))) read
+        (encodedStmtState tc var (cfgStmt (some (f var)))) ∈
+      gotoRows tc var f :=
+  stationaryTransition_mem_stationaryRows hread
+
+theorem gotoRows_next_mem_states {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'}
+    {f : Option Turing.PartrecToTM2.Γ' → Turing.PartrecToTM2.Λ'}
+    (hf : f var ∈ PartrecToTM2Support.labels tc) :
+    encodedStmtState tc var (cfgStmt (some (f var))) ∈ states tc := by
+  simpa [cfgStmt, encodedStmtState] using labelState_mem_states (var := var) hf
+
+/-- Stationary rows for a TM2 `halt` microstep. -/
+noncomputable def haltRows (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') : List TableTransition :=
+  stationaryRows
+    (encodedStmtState tc var (some (Turing.TM2.Stmt.halt)))
+    (encodedStmtState tc var none)
+
+theorem haltTransition_mem_haltRows {tc : Turing.ToPartrec.Code}
+    {var : Option Turing.PartrecToTM2.Γ'} {read : Nat}
+    (hread : read ∈ symbols) :
+    stationaryTransition
+        (encodedStmtState tc var (some (Turing.TM2.Stmt.halt))) read
+        (encodedStmtState tc var none) ∈
+      haltRows tc var :=
+  stationaryTransition_mem_stationaryRows hread
+
+theorem haltRows_next_mem_states (tc : Turing.ToPartrec.Code)
+    (var : Option Turing.PartrecToTM2.Γ') :
+    encodedStmtState tc var none ∈ states tc := by
+  exact haltState_mem_states tc
+
 /--
 First transition row for the future TM2-to-table reduction/compiler.
 
@@ -556,6 +697,16 @@ theorem programWithTable_halt_mem_states (tc : Turing.ToPartrec.Code)
     (table : List TableTransition) :
     (programWithTable tc table).halt ∈ (programWithTable tc table).states := by
   exact haltState_mem_states tc
+
+theorem RepresentsSubstate.tape_head_mem_supportedSymbols {tc : Turing.ToPartrec.Code}
+    {id : ID} {var : Option Turing.PartrecToTM2.Γ'}
+    {stmt : Option Turing.PartrecToTM2.Stmt'}
+    {stk : ∀ _k : Turing.PartrecToTM2.K', List Turing.PartrecToTM2.Γ'}
+    {table : List TableTransition}
+    (h : RepresentsSubstate tc id var stmt stk) :
+    id.tape id.head ∈ (programWithTable tc table).supportedSymbols := by
+  change id.tape id.head ∈ blankSymbol :: symbols
+  exact List.mem_cons_of_mem blankSymbol h.tape_head_mem_symbols
 
 /-- Header plus the fixed first initialization row. -/
 noncomputable def programWithInitTable (tc : Turing.ToPartrec.Code)

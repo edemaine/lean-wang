@@ -120,6 +120,12 @@ Completed proof layers:
   tape symbols. These rows write back the read symbol, keep the one-sided head
   at `0`, and change only the finite control state, forming the base row family
   for non-stack statement microsteps.
+- the stationary-row layer is now specialized to the four non-stack TM2
+  statement forms: `load`, `branch`, `goto`, and `halt`. Each row family has
+  finite row-membership lemmas and next-state support lemmas, plus a generic
+  preservation theorem showing that a stationary transition preserves
+  `RepresentsSubstate` while updating only the encoded local variable and
+  statement substate.
 
 The remaining construction obligations are explicit Lean interfaces:
 
