@@ -757,6 +757,161 @@ def simRowOfStepCode
         (foldedSimStateOfCode (foldedMoveNextSide side marked dir) q'Code)
         (foldedMoveStmt side marked read dir)
 
+set_option maxHeartbeats 800000 in
+-- The nested product selectors in this row-level primitive-recursive proof take
+-- longer than the default heartbeat budget to elaborate.
+theorem simRowOfStepCode_primrec :
+    Primrec (fun p : FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+        Turing.TM0.Stmt SourceSymbol =>
+      simRowOfStepCode p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2.1
+        p.2.2.2.2.2.1 p.2.2.2.2.2.2) := by
+  let readFn :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → Nat := fun p =>
+    foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1
+  let currentState :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → Nat := fun p =>
+    foldedSimStateOfCode p.1 p.2.2.1
+  let q'CodeFn :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → Nat := fun p =>
+    p.2.2.2.1
+  let leftFn :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → SourceSymbol := fun p =>
+    p.2.2.2.2.1
+  let rightFn :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → SourceSymbol := fun p =>
+    p.2.2.2.2.2.1
+  let stmtSum :
+      FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+          Turing.TM0.Stmt SourceSymbol → Turing.Dir ⊕ SourceSymbol := fun p =>
+    tm0StmtToSum p.2.2.2.2.2.2
+  have hmarked : Primrec (fun p : FoldSide × Bool × Nat × Nat × SourceSymbol ×
+      SourceSymbol × Turing.TM0.Stmt SourceSymbol => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  have hleft : Primrec leftFn :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+      Primrec.snd)))
+  have hright : Primrec rightFn :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+      (Primrec.snd.comp Primrec.snd))))
+  have hstmtSum : Primrec stmtSum :=
+    tm0StmtToSum_primrec.comp
+      (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+        (Primrec.snd.comp Primrec.snd)))))
+  have hread : Primrec readFn := by
+    exact foldedSymbolCode_primrec.comp
+      (Primrec.pair hmarked (Primrec.pair hleft hright))
+  have hcurrent : Primrec currentState := by
+    exact foldedSimStateOfCode_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)))
+  have hq' : Primrec q'CodeFn :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+  have hwrite :
+      Primrec₂
+        (fun p : FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol =>
+          fun new : SourceSymbol =>
+            mkRow (foldedSimStateOfCode p.1 p.2.2.1)
+              (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1)
+              (foldedSimStateOfCode p.1 p.2.2.2.1)
+              (PostStmt.write
+                (foldedWriteForStmt p.1 p.2.1 new p.2.2.2.2.1 p.2.2.2.2.2.1))) := by
+    apply Primrec₂.mk
+    have hnew : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × SourceSymbol => p.2) :=
+      Primrec.snd
+    have hbase : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × SourceSymbol => p.1) :=
+      Primrec.fst
+    have hwriteSymbol : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × SourceSymbol =>
+          foldedWriteForStmt p.1.1 p.1.2.1 p.2 p.1.2.2.2.2.1 p.1.2.2.2.2.2.1) := by
+      exact foldedWriteForStmt_primrec.comp
+        (Primrec.pair (Primrec.fst.comp hbase)
+          (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp hbase))
+              (Primrec.pair hnew
+                (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                    (Primrec.snd.comp (Primrec.snd.comp hbase)))))
+                  (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                    (Primrec.snd.comp (Primrec.snd.comp hbase))))))))))
+    exact mkRow_primrec.comp
+      (Primrec.pair (hcurrent.comp hbase)
+        (Primrec.pair (hread.comp hbase)
+          (Primrec.pair
+            (foldedSimStateOfCode_primrec.comp
+              (Primrec.pair (Primrec.fst.comp hbase) (hq'.comp hbase)))
+            (postStmtWrite_primrec.comp hwriteSymbol))))
+  have hmove :
+      Primrec₂
+        (fun p : FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol =>
+          fun dir : Turing.Dir =>
+            mkRow (foldedSimStateOfCode p.1 p.2.2.1)
+              (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1)
+              (foldedSimStateOfCode (foldedMoveNextSide p.1 p.2.1 dir) p.2.2.2.1)
+              (foldedMoveStmt p.1 p.2.1
+                (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1) dir)) := by
+    apply Primrec₂.mk
+    have hdir : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × Turing.Dir => p.2) :=
+      Primrec.snd
+    have hbase : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × Turing.Dir => p.1) :=
+      Primrec.fst
+    have hnextSide : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × Turing.Dir =>
+          foldedMoveNextSide p.1.1 p.1.2.1 p.2) := by
+      exact foldedMoveNextSide_primrec.comp
+        (Primrec.pair (Primrec.fst.comp hbase)
+          (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp hbase)) hdir))
+    have hstmt : Primrec (fun p :
+        (FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+            Turing.TM0.Stmt SourceSymbol) × Turing.Dir =>
+          foldedMoveStmt p.1.1 p.1.2.1
+            (foldedSymbolCode p.1.2.1 p.1.2.2.2.2.1 p.1.2.2.2.2.2.1) p.2) := by
+      exact foldedMoveStmt_primrec.comp
+        (Primrec.pair (Primrec.fst.comp hbase)
+          (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp hbase))
+            (Primrec.pair (hread.comp hbase) hdir)))
+    exact mkRow_primrec.comp
+      (Primrec.pair (hcurrent.comp hbase)
+        (Primrec.pair (hread.comp hbase)
+          (Primrec.pair
+            (foldedSimStateOfCode_primrec.comp
+              (Primrec.pair hnextSide (hq'.comp hbase)))
+            hstmt)))
+  refine (Primrec.sumCasesOn
+    (α := FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+      Turing.TM0.Stmt SourceSymbol)
+    (β := Turing.Dir) (γ := SourceSymbol) (σ := PostTransition)
+    (f := stmtSum)
+    (g := fun p dir =>
+      mkRow (foldedSimStateOfCode p.1 p.2.2.1)
+        (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1)
+        (foldedSimStateOfCode (foldedMoveNextSide p.1 p.2.1 dir) p.2.2.2.1)
+        (foldedMoveStmt p.1 p.2.1
+          (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1) dir))
+    (h := fun p new =>
+      mkRow (foldedSimStateOfCode p.1 p.2.2.1)
+        (foldedSymbolCode p.2.1 p.2.2.2.2.1 p.2.2.2.2.2.1)
+        (foldedSimStateOfCode p.1 p.2.2.2.1)
+        (PostStmt.write
+          (foldedWriteForStmt p.1 p.2.1 new p.2.2.2.2.1 p.2.2.2.2.2.1)))
+    hstmtSum hmove hwrite).of_eq ?_
+  intro p
+  rcases p with ⟨side, marked, qCode, q'Code, left, right, stmt⟩
+  cases stmt <;> rfl
+
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
     (q q' : SourceLabel tc) (left right : SourceSymbol)
