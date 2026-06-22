@@ -107,6 +107,86 @@ theorem natAdd_eval (a b : Nat) :
       Nat.Primrec'.add
       v
 
+/-- Combine two singleton-valued codes into a two-element list. -/
+def listPair (f g : Code) : Code :=
+  cons f (cons g nil)
+
+theorem listPair_eval {f g : Code} {v : List Nat} {a b : Nat}
+    (hf : f.eval v = pure [a]) (hg : g.eval v = pure [b]) :
+    (listPair f g).eval v = pure [a, b] := by
+  simp [listPair, hf, hg]
+
+/-- Pair the singleton outputs of two codes using `Nat.pair`. -/
+def singletonPair (f g : Code) : Code :=
+  pairNat.comp (listPair f g)
+
+theorem singletonPair_eval {f g : Code} {v : List Nat} {a b : Nat}
+    (hf : f.eval v = pure [a]) (hg : g.eval v = pure [b]) :
+    (singletonPair f g).eval v = pure [Nat.pair a b] := by
+  simp [singletonPair, listPair_eval hf hg]
+
+/-- Convert a singleton encoded pair `[Nat.pair a b]` to the list `[b, a]`. -/
+def unpairListSwap : Code :=
+  listPair unpairRight unpairLeft
+
+@[simp]
+theorem unpairListSwap_eval (a b : Nat) :
+    unpairListSwap.eval [Nat.pair a b] = pure [b, a] := by
+  simp [unpairListSwap, listPair_eval]
+
+/-- Get the second element of the input list as a singleton, defaulting as Mathlib does. -/
+def second : Code :=
+  head.comp tail
+
+@[simp]
+theorem second_eval (a b : Nat) (v : List Nat) :
+    second.eval (a :: b :: v) = pure [b] := by
+  simp [second]
+
+/-- Get the third element of the input list as a singleton, defaulting as Mathlib does. -/
+def third : Code :=
+  head.comp (tail.comp tail)
+
+@[simp]
+theorem third_eval (a b c : Nat) (v : List Nat) :
+    third.eval (a :: b :: c :: v) = pure [c] := by
+  simp [third]
+
+/--
+Build the argument expected by the step function in `Nat.Partrec.Code.prec`.
+
+On input `[y, ih, a]`, this returns `[Nat.pair a (Nat.pair y ih)]`.
+-/
+def precStepArg : Code :=
+  singletonPair third (singletonPair head second)
+
+@[simp]
+theorem precStepArg_eval (y ih a : Nat) :
+    precStepArg.eval [y, ih, a] = pure [Nat.pair a (Nat.pair y ih)] := by
+  simp [precStepArg, singletonPair_eval]
+
+/-- Add the first two entries of the input list and return the singleton result. -/
+def addFirstSecond : Code :=
+  natAdd.comp (listPair head second)
+
+@[simp]
+theorem addFirstSecond_eval (a b : Nat) (v : List Nat) :
+    addFirstSecond.eval (a :: b :: v) = pure [a + b] := by
+  simp [addFirstSecond, listPair_eval]
+
+/--
+Build the test argument for the `Nat.Partrec.Code.rfind'` body.
+
+On input `[n, m, a]`, this returns `[Nat.pair a (n + m)]`.
+-/
+def rfindTestArg : Code :=
+  singletonPair third addFirstSecond
+
+@[simp]
+theorem rfindTestArg_eval (n m a : Nat) :
+    rfindTestArg.eval [n, m, a] = pure [Nat.pair a (n + m)] := by
+  simp [rfindTestArg, singletonPair_eval]
+
 end Code
 end ToPartrec
 end Turing
