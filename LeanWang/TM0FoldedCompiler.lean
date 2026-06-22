@@ -2304,6 +2304,90 @@ theorem foldedCellOfTapeAt_write_active (T : Turing.Tape SourceSymbol)
           (T.nth (sourceOffset FoldSide.right head (leftAbs head))) new
       rfl
 
+theorem sourceOffset_left_ne_zero_of_ne_head
+    (side : FoldSide) {head i : Nat} (h : i ≠ head) :
+    sourceOffset side head (leftAbs i) ≠ 0 := by
+  cases side
+  · simp [sourceOffset, activeAbs, leftAbs]
+    omega
+  · simp [sourceOffset, activeAbs, leftAbs, rightAbs]
+    omega
+
+theorem sourceOffset_right_ne_zero_of_ne_head
+    (side : FoldSide) {head i : Nat} (h : i ≠ head) :
+    sourceOffset side head (rightAbs i) ≠ 0 := by
+  cases side
+  · simp [sourceOffset, activeAbs, rightAbs, leftAbs]
+    omega
+  · simp [sourceOffset, activeAbs, rightAbs]
+    omega
+
+theorem foldedCellOfTapeAt_write_inactive (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) {head i : Nat} (new : SourceSymbol) (h : i ≠ head) :
+    foldedCellOfTapeAt (T.write new) side head i =
+      foldedCellOfTapeAt T side head i := by
+  have hleft := sourceOffset_left_ne_zero_of_ne_head side h
+  have hright := sourceOffset_right_ne_zero_of_ne_head side h
+  simp [foldedCellOfTapeAt, hleft, hright]
+
+theorem FoldedTapeRel_write
+    {T : Turing.Tape SourceSymbol} {side : FoldSide} {head : Nat} {tape : Nat → Nat}
+    (new : SourceSymbol)
+    (hrel : FoldedTapeRel T side head tape) :
+    FoldedTapeRel (T.write new) side head
+      (Function.update tape head
+        (foldedWriteForStmt side (decide (head = 0)) new
+          (T.nth (sourceOffset side head (leftAbs head)))
+          (T.nth (sourceOffset side head (rightAbs head))))) := by
+  intro i
+  by_cases hi : i = head
+  · subst i
+    simp [Function.update_self, foldedCellOfTapeAt_write_active]
+  · rw [Function.update_of_ne hi]
+    rw [hrel i]
+    exact (foldedCellOfTapeAt_write_inactive T side new hi).symm
+
+set_option linter.flexible false in
+theorem FoldedConfigRel_write_step
+    {tc : Turing.ToPartrec.Code}
+    {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}
+    {q' : SourceLabel tc} {new : SourceSymbol}
+    (hrel : FoldedConfigRel tc cfg id)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc cfg.q cfg.Tape.head =
+        some (q', Turing.TM0.Stmt.write new)) :
+    FoldedConfigRel tc
+      { q := q', Tape := cfg.Tape.write new }
+      ((program tc).nextID id) := by
+  rcases hrel with ⟨side, hq, hstate, htape⟩
+  let left := cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head))
+  let right := cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))
+  have hread :
+      foldedRead side left right = cfg.Tape.head := by
+    unfold left right
+    exact foldedRead_active_cell cfg.Tape side id.head
+  have hstep' :
+      TM0Route.partrecStartedTM0Machine tc cfg.q (foldedRead side left right) =
+        some (q', Turing.TM0.Stmt.write new) := by
+    simpa [hread] using hstep
+  have hcell :
+      id.tape id.head = foldedSymbolCode (decide (id.head = 0)) left right := by
+    rw [htape id.head]
+    simp [foldedCellOfTapeAt, left, right]
+  have hprogramStep := program_step_sim_of_step
+    (tc := tc) (q := cfg.q) (q' := q') (side := side)
+    (marked := decide (id.head = 0)) (left := left) (right := right)
+    (stmt := Turing.TM0.Stmt.write new) hq hstep'
+  simp [PostProgram.nextID, hstate, hcell, hprogramStep, PostProgram.applyStmt,
+    simRowOfStep, left, right]
+  refine ⟨side, ?_, rfl, ?_⟩
+  · have hqset : cfg.q ∈ TM0Route.partrecStartedTM0Labels tc :=
+      (TM0Route.mem_partrecStartedTM0LabelList tc cfg.q).1 hq
+    have hq'set : q' ∈ TM0Route.partrecStartedTM0Labels tc :=
+      TM0FiniteCompiler.next_label_mem_of_step hqset hstep
+    exact (TM0Route.mem_partrecStartedTM0LabelList tc q').2 hq'set
+  · exact FoldedTapeRel_write new htape
+
 theorem activeAbs_move_right_regular {head : Nat} (h : head ≠ 0) :
     activeAbs FoldSide.left (head - 1) =
       activeAbs FoldSide.left head + 1 := by
