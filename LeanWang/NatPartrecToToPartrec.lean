@@ -58,6 +58,21 @@ theorem rfindBody_eval_succ {test : Code} {n m a k : Nat}
     (rfindBody test).eval [n, m, a] = pure [1, n.succ, m, a] := by
   simp [rfindBody, htest]
 
+theorem rfindBody_fix_stop {test : Code} {n m a : Nat}
+    (htest : test.eval [Nat.pair a (n + m)] = pure [0]) :
+    [n, m, a] ∈ (Code.fix (rfindBody test)).eval [n, m, a] := by
+  rw [Turing.ToPartrec.Code.fix_eval]
+  refine PFun.fix_stop ?_
+  simp [rfindBody_eval_zero htest]
+
+theorem rfindBody_fix_fwd {test : Code} {n m a k : Nat} {v : List Nat}
+    (htest : test.eval [Nat.pair a (n + m)] = pure [k.succ])
+    (hnext : v ∈ (Code.fix (rfindBody test)).eval [n.succ, m, a]) :
+    v ∈ (Code.fix (rfindBody test)).eval [n, m, a] := by
+  rw [Turing.ToPartrec.Code.fix_eval] at hnext ⊢
+  refine PFun.mem_fix_iff.2 (Or.inr ⟨[n.succ, m, a], ?_, hnext⟩)
+  simp [rfindBody_eval_succ htest]
+
 /--
 Implementation of the `Nat.Partrec.Code.rfind'` constructor from a translated
 predicate.
