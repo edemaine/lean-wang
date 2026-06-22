@@ -2254,6 +2254,56 @@ theorem foldedRead_active_cell (T : Turing.Tape SourceSymbol)
       T.head := by
   cases side <;> simp [foldedRead, Turing.Tape.nth_zero]
 
+theorem sourceOffset_right_left_head_ne_zero (head : Nat) :
+    sourceOffset FoldSide.right head (leftAbs head) ≠ 0 := by
+  simp [sourceOffset, activeAbs, rightAbs, leftAbs]
+  omega
+
+theorem sourceOffset_left_right_head_ne_zero (head : Nat) :
+    sourceOffset FoldSide.left head (rightAbs head) ≠ 0 := by
+  simp [sourceOffset, activeAbs, rightAbs, leftAbs]
+  omega
+
+set_option linter.flexible false in
+set_option linter.unusedSimpArgs false in
+theorem foldedCellOfTapeAt_write_active (T : Turing.Tape SourceSymbol)
+    (side : FoldSide) (head : Nat) (new : SourceSymbol) :
+    foldedCellOfTapeAt (T.write new) side head head =
+      foldedWriteForStmt side (decide (head = 0)) new
+        (T.nth (sourceOffset side head (leftAbs head)))
+        (T.nth (sourceOffset side head (rightAbs head))) := by
+  cases side
+  · by_cases h : head = 0
+    · simp [foldedCellOfTapeAt, foldedWriteForStmt, foldedWrite, foldedWriteMarked,
+        sourceOffset_left_head, sourceOffset_left_right_head_ne_zero, h]
+      change foldedSymbolCode true new
+          (T.nth (sourceOffset FoldSide.left 0 (rightAbs 0))) =
+        foldedSymbolCode true new
+          (T.nth (sourceOffset FoldSide.left 0 (rightAbs 0)))
+      rfl
+    · simp [foldedCellOfTapeAt, foldedWriteForStmt, foldedWrite, foldedWriteMarked,
+        sourceOffset_left_head, sourceOffset_left_right_head_ne_zero, h]
+      change foldedSymbolCode false new
+          (T.nth (sourceOffset FoldSide.left head (rightAbs head))) =
+        foldedSymbolCode false new
+          (T.nth (sourceOffset FoldSide.left head (rightAbs head)))
+      rfl
+  · by_cases h : head = 0
+    · simp [foldedCellOfTapeAt, foldedWriteForStmt, foldedWrite, foldedWriteMarked,
+        sourceOffset_right_head, sourceOffset_right_left_head_ne_zero, h]
+      change foldedSymbolCode true
+          (T.nth (sourceOffset FoldSide.right 0 (leftAbs 0))) new =
+        foldedSymbolCode true
+          (T.nth (sourceOffset FoldSide.right 0 (leftAbs 0))) new
+      rfl
+    · simp [foldedCellOfTapeAt, foldedWriteForStmt, foldedWrite, foldedWriteMarked,
+        sourceOffset_right_head, sourceOffset_right_left_head_ne_zero, h]
+      change foldedSymbolCode false
+          (T.nth (sourceOffset FoldSide.right head (leftAbs head))) new =
+        foldedSymbolCode false
+          (T.nth (sourceOffset FoldSide.right head (leftAbs head))) new
+      rfl
+
 theorem activeAbs_move_right_regular {head : Nat} (h : head ≠ 0) :
     activeAbs FoldSide.left (head - 1) =
       activeAbs FoldSide.left head + 1 := by
