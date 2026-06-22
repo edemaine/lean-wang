@@ -391,6 +391,34 @@ theorem precG_fix_of_precRun {g : Code} {a i b ih x : Nat}
           (Part.eq_some_iff.2 hy) hnext
       simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hmem
 
+set_option linter.flexible false in
+theorem precRun_snoc {g : Code} {a i b ih y x : Nat}
+    (hrun : precRun g a i b ih y)
+    (hstep : [x] ∈ g.eval [i + b.succ, y, a]) :
+    precRun g a i b.succ ih x := by
+  induction b generalizing i ih with
+  | zero =>
+      simp [precRun] at hrun ⊢
+      exact ⟨y, hrun, by simpa [Nat.succ_eq_add_one] using hstep⟩
+  | succ b IH =>
+      simp [precRun] at hrun ⊢
+      rcases hrun with ⟨z, hz, hrest⟩
+      refine ⟨z, hz, ?_⟩
+      refine IH hrest ?_
+      simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstep
+
+set_option linter.flexible false in
+theorem prec_mem_of_precRun {f g : Code} {a k base x : Nat}
+    (hbase : f.eval [a] = pure [base])
+    (hrun : precRun g a 0 k base x) :
+    [x] ∈ (Code.prec f g).eval [k.succ, a] := by
+  have hfix : [k.succ, 0, x, a] ∈ (Code.fix (precG g)).eval [0, k, base, a] := by
+    simpa using precG_fix_of_precRun hrun
+  rw [Turing.ToPartrec.Code.fix_eval] at hfix
+  rw [prec_eq]
+  simp [hbase]
+  exact ⟨[k.succ, 0, x, a], hfix, by simp⟩
+
 end TCode
 
 open Turing.ToPartrec
@@ -590,6 +618,81 @@ theorem translates_precStepArg {cg : Nat.Partrec.Code}
       ∃ x : Nat, x ∈ Nat.Partrec.Code.eval cg (Nat.pair a (Nat.pair y ih)) ∧ v = [x] := by
   rw [Turing.ToPartrec.Code.comp_eval]
   simpa [Part.bind_eq_bind] using hg (Nat.pair a (Nat.pair y ih)) v
+
+theorem precRun_of_nat_prec_succ {cf cg : Nat.Partrec.Code}
+    (_hf : Translates cf (translate cf)) (hg : Translates cg (translate cg))
+    {a k base x : Nat}
+    (hbase : base ∈ Nat.Partrec.Code.eval cf a)
+    (hx : x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a k.succ)) :
+    TCode.precRun ((translate cg).comp Code.precStepArg) a 0 k base x := by
+  induction k generalizing x with
+  | zero =>
+      rw [Nat.Partrec.Code.eval_prec_succ] at hx
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hx
+      rcases hx with ⟨ih, hih, hxg⟩
+      have hih_base : ih = base := by
+        rw [Nat.Partrec.Code.eval_prec_zero] at hih
+        exact Part.mem_unique hih hbase
+      subst ih
+      change [x] ∈ (((translate cg).comp Code.precStepArg).eval [0, base, a])
+      exact (translates_precStepArg hg 0 base a [x]).2 ⟨x, hxg, rfl⟩
+  | succ k IH =>
+      rw [Nat.Partrec.Code.eval_prec_succ] at hx
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hx
+      rcases hx with ⟨ih, hih, hxg⟩
+      have hrun : TCode.precRun ((translate cg).comp Code.precStepArg) a 0 k base ih :=
+        IH hih
+      have hstep : [x] ∈ (((translate cg).comp Code.precStepArg).eval [0 + k.succ, ih, a]) := by
+        simpa using (translates_precStepArg hg k.succ ih a [x]).2 ⟨x, hxg, rfl⟩
+      exact TCode.precRun_snoc hrun hstep
+
+theorem exists_precRun_of_nat_prec_succ {cf cg : Nat.Partrec.Code}
+    (hg : Translates cg (translate cg)) {a k x : Nat}
+    (hx : x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a k.succ)) :
+    ∃ base : Nat, base ∈ Nat.Partrec.Code.eval cf a ∧
+      TCode.precRun ((translate cg).comp Code.precStepArg) a 0 k base x := by
+  induction k generalizing x with
+  | zero =>
+      rw [Nat.Partrec.Code.eval_prec_succ] at hx
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hx
+      rcases hx with ⟨base, hbase, hxg⟩
+      rw [Nat.Partrec.Code.eval_prec_zero] at hbase
+      refine ⟨base, hbase, ?_⟩
+      change [x] ∈ (((translate cg).comp Code.precStepArg).eval [0, base, a])
+      exact (translates_precStepArg hg 0 base a [x]).2 ⟨x, hxg, rfl⟩
+  | succ k IH =>
+      rw [Nat.Partrec.Code.eval_prec_succ] at hx
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff] at hx
+      rcases hx with ⟨ih, hih, hxg⟩
+      rcases IH hih with ⟨base, hbase, hrun⟩
+      refine ⟨base, hbase, ?_⟩
+      have hstep : [x] ∈ (((translate cg).comp Code.precStepArg).eval [0 + k.succ, ih, a]) := by
+        simpa using (translates_precStepArg hg k.succ ih a [x]).2 ⟨x, hxg, rfl⟩
+      exact TCode.precRun_snoc hrun hstep
+
+theorem translate_prec_mem_of_nat_eval {cf cg : Nat.Partrec.Code}
+    (hf : Translates cf (translate cf)) (hg : Translates cg (translate cg))
+    {a n x : Nat}
+    (hx : x ∈ Nat.Partrec.Code.eval (.prec cf cg) (Nat.pair a n)) :
+    [x] ∈ (translate (.prec cf cg)).eval [Nat.pair a n] := by
+  cases n with
+  | zero =>
+      exact (translates_prec_zero hf hg a [x]).2
+        ⟨x, by simpa [Nat.Partrec.Code.eval_prec_zero] using hx, rfl⟩
+  | succ k =>
+      rcases exists_precRun_of_nat_prec_succ (cf := cf) (cg := cg) hg hx with
+        ⟨base, hbase, hrun⟩
+      have hbase_trans : [base] ∈ (translate cf).eval [a] :=
+        (hf a [base]).2 ⟨base, hbase, rfl⟩
+      have hbase_eq : (translate cf).eval [a] = pure [base] :=
+        Part.eq_some_iff.2 hbase_trans
+      have hprec : [x] ∈
+          (Code.prec (translate cf) ((translate cg).comp Code.precStepArg)).eval [k.succ, a] :=
+        TCode.prec_mem_of_precRun (f := translate cf)
+          (g := (translate cg).comp Code.precStepArg) hbase_eq hrun
+      rw [translate_prec, Turing.ToPartrec.Code.comp_eval]
+      simp only [Part.bind_eq_bind, Part.mem_bind_iff]
+      exact ⟨[k.succ, a], by simp, hprec⟩
 
 theorem rfindFrom_mem_of_nat_rfind {cf : Nat.Partrec.Code}
     (hf : Translates cf (translate cf)) {a m n : Nat}
