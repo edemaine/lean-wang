@@ -324,6 +324,49 @@ theorem rfindFrom_mem_trace {test : Code} {a m : Nat} {v : List Nat}
 
 end TCode
 
+namespace TCode
+
+open Turing.ToPartrec
+
+/-- The internal step code used by Mathlib's `Turing.ToPartrec.Code.prec`. -/
+def precG (g : Code) : Code :=
+  Code.cons Code.tail <|
+    Code.cons Code.succ <|
+      Code.cons (Code.comp Code.pred Code.tail) <|
+        Code.cons (Code.comp g <| Code.cons Code.id <| Code.comp Code.tail Code.tail) <|
+          Code.comp Code.tail <| Code.comp Code.tail Code.tail
+
+theorem prec_eq (f g : Code) :
+    Code.prec f g =
+      let G := precG g
+      let F := Code.case Code.id <|
+        Code.comp (Code.comp (Code.comp Code.tail Code.tail) (Code.fix G)) Code.zero'
+      Code.cons (Code.comp F (Code.cons Code.head <| Code.cons (Code.comp f Code.tail) Code.tail))
+        Code.nil := by
+  rfl
+
+theorem precG_eval {g : Code} {i b ih a x : Nat}
+    (hg : g.eval [i, ih, a] = pure [x]) :
+    (precG g).eval [i, b, ih, a] = pure [b, i.succ, b.pred, x, a] := by
+  simp [precG, hg]
+
+theorem precG_fix_stop {g : Code} {i ih a x : Nat}
+    (hg : g.eval [i, ih, a] = pure [x]) :
+    [i.succ, 0, x, a] ∈ (Code.fix (precG g)).eval [i, 0, ih, a] := by
+  rw [Turing.ToPartrec.Code.fix_eval]
+  refine PFun.fix_stop ?_
+  simp [precG_eval hg]
+
+theorem precG_fix_fwd {g : Code} {i b ih a x : Nat} {v : List Nat}
+    (hg : g.eval [i, ih, a] = pure [x])
+    (hnext : v ∈ (Code.fix (precG g)).eval [i.succ, b, x, a]) :
+    v ∈ (Code.fix (precG g)).eval [i, b.succ, ih, a] := by
+  rw [Turing.ToPartrec.Code.fix_eval] at hnext ⊢
+  refine PFun.mem_fix_iff.2 (Or.inr ⟨[i.succ, b, x, a], ?_, hnext⟩)
+  simp [precG_eval hg]
+
+end TCode
+
 open Turing.ToPartrec
 
 /--
