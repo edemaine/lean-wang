@@ -74,11 +74,10 @@ Completed proof layers:
   encoding, with correctness and undecidability for the corresponding quantified
   encoded plane-tiling predicate.
 - a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
-  Mathlib list-based `Turing.ToPartrec.Code`, with a concrete
-  `ToPartrecTM2Reduction` witness connecting Mathlib code evaluation to
-  `PartrecToTM2` halting. This remains the semantic entry point into Mathlib's
-  machine translations; the obsolete direct TM2-to-table reduction surface has
-  been removed.
+  Mathlib list-based `Turing.ToPartrec.Code`, with a concrete correctness
+  theorem connecting Mathlib code evaluation to `PartrecToTM2` halting. This
+  remains the semantic entry point into Mathlib's machine translations; the
+  obsolete direct TM2-to-table reduction surface has been removed.
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
@@ -112,16 +111,6 @@ structure PrimrecSearchTableCompiler where
   compile_computable : ...
   correct : forall {α : Type} [Primcodable α] (P : α -> Nat -> Bool) (a : α),
     Machine.HaltsEmpty (compile P a).toMachine <-> FuelMachine.Halts (P a)
-
-structure StartedTM2ToPartrecReduction where
-  correct : forall tc : Turing.ToPartrec.Code,
-    (Turing.TM2.eval (TM0Route.partrecStartedTM2 tc)
-      Turing.PartrecToTM2.K'.main TM0Route.partrecStartedTM2Input).Dom <->
-      (StateTransition.eval
-        (Turing.TM2.step TM0Route.partrecTM2)
-        (TM0Route.partrecInit tc)).Dom
-
-def startedTM2ToPartrecReduction : StartedTM2ToPartrecReduction
 
 structure FiniteTM0TableReduction where
   compile : FiniteTM0Program -> TableProgram
@@ -167,9 +156,9 @@ domino theorem surfaces now have direct corollaries from
 There is also a TM2/TM0 factoring of the same obligation. The repository now
 provides a local natural-number encoding, `Denumerable` instance, and hence
 `Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
-`ToPartrecTM2Reduction` records a computable translation from unary
-`Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and
-this translation is now concretely proved in `NatPartrecToToPartrec`.
+`NatPartrecToToPartrec.translate` is the computable translation from unary
+`Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and its
+correctness is proved directly in `NatPartrecToToPartrec`.
 The live route now factors through a finite one-sided TM0 reduction: first use
 `TM0Route` to compose Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions, then
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
@@ -181,8 +170,8 @@ until that layer is replaced by direct finite-TM0 tiles. Together these pieces
 produce a `TableCompiler`, and the fixed-domino, fixed-corner, encoded
 scaffolded domino, and unencoded scaffolded domino theorem surfaces now have
 direct corollaries from the finite-TM0 factorization using the concrete
-code-to-TM2 reduction. The `StartedTM2ToPartrecReduction` bridge is now proved
-concretely by `startedTM2ToPartrecReduction`.
+code-to-TM2 reduction. The started-TM2 bridge is a direct theorem in `TM0Route`
+rather than a separate reduction structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
 temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
