@@ -776,6 +776,60 @@ theorem div_eight_mul_add_of_lt (m t : Nat) (h : t < 8) : (8 * m + t) / 8 = m :=
 theorem mod_eight_mul_add_of_lt (m t : Nat) (h : t < 8) : (8 * m + t) % 8 = t := by
   omega
 
+/-- The left component of a pairing is bounded by the pair code. -/
+theorem left_le_pair (a b : Nat) : a ≤ Nat.pair a b := by
+  simpa using (Nat.pair a b).unpair_left_le
+
+/-- The right component of a pairing is bounded by the pair code. -/
+theorem right_le_pair (a b : Nat) : b ≤ Nat.pair a b := by
+  simpa using (Nat.pair a b).unpair_right_le
+
+theorem movePayloadCode_target_le (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) :
+    qCode ≤ movePayloadCode p k₁ k₂ qCode := by
+  exact (right_le_pair (stackNameCode k₂) qCode).trans <|
+    (right_le_pair (stackNameCode k₁) (Nat.pair (stackNameCode k₂) qCode)).trans <|
+      right_le_pair (stackPredicateCode p)
+        (Nat.pair (stackNameCode k₁) (Nat.pair (stackNameCode k₂) qCode))
+
+theorem clearPayloadCode_target_le (p : Γ' → Bool) (k : K') (qCode : Nat) :
+    qCode ≤ clearPayloadCode p k qCode := by
+  exact (right_le_pair (stackNameCode k) qCode).trans <|
+    right_le_pair (stackPredicateCode p) (Nat.pair (stackNameCode k) qCode)
+
+theorem pushPayloadCode_target_le (k : K') (f : Option Γ' → Option Γ') (qCode : Nat) :
+    qCode ≤ pushPayloadCode k f qCode := by
+  exact (right_le_pair (localActionCode f) qCode).trans <|
+    right_le_pair (stackNameCode k) (Nat.pair (localActionCode f) qCode)
+
+theorem readPayloadCode_max_le (q₀ q₁ q₂ q₃ q₄ : Nat) :
+    max q₀ (max q₁ (max q₂ (max q₃ q₄))) ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+  have h₀ : q₀ ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+    exact left_le_pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+  have h₁ : q₁ ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+    exact (left_le_pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄))).trans <|
+      right_le_pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+  have h₂ : q₂ ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+    exact (left_le_pair q₂ (Nat.pair q₃ q₄)).trans <|
+      (right_le_pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄))).trans <|
+        right_le_pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+  have h₃ : q₃ ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+    exact (left_le_pair q₃ q₄).trans <|
+      (right_le_pair q₂ (Nat.pair q₃ q₄)).trans <|
+        (right_le_pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄))).trans <|
+          right_le_pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+  have h₄ : q₄ ≤ readPayloadCode q₀ q₁ q₂ q₃ q₄ := by
+    exact (right_le_pair q₃ q₄).trans <|
+      (right_le_pair q₂ (Nat.pair q₃ q₄)).trans <|
+        (right_le_pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄))).trans <|
+          right_le_pair q₀ (Nat.pair q₁ (Nat.pair q₂ (Nat.pair q₃ q₄)))
+  omega
+
+theorem predPayloadCode_max_le (q₁ q₂ : Nat) :
+    max q₁ q₂ ≤ predPayloadCode q₁ q₂ := by
+  have h₁ : q₁ ≤ predPayloadCode q₁ q₂ := left_le_pair q₁ q₂
+  have h₂ : q₂ ≤ predPayloadCode q₁ q₂ := right_le_pair q₁ q₂
+  omega
+
 /-- Structural depth of a `PartrecToTM2` label, used as sufficient decoder fuel. -/
 def labelDepth : Λ' → Nat
   | move _ _ _ q => labelDepth q + 1
@@ -899,6 +953,70 @@ theorem decodeLabelFuel_encodeLabel_of_depth :
           simp [labelDepth] at hfuel
       | succ fuel =>
           simp [encodeLabel_ret, decodeLabelFuel, div_eight_mul_add_of_lt, ofNatCont_encodeCont]
+
+theorem labelDepth_le_encodeLabel : ∀ q : Λ', labelDepth q ≤ encodeLabel q := by
+  intro q
+  induction q with
+  | move p k₁ k₂ q ih =>
+      have htarget := movePayloadCode_target_le p k₁ k₂ (encodeLabel q)
+      rw [encodeLabel_move]
+      simp [labelDepth]
+      omega
+  | clear p k q ih =>
+      have htarget := clearPayloadCode_target_le p k (encodeLabel q)
+      rw [encodeLabel_clear]
+      simp [labelDepth]
+      omega
+  | copy q ih =>
+      rw [encodeLabel_copy]
+      simp [labelDepth]
+      omega
+  | push k f q ih =>
+      have htarget := pushPayloadCode_target_le k f (encodeLabel q)
+      rw [encodeLabel_push]
+      simp [labelDepth]
+      omega
+  | read f ih =>
+      have h₀ := ih none
+      have h₁ := ih (some Γ'.consₗ)
+      have h₂ := ih (some Γ'.cons)
+      have h₃ := ih (some Γ'.bit0)
+      have h₄ := ih (some Γ'.bit1)
+      have hpayload := readPayloadCode_max_le
+        (encodeLabel (f none)) (encodeLabel (f (some Γ'.consₗ)))
+        (encodeLabel (f (some Γ'.cons))) (encodeLabel (f (some Γ'.bit0)))
+        (encodeLabel (f (some Γ'.bit1)))
+      rw [encodeLabel_read]
+      simp [labelDepth]
+      omega
+  | succ q ih =>
+      rw [encodeLabel_succ]
+      simp [labelDepth]
+      omega
+  | pred q₁ q₂ ih₁ ih₂ =>
+      have hpayload := predPayloadCode_max_le (encodeLabel q₁) (encodeLabel q₂)
+      rw [encodeLabel_pred]
+      simp [labelDepth]
+      omega
+  | ret k =>
+      rw [encodeLabel_ret]
+      simp [labelDepth]
+
+theorem decodeLabel_encodeLabel (q : Λ') : decodeLabel (encodeLabel q) = some q := by
+  exact decodeLabelFuel_encodeLabel_of_depth q (encodeLabel q) (labelDepth_le_encodeLabel q)
+
+set_option backward.privateInPublic true in
+set_option backward.privateInPublic.warn false in
+instance instEncodable : Encodable Λ' where
+  encode := encodeLabel
+  decode := decodeLabel
+  encodek := decodeLabel_encodeLabel
+
+theorem encodeLabel_eq : Encodable.encode = encodeLabel :=
+  rfl
+
+theorem decodeLabel_eq : Encodable.decode = decodeLabel :=
+  rfl
 
 end Λ'
 
