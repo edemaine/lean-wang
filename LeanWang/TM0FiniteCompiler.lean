@@ -163,6 +163,71 @@ theorem exists_transitionOfStep_of_step {tc : Turing.ToPartrec.Code}
         exact stateCode_mem_states tc q' (next_label_mem_of_step hq hm)
       · exact rowOfStep_stmt
 
+theorem transitionOfStep_eq_none_of_no_step {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    (hstep : TM0Route.partrecStartedTM0Machine tc q a = none) :
+    transitionOfStep tc q a = none := by
+  unfold transitionOfStep
+  cases hm : TM0Route.partrecStartedTM0Machine tc q a with
+  | none => rfl
+  | some p =>
+      rw [hm] at hstep
+      cases hstep
+
+theorem transitionOfStep_state_of_some {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    {e : PostTransition}
+    (he : transitionOfStep tc q a = some e) :
+    e.state = stateCode tc q := by
+  unfold transitionOfStep at he
+  split at he
+  · cases he
+  · cases he
+    rfl
+
+theorem transitionOfStep_read_of_some {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    {e : PostTransition}
+    (he : transitionOfStep tc q a = some e) :
+    e.read = TM0Route.partrecStartedTM0SymbolCode a := by
+  unfold transitionOfStep at he
+  split at he
+  · cases he
+  · cases he
+    rfl
+
+theorem transitionOfStep_matchesInput_self_of_some {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    {e : PostTransition}
+    (he : transitionOfStep tc q a = some e) :
+    e.matchesInput (stateCode tc q) (TM0Route.partrecStartedTM0SymbolCode a) = true := by
+  have hstate := transitionOfStep_state_of_some he
+  have hread := transitionOfStep_read_of_some he
+  cases e
+  simp [PostTransition.matchesInput] at hstate hread ⊢
+  simp [hstate, hread]
+
+theorem transitionOfStep_matchesInput_of_symbol_ne {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
+    {a b : Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol}
+    {e : PostTransition}
+    (hne : b ≠ a)
+    (he : transitionOfStep tc q b = some e) :
+    e.matchesInput (stateCode tc q) (TM0Route.partrecStartedTM0SymbolCode a) = false := by
+  have hstate := transitionOfStep_state_of_some he
+  have hread := transitionOfStep_read_of_some he
+  have hread_ne :
+      TM0Route.partrecStartedTM0SymbolCode b ≠ TM0Route.partrecStartedTM0SymbolCode a := by
+    intro hcode
+    exact hne (TM0Route.partrecStartedTM0SymbolCode_injective hcode)
+  cases e
+  simp [PostTransition.matchesInput] at hstate hread ⊢
+  simp [hstate, hread, hread_ne]
+
 noncomputable def transitionsForState (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) : List PostTransition :=
   TM0Route.partrecStartedTM0SymbolList.filterMap fun a =>

@@ -287,6 +287,9 @@ The row construction now uses proof-free total state codes, and there are
 existence/shape lemmas showing that each Mathlib TM0 step contributes a generated
 row with the correct `(state, read)` key, next-state support, and finite-TM0
 statement.
+There are also same-source-state row-key lemmas for `transitionOfStep`: generated
+rows expose their state/read fields, match their own `(state, read)` key, and
+cannot match a different input symbol for the same source state.
 
 Next implementation targets:
 
