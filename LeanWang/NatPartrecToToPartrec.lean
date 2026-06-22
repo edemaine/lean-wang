@@ -365,6 +365,32 @@ theorem precG_fix_fwd {g : Code} {i b ih a x : Nat} {v : List Nat}
   refine PFun.mem_fix_iff.2 (Or.inr ⟨[i.succ, b, x, a], ?_, hnext⟩)
   simp [precG_eval hg]
 
+/-- Successful traces through the internal loop used by `Code.prec`. -/
+def precRun (g : Code) (a : Nat) : Nat → Nat → Nat → Nat → Prop
+  | i, 0, ih, x => [x] ∈ g.eval [i, ih, a]
+  | i, b + 1, ih, x => ∃ y : Nat, [y] ∈ g.eval [i, ih, a] ∧ precRun g a i.succ b y x
+
+set_option linter.flexible false in
+theorem precG_fix_of_precRun {g : Code} {a i b ih x : Nat}
+    (h : precRun g a i b ih x) :
+    [i + b.succ, 0, x, a] ∈ (Code.fix (precG g)).eval [i, b, ih, a] := by
+  induction b generalizing i ih with
+  | zero =>
+      simp [precRun] at h
+      exact precG_fix_stop (g := g) (i := i) (ih := ih) (a := a) (x := x)
+        (Part.eq_some_iff.2 h)
+  | succ b IH =>
+      simp [precRun] at h
+      rcases h with ⟨y, hy, hrest⟩
+      have hnext : [i.succ + b.succ, 0, x, a] ∈
+          (Code.fix (precG g)).eval [i.succ, b, y, a] :=
+        IH hrest
+      have hmem : [i.succ + b.succ, 0, x, a] ∈
+          (Code.fix (precG g)).eval [i, b.succ, ih, a] :=
+        precG_fix_fwd (g := g) (i := i) (b := b) (ih := ih) (a := a) (x := y)
+          (Part.eq_some_iff.2 hy) hnext
+      simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hmem
+
 end TCode
 
 open Turing.ToPartrec
