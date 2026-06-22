@@ -402,6 +402,36 @@ theorem precGStep_fwd_shape {g : Code} {i b ih a : Nat} {next : List Nat}
   simp at hwmap
   exact ⟨x, by simpa using hwmap.symm, hgv⟩
 
+set_option linter.flexible false in
+theorem precGStep_no_fwd_zero {g : Code} {i ih a : Nat} {next : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hfwd : Sum.inr next ∈ precGStep g [i, 0, ih, a]) :
+    False := by
+  unfold precGStep at hfwd
+  rw [Part.mem_map_iff] at hfwd
+  rcases hfwd with ⟨w, hw, hwmap⟩
+  simp [precG] at hw
+  rcases hw with ⟨gv, hgv, hw⟩
+  rcases hsingle gv hgv with ⟨x, rfl⟩
+  simp at hw
+  subst w
+  simp at hwmap
+
+set_option linter.flexible false in
+theorem precGStep_no_stop_succ {g : Code} {i b ih a : Nat} {out : List Nat}
+    (hsingle : ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hstop : Sum.inl out ∈ precGStep g [i, b.succ, ih, a]) :
+    False := by
+  unfold precGStep at hstop
+  rw [Part.mem_map_iff] at hstop
+  rcases hstop with ⟨w, hw, hwmap⟩
+  simp [precG] at hw
+  rcases hw with ⟨gv, hgv, hw⟩
+  rcases hsingle gv hgv with ⟨x, rfl⟩
+  simp at hw
+  subst w
+  simp at hwmap
+
 /-- Successful traces through the internal loop used by `Code.prec`. -/
 def precRun (g : Code) (a : Nat) : Nat → Nat → Nat → Nat → Prop
   | i, 0, ih, x => [x] ∈ g.eval [i, ih, a]
@@ -427,6 +457,41 @@ theorem precG_fix_of_precRun {g : Code} {a i b ih x : Nat}
         precG_fix_fwd (g := g) (i := i) (b := b) (ih := ih) (a := a) (x := y)
           (Part.eq_some_iff.2 hy) hnext
       simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hmem
+
+theorem precRun_of_precG_fix_mem {g : Code} {a i b ih x : Nat}
+    (hsingle : ∀ i ih, ∀ v : List Nat, v ∈ g.eval [i, ih, a] → ∃ x : Nat, v = [x])
+    (hfix : [i + b.succ, 0, x, a] ∈ (Code.fix (precG g)).eval [i, b, ih, a]) :
+    precRun g a i b ih x := by
+  induction b generalizing i ih with
+  | zero =>
+      rw [Turing.ToPartrec.Code.fix_eval] at hfix
+      change [i.succ, 0, x, a] ∈ PFun.fix (precGStep g) [i, 0, ih, a] at hfix
+      rcases PFun.mem_fix_iff.1 hfix with hstop | ⟨next, hfwd, _hnext⟩
+      · rcases precGStep_stop_shape (g := g) (i := i) (ih := ih) (a := a)
+            (hsingle i ih) hstop with ⟨y, hout, hy⟩
+        have hyx : y = x := by
+          simpa using hout.symm
+        simpa [precRun, hyx] using hy
+      · exact (precGStep_no_fwd_zero (g := g) (i := i) (ih := ih) (a := a)
+          (hsingle i ih) hfwd).elim
+  | succ b IH =>
+      rw [Turing.ToPartrec.Code.fix_eval] at hfix
+      change [i + (b.succ).succ, 0, x, a] ∈
+        PFun.fix (precGStep g) [i, b.succ, ih, a] at hfix
+      rcases PFun.mem_fix_iff.1 hfix with hstop | ⟨next, hfwd, hnext⟩
+      · exact (precGStep_no_stop_succ (g := g) (i := i) (b := b) (ih := ih) (a := a)
+          (hsingle i ih) hstop).elim
+      · rcases precGStep_fwd_shape (g := g) (i := i) (b := b) (ih := ih) (a := a)
+            (hsingle i ih) hfwd with ⟨y, hnext_eq, hy⟩
+        have hnext' : [i.succ + b.succ, 0, x, a] ∈
+            (Code.fix (precG g)).eval [i.succ, b, y, a] := by
+          rw [Turing.ToPartrec.Code.fix_eval]
+          change [i.succ + b.succ, 0, x, a] ∈
+            PFun.fix (precGStep g) [i.succ, b, y, a]
+          simpa [hnext_eq, Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+            using hnext
+        have hrun : precRun g a i.succ b y x := IH (i := i.succ) (ih := y) hnext'
+        exact ⟨y, hy, hrun⟩
 
 set_option linter.flexible false in
 theorem precRun_snoc {g : Code} {a i b ih y x : Nat}
