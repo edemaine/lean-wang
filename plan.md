@@ -70,6 +70,9 @@ Completed proof layers:
   pushed through the abstract scaffold to ordinary plane tiling: all scaffolded
   bounded-prefix plane instances tile exactly when the Mathlib code does not
   halt, and this quantified plane-tiling family is undecidable.
+- the scaffolded bounded-prefix family also has a canonical natural-number
+  encoding, with correctness and undecidability for the corresponding quantified
+  encoded plane-tiling predicate.
 
 The remaining construction obligations are explicit Lean interfaces:
 

@@ -915,6 +915,48 @@ theorem codeEvalnFuelPrefixDominoReduction_all_undecidable
     h.of_eq fun c => codeEvalnFuelPrefixDominoReduction_all_correct hS c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
+/-- Encoded version of `codeEvalnFuelPrefixDominoReduction`. -/
+def codeEvalnFuelPrefixDominoReductionCode (S : Scaffold) (p : Code × Nat) : Nat :=
+  encodeTileSet (codeEvalnFuelPrefixDominoReduction S p)
+
+theorem codeEvalnFuelPrefixDominoReductionCode_computable (S : Scaffold) :
+    Computable (codeEvalnFuelPrefixDominoReductionCode S) := by
+  unfold codeEvalnFuelPrefixDominoReductionCode
+  exact encodeTileSet_computable.comp (codeEvalnFuelPrefixDominoReduction_computable S)
+
+theorem codeEvalnFuelPrefixDominoReductionCode_correct {S : Scaffold}
+    (hS : IsScaffold S) (c : Code) (bound : Nat) :
+    TilesPlane (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound))) ↔
+      ¬ ∃ k : Nat, k < bound ∧ codeEvalnHalts c 0 k = true := by
+  rw [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet]
+  exact codeEvalnFuelPrefixDominoReduction_correct hS c bound
+
+theorem codeEvalnFuelPrefixDominoReductionCode_all_correct {S : Scaffold}
+    (hS : IsScaffold S) (c : Code) :
+    (∀ bound : Nat,
+      TilesPlane (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound)))) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  constructor
+  · intro htiles
+    exact (codeEvalnFuelPrefixDominoReduction_all_correct hS c).1 fun bound => by
+      simpa [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet] using
+        htiles bound
+  · intro hnonhalting bound
+    rw [codeEvalnFuelPrefixDominoReductionCode, decodeTileSet_encodeTileSet]
+    exact (codeEvalnFuelPrefixDominoReduction_all_correct hS c).2 hnonhalting bound
+
+theorem codeEvalnFuelPrefixDominoReductionCode_all_undecidable
+    (S : Scaffold) (hS : IsScaffold S) :
+    ¬ ComputablePred
+      (fun c : Code =>
+        ∀ bound : Nat,
+          TilesPlane
+            (decodeTileSet (codeEvalnFuelPrefixDominoReductionCode S (c, bound)))) := by
+  intro h
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    h.of_eq fun c => codeEvalnFuelPrefixDominoReductionCode_all_correct hS c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
 /-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
 def dominoReduction (S : Scaffold) (C : TableCompiler) (c : Code) : TileSet :=
   combineWithScaffold S (fixedDominoReduction C c).1 (fixedDominoReduction C c).2
