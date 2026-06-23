@@ -897,6 +897,86 @@ theorem parseWithFuel_mono {tc : Turing.ToPartrec.Code}
                   exact hparse
 
 set_option linter.flexible false in
+theorem parseWithFuel_eq_ofStmt_append {tc : Turing.ToPartrec.Code}
+    {fuel : Nat} {nodes : List (PartrecStartedTM2StmtNode tc)}
+    {out : Stmt tc × List (PartrecStartedTM2StmtNode tc)}
+    (hparse : parseWithFuel (tc := tc) fuel nodes = some out) :
+    nodes = ofStmt out.1 ++ out.2 := by
+  induction fuel generalizing nodes out with
+  | zero =>
+      simp [parseWithFuel] at hparse
+  | succ fuel ih =>
+      cases nodes with
+      | nil =>
+          simp [parseWithFuel] at hparse
+      | cons node rest =>
+          cases node with
+          | push k f =>
+              simp [parseWithFuel] at hparse
+              rcases hp : parseWithFuel (tc := tc) fuel rest with _ | p <;>
+                simp [hp] at hparse
+              rcases p with ⟨q, tail⟩
+              simp at hparse
+              subst out
+              have hrest := ih (nodes := rest) (out := (q, tail)) (by simpa using hp)
+              simp [ofStmt, hrest]
+          | peek k f =>
+              simp [parseWithFuel] at hparse
+              rcases hp : parseWithFuel (tc := tc) fuel rest with _ | p <;>
+                simp [hp] at hparse
+              rcases p with ⟨q, tail⟩
+              simp at hparse
+              subst out
+              have hrest := ih (nodes := rest) (out := (q, tail)) (by simpa using hp)
+              simp [ofStmt, hrest]
+          | pop k f =>
+              simp [parseWithFuel] at hparse
+              rcases hp : parseWithFuel (tc := tc) fuel rest with _ | p <;>
+                simp [hp] at hparse
+              rcases p with ⟨q, tail⟩
+              simp at hparse
+              subst out
+              have hrest := ih (nodes := rest) (out := (q, tail)) (by simpa using hp)
+              simp [ofStmt, hrest]
+          | load f =>
+              simp [parseWithFuel] at hparse
+              rcases hp : parseWithFuel (tc := tc) fuel rest with _ | p <;>
+                simp [hp] at hparse
+              rcases p with ⟨q, tail⟩
+              simp at hparse
+              subst out
+              have hrest := ih (nodes := rest) (out := (q, tail)) (by simpa using hp)
+              simp [ofStmt, hrest]
+          | branch f =>
+              simp [parseWithFuel] at hparse
+              rcases hleft : parseWithFuel (tc := tc) fuel rest with _ | left <;>
+                simp [hleft] at hparse
+              rcases hright : parseWithFuel (tc := tc) fuel left.2 with _ | right <;>
+                simp [hright] at hparse
+              rcases left with ⟨q₁, mid⟩
+              rcases right with ⟨q₂, tail⟩
+              simp at hparse
+              subst out
+              have hrest := ih (nodes := rest) (out := (q₁, mid)) (by simpa using hleft)
+              have hmid := ih (nodes := mid) (out := (q₂, tail)) (by simpa using hright)
+              simp [ofStmt, hrest, hmid, List.append_assoc]
+          | goto f =>
+              simp [parseWithFuel] at hparse
+              subst out
+              simp [ofStmt]
+          | halt =>
+              simp [parseWithFuel] at hparse
+              subst out
+              simp [ofStmt]
+
+theorem parse?_eq_some_empty_ofStmt {tc : Turing.ToPartrec.Code}
+    {nodes : List (PartrecStartedTM2StmtNode tc)} {stmt : Stmt tc}
+    (hparse : parse? (tc := tc) nodes = some (stmt, [])) :
+    nodes = ofStmt stmt := by
+  have hsound := parseWithFuel_eq_ofStmt_append (tc := tc) hparse
+  simpa [parse?] using hsound
+
+set_option linter.flexible false in
 theorem parseWithFuel_ofStmt_append {tc : Turing.ToPartrec.Code}
     (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) :
     parseWithFuel (tc := tc) (ofStmt stmt).length (ofStmt stmt ++ tail) =
