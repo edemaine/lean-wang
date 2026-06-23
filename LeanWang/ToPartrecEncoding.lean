@@ -2332,6 +2332,14 @@ theorem normalizeLabel_eq_encode_decodeLabel (n : Nat) :
     normalizeLabel n = Encodable.encode (decodeLabel n) := by
   exact normalizeLabelFuel_eq_encode_decodeLabelFuel n n
 
+set_option backward.privateInPublic true in
+set_option backward.privateInPublic.warn false in
+instance instPrimcodableLabel : Primcodable Λ' where
+  __ := instEncodable
+  prim := (Primrec.nat_iff.1 normalizeLabel_primrec).of_eq fun n => by
+    rw [normalizeLabel_eq_encode_decodeLabel]
+    rfl
+
 end Λ'
 
 end PartrecToTM2
