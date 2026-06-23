@@ -797,6 +797,39 @@ def partrecTM2RetSupportLength : Turing.PartrecToTM2.Cont' → Nat
   | Turing.PartrecToTM2.Cont'.fix _ _ => 2
   | _ => 0
 
+/-- Code-level version of `partrecTM2RetSupportLength`.
+
+For a `ret k` label, the label payload is `encodeCont k + 1`; the constructor
+bits for non-halt continuations are therefore in `payload - 2`.
+-/
+def partrecTM2RetSupportLengthCode (payload : Nat) : Nat :=
+  if (payload - 2).bodd then
+    if ((payload - 2).div2).bodd then 2 else 0
+  else 0
+
+theorem partrecTM2RetSupportLengthCode_primrec :
+    Primrec partrecTM2RetSupportLengthCode := by
+  unfold partrecTM2RetSupportLengthCode
+  let hpred : Primrec fun payload : Nat => payload - 2 :=
+    Primrec.nat_sub.comp Primrec.id (Primrec.const 2)
+  let hbodd : Primrec fun payload : Nat => (payload - 2).bodd :=
+    Primrec.nat_bodd.comp hpred
+  let hdivBodd : Primrec fun payload : Nat => ((payload - 2).div2).bodd :=
+    Primrec.nat_bodd.comp (Primrec.nat_div2.comp hpred)
+  exact (Primrec.cond hbodd
+    (Primrec.cond hdivBodd (Primrec.const 2) (Primrec.const 0))
+    (Primrec.const 0)).of_eq fun payload => by
+      cases (payload - 2).bodd <;> cases ((payload - 2).div2).bodd <;> rfl
+
+theorem partrecTM2RetSupportLengthCode_encodeCont
+    (k : Turing.PartrecToTM2.Cont') :
+    partrecTM2RetSupportLengthCode
+        (Turing.PartrecToTM2.Cont'.encodeCont k + 1) =
+      partrecTM2RetSupportLength k := by
+  cases k <;>
+    simp [partrecTM2RetSupportLengthCode, partrecTM2RetSupportLength,
+      Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+
 /--
 Numeric mirror of `tm2to1StmtSupportLength (partrecTM2 q)`, specialized to
 Mathlib's concrete `PartrecToTM2` evaluator labels.
@@ -815,6 +848,77 @@ def partrecTM2SupportLength : Turing.PartrecToTM2.Λ' → Nat
   | Turing.PartrecToTM2.Λ'.succ .. => 10
   | Turing.PartrecToTM2.Λ'.pred .. => 8
   | Turing.PartrecToTM2.Λ'.ret k => partrecTM2RetSupportLength k
+
+/-- Code-level version of `partrecTM2SupportLength`. -/
+def partrecTM2SupportLengthCode (n : Nat) : Nat :=
+  if n % 8 = 1 then 4
+  else if n % 8 = 2 then 2
+  else if n % 8 = 3 then 6
+  else if n % 8 = 4 then 2
+  else if n % 8 = 5 then 0
+  else if n % 8 = 6 then 10
+  else if n % 8 = 7 then 8
+  else partrecTM2RetSupportLengthCode (n / 8)
+
+theorem partrecTM2SupportLengthCode_primrec :
+    Primrec partrecTM2SupportLengthCode := by
+  unfold partrecTM2SupportLengthCode
+  let htag : Primrec fun n : Nat => n % 8 :=
+    Primrec.nat_mod.comp Primrec.id (Primrec.const 8)
+  let hret : Primrec fun n : Nat => partrecTM2RetSupportLengthCode (n / 8) :=
+    partrecTM2RetSupportLengthCode_primrec.comp
+      (Primrec.nat_div.comp Primrec.id (Primrec.const 8))
+  exact Primrec.ite (Primrec.eq.comp htag (Primrec.const 1)) (Primrec.const 4)
+    (Primrec.ite (Primrec.eq.comp htag (Primrec.const 2)) (Primrec.const 2)
+      (Primrec.ite (Primrec.eq.comp htag (Primrec.const 3)) (Primrec.const 6)
+        (Primrec.ite (Primrec.eq.comp htag (Primrec.const 4)) (Primrec.const 2)
+          (Primrec.ite (Primrec.eq.comp htag (Primrec.const 5)) (Primrec.const 0)
+            (Primrec.ite (Primrec.eq.comp htag (Primrec.const 6)) (Primrec.const 10)
+              (Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) (Primrec.const 8)
+                hret))))))
+
+theorem partrecTM2SupportLengthCode_encodeLabel
+    (q : Turing.PartrecToTM2.Λ') :
+    partrecTM2SupportLengthCode (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      partrecTM2SupportLength q := by
+  cases q with
+  | move p k₁ k₂ q =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_move]
+  | push k f q =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_push]
+  | read f =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_read]
+  | clear p k q =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_clear]
+  | copy q =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_copy]
+  | succ q =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_succ]
+  | pred q₁ q₂ =>
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_pred]
+  | ret k =>
+      have hcode :
+          Turing.PartrecToTM2.Λ'.encodeLabel
+              (Turing.PartrecToTM2.Λ'.ret k) =
+            8 * (Turing.PartrecToTM2.Cont'.encodeCont k + 1) + 0 := by
+        rw [Turing.PartrecToTM2.Λ'.encodeLabel_ret]
+        omega
+      rw [hcode]
+      simp [partrecTM2SupportLengthCode, partrecTM2SupportLength,
+        partrecTM2RetSupportLengthCode_encodeCont]
+
+theorem partrecTM2SupportLength_primrec :
+    Primrec partrecTM2SupportLength := by
+  exact (partrecTM2SupportLengthCode_primrec.comp Primrec.encode).of_eq fun q => by
+    rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+    exact partrecTM2SupportLengthCode_encodeLabel q
 
 theorem tm2to1StmtSupportLength_partrecTM2
     (q : Turing.PartrecToTM2.Λ') :
