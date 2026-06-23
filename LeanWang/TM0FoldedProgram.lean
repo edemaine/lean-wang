@@ -2444,6 +2444,65 @@ theorem simStepDataOfStmtTransition_eq_withCode
       cases step
       rfl
 
+theorem simStepDataOfStmtTransitionWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol × SourceSymbol =>
+      simStepDataOfStmtTransitionWithCode tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2) := by
+  let readFn :
+      Nat × Option (SourceStmt tc) × PartrecVar × FoldSide × Bool × SourceSymbol ×
+        SourceSymbol → SourceSymbol := fun p =>
+    foldedRead p.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2
+  have hread : Primrec readFn := by
+    exact foldedRead_primrec.comp
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))))
+  have hlookup : Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar ×
+      FoldSide × Bool × SourceSymbol × SourceSymbol =>
+      sourceMachineStepOfStmt tc p.2.1 p.2.2.1 (readFn p)) := by
+    exact (sourceMachineStepOfStmt_primrec_fixed_of_trAux tc haux).comp
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)) hread))
+  have hsome : Primrec₂
+      (fun p : Nat × Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+          SourceSymbol × SourceSymbol =>
+        fun step : SourceLabel tc × Turing.TM0.Stmt SourceSymbol =>
+          simStepDataOfStepCode p.2.2.2.1 p.2.2.2.2.1 p.1
+            (TM0FiniteCompiler.stateCode tc step.1)
+            p.2.2.2.2.2.1 p.2.2.2.2.2.2 step.2) := by
+    apply Primrec₂.mk
+    exact simStepDataOfStepCode_primrec.comp
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+          Primrec.fst))))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp Primrec.fst)))))
+          (Primrec.pair
+            (Primrec.fst.comp Primrec.fst)
+            (Primrec.pair
+              (TM0FiniteCompiler.stateCode_primrec_fixed tc |>.comp
+                (Primrec.fst.comp Primrec.snd))
+              (Primrec.pair
+                (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                  (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))))))
+                (Primrec.pair
+                  (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                    (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))))))
+                  (Primrec.snd.comp Primrec.snd)))))))
+  exact (Primrec.option_map hlookup hsome).of_eq fun p => by
+    unfold simStepDataOfStmtTransitionWithCode readFn
+    cases sourceMachineStepOfStmt tc p.2.1 p.2.2.1
+        (foldedRead p.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2) <;> rfl
+
 theorem simStepDataOfStmtTransition_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
     (marked : Bool) (left right : SourceSymbol) :
@@ -2599,6 +2658,36 @@ theorem simStepDataForStmtRightSymbols_eq_withCode
   intro right _hright
   exact simStepDataOfStmtTransition_eq_withCode tc stmt v side marked left right
 
+theorem simStepDataForStmtRightSymbolsWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol =>
+      simStepDataForStmtRightSymbolsWithCode tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2) := by
+  unfold simStepDataForStmtRightSymbolsWithCode
+  have htransition := simStepDataOfStmtTransitionWithCode_primrec_fixed_of_trAux tc haux
+  refine Primrec.listFilterMap (Primrec.const TM0Route.partrecStartedTM0SymbolList) ?_
+  apply Primrec₂.mk
+  exact htransition.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+              (Primrec.snd.comp Primrec.fst))))
+            (Primrec.pair
+              (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))))
+              (Primrec.pair
+                (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                  (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))))
+                Primrec.snd))))))
+
 theorem simStepDataForStmtRightSymbols_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -2658,6 +2747,32 @@ theorem simStepDataForStmtLeftSymbols_eq_withCode
   apply List.flatMap_congr
   intro left _hleft
   exact simStepDataForStmtRightSymbols_eq_withCode tc stmt v side marked left
+
+theorem simStepDataForStmtLeftSymbolsWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar × FoldSide × Bool =>
+      simStepDataForStmtLeftSymbolsWithCode tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2) := by
+  unfold simStepDataForStmtLeftSymbolsWithCode
+  have hright := simStepDataForStmtRightSymbolsWithCode_primrec_fixed_of_trAux tc haux
+  refine Primrec.list_flatMap (Primrec.const TM0Route.partrecStartedTM0SymbolList) ?_
+  apply Primrec₂.mk
+  exact hright.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+              (Primrec.snd.comp Primrec.fst))))
+            (Primrec.pair
+              (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                (Primrec.snd.comp Primrec.fst))))
+              Primrec.snd)))))
 
 theorem simStepDataForStmtLeftSymbols_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide) (marked : Bool) :
@@ -2725,6 +2840,27 @@ theorem simStepDataForStmtMarked_eq_withCode
   apply List.flatMap_congr
   intro marked _hmarked
   exact simStepDataForStmtLeftSymbols_eq_withCode tc stmt v side marked
+
+theorem simStepDataForStmtMarkedWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar × FoldSide =>
+      simStepDataForStmtMarkedWithCode tc p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  unfold simStepDataForStmtMarkedWithCode
+  have hleft := simStepDataForStmtLeftSymbolsWithCode_primrec_fixed_of_trAux tc haux
+  refine Primrec.list_flatMap (Primrec.const [false, true]) ?_
+  apply Primrec₂.mk
+  exact hleft.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          (Primrec.pair
+            (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+            Primrec.snd))))
 
 theorem simStepDataForStmtMarked_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide) :
@@ -2840,6 +2976,40 @@ theorem simStepDataForStmtLabel_eq_withCode
   apply List.flatMap_congr
   intro side _hside
   exact simStepDataForStmtMarked_eq_withCode tc stmt v side
+
+theorem simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar =>
+      simStepDataForStmtLabelWithCode tc p.1 p.2.1 p.2.2) := by
+  unfold simStepDataForStmtLabelWithCode
+  have hmarked := simStepDataForStmtMarkedWithCode_primrec_fixed_of_trAux tc haux
+  refine Primrec.list_flatMap (Primrec.const foldSideList) ?_
+  apply Primrec₂.mk
+  exact hmarked.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+          Primrec.snd)))
+
+theorem simStepDataForStmtLabelWithCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar =>
+      simStepDataForStmtLabelWithCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
+theorem simStepDataForStmtLabelWithCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Nat × Option (SourceStmt tc) × PartrecVar =>
+      simStepDataForStmtLabelWithCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForStmtLabelWithCode_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
 
 theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) :
