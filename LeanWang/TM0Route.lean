@@ -6484,6 +6484,64 @@ theorem tm2to1TrStAct_primrec_fixed_k
     | mk q s =>
       cases s <;> rfl
 
+/--
+One reconstruction step for `TM2to1.trNormal` from already translated
+recursive dependencies.
+
+The stack-action cases do not need the translated child statement: Mathlib's
+translation jumps to a `go` label that still carries the original TM2
+continuation. The dependency list therefore intentionally over-approximates
+those cases.
+-/
+noncomputable def tm2to1TrNormalBody (tc : Turing.ToPartrec.Code)
+    (code : PartrecStartedTM2StmtNode.ValidCode tc)
+    (deps : List (PartrecStartedTM0Stmt tc)) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  match PartrecStartedTM2StmtNode.ofValidCode code with
+  | Turing.TM2.Stmt.push k f q =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.push f, q)))
+  | Turing.TM2.Stmt.peek k f q =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.peek f, q)))
+  | Turing.TM2.Stmt.pop k f q =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.pop f, q)))
+  | Turing.TM2.Stmt.load a _ =>
+      match deps with
+      | q :: _ => some (Turing.TM1.Stmt.load (fun _ => a) q)
+      | _ => none
+  | Turing.TM2.Stmt.branch f _ _ =>
+      match deps with
+      | q₁ :: q₂ :: _ => some (Turing.TM1.Stmt.branch (fun _ => f) q₁ q₂)
+      | _ => none
+  | Turing.TM2.Stmt.goto l =>
+      some (Turing.TM1.Stmt.goto (tm2to1NormalGotoPayload tc l))
+  | Turing.TM2.Stmt.halt =>
+      some Turing.TM1.Stmt.halt
+
+set_option linter.flexible false in
+theorem tm2to1TrNormalBody_toValidCode
+    (tc : Turing.ToPartrec.Code) (stmt : PartrecStartedTM2Stmt tc) :
+    tm2to1TrNormalBody tc (PartrecStartedTM2StmtNode.toValidCode stmt)
+        ((PartrecStartedTM2StmtNode.depValidCodes
+            (PartrecStartedTM2StmtNode.toValidCode stmt)).map
+          (fun code =>
+            Turing.TM2to1.trNormal
+              (PartrecStartedTM2StmtNode.ofValidCode code))) =
+      some (Turing.TM2to1.trNormal stmt) := by
+  cases stmt <;>
+    simp [tm2to1TrNormalBody, PartrecStartedTM2StmtNode.depValidCodes_toValidCode,
+      PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal]
+  · funext _a _s
+    rfl
+  · funext _a _s
+    rfl
+  · funext _a _s
+    rfl
+  · funext _a _s
+    rfl
+
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
