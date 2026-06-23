@@ -955,6 +955,37 @@ theorem parse?_ofStmt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
   unfold parse?
   simpa using parseWithFuel_ofStmt_append (tc := tc) stmt []
 
+set_option linter.flexible false in
+theorem ofStmt_foldl_validStep {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (slots : Nat) :
+    (ofStmt stmt).foldl validStep (true, slots + 1) = (true, slots) := by
+  induction stmt generalizing slots with
+  | push k f q ih =>
+      simp [ofStmt, validStep, arity]
+      exact ih slots
+  | peek k f q ih =>
+      simp [ofStmt, validStep, arity]
+      exact ih slots
+  | pop k f q ih =>
+      simp [ofStmt, validStep, arity]
+      exact ih slots
+  | load f q ih =>
+      simp [ofStmt, validStep, arity]
+      exact ih slots
+  | branch f q₁ q₂ ih₁ ih₂ =>
+      simp [ofStmt, validStep, arity, List.foldl_append]
+      rw [ih₁ (slots + 1)]
+      exact ih₂ slots
+  | goto f =>
+      simp [ofStmt, validStep, arity]
+  | halt =>
+      simp [ofStmt, validStep, arity]
+
+theorem valid_ofStmt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
+    Valid (tc := tc) (ofStmt stmt) := by
+  unfold Valid
+  simpa using ofStmt_foldl_validStep (tc := tc) stmt 0
+
 end PartrecStartedTM2StmtNode
 
 def decEqPartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
