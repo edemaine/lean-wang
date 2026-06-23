@@ -1394,6 +1394,147 @@ private theorem list_sum_map_flatMap {α β : Type} (xs : List α) (f : α → L
 def partrecTM1LabelStmtSupportWeight (q : Turing.PartrecToTM2.Λ') : Nat :=
   tm2to1LabelStmtSupportWeight partrecTM2 q
 
+/-- Code-level statement-support weight for a `ret` evaluator label payload.
+
+For an encoded `ret k` label, the payload is `encodeCont k + 1`. The halt
+continuation has payload `1`; non-halt constructors are distinguished by the
+two low constructor bits in `payload - 2`.
+-/
+def partrecTM1RetStmtSupportWeightCode (payload : Nat) : Nat :=
+  if payload = 1 then 2
+  else if (payload - 2).bodd then
+    if ((payload - 2).div2).bodd then 15 else 1
+  else 1
+
+theorem partrecTM1RetStmtSupportWeightCode_primrec :
+    Primrec partrecTM1RetStmtSupportWeightCode := by
+  unfold partrecTM1RetStmtSupportWeightCode
+  let hpred : Primrec fun payload : Nat => payload - 2 :=
+    Primrec.nat_sub.comp Primrec.id (Primrec.const 2)
+  let hbodd : Primrec fun payload : Nat => (payload - 2).bodd :=
+    Primrec.nat_bodd.comp hpred
+  let hdivBodd : Primrec fun payload : Nat => ((payload - 2).div2).bodd :=
+    Primrec.nat_bodd.comp (Primrec.nat_div2.comp hpred)
+  let hrest : Primrec fun payload : Nat =>
+      if (payload - 2).bodd then
+        if ((payload - 2).div2).bodd then 15 else 1
+      else 1 :=
+    (Primrec.cond hbodd
+      (Primrec.cond hdivBodd (Primrec.const 15) (Primrec.const 1))
+      (Primrec.const 1)).of_eq fun payload => by
+        cases (payload - 2).bodd <;> cases ((payload - 2).div2).bodd <;> rfl
+  exact Primrec.ite (Primrec.eq.comp Primrec.id (Primrec.const 1)) (Primrec.const 2)
+    hrest
+
+theorem partrecTM1RetStmtSupportWeightCode_encodeCont
+    (k : Turing.PartrecToTM2.Cont') :
+    partrecTM1RetStmtSupportWeightCode
+        (Turing.PartrecToTM2.Cont'.encodeCont k + 1) =
+      partrecTM1LabelStmtSupportWeight (Turing.PartrecToTM2.Λ'.ret k) := by
+  cases k <;>
+    simp [partrecTM1RetStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+      tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+      Turing.PartrecToTM2.pop', tm2to1TrNormalSupportLength,
+      tm2to1AuxStmtSupportWeight, tm2to1RetStmtSupportLength,
+      tm2to1GoStmtSupportLength,
+      Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+
+/-- Code-level statement-support weight for an evaluator label. -/
+def partrecTM1LabelStmtSupportWeightCode (n : Nat) : Nat :=
+  if n % 8 = 1 then 27
+  else if n % 8 = 2 then 17
+  else if n % 8 = 3 then 37
+  else if n % 8 = 4 then 13
+  else if n % 8 = 5 then 1
+  else if n % 8 = 6 then 59
+  else if n % 8 = 7 then 52
+  else partrecTM1RetStmtSupportWeightCode (n / 8)
+
+theorem partrecTM1LabelStmtSupportWeightCode_primrec :
+    Primrec partrecTM1LabelStmtSupportWeightCode := by
+  unfold partrecTM1LabelStmtSupportWeightCode
+  let htag : Primrec fun n : Nat => n % 8 :=
+    Primrec.nat_mod.comp Primrec.id (Primrec.const 8)
+  let hret : Primrec fun n : Nat => partrecTM1RetStmtSupportWeightCode (n / 8) :=
+    partrecTM1RetStmtSupportWeightCode_primrec.comp
+      (Primrec.nat_div.comp Primrec.id (Primrec.const 8))
+  exact Primrec.ite (Primrec.eq.comp htag (Primrec.const 1)) (Primrec.const 27)
+    (Primrec.ite (Primrec.eq.comp htag (Primrec.const 2)) (Primrec.const 17)
+      (Primrec.ite (Primrec.eq.comp htag (Primrec.const 3)) (Primrec.const 37)
+        (Primrec.ite (Primrec.eq.comp htag (Primrec.const 4)) (Primrec.const 13)
+          (Primrec.ite (Primrec.eq.comp htag (Primrec.const 5)) (Primrec.const 1)
+            (Primrec.ite (Primrec.eq.comp htag (Primrec.const 6)) (Primrec.const 59)
+              (Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) (Primrec.const 52)
+                hret))))))
+
+theorem partrecTM1LabelStmtSupportWeightCode_encodeLabel
+    (q : Turing.PartrecToTM2.Λ') :
+    partrecTM1LabelStmtSupportWeightCode (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      partrecTM1LabelStmtSupportWeight q := by
+  cases q with
+  | move p k₁ k₂ q =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.push',
+        tm2to1TrNormalSupportLength, tm2to1AuxStmtSupportWeight,
+        tm2to1RetStmtSupportLength, tm2to1GoStmtSupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_move]
+  | push k f q =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        tm2to1TrNormalSupportLength, tm2to1AuxStmtSupportWeight,
+        tm2to1RetStmtSupportLength, tm2to1GoStmtSupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_push]
+  | read f =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        tm2to1TrNormalSupportLength, tm2to1AuxStmtSupportWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_read]
+  | clear p k q =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', tm2to1TrNormalSupportLength,
+        tm2to1AuxStmtSupportWeight, tm2to1RetStmtSupportLength,
+        tm2to1GoStmtSupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_clear]
+  | copy q =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.push',
+        tm2to1TrNormalSupportLength, tm2to1AuxStmtSupportWeight,
+        tm2to1RetStmtSupportLength, tm2to1GoStmtSupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_copy]
+  | succ q =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', tm2to1TrNormalSupportLength,
+        tm2to1AuxStmtSupportWeight, tm2to1RetStmtSupportLength,
+        tm2to1GoStmtSupportLength,
+        Turing.PartrecToTM2.Λ'.encodeLabel_succ]
+  | pred q₁ q₂ =>
+      simp [partrecTM1LabelStmtSupportWeightCode, partrecTM1LabelStmtSupportWeight,
+        tm2to1LabelStmtSupportWeight, partrecTM2, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.peek',
+        tm2to1TrNormalSupportLength, tm2to1AuxStmtSupportWeight,
+        tm2to1GoStmtSupportLength,
+        tm2to1RetStmtSupportLength, Turing.PartrecToTM2.Λ'.encodeLabel_pred]
+  | ret k =>
+      have hcode :
+          Turing.PartrecToTM2.Λ'.encodeLabel
+              (Turing.PartrecToTM2.Λ'.ret k) =
+            8 * (Turing.PartrecToTM2.Cont'.encodeCont k + 1) + 0 := by
+        rw [Turing.PartrecToTM2.Λ'.encodeLabel_ret]
+        omega
+      rw [hcode]
+      simp [partrecTM1LabelStmtSupportWeightCode,
+        partrecTM1RetStmtSupportWeightCode_encodeCont]
+
+theorem partrecTM1LabelStmtSupportWeight_primrec :
+    Primrec partrecTM1LabelStmtSupportWeight := by
+  exact (partrecTM1LabelStmtSupportWeightCode_primrec.comp Primrec.encode).of_eq fun q => by
+    rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+    exact partrecTM1LabelStmtSupportWeightCode_encodeLabel q
+
 theorem tm1StmtSupportList_length {Γ Λ σ : Type}
     (stmt : Turing.TM1.Stmt Γ Λ σ) :
     (tm1StmtSupportList stmt).length = tm1StmtSupportLength stmt := by
@@ -1644,6 +1785,27 @@ theorem partrecStartedTM0StatementCount_eq_weightData (tc : Turing.ToPartrec.Cod
   apply List.map_congr_left
   intro q _hq
   simpa [partrecTM1LabelStmtSupportWeight] using tm2to1LabelList_statementWeight q
+
+theorem partrecStartedTM0StatementCountWeightData_primrec
+    (hweight :
+      Primrec (PartrecToTM2SupportList.labelWeight partrecTM1LabelStmtSupportWeight)) :
+    Primrec partrecStartedTM0StatementCountWeightData := by
+  unfold partrecStartedTM0StatementCountWeightData
+  exact Primrec.nat_add.comp (Primrec.const 1) hweight
+
+theorem partrecStartedTM0StatementCount_primrec_of_labelWeight
+    (hweight :
+      Primrec (PartrecToTM2SupportList.labelWeight partrecTM1LabelStmtSupportWeight)) :
+    Primrec partrecStartedTM0StatementCount :=
+  (partrecStartedTM0StatementCountWeightData_primrec hweight).of_eq fun tc => by
+    rw [partrecStartedTM0StatementCount_eq_weightData]
+
+theorem partrecStartedTM0StatementCount_primrec_of_supportWeight
+    (hweight :
+      Primrec₂ (PartrecToTM2SupportList.codeSuppWeight partrecTM1LabelStmtSupportWeight)) :
+    Primrec partrecStartedTM0StatementCount :=
+  partrecStartedTM0StatementCount_primrec_of_labelWeight
+    (PartrecToTM2SupportList.labelWeight_primrec_of_codeSuppWeight hweight)
 
 theorem partrecStartedTM0StatementList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0StatementList tc).length =
