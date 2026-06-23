@@ -168,6 +168,91 @@ theorem tm0StmtMove_primrec : Primrec (Turing.TM0.Stmt.move (Γ := SourceSymbol)
 theorem tm0StmtWrite_primrec : Primrec (Turing.TM0.Stmt.write (Γ := SourceSymbol)) := by
   exact tm0StmtOfSum_primrec.comp Primrec.sumInr
 
+def trAuxMeasure (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) : Nat :=
+  (TM0Route.PartrecStartedTM1StmtNode.ofStmt p.1).length
+
+def trAuxDeps (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) :
+    List (SourceStmt tc × PartrecVar × SourceSymbol) :=
+  match p with
+  | (Turing.TM1.Stmt.move _ _, _, _) => []
+  | (Turing.TM1.Stmt.write _ _, _, _) => []
+  | (Turing.TM1.Stmt.load f q, v, a) => [(q, f a v, a)]
+  | (Turing.TM1.Stmt.branch f q₁ q₂, v, a) =>
+      if f a v then [(q₁, v, a)] else [(q₂, v, a)]
+  | (Turing.TM1.Stmt.goto _, _, _) => []
+  | (Turing.TM1.Stmt.halt, _, _) => []
+
+theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol)
+    (p' : SourceStmt tc × PartrecVar × SourceSymbol)
+    (hp' : p' ∈ trAuxDeps tc p) :
+    trAuxMeasure tc p' < trAuxMeasure tc p := by
+  rcases p with ⟨stmt, v, a⟩
+  cases stmt with
+  | move d q =>
+      simp [trAuxDeps] at hp'
+  | write f q =>
+      simp [trAuxDeps] at hp'
+  | load f q =>
+      simp [trAuxDeps] at hp'
+      subst p'
+      simp [trAuxMeasure, TM0Route.PartrecStartedTM1StmtNode.ofStmt]
+  | branch f q₁ q₂ =>
+      by_cases h : f a v
+      · simp [trAuxDeps, h] at hp'
+        subst p'
+        simp [trAuxMeasure, TM0Route.PartrecStartedTM1StmtNode.ofStmt]
+        omega
+      · simp [trAuxDeps, h] at hp'
+        subst p'
+        simp [trAuxMeasure, TM0Route.PartrecStartedTM1StmtNode.ofStmt]
+        omega
+  | goto f =>
+      simp [trAuxDeps] at hp'
+  | halt =>
+      simp [trAuxDeps] at hp'
+
+def trAuxBody (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol)
+    (rec : List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  match p with
+  | (Turing.TM1.Stmt.move d q, v, _) =>
+      some ((some q, v), Turing.TM0.Stmt.move d)
+  | (Turing.TM1.Stmt.write f q, v, a) =>
+      some ((some q, v), Turing.TM0.Stmt.write (f a v))
+  | (Turing.TM1.Stmt.load _ _, _, _) => rec.head?
+  | (Turing.TM1.Stmt.branch _ _ _, _, _) => rec.head?
+  | (Turing.TM1.Stmt.goto f, v, a) =>
+      some ((some (TM0Route.partrecStartedTM1Machine tc (f a v)), v),
+        Turing.TM0.Stmt.write a)
+  | (Turing.TM1.Stmt.halt, v, a) =>
+      some ((none, v), Turing.TM0.Stmt.write a)
+
+theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) :
+    trAuxBody tc p
+        ((trAuxDeps tc p).map fun p' =>
+          Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p'.2.2 p'.1 p'.2.1) =
+      some (Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1) := by
+  rcases p with ⟨stmt, v, a⟩
+  cases stmt with
+  | move d q =>
+      rfl
+  | write f q =>
+      rfl
+  | load f q =>
+      rfl
+  | branch f q₁ q₂ =>
+      by_cases h : f a v <;>
+        simp [trAuxBody, trAuxDeps, Turing.TM1to0.trAux, h]
+  | goto f =>
+      rfl
+  | halt =>
+      rfl
+
 def sourceMachineStepOfStmt (tc : Turing.ToPartrec.Code)
     (stmt : Option (SourceStmt tc)) (v : PartrecVar) (a : SourceSymbol) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
