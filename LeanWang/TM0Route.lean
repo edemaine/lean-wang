@@ -6926,9 +6926,103 @@ theorem tm2to1GoBody_primrec_fixed_k
     (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
       (Primrec.pair (Primrec.const Turing.Dir.right) hgoto)
   exact ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
-    (Primrec.pair
-      (Primrec.pair (Primrec.const (tm2to1StackEmptyBranchPayload k)) hthen)
-      helse)).of_eq fun _ => rfl
+      (Primrec.pair
+        (Primrec.pair (Primrec.const (tm2to1StackEmptyBranchPayload k)) hthen)
+        helse)).of_eq fun _ => rfl
+
+noncomputable def tm2to1GoCodeBody (tc : Turing.ToPartrec.Code) :
+    PartrecStartedTM1GoCode tc → PartrecStartedTM0Stmt tc
+  | Sum.inl (Sum.inl p) => tm2to1GoBody tc Turing.PartrecToTM2.K'.main p
+  | Sum.inl (Sum.inr p) => tm2to1GoBody tc Turing.PartrecToTM2.K'.rev p
+  | Sum.inr (Sum.inl p) => tm2to1GoBody tc Turing.PartrecToTM2.K'.aux p
+  | Sum.inr (Sum.inr p) => tm2to1GoBody tc Turing.PartrecToTM2.K'.stack p
+
+theorem tm2to1GoCodeBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1GoCodeBody tc) := by
+  have hleft : Primrec (fun c :
+      (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc) ⊕
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc) =>
+      match c with
+      | Sum.inl p => tm2to1GoBody tc Turing.PartrecToTM2.K'.main p
+      | Sum.inr p => tm2to1GoBody tc Turing.PartrecToTM2.K'.rev p) := by
+    have hmain : Primrec₂ (fun _c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc) =>
+        fun p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc =>
+          tm2to1GoBody tc Turing.PartrecToTM2.K'.main p) := by
+      apply Primrec₂.mk
+      exact (tm2to1GoBody_primrec_fixed_k tc Turing.PartrecToTM2.K'.main).comp Primrec.snd
+    have hrev : Primrec₂ (fun _c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc) =>
+        fun p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc =>
+          tm2to1GoBody tc Turing.PartrecToTM2.K'.rev p) := by
+      apply Primrec₂.mk
+      exact (tm2to1GoBody_primrec_fixed_k tc Turing.PartrecToTM2.K'.rev).comp Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.id hmain hrev).of_eq fun c => by
+      cases c <;> rfl
+  have hright : Primrec (fun c :
+      (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc) ⊕
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc) =>
+      match c with
+      | Sum.inl p => tm2to1GoBody tc Turing.PartrecToTM2.K'.aux p
+      | Sum.inr p => tm2to1GoBody tc Turing.PartrecToTM2.K'.stack p) := by
+    have haux : Primrec₂ (fun _c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc) =>
+        fun p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc =>
+          tm2to1GoBody tc Turing.PartrecToTM2.K'.aux p) := by
+      apply Primrec₂.mk
+      exact (tm2to1GoBody_primrec_fixed_k tc Turing.PartrecToTM2.K'.aux).comp Primrec.snd
+    have hstack : Primrec₂ (fun _c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc) =>
+        fun p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc =>
+          tm2to1GoBody tc Turing.PartrecToTM2.K'.stack p) := by
+      apply Primrec₂.mk
+      exact (tm2to1GoBody_primrec_fixed_k tc Turing.PartrecToTM2.K'.stack).comp Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.id haux hstack).of_eq fun c => by
+      cases c <;> rfl
+  have hleft₂ : Primrec₂ (fun _c : PartrecStartedTM1GoCode tc =>
+      fun c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc) =>
+        match c with
+        | Sum.inl p => tm2to1GoBody tc Turing.PartrecToTM2.K'.main p
+        | Sum.inr p => tm2to1GoBody tc Turing.PartrecToTM2.K'.rev p) := by
+    apply Primrec₂.mk
+    exact hleft.comp Primrec.snd
+  have hright₂ : Primrec₂ (fun _c : PartrecStartedTM1GoCode tc =>
+      fun c :
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc) ⊕
+          (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc) =>
+        match c with
+        | Sum.inl p => tm2to1GoBody tc Turing.PartrecToTM2.K'.aux p
+        | Sum.inr p => tm2to1GoBody tc Turing.PartrecToTM2.K'.stack p) := by
+    apply Primrec₂.mk
+    exact hright.comp Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.id hleft₂ hright₂).of_eq fun c => by
+    rcases c with c | c <;> rcases c with p | p <;> rfl
 
 /--
 One reconstruction step for `TM2to1.trNormal` from already translated
@@ -7299,9 +7393,74 @@ theorem tm2to1RetBody_primrec (tc : Turing.ToPartrec.Code) :
     (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
       (Primrec.pair (Primrec.const Turing.Dir.left) hgoto)
   exact ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
-    (Primrec.pair
-      (Primrec.pair (Primrec.const tm2to1BottomBranchPayload) hnormal)
-      helse)).of_eq fun _ => rfl
+      (Primrec.pair
+        (Primrec.pair (Primrec.const tm2to1BottomBranchPayload) hnormal)
+        helse)).of_eq fun _ => rfl
+
+noncomputable def tm2to1TrCodeBody (tc : Turing.ToPartrec.Code)
+    (M : StartedLabel tc → PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1LabelCode tc → PartrecStartedTM0Stmt tc
+  | Sum.inl q => Turing.TM2to1.trNormal (M q)
+  | Sum.inr (Sum.inl goCode) => tm2to1GoCodeBody tc goCode
+  | Sum.inr (Sum.inr q) => tm2to1RetBody tc q
+
+theorem tm2to1TrCodeBody_primrec_of_tm2
+    (tc : Turing.ToPartrec.Code)
+    (M : StartedLabel tc → PartrecStartedTM2Stmt tc)
+    (hM : Primrec M) :
+    Primrec (tm2to1TrCodeBody tc M) := by
+  have hnormal : Primrec (fun q : StartedLabel tc =>
+      Turing.TM2to1.trNormal (M q)) :=
+    ((tm2to1TrNormal_primrec tc).comp
+      ((PartrecStartedTM2StmtNode.toValidCode_primrec tc).comp hM)).of_eq fun q => by
+        rw [PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
+  have hnormal₂ : Primrec₂ (fun _code : PartrecStartedTM1LabelCode tc =>
+      fun q : StartedLabel tc => Turing.TM2to1.trNormal (M q)) := by
+    apply Primrec₂.mk
+    exact hnormal.comp Primrec.snd
+  have hrest : Primrec (fun rest :
+      PartrecStartedTM1GoCode tc ⊕ PartrecStartedTM2Stmt tc =>
+      match rest with
+      | Sum.inl goCode => tm2to1GoCodeBody tc goCode
+      | Sum.inr q => tm2to1RetBody tc q) := by
+    have hgo : Primrec₂ (fun _rest :
+        PartrecStartedTM1GoCode tc ⊕ PartrecStartedTM2Stmt tc =>
+        fun goCode : PartrecStartedTM1GoCode tc =>
+          tm2to1GoCodeBody tc goCode) := by
+      apply Primrec₂.mk
+      exact (tm2to1GoCodeBody_primrec tc).comp Primrec.snd
+    have hret : Primrec₂ (fun _rest :
+        PartrecStartedTM1GoCode tc ⊕ PartrecStartedTM2Stmt tc =>
+        fun q : PartrecStartedTM2Stmt tc => tm2to1RetBody tc q) := by
+      apply Primrec₂.mk
+      exact (tm2to1RetBody_primrec tc).comp Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.id hgo hret).of_eq fun rest => by
+      cases rest <;> rfl
+  have hrest₂ : Primrec₂ (fun _code : PartrecStartedTM1LabelCode tc =>
+      fun rest : PartrecStartedTM1GoCode tc ⊕ PartrecStartedTM2Stmt tc =>
+      match rest with
+      | Sum.inl goCode => tm2to1GoCodeBody tc goCode
+      | Sum.inr q => tm2to1RetBody tc q) := by
+    apply Primrec₂.mk
+    exact hrest.comp Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.id hnormal₂ hrest₂).of_eq fun code => by
+    rcases code with q | rest
+    · rfl
+    · rcases rest with goCode | q <;> rfl
+
+theorem tm2to1Tr_primrec_of_tm2
+    (tc : Turing.ToPartrec.Code)
+    (M : StartedLabel tc → PartrecStartedTM2Stmt tc)
+    (hM : Primrec M) :
+    Primrec (Turing.TM2to1.tr M :
+      PartrecStartedTM1Label tc → PartrecStartedTM0Stmt tc) := by
+  exact ((tm2to1TrCodeBody_primrec_of_tm2 tc M hM).comp
+    (partrecStartedTM1Label_toCode_primrec tc)).of_eq fun q => by
+      cases q with
+      | normal q => rfl
+      | go k s q =>
+          cases k <;> rfl
+      | ret q => rfl
 
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
