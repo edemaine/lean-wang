@@ -4704,6 +4704,59 @@ theorem mem_properTails_length_lt {tc : Turing.ToPartrec.Code}
   rw [List.length_drop]
   omega
 
+def firstStmtComplete {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) (i : Nat) : Bool :=
+  decide ((nodes.take (i + 1)).foldl validStep (true, 1) = (true, 0))
+
+theorem firstStmtComplete_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (firstStmtComplete (tc := tc)) := by
+  apply Primrec₂.mk
+  let takePrefix :
+      List (PartrecStartedTM1StmtNode tc) × Nat → List (PartrecStartedTM1StmtNode tc) :=
+    fun p => p.1.take (p.2 + 1)
+  have htake : Primrec takePrefix :=
+    Primrec.list_take.comp (Primrec.succ.comp Primrec.snd) Primrec.fst
+  have hfold : Primrec (fun p : List (PartrecStartedTM1StmtNode tc) × Nat =>
+      (takePrefix p).foldl validStep (true, 1)) :=
+    Primrec.list_foldl htake (Primrec.const (true, 1))
+      (((validStep_primrec tc).comp Primrec.snd).to₂)
+  have hpred : PrimrecPred (fun p : List (PartrecStartedTM1StmtNode tc) × Nat =>
+      (takePrefix p).foldl validStep (true, 1) = (true, 0)) :=
+    Primrec.eq.comp hfold (Primrec.const (true, 0))
+  exact (hpred.decide).of_eq fun p => by
+    simp [firstStmtComplete, takePrefix]
+
+def firstStmtLength {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) : Nat :=
+  ((List.range nodes.length).findIdx fun i => firstStmtComplete nodes i) + 1
+
+theorem firstStmtLength_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (firstStmtLength (tc := tc)) := by
+  unfold firstStmtLength
+  exact Primrec.succ.comp
+    (Primrec.list_findIdx (Primrec.list_range.comp Primrec.list_length)
+      (firstStmtComplete_primrec tc))
+
+def firstStmtNodes {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    List (PartrecStartedTM1StmtNode tc) :=
+  nodes.take (firstStmtLength nodes)
+
+theorem firstStmtNodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (firstStmtNodes (tc := tc)) := by
+  unfold firstStmtNodes
+  exact Primrec.list_take.comp (firstStmtLength_primrec tc) Primrec.id
+
+def afterFirstStmtNodes {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    List (PartrecStartedTM1StmtNode tc) :=
+  nodes.drop (firstStmtLength nodes)
+
+theorem afterFirstStmtNodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (afterFirstStmtNodes (tc := tc)) := by
+  unfold afterFirstStmtNodes
+  exact Primrec.list_drop.comp (firstStmtLength_primrec tc) Primrec.id
+
 end PartrecStartedTM1StmtNode
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
