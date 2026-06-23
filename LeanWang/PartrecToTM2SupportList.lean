@@ -1168,6 +1168,20 @@ theorem contEncodeFuelBound_primrec :
         (Primrec.snd.comp Primrec.snd))
   exact Primrec.nat_rec' (Primrec.fst.comp Primrec.fst) hbase hstep
 
+theorem contEncodeFuelBound_succ_start
+    (fuel codeBound contBound : Nat) :
+    contEncodeFuelBound fuel codeBound (contEncodeBoundStep codeBound contBound) =
+      contEncodeFuelBound (fuel + 1) codeBound contBound := by
+  induction fuel generalizing contBound with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      change
+        contEncodeBoundStep codeBound
+            (contEncodeFuelBound fuel codeBound (contEncodeBoundStep codeBound contBound)) =
+          contEncodeBoundStep codeBound (contEncodeFuelBound (fuel + 1) codeBound contBound)
+      rw [ih]
+
 theorem childState_cons_left_lt_boundStep
     {f fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
     (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.cons f fs) ≤ codeBound)
@@ -1394,6 +1408,34 @@ theorem trNormalLabelCodeFuelRowStep_getD_eq
       trNormalLabelCodeFuelStep prev s.1 s.2) (d := 0) hlt]
   simp only [List.getElem_map, List.getElem_range]
   exact trNormalLabelCodeFuelStep_eq hprev _ _
+
+theorem trNormalLabelCodeFuelRowStep_lookup_eq_of_bound
+    {prev : List Nat} {fuel codeBound contBound bound : Nat}
+    (hprev : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prev c k = trNormalLabelCodeFuel fuel c k)
+    {c : ToPartrec.Code} {k : Cont'}
+    (hcode : ToPartrec.Code.encodeCode c ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound)
+    (hbound : codeContStateCode c k ≤ bound) :
+    codeContStateLookup (trNormalLabelCodeFuelRowStep prev bound) c k =
+      trNormalLabelCodeFuel (fuel + 1) c k := by
+  unfold codeContStateLookup trNormalLabelCodeFuelRowStep
+  have hlt :
+      codeContStateCode c k <
+        ((List.range (bound + 1)).map fun n =>
+          let s := codeContStateOfCode n
+          trNormalLabelCodeFuelStep prev s.1 s.2).length := by
+    simp
+    omega
+  rw [List.getD_eq_getElem
+    (l := (List.range (bound + 1)).map fun n =>
+      let s := codeContStateOfCode n
+      trNormalLabelCodeFuelStep prev s.1 s.2) (d := 0) hlt]
+  simp only [List.getElem_map, List.getElem_range]
+  rw [codeContStateOfCode_codeContStateCode]
+  exact trNormalLabelCodeFuelStep_eq_of_bound hprev hcode hcont
 
 /-- Numeric version of `trNormalLabelCodeFuelStep`, dispatching on dense source-code tags. -/
 def trNormalLabelCodeFuelStepCode (prev : List Nat) (cCode : Nat) (k : Cont') : Nat :=
@@ -2145,6 +2187,39 @@ theorem codeSuppWeightCodeFuelRowStep'_getD_eq
       codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight s.1 s.2) (d := 0) hlt]
   simp only [List.getElem_map, List.getElem_range]
   exact codeSuppWeightCodeFuelStep'_eq wCode hlabel hweight _ _
+
+theorem codeSuppWeightCodeFuelRowStep'_lookup_eq_of_bound
+    (wCode : Nat → Nat)
+    {prevLabel prevWeight : List Nat} {fuel codeBound contBound bound : Nat}
+    (hlabel : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prevLabel c k = trNormalLabelCodeFuel fuel c k)
+    (hweight : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prevWeight c k = codeSuppWeightCodeFuel' wCode fuel c k)
+    {c : ToPartrec.Code} {k : Cont'}
+    (hcode : ToPartrec.Code.encodeCode c ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound)
+    (hbound : codeContStateCode c k ≤ bound) :
+    codeContStateLookup (codeSuppWeightCodeFuelRowStep' wCode prevLabel prevWeight bound) c k =
+      codeSuppWeightCodeFuel' wCode (fuel + 1) c k := by
+  unfold codeContStateLookup codeSuppWeightCodeFuelRowStep'
+  have hlt :
+      codeContStateCode c k <
+        ((List.range (bound + 1)).map fun n =>
+          let s := codeContStateOfCode n
+          codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight s.1 s.2).length := by
+    simp
+    omega
+  rw [List.getD_eq_getElem
+    (l := (List.range (bound + 1)).map fun n =>
+      let s := codeContStateOfCode n
+      codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight s.1 s.2) (d := 0) hlt]
+  simp only [List.getElem_map, List.getElem_range]
+  rw [codeContStateOfCode_codeContStateCode]
+  exact codeSuppWeightCodeFuelStep'_eq_of_bound wCode hlabel hweight hcode hcont
 
 def codeSuppWeightCodeFuelRowsBase (bound : Nat) : List Nat × List Nat :=
   let row := (List.range (bound + 1)).map fun _ => 0
