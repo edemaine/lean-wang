@@ -2835,6 +2835,13 @@ theorem simStepDataForLabelIndexFrom_primrec_fixed_of_machine
   simStepDataForLabelIndexFrom_primrec_fixed_of_trAux tc
     (trAux_primrec_fixed_of_machine tc hmachine)
 
+theorem simStepDataForLabelIndexFrom_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFrom tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFrom_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
 theorem simStepDataForLabelIndexStart_eq
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     simStepDataForLabelIndexStart tc i = simStepDataForLabelIndex tc i := by
@@ -2858,6 +2865,12 @@ theorem simStepDataForLabelIndexStart_primrec_fixed_of_machine
   simStepDataForLabelIndexStart_primrec_fixed_of_trAux tc
     (trAux_primrec_fixed_of_machine tc hmachine)
 
+theorem simStepDataForLabelIndexStart_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (simStepDataForLabelIndexStart tc) :=
+  simStepDataForLabelIndexStart_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
 theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -2872,6 +2885,12 @@ theorem simStepDataForLabelIndex_primrec_fixed_of_machine
     Primrec (simStepDataForLabelIndex tc) :=
   simStepDataForLabelIndex_primrec_fixed_of_trAux tc
     (trAux_primrec_fixed_of_machine tc hmachine)
+
+theorem simStepDataForLabelIndex_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (simStepDataForLabelIndex tc) :=
+  simStepDataForLabelIndex_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
 
 /--
 Indexed mirror of `simStepData`. This is definitionally driven by the
