@@ -764,6 +764,48 @@ theorem valid_primrecPred (tc : Turing.ToPartrec.Code) :
       (((validStep_primrec tc).comp Primrec.snd).to₂))
     (Primrec.const (true, 0))
 
+theorem foldl_validStep_false {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) (slots : Nat) :
+    nodes.foldl validStep (false, slots) = (false, slots) := by
+  induction nodes generalizing slots with
+  | nil =>
+      rfl
+  | cons node rest ih =>
+      simp [validStep, ih]
+
+theorem foldl_validStep_true_zero {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    nodes.foldl validStep (true, 0) =
+      match nodes with
+      | [] => (true, 0)
+      | _ :: _ => (false, 0) := by
+  cases nodes with
+  | nil =>
+      rfl
+  | cons node rest =>
+      simp [validStep, foldl_validStep_false]
+
+theorem foldl_validStep_true_zero_eq_true_zero_iff {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    nodes.foldl validStep (true, 0) = (true, 0) ↔ nodes = [] := by
+  cases nodes with
+  | nil =>
+      simp
+  | cons node rest =>
+      simp only [List.foldl_cons]
+      rw [show validStep (true, 0) node = (false, 0) by simp [validStep]]
+      rw [foldl_validStep_false]
+      simp
+
+theorem valid_tail_nil_of_arity_zero {tc : Turing.ToPartrec.Code}
+    {node : PartrecStartedTM2StmtNode tc} {rest : List (PartrecStartedTM2StmtNode tc)}
+    (harity : arity node = 0)
+    (hvalid : (node :: rest).foldl validStep (true, 1) = (true, 0)) :
+    rest = [] := by
+  have htail : rest.foldl validStep (true, 0) = (true, 0) := by
+    simpa [validStep, harity] using hvalid
+  exact (foldl_validStep_true_zero_eq_true_zero_iff rest).1 htail
+
 /-- The concrete started TM2 statement type encoded by these preorder nodes. -/
 abbrev Stmt (tc : Turing.ToPartrec.Code) : Type :=
   Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar
