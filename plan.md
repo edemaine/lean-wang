@@ -200,7 +200,12 @@ dependency on encoded TM1 statements for this part of the count proof.
 this statement-free form. The label-level summand is now proved primitive
 recursive by a small code-level classifier,
 `TM0Route.partrecTM2SupportLength_primrec`. The next count step is to prove the
-executable evaluator label list and its summed counts primitive recursive.
+executable evaluator label list primitive recursive. Conditional bridges are
+now in place:
+`partrecStartedTM2LabelCount_primrec_of_labelList`,
+`partrecStartedTM1LabelCountData_primrec_of_labelList`, and
+`partrecStartedTM1LabelCount_primrec_of_labelList` reduce the started-TM1 label
+count to that single remaining list-computability fact.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

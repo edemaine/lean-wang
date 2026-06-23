@@ -1075,6 +1075,29 @@ def partrecStartedTM1LabelCountData (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM2LabelCount tc +
     ((PartrecToTM2SupportList.labelList tc).map partrecTM2SupportLength).sum
 
+theorem partrecStartedTM2LabelCount_primrec_of_labelList
+    (hlabel : Primrec PartrecToTM2SupportList.labelList) :
+    Primrec partrecStartedTM2LabelCount := by
+  exact (Primrec.list_length.comp hlabel).of_eq fun tc => by
+    rw [partrecStartedTM2LabelCount, ← PartrecToTM2SupportList.labelList_length]
+
+theorem partrecStartedTM1LabelCountData_primrec_of_labelList
+    (hlabel : Primrec PartrecToTM2SupportList.labelList) :
+    Primrec partrecStartedTM1LabelCountData := by
+  unfold partrecStartedTM1LabelCountData
+  have hcount : Primrec partrecStartedTM2LabelCount :=
+    partrecStartedTM2LabelCount_primrec_of_labelList hlabel
+  have hmap :
+      Primrec fun tc : Turing.ToPartrec.Code =>
+        (PartrecToTM2SupportList.labelList tc).map partrecTM2SupportLength := by
+    refine Primrec.list_map hlabel ?_
+    exact (partrecTM2SupportLength_primrec.comp Primrec.snd).to₂
+  have hsum :
+      Primrec fun tc : Turing.ToPartrec.Code =>
+        ((PartrecToTM2SupportList.labelList tc).map partrecTM2SupportLength).sum :=
+    list_sum_nat_primrec hmap
+  exact Primrec.nat_add.comp hcount hsum
+
 theorem partrecStartedTM1LabelCount_eq_data (tc : Turing.ToPartrec.Code) :
     partrecStartedTM1LabelCount tc = partrecStartedTM1LabelCountData tc := by
   unfold partrecStartedTM1LabelCount partrecStartedTM1LabelCountData
@@ -1083,6 +1106,12 @@ theorem partrecStartedTM1LabelCount_eq_data (tc : Turing.ToPartrec.Code) :
   apply List.map_congr_left
   intro q _hq
   exact tm2to1StmtSupportLength_partrecTM2 q
+
+theorem partrecStartedTM1LabelCount_primrec_of_labelList
+    (hlabel : Primrec PartrecToTM2SupportList.labelList) :
+    Primrec partrecStartedTM1LabelCount :=
+  (partrecStartedTM1LabelCountData_primrec_of_labelList hlabel).of_eq fun tc =>
+    (partrecStartedTM1LabelCount_eq_data tc).symm
 
 theorem partrecStartedTM1LabelList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM1LabelList tc).length = partrecStartedTM1LabelCount tc := by
