@@ -4662,6 +4662,48 @@ theorem ofStmt_length_primrec (tc : Turing.ToPartrec.Code) :
     Primrec (fun stmt : Stmt tc => (ofStmt stmt).length) :=
   Primrec.list_length.comp (ofStmt_primrec tc)
 
+def ofStmtHead? {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) : Option (PartrecStartedTM1StmtNode tc) :=
+  (ofStmt stmt).head?
+
+theorem ofStmtHead?_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofStmtHead? (tc := tc)) :=
+  Primrec.list_head?.comp (ofStmt_primrec tc)
+
+def ofStmtTail {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) : List (PartrecStartedTM1StmtNode tc) :=
+  (ofStmt stmt).tail
+
+theorem ofStmtTail_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofStmtTail (tc := tc)) :=
+  Primrec.list_tail.comp (ofStmt_primrec tc)
+
+theorem ofStmtTail_length_lt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
+    (ofStmtTail stmt).length < (ofStmt stmt).length := by
+  cases stmt <;> simp [ofStmtTail, ofStmt]
+
+def properTails {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    List (List (PartrecStartedTM1StmtNode tc)) :=
+  (List.range nodes.length).map fun i => nodes.drop (i + 1)
+
+theorem properTails_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (properTails (tc := tc)) := by
+  unfold properTails
+  refine Primrec.list_map (Primrec.list_range.comp Primrec.list_length) ?_
+  exact Primrec.list_drop.comp
+    (Primrec.succ.comp Primrec₂.right) Primrec₂.left
+
+theorem mem_properTails_length_lt {tc : Turing.ToPartrec.Code}
+    {nodes tail : List (PartrecStartedTM1StmtNode tc)}
+    (htail : tail ∈ properTails nodes) :
+    tail.length < nodes.length := by
+  unfold properTails at htail
+  rcases List.mem_map.1 htail with ⟨i, hi, rfl⟩
+  have hi' : i < nodes.length := List.mem_range.1 hi
+  rw [List.length_drop]
+  omega
+
 end PartrecStartedTM1StmtNode
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
