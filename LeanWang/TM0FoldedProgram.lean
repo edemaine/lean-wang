@@ -262,6 +262,18 @@ theorem foldedSimStateCode_eq_ofCode (tc : Turing.ToPartrec.Code)
       foldedSimStateOfCode side (TM0FiniteCompiler.stateCode tc q) := by
   rfl
 
+theorem foldedSimStateCode_primrec_fixed (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : FoldSide × SourceLabel tc =>
+      foldedSimStateCode tc p.1 p.2) := by
+  exact (foldedSimStateOfCode_primrec.comp
+    (Primrec.pair Primrec.fst
+      (TM0FiniteCompiler.stateCode_primrec_fixed tc |>.comp Primrec.snd))).of_eq
+    fun _ => rfl
+
 def foldedSimStartStateCode : Nat :=
   foldedSimStateOfCode FoldSide.right TM0Route.partrecStartedTM0Start
 
@@ -1034,6 +1046,33 @@ def simStepDataOfStep (tc : Turing.ToPartrec.Code)
     (stmt : Turing.TM0.Stmt SourceSymbol) : SimStepData :=
   (side, marked, TM0FiniteCompiler.stateCode tc q,
     TM0FiniteCompiler.stateCode tc q', left, right, stmt)
+
+theorem simStepDataOfStep_primrec_fixed (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : FoldSide × Bool × SourceLabel tc × SourceLabel tc ×
+        SourceSymbol × SourceSymbol × Turing.TM0.Stmt SourceSymbol =>
+      simStepDataOfStep tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2) := by
+  unfold simStepDataOfStep
+  exact Primrec.pair Primrec.fst
+    (Primrec.pair (Primrec.fst.comp Primrec.snd)
+      (Primrec.pair
+        (TM0FiniteCompiler.stateCode_primrec_fixed tc |>.comp
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)))
+        (Primrec.pair
+          (TM0FiniteCompiler.stateCode_primrec_fixed tc |>.comp
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+              (Primrec.snd.comp Primrec.snd))))
+            (Primrec.pair
+              (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+              (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))))))))
 
 theorem simStepDataRow_ofStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
