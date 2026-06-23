@@ -839,6 +839,12 @@ theorem toCode_primrec (tc : Turing.ToPartrec.Code) :
     (Primrec.of_equiv (e := equivCode tc) :
       Primrec (equivCode tc))
 
+theorem ofCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofCode : Code tc → PartrecStartedTM2StmtNode tc) := by
+  change @Primrec (Code tc) (PartrecStartedTM2StmtNode tc) _
+    (Primcodable.ofEquiv (Code tc) (equivCode tc)) (equivCode tc).symm
+  exact Primrec.of_equiv_symm
+
 theorem arity_primrec (tc : Turing.ToPartrec.Code) :
     Primrec (arity (tc := tc)) :=
   ((codeArity_primrec tc).comp (toCode_primrec tc)).of_eq fun n => by
@@ -1384,6 +1390,53 @@ instance instPrimcodableValidCode (tc : Turing.ToPartrec.Code) :
 noncomputable instance instPrimcodableStmt (tc : Turing.ToPartrec.Code) :
     Primcodable (Stmt tc) :=
   Primcodable.ofEquiv (ValidCode tc) (stmtEquivValidCode tc)
+
+theorem toValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (toValidCode : Stmt tc → ValidCode tc) := by
+  simpa [stmtEquivValidCode] using
+    (Primrec.of_equiv (e := stmtEquivValidCode tc) :
+      Primrec (stmtEquivValidCode tc))
+
+noncomputable def ofValidCode {tc : Turing.ToPartrec.Code}
+    (code : ValidCode tc) : Stmt tc :=
+  (stmtEquivValidCode tc).symm code
+
+theorem ofValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofValidCode (tc := tc)) := by
+  change @Primrec (ValidCode tc) (Stmt tc) (instPrimcodableValidCode tc)
+    (Primcodable.ofEquiv (ValidCode tc) (stmtEquivValidCode tc))
+    (stmtEquivValidCode tc).symm
+  exact Primrec.of_equiv_symm
+
+theorem ofValidCode_toValidCode {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
+    ofValidCode (toValidCode stmt) = stmt := by
+  unfold ofValidCode
+  exact (stmtEquivValidCode tc).left_inv stmt
+
+theorem toValidCode_ofValidCode {tc : Turing.ToPartrec.Code} (code : ValidCode tc) :
+    toValidCode (ofValidCode code) = code := by
+  unfold ofValidCode
+  exact (stmtEquivValidCode tc).right_inv code
+
+theorem ofStmt_ofValidCode {tc : Turing.ToPartrec.Code} (code : ValidCode tc) :
+    ofStmt (ofValidCode code) = code.1 := by
+  have h := congrArg Subtype.val (toValidCode_ofValidCode (tc := tc) code)
+  simpa [toValidCode] using h
+
+theorem ofValidCode_ofStmt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
+    ofValidCode ⟨ofStmt stmt, valid_ofStmt stmt⟩ = stmt := by
+  simpa [toValidCode] using ofValidCode_toValidCode (tc := tc) stmt
+
+theorem ofStmt_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofStmt : Stmt tc → List (PartrecStartedTM2StmtNode tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun code : ValidCode tc => code.1) :=
+    Primrec.subtype_val (hp := valid_primrecPred tc)
+  exact (hval.comp (toValidCode_primrec tc)).of_eq fun stmt => rfl
+
+theorem ofStmt_length_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun stmt : Stmt tc => (ofStmt stmt).length) :=
+  Primrec.list_length.comp (ofStmt_primrec tc)
 
 end PartrecStartedTM2StmtNode
 
