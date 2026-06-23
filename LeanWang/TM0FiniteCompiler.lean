@@ -26,6 +26,15 @@ def stateCode (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) : Nat :=
   (TM0Route.partrecStartedTM0LabelSupportList tc).idxOf q
 
+theorem stateCode_primrec_fixed (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (stateCode tc) := by
+  unfold stateCode
+  exact Primrec.list_idxOf₁ (TM0Route.partrecStartedTM0LabelSupportList tc)
+
 theorem stateCode_default (tc : Turing.ToPartrec.Code)
     : stateCode tc (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) =
       TM0Route.partrecStartedTM0Start := by

@@ -1,6 +1,5 @@
 import LeanWang.Basic
 import LeanWang.Compactness
-import LeanWang.FiniteSearchProgram
 import LeanWang.FuelMachine
 import LeanWang.Machine
 import LeanWang.MachineTiles
