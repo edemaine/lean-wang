@@ -2874,6 +2874,48 @@ theorem partrecStartedTM2ConstGotoBody_eq_relabel
         (Turing.TM2.Stmt.goto (fun _v : PartrecVar => q)) := by
   rfl
 
+def partrecPushDefaultPayload : PartrecVar → Turing.PartrecToTM2.Γ' :=
+  fun s => s.getD default
+
+def partrecUpdateIdPayload : PartrecVar → PartrecVar → PartrecVar :=
+  fun _s v => v
+
+noncomputable def partrecStartedTM2PushDefaultBody (tc : Turing.ToPartrec.Code)
+    (k : PartrecStack) (q : PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.push k partrecPushDefaultPayload q
+
+theorem partrecStartedTM2PushDefaultBody_primrec
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (partrecStartedTM2PushDefaultBody tc k) := by
+  exact ((PartrecStartedTM2StmtNode.stmtPush_primrec tc).comp
+    (Primrec.pair (Primrec.const (k, partrecPushDefaultPayload)) Primrec.id)).of_eq
+      fun _q => rfl
+
+noncomputable def partrecStartedTM2PeekIdBody (tc : Turing.ToPartrec.Code)
+    (k : PartrecStack) (q : PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.peek k partrecUpdateIdPayload q
+
+theorem partrecStartedTM2PeekIdBody_primrec
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (partrecStartedTM2PeekIdBody tc k) := by
+  exact ((PartrecStartedTM2StmtNode.stmtPeek_primrec tc).comp
+    (Primrec.pair (Primrec.const (k, partrecUpdateIdPayload)) Primrec.id)).of_eq
+      fun _q => rfl
+
+noncomputable def partrecStartedTM2PopIdBody (tc : Turing.ToPartrec.Code)
+    (k : PartrecStack) (q : PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.pop k partrecUpdateIdPayload q
+
+theorem partrecStartedTM2PopIdBody_primrec
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (partrecStartedTM2PopIdBody tc k) := by
+  exact ((PartrecStartedTM2StmtNode.stmtPop_primrec tc).comp
+    (Primrec.pair (Primrec.const (k, partrecUpdateIdPayload)) Primrec.id)).of_eq
+      fun _q => rfl
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
