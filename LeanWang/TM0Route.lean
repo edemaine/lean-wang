@@ -6911,6 +6911,209 @@ noncomputable def tm2to1TrNormalBodyForHead (tc : Turing.ToPartrec.Code)
   | PartrecStartedTM2StmtNode.halt =>
       tm2to1HaltBody tc ()
 
+set_option maxHeartbeats 900000 in
+-- The proof follows the same nested node-code split as `depNodeListsForHead_primrec`.
+theorem tm2to1TrNormalBodyForHead_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1TrNormalBodyForHead tc) := by
+  let Node := PartrecStartedTM2StmtNode tc
+  let Body := Option (PartrecStartedTM0Stmt tc)
+  let Base := (PartrecStartedTM2Stmt tc × Node) × List (PartrecStartedTM0Stmt tc)
+  have hcode : Primrec (fun p : Base => PartrecStartedTM2StmtNode.toCode p.1.2) :=
+    (PartrecStartedTM2StmtNode.toCode_primrec tc).comp (Primrec.snd.comp Primrec.fst)
+  have hpush : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.PushCode =>
+        tm2to1PushBody tc (payload, tm2to1TrNormalTail tc p.1.1)) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : Base × PartrecStartedTM2StmtNode.PushCode =>
+        tm2to1TrNormalTail tc p.1.1.1) :=
+      (tm2to1TrNormalTail_primrec tc).comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))
+    exact (tm2to1PushBody_primrec tc).comp (Primrec.pair Primrec.snd htail)
+  have hpeek : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.UpdateCode =>
+        tm2to1PeekBody tc (payload, tm2to1TrNormalTail tc p.1.1)) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : Base × PartrecStartedTM2StmtNode.UpdateCode =>
+        tm2to1TrNormalTail tc p.1.1.1) :=
+      (tm2to1TrNormalTail_primrec tc).comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))
+    exact (tm2to1PeekBody_primrec tc).comp (Primrec.pair Primrec.snd htail)
+  have hpop : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.UpdateCode =>
+        tm2to1PopBody tc (payload, tm2to1TrNormalTail tc p.1.1)) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : Base × PartrecStartedTM2StmtNode.UpdateCode =>
+        tm2to1TrNormalTail tc p.1.1.1) :=
+      (tm2to1TrNormalTail_primrec tc).comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))
+    exact (tm2to1PopBody_primrec tc).comp (Primrec.pair Primrec.snd htail)
+  have hload : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.LoadCode =>
+        tm2to1LoadBodyFromDeps tc (payload, p.2)) := by
+    apply Primrec₂.mk
+    exact (tm2to1LoadBodyFromDeps_primrec tc).comp
+      (Primrec.pair Primrec.snd (Primrec.snd.comp Primrec.fst))
+  have hbranch : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.BranchCode =>
+        tm2to1BranchBodyFromDeps tc (payload, p.2)) := by
+    apply Primrec₂.mk
+    exact (tm2to1BranchBodyFromDeps_primrec tc).comp
+      (Primrec.pair Primrec.snd (Primrec.snd.comp Primrec.fst))
+  have hgotoHalt : Primrec₂
+      (fun _p : Base => fun payload : PartrecStartedTM2StmtNode.GotoHaltCode tc =>
+        match payload with
+        | Sum.inl f => tm2to1GotoBody tc f
+        | Sum.inr _ => tm2to1HaltBody tc ()) := by
+    apply Primrec₂.mk
+    have hgoto : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.GotoHaltCode tc =>
+          fun f : PartrecStartedTM2StmtNode.GotoCode tc => tm2to1GotoBody tc f) := by
+      apply Primrec₂.mk
+      exact (tm2to1GotoBody_primrec tc).comp Primrec.snd
+    have hhalt : Primrec₂
+        (fun _p : Base × PartrecStartedTM2StmtNode.GotoHaltCode tc =>
+          fun _u : PUnit => tm2to1HaltBody tc ()) := by
+      apply Primrec₂.mk
+      exact Primrec.const (tm2to1HaltBody tc ())
+    exact (Primrec.sumCasesOn Primrec.snd hgoto hhalt).of_eq fun p => by
+      cases p.2 <;> rfl
+  have hbranchTail : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.BranchTailCode tc =>
+        match payload with
+        | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.2)
+        | Sum.inr c =>
+            match c with
+            | Sum.inl f => tm2to1GotoBody tc f
+            | Sum.inr _ => tm2to1HaltBody tc ()) := by
+    apply Primrec₂.mk
+    have hbranch' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.BranchTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.BranchCode =>
+            tm2to1BranchBodyFromDeps tc (payload, p.1.2)) := by
+      apply Primrec₂.mk
+      exact hbranch.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hgotoHalt' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.BranchTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.GotoHaltCode tc =>
+            match payload with
+            | Sum.inl f => tm2to1GotoBody tc f
+            | Sum.inr _ => tm2to1HaltBody tc ()) := by
+      apply Primrec₂.mk
+      exact hgotoHalt.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hbranch' hgotoHalt').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hloadTail : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.LoadTailCode tc =>
+        match payload with
+        | Sum.inl f => tm2to1LoadBodyFromDeps tc (f, p.2)
+        | Sum.inr c =>
+            match c with
+            | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.2)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1GotoBody tc f
+                | Sum.inr _ => tm2to1HaltBody tc ()) := by
+    apply Primrec₂.mk
+    have hload' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.LoadTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.LoadCode =>
+            tm2to1LoadBodyFromDeps tc (payload, p.1.2)) := by
+      apply Primrec₂.mk
+      exact hload.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hbranchTail' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.LoadTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.BranchTailCode tc =>
+            match payload with
+            | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.1.2)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1GotoBody tc f
+                | Sum.inr _ => tm2to1HaltBody tc ()) := by
+      apply Primrec₂.mk
+      exact hbranchTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hload' hbranchTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hpopTail : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.PopTailCode tc =>
+        match payload with
+        | Sum.inl f => tm2to1PopBody tc (f, tm2to1TrNormalTail tc p.1.1)
+        | Sum.inr c =>
+            match c with
+            | Sum.inl f => tm2to1LoadBodyFromDeps tc (f, p.2)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.2)
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl f => tm2to1GotoBody tc f
+                    | Sum.inr _ => tm2to1HaltBody tc ()) := by
+    apply Primrec₂.mk
+    have hpop' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.PopTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.UpdateCode =>
+            tm2to1PopBody tc (payload, tm2to1TrNormalTail tc p.1.1.1)) := by
+      apply Primrec₂.mk
+      exact hpop.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hloadTail' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.PopTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.LoadTailCode tc =>
+            match payload with
+            | Sum.inl f => tm2to1LoadBodyFromDeps tc (f, p.1.2)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.1.2)
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl f => tm2to1GotoBody tc f
+                    | Sum.inr _ => tm2to1HaltBody tc ()) := by
+      apply Primrec₂.mk
+      exact hloadTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hpop' hloadTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hpeekTail : Primrec₂
+      (fun p : Base => fun payload : PartrecStartedTM2StmtNode.PeekTailCode tc =>
+        match payload with
+        | Sum.inl f => tm2to1PeekBody tc (f, tm2to1TrNormalTail tc p.1.1)
+        | Sum.inr c =>
+            match c with
+            | Sum.inl f => tm2to1PopBody tc (f, tm2to1TrNormalTail tc p.1.1)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1LoadBodyFromDeps tc (f, p.2)
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.2)
+                    | Sum.inr c =>
+                        match c with
+                        | Sum.inl f => tm2to1GotoBody tc f
+                        | Sum.inr _ => tm2to1HaltBody tc ()) := by
+    apply Primrec₂.mk
+    have hpeek' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.PeekTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.UpdateCode =>
+            tm2to1PeekBody tc (payload, tm2to1TrNormalTail tc p.1.1.1)) := by
+      apply Primrec₂.mk
+      exact hpeek.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hpopTail' : Primrec₂
+        (fun p : Base × PartrecStartedTM2StmtNode.PeekTailCode tc =>
+          fun payload : PartrecStartedTM2StmtNode.PopTailCode tc =>
+            match payload with
+            | Sum.inl f => tm2to1PopBody tc (f, tm2to1TrNormalTail tc p.1.1.1)
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => tm2to1LoadBodyFromDeps tc (f, p.1.2)
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl f => tm2to1BranchBodyFromDeps tc (f, p.1.2)
+                    | Sum.inr c =>
+                        match c with
+                        | Sum.inl f => tm2to1GotoBody tc f
+                        | Sum.inr _ => tm2to1HaltBody tc ()) := by
+      apply Primrec₂.mk
+      exact hpopTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hpeek' hpopTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  exact (Primrec.sumCasesOn hcode hpush hpeekTail).of_eq fun p => by
+    rcases p with ⟨⟨stmt, node⟩, deps⟩
+    cases node <;> rfl
+
 noncomputable def tm2to1TrNormalBody (tc : Turing.ToPartrec.Code)
     (code : PartrecStartedTM2StmtNode.ValidCode tc)
     (deps : List (PartrecStartedTM0Stmt tc)) :
