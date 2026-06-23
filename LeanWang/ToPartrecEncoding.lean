@@ -2105,6 +2105,27 @@ theorem normalizeLabelRowStep_primrec :
       (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)).to₂
   exact Primrec.list_map hrow hentry
 
+theorem normalizeLabelRows_primrec :
+    Primrec (fun p : Nat × Nat => normalizeLabelRows p.1 p.2) := by
+  let hbase : Primrec (fun p : Nat × Nat => (List.range (p.2 + 1)).map fun _ => 0) := by
+    let hrow : Primrec (fun p : Nat × Nat => List.range (p.2 + 1)) :=
+      Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+    exact Primrec.list_map hrow (Primrec.const 0).to₂
+  let hstep : Primrec₂ (fun p : Nat × Nat => fun s : Nat × List Nat =>
+      normalizeLabelRowStep s.2 p.2) :=
+    (normalizeLabelRowStep_primrec.comp
+      (Primrec.pair (Primrec.snd.comp Primrec.snd) (Primrec.snd.comp Primrec.fst))).to₂
+  exact (Primrec.nat_rec' Primrec.fst hbase hstep).of_eq fun p => by
+    induction p.1 with
+    | zero => rfl
+    | succ fuel ih =>
+        change normalizeLabelRowStep
+          (Nat.rec ((List.range (p.2 + 1)).map fun _ => 0)
+            (fun _ row => normalizeLabelRowStep row p.2) fuel) p.2 =
+          normalizeLabelRows (fuel + 1) p.2
+        rw [ih]
+        rfl
+
 theorem normalizeLookup_eq_of_getD_eq
     {prev : List Nat} {fuel bound n : Nat}
     (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
