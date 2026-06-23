@@ -2878,6 +2878,113 @@ abbrev PartrecStartedTM0Symbol : Type :=
 abbrev PartrecStartedTM0Stmt (tc : Turing.ToPartrec.Code) : Type :=
   Turing.TM1.Stmt PartrecStartedTM0Symbol (PartrecStartedTM1Label tc) PartrecVar
 
+/-!
+The started TM0 route indexes Mathlib `TM1.Stmt` values in translated TM0
+labels. These statements have finite function payloads over the concrete source
+symbol and local-store alphabets, so we encode recursive statement syntax by
+preorder node lists, mirroring `PartrecStartedTM2StmtNode`.
+-/
+
+inductive PartrecStartedTM1StmtNode (tc : Turing.ToPartrec.Code) where
+  | move : Turing.Dir → PartrecStartedTM1StmtNode tc
+  | write : (PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM0Symbol) →
+      PartrecStartedTM1StmtNode tc
+  | load : (PartrecStartedTM0Symbol → PartrecVar → PartrecVar) →
+      PartrecStartedTM1StmtNode tc
+  | branch : (PartrecStartedTM0Symbol → PartrecVar → Bool) →
+      PartrecStartedTM1StmtNode tc
+  | goto : (PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM1Label tc) →
+      PartrecStartedTM1StmtNode tc
+  | halt : PartrecStartedTM1StmtNode tc
+
+namespace PartrecStartedTM1StmtNode
+
+abbrev WriteCode : Type :=
+  PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM0Symbol
+
+abbrev LoadCode : Type :=
+  PartrecStartedTM0Symbol → PartrecVar → PartrecVar
+
+abbrev BranchCode : Type :=
+  PartrecStartedTM0Symbol → PartrecVar → Bool
+
+abbrev GotoCode (tc : Turing.ToPartrec.Code) : Type :=
+  PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM1Label tc
+
+abbrev GotoHaltCode (tc : Turing.ToPartrec.Code) : Type :=
+  GotoCode tc ⊕ PUnit
+
+abbrev BranchTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  BranchCode ⊕ GotoHaltCode tc
+
+abbrev LoadTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  LoadCode ⊕ BranchTailCode tc
+
+abbrev WriteTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  WriteCode ⊕ LoadTailCode tc
+
+def dirToBool : Turing.Dir → Bool
+  | Turing.Dir.left => false
+  | Turing.Dir.right => true
+
+def dirOfBool : Bool → Turing.Dir
+  | false => Turing.Dir.left
+  | true => Turing.Dir.right
+
+abbrev Code (tc : Turing.ToPartrec.Code) : Type :=
+  (Bool × PUnit) ⊕ WriteTailCode tc
+
+def toCode {tc : Turing.ToPartrec.Code} :
+    PartrecStartedTM1StmtNode tc → Code tc
+  | move d => Sum.inl (dirToBool d, PUnit.unit)
+  | write f => Sum.inr (Sum.inl f)
+  | load f => Sum.inr (Sum.inr (Sum.inl f))
+  | branch f => Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))
+  | goto f => Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f))))
+  | halt => Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr PUnit.unit))))
+
+def ofCode {tc : Turing.ToPartrec.Code} :
+    Code tc → PartrecStartedTM1StmtNode tc
+  | Sum.inl p => move (dirOfBool p.1)
+  | Sum.inr (Sum.inl f) => write f
+  | Sum.inr (Sum.inr (Sum.inl f)) => load f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inl f))) => branch f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))) => goto f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr _)))) => halt
+
+def equivCode (tc : Turing.ToPartrec.Code) :
+    PartrecStartedTM1StmtNode tc ≃ Code tc where
+  toFun := toCode
+  invFun := ofCode
+  left_inv := by
+    intro n
+    cases n with
+    | move d =>
+        cases d <;> rfl
+    | write f => rfl
+    | load f => rfl
+    | branch f => rfl
+    | goto f => rfl
+    | halt => rfl
+  right_inv := by
+    intro c
+    rcases c with p | c
+    · rcases p with ⟨d, u⟩
+      cases u
+      cases d <;> rfl
+    rcases c with f | c
+    · rfl
+    rcases c with f | c
+    · rfl
+    rcases c with f | c
+    · rfl
+    rcases c with f | u
+    · rfl
+    cases u
+    rfl
+
+end PartrecStartedTM1StmtNode
+
 /-- Labels of the started Mathlib TM0 machine obtained through Mathlib's TM1-to-TM0 translation. -/
 abbrev PartrecStartedTM0Label (tc : Turing.ToPartrec.Code) : Type :=
   Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)
