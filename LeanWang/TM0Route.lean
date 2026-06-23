@@ -1934,6 +1934,13 @@ theorem partrecStartedTM0StateCount_primrec_of_statementCount
   unfold partrecStartedTM0StateCount
   exact partrecStartedTM0LabelSupportCount_primrec_of_statementCount h
 
+theorem partrecStartedTM0StateCount_primrec_of_supportWeight
+    (hweight :
+      Primrec₂ (PartrecToTM2SupportList.codeSuppWeight partrecTM1LabelStmtSupportWeight)) :
+    Primrec partrecStartedTM0StateCount :=
+  partrecStartedTM0StateCount_primrec_of_statementCount
+    (partrecStartedTM0StatementCount_primrec_of_supportWeight hweight)
+
 theorem partrecStartedTM0LabelSupportList_length_eq_stateCount
     (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelSupportList tc).length =
