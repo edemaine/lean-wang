@@ -1269,6 +1269,81 @@ theorem trAuxBodyForHead_primrec_fixed_of_machine
       | goto _ => rfl
       | halt => rfl
 
+noncomputable def trAuxBodyFromHead? (tc : Turing.ToPartrec.Code)
+    (p : (SourceStmt tc × PartrecVar × SourceSymbol) ×
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  match TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1.1 with
+  | none => none
+  | some node => trAuxBodyForHead tc ((p.1, node), p.2)
+
+theorem trAuxBodyFromHead?_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (trAuxBodyFromHead? tc) := by
+  have hhead : Primrec (fun p : (SourceStmt tc × PartrecVar × SourceSymbol) ×
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) =>
+      TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1.1) :=
+    (TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?_primrec tc).comp
+      (Primrec.fst.comp Primrec.fst)
+  have hnone : Primrec (fun _p : (SourceStmt tc × PartrecVar × SourceSymbol) ×
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) =>
+      (none : Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol))) :=
+    Primrec.const none
+  have hsome : Primrec₂
+      (fun p : (SourceStmt tc × PartrecVar × SourceSymbol) ×
+          List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) =>
+        fun node : SourceStmtNode tc => trAuxBodyForHead tc ((p.1, node), p.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHead_primrec_fixed_of_machine tc hmachine).comp
+      (Primrec.pair
+        (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)
+        (Primrec.snd.comp Primrec.fst))
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun p => by
+    generalize h :
+      TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1.1 = head
+    cases head <;> simp [trAuxBodyFromHead?, h]
+
+theorem trAuxTail_move (tc : Turing.ToPartrec.Code)
+    (d : Turing.Dir) (q : SourceStmt tc) :
+    trAuxTail tc (Turing.TM1.Stmt.move d q) = q := by
+  simp [trAuxTail, trAuxTailValidCode, TM0Route.PartrecStartedTM1StmtNode.ofStmtTail,
+    TM0Route.PartrecStartedTM1StmtNode.ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.valid_ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.ofValidCode_ofStmt]
+
+theorem trAuxTail_write (tc : Turing.ToPartrec.Code)
+    (f : TM0Route.PartrecStartedTM1StmtNode.WriteCode) (q : SourceStmt tc) :
+    trAuxTail tc (Turing.TM1.Stmt.write f q) = q := by
+  simp [trAuxTail, trAuxTailValidCode, TM0Route.PartrecStartedTM1StmtNode.ofStmtTail,
+    TM0Route.PartrecStartedTM1StmtNode.ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.valid_ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.ofValidCode_ofStmt]
+
+theorem trAuxBodyFromHead?_eq_body (tc : Turing.ToPartrec.Code)
+    (p : (SourceStmt tc × PartrecVar × SourceSymbol) ×
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    trAuxBodyFromHead? tc p = trAuxBody tc p.1 p.2 := by
+  rcases p with ⟨⟨stmt, v, a⟩, rec⟩
+  cases stmt with
+  | move d q =>
+      cases d <;>
+        simp [trAuxBodyFromHead?, trAuxBodyForHead, trAuxBody, trAuxMoveBody,
+          trAuxTail_move, TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?,
+          TM0Route.PartrecStartedTM1StmtNode.ofStmt]
+  | write f q =>
+      simp [trAuxBodyFromHead?, trAuxBodyForHead, trAuxBody, trAuxWriteBody,
+        trAuxTail_write, TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?,
+        TM0Route.PartrecStartedTM1StmtNode.ofStmt]
+  | load f q =>
+      rfl
+  | branch f q₁ q₂ =>
+      rfl
+  | goto f =>
+      rfl
+  | halt =>
+      rfl
+
 theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) :
     trAuxBody tc p
