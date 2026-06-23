@@ -2826,6 +2826,16 @@ theorem partrecStartedTM0StatementAt?_eq_getElem?
   exact tm1StatementSupportAt?_eq_getElem?
     (partrecStartedTM1LabelList tc) (partrecStartedTM1Machine tc) i
 
+theorem partrecStartedTM0StatementAt?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (partrecStartedTM0StatementAt? tc) :=
+  (Primrec.list_getElem?₁ (partrecStartedTM0StatementList tc)).of_eq fun i =>
+    (partrecStartedTM0StatementAt?_eq_getElem? tc i).symm
+
 /-- Numeric count of TM1 statements supporting the translated started TM0 machine. -/
 def partrecStartedTM0StatementCount (tc : Turing.ToPartrec.Code) : Nat :=
   tm1StatementSupportLength (partrecTM1LabelList tc) partrecTM1Machine
@@ -3222,8 +3232,7 @@ theorem partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed
     Primrec (fun p : Nat × Nat × Nat =>
       partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2) := by
   have hstmt : Primrec (partrecStartedTM0StatementAt? tc) :=
-    (Primrec.list_getElem?₁ (partrecStartedTM0StatementList tc)).of_eq fun i =>
-      (partrecStartedTM0StatementAt?_eq_getElem? tc i).symm
+    partrecStartedTM0StatementAt?_primrec_fixed tc
   unfold partrecStartedTM0LabelAtByStatementFrom?
   change Primrec (fun p : Nat × Nat × Nat =>
     (flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
@@ -3258,6 +3267,23 @@ theorem partrecStartedTM0LabelAtByStatementFrom?_zero_eq
     (partrecStartedTM0StatementAt? tc) partrecVarList
     (partrecStartedTM0StatementCount tc) 0 i
 
+theorem partrecStartedTM0LabelAtByStatement?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (partrecStartedTM0LabelAtByStatement? tc) := by
+  have hfrom := partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed tc
+  have hspecial : Primrec (fun i : Nat =>
+      partrecStartedTM0LabelAtByStatementFrom? tc
+        (partrecStartedTM0StatementCount tc) 0 i) := by
+    exact hfrom.comp
+      (Primrec.pair (Primrec.const (partrecStartedTM0StatementCount tc))
+        (Primrec.pair (Primrec.const 0) Primrec.id))
+  exact hspecial.of_eq fun i =>
+    partrecStartedTM0LabelAtByStatementFrom?_zero_eq tc i
+
 theorem partrecStartedTM0LabelAtByStatement?_eq_labelAt
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     partrecStartedTM0LabelAtByStatement? tc i =
@@ -3280,6 +3306,16 @@ theorem partrecStartedTM0LabelAt?_eq_getElem?
   unfold partrecStartedTM0LabelAt? partrecStartedTM0LabelList
   exact flatMapConstMapAt?_eq_getElem?
     (partrecStartedTM0StatementList tc) partrecVarList i
+
+theorem partrecStartedTM0LabelAt?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (partrecStartedTM0LabelAt? tc) :=
+  (partrecStartedTM0LabelAtByStatement?_primrec_fixed tc).of_eq fun i =>
+    partrecStartedTM0LabelAtByStatement?_eq_labelAt tc i
 
 /-- Numeric count of translated TM0 labels before the default start label is added. -/
 def partrecStartedTM0LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
