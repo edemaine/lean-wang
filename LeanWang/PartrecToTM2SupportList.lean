@@ -2005,6 +2005,36 @@ theorem codeSuppWeightCodeFuelRowStep'_getD_eq
   simp only [List.getElem_map, List.getElem_range]
   exact codeSuppWeightCodeFuelStep'_eq wCode hlabel hweight _ _
 
+def codeSuppWeightCodeFuelRowsBase (bound : Nat) : List Nat × List Nat :=
+  let row := (List.range (bound + 1)).map fun _ => 0
+  (row, row)
+
+def codeSuppWeightCodeFuelRowsStep
+    (wCode : Nat → Nat) (bound : Nat) (rows : List Nat × List Nat) :
+    List Nat × List Nat :=
+  (trNormalLabelCodeFuelRowStep rows.1 bound,
+    codeSuppWeightCodeFuelRowStep' wCode rows.1 rows.2 bound)
+
+/--
+Paired bounded dynamic-programming rows for fuelled `trNormal` labels and
+fuelled support weights.
+
+The weight row for fuel `n + 1` is computed from the label and weight rows for
+fuel `n`, matching `codeSuppWeightCodeFuelStep'`.
+-/
+@[irreducible] def codeSuppWeightCodeFuelRows' (wCode : Nat → Nat) (fuel bound : Nat) :
+    List Nat × List Nat :=
+  Nat.rec (codeSuppWeightCodeFuelRowsBase bound)
+    (fun _ rows => codeSuppWeightCodeFuelRowsStep wCode bound rows) fuel
+
+theorem codeSuppWeightCodeFuelRowsBase_primrec :
+    Primrec codeSuppWeightCodeFuelRowsBase := by
+  unfold codeSuppWeightCodeFuelRowsBase
+  let hrow : Primrec (fun bound : Nat => (List.range (bound + 1)).map fun _ => 0) := by
+    exact Primrec.list_map
+      (Primrec.list_range.comp (Primrec.succ.comp Primrec.id)) (Primrec.const 0).to₂
+  exact Primrec.pair hrow hrow
+
 theorem codeSuppWeightCodeFuel'_eq
     (wCode : Nat → Nat) {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
     codeSuppWeightCodeFuel' wCode fuel c k = codeSuppWeightCode' wCode c k := by
