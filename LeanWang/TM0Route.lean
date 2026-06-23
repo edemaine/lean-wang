@@ -3590,6 +3590,120 @@ theorem partrecStartedTM2RetCompBody_eq_relabel
           (Turing.PartrecToTM2.Cont'.comp p.1 p.2))) := by
   rfl
 
+def partrecRetFixGotoTarget
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont')
+    (s : PartrecVar) : Turing.PartrecToTM2.Λ' :=
+  cond (Turing.PartrecToTM2.natEnd (s.getD default))
+    (Turing.PartrecToTM2.Λ'.ret p.2)
+    (Turing.PartrecToTM2.Λ'.clear Turing.PartrecToTM2.natEnd
+      Turing.PartrecToTM2.K'.main
+      (Turing.PartrecToTM2.trNormal p.1
+        (Turing.PartrecToTM2.Cont'.fix p.1 p.2)))
+
+theorem partrecTM2Cont_fix_primrec :
+    Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.Cont'.fix p.1 p.2) :=
+  (Turing.PartrecToTM2.Cont'.primrec₂_fix).comp Primrec.fst Primrec.snd
+
+theorem partrecTM2Label_retFixClear_primrec :
+    Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.Λ'.clear Turing.PartrecToTM2.natEnd
+        Turing.PartrecToTM2.K'.main
+        (Turing.PartrecToTM2.trNormal p.1
+          (Turing.PartrecToTM2.Cont'.fix p.1 p.2))) := by
+  have htr : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.trNormal p.1
+        (Turing.PartrecToTM2.Cont'.fix p.1 p.2)) :=
+    partrecTM2Label_trNormal_primrec.comp
+      (Primrec.pair Primrec.fst partrecTM2Cont_fix_primrec)
+  exact partrecTM2Label_clear_primrec.comp
+    (Primrec.pair (Primrec.const Turing.PartrecToTM2.natEnd)
+      (Primrec.pair (Primrec.const Turing.PartrecToTM2.K'.main) htr))
+
+theorem partrecRetFixGotoTarget_primrec (s : PartrecVar) :
+    Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p s) := by
+  have hret : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.Λ'.ret p.2) :=
+    partrecTM2Label_ret_primrec.comp Primrec.snd
+  have hclear : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.Λ'.clear Turing.PartrecToTM2.natEnd
+        Turing.PartrecToTM2.K'.main
+        (Turing.PartrecToTM2.trNormal p.1
+          (Turing.PartrecToTM2.Cont'.fix p.1 p.2))) :=
+    partrecTM2Label_retFixClear_primrec
+  cases s with
+  | none =>
+      simpa [partrecRetFixGotoTarget, Turing.PartrecToTM2.natEnd] using hret
+  | some a =>
+      cases a <;>
+        first
+        | simpa [partrecRetFixGotoTarget, Turing.PartrecToTM2.natEnd] using hret
+        | simpa [partrecRetFixGotoTarget, Turing.PartrecToTM2.natEnd] using hclear
+
+def partrecRetFixGotoPayload
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    PartrecVar → Turing.PartrecToTM2.Λ' :=
+  fun s => partrecRetFixGotoTarget p s
+
+theorem partrecRetFixGotoPayload_primrec :
+    Primrec partrecRetFixGotoPayload := by
+  have hsym : Primrec partrecVarToLabelEquivTuple.symm := by
+    simpa [instPrimcodablePartrecVarToLabel] using
+      (Primrec.of_equiv_symm (e := partrecVarToLabelEquivTuple) :
+        Primrec partrecVarToLabelEquivTuple.symm)
+  have hnone : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p none) :=
+    partrecRetFixGotoTarget_primrec none
+  have hconsₗ : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.consₗ)) :=
+    partrecRetFixGotoTarget_primrec (some Turing.PartrecToTM2.Γ'.consₗ)
+  have hcons : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.cons)) :=
+    partrecRetFixGotoTarget_primrec (some Turing.PartrecToTM2.Γ'.cons)
+  have hbit0 : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.bit0)) :=
+    partrecRetFixGotoTarget_primrec (some Turing.PartrecToTM2.Γ'.bit0)
+  have hbit1 : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.bit1)) :=
+    partrecRetFixGotoTarget_primrec (some Turing.PartrecToTM2.Γ'.bit1)
+  have htuple : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      (partrecRetFixGotoTarget p none,
+        partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.consₗ),
+        partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.cons),
+        partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.bit0),
+        partrecRetFixGotoTarget p (some Turing.PartrecToTM2.Γ'.bit1))) :=
+    Primrec.pair hnone
+      (Primrec.pair hconsₗ (Primrec.pair hcons (Primrec.pair hbit0 hbit1)))
+  exact (hsym.comp htuple).of_eq fun p => by
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+
+noncomputable def partrecStartedTM2RetFixBody (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    PartrecStartedTM2Stmt tc :=
+  partrecStartedTM2PopIdBody tc Turing.PartrecToTM2.K'.main
+    (partrecStartedTM2GotoBody tc (partrecRetFixGotoPayload p))
+
+theorem partrecStartedTM2RetFixBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetFixBody tc) := by
+  have hgoto : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      partrecStartedTM2GotoBody tc (partrecRetFixGotoPayload p)) :=
+    (partrecStartedTM2GotoBody_primrec tc).comp partrecRetFixGotoPayload_primrec
+  exact ((partrecStartedTM2PopIdBody_primrec tc Turing.PartrecToTM2.K'.main).comp
+    hgoto).of_eq fun _p => rfl
+
+theorem partrecStartedTM2RetFixBody_eq_relabel
+    (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    partrecStartedTM2RetFixBody tc p =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret
+          (Turing.PartrecToTM2.Cont'.fix p.1 p.2))) := by
+  rfl
+
 def partrecLoadNonePayload : PartrecStartedTM2StmtNode.LoadCode :=
   fun _s => none
 
