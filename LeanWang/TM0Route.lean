@@ -4771,6 +4771,156 @@ theorem ofStmt_length_primrec (tc : Turing.ToPartrec.Code) :
     Primrec (fun stmt : Stmt tc => (ofStmt stmt).length) :=
   Primrec.list_length.comp (ofStmt_primrec tc)
 
+noncomputable def moveStmtValidCode {tc : Turing.ToPartrec.Code}
+    (p : Turing.Dir × Stmt tc) : ValidCode tc :=
+  ⟨move p.1 :: ofStmt p.2, by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.move p.1 p.2)⟩
+
+theorem moveStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (moveStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun p : Turing.Dir × Stmt tc =>
+      (moveStmtValidCode (tc := tc) p).1) := by
+    exact Primrec.list_cons.comp
+      ((moveNode_primrec tc).comp Primrec.fst)
+      ((ofStmt_primrec tc).comp Primrec.snd)
+  exact Primrec.subtype_val_iff.1 hval
+
+theorem stmtMove_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Turing.Dir × Stmt tc => Turing.TM1.Stmt.move p.1 p.2) := by
+  exact ((ofValidCode_primrec tc).comp (moveStmtValidCode_primrec tc)).of_eq fun p => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    rfl
+
+noncomputable def writeStmtValidCode {tc : Turing.ToPartrec.Code}
+    (p : WriteCode × Stmt tc) : ValidCode tc :=
+  ⟨write p.1 :: ofStmt p.2, by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.write p.1 p.2)⟩
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `WriteCode` makes the subtype proof elaborate slowly.
+theorem writeStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (writeStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun p : WriteCode × Stmt tc =>
+      (writeStmtValidCode (tc := tc) p).1) := by
+    exact Primrec.list_cons.comp
+      ((writeNode_primrec tc).comp Primrec.fst)
+      ((ofStmt_primrec tc).comp Primrec.snd)
+  exact Primrec.subtype_val_iff.1 hval
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `WriteCode` makes the constructor proof elaborate slowly.
+theorem stmtWrite_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : WriteCode × Stmt tc => Turing.TM1.Stmt.write p.1 p.2) := by
+  exact ((ofValidCode_primrec tc).comp (writeStmtValidCode_primrec tc)).of_eq fun p => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    rfl
+
+noncomputable def loadStmtValidCode {tc : Turing.ToPartrec.Code}
+    (p : LoadCode × Stmt tc) : ValidCode tc :=
+  ⟨load p.1 :: ofStmt p.2, by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.load p.1 p.2)⟩
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `LoadCode` makes the subtype proof elaborate slowly.
+theorem loadStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (loadStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun p : LoadCode × Stmt tc =>
+      (loadStmtValidCode (tc := tc) p).1) := by
+    exact Primrec.list_cons.comp
+      ((loadNode_primrec tc).comp Primrec.fst)
+      ((ofStmt_primrec tc).comp Primrec.snd)
+  exact Primrec.subtype_val_iff.1 hval
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `LoadCode` makes the constructor proof elaborate slowly.
+theorem stmtLoad_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : LoadCode × Stmt tc => Turing.TM1.Stmt.load p.1 p.2) := by
+  exact ((ofValidCode_primrec tc).comp (loadStmtValidCode_primrec tc)).of_eq fun p => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    rfl
+
+noncomputable def branchStmtValidCode {tc : Turing.ToPartrec.Code}
+    (p : (BranchCode × Stmt tc) × Stmt tc) : ValidCode tc :=
+  ⟨branch p.1.1 :: (ofStmt p.1.2 ++ ofStmt p.2), by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.branch p.1.1 p.1.2 p.2)⟩
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `BranchCode` makes the subtype proof elaborate slowly.
+theorem branchStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (branchStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have htail : Primrec (fun p : (BranchCode × Stmt tc) × Stmt tc =>
+      ofStmt p.1.2 ++ ofStmt p.2) :=
+    Primrec.list_append.comp
+      ((ofStmt_primrec tc).comp (Primrec.snd.comp Primrec.fst))
+      ((ofStmt_primrec tc).comp Primrec.snd)
+  have hval : Primrec (fun p : (BranchCode × Stmt tc) × Stmt tc =>
+      (branchStmtValidCode (tc := tc) p).1) := by
+    exact Primrec.list_cons.comp
+      ((branchNode_primrec tc).comp (Primrec.fst.comp Primrec.fst))
+      htail
+  exact Primrec.subtype_val_iff.1 hval
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `BranchCode` makes the constructor proof elaborate slowly.
+theorem stmtBranch_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : (BranchCode × Stmt tc) × Stmt tc =>
+      Turing.TM1.Stmt.branch p.1.1 p.1.2 p.2) := by
+  exact ((ofValidCode_primrec tc).comp (branchStmtValidCode_primrec tc)).of_eq fun p => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    rfl
+
+noncomputable def gotoStmtValidCode {tc : Turing.ToPartrec.Code}
+    (f : GotoCode tc) : ValidCode tc :=
+  ⟨[goto f], by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.goto f)⟩
+
+set_option maxHeartbeats 800000 in
+-- The label-valued finite-function payload makes the subtype proof elaborate slowly.
+theorem gotoStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (gotoStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun f : GotoCode tc =>
+      (gotoStmtValidCode (tc := tc) f).1) := by
+    exact Primrec.list_cons.comp (gotoNode_primrec tc) (Primrec.const [])
+  exact Primrec.subtype_val_iff.1 hval
+
+set_option maxHeartbeats 800000 in
+-- The label-valued finite-function payload makes the constructor proof elaborate slowly.
+theorem stmtGoto_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (Turing.TM1.Stmt.goto : GotoCode tc → Stmt tc) := by
+  exact ((ofValidCode_primrec tc).comp (gotoStmtValidCode_primrec tc)).of_eq fun f => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    rfl
+
+noncomputable def haltStmtValidCode {tc : Turing.ToPartrec.Code}
+    (_u : PUnit) : ValidCode tc :=
+  ⟨[halt], by
+    simpa [ofStmt] using valid_ofStmt (Turing.TM1.Stmt.halt : Stmt tc)⟩
+
+theorem haltStmtValidCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (haltStmtValidCode (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hval : Primrec (fun u : PUnit => (haltStmtValidCode (tc := tc) u).1) := by
+    exact Primrec.list_cons.comp (haltNode_primrec tc) (Primrec.const [])
+  exact Primrec.subtype_val_iff.1 hval
+
+theorem stmtHalt_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun _u : PUnit => (Turing.TM1.Stmt.halt : Stmt tc)) := by
+  exact ((ofValidCode_primrec tc).comp (haltStmtValidCode_primrec tc)).of_eq fun u => by
+    apply ofStmt_injective
+    rw [ofStmt_ofValidCode]
+    cases u
+    rfl
+
 def ofStmtHead? {tc : Turing.ToPartrec.Code}
     (stmt : Stmt tc) : Option (PartrecStartedTM1StmtNode tc) :=
   (ofStmt stmt).head?
