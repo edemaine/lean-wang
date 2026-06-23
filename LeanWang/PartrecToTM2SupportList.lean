@@ -671,6 +671,146 @@ theorem trStmtsWeightCode_encodeLabel
       (bound := Turing.PartrecToTM2.Λ'.encodeLabel q)
       (q := q) le_rfl le_rfl)
 
+/-- Encoded `Λ'.move` constructor from an already encoded target label. -/
+def moveLabelCode (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.movePayloadCode p k₁ k₂ qCode + 1
+
+theorem moveLabelCode_primrec (p : Γ' → Bool) (k₁ k₂ : K') :
+    Primrec (moveLabelCode p k₁ k₂) := by
+  unfold moveLabelCode
+  have hpayload : Primrec (fun qCode : Nat =>
+      Turing.PartrecToTM2.Λ'.movePayloadCode p k₁ k₂ qCode) := by
+    exact Turing.PartrecToTM2.Λ'.movePayloadCode_primrec.comp
+      (Primrec.pair (Primrec.const p)
+        (Primrec.pair (Primrec.const k₁) (Primrec.pair (Primrec.const k₂) Primrec.id)))
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 1)
+
+theorem moveLabelCode_encodeLabel (p : Γ' → Bool) (k₁ k₂ : K') (q : Λ') :
+    moveLabelCode p k₁ k₂ (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.move p k₁ k₂ q) := by
+  simp [moveLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_move]
+
+/-- Encoded `Λ'.clear` constructor from an already encoded target label. -/
+def clearLabelCode (p : Γ' → Bool) (k : K') (qCode : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.clearPayloadCode p k qCode + 2
+
+theorem clearLabelCode_primrec (p : Γ' → Bool) (k : K') :
+    Primrec (clearLabelCode p k) := by
+  unfold clearLabelCode
+  have hpayload : Primrec (fun qCode : Nat =>
+      Turing.PartrecToTM2.Λ'.clearPayloadCode p k qCode) := by
+    exact Turing.PartrecToTM2.Λ'.clearPayloadCode_primrec.comp
+      (Primrec.pair (Primrec.const p) (Primrec.pair (Primrec.const k) Primrec.id))
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 2)
+
+theorem clearLabelCode_encodeLabel (p : Γ' → Bool) (k : K') (q : Λ') :
+    clearLabelCode p k (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.clear p k q) := by
+  simp [clearLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_clear]
+
+/-- Encoded `Λ'.copy` constructor from an already encoded target label. -/
+def copyLabelCode (qCode : Nat) : Nat :=
+  8 * qCode + 3
+
+theorem copyLabelCode_primrec : Primrec copyLabelCode := by
+  unfold copyLabelCode
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) Primrec.id) (Primrec.const 3)
+
+theorem copyLabelCode_encodeLabel (q : Λ') :
+    copyLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.copy q) := by
+  simp [copyLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_copy]
+
+/-- Encoded `Λ'.push` constructor from an already encoded target label. -/
+def pushLabelCode (k : K') (f : Option Γ' → Option Γ') (qCode : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.pushPayloadCode k f qCode + 4
+
+theorem pushLabelCode_primrec (k : K') (f : Option Γ' → Option Γ') :
+    Primrec (pushLabelCode k f) := by
+  unfold pushLabelCode
+  have hpayload : Primrec (fun qCode : Nat =>
+      Turing.PartrecToTM2.Λ'.pushPayloadCode k f qCode) := by
+    exact Turing.PartrecToTM2.Λ'.pushPayloadCode_primrec.comp
+      (Primrec.pair (Primrec.const k) (Primrec.pair (Primrec.const f) Primrec.id))
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 4)
+
+theorem pushLabelCode_encodeLabel (k : K') (f : Option Γ' → Option Γ') (q : Λ') :
+    pushLabelCode k f (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.push k f q) := by
+  simp [pushLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_push]
+
+/-- Encoded `Λ'.read` constructor from the five already encoded branch labels. -/
+def readLabelCode (q₀ q₁ q₂ q₃ q₄ : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.readPayloadCode q₀ q₁ q₂ q₃ q₄ + 5
+
+theorem readLabelCode_primrec :
+    Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      readLabelCode p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  unfold readLabelCode
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) Turing.PartrecToTM2.Λ'.readPayloadCode_primrec)
+    (Primrec.const 5)
+
+theorem readLabelCode_encodeLabel (f : Option Γ' → Λ') :
+    readLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel (f none))
+        (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.consₗ)))
+        (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.cons)))
+        (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.bit0)))
+        (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.bit1))) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.read f) := by
+  simp [readLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_read]
+
+/-- Encoded `Λ'.succ` constructor from an already encoded target label. -/
+def succLabelCode (qCode : Nat) : Nat :=
+  8 * qCode + 6
+
+theorem succLabelCode_primrec : Primrec succLabelCode := by
+  unfold succLabelCode
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) Primrec.id) (Primrec.const 6)
+
+theorem succLabelCode_encodeLabel (q : Λ') :
+    succLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.succ q) := by
+  simp [succLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_succ]
+
+/-- Encoded `Λ'.pred` constructor from two already encoded target labels. -/
+def predLabelCode (q₁Code q₂Code : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.predPayloadCode q₁Code q₂Code + 7
+
+theorem predLabelCode_primrec :
+    Primrec (fun p : Nat × Nat => predLabelCode p.1 p.2) := by
+  unfold predLabelCode
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) Turing.PartrecToTM2.Λ'.predPayloadCode_primrec)
+    (Primrec.const 7)
+
+theorem predLabelCode_encodeLabel (q₁ q₂ : Λ') :
+    predLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel q₁)
+        (Turing.PartrecToTM2.Λ'.encodeLabel q₂) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.pred q₁ q₂) := by
+  simp [predLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_pred]
+
+/-- Encoded `Λ'.ret` constructor. -/
+def retLabelCode (k : Cont') : Nat :=
+  8 * Turing.PartrecToTM2.Cont'.encodeCont k + 8
+
+theorem retLabelCode_primrec : Primrec retLabelCode := by
+  unfold retLabelCode
+  have henc : Primrec (fun k : Cont' => Turing.PartrecToTM2.Cont'.encodeCont k) :=
+    (Primrec.encode).of_eq fun k => by
+      rw [Turing.PartrecToTM2.Cont'.encodeCont_eq]
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) henc) (Primrec.const 8)
+
+theorem retLabelCode_encodeLabel (k : Cont') :
+    retLabelCode k = Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.ret k) := by
+  simp [retLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_ret]
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
