@@ -1823,6 +1823,15 @@ theorem partrecStartedTM0StatementCount_computable_of_labelWeight
   exact hdata.of_eq fun tc => by
     rw [partrecStartedTM0StatementCount_eq_weightData]
 
+theorem partrecStartedTM0StatementCount_primrec :
+    Primrec partrecStartedTM0StatementCount :=
+  partrecStartedTM0StatementCount_primrec_of_labelWeight
+    partrecTM1LabelStmtSupportWeight_labelWeight_primrec
+
+theorem partrecStartedTM0StatementCount_computable :
+    Computable partrecStartedTM0StatementCount :=
+  partrecStartedTM0StatementCount_primrec.to_comp
+
 theorem partrecStartedTM0StatementCount_primrec_of_supportWeight
     (hweight :
       Primrec₂ (PartrecToTM2SupportList.codeSuppWeight partrecTM1LabelStmtSupportWeight)) :
@@ -1973,6 +1982,11 @@ theorem partrecStartedTM0StateCount_primrec_of_supportWeight
   partrecStartedTM0StateCount_primrec_of_statementCount
     (partrecStartedTM0StatementCount_primrec_of_supportWeight hweight)
 
+theorem partrecStartedTM0StateCount_primrec :
+    Primrec partrecStartedTM0StateCount :=
+  partrecStartedTM0StateCount_primrec_of_statementCount
+    partrecStartedTM0StatementCount_primrec
+
 theorem partrecStartedTM0StateCount_computable_of_statementCount
     (h : Computable partrecStartedTM0StatementCount) :
     Computable partrecStartedTM0StateCount := by
@@ -1990,6 +2004,10 @@ theorem partrecStartedTM0StateCount_computable_of_supportWeight
     Computable partrecStartedTM0StateCount :=
   partrecStartedTM0StateCount_computable_of_statementCount
     (partrecStartedTM0StatementCount_computable_of_supportWeight hweight)
+
+theorem partrecStartedTM0StateCount_computable :
+    Computable partrecStartedTM0StateCount :=
+  partrecStartedTM0StateCount_primrec.to_comp
 
 theorem partrecStartedTM0LabelSupportList_length_eq_stateCount
     (tc : Turing.ToPartrec.Code) :
