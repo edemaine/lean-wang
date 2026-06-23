@@ -206,6 +206,10 @@ now in place:
 `partrecStartedTM1LabelCountData_primrec_of_labelList`, and
 `partrecStartedTM1LabelCount_primrec_of_labelList` reduce the started-TM1 label
 count to that single remaining list-computability fact.
+`PartrecToTM2SupportList` now imports the concrete evaluator encodings and has
+top-level bridges `codeSuppList_primrec_of_parts` and
+`labelList_primrec_of_codeSuppList`; the remaining support-list work is the
+mutual primitive-recursion proof for `codeSuppList'` and `contSuppList`.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

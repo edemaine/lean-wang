@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.PartrecToTM2Support
+import LeanWang.ToPartrecEncoding
 
 /-!
 Executable list mirrors for Mathlib's `PartrecToTM2` support finsets.
@@ -244,6 +244,13 @@ theorem mem_contSuppList_iff {k : Cont'} {q : Λ'} :
 def codeSuppList (c : ToPartrec.Code) (k : Cont') : List Λ' :=
   codeSuppList' c k ++ contSuppList k
 
+theorem codeSuppList_primrec_of_parts
+    (hcode : Primrec₂ codeSuppList') (hcont : Primrec contSuppList) :
+    Primrec₂ codeSuppList := by
+  apply Primrec₂.mk
+  unfold codeSuppList
+  exact Primrec.list_append.comp hcode (hcont.comp Primrec.snd)
+
 /-- Numeric length mirror of `codeSuppList`. -/
 def codeSuppLength (c : ToPartrec.Code) (k : Cont') : Nat :=
   codeSuppLength' c k + contSuppLength k
@@ -259,6 +266,12 @@ theorem mem_codeSuppList_iff {c : ToPartrec.Code} {k : Cont'} {q : Λ'} :
 /-- Executable list form of the evaluator label support for code `tc`. -/
 def labelList (tc : ToPartrec.Code) : List Λ' :=
   codeSuppList tc Cont'.halt
+
+theorem labelList_primrec_of_codeSuppList
+    (h : Primrec₂ codeSuppList) :
+    Primrec labelList := by
+  unfold labelList
+  exact h.comp Primrec.id (Primrec.const Cont'.halt)
 
 /-- Numeric length of the evaluator label support for code `tc`. -/
 def labelCount (tc : ToPartrec.Code) : Nat :=
