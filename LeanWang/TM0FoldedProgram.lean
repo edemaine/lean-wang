@@ -603,6 +603,46 @@ theorem trAuxDepsNodeData_primrec_fixed
       TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1 = head
     cases head <;> simp [trAuxDepsNodeData, h]
 
+def trAuxDepsEncoded (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) : List (EncodedTrAuxDep tc) :=
+  (trAuxDeps tc p).map fun p' =>
+    (TM0Route.PartrecStartedTM1StmtNode.ofStmt p'.1, p'.2.1, p'.2.2)
+
+theorem trAuxDepsNodeData_eq_encoded
+    (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) :
+    trAuxDepsNodeData tc p = trAuxDepsEncoded tc p := by
+  rcases p with ⟨stmt, v, a⟩
+  cases stmt with
+  | move d q =>
+      rfl
+  | write f q =>
+      rfl
+  | load f q =>
+      simp [trAuxDepsNodeData, trAuxDepsNodeDataOfHead, trAuxDepsEncoded,
+        trAuxDeps, TM0Route.PartrecStartedTM1StmtNode.ofStmt,
+        TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?,
+        TM0Route.PartrecStartedTM1StmtNode.ofStmtTail,
+        encodedTrAuxDepSingleton]
+  | branch f q₁ q₂ =>
+      by_cases h : f a v
+      · simp [trAuxDepsNodeData, trAuxDepsNodeDataOfHead, trAuxDepsEncoded,
+          trAuxDeps, h, TM0Route.PartrecStartedTM1StmtNode.ofStmt,
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?,
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtTail,
+          TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes_ofStmt_append,
+          encodedTrAuxDepSingleton]
+      · simp [trAuxDepsNodeData, trAuxDepsNodeDataOfHead, trAuxDepsEncoded,
+          trAuxDeps, h, TM0Route.PartrecStartedTM1StmtNode.ofStmt,
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?,
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtTail,
+          TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes_ofStmt_append,
+          encodedTrAuxDepSingleton]
+  | goto f =>
+      rfl
+  | halt =>
+      rfl
+
 theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol)
     (p' : SourceStmt tc × PartrecVar × SourceSymbol)
