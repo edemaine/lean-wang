@@ -1148,6 +1148,91 @@ theorem left_le_pair (a b : Nat) : a ≤ Nat.pair a b := by
 theorem right_le_pair (a b : Nat) : b ≤ Nat.pair a b := by
   simpa using (Nat.pair a b).unpair_right_le
 
+set_option linter.flexible false in
+theorem decodeMovePayload_target_le {m : Nat}
+    {fields : (Γ' → Bool) × K' × K' × Nat}
+    (hfields : decodeMovePayload m = some fields) :
+    fields.2.2.2 ≤ m := by
+  rcases hp : decodeStackPredicateCode m.unpair.1 with _ | p <;>
+    simp [decodeMovePayload, hp] at hfields
+  rcases hk₁ : decodeStackNameCode m.unpair.2.unpair.1 with _ | k₁ <;>
+    simp [hk₁] at hfields
+  rcases hk₂ : decodeStackNameCode m.unpair.2.unpair.2.unpair.1 with _ | k₂ <;>
+    simp [hk₂] at hfields
+  have htarget : m.unpair.2.unpair.2.unpair.2 ≤ m := by
+    exact (m.unpair.2.unpair.2).unpair_right_le.trans
+      ((m.unpair.2).unpair_right_le.trans m.unpair_right_le)
+  cases hfields
+  exact htarget
+
+set_option linter.flexible false in
+theorem decodeClearPayload_target_le {m : Nat}
+    {fields : (Γ' → Bool) × K' × Nat}
+    (hfields : decodeClearPayload m = some fields) :
+    fields.2.2 ≤ m := by
+  rcases hp : decodeStackPredicateCode m.unpair.1 with _ | p <;>
+    simp [decodeClearPayload, hp] at hfields
+  rcases hk : decodeStackNameCode m.unpair.2.unpair.1 with _ | k <;>
+    simp [hk] at hfields
+  have htarget : m.unpair.2.unpair.2 ≤ m := by
+    exact (m.unpair.2).unpair_right_le.trans m.unpair_right_le
+  cases hfields
+  exact htarget
+
+set_option linter.flexible false in
+theorem decodePushPayload_target_le {m : Nat}
+    {fields : K' × (Option Γ' → Option Γ') × Nat}
+    (hfields : decodePushPayload m = some fields) :
+    fields.2.2 ≤ m := by
+  rcases hk : decodeStackNameCode m.unpair.1 with _ | k <;>
+    simp [decodePushPayload, hk] at hfields
+  rcases hf : decodeLocalActionCode m.unpair.2.unpair.1 with _ | f <;>
+    simp [hf] at hfields
+  have htarget : m.unpair.2.unpair.2 ≤ m := by
+    exact (m.unpair.2).unpair_right_le.trans m.unpair_right_le
+  cases hfields
+  exact htarget
+
+theorem decodeReadPayload_fst_le (m : Nat) :
+    (decodeReadPayload m).1 ≤ m := by
+  unfold decodeReadPayload
+  exact m.unpair_left_le
+
+theorem decodeReadPayload_snd_fst_le (m : Nat) :
+    (decodeReadPayload m).2.1 ≤ m := by
+  unfold decodeReadPayload
+  exact (m.unpair.2).unpair_left_le.trans m.unpair_right_le
+
+theorem decodeReadPayload_snd_snd_fst_le (m : Nat) :
+    (decodeReadPayload m).2.2.1 ≤ m := by
+  unfold decodeReadPayload
+  exact (m.unpair.2.unpair.2).unpair_left_le.trans
+    ((m.unpair.2).unpair_right_le.trans m.unpair_right_le)
+
+theorem decodeReadPayload_snd_snd_snd_fst_le (m : Nat) :
+    (decodeReadPayload m).2.2.2.1 ≤ m := by
+  unfold decodeReadPayload
+  exact (m.unpair.2.unpair.2.unpair.2).unpair_left_le.trans
+    ((m.unpair.2.unpair.2).unpair_right_le.trans
+      ((m.unpair.2).unpair_right_le.trans m.unpair_right_le))
+
+theorem decodeReadPayload_snd_snd_snd_snd_le (m : Nat) :
+    (decodeReadPayload m).2.2.2.2 ≤ m := by
+  unfold decodeReadPayload
+  exact (m.unpair.2.unpair.2.unpair.2).unpair_right_le.trans
+    ((m.unpair.2.unpair.2).unpair_right_le.trans
+      ((m.unpair.2).unpair_right_le.trans m.unpair_right_le))
+
+theorem decodePredPayload_fst_le (m : Nat) :
+    (decodePredPayload m).1 ≤ m := by
+  unfold decodePredPayload
+  exact m.unpair_left_le
+
+theorem decodePredPayload_snd_le (m : Nat) :
+    (decodePredPayload m).2 ≤ m := by
+  unfold decodePredPayload
+  exact m.unpair_right_le
+
 theorem movePayloadCode_target_le (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) :
     qCode ≤ movePayloadCode p k₁ k₂ qCode := by
   exact (right_le_pair (stackNameCode k₂) qCode).trans <|
@@ -1513,6 +1598,97 @@ def normalizeLabelFuel : Nat → Nat → Nat
 
 def normalizeLabel (n : Nat) : Nat :=
   normalizeLabelFuel n n
+
+/-- Lookup a previously computed normalized label code, defaulting to failed decoding. -/
+def normalizeLookup (prev : List Nat) (n : Nat) : Nat :=
+  prev.getD n 0
+
+/-- One nonzero label-code normalization step from the previous fuel row. -/
+def normalizeLabelStepBody (prev : List Nat) (n : Nat) : Nat :=
+  let payload := n / 8
+  match n % 8 with
+  | 0 =>
+      match decodeMovePayload payload with
+      | none => 0
+      | some fields =>
+          match normalizeLookup prev fields.2.2.2 with
+          | 0 => 0
+          | qCode + 1 => 8 * movePayloadCode fields.1 fields.2.1 fields.2.2.1 qCode + 2
+  | 1 =>
+      match decodeClearPayload payload with
+      | none => 0
+      | some fields =>
+          match normalizeLookup prev fields.2.2 with
+          | 0 => 0
+          | qCode + 1 => 8 * clearPayloadCode fields.1 fields.2.1 qCode + 3
+  | 2 =>
+      match normalizeLookup prev payload with
+      | 0 => 0
+      | qCode + 1 => 8 * qCode + 4
+  | 3 =>
+      match decodePushPayload payload with
+      | none => 0
+      | some fields =>
+          match normalizeLookup prev fields.2.2 with
+          | 0 => 0
+          | qCode + 1 => 8 * pushPayloadCode fields.1 fields.2.1 qCode + 5
+  | 4 =>
+      let fields := decodeReadPayload payload
+      match normalizeLookup prev fields.1 with
+      | 0 => 0
+      | q₀Code + 1 =>
+        match normalizeLookup prev fields.2.1 with
+        | 0 => 0
+        | q₁Code + 1 =>
+          match normalizeLookup prev fields.2.2.1 with
+          | 0 => 0
+          | q₂Code + 1 =>
+            match normalizeLookup prev fields.2.2.2.1 with
+            | 0 => 0
+            | q₃Code + 1 =>
+              match normalizeLookup prev fields.2.2.2.2 with
+              | 0 => 0
+              | q₄Code + 1 =>
+                  8 * readPayloadCode q₀Code q₁Code q₂Code q₃Code q₄Code + 6
+  | 5 =>
+      match normalizeLookup prev payload with
+      | 0 => 0
+      | qCode + 1 => 8 * qCode + 7
+  | 6 =>
+      let fields := decodePredPayload payload
+      match normalizeLookup prev fields.1 with
+      | 0 => 0
+      | q₁Code + 1 =>
+        match normalizeLookup prev fields.2 with
+        | 0 => 0
+        | q₂Code + 1 => 8 * predPayloadCode q₁Code q₂Code + 8
+  | _ => 8 * Cont'.encodeCont (Cont'.ofNatCont payload) + 9
+
+/-- One row-entry normalization step from the previous fuel row. -/
+def normalizeLabelStepAt (prev : List Nat) : Nat → Nat
+  | 0 => 0
+  | n + 1 => normalizeLabelStepBody prev n
+
+/-- Compute one bounded row of normalized label codes from the previous fuel row. -/
+def normalizeLabelRowStep (prev : List Nat) (bound : Nat) : List Nat :=
+  (List.range (bound + 1)).map (normalizeLabelStepAt prev)
+
+/-- Bounded rows of normalized label codes, indexed first by fuel and then bound. -/
+def normalizeLabelRows : Nat → Nat → List Nat
+  | 0, bound => (List.range (bound + 1)).map fun _ => 0
+  | fuel + 1, bound => normalizeLabelRowStep (normalizeLabelRows fuel bound) bound
+
+theorem normalizeLookup_primrec :
+    Primrec (fun p : List Nat × Nat => normalizeLookup p.1 p.2) := by
+  unfold normalizeLookup
+  exact Primrec.list_getD 0
+
+theorem normalizeLookup_eq_of_getD_eq
+    {prev : List Nat} {fuel bound n : Nat}
+    (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
+    (hn : n ≤ bound) :
+    normalizeLookup prev n = normalizeLabelFuel fuel n :=
+  hprev n hn
 
 theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
     normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
