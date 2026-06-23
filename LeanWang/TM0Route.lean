@@ -2916,6 +2916,25 @@ theorem partrecStartedTM2PopIdBody_primrec
     (Primrec.pair (Primrec.const (k, partrecUpdateIdPayload)) Primrec.id)).of_eq
       fun _q => rfl
 
+noncomputable def partrecStartedTM2LoadBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.LoadCode × PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.load p.1 p.2
+
+theorem partrecStartedTM2LoadBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2LoadBody tc) :=
+  (PartrecStartedTM2StmtNode.stmtLoad_primrec tc).of_eq fun _p => rfl
+
+noncomputable def partrecStartedTM2BranchBody (tc : Turing.ToPartrec.Code)
+    (p : (PartrecStartedTM2StmtNode.BranchCode × PartrecStartedTM2Stmt tc) ×
+      PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.branch p.1.1 p.1.2 p.2
+
+theorem partrecStartedTM2BranchBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2BranchBody tc) :=
+  (PartrecStartedTM2StmtNode.stmtBranch_primrec tc).of_eq fun _p => rfl
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
