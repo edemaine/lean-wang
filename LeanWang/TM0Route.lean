@@ -287,6 +287,18 @@ namespace StartedLabel
 def wrap (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') : StartedLabel tc :=
   ⟨q⟩
 
+def equivVal (tc : Turing.ToPartrec.Code) :
+    StartedLabel tc ≃ Turing.PartrecToTM2.Λ' where
+  toFun := StartedLabel.val
+  invFun := wrap tc
+  left_inv := by
+    intro q
+    cases q
+    rfl
+  right_inv := by
+    intro q
+    rfl
+
 @[simp]
 theorem wrap_val (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') :
     (wrap tc q).val = q :=
@@ -312,6 +324,9 @@ instance (tc : Turing.ToPartrec.Code) : DecidableEq (StartedLabel tc) := by
       rfl
     · intro h
       exact congrArg StartedLabel.val h)
+
+instance instPrimcodable (tc : Turing.ToPartrec.Code) : Primcodable (StartedLabel tc) :=
+  Primcodable.ofEquiv Turing.PartrecToTM2.Λ' (equivVal tc)
 
 end StartedLabel
 
@@ -523,6 +538,13 @@ instance instDecidableEqPartrecStartedTM1Stmt (tc : Turing.ToPartrec.Code) :
         (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
         PartrecVar) :=
   decEqPartrecStartedTM1Stmt tc
+
+instance instPrimcodableTM1to0Label {Γ Λ σ : Type}
+    [Primcodable (Turing.TM1.Stmt Γ Λ σ)] [Primcodable σ]
+    {M : Λ → Turing.TM1.Stmt Γ Λ σ} :
+    Primcodable (Turing.TM1to0.Λ' M) := by
+  dsimp [Turing.TM1to0.Λ']
+  infer_instance
 
 /--
 The code-dependent TM2 evaluator whose default label is the evaluator start
@@ -2194,6 +2216,30 @@ def partrecStartedTM0LabelAtByStatementFrom?
     Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
     partrecVarList fuel k i
+
+theorem partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : Nat × Nat × Nat =>
+      partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2) := by
+  have hstmt : Primrec (partrecStartedTM0StatementAt? tc) :=
+    (Primrec.list_getElem?₁ (partrecStartedTM0StatementList tc)).of_eq fun i =>
+      (partrecStartedTM0StatementAt?_eq_getElem? tc i).symm
+  unfold partrecStartedTM0LabelAtByStatementFrom?
+  change Primrec (fun p : Nat × Nat × Nat =>
+    (flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
+        partrecVarList p.1 p.2.1 p.2.2 :
+      Option
+        (Option
+          (Turing.TM1.Stmt
+            (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+            (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+            PartrecVar) × PartrecVar)))
+  exact flatMapConstMapAtByGetFrom?_primrec
+    (partrecStartedTM0StatementAt? tc) partrecVarList hstmt
 
 theorem partrecStartedTM0LabelAtByStatementFrom?_zero_eq
     (tc : Turing.ToPartrec.Code) (i : Nat) :
