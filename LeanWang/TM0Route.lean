@@ -3906,6 +3906,20 @@ theorem partrecStartedTM0SymbolFunction_app_primrec
     simp [curried, partrecStartedTM0SymbolFunctionEquiv,
       partrecStartedTM0StackVector_ext cells]
 
+theorem partrecStartedTM0SymbolPartrecVarFunction_app_primrec
+    (β : Type*) [Primcodable β] :
+    Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol × PartrecVar =>
+        p.1 p.2.1 p.2.2) := by
+  have hsymbol : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol × PartrecVar =>
+        p.1 p.2.1) :=
+    (partrecStartedTM0SymbolFunction_app_primrec (PartrecVar → β)).comp
+      Primrec.fst (Primrec.fst.comp Primrec.snd)
+  exact (partrecVarFunction_app_primrec β).comp hsymbol (Primrec.snd.comp Primrec.snd)
+
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVectors :
     List (∀ k : PartrecStack, Option (PartrecStackSymbol k)) :=
