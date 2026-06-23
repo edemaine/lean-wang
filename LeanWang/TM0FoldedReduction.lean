@@ -105,6 +105,15 @@ def sourceSimStepDataForLabelIndexFromWithCode
   TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
     (NatPartrecToToPartrec.translate c) fuel k i
 
+/--
+Source-code version of the fully offset descriptor decoder whose current-state
+code is computed by bounded support search.
+-/
+def sourceSimStepDataForLabelIndexFromWithSearchCode
+    (c : Code) (fuel k i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+    (NatPartrecToToPartrec.translate c) fuel k i
+
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -158,6 +167,15 @@ theorem sourceSimStepDataForLabelIndexFrom_eq_withCode
       sourceSimStepDataForLabelIndexFromWithCode c fuel k i := by
   unfold sourceSimStepDataForLabelIndexFrom sourceSimStepDataForLabelIndexFromWithCode
   exact TM0FoldedCompiler.simStepDataForLabelIndexFrom_eq_withCode
+    (NatPartrecToToPartrec.translate c) fuel k i
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_eq_withCode
+    (c : Code) (fuel k i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i =
+      sourceSimStepDataForLabelIndexFromWithCode c fuel k i := by
+  unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+    sourceSimStepDataForLabelIndexFromWithCode
+  exact TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (NatPartrecToToPartrec.translate c) fuel k i
 
 theorem sourceSimStepDataByLabelIndex_eq (c : Code) :
@@ -297,6 +315,15 @@ theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global
         unfold sourceSimStepDataForLabelIndexFromWithCode
         rfl
 
+theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  hindex.of_eq fun p =>
+    sourceSimStepDataForLabelIndexFromWithSearchCode_eq_withCode
+      p.1 p.2.1 p.2.2.1 p.2.2.2
+
 /--
 Global primitive recursiveness of the canonical numeric-state decoder implies
 the source-specific canonical numeric-state decoder target by precomposing with
@@ -412,6 +439,17 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithCode
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     (sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWithCode hindex)
+
+/--
+The source-level bounded-search decoder target is enough for computability of
+the normalized folded finite-TM0 program data.
+-/
+theorem sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithCode
+    (sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode hindex)
 
 /--
 The current lowest-level folded computability target, phrased at source-code
