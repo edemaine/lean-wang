@@ -51,6 +51,16 @@ theorem stateCode_mem_states (tc : Turing.ToPartrec.Code)
     exact List.idxOf_lt_length_iff.2
       (TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hq))
 
+theorem labelSupportAtByStatementFrom?_stateCode
+    (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc))
+    (hq : q ∈ TM0Route.partrecStartedTM0LabelSupportList tc) :
+    TM0Route.partrecStartedTM0LabelSupportAtByStatementFrom? tc
+        (TM0Route.partrecStartedTM0StatementCount tc) (stateCode tc q) =
+      some q := by
+  rw [TM0Route.partrecStartedTM0LabelSupportAtByStatementFrom?_start_eq_getElem?]
+  exact TM0Route.partrecStartedTM0StateCodeOfMem_get? tc q hq
+
 theorem stateCode_ne_start_of_mem_labels_ne_default {tc : Turing.ToPartrec.Code}
     {q : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)}
     (hq : q ∈ TM0Route.partrecStartedTM0Labels tc)
