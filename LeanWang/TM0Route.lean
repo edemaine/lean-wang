@@ -2005,6 +2005,31 @@ private theorem flatMapConstMapAtByGet?_eq_list {α β : Type}
           simpa [flatMapConstMapAtByGet?, flatMapConstMapAt?, hy] using
             ih (i - ys.length)
 
+private def flatMapConstMapAtByGetFrom? {α β : Type}
+    (get : Nat → Option α) (ys : List β) :
+    Nat → Nat → Nat → Option (α × β)
+  | 0, _k, _i => none
+  | fuel + 1, k, i =>
+      match ys[i]? with
+      | some y => (get k).map fun x => (x, y)
+      | none => flatMapConstMapAtByGetFrom? get ys fuel (k + 1) (i - ys.length)
+
+private theorem flatMapConstMapAtByGetFrom?_eq_byGet {α β : Type}
+    (get : Nat → Option α) (ys : List β) (fuel k i : Nat) :
+    flatMapConstMapAtByGetFrom? get ys fuel k i =
+      flatMapConstMapAtByGet? (fun j => get (k + j)) ys fuel i := by
+  induction fuel generalizing k i with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      unfold flatMapConstMapAtByGetFrom? flatMapConstMapAtByGet?
+      cases hy : ys[i]? with
+      | some y =>
+          simp
+      | none =>
+          rw [ih (k + 1) (i - ys.length)]
+          simp [Nat.add_comm, Nat.add_left_comm]
+
 /--
 Structural decoder for the flat TM0 label index. The label list is a rectangular
 expansion of statement support by the fixed `partrecVarList`; this function
@@ -2024,6 +2049,37 @@ def partrecStartedTM0LabelAtByStatement? (tc : Turing.ToPartrec.Code) (i : Nat) 
     Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   flatMapConstMapAtByGet? (partrecStartedTM0StatementAt? tc) partrecVarList
     (partrecStartedTM0StatementCount tc) i
+
+/--
+Offset form of `partrecStartedTM0LabelAtByStatement?`, with the statement
+getter kept fixed for `tc` and the current statement index exposed as data.
+-/
+def partrecStartedTM0LabelAtByStatementFrom?
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
+  flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
+    partrecVarList fuel k i
+
+theorem partrecStartedTM0LabelAtByStatementFrom?_zero_eq
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    partrecStartedTM0LabelAtByStatementFrom? tc
+        (partrecStartedTM0StatementCount tc) 0 i =
+      partrecStartedTM0LabelAtByStatement? tc i := by
+  unfold partrecStartedTM0LabelAtByStatementFrom? partrecStartedTM0LabelAtByStatement?
+  change
+    (flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
+        partrecVarList (partrecStartedTM0StatementCount tc) 0 i :
+      Option
+        (Option
+          (Turing.TM1.Stmt
+            (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+            (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+            PartrecVar) × PartrecVar)) =
+      flatMapConstMapAtByGet? (partrecStartedTM0StatementAt? tc)
+        partrecVarList (partrecStartedTM0StatementCount tc) i
+  simpa using flatMapConstMapAtByGetFrom?_eq_byGet
+    (partrecStartedTM0StatementAt? tc) partrecVarList
+    (partrecStartedTM0StatementCount tc) 0 i
 
 theorem partrecStartedTM0LabelAtByStatement?_eq_labelAt
     (tc : Turing.ToPartrec.Code) (i : Nat) :
