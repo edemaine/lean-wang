@@ -486,6 +486,286 @@ instance instDecidableEqPartrecStartedTM2Stmt (tc : Turing.ToPartrec.Code) :
     DecidableEq (Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar) :=
   decEqPartrecStartedTM2Stmt tc
 
+/--
+One preorder node of a concrete started `PartrecToTM2` statement.
+
+Recursive statement values will be encoded as valid preorder lists of these
+nodes. The payload domains are all finite and already have concrete
+`Primcodable` instances.
+-/
+inductive PartrecStartedTM2StmtNode (tc : Turing.ToPartrec.Code) where
+  | push : PartrecStack → (PartrecVar → Turing.PartrecToTM2.Γ') →
+      PartrecStartedTM2StmtNode tc
+  | peek : PartrecStack → (PartrecVar → PartrecVar → PartrecVar) →
+      PartrecStartedTM2StmtNode tc
+  | pop : PartrecStack → (PartrecVar → PartrecVar → PartrecVar) →
+      PartrecStartedTM2StmtNode tc
+  | load : (PartrecVar → PartrecVar) → PartrecStartedTM2StmtNode tc
+  | branch : (PartrecVar → Bool) → PartrecStartedTM2StmtNode tc
+  | goto : (PartrecVar → StartedLabel tc) → PartrecStartedTM2StmtNode tc
+  | halt : PartrecStartedTM2StmtNode tc
+
+namespace PartrecStartedTM2StmtNode
+
+abbrev PushCode : Type :=
+  PartrecStack × (PartrecVar → Turing.PartrecToTM2.Γ')
+
+abbrev UpdateCode : Type :=
+  PartrecStack × (PartrecVar → PartrecVar → PartrecVar)
+
+abbrev LoadCode : Type :=
+  PartrecVar → PartrecVar
+
+abbrev BranchCode : Type :=
+  PartrecVar → Bool
+
+abbrev GotoCode (tc : Turing.ToPartrec.Code) : Type :=
+  PartrecVar → StartedLabel tc
+
+abbrev GotoHaltCode (tc : Turing.ToPartrec.Code) : Type :=
+  GotoCode tc ⊕ PUnit
+
+abbrev BranchTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  BranchCode ⊕ GotoHaltCode tc
+
+abbrev LoadTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  LoadCode ⊕ BranchTailCode tc
+
+abbrev PopTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  UpdateCode ⊕ LoadTailCode tc
+
+abbrev PeekTailCode (tc : Turing.ToPartrec.Code) : Type :=
+  UpdateCode ⊕ PopTailCode tc
+
+abbrev Code (tc : Turing.ToPartrec.Code) : Type :=
+  PushCode ⊕ PeekTailCode tc
+
+def toCode {tc : Turing.ToPartrec.Code} :
+    PartrecStartedTM2StmtNode tc → Code tc
+  | push k f => Sum.inl (k, f)
+  | peek k f => Sum.inr (Sum.inl (k, f))
+  | pop k f => Sum.inr (Sum.inr (Sum.inl (k, f)))
+  | load f => Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))
+  | branch f => Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f))))
+  | goto f => Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))))
+  | halt => Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr PUnit.unit)))))
+
+def ofCode {tc : Turing.ToPartrec.Code} :
+    Code tc → PartrecStartedTM2StmtNode tc
+  | Sum.inl p => push p.1 p.2
+  | Sum.inr (Sum.inl p) => peek p.1 p.2
+  | Sum.inr (Sum.inr (Sum.inl p)) => pop p.1 p.2
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inl f))) => load f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))) => branch f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f))))) => goto f
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr _))))) => halt
+
+def equivCode (tc : Turing.ToPartrec.Code) :
+    PartrecStartedTM2StmtNode tc ≃ Code tc where
+  toFun := toCode
+  invFun := ofCode
+  left_inv := by
+    intro n
+    cases n <;> rfl
+  right_inv := by
+    intro c
+    rcases c with p | c
+    · rcases p with ⟨k, f⟩
+      rfl
+    rcases c with p | c
+    · rcases p with ⟨k, f⟩
+      rfl
+    rcases c with p | c
+    · rcases p with ⟨k, f⟩
+      rfl
+    rcases c with f | c
+    · rfl
+    rcases c with f | c
+    · rfl
+    rcases c with f | u
+    · rfl
+    cases u
+    rfl
+
+instance instPrimcodable (tc : Turing.ToPartrec.Code) :
+    Primcodable (PartrecStartedTM2StmtNode tc) :=
+  Primcodable.ofEquiv (Code tc) (equivCode tc)
+
+/-- Number of recursive child statements required after this preorder node. -/
+def arity {tc : Turing.ToPartrec.Code} :
+    PartrecStartedTM2StmtNode tc → Nat
+  | push .. => 1
+  | peek .. => 1
+  | pop .. => 1
+  | load .. => 1
+  | branch .. => 2
+  | goto .. => 0
+  | halt => 0
+
+def codeArity {tc : Turing.ToPartrec.Code} :
+    Code tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr (Sum.inl _) => 1
+  | Sum.inr (Sum.inr (Sum.inl _)) => 1
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inl _))) => 1
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl _)))) => 2
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl _))))) => 0
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr _))))) => 0
+
+def gotoHaltCodeArity {tc : Turing.ToPartrec.Code} :
+    GotoHaltCode tc → Nat
+  | Sum.inl _ => 0
+  | Sum.inr _ => 0
+
+theorem gotoHaltCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (gotoHaltCodeArity (tc := tc)) :=
+  (Primrec.const 0).of_eq fun c => by
+    cases c <;> rfl
+
+def branchTailCodeArity {tc : Turing.ToPartrec.Code} :
+    BranchTailCode tc → Nat
+  | Sum.inl _ => 2
+  | Sum.inr c => gotoHaltCodeArity c
+
+theorem branchTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (branchTailCodeArity (tc := tc)) := by
+  unfold branchTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : BranchTailCode tc => c))
+    (Primrec.const 2).to₂
+    ((gotoHaltCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+def loadTailCodeArity {tc : Turing.ToPartrec.Code} :
+    LoadTailCode tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr c => branchTailCodeArity c
+
+theorem loadTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (loadTailCodeArity (tc := tc)) := by
+  unfold loadTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : LoadTailCode tc => c))
+    (Primrec.const 1).to₂
+    ((branchTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+def popTailCodeArity {tc : Turing.ToPartrec.Code} :
+    PopTailCode tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr c => loadTailCodeArity c
+
+theorem popTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (popTailCodeArity (tc := tc)) := by
+  unfold popTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : PopTailCode tc => c))
+    (Primrec.const 1).to₂
+    ((loadTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+def peekTailCodeArity {tc : Turing.ToPartrec.Code} :
+    PeekTailCode tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr c => popTailCodeArity c
+
+theorem peekTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (peekTailCodeArity (tc := tc)) := by
+  unfold peekTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : PeekTailCode tc => c))
+    (Primrec.const 1).to₂
+    ((popTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+theorem codeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (codeArity (tc := tc)) := by
+  unfold codeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : Code tc => c))
+    (Primrec.const 1).to₂
+    ((peekTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      rcases x with p | c
+      · rfl
+      rcases c with p | c
+      · rfl
+      rcases c with p | c
+      · rfl
+      rcases c with f | c
+      · rfl
+      rcases c with f | c
+      · rfl
+      rcases c with f | u
+      · rfl
+      cases u
+      rfl
+
+theorem toCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (toCode : PartrecStartedTM2StmtNode tc → Code tc) := by
+  simpa [equivCode] using
+    (Primrec.of_equiv (e := equivCode tc) :
+      Primrec (equivCode tc))
+
+theorem arity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (arity (tc := tc)) :=
+  ((codeArity_primrec tc).comp (toCode_primrec tc)).of_eq fun n => by
+    cases n <;> rfl
+
+def validStep {tc : Turing.ToPartrec.Code}
+    (state : Bool × Nat) (node : PartrecStartedTM2StmtNode tc) : Bool × Nat :=
+  if state.1 ∧ 0 < state.2 then
+    (true, state.2 - 1 + arity node)
+  else
+    (false, state.2)
+
+theorem validStep_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      validStep p.1 p.2) := by
+  have hstate : Primrec (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have hslots : Primrec (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      p.1.2) :=
+    Primrec.snd.comp Primrec.fst
+  have hok : PrimrecPred (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      p.1.1 ∧ 0 < p.1.2) :=
+    PrimrecPred.and
+      (Primrec.eq.comp hstate (Primrec.const true))
+      (Primrec.nat_lt.comp (Primrec.const 0) hslots)
+  have hthen : Primrec (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      (true, p.1.2 - 1 + arity p.2)) :=
+    Primrec.pair (Primrec.const true)
+      (Primrec.nat_add.comp
+        (Primrec.nat_sub.comp
+          hslots
+          (Primrec.const 1))
+        ((arity_primrec tc).comp Primrec.snd))
+  have helse : Primrec (fun p : (Bool × Nat) × PartrecStartedTM2StmtNode tc =>
+      (false, p.1.2)) :=
+    Primrec.pair (Primrec.const false) hslots
+  exact (Primrec.ite hok hthen helse).of_eq fun p => by
+    simp [validStep]
+
+/-- Shape-only validity of a preorder statement encoding. -/
+def Valid {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) : Prop :=
+  nodes.foldl validStep (true, 1) = (true, 0)
+
+instance instDecidableValid (tc : Turing.ToPartrec.Code)
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    Decidable (Valid nodes) :=
+  inferInstanceAs (Decidable (nodes.foldl validStep (true, 1) = (true, 0)))
+
+theorem valid_primrecPred (tc : Turing.ToPartrec.Code) :
+    PrimrecPred (Valid (tc := tc)) := by
+  unfold Valid
+  exact Primrec.eq.comp
+    (Primrec.list_foldl Primrec.id (Primrec.const (true, 1))
+      (((validStep_primrec tc).comp Primrec.snd).to₂))
+    (Primrec.const (true, 0))
+
+end PartrecStartedTM2StmtNode
+
 def decEqPartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
     (a b : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) →
       Decidable (a = b)
