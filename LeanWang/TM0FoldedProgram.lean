@@ -819,6 +819,57 @@ def trAuxBody (tc : Turing.ToPartrec.Code)
   | (Turing.TM1.Stmt.halt, v, a) =>
       some ((none, v), Turing.TM0.Stmt.write a)
 
+noncomputable def trAuxMoveBody (tc : Turing.ToPartrec.Code)
+    (p : (Turing.Dir × SourceStmt tc) × PartrecVar) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  some ((some p.1.2, p.2), Turing.TM0.Stmt.move p.1.1)
+
+theorem trAuxMoveBody_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxMoveBody tc) := by
+  have hlabel : Primrec (fun p : (Turing.Dir × SourceStmt tc) × PartrecVar =>
+      ((some p.1.2, p.2) : SourceLabel tc)) :=
+    Primrec.pair (Primrec.option_some.comp (Primrec.snd.comp Primrec.fst)) Primrec.snd
+  have hstmt : Primrec (fun p : (Turing.Dir × SourceStmt tc) × PartrecVar =>
+      Turing.TM0.Stmt.move (Γ := SourceSymbol) p.1.1) :=
+    tm0StmtMove_primrec.comp (Primrec.fst.comp Primrec.fst)
+  exact Primrec.option_some.comp (Primrec.pair hlabel hstmt)
+
+noncomputable def trAuxWriteBody (tc : Turing.ToPartrec.Code)
+    (p : (TM0Route.PartrecStartedTM1StmtNode.WriteCode × SourceStmt tc) ×
+      PartrecVar × SourceSymbol) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  some ((some p.1.2, p.2.1), Turing.TM0.Stmt.write (p.1.1 p.2.2 p.2.1))
+
+def trAuxHeadBodyFromDeps (tc : Turing.ToPartrec.Code)
+    (rec : List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  rec.head?
+
+theorem trAuxHeadBodyFromDeps_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxHeadBodyFromDeps tc) :=
+  Primrec.list_head?
+
+noncomputable def trAuxGotoBody (tc : Turing.ToPartrec.Code)
+    (p : TM0Route.PartrecStartedTM1StmtNode.GotoCode tc × PartrecVar × SourceSymbol) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  some ((some (TM0Route.partrecStartedTM1Machine tc (p.1 p.2.2 p.2.1)), p.2.1),
+    Turing.TM0.Stmt.write p.2.2)
+
+noncomputable def trAuxHaltBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecVar × SourceSymbol) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  some ((none, p.1), Turing.TM0.Stmt.write p.2)
+
+theorem trAuxHaltBody_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxHaltBody tc) := by
+  have hlabel : Primrec (fun p : PartrecVar × SourceSymbol =>
+      ((none, p.1) : SourceLabel tc)) :=
+    Primrec.pair (Primrec.const (none : Option (SourceStmt tc))) Primrec.fst
+  have hstmt : Primrec (fun p : PartrecVar × SourceSymbol =>
+      Turing.TM0.Stmt.write (Γ := SourceSymbol) p.2) :=
+    tm0StmtWrite_primrec.comp Primrec.snd
+  exact Primrec.option_some.comp (Primrec.pair hlabel hstmt)
+
 theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) :
     trAuxBody tc p
