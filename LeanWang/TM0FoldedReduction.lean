@@ -111,6 +111,12 @@ def sourceSimStepDataForLabelIndexStart
   TM0FoldedCompiler.simStepDataForLabelIndexStart
     (NatPartrecToToPartrec.translate c) i
 
+/-- Source-code version of the canonical numeric-state offset-start decoder. -/
+def sourceSimStepDataForLabelIndexStartWithCode
+    (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode
+    (NatPartrecToToPartrec.translate c) i
+
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -124,11 +130,26 @@ def sourceSimStepDataByLabelIndex (c : Code) : List TM0FoldedCompiler.SimStepDat
         (NatPartrecToToPartrec.translate c))).flatMap
     (sourceSimStepDataForLabelIndex c)
 
+/-- Source-code indexed descriptor list through the numeric-state decoder path. -/
+def sourceSimStepDataByLabelIndexWithCode (c : Code) :
+    List TM0FoldedCompiler.SimStepData :=
+  (List.range
+      (TM0Route.partrecStartedTM0LabelCount
+        (NatPartrecToToPartrec.translate c))).flatMap
+    (sourceSimStepDataForLabelIndexStartWithCode c)
+
 theorem sourceSimStepDataForLabelIndexStart_eq (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexStart c i =
       sourceSimStepDataForLabelIndex c i := by
   unfold sourceSimStepDataForLabelIndexStart sourceSimStepDataForLabelIndex
   exact TM0FoldedCompiler.simStepDataForLabelIndexStart_eq
+    (NatPartrecToToPartrec.translate c) i
+
+theorem sourceSimStepDataForLabelIndexStartWithCode_eq (c : Code) (i : Nat) :
+    sourceSimStepDataForLabelIndexStartWithCode c i =
+      sourceSimStepDataForLabelIndex c i := by
+  unfold sourceSimStepDataForLabelIndexStartWithCode sourceSimStepDataForLabelIndex
+  exact TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode_eq
     (NatPartrecToToPartrec.translate c) i
 
 theorem sourceSimStepDataForLabelIndexFrom_eq_withCode
@@ -143,6 +164,12 @@ theorem sourceSimStepDataByLabelIndex_eq (c : Code) :
     sourceSimStepDataByLabelIndex c = sourceSimStepData c := by
   unfold sourceSimStepDataByLabelIndex sourceSimStepData sourceSimStepDataForLabelIndex
   exact TM0FoldedCompiler.simStepDataByLabelIndex_eq
+    (NatPartrecToToPartrec.translate c)
+
+theorem sourceSimStepDataByLabelIndexWithCode_eq (c : Code) :
+    sourceSimStepDataByLabelIndexWithCode c = sourceSimStepData c := by
+  unfold sourceSimStepDataByLabelIndexWithCode sourceSimStepData
+  exact TM0FoldedCompiler.simStepDataByLabelIndexWithCode_eq
     (NatPartrecToToPartrec.translate c)
 
 /--
@@ -179,6 +206,39 @@ theorem sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom
           NatPartrecToToPartrec.translate_primrec))) ?_
   apply Primrec₂.mk
   exact hlabel
+
+/--
+Primitive recursiveness of the source-level numeric-state offset decoder is
+enough for the source-level numeric-state indexed descriptor list.
+-/
+theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWithCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec sourceSimStepDataByLabelIndexWithCode := by
+  have hstart : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithCode p.1 p.2) := by
+    have hfrom : Primrec (fun p : Code × Nat =>
+        sourceSimStepDataForLabelIndexFromWithCode p.1
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate p.1)) 0 p.2) :=
+      hindex.comp
+        (Primrec.pair Primrec.fst
+          (Primrec.pair
+            ((TM0Route.partrecStartedTM0StatementCount_primrec.comp
+                NatPartrecToToPartrec.translate_primrec).comp Primrec.fst)
+            (Primrec.pair (Primrec.const 0) Primrec.snd)))
+    exact hfrom.of_eq fun p => by
+      unfold sourceSimStepDataForLabelIndexStartWithCode
+        sourceSimStepDataForLabelIndexFromWithCode
+        TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode
+      rfl
+  unfold sourceSimStepDataByLabelIndexWithCode
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp
+      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
+          NatPartrecToToPartrec.translate_primrec))) ?_
+  apply Primrec₂.mk
+  exact hstart
 
 /--
 The older global offset-decoder target implies the source-specific decoder
@@ -266,6 +326,29 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndex
     rw [← TM0FoldedCompiler.simRows_eq_stepData
       (NatPartrecToToPartrec.translate c)]).to_comp
 
+set_option maxHeartbeats 800000 in
+-- The final equality unfolds normalized program data and the descriptor-row compiler.
+theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
+    (hsteps : Primrec sourceSimStepDataByLabelIndexWithCode) :
+    Computable sourceProgramData := by
+  have hdata : Primrec (fun c : Code =>
+      TM0FoldedCompiler.programDataOfStepData
+        (TM0Route.partrecStartedTM0StateCount
+          (NatPartrecToToPartrec.translate c))
+        (sourceSimStepDataByLabelIndexWithCode c)) := by
+    exact TM0FoldedCompiler.programDataOfStepData_primrec.comp
+      (Primrec.pair
+        (TM0Route.partrecStartedTM0StateCount_primrec.comp
+          NatPartrecToToPartrec.translate_primrec)
+        hsteps)
+  exact (hdata.of_eq fun c => by
+    unfold sourceProgramData TM0FoldedCompiler.programData
+      TM0FoldedCompiler.programDataOfStepData
+    rw [sourceSimStepDataByLabelIndexWithCode_eq c]
+    rw [sourceSimStepData_eq c]
+    rw [← TM0FoldedCompiler.simRows_eq_stepData
+      (NatPartrecToToPartrec.translate c)]).to_comp
+
 /--
 The remaining source-level folded computability target: primitive recursiveness
 of the translated fully offset decoder implies computability of the normalized
@@ -287,8 +370,8 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_labelIndexFrom
-    (sourceSimStepDataForLabelIndexFrom_primrec_of_source_withCode hindex)
+  sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
+    (sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWithCode hindex)
 
 /--
 The current lowest-level folded computability target, phrased at source-code
