@@ -1765,6 +1765,40 @@ theorem normalizeLabelStepAt_eq_normalizeLabelFuel_succ
   | succ n =>
       exact normalizeLabelStepBody_eq_normalizeLabelFuel_succ hprev hn
 
+theorem range_succ_getD_eq_self {bound n : Nat} (hn : n ≤ bound) :
+    (List.range (bound + 1)).getD n 0 = n := by
+  have hlt : n < (List.range (bound + 1)).length := by
+    simp
+    omega
+  rw [List.getD_eq_getElem (l := List.range (bound + 1)) (d := 0) hlt]
+  simp
+
+theorem normalizeLabelRowStep_getD_eq_normalizeLabelFuel_succ
+    {prev : List Nat} {fuel bound n : Nat}
+    (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
+    (hn : n ≤ bound) :
+    (normalizeLabelRowStep prev bound).getD n 0 = normalizeLabelFuel (fuel + 1) n := by
+  have hmap := List.getD_map (l := List.range (bound + 1))
+    (f := normalizeLabelStepAt prev) (d := 0) (n := n)
+  change ((List.range (bound + 1)).map (normalizeLabelStepAt prev)).getD n 0 =
+    normalizeLabelFuel (fuel + 1) n
+  rw [show (0 : Nat) = normalizeLabelStepAt prev 0 by rfl]
+  rw [hmap]
+  rw [range_succ_getD_eq_self hn]
+  exact normalizeLabelStepAt_eq_normalizeLabelFuel_succ hprev hn
+
+theorem normalizeLabelRows_getD_eq_normalizeLabelFuel
+    {fuel bound n : Nat} (hn : n ≤ bound) :
+    (normalizeLabelRows fuel bound).getD n 0 = normalizeLabelFuel fuel n := by
+  induction fuel generalizing bound n with
+  | zero =>
+      simp [normalizeLabelRows, normalizeLabelFuel]
+  | succ fuel ih =>
+      unfold normalizeLabelRows
+      refine normalizeLabelRowStep_getD_eq_normalizeLabelFuel_succ ?_ hn
+      intro k hk
+      exact ih hk
+
 theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
     normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
   induction fuel generalizing n with
