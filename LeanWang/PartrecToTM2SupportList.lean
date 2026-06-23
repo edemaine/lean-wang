@@ -1241,6 +1241,100 @@ theorem childState_fix_lt_boundStep
   · exact encodeCont_fix_le_boundStep
       ((ToPartrec.Code.encodeCode_le_fix f).trans hparent) hcont
 
+/-- Decode a numeric row index into the `(source code, continuation)` state it names. -/
+def codeContStateOfCode (n : Nat) : ToPartrec.Code × Cont' :=
+  (ToPartrec.Code.ofNatCode n.unpair.1, Turing.PartrecToTM2.Cont'.ofNatCont n.unpair.2)
+
+theorem codeContStateOfCode_primrec :
+    Primrec codeContStateOfCode := by
+  unfold codeContStateOfCode
+  exact Primrec.pair
+    (Primrec.ofNat ToPartrec.Code |>.comp (Primrec.fst.comp Primrec.unpair))
+    (Primrec.ofNat Cont' |>.comp (Primrec.snd.comp Primrec.unpair))
+
+theorem codeContStateOfCode_codeContStateCode (c : ToPartrec.Code) (k : Cont') :
+    codeContStateOfCode (codeContStateCode c k) = (c, k) := by
+  simp [codeContStateOfCode, codeContStateCode, ToPartrec.Code.ofNatCode_encodeCode,
+    Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont]
+
+/-- Lookup a previous fuel row by encoded `(source code, continuation)` state. -/
+def codeContStateLookup (prev : List Nat) (c : ToPartrec.Code) (k : Cont') : Nat :=
+  prev.getD (codeContStateCode c k) 0
+
+theorem codeContStateLookup_primrec :
+    Primrec (fun p : List Nat × (ToPartrec.Code × Cont') =>
+      codeContStateLookup p.1 p.2.1 p.2.2) := by
+  unfold codeContStateLookup
+  exact Primrec.list_getD 0 |>.comp Primrec.fst
+    (codeContStateCode_primrec.comp Primrec.snd)
+
+/-- One semantic row step for fuelled encoded `trNormal` labels. -/
+def trNormalLabelCodeFuelStep (prev : List Nat) : ToPartrec.Code → Cont' → Nat
+  | ToPartrec.Code.zero', k =>
+      pushLabelCode K'.main (fun _ : Option Γ' => some Γ'.cons) (retLabelCode k)
+  | ToPartrec.Code.succ, k =>
+      headLabelCode K'.main (succLabelCode (retLabelCode k))
+  | ToPartrec.Code.tail, k =>
+      clearLabelCode natEnd K'.main (retLabelCode k)
+  | ToPartrec.Code.cons f fs, k =>
+      pushLabelCode K'.stack (fun _ : Option Γ' => some Γ'.consₗ) <|
+        moveLabelCode (fun _ : Γ' => false) K'.main K'.rev <|
+          copyLabelCode <| codeContStateLookup prev f (Cont'.cons₁ fs k)
+  | ToPartrec.Code.comp f g, k =>
+      codeContStateLookup prev g (Cont'.comp f k)
+  | ToPartrec.Code.case f g, k =>
+      predLabelCode (codeContStateLookup prev f k) (codeContStateLookup prev g k)
+  | ToPartrec.Code.fix f, k =>
+      codeContStateLookup prev f (Cont'.fix f k)
+
+theorem trNormalLabelCodeFuelStep_eq
+    {prev : List Nat} {fuel : Nat}
+    (hprev : ∀ c k, codeContStateLookup prev c k = trNormalLabelCodeFuel fuel c k)
+    (c : ToPartrec.Code) (k : Cont') :
+    trNormalLabelCodeFuelStep prev c k = trNormalLabelCodeFuel (fuel + 1) c k := by
+  cases c with
+  | zero' =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | succ =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | tail =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | cons f fs =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel, hprev]
+  | comp f g =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel, hprev]
+  | case f g =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel, hprev]
+  | fix f =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel, hprev]
+
+/-- One bounded row of fuelled encoded `trNormal` labels. -/
+def trNormalLabelCodeFuelRowStep (prev : List Nat) (bound : Nat) : List Nat :=
+  (List.range (bound + 1)).map fun n =>
+    let s := codeContStateOfCode n
+    trNormalLabelCodeFuelStep prev s.1 s.2
+
+theorem trNormalLabelCodeFuelRowStep_getD_eq
+    {prev : List Nat} {fuel bound n : Nat}
+    (hprev : ∀ c k, codeContStateLookup prev c k = trNormalLabelCodeFuel fuel c k)
+    (hn : n ≤ bound) :
+    (trNormalLabelCodeFuelRowStep prev bound).getD n 0 =
+      trNormalLabelCodeFuel (fuel + 1) (codeContStateOfCode n).1
+        (codeContStateOfCode n).2 := by
+  unfold trNormalLabelCodeFuelRowStep
+  have hlt :
+      n < ((List.range (bound + 1)).map fun n =>
+        let s := codeContStateOfCode n
+        trNormalLabelCodeFuelStep prev s.1 s.2).length := by
+    simp
+    omega
+  rw [List.getD_eq_getElem
+    (l := (List.range (bound + 1)).map fun n =>
+      let s := codeContStateOfCode n
+      trNormalLabelCodeFuelStep prev s.1 s.2) (d := 0) hlt]
+  simp only [List.getElem_map, List.getElem_range]
+  exact trNormalLabelCodeFuelStep_eq hprev _ _
+
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
   | c@ToPartrec.Code.zero', k => trStmtsWeightCode wCode (trNormalLabelCode c k)
