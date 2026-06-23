@@ -2983,6 +2983,45 @@ def equivCode (tc : Turing.ToPartrec.Code) :
     cases u
     rfl
 
+/-- Number of recursive child statements required after this preorder node. -/
+def arity {tc : Turing.ToPartrec.Code} :
+    PartrecStartedTM1StmtNode tc → Nat
+  | move .. => 1
+  | write .. => 1
+  | load .. => 1
+  | branch .. => 2
+  | goto .. => 0
+  | halt => 0
+
+def codeArity {tc : Turing.ToPartrec.Code} :
+    Code tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr (Sum.inl _) => 1
+  | Sum.inr (Sum.inr (Sum.inl _)) => 1
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inl _))) => 2
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl _)))) => 0
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr _)))) => 0
+
+def gotoHaltCodeArity {tc : Turing.ToPartrec.Code} :
+    GotoHaltCode tc → Nat
+  | Sum.inl _ => 0
+  | Sum.inr _ => 0
+
+def branchTailCodeArity {tc : Turing.ToPartrec.Code} :
+    BranchTailCode tc → Nat
+  | Sum.inl _ => 2
+  | Sum.inr c => gotoHaltCodeArity c
+
+def loadTailCodeArity {tc : Turing.ToPartrec.Code} :
+    LoadTailCode tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr c => branchTailCodeArity c
+
+def writeTailCodeArity {tc : Turing.ToPartrec.Code} :
+    WriteTailCode tc → Nat
+  | Sum.inl _ => 1
+  | Sum.inr c => loadTailCodeArity c
+
 end PartrecStartedTM1StmtNode
 
 /-- Labels of the started Mathlib TM0 machine obtained through Mathlib's TM1-to-TM0 translation. -/
@@ -4026,6 +4065,83 @@ theorem partrecStartedTM0SymbolPartrecVarFunction_app_primrec
     (partrecStartedTM0SymbolFunction_app_primrec (PartrecVar → β)).comp
       Primrec.fst (Primrec.fst.comp Primrec.snd)
   exact (partrecVarFunction_app_primrec β).comp hsymbol (Primrec.snd.comp Primrec.snd)
+
+namespace PartrecStartedTM1StmtNode
+
+noncomputable instance instPrimcodable (tc : Turing.ToPartrec.Code) :
+    Primcodable (PartrecStartedTM1StmtNode tc) :=
+  Primcodable.ofEquiv (Code tc) (equivCode tc)
+
+theorem gotoHaltCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (gotoHaltCodeArity (tc := tc)) :=
+  (Primrec.const 0).of_eq fun c => by
+    cases c <;> rfl
+
+theorem branchTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (branchTailCodeArity (tc := tc)) := by
+  unfold branchTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : BranchTailCode tc => c))
+    (Primrec.const 2).to₂
+    ((gotoHaltCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+theorem loadTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (loadTailCodeArity (tc := tc)) := by
+  unfold loadTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : LoadTailCode tc => c))
+    (Primrec.const 1).to₂
+    ((branchTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+theorem writeTailCodeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (writeTailCodeArity (tc := tc)) := by
+  unfold writeTailCodeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : WriteTailCode tc => c))
+    (Primrec.const 1).to₂
+    ((loadTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      cases x <;> rfl
+
+theorem codeArity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (codeArity (tc := tc)) := by
+  unfold codeArity
+  exact (Primrec.sumCasesOn
+    (Primrec.id : Primrec (fun c : Code tc => c))
+    (Primrec.const 1).to₂
+    ((writeTailCodeArity_primrec tc).comp₂ Primrec₂.right)).of_eq fun x => by
+      rcases x with p | c
+      · rfl
+      rcases c with f | c
+      · rfl
+      rcases c with f | c
+      · rfl
+      rcases c with f | c
+      · rfl
+      rcases c with f | u
+      · rfl
+      cases u
+      rfl
+
+theorem toCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (toCode : PartrecStartedTM1StmtNode tc → Code tc) := by
+  simpa [equivCode] using
+    (Primrec.of_equiv (e := equivCode tc) :
+      Primrec (equivCode tc))
+
+theorem arity_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (arity (tc := tc)) :=
+  ((codeArity_primrec tc).comp (toCode_primrec tc)).of_eq fun n => by
+    cases n with
+    | move d => cases d <;> rfl
+    | write f => rfl
+    | load f => rfl
+    | branch f => rfl
+    | goto f => rfl
+    | halt => rfl
+
+end PartrecStartedTM1StmtNode
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVectors :
