@@ -3101,6 +3101,12 @@ def simStepDataForLabelIndexStart (tc : Turing.ToPartrec.Code) (i : Nat) :
   simStepDataForLabelIndexFrom tc
     (TM0Route.partrecStartedTM0StatementCount tc) 0 i
 
+/-- Canonical offset start for the numeric-state offset decoder. -/
+def simStepDataForLabelIndexStartWithCode (tc : Turing.ToPartrec.Code) (i : Nat) :
+    List SimStepData :=
+  simStepDataForLabelIndexFromWithCode tc
+    (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+
 theorem simStepDataForLabelIndex_eq_labelAt
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     simStepDataForLabelIndex tc i =
@@ -3124,6 +3130,14 @@ theorem simStepDataForLabelIndexFrom_zero_eq
   unfold simStepDataForLabelIndexFrom
   rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
   rw [simStepDataForLabelIndex_eq_labelAtByStatement]
+
+theorem simStepDataForLabelIndexStart_eq_withCode
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndexStart tc i =
+      simStepDataForLabelIndexStartWithCode tc i := by
+  unfold simStepDataForLabelIndexStart simStepDataForLabelIndexStartWithCode
+  exact simStepDataForLabelIndexFrom_eq_withCode
+    tc (TM0Route.partrecStartedTM0StatementCount tc) 0 i
 
 theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
@@ -3210,6 +3224,13 @@ theorem simStepDataForLabelIndexStart_eq
   unfold simStepDataForLabelIndexStart
   exact simStepDataForLabelIndexFrom_zero_eq tc i
 
+theorem simStepDataForLabelIndexStartWithCode_eq
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndexStartWithCode tc i =
+      simStepDataForLabelIndex tc i := by
+  rw [← simStepDataForLabelIndexStart_eq_withCode]
+  exact simStepDataForLabelIndexStart_eq tc i
+
 theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -3220,6 +3241,16 @@ theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
     (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
       (Primrec.pair (Primrec.const 0) Primrec.id))
 
+theorem simStepDataForLabelIndexStartWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (simStepDataForLabelIndexStartWithCode tc) := by
+  unfold simStepDataForLabelIndexStartWithCode
+  exact (simStepDataForLabelIndexFromWithCode_primrec_fixed_of_trAux tc haux).comp
+    (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
+      (Primrec.pair (Primrec.const 0) Primrec.id))
+
 theorem simStepDataForLabelIndexStart_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
@@ -3227,10 +3258,23 @@ theorem simStepDataForLabelIndexStart_primrec_fixed_of_machine
   simStepDataForLabelIndexStart_primrec_fixed_of_trAux tc
     (trAux_primrec_fixed_of_machine tc hmachine)
 
+theorem simStepDataForLabelIndexStartWithCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (simStepDataForLabelIndexStartWithCode tc) :=
+  simStepDataForLabelIndexStartWithCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem simStepDataForLabelIndexStart_primrec_fixed
     (tc : Turing.ToPartrec.Code) :
     Primrec (simStepDataForLabelIndexStart tc) :=
   simStepDataForLabelIndexStart_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
+theorem simStepDataForLabelIndexStartWithCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (simStepDataForLabelIndexStartWithCode tc) :=
+  simStepDataForLabelIndexStartWithCode_primrec_fixed_of_machine tc
     (TM0Route.partrecStartedTM1Machine_primrec tc)
 
 theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
@@ -3263,11 +3307,26 @@ def simStepDataByLabelIndex (tc : Turing.ToPartrec.Code) : List SimStepData :=
   (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
     (simStepDataForLabelIndex tc)
 
+/-- Indexed descriptor enumeration through the numeric-state decoder path. -/
+def simStepDataByLabelIndexWithCode (tc : Turing.ToPartrec.Code) : List SimStepData :=
+  (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
+    (simStepDataForLabelIndexStartWithCode tc)
+
 theorem simStepDataByLabelIndex_primrec_of_forLabelIndex
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
       simStepDataForLabelIndex p.1 p.2)) :
     Primrec simStepDataByLabelIndex := by
   unfold simStepDataByLabelIndex
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp TM0Route.partrecStartedTM0LabelCount_primrec) ?_
+  apply Primrec₂.mk
+  exact hindex
+
+theorem simStepDataByLabelIndexWithCode_primrec_of_forLabelIndexStartWithCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Primrec simStepDataByLabelIndexWithCode := by
+  unfold simStepDataByLabelIndexWithCode
   refine Primrec.list_flatMap
     (Primrec.list_range.comp TM0Route.partrecStartedTM0LabelCount_primrec) ?_
   apply Primrec₂.mk
@@ -3301,6 +3360,15 @@ theorem simStepDataByLabelIndex_eq (tc : Turing.ToPartrec.Code) :
   rw [← TM0Route.partrecStartedTM0LabelList_length tc]
   exact flatMap_getElem?_range_length
     (TM0Route.partrecStartedTM0LabelList tc) (fun q => simStepDataForLabel tc q)
+
+theorem simStepDataByLabelIndexWithCode_eq (tc : Turing.ToPartrec.Code) :
+    simStepDataByLabelIndexWithCode tc = simStepData tc := by
+  unfold simStepDataByLabelIndexWithCode
+  rw [← simStepDataByLabelIndex_eq tc]
+  unfold simStepDataByLabelIndex
+  apply List.flatMap_congr
+  intro i _hi
+  exact simStepDataForLabelIndexStartWithCode_eq tc i
 
 theorem simRows_eq_stepData (tc : Turing.ToPartrec.Code) :
     simRows tc = simRowsOfStepData (simStepData tc) := by
@@ -3478,6 +3546,17 @@ theorem programData_computable_of_simStepDataByLabelIndex
     (hsteps : Primrec simStepDataByLabelIndex) :
     Computable programData :=
   (programData_primrec_of_simStepDataByLabelIndex hsteps).to_comp
+
+theorem programData_primrec_of_simStepDataByLabelIndexWithCode
+    (hsteps : Primrec simStepDataByLabelIndexWithCode) :
+    Primrec programData :=
+  programData_primrec_of_stepData simStepDataByLabelIndexWithCode hsteps fun tc => by
+    rw [simStepDataByLabelIndexWithCode_eq, ← simRows_eq_stepData]
+
+theorem programData_computable_of_simStepDataByLabelIndexWithCode
+    (hsteps : Primrec simStepDataByLabelIndexWithCode) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataByLabelIndexWithCode hsteps).to_comp
 
 theorem programData_primrec_of_simStepDataForLabelIndex
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
