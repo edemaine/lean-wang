@@ -5972,6 +5972,46 @@ private theorem flatMapConstMapAt?_eq_getElem? {α β : Type}
         rw [ih]
         simp [List.length_map]
 
+private theorem flatMap_constMap_getElem?_of_getElem? {α β : Type}
+    (xs : List α) (ys : List β) {k i : Nat} {x : α} {y : β}
+    (hx : xs[k]? = some x) (hy : ys[i]? = some y) :
+    (xs.flatMap fun x => ys.map fun y => (x, y))[k * ys.length + i]? =
+      some (x, y) := by
+  induction xs generalizing k with
+  | nil =>
+      cases k <;> simp at hx
+  | cons x₀ xs ih =>
+      cases k with
+      | zero =>
+          simp only [List.getElem?_cons_zero, Option.some.injEq] at hx
+          subst x₀
+          simp only [zero_mul, zero_add, List.flatMap_cons]
+          have hmaplen : i < (ys.map fun y => (x, y)).length := by
+            rw [List.length_map]
+            exact List.getElem?_eq_some_iff.1 hy |>.1
+          rw [List.getElem?_append_left hmaplen]
+          rw [List.getElem?_map, hy]
+          rfl
+      | succ k =>
+          simp only [List.getElem?_cons_succ] at hx
+          simp only [Nat.succ_mul, List.flatMap_cons]
+          have hpos :
+              k * ys.length + ys.length + i = ys.length + (k * ys.length + i) := by
+            omega
+          rw [hpos]
+          have hle : (ys.map fun y => (x₀, y)).length ≤
+              ys.length + (k * ys.length + i) := by
+            simp only [List.length_map]
+            exact Nat.le_add_right ys.length (k * ys.length + i)
+          rw [List.getElem?_append_right hle]
+          have hindex :
+              ys.length + (k * ys.length + i) - (ys.map fun y => (x₀, y)).length =
+                k * ys.length + i := by
+            simp only [List.length_map]
+            omega
+          rw [hindex]
+          exact ih hx
+
 private def flatMapConstMapAtByGet? {α β : Type}
     (get : Nat → Option α) (ys : List β) : Nat → Nat → Option (α × β)
   | 0, _i => none
@@ -6497,6 +6537,33 @@ theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) 
     (partrecStartedTM0LabelSupportList tc)[0]? =
       some (default : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
   simp [partrecStartedTM0LabelSupportList]
+
+theorem partrecStartedTM0LabelSupportList_get_position_of_statementAt?
+    (tc : Turing.ToPartrec.Code) {k i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)}
+    {v : PartrecVar}
+    (hstmt : partrecStartedTM0StatementAt? tc k = some stmt)
+    (hv : partrecVarList[i]? = some v) :
+    (partrecStartedTM0LabelSupportList tc)[1 + k * partrecVarList.length + i]? =
+      some ((stmt, v) : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
+  have hstmtList :
+      (partrecStartedTM0StatementList tc)[k]? = some stmt := by
+    simpa [partrecStartedTM0StatementAt?_eq_getElem? tc k] using hstmt
+  have hlabel :
+      (partrecStartedTM0LabelList tc)[k * partrecVarList.length + i]? =
+        some ((stmt, v) : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
+    unfold partrecStartedTM0LabelList
+    exact flatMap_constMap_getElem?_of_getElem?
+      (partrecStartedTM0StatementList tc) partrecVarList hstmtList hv
+  unfold partrecStartedTM0LabelSupportList
+  have hpos : 1 + k * partrecVarList.length + i =
+      k * partrecVarList.length + i + 1 := by
+    omega
+  rw [hpos]
+  exact hlabel
 
 /-- Numeric code for a supported translated TM0 state. -/
 def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
