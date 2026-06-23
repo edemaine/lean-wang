@@ -2350,6 +2350,73 @@ noncomputable instance instPrimcodablePartrecStartedTM1Label (tc : Turing.ToPart
     (PartrecStartedTM1LabelCode tc)
     (partrecStartedTM1LabelEquivCode tc)
 
+theorem partrecStartedTM1Label_toCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM1LabelEquivCode tc) := by
+  simpa [instPrimcodablePartrecStartedTM1Label] using
+    (Primrec.of_equiv (e := partrecStartedTM1LabelEquivCode tc) :
+      Primrec (partrecStartedTM1LabelEquivCode tc))
+
+theorem partrecStartedTM1Label_ofCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM1LabelEquivCode tc).symm := by
+  change @Primrec (PartrecStartedTM1LabelCode tc) (PartrecStartedTM1Label tc) _
+    (Primcodable.ofEquiv
+      (PartrecStartedTM1LabelCode tc)
+      (partrecStartedTM1LabelEquivCode tc))
+    (partrecStartedTM1LabelEquivCode tc).symm
+  exact Primrec.of_equiv_symm
+
+theorem partrecStartedTM1Label_normal_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (Turing.TM2to1.Λ'.normal :
+      StartedLabel tc → PartrecStartedTM1Label tc) := by
+  have hcode : Primrec (fun q : StartedLabel tc =>
+      (Sum.inl q : PartrecStartedTM1LabelCode tc)) :=
+    Primrec.sumInl.comp Primrec.id
+  exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+theorem partrecStartedTM1Label_ret_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (Turing.TM2to1.Λ'.ret :
+      PartrecStartedTM2Stmt tc → PartrecStartedTM1Label tc) := by
+  have hcode : Primrec (fun q : PartrecStartedTM2Stmt tc =>
+      (Sum.inr (Sum.inr q) : PartrecStartedTM1LabelCode tc)) :=
+    Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id)
+  exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+theorem partrecStartedTM1Label_go_primrec_fixed_k
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (fun p :
+      Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+        PartrecStartedTM2Stmt tc =>
+      (Turing.TM2to1.Λ'.go k p.1 p.2 : PartrecStartedTM1Label tc)) := by
+  cases k
+  · have hcode : Primrec (fun p :
+        Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inl (Sum.inl (Sum.inl p))) : PartrecStartedTM1LabelCode tc)) :=
+      Primrec.sumInr.comp
+        (Primrec.sumInl.comp (Primrec.sumInl.comp (Primrec.sumInl.comp Primrec.id)))
+    exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+  · have hcode : Primrec (fun p :
+        Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inl (Sum.inl (Sum.inr p))) : PartrecStartedTM1LabelCode tc)) :=
+      Primrec.sumInr.comp
+        (Primrec.sumInl.comp (Primrec.sumInl.comp (Primrec.sumInr.comp Primrec.id)))
+    exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+  · have hcode : Primrec (fun p :
+        Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inl (Sum.inr (Sum.inl p))) : PartrecStartedTM1LabelCode tc)) :=
+      Primrec.sumInr.comp
+        (Primrec.sumInl.comp (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id)))
+    exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+  · have hcode : Primrec (fun p :
+        Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+            Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inl (Sum.inr (Sum.inr p))) : PartrecStartedTM1LabelCode tc)) :=
+      Primrec.sumInr.comp
+        (Primrec.sumInl.comp (Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id)))
+    exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
 abbrev PartrecTM1Label : Type :=
   Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
 
