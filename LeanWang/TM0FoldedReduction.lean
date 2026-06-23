@@ -96,6 +96,15 @@ def sourceSimStepDataForLabelIndexFrom
   TM0FoldedCompiler.simStepDataForLabelIndexFrom
     (NatPartrecToToPartrec.translate c) fuel k i
 
+/--
+Source-code version of the fully offset descriptor decoder factored through
+numeric folded state codes.
+-/
+def sourceSimStepDataForLabelIndexFromWithCode
+    (c : Code) (fuel k i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
+    (NatPartrecToToPartrec.translate c) fuel k i
+
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -121,6 +130,14 @@ theorem sourceSimStepDataForLabelIndexStart_eq (c : Code) (i : Nat) :
   unfold sourceSimStepDataForLabelIndexStart sourceSimStepDataForLabelIndex
   exact TM0FoldedCompiler.simStepDataForLabelIndexStart_eq
     (NatPartrecToToPartrec.translate c) i
+
+theorem sourceSimStepDataForLabelIndexFrom_eq_withCode
+    (c : Code) (fuel k i : Nat) :
+    sourceSimStepDataForLabelIndexFrom c fuel k i =
+      sourceSimStepDataForLabelIndexFromWithCode c fuel k i := by
+  unfold sourceSimStepDataForLabelIndexFrom sourceSimStepDataForLabelIndexFromWithCode
+  exact TM0FoldedCompiler.simStepDataForLabelIndexFrom_eq_withCode
+    (NatPartrecToToPartrec.translate c) fuel k i
 
 theorem sourceSimStepDataByLabelIndex_eq (c : Code) :
     sourceSimStepDataByLabelIndex c = sourceSimStepData c := by
@@ -180,6 +197,35 @@ theorem sourceSimStepDataForLabelIndexFrom_primrec_of_global
         rfl
 
 /--
+The source-level numeric-state offset decoder implies the source-level semantic
+offset decoder by the data-level `WithCode` factoring theorem.
+-/
+theorem sourceSimStepDataForLabelIndexFrom_primrec_of_source_withCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  hindex.of_eq fun p =>
+    (sourceSimStepDataForLabelIndexFrom_eq_withCode p.1 p.2.1 p.2.2.1 p.2.2.2).symm
+
+/--
+The older global numeric-state offset-decoder target implies the source-specific
+numeric-state decoder target by precomposing with the source translation.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexFromWithCode
+        rfl
+
+/--
 Global primitive recursiveness of the folded descriptor list is enough for the
 source-level normalized folded program-data map used by the final reduction.
 -/
@@ -233,6 +279,18 @@ theorem sourceProgramData_computable_of_source_labelIndexFrom
     (sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom hindex)
 
 /--
+The numeric-state source-level folded computability target. This is equivalent
+to the semantic source decoder target, but exposes the state code fed to the
+finite program.
+-/
+theorem sourceProgramData_computable_of_source_labelIndexFromWithCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFrom
+    (sourceSimStepDataForLabelIndexFrom_primrec_of_source_withCode hindex)
+
+/--
 The current lowest-level folded computability target, phrased at source-code
 level: primitive recursiveness of the fully offset label-index descriptor
 decoder implies computability of the normalized folded finite-TM0 program data
@@ -251,6 +309,22 @@ theorem sourceProgramData_computable_of_global_labelIndexFrom'
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_global_labelIndexFrom hindex).of_eq fun _ => rfl
+
+theorem sourceProgramData_computable_of_global_labelIndexFromWithCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithCode
+    (sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global hindex)
+
+theorem sourceProgramData_computable_of_global_labelIndexFromWithCode'
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_global_labelIndexFromWithCode hindex).of_eq fun _ => rfl
 
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
 def sourceFixedDominoReduction (_h : SourceObligations) (c : Code) : TileSet × WangTile :=
