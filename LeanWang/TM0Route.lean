@@ -685,6 +685,20 @@ private theorem list_sum_map_one_add {α : Type} (xs : List α) (f : α → Nat)
       rw [ih]
       omega
 
+private theorem list_sum_nat_primrec {α : Type} [Primcodable α]
+    {f : α → List Nat} (hf : Primrec f) :
+    Primrec fun a => (f a).sum := by
+  let step : α → Nat × Nat → Nat := fun _ p => p.1 + p.2
+  have hstep : Primrec₂ step := by
+    apply Primrec₂.mk
+    exact Primrec.nat_add.comp
+      (Primrec.fst.comp Primrec.snd) (Primrec.snd.comp Primrec.snd)
+  have hfold : Primrec fun a => List.foldl (fun s b => s + b) 0 (f a) := by
+    exact (Primrec.list_foldl (h := step) hf (Primrec.const 0) hstep).of_eq fun a => by
+      rfl
+  exact hfold.of_eq fun a => by
+    rw [List.sum_eq_foldl]
+
 theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
     {stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar}
     {q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Λ PartrecVar} :

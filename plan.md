@@ -181,7 +181,11 @@ with `TM0FoldedCompiler.programData_eq_program` relating it back to the
 semantic `program`. The later TM0 count wrappers are also isolated:
 `TM0Route.partrecStartedTM0StateCount_primrec_of_statementCount` reduces state
 count computability to the remaining `partrecStartedTM0StatementCount`
-computability target.
+computability target. `TM0Route` now also has a local `List Nat` sum
+primitive-recursion helper for that statement-count proof. The next obstacle is
+to add finite `Primcodable` encodings for the concrete TM2-to-TM1 labels and
+their finite function payloads, so `partrecTM1LabelList` and the per-label
+statement-length function can be treated as primitive recursive.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final
