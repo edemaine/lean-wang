@@ -188,9 +188,9 @@ undecidability reduction from `Nat.Partrec.Code`:
 structure TM0FoldedReduction.SourceObligations where
   program_computable :
     Computable (fun c : Nat.Partrec.Code =>
-      TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
   correct : forall c : Nat.Partrec.Code,
-    (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
       (Nat.Partrec.Code.eval c 0).Dom
 ```
 

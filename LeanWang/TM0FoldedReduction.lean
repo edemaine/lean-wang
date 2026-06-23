@@ -52,17 +52,20 @@ computable translation `NatPartrecToToPartrec.translate`.
 structure SourceObligations where
   program_computable :
     Computable (fun c : Code =>
-      TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
   correct : ∀ c : Code,
-    (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
       (Nat.Partrec.Code.eval c 0).Dom
 
 /-- Broad folded-route obligations imply the source-code obligations actually used. -/
 def Obligations.toSource (h : Obligations) : SourceObligations where
-  program_computable :=
-    h.program_computable.comp NatPartrecToToPartrec.translate_computable
+  program_computable := by
+    exact (h.program_computable.comp NatPartrecToToPartrec.translate_computable).of_eq
+      fun c => (TM0FoldedCompiler.programData_eq_program
+        (NatPartrecToToPartrec.translate c)).symm
   correct := by
     intro c
+    rw [TM0FoldedCompiler.programData_eq_program]
     exact (h.correct (NatPartrecToToPartrec.translate c)).trans
       ((TM0Route.partrecStartedTM0_eval_dom_iff_tm2
           (NatPartrecToToPartrec.translate c)).trans
@@ -73,7 +76,7 @@ def Obligations.toSource (h : Obligations) : SourceObligations where
 /-- Apply the folded source-code reduction and then the current table bridge. -/
 def sourceTableProgram (_h : SourceObligations) (c : Code) : TableProgram :=
   PostProgram.toTableProgram
-    (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
 
 theorem sourceTableProgram_computable (h : SourceObligations) :
     Computable (sourceTableProgram h) := by
@@ -83,7 +86,7 @@ theorem sourceTableProgram_correct (h : SourceObligations) (c : Code) :
     Machine.HaltsEmpty (sourceTableProgram h c).toMachine ↔
       (Nat.Partrec.Code.eval c 0).Dom := by
   exact (PostProgram.toTableProgram_toMachine_haltsEmpty_iff
-    (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))).trans
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))).trans
       (h.correct c)
 
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
