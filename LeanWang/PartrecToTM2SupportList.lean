@@ -2070,6 +2070,28 @@ theorem codeSuppWeightCodeFuelRowsBase_weight_correct
       codeSuppWeightCodeFuel' wCode 0 c k := by
   simp [codeSuppWeightCodeFuelRowsBase, codeContStateLookup, codeSuppWeightCodeFuel']
 
+theorem codeSuppWeightCodeFuelRowsStep_fst_getD_eq
+    (wCode : Nat → Nat) {rows : List Nat × List Nat} {fuel bound n : Nat}
+    (hlabel : ∀ c k, codeContStateLookup rows.1 c k = trNormalLabelCodeFuel fuel c k)
+    (hn : n ≤ bound) :
+    (codeSuppWeightCodeFuelRowsStep wCode bound rows).1.getD n 0 =
+      trNormalLabelCodeFuel (fuel + 1) (codeContStateOfCode n).1
+        (codeContStateOfCode n).2 := by
+  rw [codeSuppWeightCodeFuelRowsStep_fst]
+  exact trNormalLabelCodeFuelRowStep_getD_eq hlabel hn
+
+theorem codeSuppWeightCodeFuelRowsStep_snd_getD_eq
+    (wCode : Nat → Nat) {rows : List Nat × List Nat} {fuel bound n : Nat}
+    (hlabel : ∀ c k, codeContStateLookup rows.1 c k = trNormalLabelCodeFuel fuel c k)
+    (hweight : ∀ c k,
+      codeContStateLookup rows.2 c k = codeSuppWeightCodeFuel' wCode fuel c k)
+    (hn : n ≤ bound) :
+    (codeSuppWeightCodeFuelRowsStep wCode bound rows).2.getD n 0 =
+      codeSuppWeightCodeFuel' wCode (fuel + 1) (codeContStateOfCode n).1
+        (codeContStateOfCode n).2 := by
+  rw [codeSuppWeightCodeFuelRowsStep_snd]
+  exact codeSuppWeightCodeFuelRowStep'_getD_eq wCode hlabel hweight hn
+
 theorem codeSuppWeightCodeFuel'_eq
     (wCode : Nat → Nat) {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
     codeSuppWeightCodeFuel' wCode fuel c k = codeSuppWeightCode' wCode c k := by
