@@ -2693,6 +2693,54 @@ theorem codeSuppWeight'_primrec_of_code
   exact (codeSuppWeightCode'_primrec hw).of_eq fun p => by
     exact codeSuppWeightCode'_eq w wCode hwCode p.1 p.2
 
+theorem trStmtsLength_eq_weight_one (q : Λ') :
+    trStmtsLength q = trStmtsWeight (fun _ : Λ' => 1) q := by
+  induction q with
+  | move p k₁ k₂ q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | push k f q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | read q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | clear p k q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | copy q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | succ q ih =>
+      simp [trStmtsLength, trStmtsWeight, ih]
+  | pred q₁ q₂ ih₁ ih₂ =>
+      simp [trStmtsLength, trStmtsWeight, ih₁, ih₂, Nat.add_left_comm]
+  | ret k =>
+      simp [trStmtsLength, trStmtsWeight]
+
+theorem codeSuppLength'_eq_weight_one (c : ToPartrec.Code) (k : Cont') :
+    codeSuppLength' c k = codeSuppWeight' (fun _ : Λ' => 1) c k := by
+  induction c generalizing k with
+  | zero' =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one]
+  | succ =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one]
+  | tail =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one]
+  | cons f fs ihf ihfs =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one,
+        ihf, ihfs, Nat.add_assoc, Nat.add_comm]
+  | comp f g ihf ihg =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one,
+        ihf, ihg, Nat.add_assoc, Nat.add_comm]
+  | case f g ihf ihg =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one,
+        ihf, ihg, Nat.add_assoc, Nat.add_comm]
+  | fix f ih =>
+      simp [codeSuppLength', codeSuppWeight', trStmtsLength_eq_weight_one,
+        ih, Nat.add_comm, Nat.add_left_comm]
+
+theorem codeSuppLength'_primrec :
+    Primrec₂ codeSuppLength' :=
+  (codeSuppWeight'_primrec_of_code (w := fun _ : Λ' => 1)
+    (wCode := fun _ : Nat => 1) (Primrec.const 1) (fun _ => rfl)).of_eq fun c k => by
+      exact (codeSuppLength'_eq_weight_one c k).symm
+
 theorem codeSuppList'_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList' c k).length = codeSuppLength' c k := by
   induction c generalizing k with
@@ -2899,6 +2947,11 @@ theorem labelCount_primrec_of_codeSuppLength
     Primrec labelCount := by
   unfold labelCount
   exact h.comp Primrec.id (Primrec.const Cont'.halt)
+
+theorem labelCount_primrec : Primrec labelCount := by
+  unfold labelCount codeSuppLength
+  exact (codeSuppLength'_primrec.comp Primrec.id (Primrec.const Cont'.halt)).of_eq
+    fun _ => by simp [contSuppLength]
 
 /-- Weighted sum of the evaluator label support for code `tc`. -/
 def labelWeight (w : Λ' → Nat) (tc : ToPartrec.Code) : Nat :=
