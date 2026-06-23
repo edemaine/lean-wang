@@ -1880,6 +1880,15 @@ theorem partrecStartedTM0LabelCount_primrec_of_statementCount
   unfold partrecStartedTM0LabelCount
   exact Primrec.nat_mul.comp h (Primrec.const partrecVarList.length)
 
+theorem partrecStartedTM0LabelCount_primrec :
+    Primrec partrecStartedTM0LabelCount :=
+  partrecStartedTM0LabelCount_primrec_of_statementCount
+    partrecStartedTM0StatementCount_primrec
+
+theorem partrecStartedTM0LabelCount_computable :
+    Computable partrecStartedTM0LabelCount :=
+  partrecStartedTM0LabelCount_primrec.to_comp
+
 theorem partrecStartedTM0LabelList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelList tc).length =
       partrecStartedTM0LabelCount tc := by
@@ -1946,6 +1955,15 @@ theorem partrecStartedTM0LabelSupportCount_primrec_of_statementCount
   exact (Primrec.succ.comp
     (partrecStartedTM0LabelCount_primrec_of_statementCount h)).of_eq fun tc => by
       simp [Nat.succ_eq_add_one, Nat.add_comm]
+
+theorem partrecStartedTM0LabelSupportCount_primrec :
+    Primrec partrecStartedTM0LabelSupportCount :=
+  partrecStartedTM0LabelSupportCount_primrec_of_statementCount
+    partrecStartedTM0StatementCount_primrec
+
+theorem partrecStartedTM0LabelSupportCount_computable :
+    Computable partrecStartedTM0LabelSupportCount :=
+  partrecStartedTM0LabelSupportCount_primrec.to_comp
 
 theorem partrecStartedTM0LabelSupportList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelSupportList tc).length =
@@ -2018,6 +2036,15 @@ theorem partrecStartedTM0LabelSupportList_length_eq_stateCount
 /-- Numeric state list for the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0States (tc : Turing.ToPartrec.Code) : List Nat :=
   List.range (partrecStartedTM0StateCount tc)
+
+theorem partrecStartedTM0States_primrec :
+    Primrec partrecStartedTM0States := by
+  unfold partrecStartedTM0States
+  exact Primrec.list_range.comp partrecStartedTM0StateCount_primrec
+
+theorem partrecStartedTM0States_computable :
+    Computable partrecStartedTM0States :=
+  partrecStartedTM0States_primrec.to_comp
 
 /-- Numeric start state corresponding to the default translated TM0 label. -/
 def partrecStartedTM0Start : Nat :=
