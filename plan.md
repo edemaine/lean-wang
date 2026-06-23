@@ -53,9 +53,8 @@ Completed proof layers:
 - the abstract scaffold reduction from any verified `IsScaffold S`;
 - the encoded domino undecidability theorem from source-level folded-route
   obligations and a verified scaffold.
-- a primitive-recursive finite Boolean search `TableProgram` generator remains
-  available as supporting code, but the old bounded-fuel theorem route has been
-  removed from the main theorem surface.
+- the old bounded-fuel theorem route and its primitive-recursive finite Boolean
+  search `TableProgram` generator have been removed from the codebase.
 - a primitive-recursive translation from Mathlib unary `Nat.Partrec.Code` to
   Mathlib list-based `Turing.ToPartrec.Code`, with a concrete correctness
   theorem connecting Mathlib code evaluation to `PartrecToTM2` halting. This
