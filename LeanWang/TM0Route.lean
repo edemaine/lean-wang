@@ -2129,6 +2129,126 @@ theorem mem_depNodeLists_length_lt {tc : Turing.ToPartrec.Code}
   | halt =>
       simp [depNodeLists_eq_map_ofStmt] at hnodes
 
+/-- A total proof-carrying wrapper for encoded TM2 dependency statement nodes. -/
+noncomputable def depValidCodeOfNodes (tc : Turing.ToPartrec.Code)
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    ValidCode tc :=
+  if h : Valid (tc := tc) nodes then
+    ⟨nodes, h⟩
+  else
+    toValidCode (Turing.TM2.Stmt.halt : Stmt tc)
+
+theorem depValidCodeOfNodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (depValidCodeOfNodes tc) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  have hvalid : PrimrecPred (fun nodes : List (PartrecStartedTM2StmtNode tc) =>
+      Valid (tc := tc) nodes) :=
+    valid_primrecPred tc
+  have hval : Primrec (fun nodes : List (PartrecStartedTM2StmtNode tc) =>
+      if Valid (tc := tc) nodes then
+        nodes
+      else
+        ofStmt (Turing.TM2.Stmt.halt : Stmt tc)) :=
+    Primrec.ite hvalid Primrec.id
+      (Primrec.const (ofStmt (Turing.TM2.Stmt.halt : Stmt tc)))
+  have hval' : Primrec (fun nodes : List (PartrecStartedTM2StmtNode tc) =>
+      (depValidCodeOfNodes tc nodes).1) :=
+    hval.of_eq fun nodes => by
+      unfold depValidCodeOfNodes
+      by_cases h : Valid (tc := tc) nodes <;>
+        simp [h, toValidCode]
+  exact Primrec.subtype_val_iff.1 hval'
+
+theorem depValidCodeOfNodes_ofStmt {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) :
+    depValidCodeOfNodes tc (ofStmt stmt) = toValidCode stmt := by
+  apply Subtype.ext
+  simp [depValidCodeOfNodes, valid_ofStmt, toValidCode]
+
+theorem depValidCodeOfNodes_of_valid {tc : Turing.ToPartrec.Code}
+    {nodes : List (PartrecStartedTM2StmtNode tc)}
+    (hvalid : Valid (tc := tc) nodes) :
+    (depValidCodeOfNodes tc nodes).1 = nodes := by
+  simp [depValidCodeOfNodes, hvalid]
+
+noncomputable def depValidCodes {tc : Turing.ToPartrec.Code}
+    (code : ValidCode tc) : List (ValidCode tc) :=
+  (depNodeLists (ofValidCode code)).map (depValidCodeOfNodes tc)
+
+theorem depValidCodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (depValidCodes (tc := tc)) := by
+  letI : Primcodable (ValidCode tc) := instPrimcodableValidCode tc
+  unfold depValidCodes
+  refine Primrec.list_map
+    ((depNodeLists_primrec tc).comp (ofValidCode_primrec tc)) ?_
+  apply Primrec₂.mk
+  exact (depValidCodeOfNodes_primrec tc).comp Primrec.snd
+
+theorem depValidCodes_toValidCode {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) :
+    depValidCodes (toValidCode stmt) =
+      match stmt with
+      | Turing.TM2.Stmt.push _ _ q => [toValidCode q]
+      | Turing.TM2.Stmt.peek _ _ q => [toValidCode q]
+      | Turing.TM2.Stmt.pop _ _ q => [toValidCode q]
+      | Turing.TM2.Stmt.load _ q => [toValidCode q]
+      | Turing.TM2.Stmt.branch _ q₁ q₂ => [toValidCode q₁, toValidCode q₂]
+      | Turing.TM2.Stmt.goto _ => []
+      | Turing.TM2.Stmt.halt => [] := by
+  unfold depValidCodes
+  rw [ofValidCode_toValidCode]
+  cases stmt <;> simp [depNodeLists_eq_map_ofStmt, depValidCodeOfNodes_ofStmt]
+
+set_option linter.flexible false in
+theorem mem_depValidCodes_length_lt {tc : Turing.ToPartrec.Code}
+    {code dep : ValidCode tc}
+    (hdep : dep ∈ depValidCodes code) :
+    dep.1.length < code.1.length := by
+  unfold depValidCodes at hdep
+  rcases List.mem_map.1 hdep with ⟨nodes, hnodes, hdepEq⟩
+  subst dep
+  have hnode_lt :
+      nodes.length < (ofStmt (ofValidCode code)).length :=
+    mem_depNodeLists_length_lt hnodes
+  have hnodes_valid : Valid (tc := tc) nodes := by
+    rcases parse?_eq_some_of_valid (tc := tc) code.2 with ⟨stmt, hparse⟩
+    have hcode_eq : code.1 = ofStmt stmt :=
+      parse?_eq_some_empty_ofStmt (tc := tc) hparse
+    have hstmt_eq : ofValidCode code = stmt := by
+      apply ofStmt_injective
+      rw [ofStmt_ofValidCode, hcode_eq]
+    rw [hstmt_eq] at hnodes
+    cases stmt with
+    | push k f q =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+        subst nodes
+        exact valid_ofStmt q
+    | peek k f q =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+        subst nodes
+        exact valid_ofStmt q
+    | pop k f q =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+        subst nodes
+        exact valid_ofStmt q
+    | load f q =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+        subst nodes
+        exact valid_ofStmt q
+    | branch f q₁ q₂ =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+        rcases hnodes with rfl | hnodes
+        · exact valid_ofStmt q₁
+        · rcases hnodes with rfl
+          exact valid_ofStmt q₂
+    | goto f =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+    | halt =>
+        simp [depNodeLists_eq_map_ofStmt] at hnodes
+  rw [depValidCodeOfNodes_of_valid hnodes_valid]
+  rw [ofStmt_ofValidCode] at hnode_lt
+  exact hnode_lt
+
 end PartrecStartedTM2StmtNode
 
 abbrev PartrecTM2Stmt : Type :=
