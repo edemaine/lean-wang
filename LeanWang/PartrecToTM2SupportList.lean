@@ -2684,6 +2684,15 @@ theorem codeSuppWeightCode'_eq
       simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
         trStmtsWeightCode_encodeLabel, ih, hclear, hret, hwCode]
 
+theorem codeSuppWeight'_primrec_of_code
+    {w : Λ' → Nat} {wCode : Nat → Nat}
+    (hw : Primrec wCode)
+    (hwCode : ∀ q : Λ', wCode (Turing.PartrecToTM2.Λ'.encodeLabel q) = w q) :
+    Primrec₂ (codeSuppWeight' w) := by
+  apply Primrec₂.mk
+  exact (codeSuppWeightCode'_primrec hw).of_eq fun p => by
+    exact codeSuppWeightCode'_eq w wCode hwCode p.1 p.2
+
 theorem codeSuppList'_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList' c k).length = codeSuppLength' c k := by
   induction c generalizing k with
@@ -2900,6 +2909,13 @@ theorem labelWeight_primrec_of_codeSuppWeight
     Primrec (labelWeight w) := by
   unfold labelWeight
   exact h.comp Primrec.id (Primrec.const Cont'.halt)
+
+theorem labelWeight_primrec_of_codeSuppWeight'
+    {w : Λ' → Nat} (h : Primrec₂ (codeSuppWeight' w)) :
+    Primrec (labelWeight w) := by
+  unfold labelWeight codeSuppWeight
+  exact (h.comp Primrec.id (Primrec.const Cont'.halt)).of_eq fun tc => by
+    simp [contSuppWeight]
 
 theorem labelList_length (tc : ToPartrec.Code) :
     (labelList tc).length = labelCount tc := by

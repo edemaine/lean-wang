@@ -922,6 +922,12 @@ theorem partrecTM2SupportLength_primrec :
     rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
     exact partrecTM2SupportLengthCode_encodeLabel q
 
+theorem partrecTM2SupportLength_labelWeight_primrec :
+    Primrec (PartrecToTM2SupportList.labelWeight partrecTM2SupportLength) :=
+  PartrecToTM2SupportList.labelWeight_primrec_of_codeSuppWeight'
+    (PartrecToTM2SupportList.codeSuppWeight'_primrec_of_code
+      partrecTM2SupportLengthCode_primrec partrecTM2SupportLengthCode_encodeLabel)
+
 theorem tm2to1StmtSupportLength_partrecTM2
     (q : Turing.PartrecToTM2.Λ') :
     tm2to1StmtSupportLength (partrecTM2 q) = partrecTM2SupportLength q := by
@@ -1534,6 +1540,13 @@ theorem partrecTM1LabelStmtSupportWeight_primrec :
   exact (partrecTM1LabelStmtSupportWeightCode_primrec.comp Primrec.encode).of_eq fun q => by
     rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
     exact partrecTM1LabelStmtSupportWeightCode_encodeLabel q
+
+theorem partrecTM1LabelStmtSupportWeight_labelWeight_primrec :
+    Primrec (PartrecToTM2SupportList.labelWeight partrecTM1LabelStmtSupportWeight) :=
+  PartrecToTM2SupportList.labelWeight_primrec_of_codeSuppWeight'
+    (PartrecToTM2SupportList.codeSuppWeight'_primrec_of_code
+      partrecTM1LabelStmtSupportWeightCode_primrec
+      partrecTM1LabelStmtSupportWeightCode_encodeLabel)
 
 theorem tm1StmtSupportList_length {Γ Λ σ : Type}
     (stmt : Turing.TM1.Stmt Γ Λ σ) :
