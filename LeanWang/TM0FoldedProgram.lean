@@ -643,6 +643,125 @@ theorem trAuxDepsNodeData_eq_encoded
   | halt =>
       rfl
 
+/-- A total proof-carrying wrapper for encoded `trAux` dependency statement nodes. -/
+noncomputable def encodedTrAuxDepValidCode (tc : Turing.ToPartrec.Code)
+    (dep : EncodedTrAuxDep tc) :
+    TM0Route.PartrecStartedTM1StmtNode.ValidCode tc :=
+  if h : TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1 then
+    ⟨dep.1, h⟩
+  else
+    TM0Route.PartrecStartedTM1StmtNode.toValidCode
+      (Turing.TM1.Stmt.halt : SourceStmt tc)
+
+theorem encodedTrAuxDepValidCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (encodedTrAuxDepValidCode tc) := by
+  letI : Primcodable (TM0Route.PartrecStartedTM1StmtNode.ValidCode tc) :=
+    TM0Route.PartrecStartedTM1StmtNode.instPrimcodableValidCode tc
+  have hvalid : PrimrecPred (fun dep : EncodedTrAuxDep tc =>
+      TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1) :=
+    (TM0Route.PartrecStartedTM1StmtNode.valid_primrecPred tc).comp Primrec.fst
+  have hval : Primrec (fun dep : EncodedTrAuxDep tc =>
+      if TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1 then
+        dep.1
+      else
+        TM0Route.PartrecStartedTM1StmtNode.ofStmt
+          (Turing.TM1.Stmt.halt : SourceStmt tc)) :=
+    Primrec.ite hvalid Primrec.fst
+      (Primrec.const
+        (TM0Route.PartrecStartedTM1StmtNode.ofStmt
+          (Turing.TM1.Stmt.halt : SourceStmt tc)))
+  have hval' : Primrec (fun dep : EncodedTrAuxDep tc =>
+      (encodedTrAuxDepValidCode tc dep).1) :=
+    hval.of_eq fun dep => by
+      unfold encodedTrAuxDepValidCode
+      by_cases h : TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1 <;>
+        simp [h, TM0Route.PartrecStartedTM1StmtNode.toValidCode]
+  exact Primrec.subtype_val_iff.1 hval'
+
+theorem encodedTrAuxDepValidCode_ofStmt
+    {tc : Turing.ToPartrec.Code} (stmt : SourceStmt tc)
+    (v : PartrecVar) (a : SourceSymbol) :
+    encodedTrAuxDepValidCode tc
+        (TM0Route.PartrecStartedTM1StmtNode.ofStmt stmt, v, a) =
+      TM0Route.PartrecStartedTM1StmtNode.toValidCode stmt := by
+  apply Subtype.ext
+  simp [encodedTrAuxDepValidCode,
+    TM0Route.PartrecStartedTM1StmtNode.valid_ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.toValidCode]
+
+/--
+Decode one encoded dependency. Invalid statement-node lists are discarded; the
+lists produced by `trAuxDepsNodeData` are all valid, so no data is lost there.
+-/
+noncomputable def decodeEncodedTrAuxDep? (tc : Turing.ToPartrec.Code)
+    (dep : EncodedTrAuxDep tc) :
+    Option (SourceStmt tc × PartrecVar × SourceSymbol) :=
+  if TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1 then
+    some
+      (TM0Route.PartrecStartedTM1StmtNode.ofValidCode
+        (encodedTrAuxDepValidCode tc dep), dep.2.1, dep.2.2)
+  else
+    none
+
+theorem decodeEncodedTrAuxDep?_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (decodeEncodedTrAuxDep? tc) := by
+  have hvalid : PrimrecPred (fun dep : EncodedTrAuxDep tc =>
+      TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1) :=
+    (TM0Route.PartrecStartedTM1StmtNode.valid_primrecPred tc).comp Primrec.fst
+  have hstmt : Primrec (fun dep : EncodedTrAuxDep tc =>
+      TM0Route.PartrecStartedTM1StmtNode.ofValidCode
+        (encodedTrAuxDepValidCode tc dep)) :=
+    (TM0Route.PartrecStartedTM1StmtNode.ofValidCode_primrec tc).comp
+      (encodedTrAuxDepValidCode_primrec_fixed tc)
+  have hsome : Primrec (fun dep : EncodedTrAuxDep tc =>
+      some
+        (TM0Route.PartrecStartedTM1StmtNode.ofValidCode
+          (encodedTrAuxDepValidCode tc dep), dep.2.1, dep.2.2)) :=
+    Primrec.option_some.comp (Primrec.pair hstmt Primrec.snd)
+  exact (Primrec.ite hvalid hsome (Primrec.const none)).of_eq fun dep => by
+    unfold decodeEncodedTrAuxDep?
+    by_cases h : TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc) dep.1 <;>
+      simp [h]
+
+theorem decodeEncodedTrAuxDep?_ofStmt
+    {tc : Turing.ToPartrec.Code} (stmt : SourceStmt tc)
+    (v : PartrecVar) (a : SourceSymbol) :
+    decodeEncodedTrAuxDep? tc
+        (TM0Route.PartrecStartedTM1StmtNode.ofStmt stmt, v, a) =
+      some (stmt, v, a) := by
+  simp [decodeEncodedTrAuxDep?,
+    encodedTrAuxDepValidCode_ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.valid_ofStmt,
+    TM0Route.PartrecStartedTM1StmtNode.ofValidCode_toValidCode]
+
+noncomputable def trAuxDepsDecodedData (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) :
+    List (SourceStmt tc × PartrecVar × SourceSymbol) :=
+  (trAuxDepsNodeData tc p).filterMap (decodeEncodedTrAuxDep? tc)
+
+theorem trAuxDepsDecodedData_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxDepsDecodedData tc) := by
+  unfold trAuxDepsDecodedData
+  exact Primrec.listFilterMap (trAuxDepsNodeData_primrec_fixed tc)
+    (Primrec₂.mk (decodeEncodedTrAuxDep?_primrec_fixed tc |>.comp Primrec.snd))
+
+theorem trAuxDepsDecodedData_eq
+    (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) :
+    trAuxDepsDecodedData tc p = trAuxDeps tc p := by
+  unfold trAuxDepsDecodedData
+  rw [trAuxDepsNodeData_eq_encoded]
+  unfold trAuxDepsEncoded
+  induction trAuxDeps tc p with
+  | nil =>
+      rfl
+  | cons dep deps ih =>
+      rcases dep with ⟨stmt, v, a⟩
+      simp [decodeEncodedTrAuxDep?_ofStmt, ih]
+
 theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol)
     (p' : SourceStmt tc × PartrecVar × SourceSymbol)
