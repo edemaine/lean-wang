@@ -2983,6 +2983,19 @@ def equivCode (tc : Turing.ToPartrec.Code) :
     cases u
     rfl
 
+def dirEquivBool : Turing.Dir ≃ Bool where
+  toFun := dirToBool
+  invFun := dirOfBool
+  left_inv := by
+    intro d
+    cases d <;> rfl
+  right_inv := by
+    intro b
+    cases b <;> rfl
+
+instance instPrimcodableTuringDir : Primcodable Turing.Dir :=
+  Primcodable.ofEquiv Bool dirEquivBool
+
 /-- Number of recursive child statements required after this preorder node. -/
 def arity {tc : Turing.ToPartrec.Code} :
     PartrecStartedTM1StmtNode tc → Nat
@@ -4129,6 +4142,72 @@ theorem toCode_primrec (tc : Turing.ToPartrec.Code) :
   simpa [equivCode] using
     (Primrec.of_equiv (e := equivCode tc) :
       Primrec (equivCode tc))
+
+theorem ofCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofCode : Code tc → PartrecStartedTM1StmtNode tc) := by
+  change @Primrec (Code tc) (PartrecStartedTM1StmtNode tc) _
+    (Primcodable.ofEquiv (Code tc) (equivCode tc)) (equivCode tc).symm
+  exact Primrec.of_equiv_symm
+
+theorem dirToBool_primrec : Primrec dirToBool := by
+  simpa [dirEquivBool] using
+    (Primrec.of_equiv (e := dirEquivBool) : Primrec dirEquivBool)
+
+theorem moveNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (move : Turing.Dir → PartrecStartedTM1StmtNode tc) := by
+  have hcode : Primrec (fun d : Turing.Dir =>
+      (Sum.inl (dirToBool d, PUnit.unit) : Code tc)) :=
+    Primrec.sumInl.comp (Primrec.pair dirToBool_primrec (Primrec.const PUnit.unit))
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun d => by
+    cases d <;> rfl
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `WriteCode` makes the nested-sum code elaborate slowly.
+theorem writeNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (write : WriteCode → PartrecStartedTM1StmtNode tc) := by
+  have hcode : Primrec (fun f : WriteCode =>
+      (Sum.inr (Sum.inl f) : Code tc)) :=
+    Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id)
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `LoadCode` makes the nested-sum code elaborate slowly.
+theorem loadNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (load : LoadCode → PartrecStartedTM1StmtNode tc) := by
+  have hcode : Primrec (fun f : LoadCode =>
+      (Sum.inr (Sum.inr (Sum.inl f)) : Code tc)) :=
+    Primrec.sumInr.comp (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id))
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+set_option maxHeartbeats 800000 in
+-- The finite-function payload inside `BranchCode` makes the nested-sum code elaborate slowly.
+theorem branchNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (branch : BranchCode → PartrecStartedTM1StmtNode tc) := by
+  have hcode : Primrec (fun f : BranchCode =>
+      (Sum.inr (Sum.inr (Sum.inr (Sum.inl f))) : Code tc)) :=
+    Primrec.sumInr.comp
+      (Primrec.sumInr.comp (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id)))
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+set_option maxHeartbeats 800000 in
+-- The label-valued finite-function payload makes the nested-sum code elaborate slowly.
+theorem gotoNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (goto : GotoCode tc → PartrecStartedTM1StmtNode tc) := by
+  have hcode : Primrec (fun f : GotoCode tc =>
+      (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inl f)))) : Code tc)) :=
+    Primrec.sumInr.comp
+      (Primrec.sumInr.comp
+        (Primrec.sumInr.comp (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id))))
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
+
+theorem haltNode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun _u : PUnit => (halt : PartrecStartedTM1StmtNode tc)) := by
+  have hcode : Primrec (fun _u : PUnit =>
+      (Sum.inr (Sum.inr (Sum.inr (Sum.inr (Sum.inr PUnit.unit)))) : Code tc)) :=
+    Primrec.const _
+  exact ((ofCode_primrec tc).comp hcode).of_eq fun u => by
+    cases u
+    rfl
 
 theorem arity_primrec (tc : Turing.ToPartrec.Code) :
     Primrec (arity (tc := tc)) :=
