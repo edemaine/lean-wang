@@ -6516,6 +6516,18 @@ theorem tm2to1GoGotoPayload_primrec
       funext _a _s
       rfl
 
+def tm2to1RetGotoPayload (tc : Turing.ToPartrec.Code)
+    (q : PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ _ => Turing.TM2to1.Λ'.ret q
+
+theorem tm2to1RetGotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1RetGotoPayload tc) := by
+  exact (partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    (partrecStartedTM1Label_ret_primrec tc)).of_eq fun q => by
+      funext _a _s
+      rfl
+
 def tm2to1PushGotoPayload (tc : Turing.ToPartrec.Code)
     (p : PartrecStartedTM2StmtNode.PushCode × PartrecStartedTM2Stmt tc) :
     PartrecStartedTM1StmtNode.GotoCode tc :=
@@ -6869,6 +6881,55 @@ theorem tm2to1TrStAct_primrec_fixed_k
     | mk q s =>
       cases s <;> rfl
 
+noncomputable def tm2to1RetGotoStmt (tc : Turing.ToPartrec.Code)
+    (q : PartrecStartedTM2Stmt tc) : PartrecStartedTM0Stmt tc :=
+  Turing.TM1.Stmt.goto (tm2to1RetGotoPayload tc q)
+
+theorem tm2to1RetGotoStmt_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1RetGotoStmt tc) :=
+  ((PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+    (tm2to1RetGotoPayload_primrec tc)).of_eq fun _ => rfl
+
+noncomputable def tm2to1GoBody (tc : Turing.ToPartrec.Code) (k : PartrecStack)
+    (p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+      PartrecStartedTM2Stmt tc) : PartrecStartedTM0Stmt tc :=
+  Turing.TM1.Stmt.branch (tm2to1StackEmptyBranchPayload k)
+    (Turing.TM2to1.trStAct (tm2to1RetGotoStmt tc p.2) p.1)
+    (Turing.TM1.Stmt.move Turing.Dir.right
+      (Turing.TM1.Stmt.goto (tm2to1GoGotoPayload tc k p)))
+
+theorem tm2to1GoBody_primrec_fixed_k
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (tm2to1GoBody tc k) := by
+  have hret : Primrec (fun p :
+      Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+        PartrecStartedTM2Stmt tc =>
+      tm2to1RetGotoStmt tc p.2) :=
+    (tm2to1RetGotoStmt_primrec tc).comp Primrec.snd
+  have hthen : Primrec (fun p :
+      Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+        PartrecStartedTM2Stmt tc =>
+      Turing.TM2to1.trStAct (tm2to1RetGotoStmt tc p.2) p.1) :=
+    (tm2to1TrStAct_primrec_fixed_k tc k).comp
+      (Primrec.pair hret Primrec.fst)
+  have hgoto : Primrec (fun p :
+      Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+        PartrecStartedTM2Stmt tc =>
+      Turing.TM1.Stmt.goto (tm2to1GoGotoPayload tc k p)) :=
+    (PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+      (tm2to1GoGotoPayload_primrec tc k)
+  have helse : Primrec (fun p :
+      Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+        PartrecStartedTM2Stmt tc =>
+      Turing.TM1.Stmt.move Turing.Dir.right
+        (Turing.TM1.Stmt.goto (tm2to1GoGotoPayload tc k p))) :=
+    (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.Dir.right) hgoto)
+  exact ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
+    (Primrec.pair
+      (Primrec.pair (Primrec.const (tm2to1StackEmptyBranchPayload k)) hthen)
+      helse)).of_eq fun _ => rfl
+
 /--
 One reconstruction step for `TM2to1.trNormal` from already translated
 recursive dependencies.
@@ -7216,6 +7277,31 @@ theorem tm2to1TrNormal_primrec (tc : Turing.ToPartrec.Code) :
     hg
     (fun code dep hdep => PartrecStartedTM2StmtNode.mem_depValidCodes_length_lt hdep)
     hbody
+
+noncomputable def tm2to1RetBody (tc : Turing.ToPartrec.Code)
+    (q : PartrecStartedTM2Stmt tc) : PartrecStartedTM0Stmt tc :=
+  Turing.TM1.Stmt.branch tm2to1BottomBranchPayload
+    (Turing.TM2to1.trNormal q)
+    (Turing.TM1.Stmt.move Turing.Dir.left (tm2to1RetGotoStmt tc q))
+
+theorem tm2to1RetBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1RetBody tc) := by
+  have hnormal : Primrec (fun q : PartrecStartedTM2Stmt tc =>
+      Turing.TM2to1.trNormal q) :=
+    ((tm2to1TrNormal_primrec tc).comp
+      (PartrecStartedTM2StmtNode.toValidCode_primrec tc)).of_eq fun q => by
+        rw [PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
+  have hgoto : Primrec (fun q : PartrecStartedTM2Stmt tc =>
+      tm2to1RetGotoStmt tc q) :=
+    tm2to1RetGotoStmt_primrec tc
+  have helse : Primrec (fun q : PartrecStartedTM2Stmt tc =>
+      Turing.TM1.Stmt.move Turing.Dir.left (tm2to1RetGotoStmt tc q)) :=
+    (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.Dir.left) hgoto)
+  exact ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
+    (Primrec.pair
+      (Primrec.pair (Primrec.const tm2to1BottomBranchPayload) hnormal)
+      helse)).of_eq fun _ => rfl
 
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
