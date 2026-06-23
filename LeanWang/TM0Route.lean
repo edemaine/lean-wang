@@ -1708,6 +1708,60 @@ theorem mem_tm1StatementSupportList_iff {Γ Λ σ : Type}
         exact Or.inr
           ⟨q, (hlabels q).2 hq, stmt, (mem_tm1StmtSupportList_iff).2 hstmt, rfl⟩
 
+private def flatMapAt? {α β : Type} (xs : List α) (f : α → List β) :
+    Nat → Option β
+  | i =>
+      match xs with
+      | [] => none
+      | x :: xs =>
+          match (f x)[i]? with
+          | some y => some y
+          | none => flatMapAt? xs f (i - (f x).length)
+termination_by xs.length
+
+private theorem flatMapAt?_eq_getElem? {α β : Type}
+    (xs : List α) (f : α → List β) (i : Nat) :
+    flatMapAt? xs f i = (xs.flatMap f)[i]? := by
+  induction xs generalizing i with
+  | nil =>
+      simp [flatMapAt?]
+  | cons x xs ih =>
+      unfold flatMapAt?
+      simp only [List.flatMap_cons]
+      by_cases h : i < (f x).length
+      · rw [List.getElem?_append_left h]
+        cases hy : (f x)[i]? with
+        | none =>
+            rw [List.getElem?_eq_none_iff] at hy
+            omega
+        | some y =>
+            simp
+      · have hle : (f x).length ≤ i := le_of_not_gt h
+        rw [List.getElem?_append_right hle]
+        have hynone : (f x)[i]? = none := by
+          rw [List.getElem?_eq_none_iff]
+          exact hle
+        rw [hynone]
+        rw [ih]
+
+def tm1StatementSupportAt? {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) :
+    Nat → Option (Option (Turing.TM1.Stmt Γ Λ σ))
+  | 0 => some none
+  | i + 1 =>
+      flatMapAt? labels (fun q => (tm1StmtSupportList (M q)).map some) i
+
+theorem tm1StatementSupportAt?_eq_getElem? {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) (i : Nat) :
+    tm1StatementSupportAt? labels M i =
+      (tm1StatementSupportList labels M)[i]? := by
+  cases i with
+  | zero =>
+      simp [tm1StatementSupportAt?, tm1StatementSupportList]
+  | succ i =>
+      simp [tm1StatementSupportAt?, tm1StatementSupportList,
+        flatMapAt?_eq_getElem?]
+
 theorem partrecStartedTM1_supports (tc : Turing.ToPartrec.Code) :
     Turing.TM1.Supports (partrecStartedTM1Machine tc)
       (partrecStartedTM1Labels tc) := by
@@ -1736,6 +1790,22 @@ def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
       (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
       PartrecVar)) :=
   tm1StatementSupportList (partrecStartedTM1LabelList tc) (partrecStartedTM1Machine tc)
+
+def partrecStartedTM0StatementAt? (tc : Turing.ToPartrec.Code) (i : Nat) :
+    Option (Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)) :=
+  tm1StatementSupportAt? (partrecStartedTM1LabelList tc)
+    (partrecStartedTM1Machine tc) i
+
+theorem partrecStartedTM0StatementAt?_eq_getElem?
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    partrecStartedTM0StatementAt? tc i =
+      (partrecStartedTM0StatementList tc)[i]? := by
+  unfold partrecStartedTM0StatementAt? partrecStartedTM0StatementList
+  exact tm1StatementSupportAt?_eq_getElem?
+    (partrecStartedTM1LabelList tc) (partrecStartedTM1Machine tc) i
 
 /-- Numeric count of TM1 statements supporting the translated started TM0 machine. -/
 def partrecStartedTM0StatementCount (tc : Turing.ToPartrec.Code) : Nat :=
