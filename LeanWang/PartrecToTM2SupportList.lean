@@ -389,6 +389,91 @@ theorem trStmtsWeightStepBody_primrec {wCode : Nat → Nat} (hw : Primrec wCode)
   refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) hpred ?_
   exact hself
 
+set_option linter.flexible false in
+theorem trStmtsWeightStepBody_encodeLabel
+    (w : Λ' → Nat) (wCode : Nat → Nat)
+    (hwCode : ∀ q : Λ', wCode (Turing.PartrecToTM2.Λ'.encodeLabel q) = w q)
+    (prev : List Nat)
+    (hprev : ∀ q : Λ',
+      Turing.PartrecToTM2.Λ'.normalizeLookup prev
+        (Turing.PartrecToTM2.Λ'.encodeLabel q) = trStmtsWeight w q)
+    (q : Λ') :
+    trStmtsWeightStepBody wCode prev (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      trStmtsWeight w q := by
+  cases q with
+  | move p k₁ k₂ q =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_move,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeMovePayload_movePayloadCode,
+        hprev]
+      simpa [Turing.PartrecToTM2.Λ'.encodeLabel_move] using
+        hwCode (Λ'.move p k₁ k₂ q)
+  | clear p k q =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_clear,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeClearPayload_clearPayloadCode,
+        hprev]
+      simpa [Turing.PartrecToTM2.Λ'.encodeLabel_clear] using
+        hwCode (Λ'.clear p k q)
+  | copy q =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_copy,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        hprev]
+      simpa [Turing.PartrecToTM2.Λ'.encodeLabel_copy] using hwCode (Λ'.copy q)
+  | push k f q =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_push,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodePushPayload_pushPayloadCode,
+        hprev]
+      simpa [Turing.PartrecToTM2.Λ'.encodeLabel_push] using
+        hwCode (Λ'.push k f q)
+  | read f =>
+      simp [trStmtsWeightStepBody, trStmtsWeight, varList,
+        Turing.PartrecToTM2.Λ'.encodeLabel_read,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeReadPayload_readPayloadCode,
+        hprev]
+      rw [show
+        wCode
+            (8 *
+                Turing.PartrecToTM2.Λ'.readPayloadCode
+                  (Turing.PartrecToTM2.Λ'.encodeLabel (f none))
+                  (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.consₗ)))
+                  (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.cons)))
+                  (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.bit0)))
+                  (Turing.PartrecToTM2.Λ'.encodeLabel (f (some Γ'.bit1))) + 5) =
+          w (Λ'.read f) by
+        simpa [Turing.PartrecToTM2.Λ'.encodeLabel_read] using hwCode (Λ'.read f)]
+      simp [PartrecToTM2Support.stackAlphabetList]
+  | succ q =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_succ,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        unrevCodeOf_encodeLabel, hprev]
+      rw [show wCode (8 * Turing.PartrecToTM2.Λ'.encodeLabel q + 6) = w (Λ'.succ q) by
+        simpa [Turing.PartrecToTM2.Λ'.encodeLabel_succ] using hwCode (Λ'.succ q)]
+      rw [hwCode (unrev q)]
+  | pred q₁ q₂ =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_pred,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodePredPayload_predPayloadCode,
+        unrevCodeOf_encodeLabel, hprev]
+      rw [show
+        wCode (8 * Turing.PartrecToTM2.Λ'.predPayloadCode
+          (Turing.PartrecToTM2.Λ'.encodeLabel q₁) (Turing.PartrecToTM2.Λ'.encodeLabel q₂) + 7) =
+          w (Λ'.pred q₁ q₂) by
+        simpa [Turing.PartrecToTM2.Λ'.encodeLabel_pred] using hwCode (Λ'.pred q₁ q₂)]
+      rw [hwCode (unrev q₂)]
+  | ret k =>
+      simp [trStmtsWeightStepBody, trStmtsWeight,
+        Turing.PartrecToTM2.Λ'.encodeLabel_ret]
+      simpa [Turing.PartrecToTM2.Λ'.encodeLabel_ret] using hwCode (Λ'.ret k)
+
 /-- Read a previous row of label weights, defaulting to `0` outside the row. -/
 def trStmtsWeightLookup (prev : List Nat) (n : Nat) : Nat :=
   prev.getD n 0
@@ -440,9 +525,29 @@ theorem trStmtsWeightRows_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
         rw [ih]
         rfl
 
+theorem trStmtsWeightRowStep_getD
+    (wCode : Nat → Nat) (prev : List Nat) {bound n : Nat} (hn : n ≤ bound) :
+    (trStmtsWeightRowStep wCode prev bound).getD n 0 =
+      trStmtsWeightStepBody wCode prev n := by
+  unfold trStmtsWeightRowStep
+  have hlt :
+      n < ((List.range (bound + 1)).map fun n => trStmtsWeightStepBody wCode prev n).length := by
+    simpa [List.length_map, List.length_range] using Nat.lt_succ_of_le hn
+  rw [List.getD_eq_getElem
+    (l := (List.range (bound + 1)).map fun n => trStmtsWeightStepBody wCode prev n)
+    (d := 0) hlt]
+  simp
+
 /-- Numeric fuel approximation to `trStmtsWeight`, indexed by dense label code. -/
 def trStmtsWeightFuel (wCode : Nat → Nat) (fuel n : Nat) : Nat :=
   trStmtsWeightLookup (trStmtsWeightRows wCode fuel n) n
+
+/-- The diagonal row lookup is definitionally the direct fuel recursion. -/
+theorem trStmtsWeightRows_diagonal_getD_eq_fuel
+    (wCode : Nat → Nat) (fuel n : Nat) :
+    (trStmtsWeightRows wCode fuel n).getD n 0 =
+      trStmtsWeightFuel wCode fuel n := by
+  rfl
 
 theorem trStmtsWeightFuel_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
     Primrec (fun p : Nat × Nat => trStmtsWeightFuel wCode p.1 p.2) := by
