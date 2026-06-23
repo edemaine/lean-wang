@@ -6185,6 +6185,35 @@ def partrecStartedTM0LabelAtByStatementFrom?
   flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
     partrecVarList fuel k i
 
+theorem partrecStartedTM0LabelAtByStatementFrom?_zero
+    (tc : Turing.ToPartrec.Code) (k i : Nat) :
+    partrecStartedTM0LabelAtByStatementFrom? tc 0 k i = none := by
+  rfl
+
+theorem partrecStartedTM0LabelAtByStatementFrom?_succ
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    partrecStartedTM0LabelAtByStatementFrom? tc (fuel + 1) k i =
+      match partrecVarList[i]? with
+      | some v => (partrecStartedTM0StatementAt? tc k).map fun stmt => (stmt, v)
+      | none =>
+          partrecStartedTM0LabelAtByStatementFrom? tc fuel (k + 1)
+            (i - partrecVarList.length) := by
+  change
+    flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
+        partrecVarList (fuel + 1) k i =
+      match partrecVarList[i]? with
+      | some v => (partrecStartedTM0StatementAt? tc k).map fun stmt => (stmt, v)
+      | none =>
+          partrecStartedTM0LabelAtByStatementFrom? tc fuel (k + 1)
+            (i - partrecVarList.length)
+  unfold flatMapConstMapAtByGetFrom?
+  cases partrecVarList[i]? with
+  | some v =>
+      rfl
+  | none =>
+      unfold partrecStartedTM0LabelAtByStatementFrom?
+      rfl
+
 theorem partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
