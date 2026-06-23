@@ -3803,6 +3803,148 @@ theorem partrecStartedTM2RetHaltBody_eq_relabel
         (partrecTM2 (Turing.PartrecToTM2.Λ'.ret Turing.PartrecToTM2.Cont'.halt)) := by
   rfl
 
+noncomputable def partrecStartedTM2RetBodyFromPayload (tc : Turing.ToPartrec.Code)
+    (payload : Nat) : PartrecStartedTM2Stmt tc :=
+  let code := payload - 1
+  if code = 0 then
+    partrecStartedTM2RetHaltBody tc ()
+  else
+    let n := code - 1
+    let m := n.div2.div2
+    if n.bodd then
+      if n.div2.bodd then
+        partrecStartedTM2RetFixBody tc
+          (Turing.ToPartrec.Code.ofNatCode m.unpair.1,
+            Turing.PartrecToTM2.Cont'.ofNatCont m.unpair.2)
+      else
+        partrecStartedTM2RetCons₂Body tc
+          (Turing.PartrecToTM2.Cont'.ofNatCont m)
+    else
+      if n.div2.bodd then
+        partrecStartedTM2RetCompBody tc
+          (Turing.ToPartrec.Code.ofNatCode m.unpair.1,
+            Turing.PartrecToTM2.Cont'.ofNatCont m.unpair.2)
+      else
+        partrecStartedTM2RetCons₁Body tc
+          (Turing.ToPartrec.Code.ofNatCode m.unpair.1,
+            Turing.PartrecToTM2.Cont'.ofNatCont m.unpair.2)
+
+theorem partrecStartedTM2RetBodyFromPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetBodyFromPayload tc) := by
+  let hcode : Primrec (fun payload : Nat => payload - 1) :=
+    Primrec.nat_sub.comp Primrec.id (Primrec.const 1)
+  let hn : Primrec (fun payload : Nat => (payload - 1) - 1) :=
+    Primrec.nat_sub.comp hcode (Primrec.const 1)
+  let hm : Primrec (fun payload : Nat => ((payload - 1) - 1).div2.div2) :=
+    Primrec.nat_div2.comp (Primrec.nat_div2.comp hn)
+  let hm₁ : Primrec (fun payload : Nat => (((payload - 1) - 1).div2.div2).unpair.1) :=
+    Primrec.fst.comp (Primrec.unpair.comp hm)
+  let hm₂ : Primrec (fun payload : Nat => (((payload - 1) - 1).div2.div2).unpair.2) :=
+    Primrec.snd.comp (Primrec.unpair.comp hm)
+  let hf : Primrec (fun payload : Nat =>
+      Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1) :=
+    (Primrec.ofNat Turing.ToPartrec.Code).comp hm₁
+  let hkTail : Primrec (fun payload : Nat =>
+      Turing.PartrecToTM2.Cont'.ofNatCont
+        (((payload - 1) - 1).div2.div2).unpair.2) :=
+    (Primrec.ofNat Turing.PartrecToTM2.Cont').comp hm₂
+  let hkSingle : Primrec (fun payload : Nat =>
+      Turing.PartrecToTM2.Cont'.ofNatCont ((payload - 1) - 1).div2.div2) :=
+    (Primrec.ofNat Turing.PartrecToTM2.Cont').comp hm
+  let hhalt : Primrec (fun _payload : Nat =>
+      partrecStartedTM2RetHaltBody tc ()) :=
+    (partrecStartedTM2RetHaltBody_primrec tc).comp (Primrec.const ())
+  let hcons₁ : Primrec (fun payload : Nat =>
+      partrecStartedTM2RetCons₁Body tc
+        (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+          Turing.PartrecToTM2.Cont'.ofNatCont
+            (((payload - 1) - 1).div2.div2).unpair.2)) :=
+    (partrecStartedTM2RetCons₁Body_primrec tc).comp (Primrec.pair hf hkTail)
+  let hcons₂ : Primrec (fun payload : Nat =>
+      partrecStartedTM2RetCons₂Body tc
+        (Turing.PartrecToTM2.Cont'.ofNatCont ((payload - 1) - 1).div2.div2)) :=
+    (partrecStartedTM2RetCons₂Body_primrec tc).comp hkSingle
+  let hcomp : Primrec (fun payload : Nat =>
+      partrecStartedTM2RetCompBody tc
+        (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+          Turing.PartrecToTM2.Cont'.ofNatCont
+            (((payload - 1) - 1).div2.div2).unpair.2)) :=
+    (partrecStartedTM2RetCompBody_primrec tc).comp (Primrec.pair hf hkTail)
+  let hfix : Primrec (fun payload : Nat =>
+      partrecStartedTM2RetFixBody tc
+        (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+          Turing.PartrecToTM2.Cont'.ofNatCont
+            (((payload - 1) - 1).div2.div2).unpair.2)) :=
+    (partrecStartedTM2RetFixBody_primrec tc).comp (Primrec.pair hf hkTail)
+  let hbodd : Primrec (fun payload : Nat => ((payload - 1) - 1).bodd) :=
+    Primrec.nat_bodd.comp hn
+  let hdiv2bodd : Primrec (fun payload : Nat => (((payload - 1) - 1).div2).bodd) :=
+    Primrec.nat_bodd.comp (Primrec.nat_div2.comp hn)
+  let hnonhalt : Primrec (fun payload : Nat =>
+      if ((payload - 1) - 1).bodd then
+        if (((payload - 1) - 1).div2).bodd then
+          partrecStartedTM2RetFixBody tc
+            (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+              Turing.PartrecToTM2.Cont'.ofNatCont
+                (((payload - 1) - 1).div2.div2).unpair.2)
+        else
+          partrecStartedTM2RetCons₂Body tc
+            (Turing.PartrecToTM2.Cont'.ofNatCont ((payload - 1) - 1).div2.div2)
+      else
+        if (((payload - 1) - 1).div2).bodd then
+          partrecStartedTM2RetCompBody tc
+            (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+              Turing.PartrecToTM2.Cont'.ofNatCont
+                (((payload - 1) - 1).div2.div2).unpair.2)
+        else
+          partrecStartedTM2RetCons₁Body tc
+            (Turing.ToPartrec.Code.ofNatCode (((payload - 1) - 1).div2.div2).unpair.1,
+              Turing.PartrecToTM2.Cont'.ofNatCont
+                (((payload - 1) - 1).div2.div2).unpair.2)) :=
+    (Primrec.cond hbodd
+      (Primrec.cond hdiv2bodd hfix hcons₂)
+      (Primrec.cond hdiv2bodd hcomp hcons₁)).of_eq fun payload => by
+        cases (((payload - 1) - 1).bodd) <;>
+          cases ((((payload - 1) - 1).div2).bodd) <;> rfl
+  exact (Primrec.ite (Primrec.eq.comp hcode (Primrec.const 0)) hhalt hnonhalt).of_eq
+    fun payload => by
+      simp [partrecStartedTM2RetBodyFromPayload]
+
+theorem partrecStartedTM2RetBodyFromPayload_encodeCont
+    (tc : Turing.ToPartrec.Code) (k : Turing.PartrecToTM2.Cont') :
+    partrecStartedTM2RetBodyFromPayload tc
+        (Turing.PartrecToTM2.Cont'.encodeCont k + 1) =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret k)) := by
+  cases k with
+  | halt =>
+      simpa [partrecStartedTM2RetBodyFromPayload,
+        Turing.PartrecToTM2.Cont'.encodeCont] using
+        partrecStartedTM2RetHaltBody_eq_relabel tc
+  | cons₁ c k =>
+      simp [partrecStartedTM2RetBodyFromPayload,
+        Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val,
+        Turing.ToPartrec.Code.ofNatCode_encodeCode,
+        Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont,
+        partrecStartedTM2RetCons₁Body_eq_relabel]
+  | cons₂ k =>
+      simp [partrecStartedTM2RetBodyFromPayload,
+        Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val,
+        Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont,
+        partrecStartedTM2RetCons₂Body_eq_relabel]
+  | comp c k =>
+      simp [partrecStartedTM2RetBodyFromPayload,
+        Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val,
+        Turing.ToPartrec.Code.ofNatCode_encodeCode,
+        Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont,
+        partrecStartedTM2RetCompBody_eq_relabel]
+  | fix c k =>
+      simp [partrecStartedTM2RetBodyFromPayload,
+        Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val,
+        Turing.ToPartrec.Code.ofNatCode_encodeCode,
+        Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont,
+        partrecStartedTM2RetFixBody_eq_relabel]
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
