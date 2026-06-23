@@ -2825,6 +2825,55 @@ def partrecStartedTM2 (tc : Turing.ToPartrec.Code) :
       Turing.TM2.Stmt PartrecStackSymbol (StartedLabel tc) PartrecVar :=
   fun q => relabelTM2Stmt (StartedLabel.wrap tc) (partrecTM2 q.val)
 
+def partrecStartedTM2GotoPayload (tc : Turing.ToPartrec.Code)
+    (f : PartrecVar → Turing.PartrecToTM2.Λ') :
+    PartrecStartedTM2StmtNode.GotoCode tc :=
+  fun v => StartedLabel.wrap tc (f v)
+
+theorem partrecStartedTM2GotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2GotoPayload tc) :=
+  partrecVarFunction_map_primrec (StartedLabel.wrap_primrec tc)
+
+noncomputable def partrecStartedTM2GotoBody (tc : Turing.ToPartrec.Code)
+    (f : PartrecVar → Turing.PartrecToTM2.Λ') :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.goto (partrecStartedTM2GotoPayload tc f)
+
+theorem partrecStartedTM2GotoBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2GotoBody tc) :=
+  (PartrecStartedTM2StmtNode.stmtGoto_primrec tc).comp
+    (partrecStartedTM2GotoPayload_primrec tc)
+
+theorem partrecStartedTM2GotoBody_eq_relabel
+    (tc : Turing.ToPartrec.Code) (f : PartrecVar → Turing.PartrecToTM2.Λ') :
+    partrecStartedTM2GotoBody tc f =
+      relabelTM2Stmt (StartedLabel.wrap tc) (Turing.TM2.Stmt.goto f) := by
+  rfl
+
+theorem partrecStartedTM2ReadBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun f : PartrecVar → Turing.PartrecToTM2.Λ' =>
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.read f))) :=
+  (partrecStartedTM2GotoBody_primrec tc).of_eq fun _f => by
+    rfl
+
+noncomputable def partrecStartedTM2ConstGotoBody (tc : Turing.ToPartrec.Code)
+    (q : Turing.PartrecToTM2.Λ') :
+    PartrecStartedTM2Stmt tc :=
+  partrecStartedTM2GotoBody tc (fun _v : PartrecVar => q)
+
+theorem partrecStartedTM2ConstGotoBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2ConstGotoBody tc) := by
+  exact (partrecStartedTM2GotoBody_primrec tc).comp
+    (partrecVarFunction_const_primrec Primrec.id)
+
+theorem partrecStartedTM2ConstGotoBody_eq_relabel
+    (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') :
+    partrecStartedTM2ConstGotoBody tc q =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (Turing.TM2.Stmt.goto (fun _v : PartrecVar => q)) := by
+  rfl
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
