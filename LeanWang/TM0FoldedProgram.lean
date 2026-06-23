@@ -1091,6 +1091,51 @@ def simStepDataOfTransition (tc : Turing.ToPartrec.Code)
   | none => none
   | some (q', stmt) => some (simStepDataOfStep tc side marked q q' left right stmt)
 
+theorem simStepDataOfTransition_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)]
+    (hstep : Primrec (fun p : SourceLabel tc × SourceSymbol =>
+      TM0Route.partrecStartedTM0Machine tc p.1 p.2)) :
+    Primrec (fun p : SourceLabel tc × FoldSide × Bool × SourceSymbol × SourceSymbol =>
+      simStepDataOfTransition tc p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  let readFn : SourceLabel tc × FoldSide × Bool × SourceSymbol × SourceSymbol →
+      SourceSymbol := fun p => foldedRead p.2.1 p.2.2.2.1 p.2.2.2.2
+  have hread : Primrec readFn := by
+    exact foldedRead_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+  have hlookup : Primrec (fun p : SourceLabel tc × FoldSide × Bool × SourceSymbol ×
+      SourceSymbol =>
+      TM0Route.partrecStartedTM0Machine tc p.1 (readFn p)) := by
+    exact hstep.comp (Primrec.pair Primrec.fst hread)
+  have hsome : Primrec₂ (fun p : SourceLabel tc × FoldSide × Bool × SourceSymbol ×
+      SourceSymbol => fun step : SourceLabel tc × Turing.TM0.Stmt SourceSymbol =>
+      simStepDataOfStep tc p.2.1 p.2.2.1 p.1 step.1 p.2.2.2.1 p.2.2.2.2
+        step.2) := by
+    apply Primrec₂.mk
+    exact (simStepDataOfStep_primrec_fixed tc).comp
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          (Primrec.pair (Primrec.fst.comp Primrec.fst)
+            (Primrec.pair (Primrec.fst.comp Primrec.snd)
+              (Primrec.pair
+                (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                  (Primrec.snd.comp Primrec.fst))))
+                (Primrec.pair
+                  (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                    (Primrec.snd.comp Primrec.fst))))
+                  (Primrec.snd.comp Primrec.snd)))))))
+  exact (Primrec.option_map hlookup hsome).of_eq fun p => by
+    unfold simStepDataOfTransition readFn
+    cases TM0Route.partrecStartedTM0Machine tc p.1 (foldedRead p.2.1 p.2.2.2.1 p.2.2.2.2)
+    · rfl
+    · rfl
+
 theorem simTransitionOfStep_eq_map_stepData (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
     (marked : Bool) (left right : SourceSymbol) :
