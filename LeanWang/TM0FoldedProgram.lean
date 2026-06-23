@@ -3064,6 +3064,35 @@ def simStepDataForLabelIndexFrom
     (simStepDataForLabel tc)
 
 /--
+Offset label-index decoder factored through the numeric folded state code.
+
+This has the same behavior as `simStepDataForLabelIndexFrom`, but its row
+generator takes the state code as a separate natural number. This is the shape
+needed by the source-level computability proof, where dependent labels should
+only be used to decode statements and variables, not to hide the numeric state
+fed to the finite program.
+-/
+def simStepDataForLabelIndexFromWithCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    List SimStepData :=
+  (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).elim []
+    (fun q => simStepDataForStmtLabelWithCode tc
+      (TM0FiniteCompiler.stateCode tc (q.1, q.2)) q.1 q.2)
+
+theorem simStepDataForLabelIndexFrom_eq_withCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    simStepDataForLabelIndexFrom tc fuel k i =
+      simStepDataForLabelIndexFromWithCode tc fuel k i := by
+  unfold simStepDataForLabelIndexFrom simStepDataForLabelIndexFromWithCode
+  cases h : TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i with
+  | none =>
+      rfl
+  | some q =>
+      simp only [Option.elim]
+      rw [← simStepDataForStmtLabel_eq_of_label tc q,
+        simStepDataForStmtLabel_eq_withCode tc q.1 q.2]
+
+/--
 Canonical offset start for `simStepDataForLabelIndexFrom`: scan from statement
 offset `0` with exactly the computed statement-support count as fuel.
 -/
