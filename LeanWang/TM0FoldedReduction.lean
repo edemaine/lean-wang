@@ -73,29 +73,16 @@ def Obligations.toSource (h : Obligations) : SourceObligations where
             (NatPartrecToToPartrec.translate c)).trans
           (NatPartrecToToPartrec.translate_tm2_dom c)))
 
-/-- Apply the folded source-code reduction and then the current table bridge. -/
-def sourceTableProgram (_h : SourceObligations) (c : Code) : TableProgram :=
-  PostProgram.toTableProgram
-    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
-
-theorem sourceTableProgram_computable (h : SourceObligations) :
-    Computable (sourceTableProgram h) := by
-  exact PostProgram.toTableProgram_computable.comp h.program_computable
-
-theorem sourceTableProgram_correct (h : SourceObligations) (c : Code) :
-    Machine.HaltsEmpty (sourceTableProgram h c).toMachine ↔
-      (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (PostProgram.toTableProgram_toMachine_haltsEmpty_iff
-    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))).trans
-      (h.correct c)
-
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
-def sourceFixedDominoReduction (h : SourceObligations) (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDominoData (sourceTableProgram h c)
+def sourceFixedDominoReduction (_h : SourceObligations) (c : Code) : TileSet × WangTile :=
+  tableProgramFixedDominoData
+    (PostProgram.toTableProgram
+      (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)))
 
 theorem sourceFixedDominoReduction_computable (h : SourceObligations) :
     Computable (sourceFixedDominoReduction h) := by
-  exact tableProgramFixedDominoData_computable.comp (sourceTableProgram_computable h)
+  exact tableProgramFixedDominoData_computable.comp
+    (PostProgram.toTableProgram_computable.comp h.program_computable)
 
 theorem sourceFixedDominoReduction_correct (h : SourceObligations) (c : Code) :
     TilesQuarterWithSeed (sourceFixedDominoReduction h c).1
@@ -104,9 +91,12 @@ theorem sourceFixedDominoReduction_correct (h : SourceObligations) (c : Code) :
   unfold sourceFixedDominoReduction
   rw [tableProgramFixedDominoData_seed_eq]
   rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff (sourceTableProgram h c))]
+    (tableProgramFixedDominoData_mem_iff
+      (PostProgram.toTableProgram
+        (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))))]
   rw [tableProgramFixedDomino_correct]
-  rw [sourceTableProgram_correct h]
+  rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
+  rw [h.correct c]
 
 /-- Final scaffolded tileset produced directly from a source partial-recursive code. -/
 def sourceDominoReduction (S : Scaffold) (h : SourceObligations) (c : Code) : TileSet :=

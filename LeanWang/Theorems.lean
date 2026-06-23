@@ -72,38 +72,6 @@ theorem tm0Program_correct (C : TM0FiniteCompiler) (c : Code) :
           (NatPartrecToToPartrec.translate c)).trans
         (NatPartrecToToPartrec.translate_tm2_dom c)))
 
-/-!
-The current tile construction is already proved for the older table-machine
-backend. The `tableProgram` definitions below expose only the concrete
-compatibility bridge from finite one-sided TM0 programs into that backend; they
-are not a direct TM2-to-table reduction.
--/
-
-/-- Concrete adapter from the finite-TM0 route into the current table-machine Wang-tile layer. -/
-def tableProgram (C : TM0FiniteCompiler) (c : Code) : TableProgram :=
-  PostProgram.toTableProgram (tm0Program C c)
-
-theorem tableProgram_computable
-    (C : TM0FiniteCompiler) :
-    Computable (tableProgram C) := by
-  exact PostProgram.toTableProgram_computable.comp (tm0Program_computable C)
-
-/-- Correctness of the concrete table-machine adapter. -/
-theorem tableProgram_correct (C : TM0FiniteCompiler) (c : Code) :
-    Machine.HaltsEmpty (tableProgram C c).toMachine ↔
-      (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (PostProgram.toTableProgram_toMachine_haltsEmpty_iff
-    (tm0Program C c)).trans (tm0Program_correct C c)
-
-/-- View the adapted table program as the concrete machine consumed by the tile layer. -/
-def programMachine (C : TM0FiniteCompiler) (c : Code) : Machine :=
-  (tableProgram C c).toMachine
-
-theorem programMachine_correct (C : TM0FiniteCompiler) (c : Code) :
-    Machine.HaltsEmpty (programMachine C c) ↔
-      (Nat.Partrec.Code.eval c 0).Dom :=
-  tableProgram_correct C c
-
 /-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
 theorem machineTiles_correct (M : Machine) :
     TilesQuarterWithSeed (machineTiles M) (machineSeed M) ↔ ¬ Machine.HaltsEmpty M := by
@@ -123,12 +91,13 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
 
 /-- Fixed domino instance produced from a partial-recursive code. -/
 def fixedDominoReduction (C : TM0FiniteCompiler) (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDominoData (tableProgram C c)
+  tableProgramFixedDominoData (PostProgram.toTableProgram (tm0Program C c))
 
 theorem fixedDominoReduction_computable
     (C : TM0FiniteCompiler) :
     Computable (fixedDominoReduction C) := by
-  exact tableProgramFixedDominoData_computable.comp (tableProgram_computable C)
+  exact tableProgramFixedDominoData_computable.comp
+    (PostProgram.toTableProgram_computable.comp (tm0Program_computable C))
 
 /-- Correctness of the fixed domino reduction from nonhalting. -/
 theorem fixedDominoReduction_correct (C : TM0FiniteCompiler) (c : Code) :
@@ -138,11 +107,10 @@ theorem fixedDominoReduction_correct (C : TM0FiniteCompiler) (c : Code) :
   unfold fixedDominoReduction
   rw [tableProgramFixedDominoData_seed_eq]
   rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff (tableProgram C c))]
+    (tableProgramFixedDominoData_mem_iff (PostProgram.toTableProgram (tm0Program C c)))]
   rw [tableProgramFixedDomino_correct]
-  change ¬ Machine.HaltsEmpty (programMachine C c) ↔
-    ¬ (Nat.Partrec.Code.eval c 0).Dom
-  rw [programMachine_correct C]
+  rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
+  rw [tm0Program_correct C]
 
 /-- The fixed domino problem is undecidable, in reduction form. -/
 theorem fixed_domino_problem_undecidable_of_tm0Compiler
