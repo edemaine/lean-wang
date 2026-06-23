@@ -1331,6 +1331,29 @@ def simStepDataForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
         TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
           simStepDataOfTransition tc q side marked left right
 
+def simStepDataForStmtLabel (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) : List SimStepData :=
+  foldSideList.flatMap fun side =>
+    [false, true].flatMap fun marked =>
+      TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
+        TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
+          simStepDataOfStmtTransition tc stmt v side marked left right
+
+theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
+    (q : SourceLabel tc) :
+    simStepDataForStmtLabel tc q.1 q.2 = simStepDataForLabel tc q := by
+  rcases q with ⟨stmt, v⟩
+  unfold simStepDataForStmtLabel simStepDataForLabel
+  apply List.flatMap_congr
+  intro side hside
+  apply List.flatMap_congr
+  intro marked hmarked
+  apply List.flatMap_congr
+  intro left hleft
+  apply List.filterMap_congr
+  intro right hright
+  exact simStepDataOfStmtTransition_eq_of_label tc (stmt, v) side marked left right
+
 /--
 Descriptor rows for a source-label index. This is a numeric outer enumeration
 of the same semantic labels used by `simStepData`, avoiding a dependent label
