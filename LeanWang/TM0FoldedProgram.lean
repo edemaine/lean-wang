@@ -1527,6 +1527,30 @@ theorem simStepDataForLabelIndexFrom_zero_eq
   rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
   rw [simStepDataForLabelIndex_eq_labelAtByStatement]
 
+theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFrom tc p.1 p.2.1 p.2.2) := by
+  have hlookup := TM0Route.partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed tc
+  have hlabel := simStepDataForStmtLabel_primrec_fixed_of_trAux tc haux
+  have hnone : Primrec (fun _p : Nat × Nat × Nat => ([] : List SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun _p : Nat × Nat × Nat => fun q : SourceLabel tc =>
+      simStepDataForStmtLabel tc q.1 q.2) := by
+    apply Primrec₂.mk
+    exact hlabel.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.snd) (Primrec.snd.comp Primrec.snd))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    unfold simStepDataForLabelIndexFrom
+    cases h : TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2 with
+    | none =>
+        rfl
+    | some q =>
+        exact simStepDataForStmtLabel_eq_of_label tc q
+
 theorem simStepDataForLabelIndexStart_eq
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     simStepDataForLabelIndexStart tc i = simStepDataForLabelIndex tc i := by
