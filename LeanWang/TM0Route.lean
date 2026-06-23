@@ -142,6 +142,18 @@ theorem mem_partrecVarList (v : PartrecVar) :
   | some a =>
       simp [partrecVarList, PartrecToTM2Support.mem_stackAlphabetList a]
 
+theorem partrecVarList_nodup : partrecVarList.Nodup := by
+  have hmap : (PartrecToTM2Support.stackAlphabetList.map some).Nodup :=
+    PartrecToTM2Support.stackAlphabetList_nodup.map fun _ _ h => Option.some.inj h
+  simpa [partrecVarList] using hmap
+
+theorem partrecVarList_idxOf_of_getElem? {i : Nat} {v : PartrecVar}
+    (h : partrecVarList[i]? = some v) :
+    partrecVarList.idxOf v = i := by
+  rcases List.getElem?_eq_some_iff.1 h with ⟨hi, hv⟩
+  rw [← hv]
+  exact partrecVarList_nodup.idxOf_getElem i hi
+
 /-- Finite encoding of functions out of `Bool`. -/
 def boolFunctionEquivPair (β : Type*) :
     (Bool → β) ≃ β × β where

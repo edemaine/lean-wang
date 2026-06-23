@@ -3073,6 +3073,26 @@ def labelAtByStatementFromWithStateCode?
   (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).map
     fun q => (q, TM0FiniteCompiler.stateCode tc q)
 
+/--
+Offset label lookup paired with the numeric position in the rectangular
+statement-by-variable enumeration, including the leading default state.
+
+This is the Nat-coded state identifier that should eventually replace the
+dependent `idxOf`-based state code once the support-list no-duplicate facts are
+available.
+-/
+def labelAtByStatementFromWithPositionCode?
+    (tc : Turing.ToPartrec.Code) : Nat → Nat → Nat → Option (SourceLabel tc × Nat)
+  | 0, _k, _i => none
+  | fuel + 1, k, i =>
+      match TM0Route.partrecVarList[i]? with
+      | some v =>
+          (TM0Route.partrecStartedTM0StatementAt? tc k).map fun stmt =>
+            ((stmt, v), 1 + k * TM0Route.partrecVarList.length + i)
+      | none =>
+          labelAtByStatementFromWithPositionCode? tc fuel (k + 1)
+            (i - TM0Route.partrecVarList.length)
+
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
