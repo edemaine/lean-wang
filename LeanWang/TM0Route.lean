@@ -113,6 +113,53 @@ theorem mem_partrecVarList (v : PartrecVar) :
   | some a =>
       simp [partrecVarList, PartrecToTM2Support.mem_stackAlphabetList a]
 
+/-- Finite encoding of functions out of `Bool`. -/
+def boolFunctionEquivPair (β : Type*) :
+    (Bool → β) ≃ β × β where
+  toFun f := (f false, f true)
+  invFun p
+    | false => p.1
+    | true => p.2
+  left_inv := by
+    intro f
+    funext b
+    cases b <;> rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨a, b⟩
+    rfl
+
+instance instPrimcodableBoolFunction (β : Type*) [Primcodable β] :
+    Primcodable (Bool → β) :=
+  Primcodable.ofEquiv (β × β) (boolFunctionEquivPair β)
+
+/-- Finite encoding of functions out of the evaluator local variable. -/
+def partrecVarFunctionEquivTuple (β : Type*) :
+    (PartrecVar → β) ≃ β × β × β × β × β where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodablePartrecVarFunction (β : Type*) [Primcodable β] :
+    Primcodable (PartrecVar → β) :=
+  Primcodable.ofEquiv (β × β × β × β × β)
+    (partrecVarFunctionEquivTuple β)
+
 /-- Finite symbol-valued actions on the evaluator local variable. -/
 def partrecVarToSymbolEquivTuple :
     (PartrecVar → Turing.PartrecToTM2.Γ') ≃
@@ -2568,6 +2615,42 @@ instance instPrimcodablePartrecStartedTM0Symbol :
     Primcodable (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
   inferInstanceAs (Primcodable
     (Bool × (∀ k : PartrecStack, Option (PartrecStackSymbol k))))
+
+/--
+Finite encoding of functions out of the concrete TM2-to-TM1 tape alphabet.
+
+The source symbol is a bottom marker together with four stack-cell coordinates,
+so a function out of it is the same data as a curried function over those five
+finite coordinates.
+-/
+def partrecStartedTM0SymbolFunctionEquiv
+    (β : Type*) :
+    (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ≃
+      (Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β) where
+  toFun f bottom main rev aux stack :=
+    f (bottom, partrecStartedTM0StackVector main rev aux stack)
+  invFun f a :=
+    f a.1
+      (a.2 Turing.PartrecToTM2.K'.main)
+      (a.2 Turing.PartrecToTM2.K'.rev)
+      (a.2 Turing.PartrecToTM2.K'.aux)
+      (a.2 Turing.PartrecToTM2.K'.stack)
+  left_inv := by
+    intro f
+    funext a
+    rcases a with ⟨bottom, cells⟩
+    simp [partrecStartedTM0StackVector_ext cells]
+  right_inv := by
+    intro f
+    funext bottom main rev aux stack
+    rfl
+
+instance instPrimcodablePartrecStartedTM0SymbolFunction
+    (β : Type*) [Primcodable β] :
+    Primcodable (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) :=
+  Primcodable.ofEquiv
+    (Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)
+    (partrecStartedTM0SymbolFunctionEquiv β)
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVectors :
