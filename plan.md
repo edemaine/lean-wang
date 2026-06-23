@@ -178,7 +178,10 @@ file-wide noncomputable section in `TM0FoldedCompiler` and prove the resulting
 program map computable. `TM0FoldedCompiler.programData` is now a normalized
 form of `program` where the constant initial rows are exposed definitionally,
 with `TM0FoldedCompiler.programData_eq_program` relating it back to the
-semantic `program`.
+semantic `program`. The later TM0 count wrappers are also isolated:
+`TM0Route.partrecStartedTM0StateCount_primrec_of_statementCount` reduces state
+count computability to the remaining `partrecStartedTM0StatementCount`
+computability target.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

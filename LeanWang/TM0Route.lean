@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.PartrecToTM2SupportList
+import LeanWang.ToPartrecEncoding
 import Mathlib.Data.Nat.Pairing
 
 /-!
@@ -1045,6 +1046,12 @@ def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
 def partrecStartedTM0LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM0StatementCount tc * partrecVarList.length
 
+theorem partrecStartedTM0LabelCount_primrec_of_statementCount
+    (h : Primrec partrecStartedTM0StatementCount) :
+    Primrec partrecStartedTM0LabelCount := by
+  unfold partrecStartedTM0LabelCount
+  exact Primrec.nat_mul.comp h (Primrec.const partrecVarList.length)
+
 theorem partrecStartedTM0LabelList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelList tc).length =
       partrecStartedTM0LabelCount tc := by
@@ -1104,6 +1111,14 @@ def partrecStartedTM0LabelSupportList (tc : Turing.ToPartrec.Code) :
 def partrecStartedTM0LabelSupportCount (tc : Turing.ToPartrec.Code) : Nat :=
   1 + partrecStartedTM0LabelCount tc
 
+theorem partrecStartedTM0LabelSupportCount_primrec_of_statementCount
+    (h : Primrec partrecStartedTM0StatementCount) :
+    Primrec partrecStartedTM0LabelSupportCount := by
+  unfold partrecStartedTM0LabelSupportCount
+  exact (Primrec.succ.comp
+    (partrecStartedTM0LabelCount_primrec_of_statementCount h)).of_eq fun tc => by
+      simp [Nat.succ_eq_add_one, Nat.add_comm]
+
 theorem partrecStartedTM0LabelSupportList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0LabelSupportList tc).length =
       partrecStartedTM0LabelSupportCount tc := by
@@ -1125,6 +1140,12 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
 /-- Number of numeric states in the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0StateCount (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM0LabelSupportCount tc
+
+theorem partrecStartedTM0StateCount_primrec_of_statementCount
+    (h : Primrec partrecStartedTM0StatementCount) :
+    Primrec partrecStartedTM0StateCount := by
+  unfold partrecStartedTM0StateCount
+  exact partrecStartedTM0LabelSupportCount_primrec_of_statementCount h
 
 theorem partrecStartedTM0LabelSupportList_length_eq_stateCount
     (tc : Turing.ToPartrec.Code) :
