@@ -846,6 +846,32 @@ theorem trAuxWritePayload_primrec :
       p.1 p.2.2 p.2.1) :=
   Primrec.dom_finite _
 
+theorem trAuxWriteBody_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      fun f : TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+        some (((some p.1, p.2.1) : SourceLabel tc),
+          Turing.TM0.Stmt.write (Γ := SourceSymbol) (f p.2.2 p.2.1))) := by
+  apply Primrec₂.mk
+  have hlabel : Primrec (fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) ×
+        TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      ((some p.1.1, p.1.2.1) : SourceLabel tc)) :=
+    Primrec.pair
+      (Primrec.option_some.comp (Primrec.fst.comp Primrec.fst))
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+  have hpayload : Primrec (fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) ×
+        TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      p.2 p.1.2.2 p.1.2.1) :=
+    trAuxWritePayload_primrec.comp
+      (Primrec.pair Primrec.snd (Primrec.snd.comp Primrec.fst))
+  have hstmt : Primrec (fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) ×
+        TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      Turing.TM0.Stmt.write (Γ := SourceSymbol) (p.2 p.1.2.2 p.1.2.1)) :=
+    tm0StmtWrite_primrec.comp hpayload
+  exact Primrec.option_some.comp (Primrec.pair hlabel hstmt)
+
 def trAuxHeadBodyFromDeps (tc : Turing.ToPartrec.Code)
     (rec : List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
