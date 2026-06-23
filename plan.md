@@ -175,7 +175,10 @@ The remaining blocker to packaging this as a `TM0FiniteCompiler` is
 computability of `TM0FoldedCompiler.program`. The support-list and numeric
 state-code path is now executable; the next step is to remove or localize the
 file-wide noncomputable section in `TM0FoldedCompiler` and prove the resulting
-program map computable.
+program map computable. `TM0FoldedCompiler.programData` is now a normalized
+form of `program` where the constant initial rows are exposed definitionally,
+with `TM0FoldedCompiler.programData_eq_program` relating it back to the
+semantic `program`.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

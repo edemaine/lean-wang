@@ -1052,6 +1052,17 @@ theorem program_eq_programOfCountAndSimRows (tc : Turing.ToPartrec.Code) :
       programOfCountAndSimRows (TM0Route.partrecStartedTM0StateCount tc) (simRows tc) := by
   rw [program_eq_programOfCountAndRows, programOfCountAndSimRows, initRows_eq_data]
 
+/--
+Normalized form of `program` that exposes the constant initial rows
+definitionally.
+-/
+def programData (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
+  programOfCountAndSimRows (TM0Route.partrecStartedTM0StateCount tc) (simRows tc)
+
+theorem programData_eq_program (tc : Turing.ToPartrec.Code) :
+    programData tc = program tc :=
+  (program_eq_programOfCountAndSimRows tc).symm
+
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
   states := foldedStateList tc
