@@ -298,7 +298,7 @@ theorem nextID_of_running {P : PostProgram} {c : PostID} {q : Nat}
     simp [nextID]
 
 /-!
-## Compilation to the older table-machine target
+## Compatibility adapter to the current table-machine backend
 
 The current Wang-tile layer consumes `TableProgram`, whose transitions always
 write and move. A Post `move` command compiles to one table transition. A Post

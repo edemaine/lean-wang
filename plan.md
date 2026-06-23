@@ -110,11 +110,13 @@ The live route now factors through a finite one-sided TM0 reduction: first use
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
 one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
-should treat it as the mathematical reduction. The current table-machine
-Wang-tile layer is fed by the concrete compatibility bridge
-`PostProgram.toTableProgram` until that layer is replaced by direct finite-TM0
-tiles. This bridge starts only after the source machine has already been reduced
-to finite one-sided TM0 data; it is not a direct TM2-to-table reduction.
+should treat it as the mathematical reduction. The direct TM2-to-table
+reduction surface should stay removed. The table-machine definitions remain
+only because the current Wang-tile layer consumes `TableProgram`; they are fed
+by the concrete compatibility bridge `PostProgram.toTableProgram` until that
+layer is replaced by direct finite-TM0 tiles. This bridge starts only after the
+source machine has already been reduced to finite one-sided TM0 data; it is not
+a direct TM2-to-table reduction.
 Together these pieces feed the
 fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
 domino theorem surfaces directly from the finite-TM0 factorization using the
@@ -242,12 +244,12 @@ Next implementation targets:
    instances to recover the unconditional encoded and unencoded domino
    theorems.
 5. Optionally replace the current table-machine tiles by direct finite-TM0
-   tiles. The TM0
-   instruction set is already close to the Wang-tile space-time simulation, so
-   this should remove the `PostProgram.toTableProgram` detour from the final
-   theorem. Until then, `PostProgram.toTableProgram` is a verified
-   compatibility bridge for existing tile code, not part of the source
-   TM2-to-TM0 reduction.
+   tiles. The TM0 instruction set is already close to the Wang-tile space-time
+   simulation, so this should remove both the `PostProgram.toTableProgram`
+   detour from the final theorem and the need for `TableProgram` as a live
+   backend. Until then, `TableProgram` is still used by the existing tile code,
+   while `PostProgram.toTableProgram` is a verified compatibility bridge rather
+   than part of the source TM2-to-TM0 reduction.
 
 ### 1. Define Wang Tiles
 

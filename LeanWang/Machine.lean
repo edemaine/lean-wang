@@ -376,10 +376,12 @@ end TableTransition
 /--
 A finite transition-table presentation of the concrete machine model.
 
-This is the intended target for future computable reductions, implemented as
-compilers to finite transition tables: it
-contains only finite data plus support proofs. The semantic `Machine` is still
-used by the Wang-tile construction.
+This is the current backend consumed by the Wang-tile construction: it contains
+only finite data plus support proofs, and converts to the semantic `Machine`
+used by the tile simulation. The source-level reduction no longer targets this
+model directly; it reaches finite one-sided TM0 data first, then uses
+`PostProgram.toTableProgram` as a compatibility adapter for the existing tile
+layer.
 -/
 structure TableMachine where
   symbols : List Nat
@@ -499,11 +501,10 @@ end TableMachine
 /--
 Raw finite machine data, without support proofs.
 
-The computability reduction should ultimately produce this kind of finite
-object, by compiling syntax to explicit machine data. `toTableMachine` adds the
-distinguished blank/start/halt
-symbols to the supports, and the guarded table semantics keeps all transitions
-inside those finite supports.
+This is retained for the current table-machine Wang-tile backend, not as a
+direct TM2 reduction target. `toTableMachine` adds the distinguished
+blank/start/halt symbols to the supports, and the guarded table semantics keeps
+all transitions inside those finite supports.
 -/
 structure TableProgram where
   symbols : List Nat
