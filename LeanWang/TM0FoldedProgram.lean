@@ -1122,6 +1122,14 @@ theorem simStepDataForLabelIndex_eq_labelAt
   unfold simStepDataForLabelIndex
   rw [TM0Route.partrecStartedTM0LabelAt?_eq_getElem?]
 
+theorem simStepDataForLabelIndex_eq_labelAtByStatement
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndex tc i =
+      (TM0Route.partrecStartedTM0LabelAtByStatement? tc i).elim []
+        (simStepDataForLabel tc) := by
+  rw [simStepDataForLabelIndex_eq_labelAt,
+    TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt]
+
 /--
 Indexed mirror of `simStepData`. This is definitionally driven by the
 primitive-recursive label count; the theorem below connects it to the semantic
