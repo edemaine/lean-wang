@@ -4233,6 +4233,17 @@ theorem partrecStartedTM2BodyFromLabelCode_encodeLabel
         Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
         partrecStartedTM2RetBodyFromPayload_encodeCont tc k
 
+theorem partrecStartedTM2_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2 tc) := by
+  have hcode : Primrec (fun q : StartedLabel tc =>
+      Turing.PartrecToTM2.Λ'.encodeLabel q.val) := by
+    exact ((Primrec.encode.comp (StartedLabel.val_primrec tc)).of_eq fun q => by
+      simp [Turing.PartrecToTM2.Λ'.encodeLabel_eq])
+  exact ((partrecStartedTM2BodyFromLabelCode_primrec tc).comp hcode).of_eq fun q => by
+    cases q with
+    | mk q =>
+        exact partrecStartedTM2BodyFromLabelCode_encodeLabel tc q
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
@@ -8905,6 +8916,10 @@ theorem partrecStartedTM1Machine_primrec_of_tm2
     (hM : Primrec (partrecStartedTM2 tc)) :
     Primrec (partrecStartedTM1Machine tc) := by
   exact (tm2to1Tr_primrec_of_tm2 tc (partrecStartedTM2 tc) hM).of_eq fun q => rfl
+
+theorem partrecStartedTM1Machine_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM1Machine tc) :=
+  partrecStartedTM1Machine_primrec_of_tm2 tc (partrecStartedTM2_primrec tc)
 
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
