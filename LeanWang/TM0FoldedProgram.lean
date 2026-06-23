@@ -1277,6 +1277,39 @@ theorem simStepDataOfTransition_primrec_fixed_of_trAux
   simStepDataOfTransition_primrec_fixed_of_machine tc
     (sourceMachine_primrec_fixed_of_trAux tc haux)
 
+def simStepDataForStmtRightSymbols (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left : SourceSymbol) : List SimStepData :=
+  TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
+    simStepDataOfStmtTransition tc stmt v side marked left right
+
+theorem simStepDataForStmtRightSymbols_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol =>
+      simStepDataForStmtRightSymbols tc p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  unfold simStepDataForStmtRightSymbols
+  have htransition := simStepDataOfStmtTransition_primrec_fixed_of_trAux tc haux
+  refine Primrec.listFilterMap (Primrec.const TM0Route.partrecStartedTM0SymbolList) ?_
+  apply Primrec₂.mk
+  exact htransition.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+              (Primrec.snd.comp Primrec.fst))))
+            (Primrec.pair
+              (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                (Primrec.snd.comp Primrec.fst))))
+              Primrec.snd)))))
+
 theorem simTransitionOfStep_eq_map_stepData (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
     (marked : Bool) (left right : SourceSymbol) :
@@ -1336,8 +1369,7 @@ def simStepDataForStmtLabel (tc : Turing.ToPartrec.Code)
   foldSideList.flatMap fun side =>
     [false, true].flatMap fun marked =>
       TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
-        TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
-          simStepDataOfStmtTransition tc stmt v side marked left right
+        simStepDataForStmtRightSymbols tc stmt v side marked left
 
 theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) :
