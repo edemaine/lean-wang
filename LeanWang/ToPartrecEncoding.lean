@@ -1799,6 +1799,15 @@ theorem normalizeLabelRows_getD_eq_normalizeLabelFuel
       intro k hk
       exact ih hk
 
+theorem normalizeLabelRows_diagonal_getD_eq_normalizeLabel (n : Nat) :
+    (normalizeLabelRows n n).getD n 0 = normalizeLabel n := by
+  simpa [normalizeLabel] using
+    (normalizeLabelRows_getD_eq_normalizeLabelFuel (fuel := n) (bound := n) (n := n) le_rfl)
+
+theorem normalizeLookup_normalizeLabelRows_diagonal_eq_normalizeLabel (n : Nat) :
+    normalizeLookup (normalizeLabelRows n n) n = normalizeLabel n := by
+  simpa [normalizeLookup] using normalizeLabelRows_diagonal_getD_eq_normalizeLabel n
+
 theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
     normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
   induction fuel generalizing n with
