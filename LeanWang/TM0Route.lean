@@ -2847,7 +2847,6 @@ theorem partrecStartedTM0StatementCount_eq_data (tc : Turing.ToPartrec.Code) :
   rfl
 
 theorem partrecStartedTM0StatementCount_primrec_of_tm1LabelList
-    [Primcodable PartrecTM1Label]
     (hlabels : Primrec partrecTM1LabelList)
     (hweight : Primrec (fun q : PartrecTM1Label =>
       tm1StmtSupportLength (partrecTM1Machine q))) :
