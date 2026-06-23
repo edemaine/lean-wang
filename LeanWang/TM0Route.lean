@@ -696,13 +696,15 @@ theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
 def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.tr (partrecStartedTM2 tc)
 
+/-- Code-independent TM1 labels generated from the `PartrecToTM2` evaluator. -/
+abbrev PartrecTM1Label : Type :=
+  Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
+
 /-- The TM1 machine obtained directly from Mathlib's `PartrecToTM2` evaluator. -/
 def partrecTM1Machine :
-    Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar →
-      Turing.TM1.Stmt
-        (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-        (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar)
-        PartrecVar :=
+    PartrecTM1Label →
+      Turing.TM1.Stmt (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+        PartrecTM1Label PartrecVar :=
   Turing.TM2to1.tr partrecTM2
 
 def relabelTM2to1Label {Λ Λ' : Type}
@@ -1039,8 +1041,7 @@ theorem mem_tm2to1StmtSupportList_iff {Λ : Type}
       simp [tm2to1StmtSupportList, Turing.TM2to1.trStmts₁]
 
 /-- List-valued support for the started TM1 machine obtained from the TM2-to-TM1 translation. -/
-def partrecTM1LabelList (tc : Turing.ToPartrec.Code) :
-    List (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar) :=
+def partrecTM1LabelList (tc : Turing.ToPartrec.Code) : List PartrecTM1Label :=
   (PartrecToTM2SupportList.labelList tc).flatMap fun q =>
     Turing.TM2to1.Λ'.normal q :: tm2to1StmtSupportList (partrecTM2 q)
 
@@ -1472,6 +1473,43 @@ def partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code) :
 /-- Numeric count of TM1 statements supporting the translated started TM0 machine. -/
 def partrecStartedTM0StatementCount (tc : Turing.ToPartrec.Code) : Nat :=
   tm1StatementSupportLength (partrecTM1LabelList tc) partrecTM1Machine
+
+/--
+Statement-count data for the code-independent TM1 machine obtained from the
+`PartrecToTM2` evaluator.
+
+This exposes the concrete weighted-list form hidden in
+`tm1StatementSupportLength`; later computability proofs can target the label
+list and the label-local statement-support weight separately.
+-/
+def partrecTM1StatementCountData (tc : Turing.ToPartrec.Code) : Nat :=
+  1 + ((partrecTM1LabelList tc).map fun q =>
+    tm1StmtSupportLength (partrecTM1Machine q)).sum
+
+theorem partrecStartedTM0StatementCount_eq_data (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM0StatementCount tc = partrecTM1StatementCountData tc := by
+  rfl
+
+theorem partrecStartedTM0StatementCount_primrec_of_tm1LabelList
+    [Primcodable PartrecTM1Label]
+    (hlabels : Primrec partrecTM1LabelList)
+    (hweight : Primrec (fun q : PartrecTM1Label =>
+      tm1StmtSupportLength (partrecTM1Machine q))) :
+    Primrec partrecStartedTM0StatementCount := by
+  have hmap :
+      Primrec fun tc : Turing.ToPartrec.Code =>
+        (partrecTM1LabelList tc).map fun q =>
+          tm1StmtSupportLength (partrecTM1Machine q) := by
+    refine Primrec.list_map hlabels ?_
+    exact (hweight.comp Primrec.snd).to₂
+  have hsum :
+      Primrec fun tc : Turing.ToPartrec.Code =>
+        ((partrecTM1LabelList tc).map fun q =>
+          tm1StmtSupportLength (partrecTM1Machine q)).sum :=
+    list_sum_nat_primrec hmap
+  exact (Primrec.succ.comp hsum).of_eq fun tc => by
+    rw [partrecStartedTM0StatementCount_eq_data]
+    simp [partrecTM1StatementCountData, Nat.add_comm]
 
 theorem partrecStartedTM0StatementList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM0StatementList tc).length =
