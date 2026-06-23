@@ -298,6 +298,23 @@ theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global
         rfl
 
 /--
+Global primitive recursiveness of the canonical numeric-state decoder implies
+the source-specific canonical numeric-state decoder target by precomposing with
+the source-code translation.
+-/
+theorem sourceSimStepDataForLabelIndexStartWithCode_primrec_of_global
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithCode p.1 p.2) := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexStartWithCode
+        rfl
+
+/--
 Global primitive recursiveness of the folded descriptor list is enough for the
 source-level normalized folded program-data map used by the final reduction.
 -/
