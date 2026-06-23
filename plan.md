@@ -187,8 +187,11 @@ primitive-recursion helper for that statement-count proof. The next obstacle is
 to add finite `Primcodable` encodings for the concrete TM2-to-TM1 labels and
 their finite function payloads, so `partrecTM1LabelList` and the per-label
 statement-length function can be treated as primitive recursive. The finite
-function payloads and `TM2to1.StAct` are now encoded; the remaining encoding
-work is the recursive concrete `TM2.Stmt` type and then `TM2to1.Λ'`.
+function payloads and `TM2to1.StAct` are now encoded. The recursive concrete
+started `TM2.Stmt` type is now encoded by valid preorder node lists: validity
+is primitive recursive, valid lists parse completely, and the resulting
+`Primcodable (PartrecStartedTM2StmtNode.Stmt tc)` instance is available. The
+remaining encoding work on this branch is `TM2to1.Λ'`.
 Separately, `TM0Route.tm2to1TrNormalSupportLength` is now the numeric mirror
 of `tm1StmtSupportLength (Turing.TM2to1.trNormal stmt)`, avoiding a direct
 dependency on encoded TM1 statements for this part of the count proof.
