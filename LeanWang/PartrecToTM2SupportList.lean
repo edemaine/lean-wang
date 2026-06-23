@@ -144,6 +144,74 @@ theorem trStmtsList_weight (w : Λ' → Nat) (q : Λ') :
   | ret k =>
       simp [trStmtsList, trStmtsWeight]
 
+/-- Dense code for the auxiliary label `unrev q`, from the dense code for `q`. -/
+def unrevCodeOf (qCode : Nat) : Nat :=
+  8 * Turing.PartrecToTM2.Λ'.movePayloadCode (fun _ : Γ' => false) K'.rev K'.main qCode + 1
+
+theorem unrevCodeOf_primrec : Primrec unrevCodeOf := by
+  unfold unrevCodeOf
+  have hpayload :
+      Primrec fun qCode : Nat =>
+        Turing.PartrecToTM2.Λ'.movePayloadCode
+          (fun _ : Γ' => false) K'.rev K'.main qCode := by
+    exact Turing.PartrecToTM2.Λ'.movePayloadCode_primrec.comp
+      (Primrec.pair (Primrec.const (fun _ : Γ' => false))
+        (Primrec.pair (Primrec.const K'.rev)
+          (Primrec.pair (Primrec.const K'.main) Primrec.id)))
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 1)
+
+theorem unrevCodeOf_encodeLabel (q : Λ') :
+    unrevCodeOf (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (unrev q) := by
+  simp [unrevCodeOf, Turing.PartrecToTM2.unrev,
+    Turing.PartrecToTM2.Λ'.encodeLabel_move]
+
+/--
+One row step for computing `trStmtsWeight` by strong recursion over dense
+label codes.
+
+`prev` stores already-computed recursive values indexed by label code. The
+function `wCode` gives the encoded weight of the current label and of the
+extra `unrev` labels introduced by `trStmtsList`.
+-/
+def trStmtsWeightStepBody (wCode : Nat → Nat) (prev : List Nat) (n : Nat) : Nat :=
+  let payload := n / 8
+  let self := wCode n
+  if n % 8 = 1 then
+    match Turing.PartrecToTM2.Λ'.decodeMovePayload payload with
+    | none => 0
+    | some fields => self + Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2.2
+  else if n % 8 = 2 then
+    match Turing.PartrecToTM2.Λ'.decodeClearPayload payload with
+    | none => 0
+    | some fields => self + Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2
+  else if n % 8 = 3 then
+    self + Turing.PartrecToTM2.Λ'.normalizeLookup prev payload
+  else if n % 8 = 4 then
+    match Turing.PartrecToTM2.Λ'.decodePushPayload payload with
+    | none => 0
+    | some fields => self + Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2
+  else if n % 8 = 5 then
+    let fields := Turing.PartrecToTM2.Λ'.decodeReadPayload payload
+    self +
+      (Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.1 +
+        (Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.1 +
+          (Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2.1 +
+            (Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2.2.1 +
+              Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2.2.2.2))))
+  else if n % 8 = 6 then
+    self + (wCode (unrevCodeOf payload) +
+      Turing.PartrecToTM2.Λ'.normalizeLookup prev payload)
+  else if n % 8 = 7 then
+    let fields := Turing.PartrecToTM2.Λ'.decodePredPayload payload
+    self +
+      (Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.1 +
+        (wCode (unrevCodeOf fields.2) +
+          Turing.PartrecToTM2.Λ'.normalizeLookup prev fields.2))
+  else
+    self
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
