@@ -887,6 +887,43 @@ noncomputable def trAuxGotoBody (tc : Turing.ToPartrec.Code)
   some ((some (TM0Route.partrecStartedTM1Machine tc (p.1 p.2.2 p.2.1)), p.2.1),
     Turing.TM0.Stmt.write p.2.2)
 
+theorem trAuxGotoBody_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : PartrecVar × SourceSymbol =>
+      fun f : TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+        some (((some (TM0Route.partrecStartedTM1Machine tc (f p.2 p.1)), p.1) :
+          SourceLabel tc), Turing.TM0.Stmt.write (Γ := SourceSymbol) p.2)) := by
+  apply Primrec₂.mk
+  have htarget : Primrec (fun p :
+      (PartrecVar × SourceSymbol) × TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+      p.2 p.1.2 p.1.1) :=
+    (TM0Route.partrecStartedTM0SymbolPartrecVarFunction_app_primrec
+      (TM0Route.PartrecStartedTM1Label tc)).comp
+      (Primrec.pair Primrec.snd
+        (Primrec.pair (Primrec.snd.comp Primrec.fst) (Primrec.fst.comp Primrec.fst)))
+  have hstmt : Primrec (fun p :
+      (PartrecVar × SourceSymbol) × TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+      TM0Route.partrecStartedTM1Machine tc (p.2 p.1.2 p.1.1)) :=
+    hmachine.comp htarget
+  have hlabel : Primrec (fun p :
+      (PartrecVar × SourceSymbol) × TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+      ((some (TM0Route.partrecStartedTM1Machine tc (p.2 p.1.2 p.1.1)), p.1.1) :
+        SourceLabel tc)) :=
+    Primrec.pair (Primrec.option_some.comp hstmt) (Primrec.fst.comp Primrec.fst)
+  have htm0 : Primrec (fun p :
+      (PartrecVar × SourceSymbol) × TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+      Turing.TM0.Stmt.write (Γ := SourceSymbol) p.1.2) :=
+    tm0StmtWrite_primrec.comp (Primrec.snd.comp Primrec.fst)
+  exact Primrec.option_some.comp (Primrec.pair hlabel htm0)
+
+theorem trAuxGotoBody_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (trAuxGotoBody tc) :=
+  (trAuxGotoBody_primrec₂_fixed_of_machine tc hmachine).comp
+    Primrec.snd Primrec.fst
+
 noncomputable def trAuxHaltBody (tc : Turing.ToPartrec.Code)
     (p : PartrecVar × SourceSymbol) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
