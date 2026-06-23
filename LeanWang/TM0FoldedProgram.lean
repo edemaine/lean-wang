@@ -840,6 +840,12 @@ noncomputable def trAuxWriteBody (tc : Turing.ToPartrec.Code)
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
   some ((some p.1.2, p.2.1), Turing.TM0.Stmt.write (p.1.1 p.2.2 p.2.1))
 
+theorem trAuxWritePayload_primrec :
+    Primrec (fun p :
+      TM0Route.PartrecStartedTM1StmtNode.WriteCode × PartrecVar × SourceSymbol =>
+      p.1 p.2.2 p.2.1) :=
+  Primrec.dom_finite _
+
 def trAuxHeadBodyFromDeps (tc : Turing.ToPartrec.Code)
     (rec : List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
