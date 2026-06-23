@@ -2014,6 +2014,141 @@ private def flatMapConstMapAtByGetFrom? {α β : Type}
       | some y => (get k).map fun x => (x, y)
       | none => flatMapConstMapAtByGetFrom? get ys fuel (k + 1) (i - ys.length)
 
+private def flatMapConstMapAtByGetFromStep? {α β : Type}
+    (get : Nat → Option α) (ys : List β)
+    (s : Option (α × β) × Nat × Nat) :
+    Option (α × β) × Nat × Nat :=
+  match s.1 with
+  | some r => (some r, s.2)
+  | none =>
+      match ys[s.2.2]? with
+      | some y => ((get s.2.1).map fun x => (x, y), s.2.1, s.2.2)
+      | none => (none, s.2.1 + 1, s.2.2 - ys.length)
+
+private def flatMapConstMapAtByGetFromIter? {α β : Type}
+    (get : Nat → Option α) (ys : List β) (fuel k i : Nat) :
+    Option (α × β) :=
+  ((flatMapConstMapAtByGetFromStep? get ys)^[fuel] (none, k, i)).1
+
+private theorem flatMapConstMapAtByGetFromStep?_fixed_of_current_some {α β : Type}
+    (get : Nat → Option α) (ys : List β) {k i : Nat} {y : β}
+    (hy : ys[i]? = some y) :
+    flatMapConstMapAtByGetFromStep? get ys
+        ((get k).map fun x => (x, y), k, i) =
+      ((get k).map fun x => (x, y), k, i) := by
+  cases hget : get k <;> simp [flatMapConstMapAtByGetFromStep?, hy, hget]
+
+private theorem flatMapConstMapAtByGetFromIter?_eq {α β : Type}
+    (get : Nat → Option α) (ys : List β) (fuel k i : Nat) :
+    flatMapConstMapAtByGetFromIter? get ys fuel k i =
+      flatMapConstMapAtByGetFrom? get ys fuel k i := by
+  induction fuel generalizing k i with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      unfold flatMapConstMapAtByGetFromIter? flatMapConstMapAtByGetFrom?
+      rw [Function.iterate_succ_apply]
+      cases hy : ys[i]? with
+      | some y =>
+          have hstep :
+              flatMapConstMapAtByGetFromStep? get ys (none, k, i) =
+                ((get k).map fun x => (x, y), k, i) := by
+            change
+              (match ys[i]? with
+              | some y' => ((get k).map fun x => (x, y'), k, i)
+              | none => (none, k + 1, i - ys.length)) =
+                ((get k).map fun x => (x, y), k, i)
+            rw [hy]
+          rw [hstep]
+          exact congrArg Prod.fst
+            (Function.iterate_fixed
+              (flatMapConstMapAtByGetFromStep?_fixed_of_current_some get ys hy) fuel)
+      | none =>
+          simpa [flatMapConstMapAtByGetFromStep?, hy, flatMapConstMapAtByGetFromIter?]
+            using ih (k + 1) (i - ys.length)
+
+private theorem flatMapConstMapAtByGetFromStep?_primrec {α β : Type}
+    [Primcodable α] [Primcodable β]
+    (get : Nat → Option α) (ys : List β) (hget : Primrec get) :
+    Primrec (flatMapConstMapAtByGetFromStep? get ys) := by
+  let found : Option (α × β) × Nat × Nat → Option (α × β) := fun s => s.1
+  let offset : Option (α × β) × Nat × Nat → Nat := fun s => s.2.1
+  let index : Option (α × β) × Nat × Nat → Nat := fun s => s.2.2
+  have hfound : Primrec found := Primrec.fst
+  have hoffset : Primrec offset := Primrec.fst.comp Primrec.snd
+  have hindex : Primrec index := Primrec.snd.comp Primrec.snd
+  have hnoneStep : Primrec (fun s : Option (α × β) × Nat × Nat =>
+      ((none : Option (α × β)), (offset s + 1, index s - ys.length))) := by
+    exact Primrec.pair (Primrec.const (none : Option (α × β)))
+      (Primrec.pair (Primrec.succ.comp hoffset)
+        (Primrec.nat_sub.comp hindex (Primrec.const ys.length)))
+  have hsomeBlock :
+      Primrec₂ (fun s : Option (α × β) × Nat × Nat => fun y : β =>
+        ((get (offset s)).map fun x => (x, y), offset s, index s)) := by
+    apply Primrec₂.mk
+    let base : (Option (α × β) × Nat × Nat) × β → Option (α × β) × Nat × Nat :=
+      fun p => p.1
+    let yArg : (Option (α × β) × Nat × Nat) × β → β := fun p => p.2
+    have hbase : Primrec base := Primrec.fst
+    have hyArg : Primrec yArg := Primrec.snd
+    have hoffsetBase : Primrec (fun p : (Option (α × β) × Nat × Nat) × β =>
+        offset (base p)) := hoffset.comp hbase
+    have hindexBase : Primrec (fun p : (Option (α × β) × Nat × Nat) × β =>
+        index (base p)) := hindex.comp hbase
+    have hgetBase : Primrec (fun p : (Option (α × β) × Nat × Nat) × β =>
+        get (offset (base p))) := hget.comp hoffsetBase
+    have hpairWithY :
+        Primrec₂ (fun p : (Option (α × β) × Nat × Nat) × β => fun x : α =>
+          (x, yArg p)) := by
+      apply Primrec₂.mk
+      exact Primrec.pair Primrec.snd (hyArg.comp Primrec.fst)
+    have hmap : Primrec (fun p : (Option (α × β) × Nat × Nat) × β =>
+        (get (offset (base p))).map fun x => (x, yArg p)) :=
+      Primrec.option_map hgetBase hpairWithY
+    exact Primrec.pair hmap (Primrec.pair hoffsetBase hindexBase)
+  have hnone : Primrec (fun s : Option (α × β) × Nat × Nat =>
+      match ys[index s]? with
+      | some y => ((get (offset s)).map fun x => (x, y), offset s, index s)
+      | none => ((none : Option (α × β)), (offset s + 1, index s - ys.length))) := by
+    have hlookup : Primrec (fun s : Option (α × β) × Nat × Nat => ys[index s]?) :=
+      (Primrec.list_getElem?₁ ys).comp hindex
+    exact (Primrec.option_casesOn hlookup hnoneStep hsomeBlock).of_eq fun s => by
+      cases ys[index s]? <;> rfl
+  have hsomeFound :
+      Primrec₂ (fun s : Option (α × β) × Nat × Nat => fun r : α × β =>
+        (some r, s.2)) := by
+    apply Primrec₂.mk
+    exact Primrec.pair (Primrec.option_some.comp Primrec.snd)
+      (Primrec.snd.comp Primrec.fst)
+  exact (Primrec.option_casesOn hfound hnone hsomeFound).of_eq fun s => by
+    rcases s with ⟨r, k, i⟩
+    cases r <;> rfl
+
+private theorem flatMapConstMapAtByGetFromIter?_primrec {α β : Type}
+    [Primcodable α] [Primcodable β]
+    (get : Nat → Option α) (ys : List β) (hget : Primrec get) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      flatMapConstMapAtByGetFromIter? get ys p.1 p.2.1 p.2.2) := by
+  let step := flatMapConstMapAtByGetFromStep? get ys
+  let init : Nat × Nat × Nat → Option (α × β) × Nat × Nat :=
+    fun p => (none, p.2.1, p.2.2)
+  have hstep : Primrec step :=
+    flatMapConstMapAtByGetFromStep?_primrec get ys hget
+  have hinit : Primrec init := by
+    exact Primrec.pair (Primrec.const (none : Option (α × β))) Primrec.snd
+  have hiter : Primrec (fun p : Nat × Nat × Nat => (step^[p.1]) (init p)) := by
+    exact Primrec.nat_iterate Primrec.fst hinit
+      ((hstep.comp Primrec.snd).to₂)
+  exact Primrec.fst.comp hiter
+
+private theorem flatMapConstMapAtByGetFrom?_primrec {α β : Type}
+    [Primcodable α] [Primcodable β]
+    (get : Nat → Option α) (ys : List β) (hget : Primrec get) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      flatMapConstMapAtByGetFrom? get ys p.1 p.2.1 p.2.2) :=
+  (flatMapConstMapAtByGetFromIter?_primrec get ys hget).of_eq fun p =>
+    flatMapConstMapAtByGetFromIter?_eq get ys p.1 p.2.1 p.2.2
+
 private theorem flatMapConstMapAtByGetFrom?_eq_byGet {α β : Type}
     (get : Nat → Option α) (ys : List β) (fuel k i : Nat) :
     flatMapConstMapAtByGetFrom? get ys fuel k i =
