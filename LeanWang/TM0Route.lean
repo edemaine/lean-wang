@@ -60,6 +60,35 @@ theorem relabelTM2Stmt_supportsStmt {K : Type u} {Γ : K → Type v}
   | halt =>
       exact fun _ => trivial
 
+theorem relabelTM2Stmt_id {K : Type u} {Γ : K → Type v} {Λ : Type w} {σ : Type y} :
+    ∀ stmt : Turing.TM2.Stmt Γ Λ σ, relabelTM2Stmt id stmt = stmt
+  | Turing.TM2.Stmt.push k g q => by simp [relabelTM2Stmt, relabelTM2Stmt_id q]
+  | Turing.TM2.Stmt.peek k g q => by simp [relabelTM2Stmt, relabelTM2Stmt_id q]
+  | Turing.TM2.Stmt.pop k g q => by simp [relabelTM2Stmt, relabelTM2Stmt_id q]
+  | Turing.TM2.Stmt.load g q => by simp [relabelTM2Stmt, relabelTM2Stmt_id q]
+  | Turing.TM2.Stmt.branch g q₁ q₂ => by
+      simp [relabelTM2Stmt, relabelTM2Stmt_id q₁, relabelTM2Stmt_id q₂]
+  | Turing.TM2.Stmt.goto g => by
+      simp [relabelTM2Stmt]
+  | Turing.TM2.Stmt.halt => by
+      simp [relabelTM2Stmt]
+
+theorem relabelTM2Stmt_comp {K : Type u} {Γ : K → Type v}
+    {Λ : Type w} {Λ' : Type x} {Λ'' : Type z} {σ : Type y}
+    (f : Λ → Λ') (g : Λ' → Λ'') :
+    ∀ stmt : Turing.TM2.Stmt Γ Λ σ,
+      relabelTM2Stmt g (relabelTM2Stmt f stmt) = relabelTM2Stmt (g ∘ f) stmt
+  | Turing.TM2.Stmt.push k h q => by simp [relabelTM2Stmt, relabelTM2Stmt_comp f g q]
+  | Turing.TM2.Stmt.peek k h q => by simp [relabelTM2Stmt, relabelTM2Stmt_comp f g q]
+  | Turing.TM2.Stmt.pop k h q => by simp [relabelTM2Stmt, relabelTM2Stmt_comp f g q]
+  | Turing.TM2.Stmt.load h q => by simp [relabelTM2Stmt, relabelTM2Stmt_comp f g q]
+  | Turing.TM2.Stmt.branch h q₁ q₂ => by
+      simp [relabelTM2Stmt, relabelTM2Stmt_comp f g q₁, relabelTM2Stmt_comp f g q₂]
+  | Turing.TM2.Stmt.goto h => by
+      simp [relabelTM2Stmt]
+  | Turing.TM2.Stmt.halt => by
+      simp [relabelTM2Stmt]
+
 /-- Relabel a TM2 configuration. -/
 def relabelTM2Cfg {K : Type u} {Γ : K → Type v} {Λ : Type w} {Λ' : Type x}
     {σ : Type y} (f : Λ → Λ') :
@@ -1254,6 +1283,163 @@ noncomputable instance instPrimcodableStmt (tc : Turing.ToPartrec.Code) :
 
 end PartrecStartedTM2StmtNode
 
+abbrev PartrecTM2Stmt : Type :=
+  Turing.TM2.Stmt PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
+
+abbrev PartrecStartedTM2Stmt (tc : Turing.ToPartrec.Code) : Type :=
+  PartrecStartedTM2StmtNode.Stmt tc
+
+noncomputable def partrecTM2StmtEquivStarted (tc : Turing.ToPartrec.Code) :
+    PartrecTM2Stmt ≃ PartrecStartedTM2Stmt tc where
+  toFun := relabelTM2Stmt (StartedLabel.wrap tc)
+  invFun := relabelTM2Stmt (fun q : StartedLabel tc => q.val)
+  left_inv := by
+    intro stmt
+    rw [relabelTM2Stmt_comp]
+    have hcomp :
+        ((fun q : StartedLabel tc => q.val) ∘ StartedLabel.wrap tc) = id := by
+      funext q
+      rfl
+    rw [hcomp]
+    exact relabelTM2Stmt_id stmt
+  right_inv := by
+    intro stmt
+    rw [relabelTM2Stmt_comp]
+    have hcomp :
+        (StartedLabel.wrap tc ∘ fun q : StartedLabel tc => q.val) = id := by
+      funext q
+      cases q
+      rfl
+    rw [hcomp]
+    exact relabelTM2Stmt_id stmt
+
+noncomputable instance instPrimcodablePartrecTM2Stmt :
+    Primcodable PartrecTM2Stmt :=
+  Primcodable.ofEquiv
+    (PartrecStartedTM2Stmt (Turing.ToPartrec.Code.zero'))
+    (partrecTM2StmtEquivStarted Turing.ToPartrec.Code.zero')
+
+abbrev PartrecStartedTM1Label (tc : Turing.ToPartrec.Code) : Type :=
+  Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar
+
+abbrev PartrecStartedTM1GoCode (tc : Turing.ToPartrec.Code) : Type :=
+  ((Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+        Turing.PartrecToTM2.K'.main × PartrecStartedTM2Stmt tc) ⊕
+    (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+        Turing.PartrecToTM2.K'.rev × PartrecStartedTM2Stmt tc)) ⊕
+  ((Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+        Turing.PartrecToTM2.K'.aux × PartrecStartedTM2Stmt tc) ⊕
+    (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+        Turing.PartrecToTM2.K'.stack × PartrecStartedTM2Stmt tc))
+
+abbrev PartrecStartedTM1LabelCode (tc : Turing.ToPartrec.Code) : Type :=
+  StartedLabel tc ⊕ (PartrecStartedTM1GoCode tc ⊕ PartrecStartedTM2Stmt tc)
+
+def partrecStartedTM1LabelEquivCode (tc : Turing.ToPartrec.Code) :
+    PartrecStartedTM1Label tc ≃ PartrecStartedTM1LabelCode tc where
+  toFun
+    | Turing.TM2to1.Λ'.normal q => Sum.inl q
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.main s q =>
+        Sum.inr (Sum.inl (Sum.inl (Sum.inl (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.rev s q =>
+        Sum.inr (Sum.inl (Sum.inl (Sum.inr (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.aux s q =>
+        Sum.inr (Sum.inl (Sum.inr (Sum.inl (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.stack s q =>
+        Sum.inr (Sum.inl (Sum.inr (Sum.inr (s, q))))
+    | Turing.TM2to1.Λ'.ret q => Sum.inr (Sum.inr q)
+  invFun
+    | Sum.inl q => Turing.TM2to1.Λ'.normal q
+    | Sum.inr (Sum.inl (Sum.inl (Sum.inl (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.main s q
+    | Sum.inr (Sum.inl (Sum.inl (Sum.inr (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.rev s q
+    | Sum.inr (Sum.inl (Sum.inr (Sum.inl (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.aux s q
+    | Sum.inr (Sum.inl (Sum.inr (Sum.inr (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.stack s q
+    | Sum.inr (Sum.inr q) => Turing.TM2to1.Λ'.ret q
+  left_inv := by
+    intro q
+    cases q with
+    | normal q => rfl
+    | go k s q =>
+        cases k <;> rfl
+    | ret q => rfl
+  right_inv := by
+    intro code
+    rcases code with q | rest
+    · rfl
+    rcases rest with goCode | stmt
+    · rcases goCode with left | right
+      · rcases left with p | p <;> rcases p with ⟨s, q⟩ <;> rfl
+      · rcases right with p | p <;> rcases p with ⟨s, q⟩ <;> rfl
+    · rfl
+
+noncomputable instance instPrimcodablePartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
+    Primcodable (PartrecStartedTM1Label tc) :=
+  Primcodable.ofEquiv
+    (PartrecStartedTM1LabelCode tc)
+    (partrecStartedTM1LabelEquivCode tc)
+
+abbrev PartrecTM1Label : Type :=
+  Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
+
+abbrev PartrecTM1LabelCode : Type :=
+  Turing.PartrecToTM2.Λ' ⊕
+    ((((Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.main × PartrecTM2Stmt) ⊕
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.rev × PartrecTM2Stmt)) ⊕
+      ((Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.aux × PartrecTM2Stmt) ⊕
+        (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar
+          Turing.PartrecToTM2.K'.stack × PartrecTM2Stmt))) ⊕
+      PartrecTM2Stmt)
+
+def partrecTM1LabelEquivCode : PartrecTM1Label ≃ PartrecTM1LabelCode where
+  toFun
+    | Turing.TM2to1.Λ'.normal q => Sum.inl q
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.main s q =>
+        Sum.inr (Sum.inl (Sum.inl (Sum.inl (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.rev s q =>
+        Sum.inr (Sum.inl (Sum.inl (Sum.inr (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.aux s q =>
+        Sum.inr (Sum.inl (Sum.inr (Sum.inl (s, q))))
+    | Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.stack s q =>
+        Sum.inr (Sum.inl (Sum.inr (Sum.inr (s, q))))
+    | Turing.TM2to1.Λ'.ret q => Sum.inr (Sum.inr q)
+  invFun
+    | Sum.inl q => Turing.TM2to1.Λ'.normal q
+    | Sum.inr (Sum.inl (Sum.inl (Sum.inl (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.main s q
+    | Sum.inr (Sum.inl (Sum.inl (Sum.inr (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.rev s q
+    | Sum.inr (Sum.inl (Sum.inr (Sum.inl (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.aux s q
+    | Sum.inr (Sum.inl (Sum.inr (Sum.inr (s, q)))) =>
+        Turing.TM2to1.Λ'.go Turing.PartrecToTM2.K'.stack s q
+    | Sum.inr (Sum.inr q) => Turing.TM2to1.Λ'.ret q
+  left_inv := by
+    intro q
+    cases q with
+    | normal q => rfl
+    | go k s q =>
+        cases k <;> rfl
+    | ret q => rfl
+  right_inv := by
+    intro code
+    rcases code with q | rest
+    · rfl
+    rcases rest with goCode | stmt
+    · rcases goCode with left | right
+      · rcases left with p | p <;> rcases p with ⟨s, q⟩ <;> rfl
+      · rcases right with p | p <;> rcases p with ⟨s, q⟩ <;> rfl
+    · rfl
+
+noncomputable instance instPrimcodablePartrecTM1Label : Primcodable PartrecTM1Label :=
+  Primcodable.ofEquiv PartrecTM1LabelCode partrecTM1LabelEquivCode
+
 def decEqPartrecStartedTM1Label (tc : Turing.ToPartrec.Code) :
     (a b : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar) →
       Decidable (a = b)
@@ -1532,10 +1718,6 @@ theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
 /-- The TM1 machine obtained from the code-specific started TM2 evaluator. -/
 def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM2to1.tr (partrecStartedTM2 tc)
-
-/-- Code-independent TM1 labels generated from the `PartrecToTM2` evaluator. -/
-abbrev PartrecTM1Label : Type :=
-  Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
 
 /-- The TM1 machine obtained directly from Mathlib's `PartrecToTM2` evaluator. -/
 def partrecTM1Machine :
