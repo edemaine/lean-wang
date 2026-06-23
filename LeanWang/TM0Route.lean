@@ -1695,6 +1695,185 @@ theorem stmtHalt_primrec (tc : Turing.ToPartrec.Code) :
     cases u
     rfl
 
+def ofStmtHead? {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) : Option (PartrecStartedTM2StmtNode tc) :=
+  (ofStmt stmt).head?
+
+theorem ofStmtHead?_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofStmtHead? (tc := tc)) :=
+  Primrec.list_head?.comp (ofStmt_primrec tc)
+
+def ofStmtTail {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) : List (PartrecStartedTM2StmtNode tc) :=
+  (ofStmt stmt).tail
+
+theorem ofStmtTail_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (ofStmtTail (tc := tc)) :=
+  Primrec.list_tail.comp (ofStmt_primrec tc)
+
+theorem ofStmtTail_length_lt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
+    (ofStmtTail stmt).length < (ofStmt stmt).length := by
+  cases stmt <;> simp [ofStmtTail, ofStmt]
+
+def properTails {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    List (List (PartrecStartedTM2StmtNode tc)) :=
+  (List.range nodes.length).map fun i => nodes.drop (i + 1)
+
+theorem properTails_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (properTails (tc := tc)) := by
+  unfold properTails
+  refine Primrec.list_map (Primrec.list_range.comp Primrec.list_length) ?_
+  exact Primrec.list_drop.comp
+    (Primrec.succ.comp Primrec₂.right) Primrec₂.left
+
+theorem mem_properTails_length_lt {tc : Turing.ToPartrec.Code}
+    {nodes tail : List (PartrecStartedTM2StmtNode tc)}
+    (htail : tail ∈ properTails nodes) :
+    tail.length < nodes.length := by
+  unfold properTails at htail
+  rcases List.mem_map.1 htail with ⟨i, hi, rfl⟩
+  have hi' : i < nodes.length := List.mem_range.1 hi
+  rw [List.length_drop]
+  omega
+
+def firstStmtComplete {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) (i : Nat) : Bool :=
+  decide ((nodes.take (i + 1)).foldl validStep (true, 1) = (true, 0))
+
+theorem firstStmtComplete_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (firstStmtComplete (tc := tc)) := by
+  apply Primrec₂.mk
+  let takePrefix :
+      List (PartrecStartedTM2StmtNode tc) × Nat → List (PartrecStartedTM2StmtNode tc) :=
+    fun p => p.1.take (p.2 + 1)
+  have htake : Primrec takePrefix :=
+    Primrec.list_take.comp (Primrec.succ.comp Primrec.snd) Primrec.fst
+  have hfold : Primrec (fun p : List (PartrecStartedTM2StmtNode tc) × Nat =>
+      (takePrefix p).foldl validStep (true, 1)) :=
+    Primrec.list_foldl htake (Primrec.const (true, 1))
+      (((validStep_primrec tc).comp Primrec.snd).to₂)
+  have hpred : PrimrecPred (fun p : List (PartrecStartedTM2StmtNode tc) × Nat =>
+      (takePrefix p).foldl validStep (true, 1) = (true, 0)) :=
+    Primrec.eq.comp hfold (Primrec.const (true, 0))
+  exact (hpred.decide).of_eq fun p => by
+    simp [firstStmtComplete, takePrefix]
+
+def firstStmtLength {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) : Nat :=
+  ((List.range nodes.length).findIdx fun i => firstStmtComplete nodes i) + 1
+
+theorem firstStmtLength_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (firstStmtLength (tc := tc)) := by
+  unfold firstStmtLength
+  exact Primrec.succ.comp
+    (Primrec.list_findIdx (Primrec.list_range.comp Primrec.list_length)
+      (firstStmtComplete_primrec tc))
+
+def firstStmtNodes {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    List (PartrecStartedTM2StmtNode tc) :=
+  nodes.take (firstStmtLength nodes)
+
+theorem firstStmtNodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (firstStmtNodes (tc := tc)) := by
+  unfold firstStmtNodes
+  exact Primrec.list_take.comp (firstStmtLength_primrec tc) Primrec.id
+
+def afterFirstStmtNodes {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM2StmtNode tc)) :
+    List (PartrecStartedTM2StmtNode tc) :=
+  nodes.drop (firstStmtLength nodes)
+
+theorem afterFirstStmtNodes_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (afterFirstStmtNodes (tc := tc)) := by
+  unfold afterFirstStmtNodes
+  exact Primrec.list_drop.comp (firstStmtLength_primrec tc) Primrec.id
+
+theorem take_ofStmt_foldl_validStep_ne_complete {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) {k : Nat} (hk : k < (ofStmt stmt).length) :
+    ((ofStmt stmt).take k).foldl validStep (true, 1) ≠ (true, 0) := by
+  intro hcomplete
+  have htotal := ofStmt_foldl_validStep (tc := tc) stmt 0
+  simp only [Nat.zero_add] at htotal
+  have hsplit :
+      (ofStmt stmt).foldl validStep (true, 1) =
+        ((ofStmt stmt).drop k).foldl validStep
+          (((ofStmt stmt).take k).foldl validStep (true, 1)) := by
+    rw [← List.foldl_append]
+    rw [List.take_append_drop]
+  rw [hsplit, hcomplete] at htotal
+  have hdropNil :
+      (ofStmt stmt).drop k = [] :=
+    (foldl_validStep_true_zero_eq_true_zero_iff ((ofStmt stmt).drop k)).1 htotal
+  have hdropLen : 0 < ((ofStmt stmt).drop k).length := by
+    rw [List.length_drop]
+    omega
+  rw [hdropNil] at hdropLen
+  simp at hdropLen
+
+theorem firstStmtComplete_ofStmt_append_false {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) {i : Nat}
+    (hi : i + 1 < (ofStmt stmt).length) :
+    firstStmtComplete (ofStmt stmt ++ tail) i = false := by
+  unfold firstStmtComplete
+  have htake :
+      (ofStmt stmt ++ tail).take (i + 1) = (ofStmt stmt).take (i + 1) := by
+    exact List.take_append_of_le_length (Nat.le_of_lt hi)
+  have hne := take_ofStmt_foldl_validStep_ne_complete
+    (tc := tc) stmt (k := i + 1) hi
+  simp [htake, hne]
+
+theorem firstStmtComplete_ofStmt_append_last {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) :
+    firstStmtComplete (ofStmt stmt ++ tail) ((ofStmt stmt).length - 1) = true := by
+  unfold firstStmtComplete
+  have hpos := ofStmt_length_pos (tc := tc) stmt
+  have hsucc : (ofStmt stmt).length - 1 + 1 = (ofStmt stmt).length := by
+    omega
+  rw [hsucc]
+  simp [ofStmt_foldl_validStep]
+
+theorem firstStmtLength_ofStmt_append {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) :
+    firstStmtLength (ofStmt stmt ++ tail) = (ofStmt stmt).length := by
+  unfold firstStmtLength
+  let n := (ofStmt stmt).length
+  have hpos : 0 < n := by
+    simpa [n] using ofStmt_length_pos (tc := tc) stmt
+  have hidx :
+      (List.range (ofStmt stmt ++ tail).length).findIdx
+          (fun i => firstStmtComplete (ofStmt stmt ++ tail) i) =
+        n - 1 := by
+    have hlt : n - 1 < (List.range (ofStmt stmt ++ tail).length).length := by
+      simp [n]
+      omega
+    apply (List.findIdx_eq hlt).2
+    constructor
+    · simpa [n] using firstStmtComplete_ofStmt_append_last
+        (tc := tc) stmt tail
+    · intro j hj
+      have hj' : j + 1 < n := by
+        omega
+      simpa [n] using firstStmtComplete_ofStmt_append_false
+        (tc := tc) stmt tail (i := j) hj'
+  rw [hidx]
+  omega
+
+theorem firstStmtNodes_ofStmt_append {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) :
+    firstStmtNodes (ofStmt stmt ++ tail) = ofStmt stmt := by
+  unfold firstStmtNodes
+  rw [firstStmtLength_ofStmt_append (tc := tc) stmt tail]
+  exact List.take_left
+
+theorem afterFirstStmtNodes_ofStmt_append {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) (tail : List (PartrecStartedTM2StmtNode tc)) :
+    afterFirstStmtNodes (ofStmt stmt ++ tail) = tail := by
+  unfold afterFirstStmtNodes
+  rw [firstStmtLength_ofStmt_append (tc := tc) stmt tail]
+  exact List.drop_append_length
+
 end PartrecStartedTM2StmtNode
 
 abbrev PartrecTM2Stmt : Type :=
