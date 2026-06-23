@@ -2877,6 +2877,10 @@ theorem partrecStartedTM2ConstGotoBody_eq_relabel
 def partrecPushDefaultPayload : PartrecVar → Turing.PartrecToTM2.Γ' :=
   fun s => s.getD default
 
+def partrecPushConstPayload
+    (a : Turing.PartrecToTM2.Γ') : PartrecVar → Turing.PartrecToTM2.Γ' :=
+  fun _s => a
+
 def partrecUpdateIdPayload : PartrecVar → PartrecVar → PartrecVar :=
   fun _s v => v
 
@@ -2891,6 +2895,24 @@ theorem partrecStartedTM2PushDefaultBody_primrec
   exact ((PartrecStartedTM2StmtNode.stmtPush_primrec tc).comp
     (Primrec.pair (Primrec.const (k, partrecPushDefaultPayload)) Primrec.id)).of_eq
       fun _q => rfl
+
+noncomputable def partrecStartedTM2PushConstBody (tc : Turing.ToPartrec.Code)
+    (p : Turing.PartrecToTM2.K' × Turing.PartrecToTM2.Γ' ×
+      PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.push p.1 (partrecPushConstPayload p.2.1) p.2.2
+
+theorem partrecStartedTM2PushConstBody_primrec
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2PushConstBody tc) := by
+  have hpayload : Primrec (fun p : Turing.PartrecToTM2.K' ×
+      Turing.PartrecToTM2.Γ' × PartrecStartedTM2Stmt tc =>
+      (p.1, partrecPushConstPayload p.2.1)) := by
+    exact Primrec.pair Primrec.fst
+      ((partrecVarFunction_const_primrec (f := fun a : Turing.PartrecToTM2.Γ' => a)
+        Primrec.id).comp (Primrec.fst.comp Primrec.snd))
+  exact ((PartrecStartedTM2StmtNode.stmtPush_primrec tc).comp
+    (Primrec.pair hpayload (Primrec.snd.comp Primrec.snd))).of_eq fun _p => rfl
 
 noncomputable def partrecStartedTM2PeekIdBody (tc : Turing.ToPartrec.Code)
     (k : PartrecStack) (q : PartrecStartedTM2Stmt tc) :
@@ -2968,6 +2990,15 @@ theorem partrecBranchElimTruePayload_primrec :
     cases s with
     | none => rfl
     | some a => cases a <;> rfl
+
+def partrecBranchEqSomePayload
+    (a : Turing.PartrecToTM2.Γ') :
+    PartrecStartedTM2StmtNode.BranchCode :=
+  fun s => s = some a
+
+theorem partrecBranchEqSomePayload_primrec :
+    Primrec partrecBranchEqSomePayload :=
+  Primrec.dom_finite _
 
 theorem partrecTM2Label_move_primrec :
     Primrec (fun p : (Turing.PartrecToTM2.Γ' → Bool) ×
@@ -3257,6 +3288,119 @@ theorem partrecStartedTM2CopyBody_eq_relabel
     partrecStartedTM2CopyBody tc q =
       relabelTM2Stmt (StartedLabel.wrap tc)
         (partrecTM2 (Turing.PartrecToTM2.Λ'.copy q)) := by
+  rfl
+
+theorem partrecTM2Label_unrev_primrec :
+    Primrec Turing.PartrecToTM2.unrev := by
+  exact Primrec.encode_iff.1
+    ((PartrecToTM2SupportList.unrevCodeOf_primrec.comp Primrec.encode).of_eq fun q => by
+      rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+      exact PartrecToTM2SupportList.unrevCodeOf_encodeLabel q)
+
+theorem partrecTM2Label_succ_primrec :
+    Primrec Turing.PartrecToTM2.Λ'.succ := by
+  exact Primrec.encode_iff.1
+    ((PartrecToTM2SupportList.succLabelCode_primrec.comp Primrec.encode).of_eq fun q => by
+      rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+      exact PartrecToTM2SupportList.succLabelCode_encodeLabel q)
+
+noncomputable def partrecStartedTM2SuccBody (tc : Turing.ToPartrec.Code)
+    (q : Turing.PartrecToTM2.Λ') :
+    PartrecStartedTM2Stmt tc :=
+  let qUnrev := partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q)
+  let qLoop := partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.succ q)
+  let qCarry := partrecStartedTM2PushConstBody tc
+    (Turing.PartrecToTM2.K'.rev, Turing.PartrecToTM2.Γ'.bit0, qLoop)
+  let qDoneCons := partrecStartedTM2PushConstBody tc
+    (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.cons,
+      partrecStartedTM2PushConstBody tc
+        (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1, qUnrev))
+  let qDoneOther := partrecStartedTM2PushConstBody tc
+    (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1, qUnrev)
+  Turing.TM2.Stmt.pop Turing.PartrecToTM2.K'.main partrecUpdateIdPayload
+    (Turing.TM2.Stmt.branch
+      (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.bit1)
+      qCarry
+      (Turing.TM2.Stmt.branch
+        (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.cons)
+        qDoneCons qDoneOther))
+
+theorem partrecStartedTM2SuccBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2SuccBody tc) := by
+  have hunrev : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q)) :=
+    (partrecStartedTM2ConstGotoBody_primrec tc).comp partrecTM2Label_unrev_primrec
+  have hloop : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.succ q)) :=
+    (partrecStartedTM2ConstGotoBody_primrec tc).comp partrecTM2Label_succ_primrec
+  have hcarry : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2PushConstBody tc
+        (Turing.PartrecToTM2.K'.rev, Turing.PartrecToTM2.Γ'.bit0,
+          partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.succ q))) :=
+    (partrecStartedTM2PushConstBody_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.PartrecToTM2.K'.rev)
+        (Primrec.pair (Primrec.const Turing.PartrecToTM2.Γ'.bit0) hloop))
+  have hdoneOther : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2PushConstBody tc
+        (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+          partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q))) :=
+    (partrecStartedTM2PushConstBody_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.PartrecToTM2.K'.main)
+        (Primrec.pair (Primrec.const Turing.PartrecToTM2.Γ'.bit1) hunrev))
+  have hdoneCons : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2PushConstBody tc
+        (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.cons,
+          partrecStartedTM2PushConstBody tc
+            (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+              partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q)))) :=
+    (partrecStartedTM2PushConstBody_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.PartrecToTM2.K'.main)
+        (Primrec.pair (Primrec.const Turing.PartrecToTM2.Γ'.cons) hdoneOther))
+  have hbranchCons : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      Turing.TM2.Stmt.branch
+        (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.cons)
+        (partrecStartedTM2PushConstBody tc
+          (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.cons,
+            partrecStartedTM2PushConstBody tc
+              (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+                partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q))))
+        (partrecStartedTM2PushConstBody tc
+          (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+            partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q)))) :=
+    (PartrecStartedTM2StmtNode.stmtBranch_primrec tc).comp
+      (Primrec.pair
+        (Primrec.pair (Primrec.const
+          (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.cons)) hdoneCons)
+        hdoneOther)
+  have hbranchBit1 : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      Turing.TM2.Stmt.branch
+        (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.bit1)
+        (partrecStartedTM2PushConstBody tc
+          (Turing.PartrecToTM2.K'.rev, Turing.PartrecToTM2.Γ'.bit0,
+            partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.succ q)))
+        (Turing.TM2.Stmt.branch
+          (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.cons)
+          (partrecStartedTM2PushConstBody tc
+            (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.cons,
+              partrecStartedTM2PushConstBody tc
+                (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+                  partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q))))
+          (partrecStartedTM2PushConstBody tc
+            (Turing.PartrecToTM2.K'.main, Turing.PartrecToTM2.Γ'.bit1,
+              partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.unrev q))))) :=
+    (PartrecStartedTM2StmtNode.stmtBranch_primrec tc).comp
+      (Primrec.pair
+        (Primrec.pair (Primrec.const
+          (partrecBranchEqSomePayload Turing.PartrecToTM2.Γ'.bit1)) hcarry)
+        hbranchCons)
+  exact ((partrecStartedTM2PopIdBody_primrec tc Turing.PartrecToTM2.K'.main).comp
+    hbranchBit1).of_eq fun _q => rfl
+
+theorem partrecStartedTM2SuccBody_eq_relabel
+    (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') :
+    partrecStartedTM2SuccBody tc q =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.succ q)) := by
   rfl
 
 def partrecLoadNonePayload : PartrecStartedTM2StmtNode.LoadCode :=
