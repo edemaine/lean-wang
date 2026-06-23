@@ -2344,6 +2344,30 @@ def simStepDataOfStep (tc : Turing.ToPartrec.Code)
   (side, marked, TM0FiniteCompiler.stateCode tc q,
     TM0FiniteCompiler.stateCode tc q', left, right, stmt)
 
+def simStepDataOfStepCode
+    (side : FoldSide) (marked : Bool)
+    (qCode q'Code : Nat) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) : SimStepData :=
+  (side, marked, qCode, q'Code, left, right, stmt)
+
+theorem simStepDataOfStep_eq_code (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q q' : SourceLabel tc) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) :
+    simStepDataOfStep tc side marked q q' left right stmt =
+      simStepDataOfStepCode side marked
+        (TM0FiniteCompiler.stateCode tc q)
+        (TM0FiniteCompiler.stateCode tc q') left right stmt := by
+  rfl
+
+theorem simStepDataOfStepCode_primrec :
+    Primrec (fun p : FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+        Turing.TM0.Stmt SourceSymbol =>
+      simStepDataOfStepCode p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2) := by
+  unfold simStepDataOfStepCode
+  exact Primrec.id
+
 theorem simStepDataOfStep_primrec_fixed (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
       (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
@@ -2394,6 +2418,31 @@ def simStepDataOfStmtTransition (tc : Turing.ToPartrec.Code)
   match sourceMachineStepOfStmt tc stmt v (foldedRead side left right) with
   | none => none
   | some (q', tm0Stmt) => some (simStepDataOfStep tc side marked (stmt, v) q' left right tm0Stmt)
+
+def simStepDataOfStmtTransitionWithCode (tc : Turing.ToPartrec.Code)
+    (qCode : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) : Option SimStepData :=
+  match sourceMachineStepOfStmt tc stmt v (foldedRead side left right) with
+  | none => none
+  | some (q', tm0Stmt) =>
+      some (simStepDataOfStepCode side marked qCode
+        (TM0FiniteCompiler.stateCode tc q') left right tm0Stmt)
+
+theorem simStepDataOfStmtTransition_eq_withCode
+    (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) :
+    simStepDataOfStmtTransition tc stmt v side marked left right =
+      simStepDataOfStmtTransitionWithCode tc
+        (TM0FiniteCompiler.stateCode tc (stmt, v))
+        stmt v side marked left right := by
+  unfold simStepDataOfStmtTransition simStepDataOfStmtTransitionWithCode
+  cases sourceMachineStepOfStmt tc stmt v (foldedRead side left right) with
+  | none =>
+      rfl
+  | some step =>
+      cases step
+      rfl
 
 theorem simStepDataOfStmtTransition_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
