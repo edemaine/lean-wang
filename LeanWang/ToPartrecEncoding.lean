@@ -716,6 +716,9 @@ theorem encodeCont_eq : Encodable.encode = encodeCont :=
 theorem ofNatCont_eq : Denumerable.ofNat Cont' = ofNatCont :=
   rfl
 
+theorem encodeCont_ofNatCont (n : Nat) : encodeCont (ofNatCont n) = n :=
+  encode_ofNatCont n
+
 open Primrec
 
 theorem primrec₂_cons₁ : Primrec₂ Cont'.cons₁ :=
@@ -1956,6 +1959,130 @@ theorem normalizePredStep_eq_match (prev : List Nat) (fields : Nat × Nat) :
   unfold normalizePredStep
   cases normalizeLookup prev fields.1 <;>
     cases normalizeLookup prev fields.2 <;> simp
+
+def normalizeLabelStepBodyPR (prev : List Nat) (n : Nat) : Nat :=
+  let payload := n / 8
+  let tag := n % 8
+  if tag = 0 then
+    match decodeMovePayload payload with
+    | none => 0
+    | some fields => normalizeMoveStep prev fields
+  else if tag = 1 then
+    match decodeClearPayload payload with
+    | none => 0
+    | some fields => normalizeClearStep prev fields
+  else if tag = 2 then
+    normalizeLabelUnaryStep prev payload 4
+  else if tag = 3 then
+    match decodePushPayload payload with
+    | none => 0
+    | some fields => normalizePushStep prev fields
+  else if tag = 4 then
+    normalizeReadStep prev (decodeReadPayload payload)
+  else if tag = 5 then
+    normalizeLabelUnaryStep prev payload 7
+  else if tag = 6 then
+    normalizePredStep prev (decodePredPayload payload)
+  else
+    8 * Cont'.encodeCont (Cont'.ofNatCont payload) + 9
+
+theorem normalizeLabelStepBodyPR_primrec :
+    Primrec (fun p : List Nat × Nat => normalizeLabelStepBodyPR p.1 p.2) := by
+  unfold normalizeLabelStepBodyPR
+  let hpayload : Primrec (fun p : List Nat × Nat => p.2 / 8) :=
+    Primrec.nat_div.comp Primrec.snd (Primrec.const 8)
+  let htag : Primrec (fun p : List Nat × Nat => p.2 % 8) :=
+    Primrec.nat_mod.comp Primrec.snd (Primrec.const 8)
+  let hmoveArg : Primrec
+      (fun p : (List Nat × Nat) × ((Γ' → Bool) × K' × K' × Nat) =>
+        (p.1.1, p.2)) :=
+    Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd
+  let hmoveSome : Primrec₂
+      (fun p : List Nat × Nat => fun fields : (Γ' → Bool) × K' × K' × Nat =>
+        normalizeMoveStep p.1 fields) :=
+    (normalizeMoveStep_primrec.comp hmoveArg).to₂
+  let hmove : Primrec (fun p : List Nat × Nat =>
+      match decodeMovePayload (p.2 / 8) with
+      | none => 0
+      | some fields => normalizeMoveStep p.1 fields) :=
+    (Primrec.option_casesOn (decodeMovePayload_primrec.comp hpayload)
+      (Primrec.const 0) hmoveSome).of_eq fun p => by
+        cases decodeMovePayload (p.2 / 8) <;> rfl
+  let hclearArg : Primrec
+      (fun p : (List Nat × Nat) × ((Γ' → Bool) × K' × Nat) => (p.1.1, p.2)) :=
+    Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd
+  let hclearSome : Primrec₂
+      (fun p : List Nat × Nat => fun fields : (Γ' → Bool) × K' × Nat =>
+        normalizeClearStep p.1 fields) :=
+    (normalizeClearStep_primrec.comp hclearArg).to₂
+  let hclear : Primrec (fun p : List Nat × Nat =>
+      match decodeClearPayload (p.2 / 8) with
+      | none => 0
+      | some fields => normalizeClearStep p.1 fields) :=
+    (Primrec.option_casesOn (decodeClearPayload_primrec.comp hpayload)
+      (Primrec.const 0) hclearSome).of_eq fun p => by
+        cases decodeClearPayload (p.2 / 8) <;> rfl
+  let hunary (tag : Nat) : Primrec (fun p : List Nat × Nat =>
+      normalizeLabelUnaryStep p.1 (p.2 / 8) tag) :=
+    normalizeLabelUnaryStep_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.pair hpayload (Primrec.const tag)))
+  let hpushArg : Primrec
+      (fun p : (List Nat × Nat) × (K' × (Option Γ' → Option Γ') × Nat) =>
+        (p.1.1, p.2)) :=
+    Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd
+  let hpushSome : Primrec₂
+      (fun p : List Nat × Nat => fun fields : K' × (Option Γ' → Option Γ') × Nat =>
+        normalizePushStep p.1 fields) :=
+    (normalizePushStep_primrec.comp hpushArg).to₂
+  let hpush : Primrec (fun p : List Nat × Nat =>
+      match decodePushPayload (p.2 / 8) with
+      | none => 0
+      | some fields => normalizePushStep p.1 fields) :=
+    (Primrec.option_casesOn (decodePushPayload_primrec.comp hpayload)
+      (Primrec.const 0) hpushSome).of_eq fun p => by
+        cases decodePushPayload (p.2 / 8) <;> rfl
+  let hread : Primrec (fun p : List Nat × Nat =>
+      normalizeReadStep p.1 (decodeReadPayload (p.2 / 8))) :=
+    normalizeReadStep_primrec.comp
+      (Primrec.pair Primrec.fst (decodeReadPayload_primrec.comp hpayload))
+  let hpred : Primrec (fun p : List Nat × Nat =>
+      normalizePredStep p.1 (decodePredPayload (p.2 / 8))) :=
+    normalizePredStep_primrec.comp
+      (Primrec.pair Primrec.fst (decodePredPayload_primrec.comp hpayload))
+  let hretPayload : Primrec (fun p : List Nat × Nat =>
+      Cont'.encodeCont (Cont'.ofNatCont (p.2 / 8))) := by
+    exact hpayload.of_eq fun p => by
+      exact (Cont'.encodeCont_ofNatCont (p.2 / 8)).symm
+  let hret : Primrec (fun p : List Nat × Nat =>
+      8 * Cont'.encodeCont (Cont'.ofNatCont (p.2 / 8)) + 9) :=
+    Primrec.nat_add.comp (Primrec.nat_mul.comp (Primrec.const 8) hretPayload)
+      (Primrec.const 9)
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 0)) hmove ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 1)) hclear ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 2)) (hunary 4) ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 3)) hpush ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 4)) hread ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 5)) (hunary 7) ?_
+  exact Primrec.ite (Primrec.eq.comp htag (Primrec.const 6)) hpred hret
+
+theorem normalizeLabelStepBodyPR_eq_normalizeLabelStepBody (prev : List Nat) (n : Nat) :
+    normalizeLabelStepBodyPR prev n = normalizeLabelStepBody prev n := by
+  have htag_lt : n % 8 < 8 := Nat.mod_lt n (by decide : 0 < 8)
+  have htag_cases :
+      n % 8 = 0 ∨ n % 8 = 1 ∨ n % 8 = 2 ∨ n % 8 = 3 ∨
+        n % 8 = 4 ∨ n % 8 = 5 ∨ n % 8 = 6 ∨ n % 8 = 7 := by
+    omega
+  rcases htag_cases with htag | htag | htag | htag | htag | htag | htag | htag
+  all_goals
+    simp [normalizeLabelStepBodyPR, normalizeLabelStepBody, htag,
+      normalizeMoveStep_eq_match, normalizeClearStep_eq_match,
+      normalizeLabelUnaryStep_eq_match, normalizePushStep_eq_match,
+      normalizeReadStep_eq_match, normalizePredStep_eq_match]
+
+theorem normalizeLabelStepBody_primrec :
+    Primrec (fun p : List Nat × Nat => normalizeLabelStepBody p.1 p.2) :=
+  normalizeLabelStepBodyPR_primrec.of_eq fun p =>
+    normalizeLabelStepBodyPR_eq_normalizeLabelStepBody p.1 p.2
 
 theorem normalizeLookup_eq_of_getD_eq
     {prev : List Nat} {fuel bound n : Nat}
