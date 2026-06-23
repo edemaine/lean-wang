@@ -184,7 +184,6 @@ theorem sourceMachineStepOfStmt_eq_machine (tc : Turing.ToPartrec.Code)
 
 theorem sourceMachineStepOfStmt_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
@@ -212,7 +211,6 @@ theorem sourceMachineStepOfStmt_primrec_fixed_of_trAux
 
 theorem sourceMachine_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : SourceLabel tc × SourceSymbol =>
@@ -1168,7 +1166,6 @@ theorem simStepDataOfStmtTransition_eq_of_label (tc : Turing.ToPartrec.Code)
 
 theorem simStepDataOfStmtTransition_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
@@ -1269,7 +1266,6 @@ theorem simStepDataOfTransition_primrec_fixed_of_machine
 
 theorem simStepDataOfTransition_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : SourceLabel tc × FoldSide × Bool × SourceSymbol × SourceSymbol =>
@@ -1285,7 +1281,6 @@ def simStepDataForStmtRightSymbols (tc : Turing.ToPartrec.Code)
 
 theorem simStepDataForStmtRightSymbols_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
@@ -1332,7 +1327,6 @@ theorem simStepDataForStmtLeftSymbols_eq_of_label (tc : Turing.ToPartrec.Code)
 
 theorem simStepDataForStmtLeftSymbols_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool =>
@@ -1372,7 +1366,6 @@ theorem simStepDataForStmtMarked_eq_of_label (tc : Turing.ToPartrec.Code)
 
 theorem simStepDataForStmtMarked_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide =>
@@ -1459,7 +1452,6 @@ theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
 
 theorem simStepDataForStmtLabel_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Option (SourceStmt tc) × PartrecVar =>
@@ -1529,7 +1521,6 @@ theorem simStepDataForLabelIndexFrom_zero_eq
 
 theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : Nat × Nat × Nat =>
@@ -1559,7 +1550,6 @@ theorem simStepDataForLabelIndexStart_eq
 
 theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (simStepDataForLabelIndexStart tc) := by
@@ -1570,7 +1560,6 @@ theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
 
 theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
-    [Primcodable (SourceStmt tc)]
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (simStepDataForLabelIndex tc) :=
