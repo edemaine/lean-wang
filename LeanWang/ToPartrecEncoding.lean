@@ -94,6 +94,80 @@ theorem ofNatCode_eq : Denumerable.ofNat Code = ofNatCode :=
 theorem ofNatCode_encodeCode (c : Code) : ofNatCode (encodeCode c) = c := by
   simpa [encodeCode_eq, ofNatCode_eq] using Denumerable.ofNat_encode c
 
+/-- Structural depth of `Turing.ToPartrec.Code`, used as recursion fuel. -/
+def depth : Code → Nat
+  | zero' => 1
+  | succ => 1
+  | tail => 1
+  | cons f g => max (depth f) (depth g) + 1
+  | comp f g => max (depth f) (depth g) + 1
+  | case f g => max (depth f) (depth g) + 1
+  | fix f => depth f + 1
+
+theorem depth_pos (c : Code) : 0 < depth c := by
+  induction c <;> simp [depth]
+
+theorem depth_left_lt_cons (f g : Code) : depth f < depth (cons f g) := by
+  simp [depth]
+  omega
+
+theorem depth_right_lt_cons (f g : Code) : depth g < depth (cons f g) := by
+  simp [depth]
+  omega
+
+theorem depth_left_lt_comp (f g : Code) : depth f < depth (comp f g) := by
+  simp [depth]
+  omega
+
+theorem depth_right_lt_comp (f g : Code) : depth g < depth (comp f g) := by
+  simp [depth]
+  omega
+
+theorem depth_left_lt_case (f g : Code) : depth f < depth (case f g) := by
+  simp [depth]
+  omega
+
+theorem depth_right_lt_case (f g : Code) : depth g < depth (case f g) := by
+  simp [depth]
+  omega
+
+theorem depth_lt_fix (f : Code) : depth f < depth (fix f) := by
+  simp [depth]
+
+theorem depth_le_encodeCode_succ : ∀ c : Code, depth c ≤ encodeCode c + 1 := by
+  intro c
+  induction c with
+  | zero' =>
+      simp [depth, encodeCode]
+  | succ =>
+      simp [depth, encodeCode]
+  | tail =>
+      simp [depth, encodeCode]
+  | cons f g ihf ihg =>
+      have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+      have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+      simp [depth, encodeCode]
+      omega
+  | comp f g ihf ihg =>
+      have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+      have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+      simp [depth, encodeCode]
+      omega
+  | case f g ihf ihg =>
+      have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+      have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+        simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+      simp [depth, encodeCode]
+      omega
+  | fix f ih =>
+      simp [depth, encodeCode]
+      omega
+
 open Primrec
 
 theorem primrec₂_cons : Primrec₂ Code.cons :=
