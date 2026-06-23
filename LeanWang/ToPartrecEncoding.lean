@@ -2084,6 +2084,27 @@ theorem normalizeLabelStepBody_primrec :
   normalizeLabelStepBodyPR_primrec.of_eq fun p =>
     normalizeLabelStepBodyPR_eq_normalizeLabelStepBody p.1 p.2
 
+theorem normalizeLabelStepAt_primrec :
+    Primrec (fun p : List Nat × Nat => normalizeLabelStepAt p.1 p.2) := by
+  unfold normalizeLabelStepAt
+  let hsucc : Primrec₂ (fun p : List Nat × Nat => fun n : Nat =>
+      normalizeLabelStepBody p.1 n) :=
+    (normalizeLabelStepBody_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)).to₂
+  exact (Primrec.nat_casesOn Primrec.snd (Primrec.const 0) hsucc).of_eq fun p => by
+    cases p.2 <;> rfl
+
+theorem normalizeLabelRowStep_primrec :
+    Primrec (fun p : List Nat × Nat => normalizeLabelRowStep p.1 p.2) := by
+  unfold normalizeLabelRowStep
+  let hrow : Primrec (fun p : List Nat × Nat => List.range (p.2 + 1)) :=
+    Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+  let hentry : Primrec₂ (fun p : List Nat × Nat => fun n : Nat =>
+      normalizeLabelStepAt p.1 n) :=
+    (normalizeLabelStepAt_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)).to₂
+  exact Primrec.list_map hrow hentry
+
 theorem normalizeLookup_eq_of_getD_eq
     {prev : List Nat} {fuel bound n : Nat}
     (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
