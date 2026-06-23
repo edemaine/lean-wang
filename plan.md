@@ -44,7 +44,8 @@ Completed proof layers:
 
 - concrete Wang tiles, finite rectangles, plane and quarter-plane tiling notions;
 - compactness and fixed-corner square compactness variants;
-- the concrete one-tape `Machine` and finite `TableProgram` models;
+- the concrete one-tape `Machine` and finite `TableProgram` models, still used
+  by the current Wang-tile backend;
 - the machine-to-Wang fixed-domino construction;
 - computable table-tile data decoding, including the initial-row and normal-row
   tile membership bridges;
@@ -59,7 +60,7 @@ Completed proof layers:
   Mathlib list-based `Turing.ToPartrec.Code`, with a concrete correctness
   theorem connecting Mathlib code evaluation to `PartrecToTM2` halting. This
   remains only the semantic entry point into Mathlib's machine translations;
-  the obsolete direct TM2-to-table reduction surface has been removed.
+  it does not feed a table-machine construction directly.
 - finite-control support wrappers for Mathlib's `PartrecToTM2` evaluator:
   the start label, finite reachable label set, stack names, stack alphabet, and
   finite statement-substate set, with list views and numeric codes for the
@@ -68,8 +69,8 @@ Completed proof layers:
   `Nat`-valued control-state indices for the start, halt, and supported label
   statements, plus one-step/reachable label-closure lemmas for runs starting
   from `PartrecToTM2.init tc [0]`.
-- the abandoned direct `PartrecToTM2` table-machine construction has been
-  removed. The preferred machine-side proof now has one semantic route:
+- the direct `PartrecToTM2` table-machine construction is not part of the
+  current route. The preferred machine-side proof now has one semantic route:
   Mathlib code, to `ToPartrec.Code`, through Mathlib's TM2-to-TM1-to-TM0
   translations, then into the local folded finite one-sided TM0 model.
 
@@ -106,28 +107,25 @@ The live route now factors through a finite one-sided TM0 reduction: first use
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
 one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
-should treat it as the mathematical reduction. The direct TM2-to-table
-reduction surface should stay removed. The table-machine definitions remain
-only because the current Wang-tile layer consumes `TableProgram`; they are fed
-by the concrete compatibility bridge `PostProgram.toTableProgram` until that
+should treat it as the mathematical reduction. A direct TM2-to-table route
+should not be reintroduced. The table-machine definitions remain live only
+because the current Wang-tile layer consumes `TableProgram`; they are fed by
+the concrete compatibility bridge `PostProgram.toTableProgram` until that
 layer is replaced by direct finite-TM0 tiles. This bridge starts only after the
-source machine has already been reduced to finite one-sided TM0 data; it is not
-a direct TM2-to-table reduction.
+source machine has already been reduced to finite one-sided TM0 data.
 Together these pieces feed the fixed-domino, fixed-corner, encoded scaffolded
 domino, and unencoded scaffolded domino theorem surfaces from the source-level
 folded finite-TM0 factorization using the concrete source-code translation into
-Mathlib's `PartrecToTM2` evaluator. The old code-to-table `TableCompiler`
-surface and the generic theorem-level `TM0FiniteCompiler` interface have been
-removed so the theorem statements do not look like a direct TM2-to-table route.
-The started-TM2 bridge is a theorem in `TM0Route` rather than a separate
-reduction structure.
+Mathlib's `PartrecToTM2` evaluator. The theorem statements are phrased through
+the folded finite-TM0 route; the started-TM2 bridge is a theorem in `TM0Route`
+rather than a separate table-facing reduction structure.
 
-The data-level compiler `PostProgram.toTableProgram` is now in place for the
-current table-machine tile backend. A finite-TM0 `move` compiles to one
-table row. A finite-TM0 `write` compiles to a write-and-move-right row followed
-by finite return-left rows. Generated row targets and written symbols are proved
-to lie in the compiled table supports. The table simulation is now proved both
-ways at the halting level:
+The data-level bridge `PostProgram.toTableProgram` is now in place for the
+current table-machine tile backend. A finite-TM0 `move` becomes one table row. A
+finite-TM0 `write` becomes a write-and-move-right row followed by finite
+return-left rows. Generated row targets and written symbols are proved to lie in
+the resulting table supports. The table simulation is now proved both ways at
+the halting level:
 
 ```lean
 PostProgram.toTableProgram_toMachine_haltsEmpty_iff :

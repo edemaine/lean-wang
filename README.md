@@ -21,8 +21,8 @@ the concrete definitions needed for the Berger/Robinson route:
   Post-style names are still present, but the preferred public terminology is
   `FiniteTM0Program`: transitions either move or write, matching Mathlib TM0
   more closely than the older table model. The file also contains the temporary
-  data-level reduction to `TableProgram` used only to feed the existing
-  Wang-tile layer.
+  finite-TM0-to-`TableProgram` bridge used only to feed the existing Wang-tile
+  layer.
 - `LeanWang.ToPartrecEncoding`: natural-number encoding support for Mathlib's
   `Turing.ToPartrec.Code`.
 - `LeanWang.NatPartrecToToPartrec`: a primitive-recursive translation from
@@ -65,13 +65,15 @@ interfaces, plus the scaffold construction:
   code-specific started TM0 evaluator to finite one-sided TM0 program data.
 - `PostProgram.toTableProgram`: a temporary backend bridge from finite
   one-sided TM0 programs to the existing table-machine Wang-tile layer. This
-  should be replaced by direct finite-TM0 tiles later; it is not a direct
-  TM2-to-table reduction.
+  should be replaced by direct finite-TM0 tiles later; it starts only after the
+  Mathlib machine has already been reduced to finite one-sided TM0 data.
 - `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
   instances to ordinary plane tiling.
 
-The abandoned direct `PartrecToTM2`/TM2-to-table reduction has been removed.
-TM2 remains only as Mathlib's intermediate evaluator on the way to TM0.
+There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
+TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The
+`TableProgram` model is still live because the current Wang-tile construction is
+typed against it.
 
 The fixed-domino, fixed-corner, scaffold, final domino, and encoded domino
 undecidability reductions are now proved from the TM0 construction interfaces.
