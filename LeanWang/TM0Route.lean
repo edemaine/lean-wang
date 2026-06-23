@@ -2799,14 +2799,21 @@ def partrecStartedTM0Input :
 def partrecStartedTM0Machine (tc : Turing.ToPartrec.Code) :=
   Turing.TM1to0.tr (partrecStartedTM1Machine tc)
 
+/-- Tape symbols of the started Mathlib TM0 machine. -/
+abbrev PartrecStartedTM0Symbol : Type :=
+  Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol
+
+/-- TM1 statements stored inside started Mathlib TM0 labels. -/
+abbrev PartrecStartedTM0Stmt (tc : Turing.ToPartrec.Code) : Type :=
+  Turing.TM1.Stmt PartrecStartedTM0Symbol (PartrecStartedTM1Label tc) PartrecVar
+
 /-- Labels of the started Mathlib TM0 machine obtained through Mathlib's TM1-to-TM0 translation. -/
 abbrev PartrecStartedTM0Label (tc : Turing.ToPartrec.Code) : Type :=
   Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)
 
 /-- One transition result of the started Mathlib TM0 machine. -/
 abbrev PartrecStartedTM0Step (tc : Turing.ToPartrec.Code) : Type :=
-  PartrecStartedTM0Label tc ×
-    Turing.TM0.Stmt (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+  PartrecStartedTM0Label tc × Turing.TM0.Stmt PartrecStartedTM0Symbol
 
 theorem partrecStartedTM0Machine_none (tc : Turing.ToPartrec.Code)
     (v : PartrecVar) (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :
@@ -2814,22 +2821,16 @@ theorem partrecStartedTM0Machine_none (tc : Turing.ToPartrec.Code)
   rfl
 
 theorem partrecStartedTM0Machine_some (tc : Turing.ToPartrec.Code)
-    (stmt : Turing.TM1.Stmt
-      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
-      PartrecVar)
-    (v : PartrecVar) (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :
+    (stmt : PartrecStartedTM0Stmt tc)
+    (v : PartrecVar) (a : PartrecStartedTM0Symbol) :
     partrecStartedTM0Machine tc (some stmt, v) a =
       some (Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a stmt v) := by
   rfl
 
 theorem partrecStartedTM0_trAux_move (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+    (a : PartrecStartedTM0Symbol)
     (d : Turing.Dir)
-    (q : Turing.TM1.Stmt
-      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
-      PartrecVar)
+    (q : PartrecStartedTM0Stmt tc)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.move d q) v =
@@ -2837,13 +2838,9 @@ theorem partrecStartedTM0_trAux_move (tc : Turing.ToPartrec.Code)
   rfl
 
 theorem partrecStartedTM0_trAux_write (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-    (f : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar →
-      Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-    (q : Turing.TM1.Stmt
-      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
-      PartrecVar)
+    (a : PartrecStartedTM0Symbol)
+    (f : PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM0Symbol)
+    (q : PartrecStartedTM0Stmt tc)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.write f q) v =
@@ -2851,12 +2848,9 @@ theorem partrecStartedTM0_trAux_write (tc : Turing.ToPartrec.Code)
   rfl
 
 theorem partrecStartedTM0_trAux_load (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-    (f : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar → PartrecVar)
-    (q : Turing.TM1.Stmt
-      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
-      PartrecVar)
+    (a : PartrecStartedTM0Symbol)
+    (f : PartrecStartedTM0Symbol → PartrecVar → PartrecVar)
+    (q : PartrecStartedTM0Stmt tc)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.load f q) v =
@@ -2864,12 +2858,9 @@ theorem partrecStartedTM0_trAux_load (tc : Turing.ToPartrec.Code)
   rfl
 
 theorem partrecStartedTM0_trAux_branch (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-    (p : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar → Bool)
-    (q₁ q₂ : Turing.TM1.Stmt
-      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
-      PartrecVar)
+    (a : PartrecStartedTM0Symbol)
+    (p : PartrecStartedTM0Symbol → PartrecVar → Bool)
+    (q₁ q₂ : PartrecStartedTM0Stmt tc)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.branch p q₁ q₂) v =
@@ -2880,9 +2871,8 @@ theorem partrecStartedTM0_trAux_branch (tc : Turing.ToPartrec.Code)
   cases h : p a v <;> simp [Turing.TM1to0.trAux, h]
 
 theorem partrecStartedTM0_trAux_goto (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
-    (f : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar →
-      Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+    (a : PartrecStartedTM0Symbol)
+    (f : PartrecStartedTM0Symbol → PartrecVar → PartrecStartedTM1Label tc)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.goto f) v =
@@ -2890,7 +2880,7 @@ theorem partrecStartedTM0_trAux_goto (tc : Turing.ToPartrec.Code)
   rfl
 
 theorem partrecStartedTM0_trAux_halt (tc : Turing.ToPartrec.Code)
-    (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+    (a : PartrecStartedTM0Symbol)
     (v : PartrecVar) :
     Turing.TM1to0.trAux (partrecStartedTM1Machine tc) a
       (Turing.TM1.Stmt.halt) v =
