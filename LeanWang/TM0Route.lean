@@ -4141,6 +4141,101 @@ theorem arity_primrec (tc : Turing.ToPartrec.Code) :
     | goto f => rfl
     | halt => rfl
 
+def validStep {tc : Turing.ToPartrec.Code}
+    (state : Bool × Nat) (node : PartrecStartedTM1StmtNode tc) : Bool × Nat :=
+  if state.1 ∧ 0 < state.2 then
+    (true, state.2 - 1 + arity node)
+  else
+    (false, state.2)
+
+theorem validStep_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      validStep p.1 p.2) := by
+  have hstate : Primrec (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have hslots : Primrec (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      p.1.2) :=
+    Primrec.snd.comp Primrec.fst
+  have hok : PrimrecPred (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      p.1.1 ∧ 0 < p.1.2) :=
+    PrimrecPred.and
+      (Primrec.eq.comp hstate (Primrec.const true))
+      (Primrec.nat_lt.comp (Primrec.const 0) hslots)
+  have hthen : Primrec (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      (true, p.1.2 - 1 + arity p.2)) :=
+    Primrec.pair (Primrec.const true)
+      (Primrec.nat_add.comp
+        (Primrec.nat_sub.comp
+          hslots
+          (Primrec.const 1))
+        ((arity_primrec tc).comp Primrec.snd))
+  have helse : Primrec (fun p : (Bool × Nat) × PartrecStartedTM1StmtNode tc =>
+      (false, p.1.2)) :=
+    Primrec.pair (Primrec.const false) hslots
+  exact (Primrec.ite hok hthen helse).of_eq fun p => by
+    simp [validStep]
+
+/-- Shape-only validity of a preorder statement encoding. -/
+def Valid {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) : Prop :=
+  nodes.foldl validStep (true, 1) = (true, 0)
+
+instance instDecidableValid (tc : Turing.ToPartrec.Code)
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    Decidable (Valid nodes) :=
+  inferInstanceAs (Decidable (nodes.foldl validStep (true, 1) = (true, 0)))
+
+theorem valid_primrecPred (tc : Turing.ToPartrec.Code) :
+    PrimrecPred (Valid (tc := tc)) := by
+  unfold Valid
+  exact Primrec.eq.comp
+    (Primrec.list_foldl Primrec.id (Primrec.const (true, 1))
+      (((validStep_primrec tc).comp Primrec.snd).to₂))
+    (Primrec.const (true, 0))
+
+theorem foldl_validStep_false {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) (slots : Nat) :
+    nodes.foldl validStep (false, slots) = (false, slots) := by
+  induction nodes generalizing slots with
+  | nil =>
+      rfl
+  | cons node rest ih =>
+      simp [validStep, ih]
+
+theorem foldl_validStep_true_zero {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    nodes.foldl validStep (true, 0) =
+      match nodes with
+      | [] => (true, 0)
+      | _ :: _ => (false, 0) := by
+  cases nodes with
+  | nil =>
+      rfl
+  | cons node rest =>
+      simp [validStep, foldl_validStep_false]
+
+theorem foldl_validStep_true_zero_eq_true_zero_iff {tc : Turing.ToPartrec.Code}
+    (nodes : List (PartrecStartedTM1StmtNode tc)) :
+    nodes.foldl validStep (true, 0) = (true, 0) ↔ nodes = [] := by
+  cases nodes with
+  | nil =>
+      simp
+  | cons node rest =>
+      simp only [List.foldl_cons]
+      rw [show validStep (true, 0) node = (false, 0) by simp [validStep]]
+      rw [foldl_validStep_false]
+      simp
+
+theorem valid_tail_nil_of_arity_zero {tc : Turing.ToPartrec.Code}
+    {node : PartrecStartedTM1StmtNode tc} {rest : List (PartrecStartedTM1StmtNode tc)}
+    (harity : arity node = 0)
+    (hvalid : (node :: rest).foldl validStep (true, 1) = (true, 0)) :
+    rest = [] := by
+  have htail : rest.foldl validStep (true, 0) = (true, 0) := by
+    simpa [validStep, harity] using hvalid
+  exact (foldl_validStep_true_zero_eq_true_zero_iff rest).1 htail
+
 end PartrecStartedTM1StmtNode
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
