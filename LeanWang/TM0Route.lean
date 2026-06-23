@@ -7190,6 +7190,33 @@ theorem tm2to1TrNormalBody_toValidCode
   · funext _a _s
     rfl
 
+theorem tm2to1TrNormal_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun code : PartrecStartedTM2StmtNode.ValidCode tc =>
+      Turing.TM2to1.trNormal
+        (PartrecStartedTM2StmtNode.ofValidCode code)) := by
+  let f : PartrecStartedTM2StmtNode.ValidCode tc → PartrecStartedTM0Stmt tc :=
+    fun code => Turing.TM2to1.trNormal
+      (PartrecStartedTM2StmtNode.ofValidCode code)
+  let g : PartrecStartedTM2StmtNode.ValidCode tc →
+      List (PartrecStartedTM0Stmt tc) → Option (PartrecStartedTM0Stmt tc) :=
+    fun code deps => tm2to1TrNormalBody tc code deps
+  have hg : Primrec₂ g := by
+    apply Primrec₂.mk
+    exact tm2to1TrNormalBody_primrec tc
+  have hbody : ∀ code, g code ((PartrecStartedTM2StmtNode.depValidCodes code).map f) =
+      some (f code) := by
+    intro code
+    rw [← PartrecStartedTM2StmtNode.toValidCode_ofValidCode code]
+    dsimp [g, f]
+    simpa [PartrecStartedTM2StmtNode.ofValidCode_toValidCode] using
+      tm2to1TrNormalBody_toValidCode tc (PartrecStartedTM2StmtNode.ofValidCode code)
+  exact Primrec.nat_omega_rec' f
+    (Primrec.list_length.comp Primrec.subtype_val)
+    (PartrecStartedTM2StmtNode.depValidCodes_primrec tc)
+    hg
+    (fun code dep hdep => PartrecStartedTM2StmtNode.mem_depValidCodes_length_lt hdep)
+    hbody
+
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
