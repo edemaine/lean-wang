@@ -77,14 +77,6 @@ Completed proof layers:
 The remaining construction obligations are explicit Lean interfaces:
 
 ```lean
-structure FiniteTM0TableReduction where
-  compile : FiniteTM0Program -> TableProgram
-  compile_computable : Computable compile
-  correct : forall P : FiniteTM0Program,
-    Machine.HaltsEmpty (compile P).toMachine <-> P.HaltsEmpty
-
-def finiteTM0TableReduction : FiniteTM0TableReduction
-
 structure TM0FiniteCompiler where
   compile : Turing.ToPartrec.Code -> FiniteTM0Program
   compile_computable : Computable compile
@@ -118,11 +110,12 @@ The live route now factors through a finite one-sided TM0 reduction: first use
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
 one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
-should treat it as the mathematical reduction. A separate compatibility
-`FiniteTM0TableReduction` bridge feeds the current table-machine Wang-tile layer
-until that layer is replaced by direct finite-TM0 tiles. This bridge starts only
-after the source machine has already been reduced to finite one-sided TM0 data;
-it is not a direct TM2-to-table reduction. Together these pieces feed the
+should treat it as the mathematical reduction. The current table-machine
+Wang-tile layer is fed by the concrete compatibility bridge
+`PostProgram.toTableProgram` until that layer is replaced by direct finite-TM0
+tiles. This bridge starts only after the source machine has already been reduced
+to finite one-sided TM0 data; it is not a direct TM2-to-table reduction.
+Together these pieces feed the
 fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
 domino theorem surfaces directly from the finite-TM0 factorization using the
 concrete source-code translation into Mathlib's `PartrecToTM2` evaluator. The
@@ -131,7 +124,7 @@ statements do not look like a direct TM2-to-table route. The started-TM2 bridge
 is a theorem in `TM0Route` rather than a separate reduction structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
-temporary `FiniteTM0TableReduction` route. A finite-TM0 `move` compiles to one
+current table-machine tile backend. A finite-TM0 `move` compiles to one
 table row. A finite-TM0 `write` compiles to a write-and-move-right row followed
 by finite return-left rows. Generated row targets and written symbols are proved
 to lie in the compiled table supports. The table simulation is now proved both
@@ -140,12 +133,6 @@ ways at the halting level:
 ```lean
 PostProgram.toTableProgram_toMachine_haltsEmpty_iff :
   P.toTableProgram.toMachine.HaltsEmpty <-> P.HaltsEmpty
-```
-
-so the finite-TM0-to-table bridge is concrete:
-
-```lean
-finiteTM0TableReduction : FiniteTM0TableReduction
 ```
 
 `TM0Route` now also packages finite state support for the code-specific started
@@ -235,16 +222,16 @@ Next implementation targets:
    `TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom`.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 4. Specialize the concrete TM0/scaffold corollaries, in particular
-   `encoded_domino_problem_undecidable_of_scaffold_tm0Reduction_concrete` and
-   `domino_problem_undecidable_of_scaffold_tm0Reduction_concrete`, to those
-   concrete instances to recover the unconditional encoded and unencoded domino
+   `encoded_domino_problem_undecidable_of_scaffold_tm0Compiler` and
+   `domino_problem_undecidable_of_scaffold_tm0Compiler`, to those concrete
+   instances to recover the unconditional encoded and unencoded domino
    theorems.
 5. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0
    instruction set is already close to the Wang-tile space-time simulation, so
    this should remove the `PostProgram.toTableProgram` detour from the final
-   theorem. Until then, the concrete `FiniteTM0TableReduction` route is a
-   verified compatibility bridge for existing tile code, not part of the source
+   theorem. Until then, `PostProgram.toTableProgram` is a verified
+   compatibility bridge for existing tile code, not part of the source
    TM2-to-TM0 reduction.
 
 ### 1. Define Wang Tiles

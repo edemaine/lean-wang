@@ -72,17 +72,17 @@ def Obligations.toSource (h : Obligations) : SourceObligations where
 
 /-- Apply the folded source-code reduction and then the current table bridge. -/
 def sourceTableProgram (_h : SourceObligations) (c : Code) : TableProgram :=
-  finiteTM0TableReduction.compile
+  PostProgram.toTableProgram
     (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
 
 theorem sourceTableProgram_computable (h : SourceObligations) :
     Computable (sourceTableProgram h) := by
-  exact finiteTM0TableReduction.compile_computable.comp h.program_computable
+  exact PostProgram.toTableProgram_computable.comp h.program_computable
 
 theorem sourceTableProgram_correct (h : SourceObligations) (c : Code) :
     Machine.HaltsEmpty (sourceTableProgram h c).toMachine ↔
       (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (finiteTM0TableReduction.correct
+  exact (PostProgram.toTableProgram_toMachine_haltsEmpty_iff
     (TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))).trans
       (h.correct c)
 
@@ -150,7 +150,7 @@ assuming the isolated folded-route obligations.
 theorem encoded_domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_tm0Reduction_concrete
+  encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
     S hS (compiler h)
 
 /--
@@ -160,7 +160,7 @@ assuming the isolated folded-route obligations.
 theorem domino_problem_undecidable_of_scaffold
     (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_tm0Reduction_concrete
+  domino_problem_undecidable_of_scaffold_tm0Compiler
     S hS (compiler h)
 
 /--
