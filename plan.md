@@ -210,6 +210,14 @@ count to that single remaining list-computability fact.
 top-level bridges `codeSuppList_primrec_of_parts` and
 `labelList_primrec_of_codeSuppList`; the remaining support-list work is the
 mutual primitive-recursion proof for `codeSuppList'` and `contSuppList`.
+It also has weighted numeric mirrors
+`trStmtsWeight`, `codeSuppWeight'`, `contSuppWeight`, `codeSuppWeight`, and
+`labelWeight`, each proved equal to summing a weight over the corresponding
+executable support list. `TM0Route.partrecStartedTM1LabelCountWeightData` now
+rewrites the started-TM1 label count through `labelCount` plus
+`labelWeight partrecTM2SupportLength`, so the count path can proceed through
+numeric support mirrors without first proving the full support list primitive
+recursive.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

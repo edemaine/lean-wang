@@ -97,6 +97,53 @@ theorem mem_trStmtsList_iff {q r : Λ'} :
   | ret k =>
       simp [trStmtsList, trStmts₁]
 
+private theorem list_sum_map_flatMap {α β : Type} (xs : List α) (f : α → List β)
+    (w : β → Nat) :
+    ((xs.flatMap f).map w).sum = (xs.map fun x => ((f x).map w).sum).sum := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      simp [ih]
+
+/-- Weighted sum mirror of `trStmtsList`. -/
+def trStmtsWeight (w : Λ' → Nat) : Λ' → Nat
+  | Q@(Λ'.move _ _ _ q) => w Q + trStmtsWeight w q
+  | Q@(Λ'.push _ _ q) => w Q + trStmtsWeight w q
+  | Q@(Λ'.read q) => w Q + (varList.map fun s => trStmtsWeight w (q s)).sum
+  | Q@(Λ'.clear _ _ q) => w Q + trStmtsWeight w q
+  | Q@(Λ'.copy q) => w Q + trStmtsWeight w q
+  | Q@(Λ'.succ q) => w Q + (w (unrev q) + trStmtsWeight w q)
+  | Q@(Λ'.pred q₁ q₂) => w Q + (trStmtsWeight w q₁ + (w (unrev q₂) + trStmtsWeight w q₂))
+  | Q@(Λ'.ret _) => w Q
+
+theorem trStmtsList_weight (w : Λ' → Nat) (q : Λ') :
+    ((trStmtsList q).map w).sum = trStmtsWeight w q := by
+  induction q with
+  | move p k₁ k₂ q ih =>
+      simp [trStmtsList, trStmtsWeight, ih]
+  | clear p k q ih =>
+      simp [trStmtsList, trStmtsWeight, ih]
+  | copy q ih =>
+      simp [trStmtsList, trStmtsWeight, ih]
+  | push k f q ih =>
+      simp [trStmtsList, trStmtsWeight, ih]
+  | read q ih =>
+      change
+        (List.map w (Λ'.read q :: varList.flatMap fun s => trStmtsList (q s))).sum =
+          w (Λ'.read q) + (varList.map fun s => trStmtsWeight w (q s)).sum
+      simp only [List.map_cons, List.sum_cons]
+      rw [show (List.map w (List.flatMap (fun s => trStmtsList (q s)) varList)).sum =
+          (varList.map fun s => ((trStmtsList (q s)).map w).sum).sum by
+        exact list_sum_map_flatMap varList (fun s => trStmtsList (q s)) w]
+      simp [ih]
+  | succ q ih =>
+      simp [trStmtsList, trStmtsWeight, ih]
+  | pred q₁ q₂ ih₁ ih₂ =>
+      simp [trStmtsList, trStmtsWeight, ih₁, ih₂]
+  | ret k =>
+      simp [trStmtsList, trStmtsWeight]
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
@@ -146,6 +193,32 @@ def codeSuppLength' : ToPartrec.Code → Cont' → Nat
         (codeSuppLength' f (Cont'.fix f k) +
           (trStmtsLength (Λ'.clear natEnd K'.main <| trNormal f (Cont'.fix f k)) + 1))
 
+/-- Weighted sum mirror of `codeSuppList'`. -/
+def codeSuppWeight' (w : Λ' → Nat) : ToPartrec.Code → Cont' → Nat
+  | c@ToPartrec.Code.zero', k => trStmtsWeight w (trNormal c k)
+  | c@ToPartrec.Code.succ, k => trStmtsWeight w (trNormal c k)
+  | c@ToPartrec.Code.tail, k => trStmtsWeight w (trNormal c k)
+  | c@(ToPartrec.Code.cons f fs), k =>
+      trStmtsWeight w (trNormal c k) +
+        (codeSuppWeight' w f (Cont'.cons₁ fs k) +
+          (trStmtsWeight w
+              (move₂ (fun _ => false) K'.main K'.aux <|
+                move₂ (fun s => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂ (fun _ => false) K'.aux K'.stack <| trNormal fs (Cont'.cons₂ k)) +
+            (codeSuppWeight' w fs (Cont'.cons₂ k) +
+              trStmtsWeight w (head K'.stack <| Λ'.ret k))))
+  | c@(ToPartrec.Code.comp f g), k =>
+      trStmtsWeight w (trNormal c k) +
+        (codeSuppWeight' w g (Cont'.comp f k) +
+          (trStmtsWeight w (trNormal f k) + codeSuppWeight' w f k))
+  | c@(ToPartrec.Code.case f g), k =>
+      trStmtsWeight w (trNormal c k) + (codeSuppWeight' w f k + codeSuppWeight' w g k)
+  | c@(ToPartrec.Code.fix f), k =>
+      trStmtsWeight w (trNormal c k) +
+        (codeSuppWeight' w f (Cont'.fix f k) +
+          (trStmtsWeight w (Λ'.clear natEnd K'.main <| trNormal f (Cont'.fix f k)) +
+            w (Λ'.ret k)))
+
 theorem codeSuppList'_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList' c k).length = codeSuppLength' c k := by
   induction c generalizing k with
@@ -163,6 +236,24 @@ theorem codeSuppList'_length (c : ToPartrec.Code) (k : Cont') :
       simp [codeSuppList', codeSuppLength', trStmtsList_length, ihf, ihg]
   | fix f ih =>
       simp [codeSuppList', codeSuppLength', trStmtsList_length, ih]
+
+theorem codeSuppList'_weight (w : Λ' → Nat) (c : ToPartrec.Code) (k : Cont') :
+    ((codeSuppList' c k).map w).sum = codeSuppWeight' w c k := by
+  induction c generalizing k with
+  | zero' =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight]
+  | succ =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight]
+  | tail =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight]
+  | cons f fs ihf ihfs =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight, ihf, ihfs]
+  | comp f g ihf ihg =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight, ihf, ihg]
+  | case f g ihf ihg =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight, ihf, ihg]
+  | fix f ih =>
+      simp [codeSuppList', codeSuppWeight', trStmtsList_weight, ih]
 
 theorem mem_codeSuppList'_iff {c : ToPartrec.Code} {k : Cont'} {q : Λ'} :
     q ∈ codeSuppList' c k ↔ q ∈ codeSupp' c k := by
@@ -211,6 +302,20 @@ def contSuppLength : Cont' → Nat
   | Cont'.fix f k => codeSuppLength' (ToPartrec.Code.fix f) k + contSuppLength k
   | Cont'.halt => 0
 
+/-- Weighted sum mirror of `contSuppList`. -/
+def contSuppWeight (w : Λ' → Nat) : Cont' → Nat
+  | Cont'.cons₁ fs k =>
+      trStmtsWeight w
+          (move₂ (fun _ => false) K'.main K'.aux <|
+            move₂ (fun s => s = Γ'.consₗ) K'.stack K'.main <|
+              move₂ (fun _ => false) K'.aux K'.stack <| trNormal fs (Cont'.cons₂ k)) +
+        (codeSuppWeight' w fs (Cont'.cons₂ k) +
+          (trStmtsWeight w (head K'.stack <| Λ'.ret k) + contSuppWeight w k))
+  | Cont'.cons₂ k => trStmtsWeight w (head K'.stack <| Λ'.ret k) + contSuppWeight w k
+  | Cont'.comp f k => codeSuppWeight' w f k + contSuppWeight w k
+  | Cont'.fix f k => codeSuppWeight' w (ToPartrec.Code.fix f) k + contSuppWeight w k
+  | Cont'.halt => 0
+
 theorem contSuppList_length (k : Cont') :
     (contSuppList k).length = contSuppLength k := by
   induction k with
@@ -225,6 +330,21 @@ theorem contSuppList_length (k : Cont') :
       simp [contSuppList, contSuppLength, codeSuppList'_length, ih]
   | fix f k ih =>
       simp [contSuppList, contSuppLength, codeSuppList'_length, ih]
+
+theorem contSuppList_weight (w : Λ' → Nat) (k : Cont') :
+    ((contSuppList k).map w).sum = contSuppWeight w k := by
+  induction k with
+  | halt =>
+      simp [contSuppList, contSuppWeight]
+  | cons₁ fs k ih =>
+      simp [contSuppList, contSuppWeight, trStmtsList_weight,
+        codeSuppList'_weight, ih]
+  | cons₂ k ih =>
+      simp [contSuppList, contSuppWeight, trStmtsList_weight, ih]
+  | comp f k ih =>
+      simp [contSuppList, contSuppWeight, codeSuppList'_weight, ih]
+  | fix f k ih =>
+      simp [contSuppList, contSuppWeight, codeSuppList'_weight, ih]
 
 theorem mem_contSuppList_iff {k : Cont'} {q : Λ'} :
     q ∈ contSuppList k ↔ q ∈ contSupp k := by
@@ -255,9 +375,17 @@ theorem codeSuppList_primrec_of_parts
 def codeSuppLength (c : ToPartrec.Code) (k : Cont') : Nat :=
   codeSuppLength' c k + contSuppLength k
 
+/-- Weighted sum mirror of `codeSuppList`. -/
+def codeSuppWeight (w : Λ' → Nat) (c : ToPartrec.Code) (k : Cont') : Nat :=
+  codeSuppWeight' w c k + contSuppWeight w k
+
 theorem codeSuppList_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList c k).length = codeSuppLength c k := by
   simp [codeSuppList, codeSuppLength, codeSuppList'_length, contSuppList_length]
+
+theorem codeSuppList_weight (w : Λ' → Nat) (c : ToPartrec.Code) (k : Cont') :
+    ((codeSuppList c k).map w).sum = codeSuppWeight w c k := by
+  simp [codeSuppList, codeSuppWeight, codeSuppList'_weight, contSuppList_weight]
 
 theorem mem_codeSuppList_iff {c : ToPartrec.Code} {k : Cont'} {q : Λ'} :
     q ∈ codeSuppList c k ↔ q ∈ codeSupp c k := by
@@ -277,9 +405,17 @@ theorem labelList_primrec_of_codeSuppList
 def labelCount (tc : ToPartrec.Code) : Nat :=
   codeSuppLength tc Cont'.halt
 
+/-- Weighted sum of the evaluator label support for code `tc`. -/
+def labelWeight (w : Λ' → Nat) (tc : ToPartrec.Code) : Nat :=
+  codeSuppWeight w tc Cont'.halt
+
 theorem labelList_length (tc : ToPartrec.Code) :
     (labelList tc).length = labelCount tc := by
   simp [labelList, labelCount, codeSuppList_length]
+
+theorem labelList_weight (w : Λ' → Nat) (tc : ToPartrec.Code) :
+    ((labelList tc).map w).sum = labelWeight w tc := by
+  simp [labelList, labelWeight, codeSuppList_weight]
 
 theorem mem_labelList_iff {tc : ToPartrec.Code} {q : Λ'} :
     q ∈ labelList tc ↔ q ∈ PartrecToTM2Support.labels tc := by

@@ -1075,11 +1075,26 @@ def partrecStartedTM1LabelCountData (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM2LabelCount tc +
     ((PartrecToTM2SupportList.labelList tc).map partrecTM2SupportLength).sum
 
+/--
+Numeric started-TM1 label count phrased through the weighted evaluator-support
+mirror instead of an explicit mapped support list.
+-/
+def partrecStartedTM1LabelCountWeightData (tc : Turing.ToPartrec.Code) : Nat :=
+  PartrecToTM2SupportList.labelCount tc +
+    PartrecToTM2SupportList.labelWeight partrecTM2SupportLength tc
+
 theorem partrecStartedTM2LabelCount_primrec_of_labelList
     (hlabel : Primrec PartrecToTM2SupportList.labelList) :
     Primrec partrecStartedTM2LabelCount := by
   exact (Primrec.list_length.comp hlabel).of_eq fun tc => by
     rw [partrecStartedTM2LabelCount, ← PartrecToTM2SupportList.labelList_length]
+
+theorem partrecStartedTM1LabelCountWeightData_primrec
+    (hcount : Primrec PartrecToTM2SupportList.labelCount)
+    (hweight : Primrec (PartrecToTM2SupportList.labelWeight partrecTM2SupportLength)) :
+    Primrec partrecStartedTM1LabelCountWeightData := by
+  unfold partrecStartedTM1LabelCountWeightData
+  exact Primrec.nat_add.comp hcount hweight
 
 theorem partrecStartedTM1LabelCountData_primrec_of_labelList
     (hlabel : Primrec PartrecToTM2SupportList.labelList) :
@@ -1106,6 +1121,21 @@ theorem partrecStartedTM1LabelCount_eq_data (tc : Turing.ToPartrec.Code) :
   apply List.map_congr_left
   intro q _hq
   exact tm2to1StmtSupportLength_partrecTM2 q
+
+theorem partrecStartedTM1LabelCountData_eq_weightData (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM1LabelCountData tc =
+      partrecStartedTM1LabelCountWeightData tc := by
+  unfold partrecStartedTM1LabelCountData partrecStartedTM1LabelCountWeightData
+    partrecStartedTM2LabelCount
+  rw [← PartrecToTM2SupportList.labelList_length]
+  rw [PartrecToTM2SupportList.labelList_weight]
+
+theorem partrecStartedTM1LabelCount_primrec_of_labelWeight
+    (hcount : Primrec PartrecToTM2SupportList.labelCount)
+    (hweight : Primrec (PartrecToTM2SupportList.labelWeight partrecTM2SupportLength)) :
+    Primrec partrecStartedTM1LabelCount :=
+  (partrecStartedTM1LabelCountWeightData_primrec hcount hweight).of_eq fun tc => by
+    rw [partrecStartedTM1LabelCount_eq_data, partrecStartedTM1LabelCountData_eq_weightData]
 
 theorem partrecStartedTM1LabelCount_primrec_of_labelList
     (hlabel : Primrec PartrecToTM2SupportList.labelList) :
