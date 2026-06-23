@@ -3054,6 +3054,27 @@ theorem partrecStartedTM2CopyBody_eq_relabel
         (partrecTM2 (Turing.PartrecToTM2.Λ'.copy q)) := by
   rfl
 
+def partrecLoadNonePayload : PartrecStartedTM2StmtNode.LoadCode :=
+  fun _s => none
+
+noncomputable def partrecStartedTM2RetHaltBody (tc : Turing.ToPartrec.Code)
+    (_u : PUnit) : PartrecStartedTM2Stmt tc :=
+  Turing.TM2.Stmt.load partrecLoadNonePayload Turing.TM2.Stmt.halt
+
+theorem partrecStartedTM2RetHaltBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetHaltBody tc) := by
+  have hhalt : Primrec (fun _u : PUnit => (Turing.TM2.Stmt.halt : PartrecStartedTM2Stmt tc)) :=
+    PartrecStartedTM2StmtNode.stmtHalt_primrec tc
+  exact ((PartrecStartedTM2StmtNode.stmtLoad_primrec tc).comp
+    (Primrec.pair (Primrec.const partrecLoadNonePayload) hhalt)).of_eq fun _u => rfl
+
+theorem partrecStartedTM2RetHaltBody_eq_relabel
+    (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM2RetHaltBody tc () =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret Turing.PartrecToTM2.Cont'.halt)) := by
+  rfl
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
