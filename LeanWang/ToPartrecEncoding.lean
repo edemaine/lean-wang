@@ -1818,6 +1818,145 @@ theorem normalizePushStep_eq_match
   unfold normalizePushStep successorStep
   cases normalizeLookup prev fields.2.2 <;> simp
 
+def normalizeReadStep (prev : List Nat) (fields : Nat × Nat × Nat × Nat × Nat) : Nat :=
+  let q₀ := normalizeLookup prev fields.1
+  let q₁ := normalizeLookup prev fields.2.1
+  let q₂ := normalizeLookup prev fields.2.2.1
+  let q₃ := normalizeLookup prev fields.2.2.2.1
+  let q₄ := normalizeLookup prev fields.2.2.2.2
+  if q₀ = 0 then 0
+  else if q₁ = 0 then 0
+  else if q₂ = 0 then 0
+  else if q₃ = 0 then 0
+  else if q₄ = 0 then 0
+  else 8 * readPayloadCode (q₀ - 1) (q₁ - 1) (q₂ - 1) (q₃ - 1) (q₄ - 1) + 6
+
+theorem normalizeReadStep_primrec :
+    Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeReadStep p.1 p.2) := by
+  unfold normalizeReadStep
+  let hq₀ : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeLookup p.1 p.2.1) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd))
+  let hq₁ : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeLookup p.1 p.2.2.1) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)))
+  let hq₂ : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeLookup p.1 p.2.2.2.1) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+  let hq₃ : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeLookup p.1 p.2.2.2.2.1) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.fst.comp (Primrec.snd.comp
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+  let hq₄ : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      normalizeLookup p.1 p.2.2.2.2.2) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.snd.comp (Primrec.snd.comp
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+  let hpayload : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      readPayloadCode (normalizeLookup p.1 p.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.2.2 - 1)) := by
+    let htuple : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+        (normalizeLookup p.1 p.2.1 - 1,
+          normalizeLookup p.1 p.2.2.1 - 1,
+          normalizeLookup p.1 p.2.2.2.1 - 1,
+          normalizeLookup p.1 p.2.2.2.2.1 - 1,
+          normalizeLookup p.1 p.2.2.2.2.2 - 1)) :=
+      Primrec.pair (Primrec.pred.comp hq₀)
+        (Primrec.pair (Primrec.pred.comp hq₁)
+          (Primrec.pair (Primrec.pred.comp hq₂)
+            (Primrec.pair (Primrec.pred.comp hq₃) (Primrec.pred.comp hq₄))))
+    exact readPayloadCode_primrec.comp htuple
+  let hresult : Primrec (fun p : List Nat × (Nat × Nat × Nat × Nat × Nat) =>
+      8 * readPayloadCode (normalizeLookup p.1 p.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.2.1 - 1)
+        (normalizeLookup p.1 p.2.2.2.2.2 - 1) + 6) :=
+    Primrec.nat_add.comp (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 6)
+  refine Primrec.ite (Primrec.eq.comp hq₀ (Primrec.const 0)) (Primrec.const 0) ?_
+  refine Primrec.ite (Primrec.eq.comp hq₁ (Primrec.const 0)) (Primrec.const 0) ?_
+  refine Primrec.ite (Primrec.eq.comp hq₂ (Primrec.const 0)) (Primrec.const 0) ?_
+  refine Primrec.ite (Primrec.eq.comp hq₃ (Primrec.const 0)) (Primrec.const 0) ?_
+  exact Primrec.ite (Primrec.eq.comp hq₄ (Primrec.const 0)) (Primrec.const 0) hresult
+
+theorem normalizeReadStep_eq_match
+    (prev : List Nat) (fields : Nat × Nat × Nat × Nat × Nat) :
+    normalizeReadStep prev fields =
+      match normalizeLookup prev fields.1 with
+      | 0 => 0
+      | q₀ + 1 =>
+        match normalizeLookup prev fields.2.1 with
+        | 0 => 0
+        | q₁ + 1 =>
+          match normalizeLookup prev fields.2.2.1 with
+          | 0 => 0
+          | q₂ + 1 =>
+            match normalizeLookup prev fields.2.2.2.1 with
+            | 0 => 0
+            | q₃ + 1 =>
+              match normalizeLookup prev fields.2.2.2.2 with
+              | 0 => 0
+              | q₄ + 1 => 8 * readPayloadCode q₀ q₁ q₂ q₃ q₄ + 6 := by
+  unfold normalizeReadStep
+  cases normalizeLookup prev fields.1 <;>
+    cases normalizeLookup prev fields.2.1 <;>
+      cases normalizeLookup prev fields.2.2.1 <;>
+        cases normalizeLookup prev fields.2.2.2.1 <;>
+          cases normalizeLookup prev fields.2.2.2.2 <;> simp
+
+def normalizePredStep (prev : List Nat) (fields : Nat × Nat) : Nat :=
+  let q₁ := normalizeLookup prev fields.1
+  let q₂ := normalizeLookup prev fields.2
+  if q₁ = 0 then 0
+  else if q₂ = 0 then 0
+  else 8 * predPayloadCode (q₁ - 1) (q₂ - 1) + 8
+
+theorem normalizePredStep_primrec :
+    Primrec (fun p : List Nat × (Nat × Nat) => normalizePredStep p.1 p.2) := by
+  unfold normalizePredStep
+  let hq₁ : Primrec (fun p : List Nat × (Nat × Nat) => normalizeLookup p.1 p.2.1) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd))
+  let hq₂ : Primrec (fun p : List Nat × (Nat × Nat) => normalizeLookup p.1 p.2.2) :=
+    normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.snd.comp Primrec.snd))
+  let hpayload : Primrec (fun p : List Nat × (Nat × Nat) =>
+      predPayloadCode (normalizeLookup p.1 p.2.1 - 1)
+        (normalizeLookup p.1 p.2.2 - 1)) := by
+    let htuple : Primrec (fun p : List Nat × (Nat × Nat) =>
+        (normalizeLookup p.1 p.2.1 - 1, normalizeLookup p.1 p.2.2 - 1)) :=
+      Primrec.pair (Primrec.pred.comp hq₁) (Primrec.pred.comp hq₂)
+    exact predPayloadCode_primrec.comp htuple
+  let hresult : Primrec (fun p : List Nat × (Nat × Nat) =>
+      8 * predPayloadCode (normalizeLookup p.1 p.2.1 - 1)
+        (normalizeLookup p.1 p.2.2 - 1) + 8) :=
+    Primrec.nat_add.comp (Primrec.nat_mul.comp (Primrec.const 8) hpayload) (Primrec.const 8)
+  refine Primrec.ite (Primrec.eq.comp hq₁ (Primrec.const 0)) (Primrec.const 0) ?_
+  exact Primrec.ite (Primrec.eq.comp hq₂ (Primrec.const 0)) (Primrec.const 0) hresult
+
+theorem normalizePredStep_eq_match (prev : List Nat) (fields : Nat × Nat) :
+    normalizePredStep prev fields =
+      match normalizeLookup prev fields.1 with
+      | 0 => 0
+      | q₁ + 1 =>
+        match normalizeLookup prev fields.2 with
+        | 0 => 0
+        | q₂ + 1 => 8 * predPayloadCode q₁ q₂ + 8 := by
+  unfold normalizePredStep
+  cases normalizeLookup prev fields.1 <;>
+    cases normalizeLookup prev fields.2 <;> simp
+
 theorem normalizeLookup_eq_of_getD_eq
     {prev : List Nat} {fuel bound n : Nat}
     (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
