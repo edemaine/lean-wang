@@ -2477,6 +2477,165 @@ theorem partrecStartedTM1Label_go_primrec_fixed_k
         (Primrec.sumInl.comp (Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id)))
     exact ((partrecStartedTM1Label_ofCode_primrec tc).comp hcode).of_eq fun _ => rfl
 
+set_option maxHeartbeats 900000 in
+-- The dependent `StAct` payload is routed through explicit sum-code branches.
+theorem partrecStartedTM1Label_go_push_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : PartrecStartedTM2StmtNode.PushCode × PartrecStartedTM2Stmt tc =>
+      (Turing.TM2to1.Λ'.go p.1.1
+        (Turing.TM2to1.StAct.push (k := p.1.1) p.1.2) p.2 :
+        PartrecStartedTM1Label tc)) := by
+  have hstack : Primrec (fun p : PartrecStartedTM2StmtNode.PushCode ×
+      PartrecStartedTM2Stmt tc => p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have hfixed
+      (k : PartrecStack) :
+      Primrec (fun p : PartrecStartedTM2StmtNode.PushCode × PartrecStartedTM2Stmt tc =>
+        (Turing.TM2to1.Λ'.go k
+          (Turing.TM2to1.StAct.push (k := k) p.1.2) p.2 :
+          PartrecStartedTM1Label tc)) := by
+    have hpayload : Primrec (fun p : PartrecStartedTM2StmtNode.PushCode ×
+        PartrecStartedTM2Stmt tc => p.1.2) :=
+      Primrec.snd.comp Primrec.fst
+    have hcode : Primrec (fun p : PartrecStartedTM2StmtNode.PushCode ×
+        PartrecStartedTM2Stmt tc =>
+        (Sum.inl p.1.2 :
+          (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+            ((PartrecVar → PartrecVar → PartrecVar) ⊕
+              (PartrecVar → PartrecVar → PartrecVar)))) :=
+      Primrec.sumInl.comp hpayload
+    have hact : Primrec (fun p : PartrecStartedTM2StmtNode.PushCode ×
+        PartrecStartedTM2Stmt tc =>
+        (partrecStActEquivSum k).symm
+          (Sum.inl p.1.2 :
+            (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+              ((PartrecVar → PartrecVar → PartrecVar) ⊕
+                (PartrecVar → PartrecVar → PartrecVar)))) :=
+      (partrecStActOfSum_primrec k).comp hcode
+    exact ((partrecStartedTM1Label_go_primrec_fixed_k tc k).comp
+      (Primrec.pair hact Primrec.snd)).of_eq fun p => by
+        rfl
+  have hmainPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.PushCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.main) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.main)
+  have hrevPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.PushCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.rev) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.rev)
+  have hauxPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.PushCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.aux) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.aux)
+  exact (Primrec.ite hmainPred (hfixed Turing.PartrecToTM2.K'.main)
+    (Primrec.ite hrevPred (hfixed Turing.PartrecToTM2.K'.rev)
+      (Primrec.ite hauxPred (hfixed Turing.PartrecToTM2.K'.aux)
+        (hfixed Turing.PartrecToTM2.K'.stack)))).of_eq fun p => by
+          rcases p with ⟨⟨k, f⟩, q⟩
+          cases k <;> rfl
+
+set_option maxHeartbeats 900000 in
+-- The dependent `StAct` payload is routed through explicit sum-code branches.
+theorem partrecStartedTM1Label_go_peek_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc =>
+      (Turing.TM2to1.Λ'.go p.1.1
+        (Turing.TM2to1.StAct.peek (k := p.1.1) p.1.2) p.2 :
+        PartrecStartedTM1Label tc)) := by
+  have hstack : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have hfixed
+      (k : PartrecStack) :
+      Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc =>
+        (Turing.TM2to1.Λ'.go k
+          (Turing.TM2to1.StAct.peek (k := k) p.1.2) p.2 :
+          PartrecStartedTM1Label tc)) := by
+    have hpayload : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc => p.1.2) :=
+      Primrec.snd.comp Primrec.fst
+    have hcode : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inl p.1.2) :
+          (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+            ((PartrecVar → PartrecVar → PartrecVar) ⊕
+              (PartrecVar → PartrecVar → PartrecVar)))) :=
+      Primrec.sumInr.comp (Primrec.sumInl.comp hpayload)
+    have hact : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc =>
+        (partrecStActEquivSum k).symm
+          (Sum.inr (Sum.inl p.1.2) :
+            (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+              ((PartrecVar → PartrecVar → PartrecVar) ⊕
+                (PartrecVar → PartrecVar → PartrecVar)))) :=
+      (partrecStActOfSum_primrec k).comp hcode
+    exact ((partrecStartedTM1Label_go_primrec_fixed_k tc k).comp
+      (Primrec.pair hact Primrec.snd)).of_eq fun p => by
+        rfl
+  have hmainPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.main) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.main)
+  have hrevPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.rev) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.rev)
+  have hauxPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.aux) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.aux)
+  exact (Primrec.ite hmainPred (hfixed Turing.PartrecToTM2.K'.main)
+    (Primrec.ite hrevPred (hfixed Turing.PartrecToTM2.K'.rev)
+      (Primrec.ite hauxPred (hfixed Turing.PartrecToTM2.K'.aux)
+        (hfixed Turing.PartrecToTM2.K'.stack)))).of_eq fun p => by
+          rcases p with ⟨⟨k, f⟩, q⟩
+          cases k <;> rfl
+
+set_option maxHeartbeats 900000 in
+-- The dependent `StAct` payload is routed through explicit sum-code branches.
+theorem partrecStartedTM1Label_go_pop_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc =>
+      (Turing.TM2to1.Λ'.go p.1.1
+        (Turing.TM2to1.StAct.pop (k := p.1.1) p.1.2) p.2 :
+        PartrecStartedTM1Label tc)) := by
+  have hstack : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have hfixed
+      (k : PartrecStack) :
+      Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc =>
+        (Turing.TM2to1.Λ'.go k
+          (Turing.TM2to1.StAct.pop (k := k) p.1.2) p.2 :
+          PartrecStartedTM1Label tc)) := by
+    have hpayload : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc => p.1.2) :=
+      Primrec.snd.comp Primrec.fst
+    have hcode : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc =>
+        (Sum.inr (Sum.inr p.1.2) :
+          (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+            ((PartrecVar → PartrecVar → PartrecVar) ⊕
+              (PartrecVar → PartrecVar → PartrecVar)))) :=
+      Primrec.sumInr.comp (Primrec.sumInr.comp hpayload)
+    have hact : Primrec (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+        PartrecStartedTM2Stmt tc =>
+        (partrecStActEquivSum k).symm
+          (Sum.inr (Sum.inr p.1.2) :
+            (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+              ((PartrecVar → PartrecVar → PartrecVar) ⊕
+                (PartrecVar → PartrecVar → PartrecVar)))) :=
+      (partrecStActOfSum_primrec k).comp hcode
+    exact ((partrecStartedTM1Label_go_primrec_fixed_k tc k).comp
+      (Primrec.pair hact Primrec.snd)).of_eq fun p => by
+        rfl
+  have hmainPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.main) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.main)
+  have hrevPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.rev) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.rev)
+  have hauxPred : PrimrecPred (fun p : PartrecStartedTM2StmtNode.UpdateCode ×
+      PartrecStartedTM2Stmt tc => p.1.1 = Turing.PartrecToTM2.K'.aux) :=
+    Primrec.eq.comp hstack (Primrec.const Turing.PartrecToTM2.K'.aux)
+  exact (Primrec.ite hmainPred (hfixed Turing.PartrecToTM2.K'.main)
+    (Primrec.ite hrevPred (hfixed Turing.PartrecToTM2.K'.rev)
+      (Primrec.ite hauxPred (hfixed Turing.PartrecToTM2.K'.aux)
+        (hfixed Turing.PartrecToTM2.K'.stack)))).of_eq fun p => by
+          rcases p with ⟨⟨k, f⟩, q⟩
+          cases k <;> rfl
+
 abbrev PartrecTM1Label : Type :=
   Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar
 
