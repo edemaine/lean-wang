@@ -162,6 +162,25 @@ instance instPrimcodableBoolFunction (β : Type*) [Primcodable β] :
     Primcodable (Bool → β) :=
   Primcodable.ofEquiv (β × β) (boolFunctionEquivPair β)
 
+theorem boolFunctionEquivPair_primrec (β : Type*) [Primcodable β] :
+    Primrec (boolFunctionEquivPair β) := by
+  simpa [instPrimcodableBoolFunction] using
+    (Primrec.of_equiv (α := β × β) (e := boolFunctionEquivPair β))
+
+theorem boolFunction_app_primrec (β : Type*) [Primcodable β] :
+    Primrec₂ (fun f : Bool → β => fun b : Bool => f b) := by
+  apply Primrec₂.mk
+  let pair : (Bool → β) × Bool → β × β := fun p => boolFunctionEquivPair β p.1
+  have hpair : Primrec pair := (boolFunctionEquivPair_primrec β).comp Primrec.fst
+  have hfalse : Primrec (fun p : (Bool → β) × Bool => (pair p).1) :=
+    Primrec.fst.comp hpair
+  have htrue : Primrec (fun p : (Bool → β) × Bool => (pair p).2) :=
+    Primrec.snd.comp hpair
+  exact (Primrec.cond (Primrec.snd : Primrec (fun p : (Bool → β) × Bool => p.2))
+    htrue hfalse).of_eq fun p => by
+      rcases p with ⟨f, b⟩
+      cases b <;> rfl
+
 /-- Finite encoding of functions out of the evaluator local variable. -/
 def partrecVarFunctionEquivTuple (β : Type*) :
     (PartrecVar → β) ≃ β × β × β × β × β where
@@ -188,6 +207,58 @@ instance instPrimcodablePartrecVarFunction (β : Type*) [Primcodable β] :
     Primcodable (PartrecVar → β) :=
   Primcodable.ofEquiv (β × β × β × β × β)
     (partrecVarFunctionEquivTuple β)
+
+theorem partrecVarFunctionEquivTuple_primrec (β : Type*) [Primcodable β] :
+    Primrec (partrecVarFunctionEquivTuple β) := by
+  simpa [instPrimcodablePartrecVarFunction] using
+    (Primrec.of_equiv (α := β × β × β × β × β)
+      (e := partrecVarFunctionEquivTuple β))
+
+theorem partrecVarFunction_app_primrec (β : Type*) [Primcodable β] :
+    Primrec₂ (fun f : PartrecVar → β => fun v : PartrecVar => f v) := by
+  apply Primrec₂.mk
+  let tuple : (PartrecVar → β) × PartrecVar → β × β × β × β × β :=
+    fun p => partrecVarFunctionEquivTuple β p.1
+  have htuple : Primrec tuple :=
+    (partrecVarFunctionEquivTuple_primrec β).comp Primrec.fst
+  have hnone : Primrec (fun p : (PartrecVar → β) × PartrecVar =>
+      (tuple p).1) :=
+    Primrec.fst.comp htuple
+  have hsome : Primrec₂ (fun p : (PartrecVar → β) × PartrecVar =>
+      fun a : Γ' =>
+        match a with
+        | Γ'.consₗ => (tuple p).2.1
+        | Γ'.cons => (tuple p).2.2.1
+        | Γ'.bit0 => (tuple p).2.2.2.1
+        | Γ'.bit1 => (tuple p).2.2.2.2) := by
+    apply Primrec₂.mk
+    let tuple' : ((PartrecVar → β) × PartrecVar) × Γ' → β × β × β × β × β :=
+      fun p => tuple p.1
+    let sym : ((PartrecVar → β) × PartrecVar) × Γ' → Γ' := fun p => p.2
+    have htuple' : Primrec tuple' := htuple.comp Primrec.fst
+    have hsym : Primrec sym := Primrec.snd
+    have hconsₗ : PrimrecPred (fun p : ((PartrecVar → β) × PartrecVar) × Γ' =>
+        sym p = Γ'.consₗ) :=
+      Primrec.eq.comp hsym (Primrec.const Γ'.consₗ)
+    have hcons : PrimrecPred (fun p : ((PartrecVar → β) × PartrecVar) × Γ' =>
+        sym p = Γ'.cons) :=
+      Primrec.eq.comp hsym (Primrec.const Γ'.cons)
+    have hbit0 : PrimrecPred (fun p : ((PartrecVar → β) × PartrecVar) × Γ' =>
+        sym p = Γ'.bit0) :=
+      Primrec.eq.comp hsym (Primrec.const Γ'.bit0)
+    exact (Primrec.ite hconsₗ (Primrec.fst.comp (Primrec.snd.comp htuple'))
+      (Primrec.ite hcons (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp htuple')))
+        (Primrec.ite hbit0
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp htuple'))))
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp htuple'))))))).of_eq fun p => by
+        rcases p with ⟨p, a⟩
+        cases a <;> rfl
+  exact (Primrec.option_casesOn Primrec.snd hnone hsome).of_eq fun p => by
+    rcases p with ⟨f, v⟩
+    cases v with
+    | none => rfl
+    | some a => cases a <;> rfl
 
 /-- Finite symbol-valued actions on the evaluator local variable. -/
 def partrecVarToSymbolEquivTuple :
@@ -3684,6 +3755,37 @@ instance instPrimcodablePartrecStartedTM0StackVector :
       Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ')
     partrecStartedTM0StackVectorEquivTuple
 
+theorem partrecStartedTM0StackVectorToTuple_primrec :
+    Primrec partrecStartedTM0StackVectorToTuple := by
+  change Primrec partrecStartedTM0StackVectorEquivTuple
+  simpa [instPrimcodablePartrecStartedTM0StackVector] using
+    (Primrec.of_equiv
+      (α := Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ' ×
+        Option Turing.PartrecToTM2.Γ' × Option Turing.PartrecToTM2.Γ')
+      (e := partrecStartedTM0StackVectorEquivTuple))
+
+theorem partrecStartedTM0StackVector_main_primrec :
+    Primrec (fun v : ∀ k : PartrecStack, Option (PartrecStackSymbol k) =>
+      v Turing.PartrecToTM2.K'.main) :=
+  Primrec.fst.comp partrecStartedTM0StackVectorToTuple_primrec
+
+theorem partrecStartedTM0StackVector_rev_primrec :
+    Primrec (fun v : ∀ k : PartrecStack, Option (PartrecStackSymbol k) =>
+      v Turing.PartrecToTM2.K'.rev) :=
+  (Primrec.fst.comp (Primrec.snd.comp partrecStartedTM0StackVectorToTuple_primrec))
+
+theorem partrecStartedTM0StackVector_aux_primrec :
+    Primrec (fun v : ∀ k : PartrecStack, Option (PartrecStackSymbol k) =>
+      v Turing.PartrecToTM2.K'.aux) :=
+  (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+    partrecStartedTM0StackVectorToTuple_primrec)))
+
+theorem partrecStartedTM0StackVector_stack_primrec :
+    Primrec (fun v : ∀ k : PartrecStack, Option (PartrecStackSymbol k) =>
+      v Turing.PartrecToTM2.K'.stack) :=
+  (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+    partrecStartedTM0StackVectorToTuple_primrec)))
+
 instance instPrimcodablePartrecStartedTM0Symbol :
     Primcodable (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
   inferInstanceAs (Primcodable
@@ -3724,6 +3826,85 @@ instance instPrimcodablePartrecStartedTM0SymbolFunction
   Primcodable.ofEquiv
     (Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)
     (partrecStartedTM0SymbolFunctionEquiv β)
+
+theorem partrecStartedTM0SymbolFunctionEquiv_primrec
+    (β : Type*) [Primcodable β] :
+    Primrec (partrecStartedTM0SymbolFunctionEquiv β) := by
+  simpa [instPrimcodablePartrecStartedTM0SymbolFunction] using
+    (Primrec.of_equiv
+      (α := Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)
+      (e := partrecStartedTM0SymbolFunctionEquiv β))
+
+theorem partrecStartedTM0SymbolFunction_app_primrec
+    (β : Type*) [Primcodable β] :
+    Primrec₂ (fun f : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β =>
+      fun a => f a) := by
+  apply Primrec₂.mk
+  let curried :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol →
+        Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β :=
+    fun p => partrecStartedTM0SymbolFunctionEquiv β p.1
+  have hcurried : Primrec curried :=
+    (partrecStartedTM0SymbolFunctionEquiv_primrec β).comp Primrec.fst
+  have hbottom : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  have hcells : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol => p.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  have hmain : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        p.2.2 Turing.PartrecToTM2.K'.main) :=
+    partrecStartedTM0StackVector_main_primrec.comp hcells
+  have hrev : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        p.2.2 Turing.PartrecToTM2.K'.rev) :=
+    partrecStartedTM0StackVector_rev_primrec.comp hcells
+  have haux : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        p.2.2 Turing.PartrecToTM2.K'.aux) :=
+    partrecStartedTM0StackVector_aux_primrec.comp hcells
+  have hstack : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        p.2.2 Turing.PartrecToTM2.K'.stack) :=
+    partrecStartedTM0StackVector_stack_primrec.comp hcells
+  have h₀ : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        (curried p) p.2.1) :=
+    (boolFunction_app_primrec
+      (PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)).comp hcurried hbottom
+  have h₁ : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        (curried p) p.2.1 (p.2.2 Turing.PartrecToTM2.K'.main)) :=
+    (partrecVarFunction_app_primrec
+      (PartrecVar → PartrecVar → PartrecVar → β)).comp h₀ hmain
+  have h₂ : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        (curried p) p.2.1 (p.2.2 Turing.PartrecToTM2.K'.main)
+          (p.2.2 Turing.PartrecToTM2.K'.rev)) :=
+    (partrecVarFunction_app_primrec
+      (PartrecVar → PartrecVar → β)).comp h₁ hrev
+  have h₃ : Primrec (fun p :
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β) ×
+          Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        (curried p) p.2.1 (p.2.2 Turing.PartrecToTM2.K'.main)
+          (p.2.2 Turing.PartrecToTM2.K'.rev)
+          (p.2.2 Turing.PartrecToTM2.K'.aux)) :=
+    (partrecVarFunction_app_primrec (PartrecVar → β)).comp h₂ haux
+  exact ((partrecVarFunction_app_primrec β).comp h₃ hstack).of_eq fun p => by
+    rcases p with ⟨f, bottom, cells⟩
+    simp [curried, partrecStartedTM0SymbolFunctionEquiv,
+      partrecStartedTM0StackVector_ext cells]
 
 /-- Explicit finite list of all stack-vector components of the TM2-to-TM1 alphabet. -/
 def partrecStartedTM0StackVectors :
