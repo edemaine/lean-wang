@@ -73,6 +73,40 @@ def Obligations.toSource (h : Obligations) : SourceObligations where
             (NatPartrecToToPartrec.translate c)).trans
           (NatPartrecToToPartrec.translate_tm2_dom c)))
 
+/-- Source-code descriptor list for the folded finite-TM0 reduction. -/
+def sourceSimStepData (c : Code) : List TM0FoldedCompiler.SimStepData :=
+  TM0FoldedCompiler.simStepData (NatPartrecToToPartrec.translate c)
+
+/-- Source-code normalized folded program data. -/
+def sourceProgramData (c : Code) : FiniteTM0Program :=
+  TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)
+
+theorem sourceProgramData_eq (c : Code) :
+    sourceProgramData c =
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourceSimStepData_eq (c : Code) :
+    sourceSimStepData c =
+      TM0FoldedCompiler.simStepData (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+/--
+Global primitive recursiveness of the folded descriptor list is enough for the
+source-level normalized folded program-data map used by the final reduction.
+-/
+theorem sourceProgramData_computable_of_global_simStepData
+    (hsteps : Primrec TM0FoldedCompiler.simStepData) :
+    Computable sourceProgramData :=
+  (TM0FoldedCompiler.programData_computable_of_simStepData hsteps).comp
+    NatPartrecToToPartrec.translate_computable
+
+theorem sourceProgramData_computable_of_global_simStepData'
+    (hsteps : Primrec TM0FoldedCompiler.simStepData) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_global_simStepData hsteps).of_eq fun _ => rfl
+
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
 def sourceFixedDominoReduction (_h : SourceObligations) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData
