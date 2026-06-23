@@ -134,6 +134,53 @@ theorem depth_right_lt_case (f g : Code) : depth g < depth (case f g) := by
 theorem depth_lt_fix (f : Code) : depth f < depth (fix f) := by
   simp [depth]
 
+/-- The left child code of `cons` has no larger dense encoding than the parent. -/
+theorem encodeCode_left_le_cons (f g : Code) : encodeCode f ≤ encodeCode (cons f g) := by
+  have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+  simp [encodeCode]
+  omega
+
+/-- The right child code of `cons` has no larger dense encoding than the parent. -/
+theorem encodeCode_right_le_cons (f g : Code) : encodeCode g ≤ encodeCode (cons f g) := by
+  have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+  simp [encodeCode]
+  omega
+
+/-- The left child code of `comp` has no larger dense encoding than the parent. -/
+theorem encodeCode_left_le_comp (f g : Code) : encodeCode f ≤ encodeCode (comp f g) := by
+  have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+  simp [encodeCode]
+  omega
+
+/-- The right child code of `comp` has no larger dense encoding than the parent. -/
+theorem encodeCode_right_le_comp (f g : Code) : encodeCode g ≤ encodeCode (comp f g) := by
+  have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+  simp [encodeCode]
+  omega
+
+/-- The left child code of `case` has no larger dense encoding than the parent. -/
+theorem encodeCode_left_le_case (f g : Code) : encodeCode f ≤ encodeCode (case f g) := by
+  have hleft : encodeCode f ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_left_le
+  simp [encodeCode]
+  omega
+
+/-- The right child code of `case` has no larger dense encoding than the parent. -/
+theorem encodeCode_right_le_case (f g : Code) : encodeCode g ≤ encodeCode (case f g) := by
+  have hright : encodeCode g ≤ Nat.pair (encodeCode f) (encodeCode g) := by
+    simpa using (Nat.pair (encodeCode f) (encodeCode g)).unpair_right_le
+  simp [encodeCode]
+  omega
+
+/-- The child code of `fix` has no larger dense encoding than the parent. -/
+theorem encodeCode_le_fix (f : Code) : encodeCode f ≤ encodeCode (fix f) := by
+  simp [encodeCode]
+  omega
+
 theorem depth_le_encodeCode_succ : ∀ c : Code, depth c ≤ encodeCode c + 1 := by
   intro c
   induction c with
