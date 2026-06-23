@@ -181,6 +181,19 @@ theorem boolFunction_app_primrec (β : Type*) [Primcodable β] :
       rcases p with ⟨f, b⟩
       cases b <;> rfl
 
+theorem boolFunction_const_primrec {α β : Type*} [Primcodable α] [Primcodable β]
+    {f : α → β} (hf : Primrec f) :
+    Primrec (fun a : α => (fun _b : Bool => f a : Bool → β)) := by
+  have hpair : Primrec (fun a : α => (f a, f a)) :=
+    Primrec.pair hf hf
+  have hsym : Primrec (boolFunctionEquivPair β).symm := by
+    simpa [instPrimcodableBoolFunction] using
+      (Primrec.of_equiv_symm (e := boolFunctionEquivPair β) :
+        Primrec (boolFunctionEquivPair β).symm)
+  exact (hsym.comp hpair).of_eq fun a => by
+    funext b
+    cases b <;> rfl
+
 /-- Finite encoding of functions out of the evaluator local variable. -/
 def partrecVarFunctionEquivTuple (β : Type*) :
     (PartrecVar → β) ≃ β × β × β × β × β where
@@ -259,6 +272,53 @@ theorem partrecVarFunction_app_primrec (β : Type*) [Primcodable β] :
     cases v with
     | none => rfl
     | some a => cases a <;> rfl
+
+theorem partrecVarFunction_const_primrec {α β : Type*} [Primcodable α] [Primcodable β]
+    {f : α → β} (hf : Primrec f) :
+    Primrec (fun a : α => (fun _v : PartrecVar => f a : PartrecVar → β)) := by
+  have htuple : Primrec (fun a : α => (f a, f a, f a, f a, f a)) :=
+    Primrec.pair hf (Primrec.pair hf (Primrec.pair hf (Primrec.pair hf hf)))
+  have hsym : Primrec (partrecVarFunctionEquivTuple β).symm := by
+    simpa [instPrimcodablePartrecVarFunction] using
+      (Primrec.of_equiv_symm (e := partrecVarFunctionEquivTuple β) :
+        Primrec (partrecVarFunctionEquivTuple β).symm)
+  exact (hsym.comp htuple).of_eq fun a => by
+    funext v
+    cases v with
+    | none => rfl
+    | some s => cases s <;> rfl
+
+theorem partrecVarFunction_map_primrec {β γ : Type*} [Primcodable β] [Primcodable γ]
+    {g : β → γ} (hg : Primrec g) :
+    Primrec (fun f : PartrecVar → β => (fun v : PartrecVar => g (f v) : PartrecVar → γ)) := by
+  have hnone : Primrec (fun f : PartrecVar → β => g (f none)) :=
+    hg.comp ((partrecVarFunction_app_primrec β).comp Primrec.id (Primrec.const none))
+  have hconsₗ : Primrec (fun f : PartrecVar → β => g (f (some Γ'.consₗ))) :=
+    hg.comp ((partrecVarFunction_app_primrec β).comp Primrec.id
+      (Primrec.const (some Γ'.consₗ)))
+  have hcons : Primrec (fun f : PartrecVar → β => g (f (some Γ'.cons))) :=
+    hg.comp ((partrecVarFunction_app_primrec β).comp Primrec.id
+      (Primrec.const (some Γ'.cons)))
+  have hbit0 : Primrec (fun f : PartrecVar → β => g (f (some Γ'.bit0))) :=
+    hg.comp ((partrecVarFunction_app_primrec β).comp Primrec.id
+      (Primrec.const (some Γ'.bit0)))
+  have hbit1 : Primrec (fun f : PartrecVar → β => g (f (some Γ'.bit1))) :=
+    hg.comp ((partrecVarFunction_app_primrec β).comp Primrec.id
+      (Primrec.const (some Γ'.bit1)))
+  have htuple : Primrec (fun f : PartrecVar → β =>
+      (g (f none), g (f (some Γ'.consₗ)), g (f (some Γ'.cons)),
+        g (f (some Γ'.bit0)), g (f (some Γ'.bit1)))) :=
+    Primrec.pair hnone
+      (Primrec.pair hconsₗ (Primrec.pair hcons (Primrec.pair hbit0 hbit1)))
+  have hsym : Primrec (partrecVarFunctionEquivTuple γ).symm := by
+    simpa [instPrimcodablePartrecVarFunction] using
+      (Primrec.of_equiv_symm (e := partrecVarFunctionEquivTuple γ) :
+        Primrec (partrecVarFunctionEquivTuple γ).symm)
+  exact (hsym.comp htuple).of_eq fun f => by
+    funext v
+    cases v with
+    | none => rfl
+    | some s => cases s <;> rfl
 
 /-- Finite symbol-valued actions on the evaluator local variable. -/
 def partrecVarToSymbolEquivTuple :
@@ -5029,6 +5089,55 @@ theorem partrecStartedTM0SymbolFunction_app_primrec
     simp [curried, partrecStartedTM0SymbolFunctionEquiv,
       partrecStartedTM0StackVector_ext cells]
 
+theorem partrecStartedTM0SymbolFunction_const_primrec
+    {α β : Type*} [Primcodable α] [Primcodable β] {f : α → β}
+    (hf : Primrec f) :
+    Primrec (fun a : α =>
+      (fun _s : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol => f a :
+        Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → β)) := by
+  have h₄ : Primrec (fun a : α =>
+      (fun _v : PartrecVar => f a : PartrecVar → β)) :=
+    partrecVarFunction_const_primrec hf
+  have h₃ : Primrec (fun a : α =>
+      (fun _v : PartrecVar => (fun _v' : PartrecVar => f a : PartrecVar → β) :
+        PartrecVar → PartrecVar → β)) :=
+    partrecVarFunction_const_primrec h₄
+  have h₂ : Primrec (fun a : α =>
+      (fun _v : PartrecVar =>
+        (fun _v' : PartrecVar =>
+          (fun _v'' : PartrecVar => f a : PartrecVar → β) :
+          PartrecVar → PartrecVar → β) :
+        PartrecVar → PartrecVar → PartrecVar → β)) :=
+    partrecVarFunction_const_primrec h₃
+  have h₁ : Primrec (fun a : α =>
+      (fun _v : PartrecVar =>
+        (fun _v' : PartrecVar =>
+          (fun _v'' : PartrecVar =>
+            (fun _v''' : PartrecVar => f a : PartrecVar → β) :
+            PartrecVar → PartrecVar → β) :
+          PartrecVar → PartrecVar → PartrecVar → β) :
+        PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)) :=
+    partrecVarFunction_const_primrec h₂
+  have hcurried : Primrec (fun a : α =>
+      (fun _b : Bool =>
+        (fun _main : PartrecVar =>
+          (fun _rev : PartrecVar =>
+            (fun _aux : PartrecVar =>
+              (fun _stack : PartrecVar => f a : PartrecVar → β) :
+              PartrecVar → PartrecVar → β) :
+            PartrecVar → PartrecVar → PartrecVar → β) :
+          PartrecVar → PartrecVar → PartrecVar → PartrecVar → β) :
+        Bool → PartrecVar → PartrecVar → PartrecVar → PartrecVar → β)) :=
+    boolFunction_const_primrec h₁
+  have hsym : Primrec (partrecStartedTM0SymbolFunctionEquiv β).symm := by
+    simpa [instPrimcodablePartrecStartedTM0SymbolFunction] using
+      (Primrec.of_equiv_symm (e := partrecStartedTM0SymbolFunctionEquiv β) :
+        Primrec (partrecStartedTM0SymbolFunctionEquiv β).symm)
+  exact (hsym.comp hcurried).of_eq fun a => by
+    funext s
+    rcases s with ⟨bottom, cells⟩
+    rfl
+
 theorem partrecStartedTM0SymbolPartrecVarFunction_app_primrec
     (β : Type*) [Primcodable β] :
     Primrec (fun p :
@@ -5042,6 +5151,20 @@ theorem partrecStartedTM0SymbolPartrecVarFunction_app_primrec
     (partrecStartedTM0SymbolFunction_app_primrec (PartrecVar → β)).comp
       Primrec.fst (Primrec.fst.comp Primrec.snd)
   exact (partrecVarFunction_app_primrec β).comp hsymbol (Primrec.snd.comp Primrec.snd)
+
+theorem partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    {α β : Type*} [Primcodable α] [Primcodable β] {f : α → β}
+    (hf : Primrec f) :
+    Primrec (fun a : α =>
+      (fun _s : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol =>
+        fun _v : PartrecVar => f a :
+        Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol → PartrecVar → β)) := by
+  have hvar : Primrec (fun a : α =>
+      (fun _v : PartrecVar => f a : PartrecVar → β)) :=
+    partrecVarFunction_const_primrec hf
+  exact (partrecStartedTM0SymbolFunction_const_primrec hvar).of_eq fun a => by
+    funext _s _v
+    rfl
 
 namespace PartrecStartedTM1StmtNode
 
@@ -6204,6 +6327,35 @@ def tm2to1BottomBranchPayload : PartrecStartedTM1StmtNode.BranchCode :=
 def tm2to1PopWritePayload (k : PartrecStack) :
     PartrecStartedTM1StmtNode.WriteCode :=
   fun a _ => (a.1, Function.update a.2 k none)
+
+def tm2to1NormalGotoPayload (tc : Turing.ToPartrec.Code)
+    (f : PartrecStartedTM2StmtNode.GotoCode tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ s => Turing.TM2to1.Λ'.normal (f s)
+
+theorem tm2to1NormalGotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1NormalGotoPayload tc) := by
+  have hvar : Primrec (fun f : PartrecStartedTM2StmtNode.GotoCode tc =>
+      (fun s : PartrecVar => Turing.TM2to1.Λ'.normal (f s) :
+        PartrecVar → PartrecStartedTM1Label tc)) :=
+    partrecVarFunction_map_primrec (partrecStartedTM1Label_normal_primrec tc)
+  exact (partrecStartedTM0SymbolFunction_const_primrec hvar).of_eq fun f => by
+    funext _a s
+    rfl
+
+def tm2to1GoGotoPayload (tc : Turing.ToPartrec.Code) (k : PartrecStack)
+    (p : Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ×
+      PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ _ => Turing.TM2to1.Λ'.go k p.1 p.2
+
+theorem tm2to1GoGotoPayload_primrec
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (tm2to1GoGotoPayload tc k) := by
+  exact (partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    (partrecStartedTM1Label_go_primrec_fixed_k tc k)).of_eq fun p => by
+      funext _a _s
+      rfl
 
 set_option maxHeartbeats 900000 in
 -- The branch expression mirrors Mathlib's nested `TM2to1.trStAct` statement.
