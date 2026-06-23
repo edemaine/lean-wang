@@ -2851,6 +2851,15 @@ def partrecStartedTM2LabelList (tc : Turing.ToPartrec.Code) : List (StartedLabel
 def partrecStartedTM2LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
   PartrecToTM2SupportList.labelCount tc
 
+theorem partrecStartedTM2LabelCount_primrec :
+    Primrec partrecStartedTM2LabelCount := by
+  unfold partrecStartedTM2LabelCount
+  exact PartrecToTM2SupportList.labelCount_primrec
+
+theorem partrecStartedTM2LabelCount_computable :
+    Computable partrecStartedTM2LabelCount :=
+  partrecStartedTM2LabelCount_primrec.to_comp
+
 theorem partrecStartedTM2LabelList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM2LabelList tc).length = partrecStartedTM2LabelCount tc := by
   simp [partrecStartedTM2LabelList, partrecStartedTM2LabelCount,
