@@ -181,6 +181,11 @@ def trAuxMeasure (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) : Nat :=
   (TM0Route.PartrecStartedTM1StmtNode.ofStmt p.1).length
 
+theorem trAuxMeasure_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxMeasure tc) := by
+  unfold trAuxMeasure
+  exact (TM0Route.PartrecStartedTM1StmtNode.ofStmt_length_primrec tc).comp Primrec.fst
+
 def trAuxDeps (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) :
     List (SourceStmt tc × PartrecVar × SourceSymbol) :=
@@ -761,6 +766,11 @@ theorem trAuxDepsDecodedData_eq
   | cons dep deps ih =>
       rcases dep with ⟨stmt, v, a⟩
       simp [decodeEncodedTrAuxDep?_ofStmt, ih]
+
+theorem trAuxDeps_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxDeps tc) :=
+  (trAuxDepsDecodedData_primrec_fixed tc).of_eq fun p =>
+    trAuxDepsDecodedData_eq tc p
 
 theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol)
