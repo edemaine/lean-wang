@@ -389,6 +389,76 @@ theorem trStmtsWeightStepBody_primrec {wCode : Nat → Nat} (hw : Primrec wCode)
   refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) hpred ?_
   exact hself
 
+/-- Read a previous row of label weights, defaulting to `0` outside the row. -/
+def trStmtsWeightLookup (prev : List Nat) (n : Nat) : Nat :=
+  prev.getD n 0
+
+theorem trStmtsWeightLookup_primrec :
+    Primrec (fun p : List Nat × Nat => trStmtsWeightLookup p.1 p.2) := by
+  unfold trStmtsWeightLookup
+  exact Primrec.list_getD 0
+
+/-- One bounded row update for the dense-code `trStmtsWeight` recursion. -/
+def trStmtsWeightRowStep (wCode : Nat → Nat) (prev : List Nat) (bound : Nat) : List Nat :=
+  (List.range (bound + 1)).map fun n => trStmtsWeightStepBody wCode prev n
+
+theorem trStmtsWeightRowStep_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : List Nat × Nat => trStmtsWeightRowStep wCode p.1 p.2) := by
+  unfold trStmtsWeightRowStep
+  let hrow : Primrec (fun p : List Nat × Nat => List.range (p.2 + 1)) :=
+    Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+  let hentry : Primrec₂ (fun p : List Nat × Nat => fun n : Nat =>
+      trStmtsWeightStepBody wCode p.1 n) :=
+    (trStmtsWeightStepBody_primrec hw).comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd) |>.to₂
+  exact Primrec.list_map hrow hentry
+
+/-- Bounded dynamic-programming rows for dense-code `trStmtsWeight`. -/
+def trStmtsWeightRows (wCode : Nat → Nat) : Nat → Nat → List Nat
+  | 0, bound => (List.range (bound + 1)).map fun _ => 0
+  | fuel + 1, bound => trStmtsWeightRowStep wCode (trStmtsWeightRows wCode fuel bound) bound
+
+theorem trStmtsWeightRows_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : Nat × Nat => trStmtsWeightRows wCode p.1 p.2) := by
+  let hbase : Primrec (fun p : Nat × Nat => (List.range (p.2 + 1)).map fun _ => 0) := by
+    let hrow : Primrec (fun p : Nat × Nat => List.range (p.2 + 1)) :=
+      Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+    exact Primrec.list_map hrow (Primrec.const 0).to₂
+  let hstep : Primrec₂ (fun p : Nat × Nat => fun s : Nat × List Nat =>
+      trStmtsWeightRowStep wCode s.2 p.2) :=
+    (trStmtsWeightRowStep_primrec hw).comp
+      (Primrec.pair (Primrec.snd.comp Primrec.snd) (Primrec.snd.comp Primrec.fst)) |>.to₂
+  exact (Primrec.nat_rec' Primrec.fst hbase hstep).of_eq fun p => by
+    induction p.1 with
+    | zero =>
+        rfl
+    | succ fuel ih =>
+        change trStmtsWeightRowStep wCode
+          (Nat.rec ((List.range (p.2 + 1)).map fun _ => 0)
+            (fun _ row => trStmtsWeightRowStep wCode row p.2) fuel) p.2 =
+          trStmtsWeightRows wCode (fuel + 1) p.2
+        rw [ih]
+        rfl
+
+/-- Numeric fuel approximation to `trStmtsWeight`, indexed by dense label code. -/
+def trStmtsWeightFuel (wCode : Nat → Nat) (fuel n : Nat) : Nat :=
+  trStmtsWeightLookup (trStmtsWeightRows wCode fuel n) n
+
+theorem trStmtsWeightFuel_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : Nat × Nat => trStmtsWeightFuel wCode p.1 p.2) := by
+  unfold trStmtsWeightFuel
+  exact trStmtsWeightLookup_primrec.comp
+    (Primrec.pair (trStmtsWeightRows_primrec hw) Primrec.snd)
+
+/-- Diagonal dense-code approximation to `trStmtsWeight`. -/
+def trStmtsWeightCode (wCode : Nat → Nat) (n : Nat) : Nat :=
+  trStmtsWeightFuel wCode n n
+
+theorem trStmtsWeightCode_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (trStmtsWeightCode wCode) := by
+  unfold trStmtsWeightCode
+  exact trStmtsWeightFuel_primrec hw |>.comp (Primrec.pair Primrec.id Primrec.id)
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
