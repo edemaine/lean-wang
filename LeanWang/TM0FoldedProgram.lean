@@ -1079,6 +1079,26 @@ theorem programData_eq_program (tc : Turing.ToPartrec.Code) :
     programData tc = program tc :=
   (program_eq_programOfCountAndSimRows tc).symm
 
+theorem programData_symbols (tc : Turing.ToPartrec.Code) :
+    (programData tc).symbols = foldedSymbolList :=
+  rfl
+
+theorem programData_states (tc : Turing.ToPartrec.Code) :
+    (programData tc).states = foldedStateList tc :=
+  rfl
+
+theorem programData_blank (tc : Turing.ToPartrec.Code) :
+    (programData tc).blank = foldedBlank :=
+  rfl
+
+theorem programData_start (tc : Turing.ToPartrec.Code) :
+    (programData tc).start = foldedStartState :=
+  rfl
+
+theorem programData_table (tc : Turing.ToPartrec.Code) :
+    (programData tc).table = initRowsData ++ simRows tc :=
+  rfl
+
 def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   symbols := foldedSymbolList
   states := foldedStateList tc
@@ -1096,6 +1116,11 @@ theorem programHeader_primrec : Primrec programHeader := by
 
 theorem programHeader_computable : Computable programHeader :=
   programHeader_primrec.to_comp
+
+theorem programData_eq_programHeader_with_simRows (tc : Turing.ToPartrec.Code) :
+    programData tc =
+      { programHeader tc with table := (programHeader tc).table ++ simRows tc } := by
+  rfl
 
 end TM0FoldedCompiler
 
