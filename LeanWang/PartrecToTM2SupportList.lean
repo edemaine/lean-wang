@@ -212,6 +212,183 @@ def trStmtsWeightStepBody (wCode : Nat → Nat) (prev : List Nat) (n : Nat) : Na
   else
     self
 
+theorem trStmtsWeightStepBody_primrec {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : List Nat × Nat => trStmtsWeightStepBody wCode p.1 p.2) := by
+  unfold trStmtsWeightStepBody
+  let hpayload : Primrec (fun p : List Nat × Nat => p.2 / 8) :=
+    Primrec.nat_div.comp Primrec.snd (Primrec.const 8)
+  let htag : Primrec (fun p : List Nat × Nat => p.2 % 8) :=
+    Primrec.nat_mod.comp Primrec.snd (Primrec.const 8)
+  let hself : Primrec (fun p : List Nat × Nat => wCode p.2) :=
+    hw.comp Primrec.snd
+  let lookupOn
+      {α : Type} [Primcodable α] (target : α → Nat) (htarget : Primrec target) :
+      Primrec (fun p : (List Nat × Nat) × α =>
+        Turing.PartrecToTM2.Λ'.normalizeLookup p.1.1 (target p.2)) :=
+    Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst) (htarget.comp Primrec.snd))
+  let hmoveSome : Primrec₂ (fun p : List Nat × Nat =>
+      fun fields : (Γ' → Bool) × K' × K' × Nat =>
+        wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2.2) := by
+    apply Primrec₂.mk
+    exact Primrec.nat_add.comp (hself.comp Primrec.fst)
+      (lookupOn (fun fields : (Γ' → Bool) × K' × K' × Nat => fields.2.2.2)
+        (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.id))))
+  let hmove : Primrec (fun p : List Nat × Nat =>
+      match Turing.PartrecToTM2.Λ'.decodeMovePayload (p.2 / 8) with
+      | none => 0
+      | some fields =>
+          wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2.2) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodeMovePayload_primrec.comp hpayload)
+      (Primrec.const 0) hmoveSome).of_eq fun p => by
+        cases Turing.PartrecToTM2.Λ'.decodeMovePayload (p.2 / 8) <;> rfl
+  let hclearSome : Primrec₂ (fun p : List Nat × Nat =>
+      fun fields : (Γ' → Bool) × K' × Nat =>
+        wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2) := by
+    apply Primrec₂.mk
+    exact Primrec.nat_add.comp (hself.comp Primrec.fst)
+      (lookupOn (fun fields : (Γ' → Bool) × K' × Nat => fields.2.2)
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.id)))
+  let hclear : Primrec (fun p : List Nat × Nat =>
+      match Turing.PartrecToTM2.Λ'.decodeClearPayload (p.2 / 8) with
+      | none => 0
+      | some fields =>
+          wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodeClearPayload_primrec.comp hpayload)
+      (Primrec.const 0) hclearSome).of_eq fun p => by
+        cases Turing.PartrecToTM2.Λ'.decodeClearPayload (p.2 / 8) <;> rfl
+  let hcopy : Primrec (fun p : List Nat × Nat =>
+      wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 (p.2 / 8)) :=
+    Primrec.nat_add.comp hself
+      (Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+        (Primrec.pair Primrec.fst hpayload))
+  let hpushSome : Primrec₂ (fun p : List Nat × Nat =>
+      fun fields : K' × (Option Γ' → Option Γ') × Nat =>
+        wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2) := by
+    apply Primrec₂.mk
+    exact Primrec.nat_add.comp (hself.comp Primrec.fst)
+      (lookupOn (fun fields : K' × (Option Γ' → Option Γ') × Nat => fields.2.2)
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.id)))
+  let hpush : Primrec (fun p : List Nat × Nat =>
+      match Turing.PartrecToTM2.Λ'.decodePushPayload (p.2 / 8) with
+      | none => 0
+      | some fields =>
+          wCode p.2 + Turing.PartrecToTM2.Λ'.normalizeLookup p.1 fields.2.2) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodePushPayload_primrec.comp hpayload)
+      (Primrec.const 0) hpushSome).of_eq fun p => by
+        cases Turing.PartrecToTM2.Λ'.decodePushPayload (p.2 / 8) <;> rfl
+  let hreadFields :
+      Primrec (fun p : List Nat × Nat =>
+        Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)) :=
+    Turing.PartrecToTM2.Λ'.decodeReadPayload_primrec.comp hpayload
+  let hreadLookup (target :
+      Nat × Nat × Nat × Nat × Nat → Nat) (htarget : Primrec target) :
+      Primrec (fun p : List Nat × Nat =>
+        Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+          (target (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)))) :=
+    Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (htarget.comp hreadFields))
+  let hread₀ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).1) :=
+    hreadLookup (fun fields : Nat × Nat × Nat × Nat × Nat => fields.1) Primrec.fst
+  let hread₁ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.1) :=
+    hreadLookup (fun fields : Nat × Nat × Nat × Nat × Nat => fields.2.1)
+      (Primrec.fst.comp Primrec.snd)
+  let hread₂ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.1) :=
+    hreadLookup (fun fields : Nat × Nat × Nat × Nat × Nat => fields.2.2.1)
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+  let hread₃ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.1) :=
+    hreadLookup (fun fields : Nat × Nat × Nat × Nat × Nat => fields.2.2.2.1)
+      (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  let hread₄ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.2) :=
+    hreadLookup (fun fields : Nat × Nat × Nat × Nat × Nat => fields.2.2.2.2)
+      (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  let hreadTail : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+          (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).1 +
+        (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+            (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.1 +
+          (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+              (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.1 +
+            (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+                (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.1 +
+              Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+                (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.2)))) :=
+    Primrec.nat_add.comp hread₀
+      (Primrec.nat_add.comp hread₁
+        (Primrec.nat_add.comp hread₂ (Primrec.nat_add.comp hread₃ hread₄)))
+  let hread : Primrec (fun p : List Nat × Nat =>
+      wCode p.2 +
+        (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+            (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).1 +
+          (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+              (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.1 +
+            (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+                (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.1 +
+              (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+                  (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.1 +
+                Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+                  (Turing.PartrecToTM2.Λ'.decodeReadPayload (p.2 / 8)).2.2.2.2))))) :=
+    Primrec.nat_add.comp hself hreadTail
+  let hunrevPayload : Primrec (fun p : List Nat × Nat => wCode (unrevCodeOf (p.2 / 8))) :=
+    hw.comp (unrevCodeOf_primrec.comp hpayload)
+  let hsucc : Primrec (fun p : List Nat × Nat =>
+      wCode p.2 + (wCode (unrevCodeOf (p.2 / 8)) +
+        Turing.PartrecToTM2.Λ'.normalizeLookup p.1 (p.2 / 8))) :=
+    Primrec.nat_add.comp hself (Primrec.nat_add.comp hunrevPayload
+      (Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+        (Primrec.pair Primrec.fst hpayload)))
+  let hpredFields :
+      Primrec (fun p : List Nat × Nat =>
+        Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)) :=
+    Turing.PartrecToTM2.Λ'.decodePredPayload_primrec.comp hpayload
+  let hpred₁ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).1) :=
+    Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst (Primrec.fst.comp hpredFields))
+  let hpred₂Target : Primrec (fun p : List Nat × Nat =>
+      (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).2) :=
+    Primrec.snd.comp hpredFields
+  let hpredUnrev : Primrec (fun p : List Nat × Nat =>
+      wCode (unrevCodeOf (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).2)) :=
+    hw.comp (unrevCodeOf_primrec.comp hpred₂Target)
+  let hpred₂ : Primrec (fun p : List Nat × Nat =>
+      Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+        (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).2) :=
+    Turing.PartrecToTM2.Λ'.normalizeLookup_primrec.comp
+      (Primrec.pair Primrec.fst hpred₂Target)
+  let hpred : Primrec (fun p : List Nat × Nat =>
+      wCode p.2 +
+        (Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+            (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).1 +
+          (wCode (unrevCodeOf
+              (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).2) +
+            Turing.PartrecToTM2.Λ'.normalizeLookup p.1
+              (Turing.PartrecToTM2.Λ'.decodePredPayload (p.2 / 8)).2))) :=
+    Primrec.nat_add.comp hself
+      (Primrec.nat_add.comp hpred₁ (Primrec.nat_add.comp hpredUnrev hpred₂))
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 1)) hmove ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 2)) hclear ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 3)) hcopy ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 4)) hpush ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 5)) hread ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 6)) hsucc ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) hpred ?_
+  exact hself
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
