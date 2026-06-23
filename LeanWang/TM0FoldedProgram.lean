@@ -990,9 +990,13 @@ theorem trAuxHaltBody_primrec_fixed (tc : Turing.ToPartrec.Code) :
     tm0StmtWrite_primrec.comp Primrec.snd
   exact Primrec.option_some.comp (Primrec.pair hlabel hstmt)
 
+/-- Input data for one statement-node reconstruction step of `trAux`. -/
+abbrev TrAuxBodyForHeadInput (tc : Turing.ToPartrec.Code) : Type :=
+  ((SourceStmt tc × PartrecVar × SourceSymbol) × SourceStmtNode tc) ×
+    List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)
+
 noncomputable def trAuxBodyForHead (tc : Turing.ToPartrec.Code)
-    (p : ((SourceStmt tc × PartrecVar × SourceSymbol) × SourceStmtNode tc) ×
-      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    (p : TrAuxBodyForHeadInput tc) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
   let tail := trAuxTail tc p.1.1.1
   match p.1.2 with
@@ -1008,6 +1012,262 @@ noncomputable def trAuxBodyForHead (tc : Turing.ToPartrec.Code)
       trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
   | TM0Route.PartrecStartedTM1StmtNode.halt =>
       trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)
+
+theorem trAuxBodyForHeadMove_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : Bool × PUnit =>
+        trAuxMoveBody tc
+          ((TM0Route.PartrecStartedTM1StmtNode.dirOfBool payload.1,
+            trAuxTail tc p.1.1.1), p.1.1.2.1)) := by
+  apply Primrec₂.mk
+  have hdir : Primrec (fun p : TrAuxBodyForHeadInput tc × Bool × PUnit =>
+      TM0Route.PartrecStartedTM1StmtNode.dirOfBool p.2.1) :=
+    (Primrec.dom_finite _).comp (Primrec.fst.comp Primrec.snd)
+  have htail : Primrec (fun p : TrAuxBodyForHeadInput tc × Bool × PUnit =>
+      trAuxTail tc p.1.1.1.1) :=
+    (trAuxTail_primrec_fixed tc).comp
+      (Primrec.fst.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst)))
+  have hvar : Primrec (fun p : TrAuxBodyForHeadInput tc × Bool × PUnit =>
+      p.1.1.1.2.1) :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst)))
+  exact (trAuxMoveBody_primrec_fixed tc).comp
+    (Primrec.pair (Primrec.pair hdir htail) hvar)
+
+theorem trAuxBodyForHeadWrite_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+        trAuxWriteBody tc
+          ((payload, trAuxTail tc p.1.1.1), p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have htail : Primrec (fun p :
+      TrAuxBodyForHeadInput tc × TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      trAuxTail tc p.1.1.1.1) :=
+    (trAuxTail_primrec_fixed tc).comp
+      (Primrec.fst.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst)))
+  have hvar : Primrec (fun p :
+      TrAuxBodyForHeadInput tc × TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      p.1.1.1.2.1) :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst)))
+  have hsym : Primrec (fun p :
+      TrAuxBodyForHeadInput tc × TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      p.1.1.1.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst)))
+  have hargs : Primrec (fun p :
+      TrAuxBodyForHeadInput tc × TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+      ((trAuxTail tc p.1.1.1.1, p.1.1.1.2.1, p.1.1.1.2.2) :
+        SourceStmt tc × PartrecVar × SourceSymbol)) :=
+    Primrec.pair htail (Primrec.pair hvar hsym)
+  exact ((trAuxWriteBody_primrec₂_fixed tc).comp hargs Primrec.snd).of_eq fun _ => rfl
+
+theorem trAuxBodyForHeadLoad_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun _payload : TM0Route.PartrecStartedTM1StmtNode.LoadCode =>
+        trAuxHeadBodyFromDeps tc p.2) := by
+  apply Primrec₂.mk
+  exact (trAuxHeadBodyFromDeps_primrec_fixed tc).comp (Primrec.snd.comp Primrec.fst)
+
+theorem trAuxBodyForHeadBranch_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun _payload : TM0Route.PartrecStartedTM1StmtNode.BranchCode =>
+        trAuxHeadBodyFromDeps tc p.2) := by
+  apply Primrec₂.mk
+  exact (trAuxHeadBodyFromDeps_primrec_fixed tc).comp (Primrec.snd.comp Primrec.fst)
+
+theorem trAuxBodyForHeadGoto_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+        trAuxGotoBody tc (payload, p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hvarsym : Primrec (fun p :
+      TrAuxBodyForHeadInput tc × TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+      (p.1.1.1.2.1, p.1.1.1.2.2)) :=
+    Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))))
+      (Primrec.snd.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))))
+  exact ((trAuxGotoBody_primrec₂_fixed_of_machine tc hmachine).comp hvarsym
+    Primrec.snd).of_eq fun _ => rfl
+
+theorem trAuxBodyForHeadHalt_primrec₂_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun _payload : PUnit =>
+        trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hvarsym : Primrec (fun p : TrAuxBodyForHeadInput tc × PUnit =>
+      (p.1.1.1.2.1, p.1.1.1.2.2)) :=
+    Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))))
+      (Primrec.snd.comp (Primrec.snd.comp (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))))
+  exact (trAuxHaltBody_primrec_fixed tc).comp hvarsym
+
+theorem trAuxBodyForHeadGotoHalt_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.GotoHaltCode tc =>
+        match payload with
+        | Sum.inl f => trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
+        | Sum.inr _ => trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hgoto : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.GotoHaltCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.GotoCode tc =>
+          trAuxGotoBody tc (payload, p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadGoto_primrec₂_fixed_of_machine tc hmachine).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  have hhalt : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.GotoHaltCode tc =>
+        fun _payload : PUnit =>
+          trAuxHaltBody tc (p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadHalt_primrec₂_fixed tc).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.snd hgoto hhalt).of_eq fun p => by
+    cases p.2 <;> rfl
+
+theorem trAuxBodyForHeadBranchTail_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc =>
+        match payload with
+        | Sum.inl _ => trAuxHeadBodyFromDeps tc p.2
+        | Sum.inr c =>
+            match c with
+            | Sum.inl f => trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
+            | Sum.inr _ => trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hbranch : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.BranchCode =>
+          trAuxHeadBodyFromDeps tc p.1.2) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadBranch_primrec₂_fixed tc).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  have hgotoHalt : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.GotoHaltCode tc =>
+          match payload with
+          | Sum.inl f => trAuxGotoBody tc (f, p.1.1.1.2.1, p.1.1.1.2.2)
+          | Sum.inr _ => trAuxHaltBody tc (p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadGotoHalt_primrec₂_fixed_of_machine tc hmachine).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.snd hbranch hgotoHalt).of_eq fun p => by
+    cases p.2 <;> rfl
+
+theorem trAuxBodyForHeadLoadTail_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc =>
+        match payload with
+        | Sum.inl _ => trAuxHeadBodyFromDeps tc p.2
+        | Sum.inr c =>
+            match c with
+            | Sum.inl _ => trAuxHeadBodyFromDeps tc p.2
+            | Sum.inr c =>
+                match c with
+                | Sum.inl f => trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
+                | Sum.inr _ => trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hload : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.LoadCode =>
+          trAuxHeadBodyFromDeps tc p.1.2) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadLoad_primrec₂_fixed tc).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  have hbranchTail : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc =>
+          match payload with
+          | Sum.inl _ => trAuxHeadBodyFromDeps tc p.1.2
+          | Sum.inr c =>
+              match c with
+              | Sum.inl f => trAuxGotoBody tc (f, p.1.1.1.2.1, p.1.1.1.2.2)
+              | Sum.inr _ => trAuxHaltBody tc (p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadBranchTail_primrec₂_fixed_of_machine tc hmachine).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.snd hload hbranchTail).of_eq fun p => by
+    cases p.2 <;> rfl
+
+theorem trAuxBodyForHeadWriteTail_primrec₂_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec₂ (fun p : TrAuxBodyForHeadInput tc =>
+      fun payload : TM0Route.PartrecStartedTM1StmtNode.WriteTailCode tc =>
+        match payload with
+        | Sum.inl f =>
+            trAuxWriteBody tc ((f, trAuxTail tc p.1.1.1), p.1.1.2.1, p.1.1.2.2)
+        | Sum.inr c =>
+            match c with
+            | Sum.inl _ => trAuxHeadBodyFromDeps tc p.2
+            | Sum.inr c =>
+                match c with
+                | Sum.inl _ => trAuxHeadBodyFromDeps tc p.2
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl f => trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
+                    | Sum.inr _ => trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)) := by
+  apply Primrec₂.mk
+  have hwrite : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.WriteTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.WriteCode =>
+          trAuxWriteBody tc
+            ((payload, trAuxTail tc p.1.1.1.1), p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadWrite_primrec₂_fixed tc).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  have hloadTail : Primrec₂
+      (fun p : TrAuxBodyForHeadInput tc ×
+          TM0Route.PartrecStartedTM1StmtNode.WriteTailCode tc =>
+        fun payload : TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc =>
+          match payload with
+          | Sum.inl _ => trAuxHeadBodyFromDeps tc p.1.2
+          | Sum.inr c =>
+              match c with
+              | Sum.inl _ => trAuxHeadBodyFromDeps tc p.1.2
+              | Sum.inr c =>
+                  match c with
+                  | Sum.inl f => trAuxGotoBody tc (f, p.1.1.1.2.1, p.1.1.1.2.2)
+                  | Sum.inr _ => trAuxHaltBody tc (p.1.1.1.2.1, p.1.1.1.2.2)) := by
+    apply Primrec₂.mk
+    exact (trAuxBodyForHeadLoadTail_primrec₂_fixed_of_machine tc hmachine).comp
+      (Primrec.fst.comp Primrec.fst) Primrec.snd
+  exact (Primrec.sumCasesOn Primrec.snd hwrite hloadTail).of_eq fun p => by
+    cases p.2 <;> rfl
+
+theorem trAuxBodyForHead_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (trAuxBodyForHead tc) := by
+  have hcode : Primrec (fun p : TrAuxBodyForHeadInput tc =>
+      TM0Route.PartrecStartedTM1StmtNode.toCode p.1.2) :=
+    (TM0Route.PartrecStartedTM1StmtNode.toCode_primrec tc).comp
+      (Primrec.snd.comp Primrec.fst)
+  exact (Primrec.sumCasesOn hcode
+    (trAuxBodyForHeadMove_primrec₂_fixed tc)
+    (trAuxBodyForHeadWriteTail_primrec₂_fixed_of_machine tc hmachine)).of_eq fun p => by
+      rcases p with ⟨⟨stmt, node⟩, deps⟩
+      cases node with
+      | move d =>
+          cases d <;> rfl
+      | write _ => rfl
+      | load _ => rfl
+      | branch _ => rfl
+      | goto _ => rfl
+      | halt => rfl
 
 theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) :
