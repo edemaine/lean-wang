@@ -1690,6 +1690,81 @@ theorem normalizeLookup_eq_of_getD_eq
     normalizeLookup prev n = normalizeLabelFuel fuel n :=
   hprev n hn
 
+theorem normalizeLabelStepBody_eq_normalizeLabelFuel_succ
+    {prev : List Nat} {fuel bound n : Nat}
+    (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
+    (hn : n + 1 ≤ bound) :
+    normalizeLabelStepBody prev n = normalizeLabelFuel (fuel + 1) (n + 1) := by
+  have hpayload_bound : n / 8 ≤ bound := by omega
+  have htag_lt : n % 8 < 8 := Nat.mod_lt n (by decide : 0 < 8)
+  have htag_cases :
+      n % 8 = 0 ∨ n % 8 = 1 ∨ n % 8 = 2 ∨ n % 8 = 3 ∨
+        n % 8 = 4 ∨ n % 8 = 5 ∨ n % 8 = 6 ∨ n % 8 = 7 := by
+    omega
+  rcases htag_cases with htag | htag | htag | htag | htag | htag | htag | htag
+  · cases hfields : decodeMovePayload (n / 8) with
+    | none =>
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields]
+    | some fields =>
+        have htarget : fields.2.2.2 ≤ bound :=
+          (decodeMovePayload_target_le hfields).trans hpayload_bound
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields,
+          normalizeLookup_eq_of_getD_eq hprev htarget]
+  · cases hfields : decodeClearPayload (n / 8) with
+    | none =>
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields]
+    | some fields =>
+        have htarget : fields.2.2 ≤ bound :=
+          (decodeClearPayload_target_le hfields).trans hpayload_bound
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields,
+          normalizeLookup_eq_of_getD_eq hprev htarget]
+  · simp [normalizeLabelStepBody, normalizeLabelFuel, htag,
+      normalizeLookup_eq_of_getD_eq hprev hpayload_bound]
+  · cases hfields : decodePushPayload (n / 8) with
+    | none =>
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields]
+    | some fields =>
+        have htarget : fields.2.2 ≤ bound :=
+          (decodePushPayload_target_le hfields).trans hpayload_bound
+        simp [normalizeLabelStepBody, normalizeLabelFuel, htag, hfields,
+          normalizeLookup_eq_of_getD_eq hprev htarget]
+  · have hread₀ : (decodeReadPayload (n / 8)).1 ≤ bound :=
+      (decodeReadPayload_fst_le (n / 8)).trans hpayload_bound
+    have hread₁ : (decodeReadPayload (n / 8)).2.1 ≤ bound :=
+      (decodeReadPayload_snd_fst_le (n / 8)).trans hpayload_bound
+    have hread₂ : (decodeReadPayload (n / 8)).2.2.1 ≤ bound :=
+      (decodeReadPayload_snd_snd_fst_le (n / 8)).trans hpayload_bound
+    have hread₃ : (decodeReadPayload (n / 8)).2.2.2.1 ≤ bound :=
+      (decodeReadPayload_snd_snd_snd_fst_le (n / 8)).trans hpayload_bound
+    have hread₄ : (decodeReadPayload (n / 8)).2.2.2.2 ≤ bound :=
+      (decodeReadPayload_snd_snd_snd_snd_le (n / 8)).trans hpayload_bound
+    simp [normalizeLabelStepBody, normalizeLabelFuel, htag,
+      normalizeLookup_eq_of_getD_eq hprev hread₀,
+      normalizeLookup_eq_of_getD_eq hprev hread₁,
+      normalizeLookup_eq_of_getD_eq hprev hread₂,
+      normalizeLookup_eq_of_getD_eq hprev hread₃,
+      normalizeLookup_eq_of_getD_eq hprev hread₄]
+  · simp [normalizeLabelStepBody, normalizeLabelFuel, htag,
+      normalizeLookup_eq_of_getD_eq hprev hpayload_bound]
+  · have hpred₁ : (decodePredPayload (n / 8)).1 ≤ bound :=
+      (decodePredPayload_fst_le (n / 8)).trans hpayload_bound
+    have hpred₂ : (decodePredPayload (n / 8)).2 ≤ bound :=
+      (decodePredPayload_snd_le (n / 8)).trans hpayload_bound
+    simp [normalizeLabelStepBody, normalizeLabelFuel, htag,
+      normalizeLookup_eq_of_getD_eq hprev hpred₁,
+      normalizeLookup_eq_of_getD_eq hprev hpred₂]
+  · simp [normalizeLabelStepBody, normalizeLabelFuel, htag]
+
+theorem normalizeLabelStepAt_eq_normalizeLabelFuel_succ
+    {prev : List Nat} {fuel bound n : Nat}
+    (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
+    (hn : n ≤ bound) :
+    normalizeLabelStepAt prev n = normalizeLabelFuel (fuel + 1) n := by
+  cases n with
+  | zero => rfl
+  | succ n =>
+      exact normalizeLabelStepBody_eq_normalizeLabelFuel_succ hprev hn
+
 theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
     normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
   induction fuel generalizing n with
