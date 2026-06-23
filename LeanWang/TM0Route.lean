@@ -6538,6 +6538,54 @@ theorem partrecStartedTM0LabelSupportList_get_zero (tc : Turing.ToPartrec.Code) 
       some (default : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
   simp [partrecStartedTM0LabelSupportList]
 
+/--
+Statement-decoder-based lookup into the support list used for numeric TM0
+states. Position `0` is the forced default/start label; successor positions
+decode the generated label list.
+-/
+def partrecStartedTM0LabelSupportAtByStatementFrom?
+    (tc : Turing.ToPartrec.Code) (fuel p : Nat) :
+    Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
+  match p with
+  | 0 => some default
+  | p + 1 => partrecStartedTM0LabelAtByStatementFrom? tc fuel 0 p
+
+theorem partrecStartedTM0LabelSupportAtByStatementFrom?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : Nat × Nat =>
+      partrecStartedTM0LabelSupportAtByStatementFrom? tc p.1 p.2) := by
+  have hfrom := partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed tc
+  have hsucc : Primrec₂ (fun p : Nat × Nat => fun n : Nat =>
+      partrecStartedTM0LabelAtByStatementFrom? tc p.1 0 n) := by
+    apply Primrec₂.mk
+    exact hfrom.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.const 0) Primrec.snd))
+  exact (Primrec.nat_casesOn Primrec.snd
+    (Primrec.const (some (default :
+      Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))))
+    hsucc).of_eq fun p => by
+      cases p.2 <;> rfl
+
+theorem partrecStartedTM0LabelSupportAtByStatementFrom?_start_eq_getElem?
+    (tc : Turing.ToPartrec.Code) (p : Nat) :
+    partrecStartedTM0LabelSupportAtByStatementFrom? tc
+        (partrecStartedTM0StatementCount tc) p =
+      (partrecStartedTM0LabelSupportList tc)[p]? := by
+  cases p with
+  | zero =>
+      exact partrecStartedTM0LabelSupportList_get_zero tc
+  | succ p =>
+      simp only [partrecStartedTM0LabelSupportAtByStatementFrom?]
+      rw [partrecStartedTM0LabelAtByStatementFrom?_zero_eq,
+        partrecStartedTM0LabelAtByStatement?_eq_labelAt,
+        partrecStartedTM0LabelAt?_eq_getElem?]
+      simp [partrecStartedTM0LabelSupportList]
+
 theorem partrecStartedTM0LabelSupportList_get_position_of_statementAt?
     (tc : Turing.ToPartrec.Code) {k i : Nat}
     {stmt : Option (Turing.TM1.Stmt
