@@ -6578,6 +6578,84 @@ theorem tm2to1BranchPayload_primrec :
     funext _a s
     rfl
 
+noncomputable def tm2to1PushBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.PushCode × PartrecStartedTM2Stmt tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.goto (tm2to1PushGotoPayload tc p))
+
+theorem tm2to1PushBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PushBody tc) :=
+  Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+      (tm2to1PushGotoPayload_primrec tc))
+
+noncomputable def tm2to1PeekBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.goto (tm2to1PeekGotoPayload tc p))
+
+theorem tm2to1PeekBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PeekBody tc) :=
+  Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+      (tm2to1PeekGotoPayload_primrec tc))
+
+noncomputable def tm2to1PopBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.goto (tm2to1PopGotoPayload tc p))
+
+theorem tm2to1PopBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PopBody tc) :=
+  Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+      (tm2to1PopGotoPayload_primrec tc))
+
+noncomputable def tm2to1LoadBody (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.LoadCode × PartrecStartedTM0Stmt tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.load (tm2to1LoadPayload p.1) p.2)
+
+theorem tm2to1LoadBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1LoadBody tc) := by
+  exact Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtLoad_primrec tc).comp
+      (Primrec.pair (tm2to1LoadPayload_primrec.comp Primrec.fst) Primrec.snd))
+
+noncomputable def tm2to1BranchBody (tc : Turing.ToPartrec.Code)
+    (p : (PartrecStartedTM2StmtNode.BranchCode × PartrecStartedTM0Stmt tc) ×
+      PartrecStartedTM0Stmt tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.branch (tm2to1BranchPayload p.1.1) p.1.2 p.2)
+
+theorem tm2to1BranchBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1BranchBody tc) := by
+  exact Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
+      (Primrec.pair
+        (Primrec.pair (tm2to1BranchPayload_primrec.comp (Primrec.fst.comp Primrec.fst))
+          (Primrec.snd.comp Primrec.fst))
+        Primrec.snd))
+
+noncomputable def tm2to1GotoBody (tc : Turing.ToPartrec.Code)
+    (f : PartrecStartedTM2StmtNode.GotoCode tc) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  some (Turing.TM1.Stmt.goto (tm2to1NormalGotoPayload tc f))
+
+theorem tm2to1GotoBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1GotoBody tc) :=
+  Primrec.option_some.comp
+    ((PartrecStartedTM1StmtNode.stmtGoto_primrec tc).comp
+      (tm2to1NormalGotoPayload_primrec tc))
+
+noncomputable def tm2to1HaltBody (tc : Turing.ToPartrec.Code)
+    (_u : Unit) : Option (PartrecStartedTM0Stmt tc) :=
+  some Turing.TM1.Stmt.halt
+
+theorem tm2to1HaltBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1HaltBody tc) :=
+  Primrec.const (some Turing.TM1.Stmt.halt)
+
 set_option maxHeartbeats 900000 in
 -- The branch expression mirrors Mathlib's nested `TM2to1.trStAct` statement.
 theorem tm2to1TrStAct_primrec_fixed_k
@@ -6733,26 +6811,23 @@ noncomputable def tm2to1TrNormalBodyForHead (tc : Turing.ToPartrec.Code)
   let tail := tm2to1TrNormalTail tc p.1.1
   match p.1.2 with
   | PartrecStartedTM2StmtNode.push k f =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1PushGotoPayload tc ((k, f), tail)))
+      tm2to1PushBody tc ((k, f), tail)
   | PartrecStartedTM2StmtNode.peek k f =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1PeekGotoPayload tc ((k, f), tail)))
+      tm2to1PeekBody tc ((k, f), tail)
   | PartrecStartedTM2StmtNode.pop k f =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1PopGotoPayload tc ((k, f), tail)))
+      tm2to1PopBody tc ((k, f), tail)
   | PartrecStartedTM2StmtNode.load f =>
       match p.2 with
-      | q :: _ => some (Turing.TM1.Stmt.load (tm2to1LoadPayload f) q)
+      | q :: _ => tm2to1LoadBody tc (f, q)
       | _ => none
   | PartrecStartedTM2StmtNode.branch f =>
       match p.2 with
-      | q₁ :: q₂ :: _ => some (Turing.TM1.Stmt.branch (tm2to1BranchPayload f) q₁ q₂)
+      | q₁ :: q₂ :: _ => tm2to1BranchBody tc ((f, q₁), q₂)
       | _ => none
   | PartrecStartedTM2StmtNode.goto l =>
-      some (Turing.TM1.Stmt.goto (tm2to1NormalGotoPayload tc l))
+      tm2to1GotoBody tc l
   | PartrecStartedTM2StmtNode.halt =>
-      some Turing.TM1.Stmt.halt
+      tm2to1HaltBody tc ()
 
 noncomputable def tm2to1TrNormalBody (tc : Turing.ToPartrec.Code)
     (code : PartrecStartedTM2StmtNode.ValidCode tc)
@@ -6777,6 +6852,8 @@ theorem tm2to1TrNormalBody_toValidCode
     simp [tm2to1TrNormalBody, PartrecStartedTM2StmtNode.depValidCodes_toValidCode,
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal,
       tm2to1TrNormalBodyForHead, tm2to1TrNormalTail, PartrecStartedTM2StmtNode.ofStmtHead?,
+      tm2to1PushBody, tm2to1PeekBody, tm2to1PopBody, tm2to1LoadBody,
+      tm2to1BranchBody, tm2to1GotoBody, tm2to1HaltBody,
       PartrecStartedTM2StmtNode.ofStmtTail, PartrecStartedTM2StmtNode.ofStmt,
       PartrecStartedTM2StmtNode.depValidCodeOfNodes_ofStmt,
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
