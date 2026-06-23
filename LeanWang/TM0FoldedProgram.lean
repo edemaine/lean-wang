@@ -1075,6 +1075,28 @@ private theorem filterMap_simTransition_eq_map_stepData {α : Type}
   | cons x xs ih =>
       cases h : f x <;> simp [h, simRowsOfStepData, ih]
 
+private theorem flatMap_getElem?_range_length {α β : Type}
+    (xs : List α) (f : α → List β) :
+    (List.range xs.length).flatMap (fun i => (xs[i]?).elim [] f) =
+    xs.flatMap f := by
+  induction xs using List.reverseRecOn with
+  | nil =>
+      simp
+  | append_singleton xs x ih =>
+      rw [List.length_append, List.length_singleton]
+      rw [show xs.length + 1 = Nat.succ xs.length by omega]
+      rw [List.range_succ, List.flatMap_append]
+      have hprefix :
+          (List.range xs.length).flatMap (fun i => ((xs ++ [x])[i]?).elim [] f) =
+          (List.range xs.length).flatMap (fun i => (xs[i]?).elim [] f) := by
+        apply List.flatMap_congr
+        intro i hi
+        have hi_lt : i < xs.length := by
+          simpa [List.mem_range] using hi
+        rw [List.getElem?_append_left hi_lt]
+      rw [hprefix, ih]
+      simp
+
 /-- Descriptor-level folded simulation rows for one source label. -/
 def simStepDataForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
     List SimStepData :=
@@ -1083,6 +1105,24 @@ def simStepDataForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
       TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
         TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
           simStepDataOfTransition tc q side marked left right
+
+/--
+Descriptor rows for a source-label index. This is a numeric outer enumeration
+of the same semantic labels used by `simStepData`, avoiding a dependent label
+as the externally visible iterator.
+-/
+def simStepDataForLabelIndex (tc : Turing.ToPartrec.Code) (i : Nat) :
+    List SimStepData :=
+  ((TM0Route.partrecStartedTM0LabelList tc)[i]?).elim [] (simStepDataForLabel tc)
+
+/--
+Indexed mirror of `simStepData`. This is definitionally driven by the
+primitive-recursive label count; the theorem below connects it to the semantic
+label-list enumeration.
+-/
+def simStepDataByLabelIndex (tc : Turing.ToPartrec.Code) : List SimStepData :=
+  (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
+    (simStepDataForLabelIndex tc)
 
 def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
     List PostTransition :=
@@ -1105,6 +1145,13 @@ theorem simRowsForLabel_eq_stepData (tc : Turing.ToPartrec.Code) (q : SourceLabe
 /-- Descriptor-level folded simulation rows. -/
 def simStepData (tc : Turing.ToPartrec.Code) : List SimStepData :=
   (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q => simStepDataForLabel tc q
+
+theorem simStepDataByLabelIndex_eq (tc : Turing.ToPartrec.Code) :
+    simStepDataByLabelIndex tc = simStepData tc := by
+  unfold simStepDataByLabelIndex simStepDataForLabelIndex simStepData
+  rw [← TM0Route.partrecStartedTM0LabelList_length tc]
+  exact flatMap_getElem?_range_length
+    (TM0Route.partrecStartedTM0LabelList tc) (fun q => simStepDataForLabel tc q)
 
 theorem simRows_eq_stepData (tc : Turing.ToPartrec.Code) :
     simRows tc = simRowsOfStepData (simStepData tc) := by
@@ -1267,6 +1314,21 @@ theorem programData_computable_of_simStepData
     (hsteps : Primrec simStepData) :
     Computable programData :=
   (programData_primrec_of_simStepData hsteps).to_comp
+
+/--
+Indexed descriptor enumeration is enough for computability of normalized
+folded program data.
+-/
+theorem programData_primrec_of_simStepDataByLabelIndex
+    (hsteps : Primrec simStepDataByLabelIndex) :
+    Primrec programData :=
+  programData_primrec_of_stepData simStepDataByLabelIndex hsteps fun tc => by
+    rw [simStepDataByLabelIndex_eq, ← simRows_eq_stepData]
+
+theorem programData_computable_of_simStepDataByLabelIndex
+    (hsteps : Primrec simStepDataByLabelIndex) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataByLabelIndex hsteps).to_comp
 
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
