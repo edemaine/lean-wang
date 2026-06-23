@@ -1308,6 +1308,66 @@ theorem trNormalLabelCodeFuelStep_eq
   | fix f =>
       simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel, hprev]
 
+theorem trNormalLabelCodeFuelStep_eq_of_bound
+    {prev : List Nat} {fuel codeBound contBound : Nat}
+    (hprev : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prev c k = trNormalLabelCodeFuel fuel c k)
+    {c : ToPartrec.Code} {k : Cont'}
+    (hcode : ToPartrec.Code.encodeCode c ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    trNormalLabelCodeFuelStep prev c k = trNormalLabelCodeFuel (fuel + 1) c k := by
+  cases c with
+  | zero' =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | succ =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | tail =>
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel]
+  | cons f fs =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_cons f fs).trans hcode
+      have hfsCode : ToPartrec.Code.encodeCode fs ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_cons f fs).trans hcode
+      have hchildCont :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.cons₁ fs k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_cons₁_le_boundStep hfsCode hcont
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel,
+        hprev f (Cont'.cons₁ fs k) hfCode hchildCont]
+  | comp f g =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_comp f g).trans hcode
+      have hgCode : ToPartrec.Code.encodeCode g ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_comp f g).trans hcode
+      have hchildCont :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.comp f k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_comp_le_boundStep hfCode hcont
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel,
+        hprev g (Cont'.comp f k) hgCode hchildCont]
+  | case f g =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_case f g).trans hcode
+      have hgCode : ToPartrec.Code.encodeCode g ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_case f g).trans hcode
+      have hchildCont :
+          Turing.PartrecToTM2.Cont'.encodeCont k ≤
+            contEncodeBoundStep codeBound contBound :=
+        hcont.trans (contBound_le_boundStep codeBound contBound)
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel,
+        hprev f k hfCode hchildCont, hprev g k hgCode hchildCont]
+  | fix f =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_le_fix f).trans hcode
+      have hchildCont :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.fix f k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_fix_le_boundStep hfCode hcont
+      simp [trNormalLabelCodeFuelStep, trNormalLabelCodeFuel,
+        hprev f (Cont'.fix f k) hfCode hchildCont]
+
 /-- One bounded row of fuelled encoded `trNormal` labels. -/
 def trNormalLabelCodeFuelRowStep (prev : List Nat) (bound : Nat) : List Nat :=
   (List.range (bound + 1)).map fun n =>
@@ -1958,6 +2018,87 @@ theorem codeSuppWeightCodeFuelStep'_eq
   | fix f =>
       simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel',
         trNormalLabelCodeFuelStep_eq hlabel, hlabel, hweight]
+
+theorem codeSuppWeightCodeFuelStep'_eq_of_bound
+    (wCode : Nat → Nat) {prevLabel prevWeight : List Nat} {fuel codeBound contBound : Nat}
+    (hlabel : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prevLabel c k = trNormalLabelCodeFuel fuel c k)
+    (hweight : ∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contEncodeBoundStep codeBound contBound →
+      codeContStateLookup prevWeight c k = codeSuppWeightCodeFuel' wCode fuel c k)
+    {c : ToPartrec.Code} {k : Cont'}
+    (hcode : ToPartrec.Code.encodeCode c ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight c k =
+      codeSuppWeightCodeFuel' wCode (fuel + 1) c k := by
+  have hnormal :
+      trNormalLabelCodeFuelStep prevLabel c k = trNormalLabelCodeFuel (fuel + 1) c k :=
+    trNormalLabelCodeFuelStep_eq_of_bound hlabel hcode hcont
+  cases c with
+  | zero' =>
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal]
+  | succ =>
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal]
+  | tail =>
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal]
+  | cons f fs =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_cons f fs).trans hcode
+      have hfsCode : ToPartrec.Code.encodeCode fs ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_cons f fs).trans hcode
+      have hcons₁ :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.cons₁ fs k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_cons₁_le_boundStep hfsCode hcont
+      have hcons₂ :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.cons₂ k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_cons₂_le_boundStep hcont
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal,
+        hlabel fs (Cont'.cons₂ k) hfsCode hcons₂,
+        hweight f (Cont'.cons₁ fs k) hfCode hcons₁,
+        hweight fs (Cont'.cons₂ k) hfsCode hcons₂]
+  | comp f g =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_comp f g).trans hcode
+      have hgCode : ToPartrec.Code.encodeCode g ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_comp f g).trans hcode
+      have hcomp :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.comp f k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_comp_le_boundStep hfCode hcont
+      have hsame :
+          Turing.PartrecToTM2.Cont'.encodeCont k ≤
+            contEncodeBoundStep codeBound contBound :=
+        hcont.trans (contBound_le_boundStep codeBound contBound)
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal,
+        hlabel f k hfCode hsame,
+        hweight g (Cont'.comp f k) hgCode hcomp,
+        hweight f k hfCode hsame]
+  | case f g =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_left_le_case f g).trans hcode
+      have hgCode : ToPartrec.Code.encodeCode g ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_right_le_case f g).trans hcode
+      have hsame :
+          Turing.PartrecToTM2.Cont'.encodeCont k ≤
+            contEncodeBoundStep codeBound contBound :=
+        hcont.trans (contBound_le_boundStep codeBound contBound)
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal,
+        hweight f k hfCode hsame, hweight g k hgCode hsame]
+  | fix f =>
+      have hfCode : ToPartrec.Code.encodeCode f ≤ codeBound :=
+        (ToPartrec.Code.encodeCode_le_fix f).trans hcode
+      have hfix :
+          Turing.PartrecToTM2.Cont'.encodeCont (Cont'.fix f k) ≤
+            contEncodeBoundStep codeBound contBound :=
+        encodeCont_fix_le_boundStep hfCode hcont
+      simp [codeSuppWeightCodeFuelStep', codeSuppWeightCodeFuel', hnormal,
+        hlabel f (Cont'.fix f k) hfCode hfix,
+        hweight f (Cont'.fix f k) hfCode hfix]
 
 /-- One bounded row of fuelled encoded support weights. -/
 def codeSuppWeightCodeFuelRowStep'
