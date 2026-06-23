@@ -1366,6 +1366,34 @@ theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
   | halt =>
       rfl
 
+theorem trAux_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1) := by
+  let f : SourceStmt tc × PartrecVar × SourceSymbol →
+      SourceLabel tc × Turing.TM0.Stmt SourceSymbol :=
+    fun p => Turing.TM1to0.trAux
+      (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1
+  let g : SourceStmt tc × PartrecVar × SourceSymbol →
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) →
+        Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+    fun p rec => trAuxBodyFromHead? tc (p, rec)
+  have hg : Primrec₂ g := by
+    apply Primrec₂.mk
+    exact trAuxBodyFromHead?_primrec_fixed_of_machine tc hmachine
+  have hbody : ∀ p, g p ((trAuxDeps tc p).map f) = some (f p) := by
+    intro p
+    dsimp [g, f]
+    rw [trAuxBodyFromHead?_eq_body]
+    exact trAuxBody_correct tc p
+  exact Primrec.nat_omega_rec' f
+    (trAuxMeasure_primrec_fixed tc)
+    (trAuxDeps_primrec_fixed tc)
+    hg
+    (trAuxDeps_measure_lt tc)
+    hbody
+
 def sourceMachineStepOfStmt (tc : Turing.ToPartrec.Code)
     (stmt : Option (SourceStmt tc)) (v : PartrecVar) (a : SourceSymbol) :
     Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
