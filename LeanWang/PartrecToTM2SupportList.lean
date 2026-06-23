@@ -2260,6 +2260,38 @@ theorem codeSuppWeightCodeFuelRowsBase_primrec :
       (Primrec.list_range.comp (Primrec.succ.comp Primrec.id)) (Primrec.const 0).to₂
   exact Primrec.pair hrow hrow
 
+theorem codeSuppWeightCodeFuelRowsStep_primrec
+    {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : (List Nat × List Nat) × Nat =>
+      codeSuppWeightCodeFuelRowsStep wCode p.2 p.1) := by
+  have hlabel₂ : Primrec₂ (fun prevLabel : List Nat => fun bound : Nat =>
+      trNormalLabelCodeFuelRowStep prevLabel bound) :=
+    trNormalLabelCodeFuelRowStep_primrec.to₂
+  have hweight₂ : Primrec₂ (fun rows : List Nat × List Nat => fun bound : Nat =>
+      codeSuppWeightCodeFuelRowStep' wCode rows.1 rows.2 bound) :=
+    (codeSuppWeightCodeFuelRowStep'_primrec hw).to₂
+  have hlabel : Primrec (fun p : (List Nat × List Nat) × Nat =>
+      trNormalLabelCodeFuelRowStep p.1.1 p.2) :=
+    hlabel₂.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+  have hweight : Primrec (fun p : (List Nat × List Nat) × Nat =>
+      codeSuppWeightCodeFuelRowStep' wCode p.1.1 p.1.2 p.2) :=
+    hweight₂.comp Primrec.fst Primrec.snd
+  exact (Primrec.pair hlabel hweight).of_eq fun p => by
+    rfl
+
+theorem codeSuppWeightCodeFuelRows'_primrec
+    {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : Nat × Nat => codeSuppWeightCodeFuelRows' wCode p.1 p.2) := by
+  let hbase : Primrec (fun p : Nat × Nat => codeSuppWeightCodeFuelRowsBase p.2) :=
+    codeSuppWeightCodeFuelRowsBase_primrec.comp Primrec.snd
+  let hstep : Primrec₂ (fun p : Nat × Nat => fun s : Nat × (List Nat × List Nat) =>
+      codeSuppWeightCodeFuelRowsStep wCode p.2 s.2) :=
+    (codeSuppWeightCodeFuelRowsStep_primrec hw).comp
+      (Primrec.pair (Primrec.snd.comp Primrec.snd) (Primrec.snd.comp Primrec.fst)) |>.to₂
+  exact (Primrec.nat_rec' Primrec.fst hbase hstep).of_eq fun p => by
+    unfold codeSuppWeightCodeFuelRows'
+    rfl
+
 theorem codeSuppWeightCodeFuelRows'_zero (wCode : Nat → Nat) (bound : Nat) :
     codeSuppWeightCodeFuelRows' wCode 0 bound = codeSuppWeightCodeFuelRowsBase bound := by
   unfold codeSuppWeightCodeFuelRows'
