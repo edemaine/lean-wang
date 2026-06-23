@@ -6516,6 +6516,48 @@ theorem tm2to1GoGotoPayload_primrec
       funext _a _s
       rfl
 
+def tm2to1PushGotoPayload (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.PushCode × PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ _ =>
+    Turing.TM2to1.Λ'.go p.1.1
+      (Turing.TM2to1.StAct.push (k := p.1.1) p.1.2) p.2
+
+theorem tm2to1PushGotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PushGotoPayload tc) := by
+  exact (partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    (partrecStartedTM1Label_go_push_primrec tc)).of_eq fun p => by
+      funext _a _s
+      rfl
+
+def tm2to1PeekGotoPayload (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ _ =>
+    Turing.TM2to1.Λ'.go p.1.1
+      (Turing.TM2to1.StAct.peek (k := p.1.1) p.1.2) p.2
+
+theorem tm2to1PeekGotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PeekGotoPayload tc) := by
+  exact (partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    (partrecStartedTM1Label_go_peek_primrec tc)).of_eq fun p => by
+      funext _a _s
+      rfl
+
+def tm2to1PopGotoPayload (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.UpdateCode × PartrecStartedTM2Stmt tc) :
+    PartrecStartedTM1StmtNode.GotoCode tc :=
+  fun _ _ =>
+    Turing.TM2to1.Λ'.go p.1.1
+      (Turing.TM2to1.StAct.pop (k := p.1.1) p.1.2) p.2
+
+theorem tm2to1PopGotoPayload_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1PopGotoPayload tc) := by
+  exact (partrecStartedTM0SymbolPartrecVarFunction_const_primrec
+    (partrecStartedTM1Label_go_pop_primrec tc)).of_eq fun p => by
+      funext _a _s
+      rfl
+
 def tm2to1LoadPayload (f : PartrecStartedTM2StmtNode.LoadCode) :
     PartrecStartedTM1StmtNode.LoadCode :=
   fun _ s => f s
