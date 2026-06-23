@@ -3591,6 +3591,23 @@ theorem programData_computable_of_simStepDataForLabelIndexStart
   (programData_primrec_of_simStepDataForLabelIndexStart hindex).to_comp
 
 /--
+The canonical numeric-state indexed descriptor decoder is enough for primitive
+recursiveness of normalized folded program data.
+-/
+theorem programData_primrec_of_simStepDataForLabelIndexStartWithCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataByLabelIndexWithCode
+    (simStepDataByLabelIndexWithCode_primrec_of_forLabelIndexStartWithCode hindex)
+
+theorem programData_computable_of_simStepDataForLabelIndexStartWithCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndexStartWithCode hindex).to_comp
+
+/--
 The fully offset descriptor decoder is enough for primitive recursiveness of
 normalized folded program data. This isolates the remaining local recursion:
 given `(tc, fuel, statementOffset, residualIndex)`, produce the descriptor rows

@@ -416,6 +416,26 @@ theorem sourceProgramData_computable_of_global_labelIndexFrom'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_global_labelIndexFrom hindex).of_eq fun _ => rfl
 
+/--
+Global canonical numeric-state decoder bridge for the source reduction.
+This is the non-source-specialized version of
+`sourceProgramData_computable_of_source_labelIndexStartWithCode`.
+-/
+theorem sourceProgramData_computable_of_global_labelIndexStartWithCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Computable sourceProgramData :=
+  (TM0FoldedCompiler.programData_computable_of_simStepDataForLabelIndexStartWithCode
+      hindex).comp
+    NatPartrecToToPartrec.translate_computable
+
+theorem sourceProgramData_computable_of_global_labelIndexStartWithCode'
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_global_labelIndexStartWithCode hindex).of_eq fun _ => rfl
+
 theorem sourceProgramData_computable_of_global_labelIndexFromWithCode
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
       TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
