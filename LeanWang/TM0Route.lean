@@ -995,6 +995,39 @@ def tm1StmtSupportLength {Γ Λ σ : Type}
   | Turing.TM1.Stmt.goto _ => 1
   | Turing.TM1.Stmt.halt => 1
 
+def tm2to1TrNormalSupportLength {Λ : Type}
+    (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) : Nat :=
+  match stmt with
+  | Turing.TM2.Stmt.push .. => 1
+  | Turing.TM2.Stmt.peek .. => 1
+  | Turing.TM2.Stmt.pop .. => 1
+  | Turing.TM2.Stmt.load _ q => 1 + tm2to1TrNormalSupportLength q
+  | Turing.TM2.Stmt.branch _ q₁ q₂ =>
+      1 + (tm2to1TrNormalSupportLength q₁ + tm2to1TrNormalSupportLength q₂)
+  | Turing.TM2.Stmt.goto _ => 1
+  | Turing.TM2.Stmt.halt => 1
+
+theorem tm2to1TrNormalSupportLength_eq {Λ : Type}
+    (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
+    tm1StmtSupportLength (Turing.TM2to1.trNormal stmt) =
+      tm2to1TrNormalSupportLength stmt := by
+  induction stmt with
+  | push k f stmt IH =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength]
+  | peek k f stmt IH =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength]
+  | pop k f stmt IH =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength]
+  | load f stmt IH =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength, IH]
+  | branch f stmt₁ stmt₂ IH₁ IH₂ =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength,
+        IH₁, IH₂]
+  | goto f =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength]
+  | halt =>
+      simp [Turing.TM2to1.trNormal, tm1StmtSupportLength, tm2to1TrNormalSupportLength]
+
 theorem tm1StmtSupportList_length {Γ Λ σ : Type}
     (stmt : Turing.TM1.Stmt Γ Λ σ) :
     (tm1StmtSupportList stmt).length = tm1StmtSupportLength stmt := by
