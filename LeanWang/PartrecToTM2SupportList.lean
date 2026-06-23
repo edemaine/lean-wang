@@ -811,6 +811,134 @@ theorem retLabelCode_encodeLabel (k : Cont') :
     retLabelCode k = Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.ret k) := by
   simp [retLabelCode, Turing.PartrecToTM2.Λ'.encodeLabel_ret]
 
+/-- Encoded `move₂` from Mathlib's `PartrecToTM2` evaluator. -/
+def move₂LabelCode (p : Γ' → Bool) (k₁ k₂ : K') (qCode : Nat) : Nat :=
+  moveLabelCode p k₁ K'.rev
+    (pushLabelCode k₁ id
+      (moveLabelCode (fun _ : Γ' => false) K'.rev k₂ qCode))
+
+theorem move₂LabelCode_primrec (p : Γ' → Bool) (k₁ k₂ : K') :
+    Primrec (move₂LabelCode p k₁ k₂) := by
+  unfold move₂LabelCode
+  exact (moveLabelCode_primrec p k₁ K'.rev).comp
+    ((pushLabelCode_primrec k₁ id).comp
+      ((moveLabelCode_primrec (fun _ : Γ' => false) K'.rev k₂)))
+
+theorem move₂LabelCode_encodeLabel (p : Γ' → Bool) (k₁ k₂ : K') (q : Λ') :
+    move₂LabelCode p k₁ k₂ (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (move₂ p k₁ k₂ q) := by
+  simp [move₂LabelCode, Turing.PartrecToTM2.move₂, Turing.PartrecToTM2.moveExcl,
+    moveLabelCode_encodeLabel, pushLabelCode_encodeLabel]
+
+/-- Encoded `head` helper from Mathlib's `PartrecToTM2` evaluator. -/
+def headLabelCode (k : K') (qCode : Nat) : Nat :=
+  let unrevCode := unrevCodeOf qCode
+  let clearCode := clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k unrevCode
+  moveLabelCode natEnd k K'.rev <|
+    pushLabelCode K'.rev (fun _ : Option Γ' => some Γ'.cons) <|
+      readLabelCode clearCode unrevCode clearCode clearCode clearCode
+
+set_option maxHeartbeats 800000 in
+-- The explicit five-branch `read` expression makes the composed primrec proof large.
+theorem headLabelCode_primrec (k : K') :
+    Primrec (headLabelCode k) := by
+  unfold headLabelCode
+  let hunrev : Primrec (fun qCode : Nat => unrevCodeOf qCode) := unrevCodeOf_primrec
+  let hclear : Primrec (fun qCode : Nat =>
+      clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k (unrevCodeOf qCode)) :=
+    (clearLabelCode_primrec (fun x : Γ' => x = Γ'.consₗ) k).comp hunrev
+  let hread : Primrec (fun qCode : Nat =>
+      readLabelCode
+        (clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k (unrevCodeOf qCode))
+        (unrevCodeOf qCode)
+        (clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k (unrevCodeOf qCode))
+        (clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k (unrevCodeOf qCode))
+        (clearLabelCode (fun x : Γ' => x = Γ'.consₗ) k (unrevCodeOf qCode))) := by
+    exact readLabelCode_primrec.comp
+      (Primrec.pair hclear (Primrec.pair hunrev
+        (Primrec.pair hclear (Primrec.pair hclear hclear))))
+  exact (moveLabelCode_primrec natEnd k K'.rev).comp
+    ((pushLabelCode_primrec K'.rev (fun _ : Option Γ' => some Γ'.cons)).comp hread)
+
+set_option linter.flexible false in
+theorem headLabelCode_encodeLabel (k : K') (q : Λ') :
+    headLabelCode k (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      Turing.PartrecToTM2.Λ'.encodeLabel (head k q) := by
+  let uq : Λ' := unrev q
+  let cq : Λ' := Λ'.clear (fun x : Γ' => x = Γ'.consₗ) k uq
+  let rf : Option Γ' → Λ'
+    | none => cq
+    | some Γ'.consₗ => uq
+    | some Γ'.cons => cq
+    | some Γ'.bit0 => cq
+    | some Γ'.bit1 => cq
+  have hread :
+      readLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel uq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq) =
+        Turing.PartrecToTM2.Λ'.encodeLabel (Λ'.read rf) := by
+    simpa [rf] using readLabelCode_encodeLabel rf
+  unfold headLabelCode
+  rw [unrevCodeOf_encodeLabel]
+  change moveLabelCode natEnd k K'.rev
+      (pushLabelCode K'.rev (fun _ : Option Γ' => some Γ'.cons)
+        (readLabelCode (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel uq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq)
+          (Turing.PartrecToTM2.Λ'.encodeLabel cq))) =
+    Turing.PartrecToTM2.Λ'.encodeLabel (head k q)
+  rw [hread, pushLabelCode_encodeLabel, moveLabelCode_encodeLabel]
+  apply congrArg Turing.PartrecToTM2.Λ'.encodeLabel
+  simp [Turing.PartrecToTM2.head, Turing.PartrecToTM2.unrev, uq, cq, rf]
+  funext s
+  cases s with
+  | none => rfl
+  | some a => cases a <;> rfl
+
+/-- Encoded `trNormal` labels for Mathlib's `PartrecToTM2` evaluator. -/
+def trNormalLabelCode : ToPartrec.Code → Cont' → Nat
+  | ToPartrec.Code.zero', k =>
+      pushLabelCode K'.main (fun _ : Option Γ' => some Γ'.cons) (retLabelCode k)
+  | ToPartrec.Code.succ, k =>
+      headLabelCode K'.main (succLabelCode (retLabelCode k))
+  | ToPartrec.Code.tail, k =>
+      clearLabelCode natEnd K'.main (retLabelCode k)
+  | ToPartrec.Code.cons f fs, k =>
+      pushLabelCode K'.stack (fun _ : Option Γ' => some Γ'.consₗ) <|
+        moveLabelCode (fun _ : Γ' => false) K'.main K'.rev <|
+          copyLabelCode <| trNormalLabelCode f (Cont'.cons₁ fs k)
+  | ToPartrec.Code.comp f g, k =>
+      trNormalLabelCode g (Cont'.comp f k)
+  | ToPartrec.Code.case f g, k =>
+      predLabelCode (trNormalLabelCode f k) (trNormalLabelCode g k)
+  | ToPartrec.Code.fix f, k =>
+      trNormalLabelCode f (Cont'.fix f k)
+
+theorem trNormalLabelCode_encodeLabel (c : ToPartrec.Code) (k : Cont') :
+    trNormalLabelCode c k =
+      Turing.PartrecToTM2.Λ'.encodeLabel (trNormal c k) := by
+  induction c generalizing k with
+  | zero' =>
+      simp [trNormalLabelCode, pushLabelCode_encodeLabel, retLabelCode_encodeLabel]
+  | succ =>
+      simp [trNormalLabelCode, headLabelCode_encodeLabel, succLabelCode_encodeLabel,
+        retLabelCode_encodeLabel]
+  | tail =>
+      simp [trNormalLabelCode, clearLabelCode_encodeLabel, retLabelCode_encodeLabel]
+  | cons f fs ihf ihfs =>
+      simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, pushLabelCode_encodeLabel,
+        moveLabelCode_encodeLabel, copyLabelCode_encodeLabel, ihf]
+  | comp f g ihf ihg =>
+      simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, ihg]
+  | case f g ihf ihg =>
+      simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, predLabelCode_encodeLabel,
+        ihf, ihg]
+  | fix f ih =>
+      simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, ih]
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
