@@ -4174,6 +4174,65 @@ theorem partrecStartedTM2BodyFromLabelCode_primrec (tc : Turing.ToPartrec.Code) 
   intro labelCode
   simp
 
+theorem partrecStartedTM2BodyFromLabelCode_encodeLabel
+    (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') :
+    partrecStartedTM2BodyFromLabelCode tc
+        (Turing.PartrecToTM2.Λ'.encodeLabel q) =
+      relabelTM2Stmt (StartedLabel.wrap tc) (partrecTM2 q) := by
+  cases q with
+  | move p k₁ k₂ q =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_move,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeMovePayload_movePayloadCode,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2MoveBody_eq_relabel]
+  | clear p k q =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_clear,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeClearPayload_clearPayloadCode,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2ClearBody_eq_relabel]
+  | copy q =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_copy,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2CopyBody_eq_relabel]
+  | push k f q =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_push,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodePushPayload_pushPayloadCode,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2PushBody_eq_relabel]
+  | read f =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_read,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodeReadPayload_readPayloadCode,
+        partrecReadGotoPayloadOfCodes_encodeLabel,
+        partrecStartedTM2GotoBody_eq_relabel, partrecTM2]
+  | succ q =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_succ,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2SuccBody_eq_relabel]
+  | pred q₁ q₂ =>
+      simp [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_pred,
+        Turing.PartrecToTM2.Λ'.div_eight_mul_add_of_lt,
+        Turing.PartrecToTM2.Λ'.decodePredPayload_predPayloadCode,
+        partrecTM2LabelOfCode_encodeLabel,
+        partrecStartedTM2PredBody_eq_relabel]
+  | ret k =>
+      simpa [partrecStartedTM2BodyFromLabelCode,
+        Turing.PartrecToTM2.Λ'.encodeLabel_ret,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
+        partrecStartedTM2RetBodyFromPayload_encodeCont tc k
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
