@@ -1253,6 +1253,21 @@ theorem programData_computable_of_stepData
     Computable programData :=
   (programData_primrec_of_stepData stepData hsteps hrows).to_comp
 
+/--
+The remaining global computability target for normalized folded program data is
+the primitive recursiveness of the descriptor list `simStepData`.
+-/
+theorem programData_primrec_of_simStepData
+    (hsteps : Primrec simStepData) :
+    Primrec programData :=
+  programData_primrec_of_stepData simStepData hsteps
+    fun tc => (simRows_eq_stepData tc).symm
+
+theorem programData_computable_of_simStepData
+    (hsteps : Primrec simStepData) :
+    Computable programData :=
+  (programData_primrec_of_simStepData hsteps).to_comp
+
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
   rfl
