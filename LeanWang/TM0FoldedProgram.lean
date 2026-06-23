@@ -1457,6 +1457,22 @@ theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
   intro side hside
   exact simStepDataForStmtMarked_eq_of_label tc q side
 
+theorem simStepDataForStmtLabel_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar =>
+      simStepDataForStmtLabel tc p.1 p.2) := by
+  unfold simStepDataForStmtLabel
+  have hmarked := simStepDataForStmtMarked_primrec_fixed_of_trAux tc haux
+  refine Primrec.list_flatMap (Primrec.const foldSideList) ?_
+  apply Primrec₂.mk
+  exact hmarked.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+
 /--
 Descriptor rows for a source-label index. This is a numeric outer enumeration
 of the same semantic labels used by `simStepData`, avoiding a dependent label
