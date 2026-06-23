@@ -939,6 +939,105 @@ theorem trNormalLabelCode_encodeLabel (c : ToPartrec.Code) (k : Cont') :
   | fix f ih =>
       simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, ih]
 
+/--
+Fuelled encoded `trNormal` labels.
+
+The fuel is a depth bound on the source code. Insufficient fuel returns `0`;
+`trNormalLabelCodeFuel_eq` below shows that `ToPartrec.Code.depth` is enough.
+-/
+def trNormalLabelCodeFuel : Nat → ToPartrec.Code → Cont' → Nat
+  | 0, _, _ => 0
+  | _ + 1, ToPartrec.Code.zero', k =>
+      pushLabelCode K'.main (fun _ : Option Γ' => some Γ'.cons) (retLabelCode k)
+  | _ + 1, ToPartrec.Code.succ, k =>
+      headLabelCode K'.main (succLabelCode (retLabelCode k))
+  | _ + 1, ToPartrec.Code.tail, k =>
+      clearLabelCode natEnd K'.main (retLabelCode k)
+  | fuel + 1, ToPartrec.Code.cons f fs, k =>
+      pushLabelCode K'.stack (fun _ : Option Γ' => some Γ'.consₗ) <|
+        moveLabelCode (fun _ : Γ' => false) K'.main K'.rev <|
+          copyLabelCode <| trNormalLabelCodeFuel fuel f (Cont'.cons₁ fs k)
+  | fuel + 1, ToPartrec.Code.comp f g, k =>
+      trNormalLabelCodeFuel fuel g (Cont'.comp f k)
+  | fuel + 1, ToPartrec.Code.case f g, k =>
+      predLabelCode (trNormalLabelCodeFuel fuel f k) (trNormalLabelCodeFuel fuel g k)
+  | fuel + 1, ToPartrec.Code.fix f, k =>
+      trNormalLabelCodeFuel fuel f (Cont'.fix f k)
+
+theorem trNormalLabelCodeFuel_eq
+    {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
+    trNormalLabelCodeFuel fuel c k = trNormalLabelCode c k := by
+  induction c generalizing fuel k with
+  | zero' =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.zero'
+          omega
+      | succ fuel =>
+          simp [trNormalLabelCodeFuel, trNormalLabelCode]
+  | succ =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.succ
+          omega
+      | succ fuel =>
+          simp [trNormalLabelCodeFuel, trNormalLabelCode]
+  | tail =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.tail
+          omega
+      | succ fuel =>
+          simp [trNormalLabelCodeFuel, trNormalLabelCode]
+  | cons f fs ihf ihfs =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.cons f fs)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_left_lt_cons f fs
+            omega
+          simp [trNormalLabelCodeFuel, trNormalLabelCode, ihf hf]
+  | comp f g ihf ihg =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.comp f g)
+          omega
+      | succ fuel =>
+          have hg : ToPartrec.Code.depth g ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_right_lt_comp f g
+            omega
+          simp [trNormalLabelCodeFuel, trNormalLabelCode, ihg hg]
+  | case f g ihf ihg =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.case f g)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_left_lt_case f g
+            omega
+          have hg : ToPartrec.Code.depth g ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_right_lt_case f g
+            omega
+          simp [trNormalLabelCodeFuel, trNormalLabelCode, ihf hf, ihg hg]
+  | fix f ih =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.fix f)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_lt_fix f
+            omega
+          simp [trNormalLabelCodeFuel, trNormalLabelCode, ih hf]
+
+theorem trNormalLabelCodeFuel_encodeCode_eq (c : ToPartrec.Code) (k : Cont') :
+    trNormalLabelCodeFuel (ToPartrec.Code.encodeCode c + 1) c k =
+      trNormalLabelCode c k :=
+  trNormalLabelCodeFuel_eq (ToPartrec.Code.depth_le_encodeCode_succ c)
+
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
   | c@ToPartrec.Code.zero', k => trStmtsWeightCode wCode (trNormalLabelCode c k)
@@ -967,6 +1066,137 @@ def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
           (trStmtsWeightCode wCode
               (clearLabelCode natEnd K'.main <| trNormalLabelCode f (Cont'.fix f k)) +
             wCode (retLabelCode k)))
+
+/--
+Fuelled numeric mirror of `codeSuppWeightCode'`.
+
+Recursive calls consume one unit of source-code depth fuel. The continuation may
+grow, so this fuel is independent of the encoding size of the `(code,
+continuation)` pair.
+-/
+def codeSuppWeightCodeFuel' (wCode : Nat → Nat) : Nat → ToPartrec.Code → Cont' → Nat
+  | 0, _, _ => 0
+  | fuel + 1, c@ToPartrec.Code.zero', k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k)
+  | fuel + 1, c@ToPartrec.Code.succ, k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k)
+  | fuel + 1, c@ToPartrec.Code.tail, k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k)
+  | fuel + 1, c@(ToPartrec.Code.cons f fs), k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k) +
+        (codeSuppWeightCodeFuel' wCode fuel f (Cont'.cons₁ fs k) +
+          (trStmtsWeightCode wCode
+              (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+                move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+                    trNormalLabelCodeFuel fuel fs (Cont'.cons₂ k)) +
+            (codeSuppWeightCodeFuel' wCode fuel fs (Cont'.cons₂ k) +
+              trStmtsWeightCode wCode (headLabelCode K'.stack <| retLabelCode k))))
+  | fuel + 1, c@(ToPartrec.Code.comp f g), k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k) +
+        (codeSuppWeightCodeFuel' wCode fuel g (Cont'.comp f k) +
+          (trStmtsWeightCode wCode (trNormalLabelCodeFuel fuel f k) +
+            codeSuppWeightCodeFuel' wCode fuel f k))
+  | fuel + 1, c@(ToPartrec.Code.case f g), k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k) +
+        (codeSuppWeightCodeFuel' wCode fuel f k + codeSuppWeightCodeFuel' wCode fuel g k)
+  | fuel + 1, c@(ToPartrec.Code.fix f), k =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuel (fuel + 1) c k) +
+        (codeSuppWeightCodeFuel' wCode fuel f (Cont'.fix f k) +
+          (trStmtsWeightCode wCode
+              (clearLabelCode natEnd K'.main <|
+                trNormalLabelCodeFuel fuel f (Cont'.fix f k)) +
+            wCode (retLabelCode k)))
+
+theorem codeSuppWeightCodeFuel'_eq
+    (wCode : Nat → Nat) {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
+    codeSuppWeightCodeFuel' wCode fuel c k = codeSuppWeightCode' wCode c k := by
+  induction c generalizing fuel k with
+  | zero' =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.zero'
+          omega
+      | succ fuel =>
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h]
+  | succ =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.succ
+          omega
+      | succ fuel =>
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h]
+  | tail =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos ToPartrec.Code.tail
+          omega
+      | succ fuel =>
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h]
+  | cons f fs ihf ihfs =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.cons f fs)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_left_lt_cons f fs
+            omega
+          have hfs : ToPartrec.Code.depth fs ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_right_lt_cons f fs
+            omega
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h, trNormalLabelCodeFuel_eq hfs,
+            ihf hf, ihfs hfs]
+  | comp f g ihf ihg =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.comp f g)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_left_lt_comp f g
+            omega
+          have hg : ToPartrec.Code.depth g ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_right_lt_comp f g
+            omega
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h, trNormalLabelCodeFuel_eq hf,
+            ihf hf, ihg hg]
+  | case f g ihf ihg =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.case f g)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_left_lt_case f g
+            omega
+          have hg : ToPartrec.Code.depth g ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_right_lt_case f g
+            omega
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h, ihf hf, ihg hg]
+  | fix f ih =>
+      cases fuel with
+      | zero =>
+          have hpos := ToPartrec.Code.depth_pos (ToPartrec.Code.fix f)
+          omega
+      | succ fuel =>
+          have hf : ToPartrec.Code.depth f ≤ fuel := by
+            have hlt := ToPartrec.Code.depth_lt_fix f
+            omega
+          simp [codeSuppWeightCodeFuel', codeSuppWeightCode',
+            trNormalLabelCodeFuel_eq h, trNormalLabelCodeFuel_eq hf, ih hf]
+
+theorem codeSuppWeightCodeFuel'_encodeCode_eq
+    (wCode : Nat → Nat) (c : ToPartrec.Code) (k : Cont') :
+    codeSuppWeightCodeFuel' wCode (ToPartrec.Code.encodeCode c + 1) c k =
+      codeSuppWeightCode' wCode c k :=
+  codeSuppWeightCodeFuel'_eq wCode (ToPartrec.Code.depth_le_encodeCode_succ c)
 
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
