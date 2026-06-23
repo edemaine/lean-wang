@@ -1035,6 +1035,14 @@ theorem parse?_ofStmt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
   unfold parse?
   simpa using parseWithFuel_ofStmt_append (tc := tc) stmt []
 
+theorem ofStmt_injective {tc : Turing.ToPartrec.Code} :
+    Function.Injective (ofStmt (tc := tc)) := by
+  intro a b h
+  have ha := parse?_ofStmt (tc := tc) a
+  rw [h] at ha
+  rw [parse?_ofStmt (tc := tc) b] at ha
+  exact (congrArg Prod.fst (Option.some.inj ha)).symm
+
 set_option linter.flexible false in
 theorem ofStmt_foldl_validStep {tc : Turing.ToPartrec.Code}
     (stmt : Stmt tc) (slots : Nat) :
@@ -1065,6 +1073,18 @@ theorem valid_ofStmt {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) :
     Valid (tc := tc) (ofStmt stmt) := by
   unfold Valid
   simpa using ofStmt_foldl_validStep (tc := tc) stmt 0
+
+/-- Valid preorder-list representation of a concrete started TM2 statement. -/
+abbrev ValidCode (tc : Turing.ToPartrec.Code) : Type :=
+  { nodes : List (PartrecStartedTM2StmtNode tc) // Valid (tc := tc) nodes }
+
+def toValidCode {tc : Turing.ToPartrec.Code} (stmt : Stmt tc) : ValidCode tc :=
+  ⟨ofStmt stmt, valid_ofStmt stmt⟩
+
+theorem toValidCode_injective {tc : Turing.ToPartrec.Code} :
+    Function.Injective (toValidCode (tc := tc)) := by
+  intro a b h
+  exact ofStmt_injective (congrArg Subtype.val h)
 
 end PartrecStartedTM2StmtNode
 
