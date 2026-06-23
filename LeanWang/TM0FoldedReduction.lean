@@ -164,6 +164,22 @@ theorem sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom
   exact hlabel
 
 /--
+The older global offset-decoder target implies the source-specific decoder
+target by precomposing with the `Nat.Partrec.Code` translation.
+-/
+theorem sourceSimStepDataForLabelIndexFrom_primrec_of_global
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexFrom
+        rfl
+
+/--
 Global primitive recursiveness of the folded descriptor list is enough for the
 source-level normalized folded program-data map used by the final reduction.
 -/
