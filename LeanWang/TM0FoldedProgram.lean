@@ -3201,6 +3201,95 @@ theorem labelAtByStatementFromWithPositionCode?_primrec_fixed
   exact (Primrec.fst.comp hiter).of_eq fun p => by
     rfl
 
+theorem labelAtByStatementFromWithPositionCodeStep?_fixed_of_found
+    (tc : Turing.ToPartrec.Code) (r : SourceLabel tc × Nat) (k i : Nat) :
+    labelAtByStatementFromWithPositionCodeStep? tc (some r, k, i) =
+      (some r, k, i) := by
+  rfl
+
+theorem labelAtByStatementFromWithPositionCodeStep?_fixed_of_stmt_none
+    (tc : Turing.ToPartrec.Code) {k i : Nat} {v : PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = none) :
+    labelAtByStatementFromWithPositionCodeStep? tc (none, k, i) =
+      (none, k, i) := by
+  unfold labelAtByStatementFromWithPositionCodeStep?
+  simp [hv, hstmt]
+
+theorem labelAtByStatementFromWithPositionCode?_zero
+    (tc : Turing.ToPartrec.Code) (k i : Nat) :
+    labelAtByStatementFromWithPositionCode? tc 0 k i = none := by
+  rfl
+
+theorem labelAtByStatementFromWithPositionCode?_succ_of_var_none
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat}
+    (hv : TM0Route.partrecVarList[i]? = none) :
+    labelAtByStatementFromWithPositionCode? tc (fuel + 1) k i =
+      labelAtByStatementFromWithPositionCode? tc fuel
+        (k + 1) (i - TM0Route.partrecVarList.length) := by
+  unfold labelAtByStatementFromWithPositionCode?
+  rw [Function.iterate_succ_apply]
+  unfold labelAtByStatementFromWithPositionCodeStep?
+  simp [hv]
+
+theorem labelAtByStatementFromWithPositionCode?_succ_of_stmt_none
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {v : PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = none) :
+    labelAtByStatementFromWithPositionCode? tc (fuel + 1) k i = none := by
+  unfold labelAtByStatementFromWithPositionCode?
+  rw [Function.iterate_succ_apply]
+  have hfixed := labelAtByStatementFromWithPositionCodeStep?_fixed_of_stmt_none
+    tc hv hstmt
+  rw [hfixed]
+  rw [Function.iterate_fixed hfixed fuel]
+
+theorem labelAtByStatementFromWithPositionCode?_succ_of_stmt_some
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {v : PartrecVar}
+    {stmt : Option (SourceStmt tc)}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = some stmt) :
+    labelAtByStatementFromWithPositionCode? tc (fuel + 1) k i =
+      some ((((stmt, v) : SourceLabel tc),
+        1 + k * TM0Route.partrecVarList.length + i)) := by
+  unfold labelAtByStatementFromWithPositionCode?
+  rw [Function.iterate_succ_apply]
+  unfold labelAtByStatementFromWithPositionCodeStep?
+  simp only [hv, hstmt, Option.map_some]
+  have hfixed := labelAtByStatementFromWithPositionCodeStep?_fixed_of_found
+    tc ((((stmt, v) : SourceLabel tc),
+      1 + k * TM0Route.partrecVarList.length + i)) k i
+  change ((labelAtByStatementFromWithPositionCodeStep? tc)^[fuel]
+      (some ((((stmt, v) : SourceLabel tc),
+        1 + k * TM0Route.partrecVarList.length + i)), k, i)).1 =
+    some ((((stmt, v) : SourceLabel tc),
+      1 + k * TM0Route.partrecVarList.length + i))
+  rw [Function.iterate_fixed hfixed fuel]
+  rfl
+
+theorem labelAtByStatementFromWithPositionCode?_fst_eq
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    (labelAtByStatementFromWithPositionCode? tc fuel k i).map Prod.fst =
+      TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [labelAtByStatementFromWithPositionCode?_zero,
+        TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero]
+  | succ fuel ih =>
+      rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_succ]
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hv]
+          exact ih (k + 1) (i - TM0Route.partrecVarList.length)
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc k with
+          | none =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_none tc hv hstmt]
+              simp
+          | some stmt =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt]
+              rfl
+
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
