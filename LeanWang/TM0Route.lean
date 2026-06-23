@@ -7123,6 +7123,40 @@ noncomputable def tm2to1TrNormalBody (tc : Turing.ToPartrec.Code)
   | some node => tm2to1TrNormalBodyForHead tc ((stmt, node), deps)
   | none => none
 
+theorem tm2to1TrNormalBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : PartrecStartedTM2StmtNode.ValidCode tc ×
+      List (PartrecStartedTM0Stmt tc) => tm2to1TrNormalBody tc p.1 p.2) := by
+  have hstmt : Primrec (fun p : PartrecStartedTM2StmtNode.ValidCode tc ×
+      List (PartrecStartedTM0Stmt tc) =>
+      PartrecStartedTM2StmtNode.ofValidCode p.1) :=
+    (PartrecStartedTM2StmtNode.ofValidCode_primrec tc).comp Primrec.fst
+  have hhead : Primrec (fun p : PartrecStartedTM2StmtNode.ValidCode tc ×
+      List (PartrecStartedTM0Stmt tc) =>
+      PartrecStartedTM2StmtNode.ofStmtHead? (PartrecStartedTM2StmtNode.ofValidCode p.1)) :=
+    (PartrecStartedTM2StmtNode.ofStmtHead?_primrec tc).comp hstmt
+  have hnone : Primrec (fun _p : PartrecStartedTM2StmtNode.ValidCode tc ×
+      List (PartrecStartedTM0Stmt tc) =>
+      (none : Option (PartrecStartedTM0Stmt tc))) :=
+    Primrec.const none
+  have hsome : Primrec₂
+      (fun p : PartrecStartedTM2StmtNode.ValidCode tc × List (PartrecStartedTM0Stmt tc) =>
+        fun node : PartrecStartedTM2StmtNode tc =>
+          tm2to1TrNormalBodyForHead tc
+            ((PartrecStartedTM2StmtNode.ofValidCode p.1, node), p.2)) := by
+    apply Primrec₂.mk
+    exact (tm2to1TrNormalBodyForHead_primrec tc).comp
+      (Primrec.pair
+        (Primrec.pair
+          ((PartrecStartedTM2StmtNode.ofValidCode_primrec tc).comp
+            (Primrec.fst.comp Primrec.fst))
+          Primrec.snd)
+        (Primrec.snd.comp Primrec.fst))
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun p => by
+    rcases p with ⟨code, deps⟩
+    generalize h :
+      PartrecStartedTM2StmtNode.ofStmtHead? (PartrecStartedTM2StmtNode.ofValidCode code) = head
+    cases head <;> simp [tm2to1TrNormalBody, h]
+
 set_option linter.flexible false in
 theorem tm2to1TrNormalBody_toValidCode
     (tc : Turing.ToPartrec.Code) (stmt : PartrecStartedTM2Stmt tc) :
