@@ -2516,6 +2516,63 @@ theorem codeSuppWeightCodeFuelRows'_lookup_codeSuppWeightCode'
       le_rfl).2 c k le_rfl le_rfl
   simpa [codeSuppWeightCodeFuel'_encodeCode_eq] using hlookup
 
+theorem codeSuppWeightCodeFuelRows'_lookup_trNormalLabelCode
+    (wCode : Nat → Nat) (c : ToPartrec.Code) (k : Cont') :
+    codeContStateLookup
+        (codeSuppWeightCodeFuelRows' wCode (ToPartrec.Code.encodeCode c + 1)
+          (codeContStateBound (ToPartrec.Code.encodeCode c)
+            (contEncodeFuelBound (ToPartrec.Code.encodeCode c + 1)
+              (ToPartrec.Code.encodeCode c)
+              (Turing.PartrecToTM2.Cont'.encodeCont k)))).1 c k =
+      trNormalLabelCode c k := by
+  have hlookup :=
+    (codeSuppWeightCodeFuelRows'_lookup_eq (wCode := wCode)
+      (fuel := ToPartrec.Code.encodeCode c + 1)
+      (codeBound := ToPartrec.Code.encodeCode c)
+      (contBound := Turing.PartrecToTM2.Cont'.encodeCont k)
+      (bound := codeContStateBound (ToPartrec.Code.encodeCode c)
+        (contEncodeFuelBound (ToPartrec.Code.encodeCode c + 1)
+          (ToPartrec.Code.encodeCode c)
+          (Turing.PartrecToTM2.Cont'.encodeCont k)))
+      le_rfl).1 c k le_rfl le_rfl
+  simpa [trNormalLabelCodeFuel_encodeCode_eq] using hlookup
+
+theorem trNormalLabelCode_primrec :
+    Primrec (fun p : ToPartrec.Code × Cont' => trNormalLabelCode p.1 p.2) := by
+  let wCode : Nat → Nat := fun _ => 0
+  let fuel : ToPartrec.Code × Cont' → Nat := fun p => ToPartrec.Code.encodeCode p.1 + 1
+  let codeBound : ToPartrec.Code × Cont' → Nat := fun p => ToPartrec.Code.encodeCode p.1
+  let contBound : ToPartrec.Code × Cont' → Nat := fun p =>
+    Turing.PartrecToTM2.Cont'.encodeCont p.2
+  have hw : Primrec wCode := Primrec.const 0
+  have hfuel : Primrec fuel := by
+    exact Primrec.succ.comp (codeEncode_primrec.comp Primrec.fst)
+  have hcodeBound : Primrec codeBound := by
+    exact codeEncode_primrec.comp Primrec.fst
+  have hcontBound : Primrec contBound := by
+    exact contEncode_primrec.comp Primrec.snd
+  have hcontFuelBound : Primrec (fun p : ToPartrec.Code × Cont' =>
+      contEncodeFuelBound (fuel p) (codeBound p) (contBound p)) := by
+    exact contEncodeFuelBound_primrec.comp
+      (Primrec.pair (Primrec.pair hfuel hcodeBound) hcontBound)
+  have hbound : Primrec (fun p : ToPartrec.Code × Cont' =>
+      codeContStateBound (codeBound p)
+        (contEncodeFuelBound (fuel p) (codeBound p) (contBound p))) := by
+    exact codeContStateBound_primrec.comp (Primrec.pair hcodeBound hcontFuelBound)
+  have hrows : Primrec (fun p : ToPartrec.Code × Cont' =>
+      codeSuppWeightCodeFuelRows' wCode (fuel p)
+        (codeContStateBound (codeBound p)
+          (contEncodeFuelBound (fuel p) (codeBound p) (contBound p)))) := by
+    exact (codeSuppWeightCodeFuelRows'_primrec hw).comp (Primrec.pair hfuel hbound)
+  have hrow : Primrec (fun p : ToPartrec.Code × Cont' =>
+      (codeSuppWeightCodeFuelRows' wCode (fuel p)
+        (codeContStateBound (codeBound p)
+          (contEncodeFuelBound (fuel p) (codeBound p) (contBound p)))).1) :=
+    Primrec.fst.comp hrows
+  exact (codeContStateLookup_primrec.comp
+    (Primrec.pair hrow Primrec.id)).of_eq fun p => by
+      exact codeSuppWeightCodeFuelRows'_lookup_trNormalLabelCode wCode p.1 p.2
+
 theorem codeSuppWeightCode'_primrec
     {wCode : Nat → Nat} (hw : Primrec wCode) :
     Primrec (fun p : ToPartrec.Code × Cont' => codeSuppWeightCode' wCode p.1 p.2) := by

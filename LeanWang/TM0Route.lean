@@ -3545,6 +3545,13 @@ theorem partrecTM2Label_headStackRet_primrec :
       exact PartrecToTM2SupportList.headLabelCode_encodeLabel
         Turing.PartrecToTM2.K'.stack (Turing.PartrecToTM2.Λ'.ret k))
 
+theorem partrecTM2Label_trNormal_primrec :
+    Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.trNormal p.1 p.2) := by
+  exact Primrec.encode_iff.1
+    (PartrecToTM2SupportList.trNormalLabelCode_primrec.of_eq fun p => by
+      exact PartrecToTM2SupportList.trNormalLabelCode_encodeLabel p.1 p.2)
+
 noncomputable def partrecStartedTM2RetCons₂Body (tc : Turing.ToPartrec.Code)
     (k : Turing.PartrecToTM2.Cont') :
     PartrecStartedTM2Stmt tc :=
@@ -3562,6 +3569,25 @@ theorem partrecStartedTM2RetCons₂Body_eq_relabel
       relabelTM2Stmt (StartedLabel.wrap tc)
         (partrecTM2 (Turing.PartrecToTM2.Λ'.ret
           (Turing.PartrecToTM2.Cont'.cons₂ k))) := by
+  rfl
+
+noncomputable def partrecStartedTM2RetCompBody (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    PartrecStartedTM2Stmt tc :=
+  partrecStartedTM2ConstGotoBody tc
+    (Turing.PartrecToTM2.trNormal p.1 p.2)
+
+theorem partrecStartedTM2RetCompBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetCompBody tc) :=
+  (partrecStartedTM2ConstGotoBody_primrec tc).comp partrecTM2Label_trNormal_primrec
+
+theorem partrecStartedTM2RetCompBody_eq_relabel
+    (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    partrecStartedTM2RetCompBody tc p =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret
+          (Turing.PartrecToTM2.Cont'.comp p.1 p.2))) := by
   rfl
 
 def partrecLoadNonePayload : PartrecStartedTM2StmtNode.LoadCode :=
