@@ -315,8 +315,8 @@ theorem sourceProgramData_computable_of_global_labelIndexFromWithCode
       TM0FoldedCompiler.simStepDataForLabelIndexFromWithCode
         p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_labelIndexFromWithCode
-    (sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global hindex)
+  (TM0FoldedCompiler.programData_computable_of_simStepDataForLabelIndexFromWithCode hindex).comp
+    NatPartrecToToPartrec.translate_computable
 
 theorem sourceProgramData_computable_of_global_labelIndexFromWithCode'
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
