@@ -96,9 +96,11 @@ implementation side may still use "compiler"/"compilation" when describing the
 concrete construction of finite program data. In prose, "reduction" should be
 the default word for the mathematical notion.
 
-There is also a TM2/TM0 factoring of the same obligation. The repository now
-provides a local natural-number encoding, `Denumerable` instance, and hence
-`Primcodable` instance for Mathlib's `Turing.ToPartrec.Code`.
+The only live machine-side source route now factors through Mathlib's TM2,
+TM1, and TM0 translations before entering the local folded one-sided TM0 model.
+The repository provides a local natural-number encoding, `Denumerable`
+instance, and hence `Primcodable` instance for Mathlib's
+`Turing.ToPartrec.Code`.
 `NatPartrecToToPartrec.translate` is the computable translation from unary
 `Nat.Partrec.Code` to the corresponding Mathlib TM2 evaluator code, and its
 correctness is proved directly in `NatPartrecToToPartrec`.
@@ -107,12 +109,13 @@ The live route now factors through a finite one-sided TM0 reduction: first use
 reduce the resulting two-sided Mathlib TM0 machine/input to the local finite
 one-sided TM0 model by folding the two tape directions into one tape. This is
 implemented in the current code as concrete program construction, but the proof
-should treat it as the mathematical reduction. A direct TM2-to-table route
-should not be reintroduced. The table-machine definitions remain live only
-because the current Wang-tile layer consumes `TableProgram`; they are fed by
-the concrete compatibility bridge `PostProgram.toTableProgram` until that
-layer is replaced by direct finite-TM0 tiles. This bridge starts only after the
-source machine has already been reduced to finite one-sided TM0 data.
+should treat it as the mathematical reduction. There is no direct TM2-to-table
+reduction in the live route, and one should not be reintroduced. The
+table-machine definitions remain live only because the current Wang-tile layer
+consumes `TableProgram`; they are fed by the concrete compatibility bridge
+`PostProgram.toTableProgram` until that layer is replaced by direct finite-TM0
+tiles. This bridge starts only after the source machine has already been
+reduced to finite one-sided TM0 data.
 Together these pieces feed the fixed-domino, fixed-corner, encoded scaffolded
 domino, and unencoded scaffolded domino theorem surfaces from the source-level
 folded finite-TM0 factorization using the concrete source-code translation into
