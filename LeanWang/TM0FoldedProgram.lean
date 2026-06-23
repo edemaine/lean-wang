@@ -3148,6 +3148,47 @@ theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
     | some q =>
         exact simStepDataForStmtLabel_eq_of_label tc q
 
+theorem simStepDataForLabelIndexFromWithCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithCode tc p.1 p.2.1 p.2.2) := by
+  have hlookup := TM0Route.partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed tc
+  have hlabel := simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux tc haux
+  have hstate : Primrec (fun q : SourceLabel tc =>
+      TM0FiniteCompiler.stateCode tc (q.1, q.2)) :=
+    (TM0FiniteCompiler.stateCode_primrec_fixed tc).of_eq fun _ => rfl
+  have hnone : Primrec (fun _p : Nat × Nat × Nat => ([] : List SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun _p : Nat × Nat × Nat => fun q : SourceLabel tc =>
+      simStepDataForStmtLabelWithCode tc
+        (TM0FiniteCompiler.stateCode tc (q.1, q.2)) q.1 q.2) := by
+    apply Primrec₂.mk
+    exact hlabel.comp
+      (Primrec.pair
+        (hstate.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.snd.comp Primrec.snd)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    unfold simStepDataForLabelIndexFromWithCode
+    cases TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2 <;> rfl
+
+theorem simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
+theorem simStepDataForLabelIndexFromWithCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
 theorem simStepDataForLabelIndexFrom_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
