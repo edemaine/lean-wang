@@ -193,6 +193,12 @@ work is the recursive concrete `TM2.Stmt` type and then `TM2to1.Λ'`.
 Separately, `TM0Route.tm2to1TrNormalSupportLength` is now the numeric mirror
 of `tm1StmtSupportLength (Turing.TM2to1.trNormal stmt)`, avoiding a direct
 dependency on encoded TM1 statements for this part of the count proof.
+`TM0Route.partrecTM2SupportLength` now also mirrors
+`tm2to1StmtSupportLength (partrecTM2 q)` directly on concrete
+`PartrecToTM2` evaluator labels, and
+`partrecStartedTM1LabelCount_eq_data` rewrites the started-TM1 label count to
+this statement-free form. The next count step is to prove this label-level
+summand and the executable evaluator label list primitive recursive.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final

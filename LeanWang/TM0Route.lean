@@ -789,6 +789,67 @@ theorem tm2to1StmtSupportList_length {Λ : Type}
   | halt =>
       simp [tm2to1StmtSupportList, tm2to1StmtSupportLength]
 
+/--
+Auxiliary-label count contributed by a `PartrecToTM2` continuation when its
+`ret` label is translated through Mathlib's TM2-to-TM1 construction.
+-/
+def partrecTM2RetSupportLength : Turing.PartrecToTM2.Cont' → Nat
+  | Turing.PartrecToTM2.Cont'.fix _ _ => 2
+  | _ => 0
+
+/--
+Numeric mirror of `tm2to1StmtSupportLength (partrecTM2 q)`, specialized to
+Mathlib's concrete `PartrecToTM2` evaluator labels.
+
+This avoids needing a `Primcodable` instance for arbitrary recursive
+`TM2.Stmt` values when proving computability of the source reduction: for the
+evaluator machine, the TM2-to-TM1 auxiliary-label contribution is determined by
+the outer evaluator label constructor.
+-/
+def partrecTM2SupportLength : Turing.PartrecToTM2.Λ' → Nat
+  | Turing.PartrecToTM2.Λ'.move .. => 4
+  | Turing.PartrecToTM2.Λ'.push .. => 2
+  | Turing.PartrecToTM2.Λ'.read .. => 0
+  | Turing.PartrecToTM2.Λ'.clear .. => 2
+  | Turing.PartrecToTM2.Λ'.copy .. => 6
+  | Turing.PartrecToTM2.Λ'.succ .. => 10
+  | Turing.PartrecToTM2.Λ'.pred .. => 8
+  | Turing.PartrecToTM2.Λ'.ret k => partrecTM2RetSupportLength k
+
+theorem tm2to1StmtSupportLength_partrecTM2
+    (q : Turing.PartrecToTM2.Λ') :
+    tm2to1StmtSupportLength (partrecTM2 q) = partrecTM2SupportLength q := by
+  cases q with
+  | move p k₁ k₂ q =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.push',
+        tm2to1StmtSupportLength]
+  | push k f q =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        tm2to1StmtSupportLength]
+  | read f =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        tm2to1StmtSupportLength]
+  | clear p k q =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', tm2to1StmtSupportLength]
+  | copy q =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.push',
+        tm2to1StmtSupportLength]
+  | succ q =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', tm2to1StmtSupportLength]
+  | pred q₁ q₂ =>
+      simp [partrecTM2, partrecTM2SupportLength, Turing.PartrecToTM2.tr,
+        Turing.PartrecToTM2.pop', Turing.PartrecToTM2.peek',
+        tm2to1StmtSupportLength]
+  | ret k =>
+      cases k <;>
+        simp [partrecTM2, partrecTM2SupportLength, partrecTM2RetSupportLength,
+          Turing.PartrecToTM2.tr, Turing.PartrecToTM2.pop',
+          tm2to1StmtSupportLength]
+
 theorem tm2to1StmtSupportLength_relabel {Λ Λ' : Type}
     (f : Λ → Λ') (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
     tm2to1StmtSupportLength (relabelTM2Stmt f stmt) =
@@ -899,6 +960,25 @@ def partrecStartedTM1LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM2LabelCount tc +
     ((PartrecToTM2SupportList.labelList tc).map fun q =>
       tm2to1StmtSupportLength (partrecTM2 q)).sum
+
+/--
+Statement-free numeric form of `partrecStartedTM1LabelCount`.
+
+The summand is the label-level mirror `partrecTM2SupportLength`, so this is the
+form that the eventual primitive-recursion proof should target.
+-/
+def partrecStartedTM1LabelCountData (tc : Turing.ToPartrec.Code) : Nat :=
+  partrecStartedTM2LabelCount tc +
+    ((PartrecToTM2SupportList.labelList tc).map partrecTM2SupportLength).sum
+
+theorem partrecStartedTM1LabelCount_eq_data (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM1LabelCount tc = partrecStartedTM1LabelCountData tc := by
+  unfold partrecStartedTM1LabelCount partrecStartedTM1LabelCountData
+  apply congrArg (fun n => partrecStartedTM2LabelCount tc + n)
+  apply congrArg List.sum
+  apply List.map_congr_left
+  intro q _hq
+  exact tm2to1StmtSupportLength_partrecTM2 q
 
 theorem partrecStartedTM1LabelList_length (tc : Turing.ToPartrec.Code) :
     (partrecStartedTM1LabelList tc).length = partrecStartedTM1LabelCount tc := by
