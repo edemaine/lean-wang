@@ -568,6 +568,21 @@ instance (tc : Turing.ToPartrec.Code) : DecidableEq (StartedLabel tc) := by
 instance instPrimcodable (tc : Turing.ToPartrec.Code) : Primcodable (StartedLabel tc) :=
   Primcodable.ofEquiv Turing.PartrecToTM2.Λ' (equivVal tc)
 
+theorem val_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (StartedLabel.val : StartedLabel tc → Turing.PartrecToTM2.Λ') := by
+  change @Primrec (StartedLabel tc) Turing.PartrecToTM2.Λ'
+    (Primcodable.ofEquiv Turing.PartrecToTM2.Λ' (equivVal tc))
+    Turing.PartrecToTM2.Λ'.instPrimcodableLabel
+    (equivVal tc)
+  exact Primrec.of_equiv
+
+theorem wrap_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (wrap tc) := by
+  change @Primrec Turing.PartrecToTM2.Λ' (StartedLabel tc) _
+    (Primcodable.ofEquiv Turing.PartrecToTM2.Λ' (equivVal tc))
+    (equivVal tc).symm
+  exact Primrec.of_equiv_symm
+
 end StartedLabel
 
 instance instDecidableEqPartrecStartedTM0Symbol :
