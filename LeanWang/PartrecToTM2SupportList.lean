@@ -2458,6 +2458,27 @@ theorem codeSuppWeightCodeFuel'_encodeCode_eq
       codeSuppWeightCode' wCode c k :=
   codeSuppWeightCodeFuel'_eq wCode (ToPartrec.Code.depth_le_encodeCode_succ c)
 
+theorem codeSuppWeightCodeFuelRows'_lookup_codeSuppWeightCode'
+    (wCode : Nat → Nat) (c : ToPartrec.Code) (k : Cont') :
+    codeContStateLookup
+        (codeSuppWeightCodeFuelRows' wCode (ToPartrec.Code.encodeCode c + 1)
+          (codeContStateBound (ToPartrec.Code.encodeCode c)
+            (contEncodeFuelBound (ToPartrec.Code.encodeCode c + 1)
+              (ToPartrec.Code.encodeCode c)
+              (Turing.PartrecToTM2.Cont'.encodeCont k)))).2 c k =
+      codeSuppWeightCode' wCode c k := by
+  have hlookup :=
+    (codeSuppWeightCodeFuelRows'_lookup_eq (wCode := wCode)
+      (fuel := ToPartrec.Code.encodeCode c + 1)
+      (codeBound := ToPartrec.Code.encodeCode c)
+      (contBound := Turing.PartrecToTM2.Cont'.encodeCont k)
+      (bound := codeContStateBound (ToPartrec.Code.encodeCode c)
+        (contEncodeFuelBound (ToPartrec.Code.encodeCode c + 1)
+          (ToPartrec.Code.encodeCode c)
+          (Turing.PartrecToTM2.Cont'.encodeCont k)))
+      le_rfl).2 c k le_rfl le_rfl
+  simpa [codeSuppWeightCodeFuel'_encodeCode_eq] using hlookup
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
