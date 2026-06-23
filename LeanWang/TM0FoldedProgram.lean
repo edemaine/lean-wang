@@ -1423,6 +1423,30 @@ theorem programData_computable_of_simStepDataForLabelIndexStart
     Computable programData :=
   (programData_primrec_of_simStepDataForLabelIndexStart hindex).to_comp
 
+/--
+The fully offset descriptor decoder is enough for primitive recursiveness of
+normalized folded program data. This isolates the remaining local recursion:
+given `(tc, fuel, statementOffset, residualIndex)`, produce the descriptor rows
+for the decoded label.
+-/
+theorem programData_primrec_of_simStepDataForLabelIndexFrom
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataForLabelIndexStart <| by
+    unfold simStepDataForLabelIndexStart
+    exact hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair
+          (TM0Route.partrecStartedTM0StatementCount_primrec.comp Primrec.fst)
+          (Primrec.pair (Primrec.const 0) Primrec.snd)))
+
+theorem programData_computable_of_simStepDataForLabelIndexFrom
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndexFrom hindex).to_comp
+
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
   rfl

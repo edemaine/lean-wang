@@ -107,6 +107,26 @@ theorem sourceProgramData_computable_of_global_simStepData'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_global_simStepData hsteps).of_eq fun _ => rfl
 
+/--
+The current lowest-level folded computability target, phrased at source-code
+level: primitive recursiveness of the fully offset label-index descriptor
+decoder implies computability of the normalized folded finite-TM0 program data
+used by the final reduction.
+-/
+theorem sourceProgramData_computable_of_global_labelIndexFrom
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourceProgramData :=
+  (TM0FoldedCompiler.programData_computable_of_simStepDataForLabelIndexFrom hindex).comp
+    NatPartrecToToPartrec.translate_computable
+
+theorem sourceProgramData_computable_of_global_labelIndexFrom'
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_global_labelIndexFrom hindex).of_eq fun _ => rfl
+
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
 def sourceFixedDominoReduction (_h : SourceObligations) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData
