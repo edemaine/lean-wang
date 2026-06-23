@@ -1166,6 +1166,62 @@ theorem simStepDataOfStmtTransition_eq_of_label (tc : Turing.ToPartrec.Code)
   cases h : TM0Route.partrecStartedTM0Machine tc (stmt, v) (foldedRead side left right) <;>
     simp
 
+theorem simStepDataOfStmtTransition_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol × SourceSymbol =>
+      simStepDataOfStmtTransition tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2) := by
+  let readFn :
+      Option (SourceStmt tc) × PartrecVar × FoldSide × Bool × SourceSymbol ×
+        SourceSymbol → SourceSymbol := fun p =>
+    foldedRead p.2.2.1 p.2.2.2.2.1 p.2.2.2.2.2
+  have hread : Primrec readFn := by
+    exact foldedRead_primrec.comp
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp Primrec.snd))))
+          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp Primrec.snd))))))
+  have hlookup : Primrec (fun p : Option (SourceStmt tc) × PartrecVar ×
+      FoldSide × Bool × SourceSymbol × SourceSymbol =>
+      sourceMachineStepOfStmt tc p.1 p.2.1 (readFn p)) := by
+    exact (sourceMachineStepOfStmt_primrec_fixed_of_trAux tc haux).comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd) hread))
+  have hsome : Primrec₂
+      (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+          SourceSymbol × SourceSymbol =>
+        fun step : SourceLabel tc × Turing.TM0.Stmt SourceSymbol =>
+          simStepDataOfStep tc p.2.2.1 p.2.2.2.1 (p.1, p.2.1) step.1
+            p.2.2.2.2.1 p.2.2.2.2.2 step.2) := by
+    apply Primrec₂.mk
+    exact (simStepDataOfStep_primrec_fixed tc).comp
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+            (Primrec.snd.comp Primrec.fst))))
+          (Primrec.pair
+            (Primrec.pair (Primrec.fst.comp Primrec.fst)
+              (Primrec.fst.comp (Primrec.snd.comp Primrec.fst)))
+            (Primrec.pair (Primrec.fst.comp Primrec.snd)
+              (Primrec.pair
+                (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp
+                  (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))))
+                (Primrec.pair
+                  (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp
+                    (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))))
+                  (Primrec.snd.comp Primrec.snd)))))))
+  exact (Primrec.option_map hlookup hsome).of_eq fun p => by
+    unfold simStepDataOfStmtTransition readFn
+    cases sourceMachineStepOfStmt tc p.1 p.2.1
+        (foldedRead p.2.2.1 p.2.2.2.2.1 p.2.2.2.2.2) <;> rfl
+
 theorem simStepDataOfTransition_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
