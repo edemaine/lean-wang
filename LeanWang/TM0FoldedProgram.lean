@@ -806,6 +806,22 @@ def simRowOfStepCode
         (foldedSimStateOfCode (foldedMoveNextSide side marked dir) q'Code)
         (foldedMoveStmt side marked read dir)
 
+/-- Numeric data needed to generate one folded finite-TM0 simulation row. -/
+abbrev SimStepData :=
+  FoldSide × Bool × Nat × Nat × SourceSymbol × SourceSymbol ×
+    Turing.TM0.Stmt SourceSymbol
+
+/--
+Generate one folded finite-TM0 row from numeric transition data.
+
+The hard computability problem is producing the list of these descriptors from
+the Mathlib TM0 transition function; once such a list is available, turning it
+into finite-TM0 rows is primitive recursive.
+-/
+def simStepDataRow (p : SimStepData) : PostTransition :=
+  simRowOfStepCode p.1 p.2.1 p.2.2.1 p.2.2.2.1
+    p.2.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2
+
 set_option maxHeartbeats 800000 in
 -- The nested product selectors in this row-level primitive-recursive proof take
 -- longer than the default heartbeat budget to elaborate.
@@ -960,6 +976,24 @@ theorem simRowOfStepCode_primrec :
   intro p
   rcases p with ⟨side, marked, qCode, q'Code, left, right, stmt⟩
   cases stmt <;> rfl
+
+theorem simStepDataRow_primrec : Primrec simStepDataRow :=
+  simRowOfStepCode_primrec
+
+/-- Generate folded finite-TM0 simulation rows from numeric transition data. -/
+def simRowsOfStepData (steps : List SimStepData) : List PostTransition :=
+  steps.map simStepDataRow
+
+theorem simRowsOfStepData_primrec : Primrec simRowsOfStepData := by
+  unfold simRowsOfStepData
+  have hrow : Primrec₂ fun _steps : List SimStepData => fun p : SimStepData =>
+      simStepDataRow p := by
+    apply Primrec₂.mk
+    exact simStepDataRow_primrec.comp Primrec.snd
+  exact Primrec.list_map Primrec.id hrow
+
+theorem simRowsOfStepData_computable : Computable simRowsOfStepData :=
+  simRowsOfStepData_primrec.to_comp
 
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
