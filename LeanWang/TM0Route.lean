@@ -6622,6 +6622,33 @@ theorem tm2to1LoadBody_primrec (tc : Turing.ToPartrec.Code) :
     ((PartrecStartedTM1StmtNode.stmtLoad_primrec tc).comp
       (Primrec.pair (tm2to1LoadPayload_primrec.comp Primrec.fst) Primrec.snd))
 
+noncomputable def tm2to1LoadBodyFromDeps (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.LoadCode × List (PartrecStartedTM0Stmt tc)) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  match p.2 with
+  | q :: _ => tm2to1LoadBody tc (p.1, q)
+  | _ => none
+
+theorem tm2to1LoadBodyFromDeps_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1LoadBodyFromDeps tc) := by
+  have hhead : Primrec (fun p :
+      PartrecStartedTM2StmtNode.LoadCode × List (PartrecStartedTM0Stmt tc) =>
+      p.2.head?) :=
+    Primrec.list_head?.comp Primrec.snd
+  have hnone : Primrec (fun _p :
+      PartrecStartedTM2StmtNode.LoadCode × List (PartrecStartedTM0Stmt tc) =>
+      (none : Option (PartrecStartedTM0Stmt tc))) :=
+    Primrec.const none
+  have hsome : Primrec₂
+      (fun p : PartrecStartedTM2StmtNode.LoadCode × List (PartrecStartedTM0Stmt tc) =>
+        fun q : PartrecStartedTM0Stmt tc => tm2to1LoadBody tc (p.1, q)) := by
+    apply Primrec₂.mk
+    exact (tm2to1LoadBody_primrec tc).comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd)
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun p => by
+    rcases p with ⟨f, deps⟩
+    cases deps <;> rfl
+
 noncomputable def tm2to1BranchBody (tc : Turing.ToPartrec.Code)
     (p : (PartrecStartedTM2StmtNode.BranchCode × PartrecStartedTM0Stmt tc) ×
       PartrecStartedTM0Stmt tc) :
@@ -6636,6 +6663,65 @@ theorem tm2to1BranchBody_primrec (tc : Turing.ToPartrec.Code) :
         (Primrec.pair (tm2to1BranchPayload_primrec.comp (Primrec.fst.comp Primrec.fst))
           (Primrec.snd.comp Primrec.fst))
         Primrec.snd))
+
+noncomputable def tm2to1BranchBodyFromDeps (tc : Turing.ToPartrec.Code)
+    (p : PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc)) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  match p.2 with
+  | q₁ :: q₂ :: _ => tm2to1BranchBody tc ((p.1, q₁), q₂)
+  | _ => none
+
+theorem tm2to1BranchBodyFromDeps_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1BranchBodyFromDeps tc) := by
+  have hhead : Primrec (fun p :
+      PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc) =>
+      p.2.head?) :=
+    Primrec.list_head?.comp Primrec.snd
+  have hnone : Primrec (fun _p :
+      PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc) =>
+      (none : Option (PartrecStartedTM0Stmt tc))) :=
+    Primrec.const none
+  have hsome : Primrec₂
+      (fun p : PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc) =>
+        fun q₁ : PartrecStartedTM0Stmt tc =>
+          match p.2.tail.head? with
+          | some q₂ => tm2to1BranchBody tc ((p.1, q₁), q₂)
+          | none => none) := by
+    apply Primrec₂.mk
+    have htailHead : Primrec (fun p :
+        (PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc)) ×
+          PartrecStartedTM0Stmt tc =>
+        p.1.2.tail.head?) :=
+      Primrec.list_head?.comp (Primrec.list_tail.comp (Primrec.snd.comp Primrec.fst))
+    have hnone₂ : Primrec (fun _p :
+        (PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc)) ×
+          PartrecStartedTM0Stmt tc =>
+        (none : Option (PartrecStartedTM0Stmt tc))) :=
+      Primrec.const none
+    have hsome₂ : Primrec₂
+        (fun p :
+          (PartrecStartedTM2StmtNode.BranchCode × List (PartrecStartedTM0Stmt tc)) ×
+            PartrecStartedTM0Stmt tc =>
+          fun q₂ : PartrecStartedTM0Stmt tc =>
+            tm2to1BranchBody tc ((p.1.1, p.2), q₂)) := by
+      apply Primrec₂.mk
+      exact (tm2to1BranchBody_primrec tc).comp
+        (Primrec.pair
+          (Primrec.pair (Primrec.fst.comp (Primrec.fst.comp Primrec.fst))
+            (Primrec.snd.comp Primrec.fst))
+          Primrec.snd)
+    exact (Primrec.option_casesOn htailHead hnone₂ hsome₂).of_eq fun p => by
+      rcases p with ⟨⟨f, deps⟩, q₁⟩
+      cases deps with
+      | nil => rfl
+      | cons q₂ rest =>
+          cases rest <;> rfl
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun p => by
+    rcases p with ⟨f, deps⟩
+    cases deps with
+    | nil => rfl
+    | cons q₁ rest =>
+        cases rest <;> rfl
 
 noncomputable def tm2to1GotoBody (tc : Turing.ToPartrec.Code)
     (f : PartrecStartedTM2StmtNode.GotoCode tc) :
@@ -6817,13 +6903,9 @@ noncomputable def tm2to1TrNormalBodyForHead (tc : Turing.ToPartrec.Code)
   | PartrecStartedTM2StmtNode.pop k f =>
       tm2to1PopBody tc ((k, f), tail)
   | PartrecStartedTM2StmtNode.load f =>
-      match p.2 with
-      | q :: _ => tm2to1LoadBody tc (f, q)
-      | _ => none
+      tm2to1LoadBodyFromDeps tc (f, p.2)
   | PartrecStartedTM2StmtNode.branch f =>
-      match p.2 with
-      | q₁ :: q₂ :: _ => tm2to1BranchBody tc ((f, q₁), q₂)
-      | _ => none
+      tm2to1BranchBodyFromDeps tc (f, p.2)
   | PartrecStartedTM2StmtNode.goto l =>
       tm2to1GotoBody tc l
   | PartrecStartedTM2StmtNode.halt =>
@@ -6853,7 +6935,8 @@ theorem tm2to1TrNormalBody_toValidCode
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal,
       tm2to1TrNormalBodyForHead, tm2to1TrNormalTail, PartrecStartedTM2StmtNode.ofStmtHead?,
       tm2to1PushBody, tm2to1PeekBody, tm2to1PopBody, tm2to1LoadBody,
-      tm2to1BranchBody, tm2to1GotoBody, tm2to1HaltBody,
+      tm2to1LoadBodyFromDeps, tm2to1BranchBody, tm2to1BranchBodyFromDeps,
+      tm2to1GotoBody, tm2to1HaltBody,
       PartrecStartedTM2StmtNode.ofStmtTail, PartrecStartedTM2StmtNode.ofStmt,
       PartrecStartedTM2StmtNode.depValidCodeOfNodes_ofStmt,
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
