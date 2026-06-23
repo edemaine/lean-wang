@@ -113,6 +113,160 @@ theorem mem_partrecVarList (v : PartrecVar) :
   | some a =>
       simp [partrecVarList, PartrecToTM2Support.mem_stackAlphabetList a]
 
+/-- Finite symbol-valued actions on the evaluator local variable. -/
+def partrecVarToSymbolEquivTuple :
+    (PartrecVar → Turing.PartrecToTM2.Γ') ≃
+      Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ' ×
+        Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ' where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodablePartrecVarToSymbol :
+    Primcodable (PartrecVar → Turing.PartrecToTM2.Γ') :=
+  Primcodable.ofEquiv
+    (Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ' ×
+      Turing.PartrecToTM2.Γ' × Turing.PartrecToTM2.Γ')
+    partrecVarToSymbolEquivTuple
+
+/-- Finite Boolean tests on the evaluator local variable. -/
+def partrecVarPredicateEquivTuple :
+    (PartrecVar → Bool) ≃ Bool × Bool × Bool × Bool × Bool where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodablePartrecVarPredicate :
+    Primcodable (PartrecVar → Bool) :=
+  Primcodable.ofEquiv (Bool × Bool × Bool × Bool × Bool)
+    partrecVarPredicateEquivTuple
+
+/-- Finite label-valued jumps on the evaluator local variable. -/
+def partrecVarToLabelEquivTuple :
+    (PartrecVar → Turing.PartrecToTM2.Λ') ≃
+      Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ' ×
+        Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ' where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s
+    cases s with
+    | none => rfl
+    | some a => cases a <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodablePartrecVarToLabel :
+    Primcodable (PartrecVar → Turing.PartrecToTM2.Λ') :=
+  Primcodable.ofEquiv
+    (Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ' ×
+      Turing.PartrecToTM2.Λ' × Turing.PartrecToTM2.Λ')
+    partrecVarToLabelEquivTuple
+
+/-- Finite binary local-store actions used by `peek`/`pop`. -/
+def partrecVarBinaryActionEquivTuple :
+    (PartrecVar → PartrecVar → PartrecVar) ≃
+      (PartrecVar → PartrecVar) × (PartrecVar → PartrecVar) ×
+        (PartrecVar → PartrecVar) × (PartrecVar → PartrecVar) ×
+          (PartrecVar → PartrecVar) where
+  toFun f := (f none, f (some Γ'.consₗ), f (some Γ'.cons),
+    f (some Γ'.bit0), f (some Γ'.bit1))
+  invFun t
+    | none => t.1
+    | some Γ'.consₗ => t.2.1
+    | some Γ'.cons => t.2.2.1
+    | some Γ'.bit0 => t.2.2.2.1
+    | some Γ'.bit1 => t.2.2.2.2
+  left_inv := by
+    intro f
+    funext s a
+    cases s with
+    | none => rfl
+    | some x => cases x <;> rfl
+  right_inv := by
+    intro t
+    rcases t with ⟨a, b, c, d, e⟩
+    rfl
+
+instance instPrimcodablePartrecVarBinaryAction :
+    Primcodable (PartrecVar → PartrecVar → PartrecVar) :=
+  Primcodable.ofEquiv
+    ((PartrecVar → PartrecVar) × (PartrecVar → PartrecVar) ×
+      (PartrecVar → PartrecVar) × (PartrecVar → PartrecVar) ×
+        (PartrecVar → PartrecVar))
+    partrecVarBinaryActionEquivTuple
+
+/-- Finite encoding of the concrete stack actions used by the TM2-to-TM1 route. -/
+def partrecStActEquivSum (k : PartrecStack) :
+    Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k ≃
+      (PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+        ((PartrecVar → PartrecVar → PartrecVar) ⊕
+          (PartrecVar → PartrecVar → PartrecVar)) where
+  toFun
+    | Turing.TM2to1.StAct.push f => Sum.inl f
+    | Turing.TM2to1.StAct.peek f => Sum.inr (Sum.inl f)
+    | Turing.TM2to1.StAct.pop f => Sum.inr (Sum.inr f)
+  invFun
+    | Sum.inl f => Turing.TM2to1.StAct.push (k := k) f
+    | Sum.inr (Sum.inl f) => Turing.TM2to1.StAct.peek (k := k) f
+    | Sum.inr (Sum.inr f) => Turing.TM2to1.StAct.pop (k := k) f
+  left_inv := by
+    intro a
+    cases a <;> rfl
+  right_inv := by
+    intro a
+    cases a with
+    | inl f => rfl
+    | inr b =>
+        cases b <;> rfl
+
+instance instPrimcodablePartrecStAct (k : PartrecStack) :
+    Primcodable (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k) :=
+  Primcodable.ofEquiv
+    ((PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+      ((PartrecVar → PartrecVar → PartrecVar) ⊕
+        (PartrecVar → PartrecVar → PartrecVar)))
+    (partrecStActEquivSum k)
+
 /-- Mathlib's `PartrecToTM2` evaluator at the local constant stack-alphabet type. -/
 def partrecTM2 :
     Turing.PartrecToTM2.Λ' →

@@ -185,7 +185,9 @@ computability target. `TM0Route` now also has a local `List Nat` sum
 primitive-recursion helper for that statement-count proof. The next obstacle is
 to add finite `Primcodable` encodings for the concrete TM2-to-TM1 labels and
 their finite function payloads, so `partrecTM1LabelList` and the per-label
-statement-length function can be treated as primitive recursive.
+statement-length function can be treated as primitive recursive. The finite
+function payloads and `TM2to1.StAct` are now encoded; the remaining encoding
+work is the recursive concrete `TM2.Stmt` type and then `TM2to1.Λ'`.
 
 There is now also a lighter source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final
