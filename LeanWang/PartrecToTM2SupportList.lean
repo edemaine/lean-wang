@@ -939,6 +939,35 @@ theorem trNormalLabelCode_encodeLabel (c : ToPartrec.Code) (k : Cont') :
   | fix f ih =>
       simp [trNormalLabelCode, Turing.PartrecToTM2.trNormal, ih]
 
+/-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
+def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
+  | c@ToPartrec.Code.zero', k => trStmtsWeightCode wCode (trNormalLabelCode c k)
+  | c@ToPartrec.Code.succ, k => trStmtsWeightCode wCode (trNormalLabelCode c k)
+  | c@ToPartrec.Code.tail, k => trStmtsWeightCode wCode (trNormalLabelCode c k)
+  | c@(ToPartrec.Code.cons f fs), k =>
+      trStmtsWeightCode wCode (trNormalLabelCode c k) +
+        (codeSuppWeightCode' wCode f (Cont'.cons₁ fs k) +
+          (trStmtsWeightCode wCode
+              (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+                move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+                    trNormalLabelCode fs (Cont'.cons₂ k)) +
+            (codeSuppWeightCode' wCode fs (Cont'.cons₂ k) +
+              trStmtsWeightCode wCode (headLabelCode K'.stack <| retLabelCode k))))
+  | c@(ToPartrec.Code.comp f g), k =>
+      trStmtsWeightCode wCode (trNormalLabelCode c k) +
+        (codeSuppWeightCode' wCode g (Cont'.comp f k) +
+          (trStmtsWeightCode wCode (trNormalLabelCode f k) + codeSuppWeightCode' wCode f k))
+  | c@(ToPartrec.Code.case f g), k =>
+      trStmtsWeightCode wCode (trNormalLabelCode c k) +
+        (codeSuppWeightCode' wCode f k + codeSuppWeightCode' wCode g k)
+  | c@(ToPartrec.Code.fix f), k =>
+      trStmtsWeightCode wCode (trNormalLabelCode c k) +
+        (codeSuppWeightCode' wCode f (Cont'.fix f k) +
+          (trStmtsWeightCode wCode
+              (clearLabelCode natEnd K'.main <| trNormalLabelCode f (Cont'.fix f k)) +
+            wCode (retLabelCode k)))
+
 /-- List-valued mirror of Mathlib's `PartrecToTM2.codeSupp'`. -/
 def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
   | c@ToPartrec.Code.zero', k => trStmtsList (trNormal c k)
@@ -1013,6 +1042,64 @@ def codeSuppWeight' (w : Λ' → Nat) : ToPartrec.Code → Cont' → Nat
         (codeSuppWeight' w f (Cont'.fix f k) +
           (trStmtsWeight w (Λ'.clear natEnd K'.main <| trNormal f (Cont'.fix f k)) +
             w (Λ'.ret k)))
+
+theorem codeSuppWeightCode'_eq
+    (w : Λ' → Nat) (wCode : Nat → Nat)
+    (hwCode : ∀ q : Λ', wCode (Turing.PartrecToTM2.Λ'.encodeLabel q) = w q)
+    (c : ToPartrec.Code) (k : Cont') :
+    codeSuppWeightCode' wCode c k = codeSuppWeight' w c k := by
+  induction c generalizing k with
+  | zero' =>
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, hwCode]
+  | succ =>
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, hwCode]
+  | tail =>
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, hwCode]
+  | cons f fs ihf ihfs =>
+      have haux :
+          trStmtsWeightCode wCode
+              (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+                move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+                    Turing.PartrecToTM2.Λ'.encodeLabel (trNormal fs (Cont'.cons₂ k))) =
+            trStmtsWeight w
+              (move₂ (fun _ : Γ' => false) K'.main K'.aux <|
+                move₂ (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂ (fun _ : Γ' => false) K'.aux K'.stack <| trNormal fs (Cont'.cons₂ k)) := by
+        rw [move₂LabelCode_encodeLabel]
+        rw [move₂LabelCode_encodeLabel]
+        rw [move₂LabelCode_encodeLabel]
+        exact trStmtsWeightCode_encodeLabel w wCode hwCode _
+      have hhead :
+          trStmtsWeightCode wCode (headLabelCode K'.stack (retLabelCode k)) =
+            trStmtsWeight w (head K'.stack (Λ'.ret k)) := by
+        rw [retLabelCode_encodeLabel]
+        rw [headLabelCode_encodeLabel]
+        exact trStmtsWeightCode_encodeLabel w wCode hwCode _
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, ihf, ihfs, haux, hhead, hwCode]
+  | comp f g ihf ihg =>
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, ihf, ihg, hwCode]
+  | case f g ihf ihg =>
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, ihf, ihg, hwCode]
+  | fix f ih =>
+      have hclear :
+          trStmtsWeightCode wCode
+              (clearLabelCode natEnd K'.main <|
+                Turing.PartrecToTM2.Λ'.encodeLabel (trNormal f (Cont'.fix f k))) =
+            trStmtsWeight w (Λ'.clear natEnd K'.main <| trNormal f (Cont'.fix f k)) := by
+        rw [clearLabelCode_encodeLabel]
+        exact trStmtsWeightCode_encodeLabel w wCode hwCode _
+      have hret : wCode (retLabelCode k) = w (Λ'.ret k) := by
+        rw [retLabelCode_encodeLabel]
+        exact hwCode (Λ'.ret k)
+      simp [codeSuppWeightCode', codeSuppWeight', trNormalLabelCode_encodeLabel,
+        trStmtsWeightCode_encodeLabel, ih, hclear, hret, hwCode]
 
 theorem codeSuppList'_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList' c k).length = codeSuppLength' c k := by
