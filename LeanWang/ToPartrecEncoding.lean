@@ -1683,6 +1683,141 @@ theorem normalizeLookup_primrec :
   unfold normalizeLookup
   exact Primrec.list_getD 0
 
+def successorStep (q payload tag : Nat) : Nat :=
+  if q = 0 then 0 else 8 * payload + tag
+
+theorem successorStep_primrec :
+    Primrec (fun p : Nat × Nat × Nat => successorStep p.1 p.2.1 p.2.2) := by
+  unfold successorStep
+  refine Primrec.ite (Primrec.eq.comp Primrec.fst (Primrec.const 0)) (Primrec.const 0) ?_
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 8) (Primrec.fst.comp Primrec.snd))
+    (Primrec.snd.comp Primrec.snd)
+
+def normalizeLabelUnaryStep (prev : List Nat) (target tag : Nat) : Nat :=
+  let q := normalizeLookup prev target
+  successorStep q (q - 1) tag
+
+theorem normalizeLabelUnaryStep_primrec :
+    Primrec (fun p : List Nat × Nat × Nat => normalizeLabelUnaryStep p.1 p.2.1 p.2.2) := by
+  unfold normalizeLabelUnaryStep
+  let hq : Primrec (fun p : List Nat × Nat × Nat => normalizeLookup p.1 p.2.1) :=
+    normalizeLookup_primrec.comp (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd))
+  exact successorStep_primrec.comp
+    (Primrec.pair hq (Primrec.pair (Primrec.pred.comp hq) (Primrec.snd.comp Primrec.snd)))
+
+theorem normalizeLabelUnaryStep_eq_match (prev : List Nat) (target tag : Nat) :
+    normalizeLabelUnaryStep prev target tag =
+      match normalizeLookup prev target with
+      | 0 => 0
+      | q + 1 => 8 * q + tag := by
+  unfold normalizeLabelUnaryStep successorStep
+  cases normalizeLookup prev target <;> simp
+
+def normalizeMoveStep (prev : List Nat) (fields : (Γ' → Bool) × K' × K' × Nat) : Nat :=
+  let q := normalizeLookup prev fields.2.2.2
+  successorStep q (movePayloadCode fields.1 fields.2.1 fields.2.2.1 (q - 1)) 2
+
+theorem normalizeMoveStep_primrec :
+    Primrec (fun p : List Nat × ((Γ' → Bool) × K' × K' × Nat) =>
+      normalizeMoveStep p.1 p.2) := by
+  unfold normalizeMoveStep
+  let htarget : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × K' × Nat) =>
+      p.2.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+  let hq : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × K' × Nat) =>
+      normalizeLookup p.1 p.2.2.2.2) :=
+    normalizeLookup_primrec.comp (Primrec.pair Primrec.fst htarget)
+  let hpayload : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × K' × Nat) =>
+      movePayloadCode p.2.1 p.2.2.1 p.2.2.2.1
+        (normalizeLookup p.1 p.2.2.2.2 - 1)) := by
+    let htuple : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × K' × Nat) =>
+        (p.2.1, p.2.2.1, p.2.2.2.1, normalizeLookup p.1 p.2.2.2.2 - 1)) :=
+      Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+            (Primrec.pred.comp hq)))
+    exact movePayloadCode_primrec.comp htuple
+  exact successorStep_primrec.comp
+    (Primrec.pair hq (Primrec.pair hpayload (Primrec.const 2)))
+
+theorem normalizeMoveStep_eq_match
+    (prev : List Nat) (fields : (Γ' → Bool) × K' × K' × Nat) :
+    normalizeMoveStep prev fields =
+      match normalizeLookup prev fields.2.2.2 with
+      | 0 => 0
+      | q + 1 => 8 * movePayloadCode fields.1 fields.2.1 fields.2.2.1 q + 2 := by
+  unfold normalizeMoveStep successorStep
+  cases normalizeLookup prev fields.2.2.2 <;> simp
+
+def normalizeClearStep (prev : List Nat) (fields : (Γ' → Bool) × K' × Nat) : Nat :=
+  let q := normalizeLookup prev fields.2.2
+  successorStep q (clearPayloadCode fields.1 fields.2.1 (q - 1)) 3
+
+theorem normalizeClearStep_primrec :
+    Primrec (fun p : List Nat × ((Γ' → Bool) × K' × Nat) =>
+      normalizeClearStep p.1 p.2) := by
+  unfold normalizeClearStep
+  let htarget : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × Nat) => p.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  let hq : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × Nat) =>
+      normalizeLookup p.1 p.2.2.2) :=
+    normalizeLookup_primrec.comp (Primrec.pair Primrec.fst htarget)
+  let hpayload : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × Nat) =>
+      clearPayloadCode p.2.1 p.2.2.1 (normalizeLookup p.1 p.2.2.2 - 1)) := by
+    let htuple : Primrec (fun p : List Nat × ((Γ' → Bool) × K' × Nat) =>
+        (p.2.1, p.2.2.1, normalizeLookup p.1 p.2.2.2 - 1)) :=
+      Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.pred.comp hq))
+    exact clearPayloadCode_primrec.comp htuple
+  exact successorStep_primrec.comp
+    (Primrec.pair hq (Primrec.pair hpayload (Primrec.const 3)))
+
+theorem normalizeClearStep_eq_match
+    (prev : List Nat) (fields : (Γ' → Bool) × K' × Nat) :
+    normalizeClearStep prev fields =
+      match normalizeLookup prev fields.2.2 with
+      | 0 => 0
+      | q + 1 => 8 * clearPayloadCode fields.1 fields.2.1 q + 3 := by
+  unfold normalizeClearStep successorStep
+  cases normalizeLookup prev fields.2.2 <;> simp
+
+def normalizePushStep (prev : List Nat) (fields : K' × (Option Γ' → Option Γ') × Nat) :
+    Nat :=
+  let q := normalizeLookup prev fields.2.2
+  successorStep q (pushPayloadCode fields.1 fields.2.1 (q - 1)) 5
+
+theorem normalizePushStep_primrec :
+    Primrec (fun p : List Nat × (K' × (Option Γ' → Option Γ') × Nat) =>
+      normalizePushStep p.1 p.2) := by
+  unfold normalizePushStep
+  let htarget : Primrec (fun p : List Nat × (K' × (Option Γ' → Option Γ') × Nat) =>
+      p.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  let hq : Primrec (fun p : List Nat × (K' × (Option Γ' → Option Γ') × Nat) =>
+      normalizeLookup p.1 p.2.2.2) :=
+    normalizeLookup_primrec.comp (Primrec.pair Primrec.fst htarget)
+  let hpayload : Primrec (fun p : List Nat × (K' × (Option Γ' → Option Γ') × Nat) =>
+      pushPayloadCode p.2.1 p.2.2.1 (normalizeLookup p.1 p.2.2.2 - 1)) := by
+    let htuple : Primrec (fun p : List Nat × (K' × (Option Γ' → Option Γ') × Nat) =>
+        (p.2.1, p.2.2.1, normalizeLookup p.1 p.2.2.2 - 1)) :=
+      Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+          (Primrec.pred.comp hq))
+    exact pushPayloadCode_primrec.comp htuple
+  exact successorStep_primrec.comp
+    (Primrec.pair hq (Primrec.pair hpayload (Primrec.const 5)))
+
+theorem normalizePushStep_eq_match
+    (prev : List Nat) (fields : K' × (Option Γ' → Option Γ') × Nat) :
+    normalizePushStep prev fields =
+      match normalizeLookup prev fields.2.2 with
+      | 0 => 0
+      | q + 1 => 8 * pushPayloadCode fields.1 fields.2.1 q + 5 := by
+  unfold normalizePushStep successorStep
+  cases normalizeLookup prev fields.2.2 <;> simp
+
 theorem normalizeLookup_eq_of_getD_eq
     {prev : List Nat} {fuel bound n : Nat}
     (hprev : ∀ k ≤ bound, normalizeLookup prev k = normalizeLabelFuel fuel k)
