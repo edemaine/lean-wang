@@ -3945,6 +3945,73 @@ theorem partrecStartedTM2RetBodyFromPayload_encodeCont
         Turing.PartrecToTM2.Λ'.ofNatCont_encodeCont,
         partrecStartedTM2RetFixBody_eq_relabel]
 
+def partrecTM2LabelOfCode (n : Nat) : Turing.PartrecToTM2.Λ' :=
+  (Encodable.decode (α := Turing.PartrecToTM2.Λ') n).getD default
+
+theorem partrecTM2LabelOfCode_primrec :
+    Primrec partrecTM2LabelOfCode :=
+  Primrec.option_getD_default.comp Primrec.decode
+
+theorem partrecTM2LabelOfCode_encodeLabel (q : Turing.PartrecToTM2.Λ') :
+    partrecTM2LabelOfCode (Turing.PartrecToTM2.Λ'.encodeLabel q) = q := by
+  unfold partrecTM2LabelOfCode
+  rw [Turing.PartrecToTM2.Λ'.decodeLabel_eq]
+  simp [Turing.PartrecToTM2.Λ'.decodeLabel_encodeLabel]
+
+def partrecReadGotoPayloadOfCodes
+    (p : Nat × Nat × Nat × Nat × Nat) :
+    PartrecVar → Turing.PartrecToTM2.Λ' :=
+  partrecVarToLabelEquivTuple.symm
+    (partrecTM2LabelOfCode p.1,
+      partrecTM2LabelOfCode p.2.1,
+      partrecTM2LabelOfCode p.2.2.1,
+      partrecTM2LabelOfCode p.2.2.2.1,
+      partrecTM2LabelOfCode p.2.2.2.2)
+
+theorem partrecReadGotoPayloadOfCodes_primrec :
+    Primrec partrecReadGotoPayloadOfCodes := by
+  have hsym : Primrec partrecVarToLabelEquivTuple.symm := by
+    simpa [instPrimcodablePartrecVarToLabel] using
+      (Primrec.of_equiv_symm (e := partrecVarToLabelEquivTuple) :
+        Primrec partrecVarToLabelEquivTuple.symm)
+  have h₀ : Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      partrecTM2LabelOfCode p.1) :=
+    partrecTM2LabelOfCode_primrec.comp Primrec.fst
+  have h₁ : Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      partrecTM2LabelOfCode p.2.1) :=
+    partrecTM2LabelOfCode_primrec.comp (Primrec.fst.comp Primrec.snd)
+  have h₂ : Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      partrecTM2LabelOfCode p.2.2.1) :=
+    partrecTM2LabelOfCode_primrec.comp (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+  have h₃ : Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      partrecTM2LabelOfCode p.2.2.2.1) :=
+    partrecTM2LabelOfCode_primrec.comp
+      (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  have h₄ : Primrec (fun p : Nat × Nat × Nat × Nat × Nat =>
+      partrecTM2LabelOfCode p.2.2.2.2) :=
+    partrecTM2LabelOfCode_primrec.comp
+      (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  exact hsym.comp
+    (Primrec.pair h₀ (Primrec.pair h₁ (Primrec.pair h₂ (Primrec.pair h₃ h₄))))
+
+theorem partrecReadGotoPayloadOfCodes_encodeLabel
+    (f : PartrecVar → Turing.PartrecToTM2.Λ') :
+    partrecReadGotoPayloadOfCodes
+        (Turing.PartrecToTM2.Λ'.encodeLabel (f none),
+          Turing.PartrecToTM2.Λ'.encodeLabel (f (some Turing.PartrecToTM2.Γ'.consₗ)),
+          Turing.PartrecToTM2.Λ'.encodeLabel (f (some Turing.PartrecToTM2.Γ'.cons)),
+          Turing.PartrecToTM2.Λ'.encodeLabel (f (some Turing.PartrecToTM2.Γ'.bit0)),
+          Turing.PartrecToTM2.Λ'.encodeLabel (f (some Turing.PartrecToTM2.Γ'.bit1))) =
+      f := by
+  funext s
+  cases s with
+  | none =>
+      simp [partrecReadGotoPayloadOfCodes, partrecTM2LabelOfCode_encodeLabel,
+        partrecVarToLabelEquivTuple]
+  | some a =>
+      cases a <;> simp [partrecReadGotoPayloadOfCodes, partrecTM2LabelOfCode_encodeLabel,
+        partrecVarToLabelEquivTuple]
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
