@@ -1874,6 +1874,261 @@ theorem afterFirstStmtNodes_ofStmt_append {tc : Turing.ToPartrec.Code}
   rw [firstStmtLength_ofStmt_append (tc := tc) stmt tail]
   exact List.drop_append_length
 
+def depNodeListsForHead {tc : Turing.ToPartrec.Code}
+    (p : Stmt tc × PartrecStartedTM2StmtNode tc) :
+    List (List (PartrecStartedTM2StmtNode tc)) :=
+  let tail := ofStmtTail p.1
+  match p.2 with
+  | push .. => [tail]
+  | peek .. => [tail]
+  | pop .. => [tail]
+  | load .. => [tail]
+  | branch _ => [firstStmtNodes tail, afterFirstStmtNodes tail]
+  | goto _ => []
+  | halt => []
+
+set_option maxHeartbeats 900000 in
+-- The nested sum split over TM2 node codes makes this case analysis elaborate slowly.
+theorem depNodeListsForHead_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (depNodeListsForHead (tc := tc)) := by
+  let Node := PartrecStartedTM2StmtNode tc
+  let DepLists := List (List Node)
+  have hcode : Primrec (fun p : Stmt tc × Node => toCode p.2) :=
+    (toCode_primrec tc).comp Primrec.snd
+  have hpush : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : PushCode =>
+        [ofStmtTail p.1]) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : (Stmt tc × Node) × PushCode => ofStmtTail p.1.1) :=
+      (ofStmtTail_primrec tc).comp (Primrec.fst.comp Primrec.fst)
+    exact Primrec.list_cons.comp htail (Primrec.const ([] : DepLists))
+  have hpeek : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : UpdateCode =>
+        [ofStmtTail p.1]) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : (Stmt tc × Node) × UpdateCode => ofStmtTail p.1.1) :=
+      (ofStmtTail_primrec tc).comp (Primrec.fst.comp Primrec.fst)
+    exact Primrec.list_cons.comp htail (Primrec.const ([] : DepLists))
+  have hpop : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : UpdateCode =>
+        [ofStmtTail p.1]) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : (Stmt tc × Node) × UpdateCode => ofStmtTail p.1.1) :=
+      (ofStmtTail_primrec tc).comp (Primrec.fst.comp Primrec.fst)
+    exact Primrec.list_cons.comp htail (Primrec.const ([] : DepLists))
+  have hload : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : LoadCode =>
+        [ofStmtTail p.1]) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : (Stmt tc × Node) × LoadCode => ofStmtTail p.1.1) :=
+      (ofStmtTail_primrec tc).comp (Primrec.fst.comp Primrec.fst)
+    exact Primrec.list_cons.comp htail (Primrec.const ([] : DepLists))
+  have hbranch : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : BranchCode =>
+        [firstStmtNodes (ofStmtTail p.1), afterFirstStmtNodes (ofStmtTail p.1)]) := by
+    apply Primrec₂.mk
+    have htail : Primrec (fun p : (Stmt tc × Node) × BranchCode => ofStmtTail p.1.1) :=
+      (ofStmtTail_primrec tc).comp (Primrec.fst.comp Primrec.fst)
+    have hfirst : Primrec (fun p : (Stmt tc × Node) × BranchCode =>
+        firstStmtNodes (ofStmtTail p.1.1)) :=
+      (firstStmtNodes_primrec tc).comp htail
+    have hafter : Primrec (fun p : (Stmt tc × Node) × BranchCode =>
+        afterFirstStmtNodes (ofStmtTail p.1.1)) :=
+      (afterFirstStmtNodes_primrec tc).comp htail
+    exact Primrec.list_cons.comp hfirst
+      (Primrec.list_cons.comp hafter (Primrec.const ([] : DepLists)))
+  have hgotoHalt : Primrec₂
+      (fun p : Stmt tc × Node => fun _payload : GotoHaltCode tc =>
+        ([] : DepLists)) := by
+    apply Primrec₂.mk
+    exact Primrec.const ([] : DepLists)
+  have hbranchTail : Primrec₂
+      (fun p : Stmt tc × Node => fun payload : BranchTailCode tc =>
+        match payload with
+        | Sum.inl f => [firstStmtNodes (ofStmtTail p.1), afterFirstStmtNodes (ofStmtTail p.1)]
+        | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    have hbranch' : Primrec₂
+        (fun p : (Stmt tc × Node) × BranchTailCode tc => fun _payload : BranchCode =>
+          [firstStmtNodes (ofStmtTail p.1.1), afterFirstStmtNodes (ofStmtTail p.1.1)]) := by
+      apply Primrec₂.mk
+      exact hbranch.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hgotoHalt' : Primrec₂
+        (fun p : (Stmt tc × Node) × BranchTailCode tc => fun _payload : GotoHaltCode tc =>
+          ([] : DepLists)) := by
+      apply Primrec₂.mk
+      exact hgotoHalt.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hbranch' hgotoHalt').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hloadTail : Primrec₂
+      (fun p : Stmt tc × Node => fun payload : LoadTailCode tc =>
+        match payload with
+        | Sum.inl _ => [ofStmtTail p.1]
+        | Sum.inr c =>
+            match c with
+            | Sum.inl _ => [firstStmtNodes (ofStmtTail p.1), afterFirstStmtNodes (ofStmtTail p.1)]
+            | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    have hload' : Primrec₂
+        (fun p : (Stmt tc × Node) × LoadTailCode tc => fun _payload : LoadCode =>
+          [ofStmtTail p.1.1]) := by
+      apply Primrec₂.mk
+      exact hload.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hbranchTail' : Primrec₂
+        (fun p : (Stmt tc × Node) × LoadTailCode tc => fun payload : BranchTailCode tc =>
+          match payload with
+          | Sum.inl _ => [firstStmtNodes (ofStmtTail p.1.1),
+              afterFirstStmtNodes (ofStmtTail p.1.1)]
+          | Sum.inr _ => []) := by
+      apply Primrec₂.mk
+      exact hbranchTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hload' hbranchTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hpopTail : Primrec₂
+      (fun p : Stmt tc × Node => fun payload : PopTailCode tc =>
+        match payload with
+        | Sum.inl _ => [ofStmtTail p.1]
+        | Sum.inr c =>
+            match c with
+            | Sum.inl _ => [ofStmtTail p.1]
+            | Sum.inr c =>
+                match c with
+                | Sum.inl _ =>
+                    [firstStmtNodes (ofStmtTail p.1), afterFirstStmtNodes (ofStmtTail p.1)]
+                | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    have hpop' : Primrec₂
+        (fun p : (Stmt tc × Node) × PopTailCode tc => fun _payload : UpdateCode =>
+          [ofStmtTail p.1.1]) := by
+      apply Primrec₂.mk
+      exact hpop.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hloadTail' : Primrec₂
+        (fun p : (Stmt tc × Node) × PopTailCode tc => fun payload : LoadTailCode tc =>
+          match payload with
+          | Sum.inl _ => [ofStmtTail p.1.1]
+          | Sum.inr c =>
+              match c with
+              | Sum.inl _ => [firstStmtNodes (ofStmtTail p.1.1),
+                  afterFirstStmtNodes (ofStmtTail p.1.1)]
+              | Sum.inr _ => []) := by
+      apply Primrec₂.mk
+      exact hloadTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hpop' hloadTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  have hpeekTail : Primrec₂
+      (fun p : Stmt tc × Node => fun payload : PeekTailCode tc =>
+        match payload with
+        | Sum.inl _ => [ofStmtTail p.1]
+        | Sum.inr c =>
+            match c with
+            | Sum.inl _ => [ofStmtTail p.1]
+            | Sum.inr c =>
+                match c with
+                | Sum.inl _ => [ofStmtTail p.1]
+                | Sum.inr c =>
+                    match c with
+                    | Sum.inl _ =>
+                        [firstStmtNodes (ofStmtTail p.1), afterFirstStmtNodes (ofStmtTail p.1)]
+                    | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    have hpeek' : Primrec₂
+        (fun p : (Stmt tc × Node) × PeekTailCode tc => fun _payload : UpdateCode =>
+          [ofStmtTail p.1.1]) := by
+      apply Primrec₂.mk
+      exact hpeek.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    have hpopTail' : Primrec₂
+        (fun p : (Stmt tc × Node) × PeekTailCode tc => fun payload : PopTailCode tc =>
+          match payload with
+          | Sum.inl _ => [ofStmtTail p.1.1]
+          | Sum.inr c =>
+              match c with
+              | Sum.inl _ => [ofStmtTail p.1.1]
+              | Sum.inr c =>
+                  match c with
+                  | Sum.inl _ => [firstStmtNodes (ofStmtTail p.1.1),
+                      afterFirstStmtNodes (ofStmtTail p.1.1)]
+                  | Sum.inr _ => []) := by
+      apply Primrec₂.mk
+      exact hpopTail.comp (Primrec.fst.comp Primrec.fst) Primrec.snd
+    exact (Primrec.sumCasesOn Primrec.snd hpeek' hpopTail').of_eq fun p => by
+      cases p.2 <;> rfl
+  exact (Primrec.sumCasesOn hcode hpush hpeekTail).of_eq fun p => by
+    rcases p with ⟨stmt, node⟩
+    cases node <;> rfl
+
+def depNodeLists {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) : List (List (PartrecStartedTM2StmtNode tc)) :=
+  match ofStmtHead? stmt with
+  | none => []
+  | some node => depNodeListsForHead (stmt, node)
+
+theorem depNodeLists_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (depNodeLists (tc := tc)) := by
+  have hhead : Primrec (ofStmtHead? (tc := tc)) :=
+    ofStmtHead?_primrec tc
+  have hnone : Primrec (fun _stmt : Stmt tc =>
+      ([] : List (List (PartrecStartedTM2StmtNode tc)))) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun stmt : Stmt tc => fun node : PartrecStartedTM2StmtNode tc =>
+      depNodeListsForHead (stmt, node)) := by
+    apply Primrec₂.mk
+    exact (depNodeListsForHead_primrec tc).comp
+      (Primrec.pair (Primrec.fst.comp Primrec.id) Primrec.snd)
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun stmt => by
+    unfold depNodeLists
+    cases ofStmtHead? stmt <;> rfl
+
+set_option linter.flexible false in
+theorem depNodeLists_eq_map_ofStmt {tc : Turing.ToPartrec.Code}
+    (stmt : Stmt tc) :
+    depNodeLists stmt =
+      match stmt with
+      | Turing.TM2.Stmt.push _ _ q => [ofStmt q]
+      | Turing.TM2.Stmt.peek _ _ q => [ofStmt q]
+      | Turing.TM2.Stmt.pop _ _ q => [ofStmt q]
+      | Turing.TM2.Stmt.load _ q => [ofStmt q]
+      | Turing.TM2.Stmt.branch _ q₁ q₂ => [ofStmt q₁, ofStmt q₂]
+      | Turing.TM2.Stmt.goto _ => []
+      | Turing.TM2.Stmt.halt => [] := by
+  cases stmt <;> simp [depNodeLists, depNodeListsForHead, ofStmtHead?, ofStmtTail, ofStmt]
+  · rw [firstStmtNodes_ofStmt_append, afterFirstStmtNodes_ofStmt_append]
+    simp
+
+set_option linter.flexible false in
+theorem mem_depNodeLists_length_lt {tc : Turing.ToPartrec.Code}
+    {stmt : Stmt tc} {nodes : List (PartrecStartedTM2StmtNode tc)}
+    (hnodes : nodes ∈ depNodeLists stmt) :
+    nodes.length < (ofStmt stmt).length := by
+  cases stmt with
+  | push k f q =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+      subst nodes
+      simp [ofStmt]
+  | peek k f q =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+      subst nodes
+      simp [ofStmt]
+  | pop k f q =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+      subst nodes
+      simp [ofStmt]
+  | load f q =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+      subst nodes
+      simp [ofStmt]
+  | branch f q₁ q₂ =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+      rcases hnodes with rfl | hnodes
+      · simp [ofStmt]
+        omega
+      · rcases hnodes with rfl
+        simp [ofStmt]
+        omega
+  | goto f =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+  | halt =>
+      simp [depNodeLists_eq_map_ofStmt] at hnodes
+
 end PartrecStartedTM2StmtNode
 
 abbrev PartrecTM2Stmt : Type :=
