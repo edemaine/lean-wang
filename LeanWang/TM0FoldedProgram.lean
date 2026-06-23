@@ -3073,6 +3073,22 @@ def labelAtByStatementFromWithStateCode?
   (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).map
     fun q => (q, TM0FiniteCompiler.stateCode tc q)
 
+/-- One step of the position-coded offset label lookup. -/
+def labelAtByStatementFromWithPositionCodeStep?
+    (tc : Turing.ToPartrec.Code)
+    (s : Option (SourceLabel tc × Nat) × Nat × Nat) :
+    Option (SourceLabel tc × Nat) × Nat × Nat :=
+  match s.1 with
+  | some r => (some r, s.2)
+  | none =>
+      match TM0Route.partrecVarList[s.2.2]? with
+      | some v =>
+          ((TM0Route.partrecStartedTM0StatementAt? tc s.2.1).map fun stmt =>
+            ((stmt, v), 1 + s.2.1 * TM0Route.partrecVarList.length + s.2.2),
+            s.2.1, s.2.2)
+      | none =>
+          (none, s.2.1 + 1, s.2.2 - TM0Route.partrecVarList.length)
+
 /--
 Offset label lookup paired with the numeric position in the rectangular
 statement-by-variable enumeration, including the leading default state.
@@ -3082,16 +3098,108 @@ dependent `idxOf`-based state code once the support-list no-duplicate facts are
 available.
 -/
 def labelAtByStatementFromWithPositionCode?
-    (tc : Turing.ToPartrec.Code) : Nat → Nat → Nat → Option (SourceLabel tc × Nat)
-  | 0, _k, _i => none
-  | fuel + 1, k, i =>
-      match TM0Route.partrecVarList[i]? with
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    Option (SourceLabel tc × Nat) :=
+  ((labelAtByStatementFromWithPositionCodeStep? tc)^[fuel] (none, k, i)).1
+
+theorem labelAtByStatementFromWithPositionCodeStep?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (labelAtByStatementFromWithPositionCodeStep? tc) := by
+  let State := Option (SourceLabel tc × Nat) × Nat × Nat
+  let found : State → Option (SourceLabel tc × Nat) := fun s => s.1
+  let offset : State → Nat := fun s => s.2.1
+  let index : State → Nat := fun s => s.2.2
+  have hfound : Primrec found := Primrec.fst
+  have hoffset : Primrec offset := Primrec.fst.comp Primrec.snd
+  have hindex : Primrec index := Primrec.snd.comp Primrec.snd
+  have hstmt : Primrec (TM0Route.partrecStartedTM0StatementAt? tc) :=
+    TM0Route.partrecStartedTM0StatementAt?_primrec_fixed tc
+  have hnoneStep : Primrec (fun s : State =>
+      ((none : Option (SourceLabel tc × Nat)),
+        (offset s + 1, index s - TM0Route.partrecVarList.length))) := by
+    exact Primrec.pair (Primrec.const (none : Option (SourceLabel tc × Nat)))
+      (Primrec.pair (Primrec.succ.comp hoffset)
+        (Primrec.nat_sub.comp hindex (Primrec.const TM0Route.partrecVarList.length)))
+  have hsomeBlock : Primrec₂ (fun s : State => fun v : PartrecVar =>
+      ((TM0Route.partrecStartedTM0StatementAt? tc (offset s)).map fun stmt =>
+        ((stmt, v), 1 + offset s * TM0Route.partrecVarList.length + index s),
+        offset s, index s)) := by
+    apply Primrec₂.mk
+    let base : State × PartrecVar → State := fun p => p.1
+    let vArg : State × PartrecVar → PartrecVar := fun p => p.2
+    let code : State × PartrecVar → Nat := fun p =>
+      1 + offset (base p) * TM0Route.partrecVarList.length + index (base p)
+    have hbase : Primrec base := Primrec.fst
+    have hvArg : Primrec vArg := Primrec.snd
+    have hoffsetBase : Primrec (fun p : State × PartrecVar => offset (base p)) :=
+      hoffset.comp hbase
+    have hindexBase : Primrec (fun p : State × PartrecVar => index (base p)) :=
+      hindex.comp hbase
+    have hcode : Primrec code := by
+      exact Primrec.nat_add.comp
+        (Primrec.nat_add.comp (Primrec.const 1)
+          (Primrec.nat_mul.comp hoffsetBase
+            (Primrec.const TM0Route.partrecVarList.length)))
+        hindexBase
+    have hget : Primrec (fun p : State × PartrecVar =>
+        TM0Route.partrecStartedTM0StatementAt? tc (offset (base p))) :=
+      hstmt.comp hoffsetBase
+    have hpair : Primrec₂ (fun p : State × PartrecVar =>
+        fun stmt : Option (SourceStmt tc) => ((stmt, vArg p), code p)) := by
+      apply Primrec₂.mk
+      exact Primrec.pair
+        (Primrec.pair Primrec.snd (hvArg.comp Primrec.fst))
+        (hcode.comp Primrec.fst)
+    have hmap : Primrec (fun p : State × PartrecVar =>
+        (TM0Route.partrecStartedTM0StatementAt? tc (offset (base p))).map
+          fun stmt => ((stmt, vArg p), code p)) :=
+      Primrec.option_map hget hpair
+    exact Primrec.pair hmap (Primrec.pair hoffsetBase hindexBase)
+  have hnone : Primrec (fun s : State =>
+      match TM0Route.partrecVarList[index s]? with
       | some v =>
-          (TM0Route.partrecStartedTM0StatementAt? tc k).map fun stmt =>
-            ((stmt, v), 1 + k * TM0Route.partrecVarList.length + i)
+          ((TM0Route.partrecStartedTM0StatementAt? tc (offset s)).map fun stmt =>
+            ((stmt, v), 1 + offset s * TM0Route.partrecVarList.length + index s),
+            offset s, index s)
       | none =>
-          labelAtByStatementFromWithPositionCode? tc fuel (k + 1)
-            (i - TM0Route.partrecVarList.length)
+          ((none : Option (SourceLabel tc × Nat)),
+            (offset s + 1, index s - TM0Route.partrecVarList.length))) := by
+    have hlookup : Primrec (fun s : State => TM0Route.partrecVarList[index s]?) :=
+      (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp hindex
+    exact (Primrec.option_casesOn hlookup hnoneStep hsomeBlock).of_eq fun s => by
+      cases TM0Route.partrecVarList[index s]? <;> rfl
+  have hsomeFound : Primrec₂ (fun s : State => fun r : SourceLabel tc × Nat =>
+      (some r, s.2)) := by
+    apply Primrec₂.mk
+    exact Primrec.pair (Primrec.option_some.comp Primrec.snd)
+      (Primrec.snd.comp Primrec.fst)
+  exact (Primrec.option_casesOn hfound hnone hsomeFound).of_eq fun s => by
+    rcases s with ⟨r, k, i⟩
+    cases r <;> rfl
+
+theorem labelAtByStatementFromWithPositionCode?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : Nat × Nat × Nat =>
+      labelAtByStatementFromWithPositionCode? tc p.1 p.2.1 p.2.2) := by
+  let step := labelAtByStatementFromWithPositionCodeStep? tc
+  let init : Nat × Nat × Nat → Option (SourceLabel tc × Nat) × Nat × Nat :=
+    fun p => (none, p.2.1, p.2.2)
+  have hstep : Primrec step :=
+    labelAtByStatementFromWithPositionCodeStep?_primrec_fixed tc
+  have hinit : Primrec init :=
+    Primrec.pair (Primrec.const (none : Option (SourceLabel tc × Nat))) Primrec.snd
+  have hiter : Primrec (fun p : Nat × Nat × Nat => (step^[p.1]) (init p)) := by
+    exact Primrec.nat_iterate Primrec.fst hinit ((hstep.comp Primrec.snd).to₂)
+  exact (Primrec.fst.comp hiter).of_eq fun p => by
+    rfl
 
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
