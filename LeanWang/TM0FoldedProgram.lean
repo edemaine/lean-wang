@@ -1027,6 +1027,63 @@ def simTransitionOfStep (tc : Turing.ToPartrec.Code)
   | none => none
   | some (q', stmt) => some (simRowOfStep tc side marked q q' left right stmt)
 
+/-- Numeric descriptor for one semantic folded simulation step. -/
+def simStepDataOfStep (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q q' : SourceLabel tc) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) : SimStepData :=
+  (side, marked, TM0FiniteCompiler.stateCode tc q,
+    TM0FiniteCompiler.stateCode tc q', left, right, stmt)
+
+theorem simStepDataRow_ofStep (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q q' : SourceLabel tc) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) :
+    simStepDataRow (simStepDataOfStep tc side marked q q' left right stmt) =
+      simRowOfStep tc side marked q q' left right stmt := by
+  rw [simRowOfStep_eq_code]
+  rfl
+
+/-- Descriptor-level version of `simTransitionOfStep`. -/
+def simStepDataOfTransition (tc : Turing.ToPartrec.Code)
+    (q : SourceLabel tc) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) : Option SimStepData :=
+  match TM0Route.partrecStartedTM0Machine tc q (foldedRead side left right) with
+  | none => none
+  | some (q', stmt) => some (simStepDataOfStep tc side marked q q' left right stmt)
+
+theorem simTransitionOfStep_eq_map_stepData (tc : Turing.ToPartrec.Code)
+    (q : SourceLabel tc) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) :
+    simTransitionOfStep tc q side marked left right =
+      (simStepDataOfTransition tc q side marked left right).map simStepDataRow := by
+  unfold simTransitionOfStep simStepDataOfTransition
+  cases h : TM0Route.partrecStartedTM0Machine tc q (foldedRead side left right) with
+  | none =>
+      rfl
+  | some step =>
+      rcases step with ⟨q', stmt⟩
+      simp [simStepDataRow_ofStep]
+
+private theorem filterMap_simTransition_eq_map_stepData {α : Type}
+    (xs : List α) (f : α → Option SimStepData) :
+    xs.filterMap (fun x => (f x).map simStepDataRow) =
+      simRowsOfStepData (xs.filterMap f) := by
+  induction xs with
+  | nil =>
+      rfl
+  | cons x xs ih =>
+      cases h : f x <;> simp [h, simRowsOfStepData, ih]
+
+/-- Descriptor-level folded simulation rows for one source label. -/
+def simStepDataForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
+    List SimStepData :=
+  foldSideList.flatMap fun side =>
+    [false, true].flatMap fun marked =>
+      TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
+        TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
+          simStepDataOfTransition tc q side marked left right
+
 def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
     List PostTransition :=
   foldSideList.flatMap fun side =>
@@ -1037,6 +1094,22 @@ def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
 
 def simRows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q => simRowsForLabel tc q
+
+theorem simRowsForLabel_eq_stepData (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
+    simRowsForLabel tc q = simRowsOfStepData (simStepDataForLabel tc q) := by
+  unfold simRowsForLabel simStepDataForLabel
+  simp only [simTransitionOfStep_eq_map_stepData]
+  simp [simRowsOfStepData, filterMap_simTransition_eq_map_stepData,
+    List.map_flatMap]
+
+/-- Descriptor-level folded simulation rows. -/
+def simStepData (tc : Turing.ToPartrec.Code) : List SimStepData :=
+  (TM0Route.partrecStartedTM0LabelList tc).flatMap fun q => simStepDataForLabel tc q
+
+theorem simRows_eq_stepData (tc : Turing.ToPartrec.Code) :
+    simRows tc = simRowsOfStepData (simStepData tc) := by
+  unfold simRows simStepData
+  simp [simRowsForLabel_eq_stepData, simRowsOfStepData, List.map_flatMap]
 
 def programOfParts (qCodes : List Nat) (init sim : List PostTransition) : FiniteTM0Program where
   symbols := foldedSymbolList
