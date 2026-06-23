@@ -1182,6 +1182,15 @@ theorem contEncodeFuelBound_succ_start
           contEncodeBoundStep codeBound (contEncodeFuelBound (fuel + 1) codeBound contBound)
       rw [ih]
 
+theorem contBound_le_contEncodeFuelBound (fuel codeBound contBound : Nat) :
+    contBound ≤ contEncodeFuelBound fuel codeBound contBound := by
+  induction fuel with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      exact ih.trans
+        (contBound_le_boundStep codeBound (contEncodeFuelBound fuel codeBound contBound))
+
 theorem childState_cons_left_lt_boundStep
     {f fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
     (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.cons f fs) ≤ codeBound)
@@ -2307,6 +2316,57 @@ theorem codeSuppWeightCodeFuelRowsStep_snd_getD_eq
         (codeContStateOfCode n).2 := by
   rw [codeSuppWeightCodeFuelRowsStep_snd]
   exact codeSuppWeightCodeFuelRowStep'_getD_eq wCode hlabel hweight hn
+
+theorem codeSuppWeightCodeFuelRows'_lookup_eq
+    (wCode : Nat → Nat) {fuel codeBound contBound bound : Nat}
+    (hbound :
+      codeContStateBound codeBound (contEncodeFuelBound fuel codeBound contBound) ≤ bound) :
+    (∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound →
+      codeContStateLookup (codeSuppWeightCodeFuelRows' wCode fuel bound).1 c k =
+        trNormalLabelCodeFuel fuel c k) ∧
+    (∀ c k,
+      ToPartrec.Code.encodeCode c ≤ codeBound →
+      Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound →
+      codeContStateLookup (codeSuppWeightCodeFuelRows' wCode fuel bound).2 c k =
+        codeSuppWeightCodeFuel' wCode fuel c k) := by
+  induction fuel generalizing contBound with
+  | zero =>
+      constructor
+      · intro c k _hcode _hcont
+        rw [codeSuppWeightCodeFuelRows'_zero]
+        exact codeSuppWeightCodeFuelRowsBase_label_correct bound c k
+      · intro c k _hcode _hcont
+        rw [codeSuppWeightCodeFuelRows'_zero]
+        exact codeSuppWeightCodeFuelRowsBase_weight_correct wCode bound c k
+  | succ fuel ih =>
+      have hboundPrev :
+          codeContStateBound codeBound
+              (contEncodeFuelBound fuel codeBound
+                (contEncodeBoundStep codeBound contBound)) ≤ bound := by
+        rwa [contEncodeFuelBound_succ_start]
+      have hprev := ih hboundPrev
+      constructor
+      · intro c k hcode hcont
+        have hcontFuel :
+            Turing.PartrecToTM2.Cont'.encodeCont k ≤
+              contEncodeFuelBound (fuel + 1) codeBound contBound :=
+          hcont.trans (contBound_le_contEncodeFuelBound (fuel + 1) codeBound contBound)
+        have hstateLe : codeContStateCode c k ≤ bound := by
+          exact (le_of_lt (codeContStateCode_lt_bound hcode hcontFuel)).trans hbound
+        rw [codeSuppWeightCodeFuelRows'_succ, codeSuppWeightCodeFuelRowsStep_fst]
+        exact trNormalLabelCodeFuelRowStep_lookup_eq_of_bound hprev.1 hcode hcont hstateLe
+      · intro c k hcode hcont
+        have hcontFuel :
+            Turing.PartrecToTM2.Cont'.encodeCont k ≤
+              contEncodeFuelBound (fuel + 1) codeBound contBound :=
+          hcont.trans (contBound_le_contEncodeFuelBound (fuel + 1) codeBound contBound)
+        have hstateLe : codeContStateCode c k ≤ bound := by
+          exact (le_of_lt (codeContStateCode_lt_bound hcode hcontFuel)).trans hbound
+        rw [codeSuppWeightCodeFuelRows'_succ, codeSuppWeightCodeFuelRowsStep_snd]
+        exact codeSuppWeightCodeFuelRowStep'_lookup_eq_of_bound
+          wCode hprev.1 hprev.2 hcode hcont hstateLe
 
 theorem codeSuppWeightCodeFuel'_eq
     (wCode : Nat → Nat) {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
