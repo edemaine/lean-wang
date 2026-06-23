@@ -48,11 +48,11 @@ Completed proof layers:
 - the machine-to-Wang fixed-domino construction;
 - computable table-tile data decoding, including the initial-row and normal-row
   tile membership bridges;
-- the fixed-domino reduction from the verified finite-TM0 route plus the
-  temporary finite-TM0-to-table bridge;
+- the fixed-domino reduction from the source-level folded finite-TM0 route plus
+  the temporary finite-TM0-to-table backend bridge;
 - the abstract scaffold reduction from any verified `IsScaffold S`;
-- the encoded domino undecidability theorem from a verified reduction to finite
-  machine data and verified scaffold.
+- the encoded domino undecidability theorem from source-level folded-route
+  obligations and a verified scaffold.
 - a primitive-recursive finite Boolean search `TableProgram` generator remains
   available as supporting code, but the old bounded-fuel theorem route has been
   removed from the main theorem surface.
@@ -77,14 +77,13 @@ Completed proof layers:
 The remaining construction obligations are explicit Lean interfaces:
 
 ```lean
-structure TM0FiniteCompiler where
-  compile : Turing.ToPartrec.Code -> FiniteTM0Program
-  compile_computable : Computable compile
-  correct : forall tc : Turing.ToPartrec.Code,
-    (compile tc).HaltsEmpty <->
-      (Turing.TM0.eval
-        (TM0Route.partrecStartedTM0Machine tc)
-        TM0Route.partrecStartedTM0Input).Dom
+structure TM0FoldedReduction.SourceObligations where
+  program_computable :
+    Computable (fun c : Nat.Partrec.Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+  correct : forall c : Nat.Partrec.Code,
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
+      (Nat.Partrec.Code.eval c 0).Dom
 
 def IsScaffold (S : Scaffold) : Prop :=
   forall (T : TileSet) (seed : WangTile),
@@ -92,12 +91,10 @@ def IsScaffold (S : Scaffold) : Prop :=
       forall n : Nat, 0 < n -> TileableFixedCornerSquare T seed n
 ```
 
-The names below keep `Compiler` because the maps produce finite program data.
-Mathematically, each such interface packages a computable reduction; the
-implementation side compiles source instances to finite machine data. In prose,
-"reduction" should be the default word for the mathematical notion, with
-"compiler"/"compilation" used when describing the concrete construction of the
-finite program.
+Mathematically, these obligations package computable reductions; the
+implementation side may still use "compiler"/"compilation" when describing the
+concrete construction of finite program data. In prose, "reduction" should be
+the default word for the mathematical notion.
 
 There is also a TM2/TM0 factoring of the same obligation. The repository now
 provides a local natural-number encoding, `Denumerable` instance, and hence
@@ -117,13 +114,14 @@ by the concrete compatibility bridge `PostProgram.toTableProgram` until that
 layer is replaced by direct finite-TM0 tiles. This bridge starts only after the
 source machine has already been reduced to finite one-sided TM0 data; it is not
 a direct TM2-to-table reduction.
-Together these pieces feed the
-fixed-domino, fixed-corner, encoded scaffolded domino, and unencoded scaffolded
-domino theorem surfaces directly from the finite-TM0 factorization using the
-concrete source-code translation into Mathlib's `PartrecToTM2` evaluator. The
-old code-to-table `TableCompiler` surface has been removed so the theorem
-statements do not look like a direct TM2-to-table route. The started-TM2 bridge
-is a theorem in `TM0Route` rather than a separate reduction structure.
+Together these pieces feed the fixed-domino, fixed-corner, encoded scaffolded
+domino, and unencoded scaffolded domino theorem surfaces from the source-level
+folded finite-TM0 factorization using the concrete source-code translation into
+Mathlib's `PartrecToTM2` evaluator. The old code-to-table `TableCompiler`
+surface and the generic theorem-level `TM0FiniteCompiler` interface have been
+removed so the theorem statements do not look like a direct TM2-to-table route.
+The started-TM2 bridge is a theorem in `TM0Route` rather than a separate
+reduction structure.
 
 The data-level compiler `PostProgram.toTableProgram` is now in place for the
 current table-machine tile backend. A finite-TM0 `move` compiles to one
@@ -173,14 +171,15 @@ TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
       TM0Route.partrecStartedTM0Input).Dom
 ```
 
-The remaining blocker to packaging this as a `TM0FiniteCompiler` is
-computability of `TM0FoldedCompiler.program`. The support-list and numeric
-state-code path is now executable; the next step is to remove or localize the
-file-wide noncomputable section in `TM0FoldedCompiler` and prove the resulting
-program map computable. `TM0FoldedCompiler.programData` is now a normalized
-form of `program` where the constant initial rows are exposed definitionally,
-with `TM0FoldedCompiler.programData_eq_program` relating it back to the
-semantic `program`. The later TM0 count wrappers are also isolated:
+The remaining blocker for the source-level folded route is computability of
+`TM0FoldedCompiler.programData ∘ NatPartrecToToPartrec.translate`. The
+support-list and numeric state-code path is now executable; the next step is to
+remove or localize the file-wide noncomputable section in `TM0FoldedCompiler`
+and prove the resulting source program-data map computable.
+`TM0FoldedCompiler.programData` is a normalized form of `program` where the
+constant initial rows are exposed definitionally, with
+`TM0FoldedCompiler.programData_eq_program` relating it back to the semantic
+`program`. The later TM0 count wrappers are also isolated:
 `TM0Route.partrecStartedTM0StateCount_primrec_of_statementCount` reduces state
 count computability to the remaining `partrecStartedTM0StatementCount`
 computability target. `TM0Route` now also has a local `List Nat` sum
@@ -247,27 +246,21 @@ Next implementation targets:
 
    ```lean
    Computable (fun c : Nat.Partrec.Code =>
-     TM0FoldedCompiler.program (NatPartrecToToPartrec.translate c))
+     TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
    ```
 
    This can use Mathlib's existing recursion theorem for `Nat.Partrec.Code`
    instead of first proving a general recursion theorem for
    `Turing.ToPartrec.Code`.
 2. Optionally strengthen the result to computability on all
-   `Turing.ToPartrec.Code` so the folded program can be packaged as:
-
-   ```lean
-   TM0FiniteCompiler
-   ```
-
-   with `compile := TM0FoldedCompiler.program` and correctness supplied by
-   `TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom`.
+   `Turing.ToPartrec.Code` for a reusable folded-route corollary. This should
+   still feed the source-level theorem through `Obligations.toSource`, not
+   reintroduce a generic table-facing compiler interface.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-4. Specialize the concrete TM0/scaffold corollaries, in particular
-   `encoded_domino_problem_undecidable_of_scaffold_tm0Compiler` and
-   `domino_problem_undecidable_of_scaffold_tm0Compiler`, to those concrete
-   instances to recover the unconditional encoded and unencoded domino
-   theorems.
+4. Specialize the concrete folded-route/scaffold corollaries, in particular
+   `encoded_domino_problem_undecidable_of_scaffold_source` and
+   `domino_problem_undecidable_of_scaffold_source`, to those concrete
+   instances to recover the unconditional encoded and unencoded domino theorems.
 5. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0 instruction set is already close to the Wang-tile space-time
    simulation, so this should remove both the `PostProgram.toTableProgram`

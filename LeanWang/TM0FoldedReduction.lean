@@ -3,8 +3,10 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.NatPartrecToToPartrec
 import LeanWang.TM0FoldedProgram
 import LeanWang.Theorems
+import Mathlib.Computability.Reduce
 
 /-!
 Packaging the folded finite-TM0 construction as the machine-side reduction.
@@ -32,15 +34,6 @@ structure Obligations where
       (Turing.TM0.eval
         (TM0Route.partrecStartedTM0Machine tc)
         TM0Route.partrecStartedTM0Input).Dom
-
-/--
-The folded finite-TM0 construction packaged as the `TM0FiniteCompiler`
-interface used by the main theorem surface.
--/
-def compiler (h : Obligations) : TM0FiniteCompiler where
-  compile := TM0FoldedCompiler.program
-  compile_computable := h.program_computable
-  correct := h.correct
 
 /--
 The exact obligations needed for the final reduction from `Nat.Partrec.Code`.
@@ -191,26 +184,6 @@ theorem sourceDominoReductionCode_correct
   exact sourceDominoReduction_correct hS h c
 
 /--
-Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
-assuming the isolated folded-route obligations.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold
-    (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
-    S hS (compiler h)
-
-/--
-Unencoded domino undecidability from a scaffold and the folded finite-TM0 route,
-assuming the isolated folded-route obligations.
--/
-theorem domino_problem_undecidable_of_scaffold
-    (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_tm0Compiler
-    S hS (compiler h)
-
-/--
 Encoded domino undecidability from the exact source-code folded-route
 obligations.
 -/
@@ -243,6 +216,24 @@ theorem domino_problem_undecidable_of_scaffold_source
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
     hdomino.of_eq fun c => sourceDominoReduction_correct hS h c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
+Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
+assuming the broader folded-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold
+    (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS h.toSource
+
+/--
+Unencoded domino undecidability from a scaffold and the folded finite-TM0 route,
+assuming the broader folded-route obligations.
+-/
+theorem domino_problem_undecidable_of_scaffold
+    (S : Scaffold) (hS : IsScaffold S) (h : Obligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS h.toSource
 
 end TM0FoldedReduction
 

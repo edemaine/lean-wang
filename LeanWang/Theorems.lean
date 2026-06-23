@@ -6,71 +6,20 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Compactness
 import LeanWang.Machine
 import LeanWang.MachineTiles
-import LeanWang.NatPartrecToToPartrec
-import LeanWang.PostMachine
-import LeanWang.TM0Route
-import LeanWang.ToPartrecEncoding
-import Mathlib.Computability.Reduce
-import Mathlib.Computability.TuringMachine.ToPartrec
 
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
 
-This file collects the main reduction theorems. The final theorem is currently
-parameterized by construction obligations: a computable reduction from Mathlib
-partial-recursive codes through the TM0 route into finite one-sided TM0 programs,
-and a concrete scaffold satisfying the abstract square-forcing property. The
-current Wang-tile layer still consumes the older table-machine backend, so this
-file uses the concrete `PostProgram.toTableProgram` compatibility bridge at that
-boundary.
+This file collects the generic tiling theorems used by the reductions:
+machine-tile correctness, fixed-corner-square compactness, and the abstract
+scaffold construction. The partial-recursive-code reduction is kept in
+`TM0FoldedReduction`, so this file does not expose a separate machine-side
+reduction interface.
 -/
 
 noncomputable section
 
 namespace LeanWang
-
-open Nat.Partrec (Code)
-
-/--
-A computable reduction from Mathlib's code-specific started TM0 evaluator to
-finite one-sided TM0 program data.
-
-This is the preferred machine-side obligation: compile the finite TM0
-machine/input produced by Mathlib's TM2-to-TM1-to-TM0 reductions into the local
-one-sided finite TM0 model with the same halting behavior.
--/
-structure TM0FiniteCompiler where
-  compile : Turing.ToPartrec.Code → FiniteTM0Program
-  compile_computable : Computable compile
-  correct : ∀ tc : Turing.ToPartrec.Code,
-    (compile tc).HaltsEmpty ↔
-      (Turing.TM0.eval
-        (TM0Route.partrecStartedTM0Machine tc)
-        TM0Route.partrecStartedTM0Input).Dom
-
-/--
-Apply the Mathlib-code-to-finite-TM0 reduction/compiler.
-
-The `Compiler` names below remain for the executable maps that build finite
-program data. Mathematically these maps are the many-one reductions used by the
-undecidability proof.
--/
-def tm0Program (C : TM0FiniteCompiler) (c : Code) : FiniteTM0Program :=
-  C.compile (NatPartrecToToPartrec.translate c)
-
-theorem tm0Program_computable (C : TM0FiniteCompiler) :
-    Computable (tm0Program C) := by
-  exact C.compile_computable.comp NatPartrecToToPartrec.translate_computable
-
-/-- Correctness of the reduction from partial-recursive codes to finite TM0 programs. -/
-theorem tm0Program_correct (C : TM0FiniteCompiler) (c : Code) :
-    (tm0Program C c).HaltsEmpty ↔ (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (C.correct (NatPartrecToToPartrec.translate c)).trans
-    ((TM0Route.partrecStartedTM0_eval_dom_iff_tm2
-        (NatPartrecToToPartrec.translate c)).trans
-      ((TM0Route.partrecStartedTM2_eval_dom_iff_partrec
-          (NatPartrecToToPartrec.translate c)).trans
-        (NatPartrecToToPartrec.translate_tm2_dom c)))
 
 /-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
 theorem machineTiles_correct (M : Machine) :
@@ -88,55 +37,6 @@ theorem tableProgramFixedDomino_correct (P : TableProgram) :
       ¬ Machine.HaltsEmpty P.toMachine := by
   unfold tableProgramFixedDomino tableProgramTiles tableProgramSeed
   exact machineTiles_correct P.toMachine
-
-/-- Fixed domino instance produced from a partial-recursive code. -/
-def fixedDominoReduction (C : TM0FiniteCompiler) (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDominoData (PostProgram.toTableProgram (tm0Program C c))
-
-theorem fixedDominoReduction_computable
-    (C : TM0FiniteCompiler) :
-    Computable (fixedDominoReduction C) := by
-  exact tableProgramFixedDominoData_computable.comp
-    (PostProgram.toTableProgram_computable.comp (tm0Program_computable C))
-
-/-- Correctness of the fixed domino reduction from nonhalting. -/
-theorem fixedDominoReduction_correct (C : TM0FiniteCompiler) (c : Code) :
-    TilesQuarterWithSeed (fixedDominoReduction C c).1
-        (fixedDominoReduction C c).2 ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  unfold fixedDominoReduction
-  rw [tableProgramFixedDominoData_seed_eq]
-  rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff (PostProgram.toTableProgram (tm0Program C c)))]
-  rw [tableProgramFixedDomino_correct]
-  rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
-  rw [tm0Program_correct C]
-
-/-- The fixed domino problem is undecidable, in reduction form. -/
-theorem fixed_domino_problem_undecidable_of_tm0Compiler
-    (C : TM0FiniteCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        TilesQuarterWithSeed (fixedDominoReduction C c).1
-          (fixedDominoReduction C c).2) := by
-  intro h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    h.of_eq fun c => fixedDominoReduction_correct C c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-/-- The fixed-corner finite-square problem is undecidable, in reduction form. -/
-theorem fixed_corner_square_problem_undecidable_of_tm0Compiler
-    (C : TM0FiniteCompiler) :
-    ¬ ComputablePred
-      (fun c : Code =>
-        ∀ n : Nat, 0 < n → TileableFixedCornerSquare
-          (fixedDominoReduction C c).1
-          (fixedDominoReduction C c).2 n) := by
-  intro h
-  apply fixed_domino_problem_undecidable_of_tm0Compiler C
-  exact h.of_eq fun c =>
-    (tilesQuarterWithSeed_iff_all_fixedCornerSquares
-      (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where
@@ -574,79 +474,6 @@ theorem scaffold_reduction_correct {S : Scaffold} (hS : IsScaffold S)
     TilesPlane (combineWithScaffold S T seed) ↔
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
   hS T seed
-
-/-- The final Berger/Robinson tileset produced from a partial-recursive code and a scaffold. -/
-def dominoReduction
-    (S : Scaffold) (C : TM0FiniteCompiler) (c : Code) : TileSet :=
-  combineWithScaffold S (fixedDominoReduction C c).1
-    (fixedDominoReduction C c).2
-
-theorem dominoReduction_computable
-    (S : Scaffold) (C : TM0FiniteCompiler) :
-    Computable (dominoReduction S C) := by
-  unfold dominoReduction
-  exact (combineWithScaffold_computable S).comp (fixedDominoReduction_computable C)
-
-/-- Correctness of the final domino reduction from nonhalting. -/
-theorem dominoReduction_correct {S : Scaffold} (hS : IsScaffold S)
-    (C : TM0FiniteCompiler) (c : Code) :
-    TilesPlane (dominoReduction S C c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [dominoReduction]
-  exact (scaffold_reduction_correct hS
-    (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).trans
-      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (fixedDominoReduction C c).1 (fixedDominoReduction C c).2).symm.trans
-          (fixedDominoReduction_correct C c))
-
-/-- Encoded version of `dominoReduction`, using the canonical finite tileset encoding. -/
-def dominoReductionCode
-    (S : Scaffold) (C : TM0FiniteCompiler) (c : Code) : Nat :=
-  encodeTileSet (dominoReduction S C c)
-
-/-- Computability target for the encoded final reduction. -/
-theorem dominoReductionCode_computable
-    (S : Scaffold) (C : TM0FiniteCompiler) :
-    Computable (dominoReductionCode S C) := by
-  unfold dominoReductionCode
-  exact encodeTileSet_computable.comp (dominoReduction_computable S C)
-
-/-- Correctness target for the encoded final reduction. -/
-theorem dominoReductionCode_correct {S : Scaffold} (hS : IsScaffold S)
-    (C : TM0FiniteCompiler) (c : Code) :
-    TilesPlane (decodeTileSet (dominoReductionCode S C c)) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [dominoReductionCode, decodeTileSet_encodeTileSet]
-  exact dominoReduction_correct hS C c
-
-/-- The domino problem is undecidable for finite Wang tilesets, assuming a scaffold
-and the TM0 finite-program reduction route. -/
-theorem domino_problem_undecidable_of_scaffold_tm0Compiler
-    (S : Scaffold) (hS : IsScaffold S) (C : TM0FiniteCompiler) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  intro h
-  have hdomino : ComputablePred
-      (fun c : Code => TilesPlane (dominoReduction S C c)) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun T : TileSet => TilesPlane T)
-        (dominoReduction_computable S C)) h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    hdomino.of_eq fun c => dominoReduction_correct hS C c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
-
-/-- The domino problem is undecidable for encoded finite Wang tilesets, assuming a scaffold
-and the TM0 finite-program reduction route. -/
-theorem encoded_domino_problem_undecidable_of_scaffold_tm0Compiler
-    (S : Scaffold) (hS : IsScaffold S) (C : TM0FiniteCompiler) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  intro h
-  have hencoded : ComputablePred
-      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode S C c))) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
-        (dominoReductionCode_computable S C)) h
-  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
-    hencoded.of_eq fun c => dominoReductionCode_correct hS C c
-  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 end LeanWang
 
