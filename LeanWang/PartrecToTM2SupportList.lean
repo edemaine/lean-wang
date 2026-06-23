@@ -1335,6 +1335,150 @@ theorem trNormalLabelCodeFuelRowStep_getD_eq
   simp only [List.getElem_map, List.getElem_range]
   exact trNormalLabelCodeFuelStep_eq hprev _ _
 
+/-- Numeric version of `trNormalLabelCodeFuelStep`, dispatching on dense source-code tags. -/
+def trNormalLabelCodeFuelStepCode (prev : List Nat) (cCode : Nat) (k : Cont') : Nat :=
+  if cCode = 0 then
+    pushLabelCode K'.main (fun _ : Option Γ' => some Γ'.cons) (retLabelCode k)
+  else if cCode = 1 then
+    headLabelCode K'.main (succLabelCode (retLabelCode k))
+  else if cCode = 2 then
+    clearLabelCode natEnd K'.main (retLabelCode k)
+  else
+    let n := cCode - 3
+    let m := n.div2.div2
+    let f := ToPartrec.Code.ofNatCode m.unpair.1
+    let g := ToPartrec.Code.ofNatCode m.unpair.2
+    match n.bodd, n.div2.bodd with
+    | false, false =>
+        pushLabelCode K'.stack (fun _ : Option Γ' => some Γ'.consₗ) <|
+          moveLabelCode (fun _ : Γ' => false) K'.main K'.rev <|
+            copyLabelCode <| codeContStateLookup prev f (Cont'.cons₁ g k)
+    | false, true =>
+        codeContStateLookup prev g (Cont'.comp f k)
+    | true, false =>
+        predLabelCode (codeContStateLookup prev f k) (codeContStateLookup prev g k)
+    | true, true =>
+        codeContStateLookup prev f (Cont'.fix f k)
+
+theorem trNormalLabelCodeFuelStepCode_primrec :
+    Primrec (fun p : List Nat × Nat × Cont' =>
+      trNormalLabelCodeFuelStepCode p.1 p.2.1 p.2.2) := by
+  unfold trNormalLabelCodeFuelStepCode
+  let hcode : Primrec (fun p : List Nat × Nat × Cont' => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  let hk : Primrec (fun p : List Nat × Nat × Cont' => p.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  let hn : Primrec (fun p : List Nat × Nat × Cont' => p.2.1 - 3) :=
+    Primrec.nat_sub.comp hcode (Primrec.const 3)
+  let hm : Primrec (fun p : List Nat × Nat × Cont' => (p.2.1 - 3).div2.div2) :=
+    Primrec.nat_div2.comp (Primrec.nat_div2.comp hn)
+  let hm₁ : Primrec (fun p : List Nat × Nat × Cont' => ((p.2.1 - 3).div2.div2).unpair.1) :=
+    Primrec.fst.comp (Primrec.unpair.comp hm)
+  let hm₂ : Primrec (fun p : List Nat × Nat × Cont' => ((p.2.1 - 3).div2.div2).unpair.2) :=
+    Primrec.snd.comp (Primrec.unpair.comp hm)
+  let hf : Primrec (fun p : List Nat × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm₁
+  let hg : Primrec (fun p : List Nat × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm₂
+  let hret : Primrec (fun p : List Nat × Nat × Cont' => retLabelCode p.2.2) :=
+    retLabelCode_primrec.comp hk
+  let hzero : Primrec (fun p : List Nat × Nat × Cont' =>
+      pushLabelCode K'.main (fun _ : Option Γ' => some Γ'.cons) (retLabelCode p.2.2)) :=
+    (pushLabelCode_primrec K'.main (fun _ : Option Γ' => some Γ'.cons)).comp hret
+  let hsucc : Primrec (fun p : List Nat × Nat × Cont' =>
+      headLabelCode K'.main (succLabelCode (retLabelCode p.2.2))) :=
+    (headLabelCode_primrec K'.main).comp (succLabelCode_primrec.comp hret)
+  let htail : Primrec (fun p : List Nat × Nat × Cont' =>
+      clearLabelCode natEnd K'.main (retLabelCode p.2.2)) :=
+    (clearLabelCode_primrec natEnd K'.main).comp hret
+  let hlookupFCons₁ : Primrec (fun p : List Nat × Nat × Cont' =>
+      codeContStateLookup p.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+        (Cont'.cons₁
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) := by
+    let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1,
+          Cont'.cons₁
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) := by
+      exact Primrec.pair hf ((Turing.PartrecToTM2.Cont'.primrec₂_cons₁).comp hg hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
+  let hcons : Primrec (fun p : List Nat × Nat × Cont' =>
+      pushLabelCode K'.stack (fun _ : Option Γ' => some Γ'.consₗ) <|
+        moveLabelCode (fun _ : Γ' => false) K'.main K'.rev <|
+          copyLabelCode <| codeContStateLookup p.1
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+            (Cont'.cons₁
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) :=
+    (pushLabelCode_primrec K'.stack (fun _ : Option Γ' => some Γ'.consₗ)).comp
+      ((moveLabelCode_primrec (fun _ : Γ' => false) K'.main K'.rev).comp
+        (copyLabelCode_primrec.comp hlookupFCons₁))
+  let hlookupGComp : Primrec (fun p : List Nat × Nat × Cont' =>
+      codeContStateLookup p.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+        (Cont'.comp
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+    let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2,
+          Cont'.comp
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+      exact Primrec.pair hg ((Turing.PartrecToTM2.Cont'.primrec₂_comp).comp hf hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
+  let hlookupF : Primrec (fun p : List Nat × Nat × Cont' =>
+      codeContStateLookup p.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2) := by
+    let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1, p.2.2)) :=
+      Primrec.pair hf hk
+    exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
+  let hlookupG : Primrec (fun p : List Nat × Nat × Cont' =>
+      codeContStateLookup p.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2) := by
+    let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2, p.2.2)) :=
+      Primrec.pair hg hk
+    exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
+  let hcase : Primrec (fun p : List Nat × Nat × Cont' =>
+      predLabelCode
+        (codeContStateLookup p.1
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)
+        (codeContStateLookup p.1
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) :=
+    predLabelCode_primrec.comp (Primrec.pair hlookupF hlookupG)
+  let hlookupFFix : Primrec (fun p : List Nat × Nat × Cont' =>
+      codeContStateLookup p.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+        (Cont'.fix
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+    let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1,
+          Cont'.fix
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+      exact Primrec.pair hf ((Turing.PartrecToTM2.Cont'.primrec₂_fix).comp hf hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
+  let htag₀ : PrimrecPred (fun p : List Nat × Nat × Cont' => p.2.1 = 0) :=
+    Primrec.eq.comp hcode (Primrec.const 0)
+  let htag₁ : PrimrecPred (fun p : List Nat × Nat × Cont' => p.2.1 = 1) :=
+    Primrec.eq.comp hcode (Primrec.const 1)
+  let htag₂ : PrimrecPred (fun p : List Nat × Nat × Cont' => p.2.1 = 2) :=
+    Primrec.eq.comp hcode (Primrec.const 2)
+  let hbodd : Primrec (fun p : List Nat × Nat × Cont' => (p.2.1 - 3).bodd) :=
+    Primrec.nat_bodd.comp hn
+  let hdiv2bodd : Primrec (fun p : List Nat × Nat × Cont' => ((p.2.1 - 3).div2).bodd) :=
+    Primrec.nat_bodd.comp (Primrec.nat_div2.comp hn)
+  refine Primrec.ite htag₀ hzero ?_
+  refine Primrec.ite htag₁ hsucc ?_
+  refine Primrec.ite htag₂ htail ?_
+  refine (Primrec.ite (Primrec.eq.comp hbodd (Primrec.const false))
+    (Primrec.ite (Primrec.eq.comp hdiv2bodd (Primrec.const false)) hcons hlookupGComp)
+    (Primrec.ite (Primrec.eq.comp hdiv2bodd (Primrec.const false)) hcase hlookupFFix)).of_eq ?_
+  intro p
+  dsimp only
+  cases hb : (p.2.1 - 3).bodd <;>
+    cases hd : ((p.2.1 - 3).div2).bodd <;>
+    simp
+
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
   | c@ToPartrec.Code.zero', k => trStmtsWeightCode wCode (trNormalLabelCode c k)
