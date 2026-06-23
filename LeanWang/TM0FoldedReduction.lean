@@ -208,13 +208,31 @@ theorem sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom
   exact hlabel
 
 /--
-Primitive recursiveness of the source-level numeric-state offset decoder is
+Primitive recursiveness of the source-level canonical numeric-state decoder is
 enough for the source-level numeric-state indexed descriptor list.
+-/
+theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexStartWithCode
+    (hindex : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Primrec sourceSimStepDataByLabelIndexWithCode := by
+  unfold sourceSimStepDataByLabelIndexWithCode
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp
+      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
+          NatPartrecToToPartrec.translate_primrec))) ?_
+  apply Primrec₂.mk
+  exact hindex
+
+/--
+Primitive recursiveness of the source-level numeric-state offset decoder is
+enough for primitive recursiveness of the source-level numeric-state indexed
+descriptor list.
 -/
 theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWithCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     Primrec sourceSimStepDataByLabelIndexWithCode := by
+  apply sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexStartWithCode
   have hstart : Primrec (fun p : Code × Nat =>
       sourceSimStepDataForLabelIndexStartWithCode p.1 p.2) := by
     have hfrom : Primrec (fun p : Code × Nat =>
@@ -232,12 +250,6 @@ theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWi
         sourceSimStepDataForLabelIndexFromWithCode
         TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode
       rfl
-  unfold sourceSimStepDataByLabelIndexWithCode
-  refine Primrec.list_flatMap
-    (Primrec.list_range.comp
-      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec))) ?_
-  apply Primrec₂.mk
   exact hstart
 
 /--
@@ -348,6 +360,17 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     rw [sourceSimStepData_eq c]
     rw [← TM0FoldedCompiler.simRows_eq_stepData
       (NatPartrecToToPartrec.translate c)]).to_comp
+
+/--
+Primitive recursiveness of the source-level canonical numeric-state decoder is
+enough for computability of the normalized folded finite-TM0 program data.
+-/
+theorem sourceProgramData_computable_of_source_labelIndexStartWithCode
+    (hindex : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
+    (sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexStartWithCode hindex)
 
 /--
 The remaining source-level folded computability target: primitive recursiveness
