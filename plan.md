@@ -179,23 +179,22 @@ and prove the resulting source program-data map computable.
 `TM0FoldedCompiler.programData` is a normalized form of `program` where the
 constant initial rows are exposed definitionally, with
 `TM0FoldedCompiler.programData_eq_program` relating it back to the semantic
-`program`. The later TM0 count wrappers are also isolated:
-`TM0Route.partrecStartedTM0StateCount_primrec_of_statementCount` reduces state
-count computability to the remaining `partrecStartedTM0StatementCount`
-computability target. `TM0Route` now also has a local `List Nat` sum
-primitive-recursion helper for that statement-count proof. The next obstacle is
-to add finite `Primcodable` encodings for the concrete TM2-to-TM1 labels and
-their finite function payloads, so `partrecTM1LabelList` and the per-label
-statement-length function can be treated as primitive recursive. The finite
+`program`. The TM0 count wrappers now have direct primitive-recursive proofs
+through weighted support mirrors, including
+`partrecStartedTM0StatementCount_primrec`,
+`partrecStartedTM0LabelCount_primrec`, and
+`partrecStartedTM0StateCount_primrec`. The current obstacle is no longer the
+numeric count path but the global descriptor decoder needed for
+`TM0FoldedCompiler.simStepDataForLabelIndexFrom`: the fixed-code statement and
+label decoders are primitive recursive, but the final proof must package the
+code-uniform dependent label lookup into nondependent `SimStepData`. The finite
 function payloads and `TM2to1.StAct` are now encoded. The recursive concrete
 started `TM2.Stmt` type is now encoded by valid preorder node lists: validity
 is primitive recursive, valid lists parse completely, and the resulting
 `Primcodable (PartrecStartedTM2StmtNode.Stmt tc)` instance is available. The
 started and unstarted concrete `TM2to1.Λ'` label types are now encoded too, by
 flattening the four concrete stack-action cases and transporting unstarted
-TM2 statements through the started-label wrapper. The remaining work on this
-branch is to use these encodings to discharge the primitive-recursive
-label-list/count obligations.
+TM2 statements through the started-label wrapper.
 Separately, `TM0Route.tm2to1TrNormalSupportLength` is now the numeric mirror
 of `tm1StmtSupportLength (Turing.TM2to1.trNormal stmt)`, avoiding a direct
 dependency on encoded TM1 statements for this part of the count proof.
