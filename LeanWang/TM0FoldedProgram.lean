@@ -990,6 +990,25 @@ theorem trAuxHaltBody_primrec_fixed (tc : Turing.ToPartrec.Code) :
     tm0StmtWrite_primrec.comp Primrec.snd
   exact Primrec.option_some.comp (Primrec.pair hlabel hstmt)
 
+noncomputable def trAuxBodyForHead (tc : Turing.ToPartrec.Code)
+    (p : ((SourceStmt tc × PartrecVar × SourceSymbol) × SourceStmtNode tc) ×
+      List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  let tail := trAuxTail tc p.1.1.1
+  match p.1.2 with
+  | TM0Route.PartrecStartedTM1StmtNode.move d =>
+      trAuxMoveBody tc ((d, tail), p.1.1.2.1)
+  | TM0Route.PartrecStartedTM1StmtNode.write f =>
+      trAuxWriteBody tc ((f, tail), p.1.1.2.1, p.1.1.2.2)
+  | TM0Route.PartrecStartedTM1StmtNode.load _ =>
+      trAuxHeadBodyFromDeps tc p.2
+  | TM0Route.PartrecStartedTM1StmtNode.branch _ =>
+      trAuxHeadBodyFromDeps tc p.2
+  | TM0Route.PartrecStartedTM1StmtNode.goto f =>
+      trAuxGotoBody tc (f, p.1.1.2.1, p.1.1.2.2)
+  | TM0Route.PartrecStartedTM1StmtNode.halt =>
+      trAuxHaltBody tc (p.1.1.2.1, p.1.1.2.2)
+
 theorem trAuxBody_correct (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol) :
     trAuxBody tc p
