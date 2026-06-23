@@ -2035,6 +2035,41 @@ theorem codeSuppWeightCodeFuelRowsBase_primrec :
       (Primrec.list_range.comp (Primrec.succ.comp Primrec.id)) (Primrec.const 0).to₂
   exact Primrec.pair hrow hrow
 
+theorem codeSuppWeightCodeFuelRows'_zero (wCode : Nat → Nat) (bound : Nat) :
+    codeSuppWeightCodeFuelRows' wCode 0 bound = codeSuppWeightCodeFuelRowsBase bound := by
+  unfold codeSuppWeightCodeFuelRows'
+  rfl
+
+theorem codeSuppWeightCodeFuelRows'_succ
+    (wCode : Nat → Nat) (fuel bound : Nat) :
+    codeSuppWeightCodeFuelRows' wCode (fuel + 1) bound =
+      codeSuppWeightCodeFuelRowsStep wCode bound
+        (codeSuppWeightCodeFuelRows' wCode fuel bound) := by
+  unfold codeSuppWeightCodeFuelRows'
+  rfl
+
+theorem codeSuppWeightCodeFuelRowsStep_fst
+    (wCode : Nat → Nat) (bound : Nat) (rows : List Nat × List Nat) :
+    (codeSuppWeightCodeFuelRowsStep wCode bound rows).1 =
+      trNormalLabelCodeFuelRowStep rows.1 bound := rfl
+
+theorem codeSuppWeightCodeFuelRowsStep_snd
+    (wCode : Nat → Nat) (bound : Nat) (rows : List Nat × List Nat) :
+    (codeSuppWeightCodeFuelRowsStep wCode bound rows).2 =
+      codeSuppWeightCodeFuelRowStep' wCode rows.1 rows.2 bound := rfl
+
+theorem codeSuppWeightCodeFuelRowsBase_label_correct
+    (bound : Nat) (c : ToPartrec.Code) (k : Cont') :
+    codeContStateLookup (codeSuppWeightCodeFuelRowsBase bound).1 c k =
+      trNormalLabelCodeFuel 0 c k := by
+  simp [codeSuppWeightCodeFuelRowsBase, codeContStateLookup, trNormalLabelCodeFuel]
+
+theorem codeSuppWeightCodeFuelRowsBase_weight_correct
+    (wCode : Nat → Nat) (bound : Nat) (c : ToPartrec.Code) (k : Cont') :
+    codeContStateLookup (codeSuppWeightCodeFuelRowsBase bound).2 c k =
+      codeSuppWeightCodeFuel' wCode 0 c k := by
+  simp [codeSuppWeightCodeFuelRowsBase, codeContStateLookup, codeSuppWeightCodeFuel']
+
 theorem codeSuppWeightCodeFuel'_eq
     (wCode : Nat → Nat) {fuel : Nat} (h : ToPartrec.Code.depth c ≤ fuel) :
     codeSuppWeightCodeFuel' wCode fuel c k = codeSuppWeightCode' wCode c k := by
