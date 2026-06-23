@@ -2251,6 +2251,21 @@ theorem normalizeLookup_normalizeLabelRows_diagonal_eq_normalizeLabel (n : Nat) 
     normalizeLookup (normalizeLabelRows n n) n = normalizeLabel n := by
   simpa [normalizeLookup] using normalizeLabelRows_diagonal_getD_eq_normalizeLabel n
 
+theorem normalizeLabelFuel_primrec :
+    Primrec (fun p : Nat × Nat => normalizeLabelFuel p.1 p.2) := by
+  let hlookup : Primrec (fun p : Nat × Nat => normalizeLookup (normalizeLabelRows p.1 p.2) p.2) :=
+    normalizeLookup_primrec.comp (Primrec.pair normalizeLabelRows_primrec Primrec.snd)
+  exact hlookup.of_eq fun p => by
+    simpa [normalizeLookup] using
+      (normalizeLabelRows_getD_eq_normalizeLabelFuel
+        (fuel := p.1) (bound := p.2) (n := p.2) le_rfl)
+
+theorem normalizeLabel_primrec : Primrec normalizeLabel := by
+  let hrows : Primrec (fun n : Nat => normalizeLabelRows n n) :=
+    normalizeLabelRows_primrec.comp (Primrec.pair Primrec.id Primrec.id)
+  exact (normalizeLookup_primrec.comp (Primrec.pair hrows Primrec.id)).of_eq fun n =>
+    normalizeLookup_normalizeLabelRows_diagonal_eq_normalizeLabel n
+
 theorem normalizeLabelFuel_eq_encode_decodeLabelFuel (fuel n : Nat) :
     normalizeLabelFuel fuel n = Encodable.encode (decodeLabelFuel fuel n) := by
   induction fuel generalizing n with
