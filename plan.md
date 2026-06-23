@@ -191,7 +191,11 @@ function payloads and `TM2to1.StAct` are now encoded. The recursive concrete
 started `TM2.Stmt` type is now encoded by valid preorder node lists: validity
 is primitive recursive, valid lists parse completely, and the resulting
 `Primcodable (PartrecStartedTM2StmtNode.Stmt tc)` instance is available. The
-remaining encoding work on this branch is `TM2to1.Λ'`.
+started and unstarted concrete `TM2to1.Λ'` label types are now encoded too, by
+flattening the four concrete stack-action cases and transporting unstarted
+TM2 statements through the started-label wrapper. The remaining work on this
+branch is to use these encodings to discharge the primitive-recursive
+label-list/count obligations.
 Separately, `TM0Route.tm2to1TrNormalSupportLength` is now the numeric mirror
 of `tm1StmtSupportLength (Turing.TM2to1.trNormal stmt)`, avoiding a direct
 dependency on encoded TM1 statements for this part of the count proof.
