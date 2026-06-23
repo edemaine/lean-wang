@@ -4012,6 +4012,168 @@ theorem partrecReadGotoPayloadOfCodes_encodeLabel
       cases a <;> simp [partrecReadGotoPayloadOfCodes, partrecTM2LabelOfCode_encodeLabel,
         partrecVarToLabelEquivTuple]
 
+noncomputable def partrecStartedTM2BodyFromLabelCode (tc : Turing.ToPartrec.Code)
+    (labelCode : Nat) : PartrecStartedTM2Stmt tc :=
+  let payload := labelCode / 8
+  let fallback := partrecStartedTM2RetBodyFromPayload tc payload
+  if labelCode % 8 = 1 then
+    match Turing.PartrecToTM2.Λ'.decodeMovePayload payload with
+    | none => fallback
+    | some fields =>
+        partrecStartedTM2MoveBody tc
+          (fields.1, fields.2.1, fields.2.2.1, partrecTM2LabelOfCode fields.2.2.2)
+  else if labelCode % 8 = 2 then
+    match Turing.PartrecToTM2.Λ'.decodeClearPayload payload with
+    | none => fallback
+    | some fields =>
+        partrecStartedTM2ClearBody tc
+          (fields.1, fields.2.1, partrecTM2LabelOfCode fields.2.2)
+  else if labelCode % 8 = 3 then
+    partrecStartedTM2CopyBody tc (partrecTM2LabelOfCode payload)
+  else if labelCode % 8 = 4 then
+    match Turing.PartrecToTM2.Λ'.decodePushPayload payload with
+    | none => fallback
+    | some fields =>
+        partrecStartedTM2PushBody tc
+          ((fields.1, fields.2.1), partrecTM2LabelOfCode fields.2.2)
+  else if labelCode % 8 = 5 then
+    partrecStartedTM2GotoBody tc
+      (partrecReadGotoPayloadOfCodes
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload payload))
+  else if labelCode % 8 = 6 then
+    partrecStartedTM2SuccBody tc (partrecTM2LabelOfCode payload)
+  else if labelCode % 8 = 7 then
+    let fields := Turing.PartrecToTM2.Λ'.decodePredPayload payload
+    partrecStartedTM2PredBody tc
+      (partrecTM2LabelOfCode fields.1, partrecTM2LabelOfCode fields.2)
+  else
+    fallback
+
+theorem partrecStartedTM2BodyFromLabelCode_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2BodyFromLabelCode tc) := by
+  let hpayload : Primrec (fun labelCode : Nat => labelCode / 8) :=
+    Primrec.nat_div.comp Primrec.id (Primrec.const 8)
+  let htag : Primrec (fun labelCode : Nat => labelCode % 8) :=
+    Primrec.nat_mod.comp Primrec.id (Primrec.const 8)
+  let hfallback : Primrec (fun labelCode : Nat =>
+      partrecStartedTM2RetBodyFromPayload tc (labelCode / 8)) :=
+    (partrecStartedTM2RetBodyFromPayload_primrec tc).comp hpayload
+  let hmoveArg : Primrec
+      (fun p : Nat × ((Turing.PartrecToTM2.Γ' → Bool) ×
+          Turing.PartrecToTM2.K' × Turing.PartrecToTM2.K' × Nat) =>
+        (p.2.1, p.2.2.1, p.2.2.2.1, partrecTM2LabelOfCode p.2.2.2.2)) := by
+    exact Primrec.pair (Primrec.fst.comp Primrec.snd)
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+          (partrecTM2LabelOfCode_primrec.comp
+            (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))))
+  let hmoveSome : Primrec₂
+      (fun _labelCode : Nat =>
+        fun fields : (Turing.PartrecToTM2.Γ' → Bool) ×
+            Turing.PartrecToTM2.K' × Turing.PartrecToTM2.K' × Nat =>
+          partrecStartedTM2MoveBody tc
+            (fields.1, fields.2.1, fields.2.2.1,
+              partrecTM2LabelOfCode fields.2.2.2)) :=
+    ((partrecStartedTM2MoveBody_primrec tc).comp hmoveArg).to₂
+  let hmove : Primrec (fun labelCode : Nat =>
+      match Turing.PartrecToTM2.Λ'.decodeMovePayload (labelCode / 8) with
+      | none => partrecStartedTM2RetBodyFromPayload tc (labelCode / 8)
+      | some fields =>
+          partrecStartedTM2MoveBody tc
+            (fields.1, fields.2.1, fields.2.2.1,
+              partrecTM2LabelOfCode fields.2.2.2)) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodeMovePayload_primrec.comp hpayload)
+      hfallback hmoveSome).of_eq fun labelCode => by
+        cases Turing.PartrecToTM2.Λ'.decodeMovePayload (labelCode / 8) <;> rfl
+  let hclearArg : Primrec
+      (fun p : Nat × ((Turing.PartrecToTM2.Γ' → Bool) × Turing.PartrecToTM2.K' × Nat) =>
+        (p.2.1, p.2.2.1, partrecTM2LabelOfCode p.2.2.2)) := by
+    exact Primrec.pair (Primrec.fst.comp Primrec.snd)
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (partrecTM2LabelOfCode_primrec.comp
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+  let hclearSome : Primrec₂
+      (fun _labelCode : Nat =>
+        fun fields : (Turing.PartrecToTM2.Γ' → Bool) × Turing.PartrecToTM2.K' × Nat =>
+          partrecStartedTM2ClearBody tc
+            (fields.1, fields.2.1, partrecTM2LabelOfCode fields.2.2)) :=
+    ((partrecStartedTM2ClearBody_primrec tc).comp hclearArg).to₂
+  let hclear : Primrec (fun labelCode : Nat =>
+      match Turing.PartrecToTM2.Λ'.decodeClearPayload (labelCode / 8) with
+      | none => partrecStartedTM2RetBodyFromPayload tc (labelCode / 8)
+      | some fields =>
+          partrecStartedTM2ClearBody tc
+            (fields.1, fields.2.1, partrecTM2LabelOfCode fields.2.2)) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodeClearPayload_primrec.comp hpayload)
+      hfallback hclearSome).of_eq fun labelCode => by
+        cases Turing.PartrecToTM2.Λ'.decodeClearPayload (labelCode / 8) <;> rfl
+  let hcopy : Primrec (fun labelCode : Nat =>
+      partrecStartedTM2CopyBody tc (partrecTM2LabelOfCode (labelCode / 8))) :=
+    (partrecStartedTM2CopyBody_primrec tc).comp
+      (partrecTM2LabelOfCode_primrec.comp hpayload)
+  let hpushArg : Primrec
+      (fun p : Nat × (Turing.PartrecToTM2.K' ×
+          (PartrecVar → Option Turing.PartrecToTM2.Γ') × Nat) =>
+        ((p.2.1, p.2.2.1), partrecTM2LabelOfCode p.2.2.2)) := by
+    exact Primrec.pair
+      (Primrec.pair (Primrec.fst.comp Primrec.snd)
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.snd)))
+      (partrecTM2LabelOfCode_primrec.comp
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  let hpushSome : Primrec₂
+      (fun _labelCode : Nat =>
+        fun fields : Turing.PartrecToTM2.K' ×
+            (PartrecVar → Option Turing.PartrecToTM2.Γ') × Nat =>
+          partrecStartedTM2PushBody tc
+            ((fields.1, fields.2.1), partrecTM2LabelOfCode fields.2.2)) :=
+    ((partrecStartedTM2PushBody_primrec tc).comp hpushArg).to₂
+  let hpush : Primrec (fun labelCode : Nat =>
+      match Turing.PartrecToTM2.Λ'.decodePushPayload (labelCode / 8) with
+      | none => partrecStartedTM2RetBodyFromPayload tc (labelCode / 8)
+      | some fields =>
+          partrecStartedTM2PushBody tc
+            ((fields.1, fields.2.1), partrecTM2LabelOfCode fields.2.2)) :=
+    (Primrec.option_casesOn
+      (Turing.PartrecToTM2.Λ'.decodePushPayload_primrec.comp hpayload)
+      hfallback hpushSome).of_eq fun labelCode => by
+        cases Turing.PartrecToTM2.Λ'.decodePushPayload (labelCode / 8) <;> rfl
+  let hread : Primrec (fun labelCode : Nat =>
+      partrecStartedTM2GotoBody tc
+        (partrecReadGotoPayloadOfCodes
+          (Turing.PartrecToTM2.Λ'.decodeReadPayload (labelCode / 8)))) :=
+    (partrecStartedTM2GotoBody_primrec tc).comp
+      (partrecReadGotoPayloadOfCodes_primrec.comp
+        (Turing.PartrecToTM2.Λ'.decodeReadPayload_primrec.comp hpayload))
+  let hsucc : Primrec (fun labelCode : Nat =>
+      partrecStartedTM2SuccBody tc (partrecTM2LabelOfCode (labelCode / 8))) :=
+    (partrecStartedTM2SuccBody_primrec tc).comp
+      (partrecTM2LabelOfCode_primrec.comp hpayload)
+  let hpredFields : Primrec (fun labelCode : Nat =>
+      Turing.PartrecToTM2.Λ'.decodePredPayload (labelCode / 8)) :=
+    Turing.PartrecToTM2.Λ'.decodePredPayload_primrec.comp hpayload
+  let hpredArg : Primrec (fun labelCode : Nat =>
+      (partrecTM2LabelOfCode (Turing.PartrecToTM2.Λ'.decodePredPayload (labelCode / 8)).1,
+        partrecTM2LabelOfCode (Turing.PartrecToTM2.Λ'.decodePredPayload (labelCode / 8)).2)) :=
+    Primrec.pair
+      (partrecTM2LabelOfCode_primrec.comp (Primrec.fst.comp hpredFields))
+      (partrecTM2LabelOfCode_primrec.comp (Primrec.snd.comp hpredFields))
+  let hpred : Primrec (fun labelCode : Nat =>
+      let fields := Turing.PartrecToTM2.Λ'.decodePredPayload (labelCode / 8)
+      partrecStartedTM2PredBody tc
+        (partrecTM2LabelOfCode fields.1, partrecTM2LabelOfCode fields.2)) :=
+    (partrecStartedTM2PredBody_primrec tc).comp hpredArg
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 1)) hmove ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 2)) hclear ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 3)) hcopy ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 4)) hpush ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 5)) hread ?_
+  refine Primrec.ite (Primrec.eq.comp htag (Primrec.const 6)) hsucc ?_
+  refine (Primrec.ite (Primrec.eq.comp htag (Primrec.const 7)) hpred hfallback).of_eq ?_
+  intro labelCode
+  simp
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
