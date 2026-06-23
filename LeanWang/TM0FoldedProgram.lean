@@ -1086,6 +1086,17 @@ def programHeader (tc : Turing.ToPartrec.Code) : FiniteTM0Program where
   start := foldedStartState
   table := initRows tc
 
+theorem programHeader_primrec : Primrec programHeader := by
+  unfold programHeader
+  exact PostProgram.mk_primrec.comp
+    (Primrec.pair (Primrec.const foldedSymbolList)
+      (Primrec.pair foldedStateList_primrec
+        (Primrec.pair (Primrec.const foldedBlank)
+          (Primrec.pair (Primrec.const foldedStartState) initRows_primrec))))
+
+theorem programHeader_computable : Computable programHeader :=
+  programHeader_primrec.to_comp
+
 end TM0FoldedCompiler
 
 end LeanWang
