@@ -6714,24 +6714,33 @@ translation jumps to a `go` label that still carries the original TM2
 continuation. The dependency list therefore intentionally over-approximates
 those cases.
 -/
+noncomputable def tm2to1TrNormalTail (tc : Turing.ToPartrec.Code)
+    (stmt : PartrecStartedTM2Stmt tc) : PartrecStartedTM2Stmt tc :=
+  PartrecStartedTM2StmtNode.ofValidCode
+    (PartrecStartedTM2StmtNode.depValidCodeOfNodes tc
+      (PartrecStartedTM2StmtNode.ofStmtTail stmt))
+
+theorem tm2to1TrNormalTail_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (tm2to1TrNormalTail tc) := by
+  exact ((PartrecStartedTM2StmtNode.ofValidCode_primrec tc).comp
+    ((PartrecStartedTM2StmtNode.depValidCodeOfNodes_primrec tc).comp
+      (PartrecStartedTM2StmtNode.ofStmtTail_primrec tc))).of_eq fun _stmt => rfl
+
 noncomputable def tm2to1TrNormalBodyForHead (tc : Turing.ToPartrec.Code)
     (p : (PartrecStartedTM2Stmt tc × PartrecStartedTM2StmtNode tc) ×
       List (PartrecStartedTM0Stmt tc)) :
     Option (PartrecStartedTM0Stmt tc) :=
-  let tail :=
-    PartrecStartedTM2StmtNode.ofValidCode
-      (PartrecStartedTM2StmtNode.depValidCodeOfNodes tc
-        (PartrecStartedTM2StmtNode.ofStmtTail p.1.1))
+  let tail := tm2to1TrNormalTail tc p.1.1
   match p.1.2 with
   | PartrecStartedTM2StmtNode.push k f =>
       some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.push f, tail)))
+        (tm2to1PushGotoPayload tc ((k, f), tail)))
   | PartrecStartedTM2StmtNode.peek k f =>
       some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.peek f, tail)))
+        (tm2to1PeekGotoPayload tc ((k, f), tail)))
   | PartrecStartedTM2StmtNode.pop k f =>
       some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.pop f, tail)))
+        (tm2to1PopGotoPayload tc ((k, f), tail)))
   | PartrecStartedTM2StmtNode.load f =>
       match p.2 with
       | q :: _ => some (Turing.TM1.Stmt.load (tm2to1LoadPayload f) q)
@@ -6767,7 +6776,7 @@ theorem tm2to1TrNormalBody_toValidCode
   cases stmt <;>
     simp [tm2to1TrNormalBody, PartrecStartedTM2StmtNode.depValidCodes_toValidCode,
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal,
-      tm2to1TrNormalBodyForHead, PartrecStartedTM2StmtNode.ofStmtHead?,
+      tm2to1TrNormalBodyForHead, tm2to1TrNormalTail, PartrecStartedTM2StmtNode.ofStmtHead?,
       PartrecStartedTM2StmtNode.ofStmtTail, PartrecStartedTM2StmtNode.ofStmt,
       PartrecStartedTM2StmtNode.depValidCodeOfNodes_ofStmt,
       PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
