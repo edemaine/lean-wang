@@ -3310,6 +3310,54 @@ theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     cases TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2 <;> rfl
 
 /--
+Offset label lookup paired with the numeric current-state code computed by the
+executable support-position search.
+-/
+def labelAtByStatementFromWithSearchCode?
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    Option (SourceLabel tc × Nat) :=
+  (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).map
+    fun q => (q, TM0FiniteCompiler.stateCodeBySupportSearch tc
+      (TM0Route.partrecStartedTM0StatementCount tc) q)
+
+theorem labelAtByStatementFromWithSearchCode?_primrec_fixed
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : Nat × Nat × Nat =>
+      labelAtByStatementFromWithSearchCode? tc p.1 p.2.1 p.2.2) := by
+  have hlookup := TM0Route.partrecStartedTM0LabelAtByStatementFrom?_primrec_fixed tc
+  have hsearch : Primrec (fun q : SourceLabel tc =>
+      TM0FiniteCompiler.stateCodeBySupportSearch tc
+        (TM0Route.partrecStartedTM0StatementCount tc) q) := by
+    exact (TM0FiniteCompiler.stateCodeBySupportSearch_primrec_fixed tc).comp
+      (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
+        Primrec.id)
+  have hsome : Primrec₂ (fun _p : Nat × Nat × Nat => fun q : SourceLabel tc =>
+      (q, TM0FiniteCompiler.stateCodeBySupportSearch tc
+        (TM0Route.partrecStartedTM0StatementCount tc) q)) := by
+    apply Primrec₂.mk
+    exact Primrec.pair Primrec.snd (hsearch.comp Primrec.snd)
+  exact (Primrec.option_map hlookup hsome).of_eq fun p => by
+    unfold labelAtByStatementFromWithSearchCode?
+    cases TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc p.1 p.2.1 p.2.2 <;> rfl
+
+theorem labelAtByStatementFromWithSearchCode?_eq_stateCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    labelAtByStatementFromWithSearchCode? tc fuel k i =
+      labelAtByStatementFromWithStateCode? tc fuel k i := by
+  unfold labelAtByStatementFromWithSearchCode? labelAtByStatementFromWithStateCode?
+  cases h : TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i with
+  | none =>
+      rfl
+  | some q =>
+      simp only [Option.map_some]
+      rw [TM0FiniteCompiler.stateCodeBySupportSearch_eq_stateCode tc q
+        (TM0Route.mem_partrecStartedTM0LabelSupportList_of_labelAtByStatementFrom?_eq_some h)]
+
+/--
 Offset label-index decoder factored through the numeric folded state code.
 
 This has the same behavior as `simStepDataForLabelIndexFrom`, but its row
@@ -3323,6 +3371,19 @@ def simStepDataForLabelIndexFromWithCode
     List SimStepData :=
   (labelAtByStatementFromWithStateCode? tc fuel k i).elim []
     (fun q => simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2)
+
+def simStepDataForLabelIndexFromWithSearchCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    List SimStepData :=
+  (labelAtByStatementFromWithSearchCode? tc fuel k i).elim []
+    (fun q => simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2)
+
+theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    simStepDataForLabelIndexFromWithSearchCode tc fuel k i =
+      simStepDataForLabelIndexFromWithCode tc fuel k i := by
+  unfold simStepDataForLabelIndexFromWithSearchCode simStepDataForLabelIndexFromWithCode
+  rw [labelAtByStatementFromWithSearchCode?_eq_stateCode]
 
 theorem simStepDataForLabelIndexFrom_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
@@ -3431,6 +3492,29 @@ theorem simStepDataForLabelIndexFromWithCode_primrec_fixed_of_trAux
   exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
     unfold simStepDataForLabelIndexFromWithCode
     cases labelAtByStatementFromWithStateCode? tc p.1 p.2.1 p.2.2 <;> rfl
+
+theorem simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithSearchCode tc p.1 p.2.1 p.2.2) := by
+  have hlookup := labelAtByStatementFromWithSearchCode?_primrec_fixed tc
+  have hlabel := simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux tc haux
+  have hnone : Primrec (fun _p : Nat × Nat × Nat => ([] : List SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun _p : Nat × Nat × Nat => fun q : SourceLabel tc × Nat =>
+      simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2) := by
+    apply Primrec₂.mk
+    exact hlabel.comp
+      (Primrec.pair
+        (Primrec.snd.comp Primrec.snd)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.fst.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.fst.comp Primrec.snd))))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    unfold simStepDataForLabelIndexFromWithSearchCode
+    cases labelAtByStatementFromWithSearchCode? tc p.1 p.2.1 p.2.2 <;> rfl
 
 theorem simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)

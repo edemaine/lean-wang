@@ -6461,6 +6461,36 @@ theorem mem_partrecStartedTM0LabelSupportList_of_mem_labels
     q ∈ partrecStartedTM0LabelSupportList tc := by
   simp [partrecStartedTM0LabelSupportList, mem_partrecStartedTM0LabelList, hq]
 
+theorem mem_partrecStartedTM0LabelSupportList_of_labelAtByStatementFrom?_eq_some
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat}
+    {q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)}
+    (h : partrecStartedTM0LabelAtByStatementFrom? tc fuel k i = some q) :
+    q ∈ partrecStartedTM0LabelSupportList tc := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [partrecStartedTM0LabelAtByStatementFrom?_zero] at h
+  | succ fuel ih =>
+      rw [partrecStartedTM0LabelAtByStatementFrom?_succ] at h
+      cases hv : partrecVarList[i]? with
+      | none =>
+          exact ih (by simpa [hv] using h)
+      | some v =>
+          cases hstmt : partrecStartedTM0StatementAt? tc k with
+          | none =>
+              simp [hv, hstmt] at h
+          | some stmt =>
+              simp only [hv, hstmt, Option.map_some, Option.some.injEq] at h
+              subst q
+              unfold partrecStartedTM0LabelSupportList partrecStartedTM0LabelList
+              simp only [List.mem_cons, List.mem_flatMap, List.mem_map]
+              exact Or.inr
+                ⟨stmt, by
+                  rw [partrecStartedTM0StatementAt?_eq_getElem?] at hstmt
+                  exact List.mem_iff_getElem?.2 ⟨k, hstmt⟩,
+                  v, by
+                    exact List.mem_iff_getElem?.2 ⟨i, hv⟩,
+                  rfl⟩
+
 /-- Number of numeric states in the finite one-sided TM0 program extracted from `TM0Route`. -/
 def partrecStartedTM0StateCount (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM0LabelSupportCount tc
