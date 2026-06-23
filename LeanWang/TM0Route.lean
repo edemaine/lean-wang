@@ -3552,6 +3552,84 @@ theorem partrecTM2Label_trNormal_primrec :
     (PartrecToTM2SupportList.trNormalLabelCode_primrec.of_eq fun p => by
       exact PartrecToTM2SupportList.trNormalLabelCode_encodeLabel p.1 p.2)
 
+theorem partrecTM2Label_move₂_primrec
+    (p : Turing.PartrecToTM2.Γ' → Bool)
+    (k₁ k₂ : Turing.PartrecToTM2.K') :
+    Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      Turing.PartrecToTM2.move₂ p k₁ k₂ q) := by
+  exact Primrec.encode_iff.1
+    (((PartrecToTM2SupportList.move₂LabelCode_primrec p k₁ k₂).comp
+      Primrec.encode).of_eq fun q => by
+      rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+      exact PartrecToTM2SupportList.move₂LabelCode_encodeLabel p k₁ k₂ q)
+
+theorem partrecTM2Label_retCons₁Target_primrec :
+    Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+        Turing.PartrecToTM2.K'.main Turing.PartrecToTM2.K'.aux <|
+        Turing.PartrecToTM2.move₂
+          (fun s : Turing.PartrecToTM2.Γ' => s = Turing.PartrecToTM2.Γ'.consₗ)
+          Turing.PartrecToTM2.K'.stack Turing.PartrecToTM2.K'.main <|
+          Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+            Turing.PartrecToTM2.K'.aux Turing.PartrecToTM2.K'.stack <|
+            Turing.PartrecToTM2.trNormal p.1
+              (Turing.PartrecToTM2.Cont'.cons₂ p.2)) := by
+  have hcons₂ : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.Cont'.cons₂ p.2) :=
+    Turing.PartrecToTM2.Cont'.primrec_cons₂.comp Primrec.snd
+  have htr : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.trNormal p.1
+        (Turing.PartrecToTM2.Cont'.cons₂ p.2)) :=
+    partrecTM2Label_trNormal_primrec.comp (Primrec.pair Primrec.fst hcons₂)
+  have hmoveAux : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+        Turing.PartrecToTM2.K'.aux Turing.PartrecToTM2.K'.stack
+        (Turing.PartrecToTM2.trNormal p.1
+          (Turing.PartrecToTM2.Cont'.cons₂ p.2))) :=
+    (partrecTM2Label_move₂_primrec (fun _ : Turing.PartrecToTM2.Γ' => false)
+      Turing.PartrecToTM2.K'.aux Turing.PartrecToTM2.K'.stack).comp htr
+  have hmoveStack : Primrec (fun p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.move₂
+        (fun s : Turing.PartrecToTM2.Γ' => s = Turing.PartrecToTM2.Γ'.consₗ)
+        Turing.PartrecToTM2.K'.stack Turing.PartrecToTM2.K'.main
+        (Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+          Turing.PartrecToTM2.K'.aux Turing.PartrecToTM2.K'.stack
+          (Turing.PartrecToTM2.trNormal p.1
+            (Turing.PartrecToTM2.Cont'.cons₂ p.2)))) :=
+    (partrecTM2Label_move₂_primrec
+      (fun s : Turing.PartrecToTM2.Γ' => s = Turing.PartrecToTM2.Γ'.consₗ)
+      Turing.PartrecToTM2.K'.stack Turing.PartrecToTM2.K'.main).comp hmoveAux
+  exact (partrecTM2Label_move₂_primrec (fun _ : Turing.PartrecToTM2.Γ' => false)
+    Turing.PartrecToTM2.K'.main Turing.PartrecToTM2.K'.aux).comp hmoveStack
+
+noncomputable def partrecStartedTM2RetCons₁Body (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    PartrecStartedTM2Stmt tc :=
+  partrecStartedTM2ConstGotoBody tc
+    (Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+      Turing.PartrecToTM2.K'.main Turing.PartrecToTM2.K'.aux <|
+      Turing.PartrecToTM2.move₂
+        (fun s : Turing.PartrecToTM2.Γ' => s = Turing.PartrecToTM2.Γ'.consₗ)
+        Turing.PartrecToTM2.K'.stack Turing.PartrecToTM2.K'.main <|
+        Turing.PartrecToTM2.move₂ (fun _ : Turing.PartrecToTM2.Γ' => false)
+          Turing.PartrecToTM2.K'.aux Turing.PartrecToTM2.K'.stack <|
+          Turing.PartrecToTM2.trNormal p.1
+            (Turing.PartrecToTM2.Cont'.cons₂ p.2))
+
+theorem partrecStartedTM2RetCons₁Body_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetCons₁Body tc) :=
+  (partrecStartedTM2ConstGotoBody_primrec tc).comp
+    partrecTM2Label_retCons₁Target_primrec
+
+theorem partrecStartedTM2RetCons₁Body_eq_relabel
+    (tc : Turing.ToPartrec.Code)
+    (p : Turing.ToPartrec.Code × Turing.PartrecToTM2.Cont') :
+    partrecStartedTM2RetCons₁Body tc p =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret
+          (Turing.PartrecToTM2.Cont'.cons₁ p.1 p.2))) := by
+  rfl
+
 noncomputable def partrecStartedTM2RetCons₂Body (tc : Turing.ToPartrec.Code)
     (k : Turing.PartrecToTM2.Cont') :
     PartrecStartedTM2Stmt tc :=
