@@ -1124,6 +1124,16 @@ def simStepDataByLabelIndex (tc : Turing.ToPartrec.Code) : List SimStepData :=
   (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
     (simStepDataForLabelIndex tc)
 
+theorem simStepDataByLabelIndex_primrec_of_forLabelIndex
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndex p.1 p.2)) :
+    Primrec simStepDataByLabelIndex := by
+  unfold simStepDataByLabelIndex
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp TM0Route.partrecStartedTM0LabelCount_primrec) ?_
+  apply Primrec₂.mk
+  exact hindex
+
 def simRowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
     List PostTransition :=
   foldSideList.flatMap fun side =>
@@ -1329,6 +1339,19 @@ theorem programData_computable_of_simStepDataByLabelIndex
     (hsteps : Primrec simStepDataByLabelIndex) :
     Computable programData :=
   (programData_primrec_of_simStepDataByLabelIndex hsteps).to_comp
+
+theorem programData_primrec_of_simStepDataForLabelIndex
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndex p.1 p.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataByLabelIndex
+    (simStepDataByLabelIndex_primrec_of_forLabelIndex hindex)
+
+theorem programData_computable_of_simStepDataForLabelIndex
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndex p.1 p.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndex hindex).to_comp
 
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
