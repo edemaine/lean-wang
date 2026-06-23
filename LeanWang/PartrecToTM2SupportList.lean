@@ -1038,6 +1038,108 @@ theorem trNormalLabelCodeFuel_encodeCode_eq (c : ToPartrec.Code) (k : Cont') :
       trNormalLabelCode c k :=
   trNormalLabelCodeFuel_eq (ToPartrec.Code.depth_le_encodeCode_succ c)
 
+/-- Encoded state used by row computations over `(source code, continuation)` pairs. -/
+def codeContStateCode (c : ToPartrec.Code) (k : Cont') : Nat :=
+  Nat.pair (ToPartrec.Code.encodeCode c) (Turing.PartrecToTM2.Cont'.encodeCont k)
+
+/-- A square bound for every state code with bounded source-code and continuation codes. -/
+def codeContStateBound (codeBound contBound : Nat) : Nat :=
+  (max codeBound contBound + 1) ^ 2
+
+theorem codeContStateCode_lt_bound
+    {c : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hcode : ToPartrec.Code.encodeCode c ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode c k < codeContStateBound codeBound contBound := by
+  unfold codeContStateCode codeContStateBound
+  exact lt_of_lt_of_le
+    (Nat.pair_lt_max_add_one_sq
+      (ToPartrec.Code.encodeCode c) (Turing.PartrecToTM2.Cont'.encodeCont k))
+    (by
+      have hle := Nat.succ_le_succ (max_le_max hcode hcont)
+      simpa [Nat.pow_two] using Nat.mul_le_mul hle hle)
+
+/-- One coarse growth step for continuations produced by recursive evaluator calls. -/
+def contEncodeBoundStep (codeBound contBound : Nat) : Nat :=
+  4 * codeContStateBound codeBound contBound + 4
+
+theorem encodeCont_cons₁_le_boundStep
+    {fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hcode : ToPartrec.Code.encodeCode fs ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    Turing.PartrecToTM2.Cont'.encodeCont (Cont'.cons₁ fs k) ≤
+      contEncodeBoundStep codeBound contBound := by
+  have hpair := codeContStateCode_lt_bound (c := fs) (k := k) hcode hcont
+  unfold codeContStateCode at hpair
+  unfold contEncodeBoundStep
+  simp [Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+  omega
+
+theorem encodeCont_cons₂_le_boundStep
+    {k : Cont'} {codeBound contBound : Nat}
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    Turing.PartrecToTM2.Cont'.encodeCont (Cont'.cons₂ k) ≤
+      contEncodeBoundStep codeBound contBound := by
+  have hcont_bound : contBound ≤ codeContStateBound codeBound contBound := by
+    unfold codeContStateBound
+    rw [Nat.pow_two]
+    exact (le_max_right codeBound contBound).trans
+      ((Nat.le_succ (max codeBound contBound)).trans (Nat.le_mul_self _))
+  unfold contEncodeBoundStep
+  simp [Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+  omega
+
+theorem encodeCont_comp_le_boundStep
+    {f : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hcode : ToPartrec.Code.encodeCode f ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    Turing.PartrecToTM2.Cont'.encodeCont (Cont'.comp f k) ≤
+      contEncodeBoundStep codeBound contBound := by
+  have hpair := codeContStateCode_lt_bound (c := f) (k := k) hcode hcont
+  unfold codeContStateCode at hpair
+  unfold contEncodeBoundStep
+  simp [Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+  omega
+
+theorem encodeCont_fix_le_boundStep
+    {f : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hcode : ToPartrec.Code.encodeCode f ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    Turing.PartrecToTM2.Cont'.encodeCont (Cont'.fix f k) ≤
+      contEncodeBoundStep codeBound contBound := by
+  have hpair := codeContStateCode_lt_bound (c := f) (k := k) hcode hcont
+  unfold codeContStateCode at hpair
+  unfold contEncodeBoundStep
+  simp [Turing.PartrecToTM2.Cont'.encodeCont, Nat.bit_val]
+  omega
+
+/-- Iterated coarse continuation bound for all continuations reachable within `fuel` calls. -/
+def contEncodeFuelBound (fuel codeBound contBound : Nat) : Nat :=
+  Nat.rec contBound (fun _ bound => contEncodeBoundStep codeBound bound) fuel
+
+theorem contEncodeBoundStep_primrec :
+    Primrec (fun p : Nat × Nat => contEncodeBoundStep p.1 p.2) := by
+  unfold contEncodeBoundStep codeContStateBound
+  have hpow : Primrec₂ (fun a b : Nat => a ^ b) :=
+    Primrec₂.unpaired'.1 Nat.Primrec.pow
+  exact Primrec.nat_add.comp
+    (Primrec.nat_mul.comp (Primrec.const 4)
+      (hpow.comp
+        (Primrec.succ.comp (Primrec.nat_max.comp Primrec.fst Primrec.snd))
+        (Primrec.const 2)))
+    (Primrec.const 4)
+
+theorem contEncodeFuelBound_primrec :
+    Primrec (fun p : (Nat × Nat) × Nat => contEncodeFuelBound p.1.1 p.1.2 p.2) := by
+  let hbase : Primrec (fun p : (Nat × Nat) × Nat => p.2) := Primrec.snd
+  let hstep : Primrec₂ (fun p : (Nat × Nat) × Nat => fun s : Nat × Nat =>
+      contEncodeBoundStep p.1.2 s.2) := by
+    apply Primrec₂.mk
+    exact contEncodeBoundStep_primrec.comp
+      (Primrec.pair (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+        (Primrec.snd.comp Primrec.snd))
+  exact Primrec.nat_rec' (Primrec.fst.comp Primrec.fst) hbase hstep
+
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
   | c@ToPartrec.Code.zero', k => trStmtsWeightCode wCode (trNormalLabelCode c k)
