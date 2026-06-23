@@ -3528,6 +3528,42 @@ theorem partrecStartedTM2PredBody_eq_relabel
         (partrecTM2 (Turing.PartrecToTM2.Λ'.pred p.1 p.2)) := by
   rfl
 
+theorem partrecTM2Label_ret_primrec :
+    Primrec Turing.PartrecToTM2.Λ'.ret := by
+  exact Primrec.encode_iff.1
+    (PartrecToTM2SupportList.retLabelCode_primrec.of_eq fun k => by
+      exact PartrecToTM2SupportList.retLabelCode_encodeLabel k)
+
+theorem partrecTM2Label_headStackRet_primrec :
+    Primrec (fun k : Turing.PartrecToTM2.Cont' =>
+      Turing.PartrecToTM2.head Turing.PartrecToTM2.K'.stack
+        (Turing.PartrecToTM2.Λ'.ret k)) := by
+  exact Primrec.encode_iff.1
+    (((PartrecToTM2SupportList.headLabelCode_primrec Turing.PartrecToTM2.K'.stack).comp
+      PartrecToTM2SupportList.retLabelCode_primrec).of_eq fun k => by
+      rw [PartrecToTM2SupportList.retLabelCode_encodeLabel]
+      exact PartrecToTM2SupportList.headLabelCode_encodeLabel
+        Turing.PartrecToTM2.K'.stack (Turing.PartrecToTM2.Λ'.ret k))
+
+noncomputable def partrecStartedTM2RetCons₂Body (tc : Turing.ToPartrec.Code)
+    (k : Turing.PartrecToTM2.Cont') :
+    PartrecStartedTM2Stmt tc :=
+  partrecStartedTM2ConstGotoBody tc
+    (Turing.PartrecToTM2.head Turing.PartrecToTM2.K'.stack
+      (Turing.PartrecToTM2.Λ'.ret k))
+
+theorem partrecStartedTM2RetCons₂Body_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2RetCons₂Body tc) :=
+  (partrecStartedTM2ConstGotoBody_primrec tc).comp partrecTM2Label_headStackRet_primrec
+
+theorem partrecStartedTM2RetCons₂Body_eq_relabel
+    (tc : Turing.ToPartrec.Code) (k : Turing.PartrecToTM2.Cont') :
+    partrecStartedTM2RetCons₂Body tc k =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.ret
+          (Turing.PartrecToTM2.Cont'.cons₂ k))) := by
+  rfl
+
 def partrecLoadNonePayload : PartrecStartedTM2StmtNode.LoadCode :=
   fun _s => none
 
