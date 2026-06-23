@@ -1042,9 +1042,27 @@ theorem trNormalLabelCodeFuel_encodeCode_eq (c : ToPartrec.Code) (k : Cont') :
 def codeContStateCode (c : ToPartrec.Code) (k : Cont') : Nat :=
   Nat.pair (ToPartrec.Code.encodeCode c) (Turing.PartrecToTM2.Cont'.encodeCont k)
 
+theorem codeContStateCode_primrec :
+    Primrec (fun p : ToPartrec.Code × Cont' => codeContStateCode p.1 p.2) := by
+  unfold codeContStateCode
+  have hcode : Primrec (fun c : ToPartrec.Code => ToPartrec.Code.encodeCode c) :=
+    (Primrec.encode).of_eq fun c => by rw [ToPartrec.Code.encodeCode_eq]
+  have hcont : Primrec (fun k : Cont' => Turing.PartrecToTM2.Cont'.encodeCont k) :=
+    (Primrec.encode).of_eq fun k => by rw [Turing.PartrecToTM2.Cont'.encodeCont_eq]
+  exact Primrec₂.natPair.comp (hcode.comp Primrec.fst) (hcont.comp Primrec.snd)
+
 /-- A square bound for every state code with bounded source-code and continuation codes. -/
 def codeContStateBound (codeBound contBound : Nat) : Nat :=
   (max codeBound contBound + 1) ^ 2
+
+theorem codeContStateBound_primrec :
+    Primrec (fun p : Nat × Nat => codeContStateBound p.1 p.2) := by
+  unfold codeContStateBound
+  have hpow : Primrec₂ (fun a b : Nat => a ^ b) :=
+    Primrec₂.unpaired'.1 Nat.Primrec.pow
+  exact hpow.comp
+    (Primrec.succ.comp (Primrec.nat_max.comp Primrec.fst Primrec.snd))
+    (Primrec.const 2)
 
 theorem codeContStateCode_lt_bound
     {c : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
@@ -1062,6 +1080,16 @@ theorem codeContStateCode_lt_bound
 /-- One coarse growth step for continuations produced by recursive evaluator calls. -/
 def contEncodeBoundStep (codeBound contBound : Nat) : Nat :=
   4 * codeContStateBound codeBound contBound + 4
+
+theorem contBound_le_boundStep (codeBound contBound : Nat) :
+    contBound ≤ contEncodeBoundStep codeBound contBound := by
+  have hcont_bound : contBound ≤ codeContStateBound codeBound contBound := by
+    unfold codeContStateBound
+    rw [Nat.pow_two]
+    exact (le_max_right codeBound contBound).trans
+      ((Nat.le_succ (max codeBound contBound)).trans (Nat.le_mul_self _))
+  unfold contEncodeBoundStep
+  omega
 
 theorem encodeCont_cons₁_le_boundStep
     {fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
@@ -1139,6 +1167,79 @@ theorem contEncodeFuelBound_primrec :
       (Primrec.pair (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
         (Primrec.snd.comp Primrec.snd))
   exact Primrec.nat_rec' (Primrec.fst.comp Primrec.fst) hbase hstep
+
+theorem childState_cons_left_lt_boundStep
+    {f fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.cons f fs) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode f (Cont'.cons₁ fs k) <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_left_le_cons f fs).trans hparent
+  · exact encodeCont_cons₁_le_boundStep
+      ((ToPartrec.Code.encodeCode_right_le_cons f fs).trans hparent) hcont
+
+theorem childState_cons_right_lt_boundStep
+    {f fs : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.cons f fs) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode fs (Cont'.cons₂ k) <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_right_le_cons f fs).trans hparent
+  · exact encodeCont_cons₂_le_boundStep hcont
+
+theorem childState_comp_right_lt_boundStep
+    {f g : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.comp f g) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode g (Cont'.comp f k) <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_right_le_comp f g).trans hparent
+  · exact encodeCont_comp_le_boundStep
+      ((ToPartrec.Code.encodeCode_left_le_comp f g).trans hparent) hcont
+
+theorem childState_comp_left_lt_boundStep
+    {f g : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.comp f g) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode f k <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_left_le_comp f g).trans hparent
+  · exact hcont.trans (contBound_le_boundStep codeBound contBound)
+
+theorem childState_case_left_lt_boundStep
+    {f g : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.case f g) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode f k <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_left_le_case f g).trans hparent
+  · exact hcont.trans (contBound_le_boundStep codeBound contBound)
+
+theorem childState_case_right_lt_boundStep
+    {f g : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.case f g) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode g k <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_right_le_case f g).trans hparent
+  · exact hcont.trans (contBound_le_boundStep codeBound contBound)
+
+theorem childState_fix_lt_boundStep
+    {f : ToPartrec.Code} {k : Cont'} {codeBound contBound : Nat}
+    (hparent : ToPartrec.Code.encodeCode (ToPartrec.Code.fix f) ≤ codeBound)
+    (hcont : Turing.PartrecToTM2.Cont'.encodeCont k ≤ contBound) :
+    codeContStateCode f (Cont'.fix f k) <
+      codeContStateBound codeBound (contEncodeBoundStep codeBound contBound) := by
+  refine codeContStateCode_lt_bound ?_ ?_
+  · exact (ToPartrec.Code.encodeCode_le_fix f).trans hparent
+  · exact encodeCont_fix_le_boundStep
+      ((ToPartrec.Code.encodeCode_le_fix f).trans hparent) hcont
 
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
