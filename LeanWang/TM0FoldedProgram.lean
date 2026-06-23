@@ -1148,6 +1148,24 @@ def simStepDataOfTransition (tc : Turing.ToPartrec.Code)
   | none => none
   | some (q', stmt) => some (simStepDataOfStep tc side marked q q' left right stmt)
 
+def simStepDataOfStmtTransition (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) : Option SimStepData :=
+  match sourceMachineStepOfStmt tc stmt v (foldedRead side left right) with
+  | none => none
+  | some (q', tm0Stmt) => some (simStepDataOfStep tc side marked (stmt, v) q' left right tm0Stmt)
+
+theorem simStepDataOfStmtTransition_eq_of_label (tc : Turing.ToPartrec.Code)
+    (q : SourceLabel tc) (side : FoldSide)
+    (marked : Bool) (left right : SourceSymbol) :
+    simStepDataOfStmtTransition tc q.1 q.2 side marked left right =
+      simStepDataOfTransition tc q side marked left right := by
+  rcases q with ⟨stmt, v⟩
+  unfold simStepDataOfStmtTransition simStepDataOfTransition
+  rw [sourceMachineStepOfStmt_eq_machine]
+  cases h : TM0Route.partrecStartedTM0Machine tc (stmt, v) (foldedRead side left right) <;>
+    simp
+
 theorem simStepDataOfTransition_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
