@@ -1622,6 +1622,62 @@ def codeSuppWeightCodeFuelStep'
                 codeContStateLookup prevLabel f (Cont'.fix f k)) +
             wCode (retLabelCode k)))
 
+/--
+Numeric version of `codeSuppWeightCodeFuelStep'`, dispatching on dense source-code tags.
+-/
+def codeSuppWeightCodeFuelStepCode'
+    (wCode : Nat → Nat) (prevLabel prevWeight : List Nat) (cCode : Nat) (k : Cont') :
+    Nat :=
+  let normal := trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode prevLabel cCode k)
+  if cCode = 0 then
+    normal
+  else if cCode = 1 then
+    normal
+  else if cCode = 2 then
+    normal
+  else
+    let n := cCode - 3
+    let m := n.div2.div2
+    let f := ToPartrec.Code.ofNatCode m.unpair.1
+    let g := ToPartrec.Code.ofNatCode m.unpair.2
+    match n.bodd, n.div2.bodd with
+    | false, false =>
+        normal +
+          (codeContStateLookup prevWeight f (Cont'.cons₁ g k) +
+            (trStmtsWeightCode wCode
+                (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+                  move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                    move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+                      codeContStateLookup prevLabel g (Cont'.cons₂ k)) +
+              (codeContStateLookup prevWeight g (Cont'.cons₂ k) +
+                trStmtsWeightCode wCode (headLabelCode K'.stack <| retLabelCode k))))
+    | false, true =>
+        normal +
+          (codeContStateLookup prevWeight g (Cont'.comp f k) +
+            (trStmtsWeightCode wCode (codeContStateLookup prevLabel f k) +
+              codeContStateLookup prevWeight f k))
+    | true, false =>
+        normal + (codeContStateLookup prevWeight f k + codeContStateLookup prevWeight g k)
+    | true, true =>
+        let f := ToPartrec.Code.ofNatCode m
+        normal +
+          (codeContStateLookup prevWeight f (Cont'.fix f k) +
+            (trStmtsWeightCode wCode
+                (clearLabelCode natEnd K'.main <|
+                  codeContStateLookup prevLabel f (Cont'.fix f k)) +
+              wCode (retLabelCode k)))
+
+theorem codeSuppWeightCodeFuelStepCode'_encodeCode
+    (wCode : Nat → Nat) (prevLabel prevWeight : List Nat)
+    (c : ToPartrec.Code) (k : Cont') :
+    codeSuppWeightCodeFuelStepCode' wCode prevLabel prevWeight
+        (ToPartrec.Code.encodeCode c) k =
+      codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight c k := by
+  cases c <;>
+    unfold codeSuppWeightCodeFuelStepCode' codeSuppWeightCodeFuelStep' <;>
+    rw [trNormalLabelCodeFuelStepCode_encodeCode] <;>
+    simp [ToPartrec.Code.encodeCode, Nat.div2_val, ToPartrec.Code.ofNatCode_encodeCode]
+
 theorem codeSuppWeightCodeFuelStep'_eq
     (wCode : Nat → Nat) {prevLabel prevWeight : List Nat} {fuel : Nat}
     (hlabel : ∀ c k, codeContStateLookup prevLabel c k = trNormalLabelCodeFuel fuel c k)
