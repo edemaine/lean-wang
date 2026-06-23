@@ -5225,6 +5225,182 @@ theorem partrecStartedTM0StackVectorCode_primrec :
   classical
   exact Primrec.dom_finite partrecStartedTM0StackVectorCode
 
+theorem partrecStartedTM0StackVectorUpdate_primrec (k : PartrecStack) :
+    Primrec (fun p :
+      (∀ k : PartrecStack, Option (PartrecStackSymbol k)) ×
+        Option (PartrecStackSymbol k) =>
+      Function.update p.1 k p.2) := by
+  classical
+  exact Primrec.dom_finite _
+
+def tm2to1PushWritePayload (k : PartrecStack)
+    (f : PartrecVar → PartrecStackSymbol k) :
+    PartrecStartedTM1StmtNode.WriteCode :=
+  fun a s => (a.1, Function.update a.2 k (some (f s)))
+
+theorem tm2to1PushWritePayload_primrec (k : PartrecStack) :
+    Primrec (tm2to1PushWritePayload k) := by
+  classical
+  exact Primrec.dom_finite _
+
+def tm2to1PeekLoadPayload (k : PartrecStack)
+    (f : PartrecVar → Option (PartrecStackSymbol k) → PartrecVar) :
+    PartrecStartedTM1StmtNode.LoadCode :=
+  fun a s => f s (a.2 k)
+
+theorem tm2to1PeekLoadPayload_primrec (k : PartrecStack) :
+    Primrec (tm2to1PeekLoadPayload k) := by
+  classical
+  exact Primrec.dom_finite _
+
+def tm2to1PopLoadNonePayload (k : PartrecStack)
+    (f : PartrecVar → Option (PartrecStackSymbol k) → PartrecVar) :
+    PartrecStartedTM1StmtNode.LoadCode :=
+  fun _ s => f s none
+
+theorem tm2to1PopLoadNonePayload_primrec (k : PartrecStack) :
+    Primrec (tm2to1PopLoadNonePayload k) := by
+  classical
+  exact Primrec.dom_finite _
+
+def tm2to1StackEmptyBranchPayload (k : PartrecStack) :
+    PartrecStartedTM1StmtNode.BranchCode :=
+  fun a _ => (a.2 k).isNone
+
+def tm2to1BottomBranchPayload : PartrecStartedTM1StmtNode.BranchCode :=
+  fun a _ => a.1
+
+def tm2to1PopWritePayload (k : PartrecStack) :
+    PartrecStartedTM1StmtNode.WriteCode :=
+  fun a _ => (a.1, Function.update a.2 k none)
+
+set_option maxHeartbeats 900000 in
+-- The branch expression mirrors Mathlib's nested `TM2to1.trStAct` statement.
+theorem tm2to1TrStAct_primrec_fixed_k
+    (tc : Turing.ToPartrec.Code) (k : PartrecStack) :
+    Primrec (fun p :
+      PartrecStartedTM0Stmt tc ×
+        Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k =>
+      Turing.TM2to1.trStAct p.1 p.2) := by
+  let StActK := Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k
+  let PushPayload := PartrecVar → PartrecStackSymbol k
+  let VarPayload := PartrecVar → Option (PartrecStackSymbol k) → PartrecVar
+  have hcode : Primrec (fun p : PartrecStartedTM0Stmt tc × StActK =>
+      (partrecStActEquivSum k) p.2) := by
+    simpa [StActK] using
+      ((Primrec.of_equiv (e := partrecStActEquivSum k) :
+        Primrec (partrecStActEquivSum k)).comp Primrec.snd)
+  have hpush : Primrec₂
+      (fun p : PartrecStartedTM0Stmt tc × StActK => fun f : PushPayload =>
+        Turing.TM2to1.trStAct p.1 (Turing.TM2to1.StAct.push (k := k) f)) := by
+    apply Primrec₂.mk
+    have hmove : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × PushPayload =>
+        Turing.TM1.Stmt.move Turing.Dir.right p.1.1) :=
+      (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+        (Primrec.pair (Primrec.const Turing.Dir.right) (Primrec.fst.comp Primrec.fst))
+    have hwritePayload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × PushPayload =>
+        tm2to1PushWritePayload k p.2) :=
+      (tm2to1PushWritePayload_primrec k).comp Primrec.snd
+    exact ((PartrecStartedTM1StmtNode.stmtWrite_primrec tc).comp
+      (Primrec.pair hwritePayload hmove)).of_eq fun p => by
+        rfl
+  have hpeek : Primrec₂
+      (fun p : PartrecStartedTM0Stmt tc × StActK => fun f : VarPayload =>
+        Turing.TM2to1.trStAct p.1 (Turing.TM2to1.StAct.peek (k := k) f)) := by
+    apply Primrec₂.mk
+    have hmoveRight : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.move Turing.Dir.right p.1.1) :=
+      (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+        (Primrec.pair (Primrec.const Turing.Dir.right) (Primrec.fst.comp Primrec.fst))
+    have hloadPayload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        tm2to1PeekLoadPayload k p.2) :=
+      (tm2to1PeekLoadPayload_primrec k).comp Primrec.snd
+    have hload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.load (tm2to1PeekLoadPayload k p.2)
+          (Turing.TM1.Stmt.move Turing.Dir.right p.1.1)) :=
+      (PartrecStartedTM1StmtNode.stmtLoad_primrec tc).comp
+        (Primrec.pair hloadPayload hmoveRight)
+    exact ((PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+      (Primrec.pair (Primrec.const Turing.Dir.left) hload)).of_eq fun p => by
+        rfl
+  have hpop : Primrec₂
+      (fun p : PartrecStartedTM0Stmt tc × StActK => fun f : VarPayload =>
+        Turing.TM2to1.trStAct p.1 (Turing.TM2to1.StAct.pop (k := k) f)) := by
+    apply Primrec₂.mk
+    have hq : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload => p.1.1) :=
+      Primrec.fst.comp Primrec.fst
+    have hnonePayload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        tm2to1PopLoadNonePayload k p.2) :=
+      (tm2to1PopLoadNonePayload_primrec k).comp Primrec.snd
+    have hthen : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.load (tm2to1PopLoadNonePayload k p.2) p.1.1) :=
+      (PartrecStartedTM1StmtNode.stmtLoad_primrec tc).comp
+        (Primrec.pair hnonePayload hq)
+    have hwrite : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.write (tm2to1PopWritePayload k) p.1.1) :=
+      (PartrecStartedTM1StmtNode.stmtWrite_primrec tc).comp
+        (Primrec.pair (Primrec.const (tm2to1PopWritePayload k)) hq)
+    have hloadPayload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        tm2to1PeekLoadPayload k p.2) :=
+      (tm2to1PeekLoadPayload_primrec k).comp Primrec.snd
+    have hload : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.load (tm2to1PeekLoadPayload k p.2)
+          (Turing.TM1.Stmt.write (tm2to1PopWritePayload k) p.1.1)) :=
+      (PartrecStartedTM1StmtNode.stmtLoad_primrec tc).comp
+        (Primrec.pair hloadPayload hwrite)
+    have helse : Primrec (fun p : (PartrecStartedTM0Stmt tc × StActK) × VarPayload =>
+        Turing.TM1.Stmt.move Turing.Dir.left
+          (Turing.TM1.Stmt.load (tm2to1PeekLoadPayload k p.2)
+            (Turing.TM1.Stmt.write (tm2to1PopWritePayload k) p.1.1))) :=
+      (PartrecStartedTM1StmtNode.stmtMove_primrec tc).comp
+        (Primrec.pair (Primrec.const Turing.Dir.left) hload)
+    exact ((PartrecStartedTM1StmtNode.stmtBranch_primrec tc).comp
+      (Primrec.pair
+        (Primrec.pair (Primrec.const (tm2to1BottomBranchPayload)) hthen)
+        helse)).of_eq fun p => by
+          rfl
+  have hrest : Primrec₂
+      (fun p : PartrecStartedTM0Stmt tc × StActK =>
+        fun rest : VarPayload ⊕ VarPayload =>
+          match rest with
+          | Sum.inl f => Turing.TM2to1.trStAct p.1 (Turing.TM2to1.StAct.peek (k := k) f)
+          | Sum.inr f => Turing.TM2to1.trStAct p.1 (Turing.TM2to1.StAct.pop (k := k) f)) := by
+    apply Primrec₂.mk
+    have hpeek' : Primrec₂
+        (fun p : (PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload) =>
+          fun f : VarPayload =>
+            Turing.TM2to1.trStAct p.1.1 (Turing.TM2to1.StAct.peek (k := k) f)) := by
+      apply Primrec₂.mk
+      have hbase : Primrec (fun p :
+          ((PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload)) ×
+            VarPayload => p.1.1) :=
+        Primrec.fst.comp Primrec.fst
+      have hpayload : Primrec (fun p :
+          ((PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload)) ×
+            VarPayload => p.2) :=
+        Primrec.snd
+      exact hpeek.comp hbase hpayload
+    have hpop' : Primrec₂
+        (fun p : (PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload) =>
+          fun f : VarPayload =>
+            Turing.TM2to1.trStAct p.1.1 (Turing.TM2to1.StAct.pop (k := k) f)) := by
+      apply Primrec₂.mk
+      have hbase : Primrec (fun p :
+          ((PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload)) ×
+            VarPayload => p.1.1) :=
+        Primrec.fst.comp Primrec.fst
+      have hpayload : Primrec (fun p :
+          ((PartrecStartedTM0Stmt tc × StActK) × (VarPayload ⊕ VarPayload)) ×
+            VarPayload => p.2) :=
+        Primrec.snd
+      exact hpop.comp hbase hpayload
+    exact (Primrec.sumCasesOn Primrec.snd hpeek' hpop').of_eq fun p => by
+      cases p.2 <;> rfl
+  refine (Primrec.sumCasesOn hcode hpush hrest).of_eq fun p => ?_
+  · cases p with
+    | mk q s =>
+      cases s <;> rfl
+
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
