@@ -1115,6 +1115,27 @@ def simStepDataForLabelIndex (tc : Turing.ToPartrec.Code) (i : Nat) :
     List SimStepData :=
   ((TM0Route.partrecStartedTM0LabelList tc)[i]?).elim [] (simStepDataForLabel tc)
 
+/--
+Offset form of `simStepDataForLabelIndex`, using the statement-decoder-based
+label index from `TM0Route`. The extra `fuel` and statement offset `k` expose
+the recursive state needed for the eventual primitive-recursive proof of the
+descriptor list.
+-/
+def simStepDataForLabelIndexFrom
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    List SimStepData :=
+  (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).elim []
+    (simStepDataForLabel tc)
+
+/--
+Canonical offset start for `simStepDataForLabelIndexFrom`: scan from statement
+offset `0` with exactly the computed statement-support count as fuel.
+-/
+def simStepDataForLabelIndexStart (tc : Turing.ToPartrec.Code) (i : Nat) :
+    List SimStepData :=
+  simStepDataForLabelIndexFrom tc
+    (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+
 theorem simStepDataForLabelIndex_eq_labelAt
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     simStepDataForLabelIndex tc i =
@@ -1129,6 +1150,21 @@ theorem simStepDataForLabelIndex_eq_labelAtByStatement
         (simStepDataForLabel tc) := by
   rw [simStepDataForLabelIndex_eq_labelAt,
     TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt]
+
+theorem simStepDataForLabelIndexFrom_zero_eq
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndexFrom tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 i =
+      simStepDataForLabelIndex tc i := by
+  unfold simStepDataForLabelIndexFrom
+  rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
+  rw [simStepDataForLabelIndex_eq_labelAtByStatement]
+
+theorem simStepDataForLabelIndexStart_eq
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndexStart tc i = simStepDataForLabelIndex tc i := by
+  unfold simStepDataForLabelIndexStart
+  exact simStepDataForLabelIndexFrom_zero_eq tc i
 
 /--
 Indexed mirror of `simStepData`. This is definitionally driven by the
@@ -1367,6 +1403,25 @@ theorem programData_computable_of_simStepDataForLabelIndex
       simStepDataForLabelIndex p.1 p.2)) :
     Computable programData :=
   (programData_primrec_of_simStepDataForLabelIndex hindex).to_comp
+
+/--
+The offset-start descriptor enumeration is enough for computability of
+normalized folded program data. This is the form targeted by the remaining
+structural decoder proof.
+-/
+theorem programData_primrec_of_simStepDataForLabelIndexStart
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStart p.1 p.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataForLabelIndex
+    (hindex.of_eq fun p => by
+      exact simStepDataForLabelIndexStart_eq p.1 p.2)
+
+theorem programData_computable_of_simStepDataForLabelIndexStart
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStart p.1 p.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndexStart hindex).to_comp
 
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
