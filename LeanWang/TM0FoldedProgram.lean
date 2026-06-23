@@ -30,6 +30,15 @@ abbrev SourceLabel (tc : Turing.ToPartrec.Code) : Type :=
 abbrev SourceStmt (tc : Turing.ToPartrec.Code) : Type :=
   TM0Route.PartrecStartedTM0Stmt tc
 
+abbrev SourceStmtNode (tc : Turing.ToPartrec.Code) : Type :=
+  TM0Route.PartrecStartedTM1StmtNode tc
+
+abbrev SourceStmtNodes (tc : Turing.ToPartrec.Code) : Type :=
+  List (SourceStmtNode tc)
+
+abbrev EncodedTrAuxDep (tc : Turing.ToPartrec.Code) : Type :=
+  SourceStmtNodes tc × PartrecVar × SourceSymbol
+
 /-- Which half of a folded one-sided cell is the simulated two-sided head reading? -/
 inductive FoldSide where
   | left
@@ -183,6 +192,416 @@ def trAuxDeps (tc : Turing.ToPartrec.Code)
       if f a v then [(q₁, v, a)] else [(q₂, v, a)]
   | (Turing.TM1.Stmt.goto _, _, _) => []
   | (Turing.TM1.Stmt.halt, _, _) => []
+
+def encodedTrAuxDepSingleton {tc : Turing.ToPartrec.Code}
+    (nodes : SourceStmtNodes tc) (v : PartrecVar) (a : SourceSymbol) :
+    List (EncodedTrAuxDep tc) :=
+  [(nodes, v, a)]
+
+theorem encodedTrAuxDepSingleton_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : SourceStmtNodes tc × PartrecVar × SourceSymbol =>
+      encodedTrAuxDepSingleton p.1 p.2.1 p.2.2) := by
+  unfold encodedTrAuxDepSingleton
+  exact Primrec.list_cons.comp Primrec.id (Primrec.const [])
+
+def trAuxDepsNodeDataOfCode (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol)
+    (code : TM0Route.PartrecStartedTM1StmtNode.Code tc) : List (EncodedTrAuxDep tc) :=
+  let tail := TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1
+  match code with
+  | Sum.inr (Sum.inr (Sum.inl f)) =>
+      encodedTrAuxDepSingleton tail (f p.2.2 p.2.1) p.2.2
+  | Sum.inr (Sum.inr (Sum.inr (Sum.inl f))) =>
+      if f p.2.2 p.2.1 then
+        encodedTrAuxDepSingleton
+          (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes tail) p.2.1 p.2.2
+      else
+        encodedTrAuxDepSingleton
+          (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes tail) p.2.1 p.2.2
+  | _ => []
+
+def trAuxDepsNodeDataOfHead (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol)
+    (node : SourceStmtNode tc) : List (EncodedTrAuxDep tc) :=
+  let tail := TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1
+  match node with
+  | TM0Route.PartrecStartedTM1StmtNode.load f =>
+      encodedTrAuxDepSingleton tail (f p.2.2 p.2.1) p.2.2
+  | TM0Route.PartrecStartedTM1StmtNode.branch f =>
+      if f p.2.2 p.2.1 then
+        encodedTrAuxDepSingleton
+          (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes tail) p.2.1 p.2.2
+      else
+        encodedTrAuxDepSingleton
+          (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes tail) p.2.1 p.2.2
+  | _ => []
+
+theorem trAuxDepsNodeDataOfCode_toCode
+    (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol)
+    (node : SourceStmtNode tc) :
+    trAuxDepsNodeDataOfCode tc p
+        (TM0Route.PartrecStartedTM1StmtNode.toCode node) =
+      trAuxDepsNodeDataOfHead tc p node := by
+  cases node <;> rfl
+
+set_option maxHeartbeats 800000 in
+-- Nested case analysis over the encoded TM1 statement node sum type is expensive to elaborate.
+theorem trAuxDepsNodeDataOfCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) ×
+          TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        trAuxDepsNodeDataOfCode tc p.1 p.2) := by
+  have hload : Primrec₂
+      (fun p :
+        (SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        fun f : SourceSymbol → PartrecVar → PartrecVar =>
+          encodedTrAuxDepSingleton
+            (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1)
+            (f p.1.2.2 p.1.2.1) p.1.2.2) := by
+    apply Primrec₂.mk
+    have hstmt : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → PartrecVar) =>
+          p.1.1.1) :=
+      Primrec.fst.comp (Primrec.fst.comp Primrec.fst)
+    have htail : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → PartrecVar) =>
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1) :=
+      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail_primrec tc).comp hstmt
+    have hv : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → PartrecVar) =>
+          p.1.1.2.1) :=
+      Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+    have ha : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → PartrecVar) =>
+          p.1.1.2.2) :=
+      Primrec.snd.comp (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+    have happ : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → PartrecVar) =>
+          p.2 p.1.1.2.2 p.1.1.2.1) :=
+      (TM0Route.partrecStartedTM0SymbolPartrecVarFunction_app_primrec PartrecVar).comp
+        (Primrec.pair Primrec.snd (Primrec.pair ha hv))
+    exact (encodedTrAuxDepSingleton_primrec tc).comp
+      (Primrec.pair htail (Primrec.pair happ ha))
+  have hbranch : Primrec₂
+      (fun p :
+        (SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        fun f : SourceSymbol → PartrecVar → Bool =>
+          if f p.1.2.2 p.1.2.1 then
+            encodedTrAuxDepSingleton
+              (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+              p.1.2.1 p.1.2.2
+          else
+            encodedTrAuxDepSingleton
+              (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+              p.1.2.1 p.1.2.2) := by
+    apply Primrec₂.mk
+    have hstmt : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          p.1.1.1) :=
+      Primrec.fst.comp (Primrec.fst.comp Primrec.fst)
+    have htail : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1) :=
+      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail_primrec tc).comp hstmt
+    have hfirst : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+            (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1)) :=
+      (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes_primrec tc).comp htail
+    have hafter : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+            (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1)) :=
+      (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes_primrec tc).comp htail
+    have hv : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          p.1.1.2.1) :=
+      Primrec.fst.comp (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+    have ha : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          p.1.1.2.2) :=
+      Primrec.snd.comp (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+    have hcond : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          p.2 p.1.1.2.2 p.1.1.2.1) :=
+      (TM0Route.partrecStartedTM0SymbolPartrecVarFunction_app_primrec Bool).comp
+        (Primrec.pair Primrec.snd (Primrec.pair ha hv))
+    have hthen : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          encodedTrAuxDepSingleton
+            (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+              (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+            p.1.1.2.1 p.1.1.2.2) :=
+      (encodedTrAuxDepSingleton_primrec tc).comp
+        (Primrec.pair hfirst (Primrec.pair hv ha))
+    have helse : Primrec (fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            (SourceSymbol → PartrecVar → Bool) =>
+          encodedTrAuxDepSingleton
+            (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+              (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+            p.1.1.2.1 p.1.1.2.2) :=
+      (encodedTrAuxDepSingleton_primrec tc).comp
+        (Primrec.pair hafter (Primrec.pair hv ha))
+    exact (Primrec.cond hcond hthen helse).of_eq fun p => by
+      by_cases h : p.2 p.1.1.2.2 p.1.1.2.1 <;> simp [h]
+  have hbranchTail : Primrec₂
+      (fun p :
+        (SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        fun c : TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc =>
+          match c with
+          | Sum.inl f => if f p.1.2.2 p.1.2.1 then
+              encodedTrAuxDepSingleton
+                (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                  (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                p.1.2.1 p.1.2.2
+            else
+              encodedTrAuxDepSingleton
+                (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                  (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                p.1.2.1 p.1.2.2
+          | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (f := fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            TM0Route.PartrecStartedTM1StmtNode.BranchTailCode tc => p.2)
+      (g := fun p f =>
+        if f p.1.1.2.2 p.1.1.2.1 then
+          encodedTrAuxDepSingleton
+            (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+              (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+            p.1.1.2.1 p.1.1.2.2
+        else
+          encodedTrAuxDepSingleton
+            (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+              (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+            p.1.1.2.1 p.1.1.2.2)
+      (h := fun _ _ => ([] : List (EncodedTrAuxDep tc)))
+      Primrec.snd
+      (hbranch.comp₂ (Primrec.fst.comp₂ Primrec₂.left) Primrec₂.right)
+      (Primrec.const []).to₂).of_eq ?_
+    intro p
+    cases p.2 <;> rfl
+  have hloadTail : Primrec₂
+      (fun p :
+        (SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        fun c : TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc =>
+          match c with
+          | Sum.inl f =>
+              encodedTrAuxDepSingleton
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1)
+                (f p.1.2.2 p.1.2.1) p.1.2.2
+          | Sum.inr c => match c with
+              | Sum.inl f => if f p.1.2.2 p.1.2.1 then
+                  encodedTrAuxDepSingleton
+                    (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                    p.1.2.1 p.1.2.2
+                else
+                  encodedTrAuxDepSingleton
+                    (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                    p.1.2.1 p.1.2.2
+              | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (f := fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            TM0Route.PartrecStartedTM1StmtNode.LoadTailCode tc => p.2)
+      (g := fun p f =>
+        encodedTrAuxDepSingleton
+          (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1)
+          (f p.1.1.2.2 p.1.1.2.1) p.1.1.2.2)
+      (h := fun p c =>
+        match c with
+        | Sum.inl f => if f p.1.1.2.2 p.1.1.2.1 then
+            encodedTrAuxDepSingleton
+              (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+              p.1.1.2.1 p.1.1.2.2
+          else
+            encodedTrAuxDepSingleton
+              (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+              p.1.1.2.1 p.1.1.2.2
+        | Sum.inr _ => [])
+      Primrec.snd
+      (hload.comp₂ (Primrec.fst.comp₂ Primrec₂.left) Primrec₂.right)
+      (hbranchTail.comp₂ (Primrec.fst.comp₂ Primrec₂.left) Primrec₂.right)).of_eq ?_
+    intro p
+    cases p.2 <;> rfl
+  have hwriteTail : Primrec₂
+      (fun p :
+        (SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc =>
+        fun c : TM0Route.PartrecStartedTM1StmtNode.WriteTailCode tc =>
+          match c with
+          | Sum.inl _ => []
+          | Sum.inr c => match c with
+              | Sum.inl f =>
+                  encodedTrAuxDepSingleton
+                    (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1)
+                    (f p.1.2.2 p.1.2.1) p.1.2.2
+              | Sum.inr c => match c with
+                  | Sum.inl f => if f p.1.2.2 p.1.2.1 then
+                      encodedTrAuxDepSingleton
+                        (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                          (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                        p.1.2.1 p.1.2.2
+                    else
+                      encodedTrAuxDepSingleton
+                        (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                          (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                        p.1.2.1 p.1.2.2
+                  | Sum.inr _ => []) := by
+    apply Primrec₂.mk
+    refine (Primrec.sumCasesOn
+      (f := fun p :
+        ((SourceStmt tc × PartrecVar × SourceSymbol) ×
+            TM0Route.PartrecStartedTM1StmtNode.Code tc) ×
+            TM0Route.PartrecStartedTM1StmtNode.WriteTailCode tc => p.2)
+      (g := fun _ _ => ([] : List (EncodedTrAuxDep tc)))
+      (h := fun p c =>
+        match c with
+        | Sum.inl f =>
+            encodedTrAuxDepSingleton
+              (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1)
+              (f p.1.1.2.2 p.1.1.2.1) p.1.1.2.2
+        | Sum.inr c => match c with
+            | Sum.inl f => if f p.1.1.2.2 p.1.1.2.1 then
+                encodedTrAuxDepSingleton
+                  (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                    (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+                  p.1.1.2.1 p.1.1.2.2
+              else
+                encodedTrAuxDepSingleton
+                  (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                    (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1.1))
+                  p.1.1.2.1 p.1.1.2.2
+            | Sum.inr _ => [])
+      Primrec.snd (Primrec.const []).to₂
+      (hloadTail.comp₂ (Primrec.fst.comp₂ Primrec₂.left) Primrec₂.right)).of_eq ?_
+    intro p
+    cases p.2 <;> rfl
+  refine (Primrec.sumCasesOn
+    (f := fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) ×
+          TM0Route.PartrecStartedTM1StmtNode.Code tc => p.2)
+    (g := fun _ _ => ([] : List (EncodedTrAuxDep tc)))
+    (h := fun p c =>
+      match c with
+      | Sum.inl _ => []
+      | Sum.inr c => match c with
+          | Sum.inl f =>
+              encodedTrAuxDepSingleton
+                (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1)
+                (f p.1.2.2 p.1.2.1) p.1.2.2
+          | Sum.inr c => match c with
+              | Sum.inl f => if f p.1.2.2 p.1.2.1 then
+                  encodedTrAuxDepSingleton
+                    (TM0Route.PartrecStartedTM1StmtNode.firstStmtNodes
+                      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                    p.1.2.1 p.1.2.2
+                else
+                  encodedTrAuxDepSingleton
+                    (TM0Route.PartrecStartedTM1StmtNode.afterFirstStmtNodes
+                      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail p.1.1))
+                    p.1.2.1 p.1.2.2
+              | Sum.inr _ => [])
+    Primrec.snd (Primrec.const []).to₂ hwriteTail).of_eq ?_
+  intro p
+  cases p.2 with
+  | inl _ =>
+      rfl
+  | inr c =>
+      cases c with
+      | inl _ =>
+          rfl
+      | inr c =>
+          cases c with
+          | inl _ =>
+              rfl
+          | inr c =>
+              cases c with
+              | inl _ =>
+                  rfl
+              | inr c =>
+                  cases c <;> rfl
+
+theorem trAuxDepsNodeDataOfHead_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : (SourceStmt tc × PartrecVar × SourceSymbol) × SourceStmtNode tc =>
+      trAuxDepsNodeDataOfHead tc p.1 p.2) := by
+  have hcode : Primrec (fun p :
+      (SourceStmt tc × PartrecVar × SourceSymbol) × SourceStmtNode tc =>
+        TM0Route.PartrecStartedTM1StmtNode.toCode p.2) :=
+    (TM0Route.PartrecStartedTM1StmtNode.toCode_primrec tc).comp Primrec.snd
+  exact ((trAuxDepsNodeDataOfCode_primrec_fixed tc).comp
+    (Primrec.pair Primrec.fst hcode)).of_eq fun p => by
+      rw [trAuxDepsNodeDataOfCode_toCode]
+
+def trAuxDepsNodeData (tc : Turing.ToPartrec.Code)
+    (p : SourceStmt tc × PartrecVar × SourceSymbol) : List (EncodedTrAuxDep tc) :=
+  match TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1 with
+  | none => []
+  | some node => trAuxDepsNodeDataOfHead tc p node
+
+theorem trAuxDepsNodeData_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxDepsNodeData tc) := by
+  have hhead : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1) :=
+    (TM0Route.PartrecStartedTM1StmtNode.ofStmtHead?_primrec tc).comp Primrec.fst
+  have hnone : Primrec (fun _p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      ([] : List (EncodedTrAuxDep tc))) :=
+    Primrec.const []
+  have hsome : Primrec₂
+      (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+        fun node : SourceStmtNode tc => trAuxDepsNodeDataOfHead tc p node) := by
+    apply Primrec₂.mk
+    exact trAuxDepsNodeDataOfHead_primrec_fixed tc
+  exact (Primrec.option_casesOn hhead hnone hsome).of_eq fun p => by
+    generalize h :
+      TM0Route.PartrecStartedTM1StmtNode.ofStmtHead? p.1 = head
+    cases head <;> simp [trAuxDepsNodeData, h]
 
 theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol)
