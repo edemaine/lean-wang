@@ -1137,6 +1137,15 @@ theorem partrecStartedTM1LabelCount_primrec_of_labelWeight
   (partrecStartedTM1LabelCountWeightData_primrec hcount hweight).of_eq fun tc => by
     rw [partrecStartedTM1LabelCount_eq_data, partrecStartedTM1LabelCountData_eq_weightData]
 
+theorem partrecStartedTM1LabelCount_primrec_of_supportMirrors
+    (hcount : Primrec₂ PartrecToTM2SupportList.codeSuppLength)
+    (hweight :
+      Primrec₂ (PartrecToTM2SupportList.codeSuppWeight partrecTM2SupportLength)) :
+    Primrec partrecStartedTM1LabelCount :=
+  partrecStartedTM1LabelCount_primrec_of_labelWeight
+    (PartrecToTM2SupportList.labelCount_primrec_of_codeSuppLength hcount)
+    (PartrecToTM2SupportList.labelWeight_primrec_of_codeSuppWeight hweight)
+
 theorem partrecStartedTM1LabelCount_primrec_of_labelList
     (hlabel : Primrec PartrecToTM2SupportList.labelList) :
     Primrec partrecStartedTM1LabelCount :=

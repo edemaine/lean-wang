@@ -375,9 +375,24 @@ theorem codeSuppList_primrec_of_parts
 def codeSuppLength (c : ToPartrec.Code) (k : Cont') : Nat :=
   codeSuppLength' c k + contSuppLength k
 
+theorem codeSuppLength_primrec_of_parts
+    (hcode : Primrec₂ codeSuppLength') (hcont : Primrec contSuppLength) :
+    Primrec₂ codeSuppLength := by
+  apply Primrec₂.mk
+  unfold codeSuppLength
+  exact Primrec.nat_add.comp hcode (hcont.comp Primrec.snd)
+
 /-- Weighted sum mirror of `codeSuppList`. -/
 def codeSuppWeight (w : Λ' → Nat) (c : ToPartrec.Code) (k : Cont') : Nat :=
   codeSuppWeight' w c k + contSuppWeight w k
+
+theorem codeSuppWeight_primrec_of_parts
+    {w : Λ' → Nat}
+    (hcode : Primrec₂ (codeSuppWeight' w)) (hcont : Primrec (contSuppWeight w)) :
+    Primrec₂ (codeSuppWeight w) := by
+  apply Primrec₂.mk
+  unfold codeSuppWeight
+  exact Primrec.nat_add.comp hcode (hcont.comp Primrec.snd)
 
 theorem codeSuppList_length (c : ToPartrec.Code) (k : Cont') :
     (codeSuppList c k).length = codeSuppLength c k := by
@@ -405,9 +420,21 @@ theorem labelList_primrec_of_codeSuppList
 def labelCount (tc : ToPartrec.Code) : Nat :=
   codeSuppLength tc Cont'.halt
 
+theorem labelCount_primrec_of_codeSuppLength
+    (h : Primrec₂ codeSuppLength) :
+    Primrec labelCount := by
+  unfold labelCount
+  exact h.comp Primrec.id (Primrec.const Cont'.halt)
+
 /-- Weighted sum of the evaluator label support for code `tc`. -/
 def labelWeight (w : Λ' → Nat) (tc : ToPartrec.Code) : Nat :=
   codeSuppWeight w tc Cont'.halt
+
+theorem labelWeight_primrec_of_codeSuppWeight
+    {w : Λ' → Nat} (h : Primrec₂ (codeSuppWeight w)) :
+    Primrec (labelWeight w) := by
+  unfold labelWeight
+  exact h.comp Primrec.id (Primrec.const Cont'.halt)
 
 theorem labelList_length (tc : ToPartrec.Code) :
     (labelList tc).length = labelCount tc := by
