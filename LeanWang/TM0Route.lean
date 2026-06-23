@@ -7477,6 +7477,12 @@ theorem tm2to1Tr_primrec_of_tm2
           cases k <;> rfl
       | ret q => rfl
 
+theorem partrecStartedTM1Machine_primrec_of_tm2
+    (tc : Turing.ToPartrec.Code)
+    (hM : Primrec (partrecStartedTM2 tc)) :
+    Primrec (partrecStartedTM1Machine tc) := by
+  exact (tm2to1Tr_primrec_of_tm2 tc (partrecStartedTM2 tc) hM).of_eq fun q => rfl
+
 /-- Numeric code for a translated TM0 tape symbol. -/
 def partrecStartedTM0SymbolCode
     (a : Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) : Nat :=
