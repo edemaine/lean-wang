@@ -2580,6 +2580,25 @@ def simStepDataForStmtRightSymbols (tc : Turing.ToPartrec.Code)
   TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
     simStepDataOfStmtTransition tc stmt v side marked left right
 
+def simStepDataForStmtRightSymbolsWithCode (tc : Turing.ToPartrec.Code)
+    (qCode : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left : SourceSymbol) : List SimStepData :=
+  TM0Route.partrecStartedTM0SymbolList.filterMap fun right =>
+    simStepDataOfStmtTransitionWithCode tc qCode stmt v side marked left right
+
+theorem simStepDataForStmtRightSymbols_eq_withCode
+    (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) (left : SourceSymbol) :
+    simStepDataForStmtRightSymbols tc stmt v side marked left =
+      simStepDataForStmtRightSymbolsWithCode tc
+        (TM0FiniteCompiler.stateCode tc (stmt, v))
+        stmt v side marked left := by
+  unfold simStepDataForStmtRightSymbols simStepDataForStmtRightSymbolsWithCode
+  apply List.filterMap_congr
+  intro right _hright
+  exact simStepDataOfStmtTransition_eq_withCode tc stmt v side marked left right
+
 theorem simStepDataForStmtRightSymbols_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -2620,6 +2639,25 @@ def simStepDataForStmtLeftSymbols (tc : Turing.ToPartrec.Code)
     (marked : Bool) : List SimStepData :=
   TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
     simStepDataForStmtRightSymbols tc stmt v side marked left
+
+def simStepDataForStmtLeftSymbolsWithCode (tc : Turing.ToPartrec.Code)
+    (qCode : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) : List SimStepData :=
+  TM0Route.partrecStartedTM0SymbolList.flatMap fun left =>
+    simStepDataForStmtRightSymbolsWithCode tc qCode stmt v side marked left
+
+theorem simStepDataForStmtLeftSymbols_eq_withCode
+    (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
+    (marked : Bool) :
+    simStepDataForStmtLeftSymbols tc stmt v side marked =
+      simStepDataForStmtLeftSymbolsWithCode tc
+        (TM0FiniteCompiler.stateCode tc (stmt, v))
+        stmt v side marked := by
+  unfold simStepDataForStmtLeftSymbols simStepDataForStmtLeftSymbolsWithCode
+  apply List.flatMap_congr
+  intro left _hleft
+  exact simStepDataForStmtRightSymbols_eq_withCode tc stmt v side marked left
 
 theorem simStepDataForStmtLeftSymbols_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide) (marked : Bool) :
@@ -2669,6 +2707,24 @@ def simStepDataForStmtMarked (tc : Turing.ToPartrec.Code)
     List SimStepData :=
   [false, true].flatMap fun marked =>
     simStepDataForStmtLeftSymbols tc stmt v side marked
+
+def simStepDataForStmtMarkedWithCode (tc : Turing.ToPartrec.Code)
+    (qCode : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide) :
+    List SimStepData :=
+  [false, true].flatMap fun marked =>
+    simStepDataForStmtLeftSymbolsWithCode tc qCode stmt v side marked
+
+theorem simStepDataForStmtMarked_eq_withCode
+    (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide) :
+    simStepDataForStmtMarked tc stmt v side =
+      simStepDataForStmtMarkedWithCode tc
+        (TM0FiniteCompiler.stateCode tc (stmt, v))
+        stmt v side := by
+  unfold simStepDataForStmtMarked simStepDataForStmtMarkedWithCode
+  apply List.flatMap_congr
+  intro marked _hmarked
+  exact simStepDataForStmtLeftSymbols_eq_withCode tc stmt v side marked
 
 theorem simStepDataForStmtMarked_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide) :
@@ -2767,6 +2823,23 @@ def simStepDataForStmtLabel (tc : Turing.ToPartrec.Code)
     (stmt : Option (SourceStmt tc)) (v : PartrecVar) : List SimStepData :=
   foldSideList.flatMap fun side =>
     simStepDataForStmtMarked tc stmt v side
+
+def simStepDataForStmtLabelWithCode (tc : Turing.ToPartrec.Code)
+    (qCode : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) : List SimStepData :=
+  foldSideList.flatMap fun side =>
+    simStepDataForStmtMarkedWithCode tc qCode stmt v side
+
+theorem simStepDataForStmtLabel_eq_withCode
+    (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) :
+    simStepDataForStmtLabel tc stmt v =
+      simStepDataForStmtLabelWithCode tc
+        (TM0FiniteCompiler.stateCode tc (stmt, v))
+        stmt v := by
+  unfold simStepDataForStmtLabel simStepDataForStmtLabelWithCode
+  apply List.flatMap_congr
+  intro side _hside
+  exact simStepDataForStmtMarked_eq_withCode tc stmt v side
 
 theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) :
