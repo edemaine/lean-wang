@@ -1051,6 +1051,26 @@ theorem programOfCountAndSimRows_computable :
       programOfCountAndSimRows p.1 p.2) :=
   programOfCountAndSimRows_primrec.to_comp
 
+def appendSimRows (P : FiniteTM0Program) (sim : List PostTransition) : FiniteTM0Program :=
+  { P with table := P.table ++ sim }
+
+theorem appendSimRows_primrec :
+    Primrec (fun p : FiniteTM0Program × List PostTransition =>
+      appendSimRows p.1 p.2) := by
+  unfold appendSimRows
+  exact PostProgram.mk_primrec.comp
+    (Primrec.pair (PostProgram.symbols_primrec.comp Primrec.fst)
+      (Primrec.pair (PostProgram.states_primrec.comp Primrec.fst)
+        (Primrec.pair (PostProgram.blank_primrec.comp Primrec.fst)
+          (Primrec.pair (PostProgram.start_primrec.comp Primrec.fst)
+            (Primrec.list_append.comp
+              (PostProgram.table_primrec.comp Primrec.fst) Primrec.snd)))))
+
+theorem appendSimRows_computable :
+    Computable (fun p : FiniteTM0Program × List PostTransition =>
+      appendSimRows p.1 p.2) :=
+  appendSimRows_primrec.to_comp
+
 def program (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
   programOfCountAndRows (TM0Route.partrecStartedTM0StateCount tc) (initRows tc) (simRows tc)
 
@@ -1121,6 +1141,17 @@ theorem programData_eq_programHeader_with_simRows (tc : Turing.ToPartrec.Code) :
     programData tc =
       { programHeader tc with table := (programHeader tc).table ++ simRows tc } := by
   rfl
+
+theorem programData_eq_appendSimRows_programHeader (tc : Turing.ToPartrec.Code) :
+    programData tc = appendSimRows (programHeader tc) (simRows tc) := by
+  rfl
+
+def programDataFromSimRows (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
+  appendSimRows (programHeader tc) (simRows tc)
+
+theorem programDataFromSimRows_eq_programData (tc : Turing.ToPartrec.Code) :
+    programDataFromSimRows tc = programData tc :=
+  (programData_eq_appendSimRows_programHeader tc).symm
 
 end TM0FoldedCompiler
 
