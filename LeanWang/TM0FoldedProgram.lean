@@ -1435,6 +1435,14 @@ theorem sourceMachineStepOfStmt_primrec_fixed_of_trAux
     rcases p with ⟨stmtOpt, v, a⟩
     cases stmtOpt <;> rfl
 
+theorem sourceMachineStepOfStmt_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
+      sourceMachineStepOfStmt tc p.1 p.2.1 p.2.2) :=
+  sourceMachineStepOfStmt_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem sourceMachine_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -1445,6 +1453,14 @@ theorem sourceMachine_primrec_fixed_of_trAux
     (Primrec.pair (Primrec.fst.comp Primrec.fst)
       (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd)) |>.of_eq
     fun p => (sourceMachineStepOfStmt_eq_machine tc p.1 p.2)
+
+theorem sourceMachine_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : SourceLabel tc × SourceSymbol =>
+      TM0Route.partrecStartedTM0Machine tc p.1 p.2) :=
+  sourceMachine_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
 
 def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
@@ -2445,6 +2461,16 @@ theorem simStepDataOfStmtTransition_primrec_fixed_of_trAux
     cases sourceMachineStepOfStmt tc p.1 p.2.1
         (foldedRead p.2.2.1 p.2.2.2.2.1 p.2.2.2.2.2) <;> rfl
 
+theorem simStepDataOfStmtTransition_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol × SourceSymbol =>
+      simStepDataOfStmtTransition tc p.1 p.2.1 p.2.2.1 p.2.2.2.1
+        p.2.2.2.2.1 p.2.2.2.2.2) :=
+  simStepDataOfStmtTransition_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem simStepDataOfTransition_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
@@ -2531,6 +2557,15 @@ theorem simStepDataForStmtRightSymbols_primrec_fixed_of_trAux
                 (Primrec.snd.comp Primrec.fst))))
               Primrec.snd)))))
 
+theorem simStepDataForStmtRightSymbols_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool ×
+        SourceSymbol =>
+      simStepDataForStmtRightSymbols tc p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) :=
+  simStepDataForStmtRightSymbols_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 def simStepDataForStmtLeftSymbols (tc : Turing.ToPartrec.Code)
     (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide)
     (marked : Bool) : List SimStepData :=
@@ -2572,6 +2607,14 @@ theorem simStepDataForStmtLeftSymbols_primrec_fixed_of_trAux
             (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
             Primrec.snd))))
 
+theorem simStepDataForStmtLeftSymbols_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide × Bool =>
+      simStepDataForStmtLeftSymbols tc p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  simStepDataForStmtLeftSymbols_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 def simStepDataForStmtMarked (tc : Turing.ToPartrec.Code)
     (stmt : Option (SourceStmt tc)) (v : PartrecVar) (side : FoldSide) :
     List SimStepData :=
@@ -2608,6 +2651,14 @@ theorem simStepDataForStmtMarked_primrec_fixed_of_trAux
         (Primrec.pair
           (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
           Primrec.snd)))
+
+theorem simStepDataForStmtMarked_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × FoldSide =>
+      simStepDataForStmtMarked tc p.1 p.2.1 p.2.2) :=
+  simStepDataForStmtMarked_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
 
 theorem simTransitionOfStep_eq_map_stepData (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
@@ -2691,6 +2742,14 @@ theorem simStepDataForStmtLabel_primrec_fixed_of_trAux
       (Primrec.fst.comp Primrec.fst)
       (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
 
+theorem simStepDataForStmtLabel_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar =>
+      simStepDataForStmtLabel tc p.1 p.2) :=
+  simStepDataForStmtLabel_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 /--
 Descriptor rows for a source-label index. This is a numeric outer enumeration
 of the same semantic labels used by `simStepData`, avoiding a dependent label
@@ -2768,6 +2827,14 @@ theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
     | some q =>
         exact simStepDataForStmtLabel_eq_of_label tc q
 
+theorem simStepDataForLabelIndexFrom_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFrom tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFrom_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem simStepDataForLabelIndexStart_eq
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     simStepDataForLabelIndexStart tc i = simStepDataForLabelIndex tc i := by
@@ -2784,6 +2851,13 @@ theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
     (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
       (Primrec.pair (Primrec.const 0) Primrec.id))
 
+theorem simStepDataForLabelIndexStart_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (simStepDataForLabelIndexStart tc) :=
+  simStepDataForLabelIndexStart_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -2791,6 +2865,13 @@ theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
     Primrec (simStepDataForLabelIndex tc) :=
   (simStepDataForLabelIndexStart_primrec_fixed_of_trAux tc haux).of_eq fun i =>
     simStepDataForLabelIndexStart_eq tc i
+
+theorem simStepDataForLabelIndex_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (simStepDataForLabelIndex tc) :=
+  simStepDataForLabelIndex_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
 
 /--
 Indexed mirror of `simStepData`. This is definitionally driven by the
