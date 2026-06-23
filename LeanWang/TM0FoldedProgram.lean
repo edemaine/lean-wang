@@ -168,6 +168,48 @@ theorem tm0StmtMove_primrec : Primrec (Turing.TM0.Stmt.move (Γ := SourceSymbol)
 theorem tm0StmtWrite_primrec : Primrec (Turing.TM0.Stmt.write (Γ := SourceSymbol)) := by
   exact tm0StmtOfSum_primrec.comp Primrec.sumInr
 
+def sourceMachineStepOfStmt (tc : Turing.ToPartrec.Code)
+    (stmt : Option (SourceStmt tc)) (v : PartrecVar) (a : SourceSymbol) :
+    Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol) :=
+  match stmt with
+  | none => none
+  | some stmt =>
+      some (Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) a stmt v)
+
+theorem sourceMachineStepOfStmt_eq_machine (tc : Turing.ToPartrec.Code)
+    (q : SourceLabel tc) (a : SourceSymbol) :
+    sourceMachineStepOfStmt tc q.1 q.2 a =
+      TM0Route.partrecStartedTM0Machine tc q a := by
+  rcases q with ⟨stmt | none, v⟩ <;> rfl
+
+theorem sourceMachineStepOfStmt_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
+      sourceMachineStepOfStmt tc p.1 p.2.1 p.2.2) := by
+  have hstmtOpt : Primrec (fun p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
+      p.1) := Primrec.fst
+  have hnone : Primrec (fun _p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
+      (none : Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol))) :=
+    Primrec.const none
+  have hsome : Primrec₂
+      (fun p : Option (SourceStmt tc) × PartrecVar × SourceSymbol =>
+        fun stmt : SourceStmt tc =>
+          some (Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc)
+            p.2.2 stmt p.2.1)) := by
+    apply Primrec₂.mk
+    exact Primrec.option_some.comp
+      (haux.comp
+        (Primrec.pair Primrec.snd
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))))
+  exact (Primrec.option_casesOn hstmtOpt hnone hsome).of_eq fun p => by
+    rcases p with ⟨stmtOpt, v, a⟩
+    cases stmtOpt <;> rfl
+
 theorem sourceMachine_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     [Primcodable (SourceStmt tc)]
@@ -175,27 +217,10 @@ theorem sourceMachine_primrec_fixed_of_trAux
       Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
     Primrec (fun p : SourceLabel tc × SourceSymbol =>
       TM0Route.partrecStartedTM0Machine tc p.1 p.2) := by
-  let stmtOpt : SourceLabel tc × SourceSymbol → Option (SourceStmt tc) := fun p => p.1.1
-  let localVar : SourceLabel tc × SourceSymbol → PartrecVar := fun p => p.1.2
-  let sym : SourceLabel tc × SourceSymbol → SourceSymbol := fun p => p.2
-  have hstmtOpt : Primrec stmtOpt := Primrec.fst.comp Primrec.fst
-  have hlocalVar : Primrec localVar := Primrec.snd.comp Primrec.fst
-  have hsym : Primrec sym := Primrec.snd
-  have hnone : Primrec (fun _p : SourceLabel tc × SourceSymbol =>
-      (none : Option (SourceLabel tc × Turing.TM0.Stmt SourceSymbol))) :=
-    Primrec.const none
-  have hsome : Primrec₂
-      (fun p : SourceLabel tc × SourceSymbol => fun stmt : SourceStmt tc =>
-        some (Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc)
-          (sym p) stmt (localVar p))) := by
-    apply Primrec₂.mk
-    exact Primrec.option_some.comp
-      (haux.comp
-        (Primrec.pair Primrec.snd
-          (Primrec.pair (hlocalVar.comp Primrec.fst) (hsym.comp Primrec.fst))))
-  exact (Primrec.option_casesOn hstmtOpt hnone hsome).of_eq fun p => by
-    rcases p with ⟨⟨stmtOpt, v⟩, a⟩
-    cases stmtOpt <;> rfl
+  exact (sourceMachineStepOfStmt_primrec_fixed_of_trAux tc haux).comp
+    (Primrec.pair (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd)) |>.of_eq
+    fun p => (sourceMachineStepOfStmt_eq_machine tc p.1 p.2)
 
 def foldedSymbolCode (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
