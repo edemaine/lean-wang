@@ -1168,6 +1168,16 @@ theorem simStepDataOfTransition_primrec_fixed_of_machine
     · rfl
     · rfl
 
+theorem simStepDataOfTransition_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : SourceLabel tc × FoldSide × Bool × SourceSymbol × SourceSymbol =>
+      simStepDataOfTransition tc p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) :=
+  simStepDataOfTransition_primrec_fixed_of_machine tc
+    (sourceMachine_primrec_fixed_of_trAux tc haux)
+
 theorem simTransitionOfStep_eq_map_stepData (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) (side : FoldSide)
     (marked : Bool) (left right : SourceSymbol) :
