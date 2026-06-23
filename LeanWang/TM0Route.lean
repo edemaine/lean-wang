@@ -2998,6 +2998,62 @@ theorem partrecStartedTM2PushBody_eq_relabel
         (partrecTM2 (Turing.PartrecToTM2.Λ'.push p.1.1 p.1.2 p.2)) := by
   rfl
 
+theorem partrecTM2Label_copy_primrec :
+    Primrec (Turing.PartrecToTM2.Λ'.copy) := by
+  exact Primrec.encode_iff.1
+    ((PartrecToTM2SupportList.copyLabelCode_primrec.comp Primrec.encode).of_eq fun q => by
+      rw [Turing.PartrecToTM2.Λ'.encodeLabel_eq]
+      exact PartrecToTM2SupportList.copyLabelCode_encodeLabel q)
+
+noncomputable def partrecStartedTM2CopyBody (tc : Turing.ToPartrec.Code)
+    (q : Turing.PartrecToTM2.Λ') :
+    PartrecStartedTM2Stmt tc :=
+  let qDone := partrecStartedTM2ConstGotoBody tc q
+  let qLoop := partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.copy q)
+  let qPush :=
+    partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.main
+      (partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.stack qLoop)
+  partrecStartedTM2PopIdBody tc Turing.PartrecToTM2.K'.rev
+    (Turing.TM2.Stmt.branch Option.isSome qPush qDone)
+
+theorem partrecStartedTM2CopyBody_primrec (tc : Turing.ToPartrec.Code) :
+    Primrec (partrecStartedTM2CopyBody tc) := by
+  have hdone : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2ConstGotoBody tc q) :=
+    partrecStartedTM2ConstGotoBody_primrec tc
+  have hloop : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.copy q)) :=
+    (partrecStartedTM2ConstGotoBody_primrec tc).comp
+      partrecTM2Label_copy_primrec
+  have hpushStack : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.stack
+        (partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.copy q))) :=
+    (partrecStartedTM2PushDefaultBody_primrec tc Turing.PartrecToTM2.K'.stack).comp
+      hloop
+  have hpush : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.main
+        (partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.stack
+          (partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.copy q)))) :=
+    (partrecStartedTM2PushDefaultBody_primrec tc Turing.PartrecToTM2.K'.main).comp
+      hpushStack
+  have hbranch : Primrec (fun q : Turing.PartrecToTM2.Λ' =>
+      Turing.TM2.Stmt.branch Option.isSome
+        (partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.main
+          (partrecStartedTM2PushDefaultBody tc Turing.PartrecToTM2.K'.stack
+            (partrecStartedTM2ConstGotoBody tc (Turing.PartrecToTM2.Λ'.copy q))))
+        (partrecStartedTM2ConstGotoBody tc q)) :=
+    (PartrecStartedTM2StmtNode.stmtBranch_primrec tc).comp
+      (Primrec.pair (Primrec.pair (Primrec.const Option.isSome) hpush) hdone)
+  exact ((partrecStartedTM2PopIdBody_primrec tc Turing.PartrecToTM2.K'.rev).comp
+    hbranch).of_eq fun _q => rfl
+
+theorem partrecStartedTM2CopyBody_eq_relabel
+    (tc : Turing.ToPartrec.Code) (q : Turing.PartrecToTM2.Λ') :
+    partrecStartedTM2CopyBody tc q =
+      relabelTM2Stmt (StartedLabel.wrap tc)
+        (partrecTM2 (Turing.PartrecToTM2.Λ'.copy q)) := by
+  rfl
+
 noncomputable def partrecStartedTM2Labels (tc : Turing.ToPartrec.Code) :
     Finset (StartedLabel tc) :=
   (PartrecToTM2Support.labels tc).map
