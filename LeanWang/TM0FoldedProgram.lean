@@ -802,6 +802,57 @@ theorem trAuxDeps_measure_lt (tc : Turing.ToPartrec.Code)
   | halt =>
       simp [trAuxDeps] at hp'
 
+noncomputable def trAuxTailValidCode (tc : Turing.ToPartrec.Code)
+    (stmt : SourceStmt tc) :
+    TM0Route.PartrecStartedTM1StmtNode.ValidCode tc :=
+  if h : TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc)
+      (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt) then
+    ⟨TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt, h⟩
+  else
+    TM0Route.PartrecStartedTM1StmtNode.toValidCode
+      (Turing.TM1.Stmt.halt : SourceStmt tc)
+
+theorem trAuxTailValidCode_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxTailValidCode tc) := by
+  letI : Primcodable (TM0Route.PartrecStartedTM1StmtNode.ValidCode tc) :=
+    TM0Route.PartrecStartedTM1StmtNode.instPrimcodableValidCode tc
+  have htail : Primrec (fun stmt : SourceStmt tc =>
+      TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt) :=
+    TM0Route.PartrecStartedTM1StmtNode.ofStmtTail_primrec tc
+  have hvalid : PrimrecPred (fun stmt : SourceStmt tc =>
+      TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc)
+        (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt)) :=
+    (TM0Route.PartrecStartedTM1StmtNode.valid_primrecPred tc).comp htail
+  have hval : Primrec (fun stmt : SourceStmt tc =>
+      if TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc)
+          (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt) then
+        TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt
+      else
+        TM0Route.PartrecStartedTM1StmtNode.ofStmt
+          (Turing.TM1.Stmt.halt : SourceStmt tc)) :=
+    Primrec.ite hvalid htail
+      (Primrec.const
+        (TM0Route.PartrecStartedTM1StmtNode.ofStmt
+          (Turing.TM1.Stmt.halt : SourceStmt tc)))
+  have hval' : Primrec (fun stmt : SourceStmt tc =>
+      (trAuxTailValidCode tc stmt).1) :=
+    hval.of_eq fun stmt => by
+      unfold trAuxTailValidCode
+      by_cases h : TM0Route.PartrecStartedTM1StmtNode.Valid (tc := tc)
+          (TM0Route.PartrecStartedTM1StmtNode.ofStmtTail stmt) <;>
+        simp [h, TM0Route.PartrecStartedTM1StmtNode.toValidCode]
+  exact Primrec.subtype_val_iff.1 hval'
+
+noncomputable def trAuxTail (tc : Turing.ToPartrec.Code)
+    (stmt : SourceStmt tc) : SourceStmt tc :=
+  TM0Route.PartrecStartedTM1StmtNode.ofValidCode
+    (trAuxTailValidCode tc stmt)
+
+theorem trAuxTail_primrec_fixed (tc : Turing.ToPartrec.Code) :
+    Primrec (trAuxTail tc) := by
+  exact (TM0Route.PartrecStartedTM1StmtNode.ofValidCode_primrec tc).comp
+    (trAuxTailValidCode_primrec_fixed tc)
+
 def trAuxBody (tc : Turing.ToPartrec.Code)
     (p : SourceStmt tc × PartrecVar × SourceSymbol)
     (rec : List (SourceLabel tc × Turing.TM0.Stmt SourceSymbol)) :
