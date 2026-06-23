@@ -1870,6 +1870,65 @@ def partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
   (partrecStartedTM0StatementList tc).flatMap fun stmt =>
     partrecVarList.map fun v => (stmt, v)
 
+private def flatMapConstMapAt? {α β : Type} (xs : List α) (ys : List β) :
+    Nat → Option (α × β)
+  | i =>
+      match xs with
+      | [] => none
+      | x :: xs =>
+          match ys[i]? with
+          | some y => some (x, y)
+          | none => flatMapConstMapAt? xs ys (i - ys.length)
+termination_by xs.length
+
+private theorem flatMapConstMapAt?_eq_getElem? {α β : Type}
+    (xs : List α) (ys : List β) (i : Nat) :
+    flatMapConstMapAt? xs ys i =
+      (xs.flatMap fun x => ys.map fun y => (x, y))[i]? := by
+  induction xs generalizing i with
+  | nil =>
+      simp [flatMapConstMapAt?]
+  | cons x xs ih =>
+      unfold flatMapConstMapAt?
+      simp only [List.flatMap_cons]
+      by_cases h : i < ys.length
+      · have hmaplen : i < (ys.map fun y => (x, y)).length := by
+          simpa using h
+        rw [List.getElem?_append_left hmaplen]
+        rw [List.getElem?_map]
+        cases hy : ys[i]? with
+        | none =>
+            rw [List.getElem?_eq_none_iff] at hy
+            omega
+        | some y =>
+            simp
+      · have hmaple : (ys.map fun y => (x, y)).length ≤ i := by
+          simpa using le_of_not_gt h
+        rw [List.getElem?_append_right hmaple]
+        have hynone : ys[i]? = none := by
+          rw [List.getElem?_eq_none_iff]
+          exact le_of_not_gt h
+        rw [hynone]
+        rw [ih]
+        simp [List.length_map]
+
+/--
+Structural decoder for the flat TM0 label index. The label list is a rectangular
+expansion of statement support by the fixed `partrecVarList`; this function
+exposes that indexing without unfolding the full flatMap at every use site.
+-/
+def partrecStartedTM0LabelAt? (tc : Turing.ToPartrec.Code) (i : Nat) :
+    Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
+  flatMapConstMapAt? (partrecStartedTM0StatementList tc) partrecVarList i
+
+theorem partrecStartedTM0LabelAt?_eq_getElem?
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    partrecStartedTM0LabelAt? tc i =
+      (partrecStartedTM0LabelList tc)[i]? := by
+  unfold partrecStartedTM0LabelAt? partrecStartedTM0LabelList
+  exact flatMapConstMapAt?_eq_getElem?
+    (partrecStartedTM0StatementList tc) partrecVarList i
+
 /-- Numeric count of translated TM0 labels before the default start label is added. -/
 def partrecStartedTM0LabelCount (tc : Turing.ToPartrec.Code) : Nat :=
   partrecStartedTM0StatementCount tc * partrecVarList.length
