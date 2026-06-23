@@ -1085,6 +1085,26 @@ theorem programOfCountAndSimRows_computable :
       programOfCountAndSimRows p.1 p.2) :=
   programOfCountAndSimRows_primrec.to_comp
 
+/--
+Build normalized folded program data from a numeric state count and a list of
+numeric simulation-step descriptors.
+-/
+def programDataOfStepData (stateCount : Nat) (steps : List SimStepData) :
+    FiniteTM0Program :=
+  programOfCountAndSimRows stateCount (simRowsOfStepData steps)
+
+theorem programDataOfStepData_primrec :
+    Primrec (fun p : Nat × List SimStepData =>
+      programDataOfStepData p.1 p.2) := by
+  unfold programDataOfStepData
+  exact programOfCountAndSimRows_primrec.comp
+    (Primrec.pair Primrec.fst (simRowsOfStepData_primrec.comp Primrec.snd))
+
+theorem programDataOfStepData_computable :
+    Computable (fun p : Nat × List SimStepData =>
+      programDataOfStepData p.1 p.2) :=
+  programDataOfStepData_primrec.to_comp
+
 def appendSimRows (P : FiniteTM0Program) (sim : List PostTransition) : FiniteTM0Program :=
   { P with table := P.table ++ sim }
 
@@ -1132,6 +1152,33 @@ def programData (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
 theorem programData_eq_program (tc : Turing.ToPartrec.Code) :
     programData tc = program tc :=
   (program_eq_programOfCountAndSimRows tc).symm
+
+/--
+The remaining computability obligation for `programData` can be reduced to a
+primitive-recursive list of numeric step descriptors whose generated rows are
+exactly the semantic `simRows`.
+-/
+theorem programData_primrec_of_stepData
+    (stepData : Turing.ToPartrec.Code → List SimStepData)
+    (hsteps : Primrec stepData)
+    (hrows : ∀ tc : Turing.ToPartrec.Code,
+      simRowsOfStepData (stepData tc) = simRows tc) :
+    Primrec programData := by
+  have hdata : Primrec fun tc : Turing.ToPartrec.Code =>
+      programDataOfStepData (TM0Route.partrecStartedTM0StateCount tc) (stepData tc) :=
+    programDataOfStepData_primrec.comp
+      (Primrec.pair TM0Route.partrecStartedTM0StateCount_primrec hsteps)
+  exact hdata.of_eq fun tc => by
+    unfold programData programDataOfStepData
+    rw [hrows tc]
+
+theorem programData_computable_of_stepData
+    (stepData : Turing.ToPartrec.Code → List SimStepData)
+    (hsteps : Primrec stepData)
+    (hrows : ∀ tc : Turing.ToPartrec.Code,
+      simRowsOfStepData (stepData tc) = simRows tc) :
+    Computable programData :=
+  (programData_primrec_of_stepData stepData hsteps hrows).to_comp
 
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
