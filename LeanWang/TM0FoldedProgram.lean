@@ -1557,6 +1557,26 @@ theorem simStepDataForLabelIndexStart_eq
   unfold simStepDataForLabelIndexStart
   exact simStepDataForLabelIndexFrom_zero_eq tc i
 
+theorem simStepDataForLabelIndexStart_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (simStepDataForLabelIndexStart tc) := by
+  unfold simStepDataForLabelIndexStart
+  exact (simStepDataForLabelIndexFrom_primrec_fixed_of_trAux tc haux).comp
+    (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
+      (Primrec.pair (Primrec.const 0) Primrec.id))
+
+theorem simStepDataForLabelIndex_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    [Primcodable (SourceStmt tc)]
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (simStepDataForLabelIndex tc) :=
+  (simStepDataForLabelIndexStart_primrec_fixed_of_trAux tc haux).of_eq fun i =>
+    simStepDataForLabelIndexStart_eq tc i
+
 /--
 Indexed mirror of `simStepData`. This is definitionally driven by the
 primitive-recursive label count; the theorem below connects it to the semantic
