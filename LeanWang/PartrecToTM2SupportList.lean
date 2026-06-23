@@ -1678,6 +1678,256 @@ theorem codeSuppWeightCodeFuelStepCode'_encodeCode
     rw [trNormalLabelCodeFuelStepCode_encodeCode] <;>
     simp [ToPartrec.Code.encodeCode, Nat.div2_val, ToPartrec.Code.ofNatCode_encodeCode]
 
+theorem codeSuppWeightCodeFuelStepCode'_primrec
+    {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeSuppWeightCodeFuelStepCode' wCode p.1.1 p.1.2 p.2.1 p.2.2) := by
+  unfold codeSuppWeightCodeFuelStepCode'
+  let hprevLabel : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => p.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  let hprevWeight : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => p.1.2) :=
+    Primrec.snd.comp Primrec.fst
+  let hcode : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  let hk : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  let hn : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.1 - 3) :=
+    Primrec.nat_sub.comp hcode (Primrec.const 3)
+  let hm : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      (p.2.1 - 3).div2.div2) :=
+    Primrec.nat_div2.comp (Primrec.nat_div2.comp hn)
+  let hm₁ : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      ((p.2.1 - 3).div2.div2).unpair.1) :=
+    Primrec.fst.comp (Primrec.unpair.comp hm)
+  let hm₂ : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      ((p.2.1 - 3).div2.div2).unpair.2) :=
+    Primrec.snd.comp (Primrec.unpair.comp hm)
+  let hf : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm₁
+  let hg : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm₂
+  let hsingle : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm
+  let hnormal : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode p.1.1 p.2.1 p.2.2)) :=
+    (trStmtsWeightCode_primrec hw).comp
+      (trNormalLabelCodeFuelStepCode_primrec.comp
+        (Primrec.pair hprevLabel (Primrec.pair hcode hk)))
+  let hret : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => retLabelCode p.2.2) :=
+    retLabelCode_primrec.comp hk
+  let hhead : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (headLabelCode K'.stack (retLabelCode p.2.2))) :=
+    (trStmtsWeightCode_primrec hw).comp
+      ((headLabelCode_primrec K'.stack).comp hret)
+  let hlookupWeightFCons₁ : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+        (Cont'.cons₁
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1,
+          Cont'.cons₁
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) := by
+      exact Primrec.pair hf ((Turing.PartrecToTM2.Cont'.primrec₂_cons₁).comp hg hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hlookupLabelGCons₂ : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+        (Cont'.cons₂ p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2,
+          Cont'.cons₂ p.2.2)) := by
+      exact Primrec.pair hg (Turing.PartrecToTM2.Cont'.primrec_cons₂.comp hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevLabel hstate)
+  let hauxCons : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode
+        (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+          move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+            move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+              codeContStateLookup p.1.1
+                (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+                (Cont'.cons₂ p.2.2))) :=
+    (trStmtsWeightCode_primrec hw).comp
+      ((move₂LabelCode_primrec (fun _ : Γ' => false) K'.main K'.aux).comp
+        ((move₂LabelCode_primrec (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main).comp
+          ((move₂LabelCode_primrec (fun _ : Γ' => false) K'.aux K'.stack).comp
+            hlookupLabelGCons₂)))
+  let hlookupWeightGCons₂ : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+        (Cont'.cons₂ p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2,
+          Cont'.cons₂ p.2.2)) := by
+      exact Primrec.pair hg (Turing.PartrecToTM2.Cont'.primrec_cons₂.comp hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hcons : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode p.1.1 p.2.1 p.2.2) +
+        (codeContStateLookup p.1.2
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+            (Cont'.cons₁
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2) +
+          (trStmtsWeightCode wCode
+              (move₂LabelCode (fun _ : Γ' => false) K'.main K'.aux <|
+                move₂LabelCode (fun s : Γ' => s = Γ'.consₗ) K'.stack K'.main <|
+                  move₂LabelCode (fun _ : Γ' => false) K'.aux K'.stack <|
+                    codeContStateLookup p.1.1
+                      (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+                      (Cont'.cons₂ p.2.2)) +
+            (codeContStateLookup p.1.2
+                (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+                (Cont'.cons₂ p.2.2) +
+              trStmtsWeightCode wCode (headLabelCode K'.stack (retLabelCode p.2.2)))))) :=
+    Primrec.nat_add.comp hnormal
+      (Primrec.nat_add.comp hlookupWeightFCons₁
+        (Primrec.nat_add.comp hauxCons
+          (Primrec.nat_add.comp hlookupWeightGCons₂ hhead)))
+  let hlookupWeightGComp : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+        (Cont'.comp
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2,
+          Cont'.comp
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+      exact Primrec.pair hg ((Turing.PartrecToTM2.Cont'.primrec₂_comp).comp hf hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hlookupLabelF : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1, p.2.2)) :=
+      Primrec.pair hf hk
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevLabel hstate)
+  let htrLabelF : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode
+        (codeContStateLookup p.1.1
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) :=
+    (trStmtsWeightCode_primrec hw).comp hlookupLabelF
+  let hlookupWeightF : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1, p.2.2)) :=
+      Primrec.pair hf hk
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hcomp : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode p.1.1 p.2.1 p.2.2) +
+        (codeContStateLookup p.1.2
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2)
+            (Cont'.comp
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2) +
+          (trStmtsWeightCode wCode
+              (codeContStateLookup p.1.1
+                (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2) +
+            codeContStateLookup p.1.2
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2))) :=
+    Primrec.nat_add.comp hnormal
+      (Primrec.nat_add.comp hlookupWeightGComp
+        (Primrec.nat_add.comp htrLabelF hlookupWeightF))
+  let hlookupWeightG : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2, p.2.2)) :=
+      Primrec.pair hg hk
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hcase : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode p.1.1 p.2.1 p.2.2) +
+        (codeContStateLookup p.1.2
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2 +
+          codeContStateLookup p.1.2
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) p.2.2)) :=
+    Primrec.nat_add.comp hnormal (Primrec.nat_add.comp hlookupWeightF hlookupWeightG)
+  let hlookupWeightFFix : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.2
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
+        (Cont'.fix
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2),
+          Cont'.fix
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
+      exact Primrec.pair hsingle ((Turing.PartrecToTM2.Cont'.primrec₂_fix).comp hsingle hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevWeight hstate)
+  let hlookupLabelFFix : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      codeContStateLookup p.1.1
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
+        (Cont'.fix
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
+    let hstate : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2),
+          Cont'.fix
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
+      exact Primrec.pair hsingle ((Turing.PartrecToTM2.Cont'.primrec₂_fix).comp hsingle hk)
+    exact codeContStateLookup_primrec.comp (Primrec.pair hprevLabel hstate)
+  let hclearFix : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode
+        (clearLabelCode natEnd K'.main <|
+          codeContStateLookup p.1.1
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
+            (Cont'.fix
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2))) :=
+    (trStmtsWeightCode_primrec hw).comp
+      ((clearLabelCode_primrec natEnd K'.main).comp hlookupLabelFFix)
+  let hwret : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      wCode (retLabelCode p.2.2)) :=
+    hw.comp hret
+  let hfix : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' =>
+      trStmtsWeightCode wCode (trNormalLabelCodeFuelStepCode p.1.1 p.2.1 p.2.2) +
+        (codeContStateLookup p.1.2
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
+            (Cont'.fix
+              (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2) +
+          (trStmtsWeightCode wCode
+              (clearLabelCode natEnd K'.main <|
+                codeContStateLookup p.1.1
+                  (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
+                  (Cont'.fix
+                    (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) +
+            wCode (retLabelCode p.2.2)))) :=
+    Primrec.nat_add.comp hnormal
+      (Primrec.nat_add.comp hlookupWeightFFix
+        (Primrec.nat_add.comp hclearFix hwret))
+  let htag₀ : PrimrecPred (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.1 = 0) :=
+    Primrec.eq.comp hcode (Primrec.const 0)
+  let htag₁ : PrimrecPred (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.1 = 1) :=
+    Primrec.eq.comp hcode (Primrec.const 1)
+  let htag₂ : PrimrecPred (fun p : (List Nat × List Nat) × Nat × Cont' => p.2.1 = 2) :=
+    Primrec.eq.comp hcode (Primrec.const 2)
+  let hbodd : Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => (p.2.1 - 3).bodd) :=
+    Primrec.nat_bodd.comp hn
+  let hdiv2bodd :
+      Primrec (fun p : (List Nat × List Nat) × Nat × Cont' => ((p.2.1 - 3).div2).bodd) :=
+    Primrec.nat_bodd.comp (Primrec.nat_div2.comp hn)
+  refine Primrec.ite htag₀ hnormal ?_
+  refine Primrec.ite htag₁ hnormal ?_
+  refine Primrec.ite htag₂ hnormal ?_
+  refine (Primrec.ite (Primrec.eq.comp hbodd (Primrec.const false))
+    (Primrec.ite (Primrec.eq.comp hdiv2bodd (Primrec.const false)) hcons hcomp)
+    (Primrec.ite (Primrec.eq.comp hdiv2bodd (Primrec.const false)) hcase hfix)).of_eq ?_
+  intro p
+  dsimp only
+  cases hb : (p.2.1 - 3).bodd <;>
+    cases hd : ((p.2.1 - 3).div2).bodd <;>
+    simp
+
+theorem codeSuppWeightCodeFuelStep'_primrec
+    {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : (List Nat × List Nat) × (ToPartrec.Code × Cont') =>
+      codeSuppWeightCodeFuelStep' wCode p.1.1 p.1.2 p.2.1 p.2.2) := by
+  let hcode : Primrec ToPartrec.Code.encodeCode :=
+    (Primrec.encode).of_eq fun c => by rw [ToPartrec.Code.encodeCode_eq]
+  exact (codeSuppWeightCodeFuelStepCode'_primrec hw |>.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (hcode.comp (Primrec.fst.comp Primrec.snd))
+        (Primrec.snd.comp Primrec.snd)))).of_eq fun p => by
+      exact codeSuppWeightCodeFuelStepCode'_encodeCode wCode p.1.1 p.1.2 p.2.1 p.2.2
+
 theorem codeSuppWeightCodeFuelStep'_eq
     (wCode : Nat → Nat) {prevLabel prevWeight : List Nat} {fuel : Nat}
     (hlabel : ∀ c k, codeContStateLookup prevLabel c k = trNormalLabelCodeFuel fuel c k)
@@ -1715,6 +1965,22 @@ def codeSuppWeightCodeFuelRowStep'
   (List.range (bound + 1)).map fun n =>
     let s := codeContStateOfCode n
     codeSuppWeightCodeFuelStep' wCode prevLabel prevWeight s.1 s.2
+
+theorem codeSuppWeightCodeFuelRowStep'_primrec
+    {wCode : Nat → Nat} (hw : Primrec wCode) :
+    Primrec (fun p : (List Nat × List Nat) × Nat =>
+      codeSuppWeightCodeFuelRowStep' wCode p.1.1 p.1.2 p.2) := by
+  unfold codeSuppWeightCodeFuelRowStep'
+  let hrow : Primrec (fun p : (List Nat × List Nat) × Nat => List.range (p.2 + 1)) :=
+    Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+  let hentry : Primrec₂ (fun p : (List Nat × List Nat) × Nat => fun n : Nat =>
+      let s := codeContStateOfCode n
+      codeSuppWeightCodeFuelStep' wCode p.1.1 p.1.2 s.1 s.2) := by
+    apply Primrec₂.mk
+    exact (codeSuppWeightCodeFuelStep'_primrec hw).comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (codeContStateOfCode_primrec.comp Primrec.snd))
+  exact Primrec.list_map hrow hentry
 
 theorem codeSuppWeightCodeFuelRowStep'_getD_eq
     (wCode : Nat → Nat) {prevLabel prevWeight : List Nat} {fuel bound n : Nat}
