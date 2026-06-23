@@ -414,6 +414,39 @@ instance instPrimcodablePartrecStAct (k : PartrecStack) :
         (PartrecVar → PartrecVar → PartrecVar)))
     (partrecStActEquivSum k)
 
+theorem partrecStActOfSum_primrec (k : PartrecStack) :
+    Primrec (partrecStActEquivSum k).symm := by
+  change @Primrec
+    ((PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+      ((PartrecVar → PartrecVar → PartrecVar) ⊕
+        (PartrecVar → PartrecVar → PartrecVar)))
+    (Turing.TM2to1.StAct PartrecStack PartrecStackSymbol PartrecVar k)
+    _
+    (Primcodable.ofEquiv
+      ((PartrecVar → Turing.PartrecToTM2.Γ') ⊕
+        ((PartrecVar → PartrecVar → PartrecVar) ⊕
+          (PartrecVar → PartrecVar → PartrecVar)))
+      (partrecStActEquivSum k))
+    (partrecStActEquivSum k).symm
+  exact Primrec.of_equiv_symm
+
+theorem partrecStActPush_primrec (k : PartrecStack) :
+    Primrec (Turing.TM2to1.StAct.push
+      (K := PartrecStack) (Γ := PartrecStackSymbol) (σ := PartrecVar) (k := k)) := by
+  exact ((partrecStActOfSum_primrec k).comp Primrec.sumInl).of_eq fun _ => rfl
+
+theorem partrecStActPeek_primrec (k : PartrecStack) :
+    Primrec (Turing.TM2to1.StAct.peek
+      (K := PartrecStack) (Γ := PartrecStackSymbol) (σ := PartrecVar) (k := k)) := by
+  exact ((partrecStActOfSum_primrec k).comp
+    (Primrec.sumInr.comp (Primrec.sumInl.comp Primrec.id))).of_eq fun _ => rfl
+
+theorem partrecStActPop_primrec (k : PartrecStack) :
+    Primrec (Turing.TM2to1.StAct.pop
+      (K := PartrecStack) (Γ := PartrecStackSymbol) (σ := PartrecVar) (k := k)) := by
+  exact ((partrecStActOfSum_primrec k).comp
+    (Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id))).of_eq fun _ => rfl
+
 /-- Mathlib's `PartrecToTM2` evaluator at the local constant stack-alphabet type. -/
 def partrecTM2 :
     Turing.PartrecToTM2.Λ' →
