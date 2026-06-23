@@ -1358,6 +1358,7 @@ def trNormalLabelCodeFuelStepCode (prev : List Nat) (cCode : Nat) (k : Cont') : 
     | true, false =>
         predLabelCode (codeContStateLookup prev f k) (codeContStateLookup prev g k)
     | true, true =>
+        let f := ToPartrec.Code.ofNatCode m
         codeContStateLookup prev f (Cont'.fix f k)
 
 theorem trNormalLabelCodeFuelStepCode_primrec :
@@ -1382,6 +1383,9 @@ theorem trNormalLabelCodeFuelStepCode_primrec :
   let hg : Primrec (fun p : List Nat × Nat × Cont' =>
       ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.2) :=
     Primrec.ofNat ToPartrec.Code |>.comp hm₂
+  let hsingle : Primrec (fun p : List Nat × Nat × Cont' =>
+      ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) :=
+    Primrec.ofNat ToPartrec.Code |>.comp hm
   let hret : Primrec (fun p : List Nat × Nat × Cont' => retLabelCode p.2.2) :=
     retLabelCode_primrec.comp hk
   let hzero : Primrec (fun p : List Nat × Nat × Cont' =>
@@ -1448,14 +1452,14 @@ theorem trNormalLabelCodeFuelStepCode_primrec :
     predLabelCode_primrec.comp (Primrec.pair hlookupF hlookupG)
   let hlookupFFix : Primrec (fun p : List Nat × Nat × Cont' =>
       codeContStateLookup p.1
-        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1)
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2))
         (Cont'.fix
-          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
+          (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
     let hstate : Primrec (fun p : List Nat × Nat × Cont' =>
-        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1,
+        (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2),
           Cont'.fix
-            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2).unpair.1) p.2.2)) := by
-      exact Primrec.pair hf ((Turing.PartrecToTM2.Cont'.primrec₂_fix).comp hf hk)
+            (ToPartrec.Code.ofNatCode ((p.2.1 - 3).div2.div2)) p.2.2)) := by
+      exact Primrec.pair hsingle ((Turing.PartrecToTM2.Cont'.primrec₂_fix).comp hsingle hk)
     exact codeContStateLookup_primrec.comp (Primrec.pair Primrec.fst hstate)
   let htag₀ : PrimrecPred (fun p : List Nat × Nat × Cont' => p.2.1 = 0) :=
     Primrec.eq.comp hcode (Primrec.const 0)
@@ -1478,6 +1482,39 @@ theorem trNormalLabelCodeFuelStepCode_primrec :
   cases hb : (p.2.1 - 3).bodd <;>
     cases hd : ((p.2.1 - 3).div2).bodd <;>
     simp
+
+theorem trNormalLabelCodeFuelStepCode_encodeCode
+    (prev : List Nat) (c : ToPartrec.Code) (k : Cont') :
+    trNormalLabelCodeFuelStepCode prev (ToPartrec.Code.encodeCode c) k =
+      trNormalLabelCodeFuelStep prev c k := by
+  cases c <;>
+    simp [trNormalLabelCodeFuelStepCode, trNormalLabelCodeFuelStep,
+      ToPartrec.Code.encodeCode, Nat.div2_val, ToPartrec.Code.ofNatCode_encodeCode]
+
+theorem trNormalLabelCodeFuelStep_primrec :
+    Primrec (fun p : List Nat × (ToPartrec.Code × Cont') =>
+      trNormalLabelCodeFuelStep p.1 p.2.1 p.2.2) := by
+  let hcode : Primrec ToPartrec.Code.encodeCode :=
+    (Primrec.encode).of_eq fun c => by rw [ToPartrec.Code.encodeCode_eq]
+  exact (trNormalLabelCodeFuelStepCode_primrec.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (hcode.comp (Primrec.fst.comp Primrec.snd))
+        (Primrec.snd.comp Primrec.snd)))).of_eq fun p => by
+      exact trNormalLabelCodeFuelStepCode_encodeCode p.1 p.2.1 p.2.2
+
+theorem trNormalLabelCodeFuelRowStep_primrec :
+    Primrec (fun p : List Nat × Nat => trNormalLabelCodeFuelRowStep p.1 p.2) := by
+  unfold trNormalLabelCodeFuelRowStep
+  let hrow : Primrec (fun p : List Nat × Nat => List.range (p.2 + 1)) :=
+    Primrec.list_range.comp (Primrec.succ.comp Primrec.snd)
+  let hentry : Primrec₂ (fun p : List Nat × Nat => fun n : Nat =>
+      let s := codeContStateOfCode n
+      trNormalLabelCodeFuelStep p.1 s.1 s.2) := by
+    apply Primrec₂.mk
+    exact trNormalLabelCodeFuelStep_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (codeContStateOfCode_primrec.comp Primrec.snd))
+  exact Primrec.list_map hrow hentry
 
 /-- Numeric mirror of `codeSuppWeight'`, using encoded labels for every `trStmtsWeight`. -/
 def codeSuppWeightCode' (wCode : Nat → Nat) : ToPartrec.Code → Cont' → Nat
