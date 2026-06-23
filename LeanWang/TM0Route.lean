@@ -6357,6 +6357,26 @@ theorem tm2to1GoGotoPayload_primrec
       funext _a _s
       rfl
 
+def tm2to1LoadPayload (f : PartrecStartedTM2StmtNode.LoadCode) :
+    PartrecStartedTM1StmtNode.LoadCode :=
+  fun _ s => f s
+
+theorem tm2to1LoadPayload_primrec :
+    Primrec tm2to1LoadPayload :=
+  (partrecStartedTM0SymbolFunction_const_primrec Primrec.id).of_eq fun f => by
+    funext _a s
+    rfl
+
+def tm2to1BranchPayload (f : PartrecStartedTM2StmtNode.BranchCode) :
+    PartrecStartedTM1StmtNode.BranchCode :=
+  fun _ s => f s
+
+theorem tm2to1BranchPayload_primrec :
+    Primrec tm2to1BranchPayload :=
+  (partrecStartedTM0SymbolFunction_const_primrec Primrec.id).of_eq fun f => by
+    funext _a s
+    rfl
+
 set_option maxHeartbeats 900000 in
 -- The branch expression mirrors Mathlib's nested `TM2to1.trStAct` statement.
 theorem tm2to1TrStAct_primrec_fixed_k
@@ -6493,32 +6513,45 @@ translation jumps to a `go` label that still carries the original TM2
 continuation. The dependency list therefore intentionally over-approximates
 those cases.
 -/
+noncomputable def tm2to1TrNormalBodyForHead (tc : Turing.ToPartrec.Code)
+    (p : (PartrecStartedTM2Stmt tc × PartrecStartedTM2StmtNode tc) ×
+      List (PartrecStartedTM0Stmt tc)) :
+    Option (PartrecStartedTM0Stmt tc) :=
+  let tail :=
+    PartrecStartedTM2StmtNode.ofValidCode
+      (PartrecStartedTM2StmtNode.depValidCodeOfNodes tc
+        (PartrecStartedTM2StmtNode.ofStmtTail p.1.1))
+  match p.1.2 with
+  | PartrecStartedTM2StmtNode.push k f =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.push f, tail)))
+  | PartrecStartedTM2StmtNode.peek k f =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.peek f, tail)))
+  | PartrecStartedTM2StmtNode.pop k f =>
+      some (Turing.TM1.Stmt.goto
+        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.pop f, tail)))
+  | PartrecStartedTM2StmtNode.load f =>
+      match p.2 with
+      | q :: _ => some (Turing.TM1.Stmt.load (tm2to1LoadPayload f) q)
+      | _ => none
+  | PartrecStartedTM2StmtNode.branch f =>
+      match p.2 with
+      | q₁ :: q₂ :: _ => some (Turing.TM1.Stmt.branch (tm2to1BranchPayload f) q₁ q₂)
+      | _ => none
+  | PartrecStartedTM2StmtNode.goto l =>
+      some (Turing.TM1.Stmt.goto (tm2to1NormalGotoPayload tc l))
+  | PartrecStartedTM2StmtNode.halt =>
+      some Turing.TM1.Stmt.halt
+
 noncomputable def tm2to1TrNormalBody (tc : Turing.ToPartrec.Code)
     (code : PartrecStartedTM2StmtNode.ValidCode tc)
     (deps : List (PartrecStartedTM0Stmt tc)) :
     Option (PartrecStartedTM0Stmt tc) :=
-  match PartrecStartedTM2StmtNode.ofValidCode code with
-  | Turing.TM2.Stmt.push k f q =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.push f, q)))
-  | Turing.TM2.Stmt.peek k f q =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.peek f, q)))
-  | Turing.TM2.Stmt.pop k f q =>
-      some (Turing.TM1.Stmt.goto
-        (tm2to1GoGotoPayload tc k (Turing.TM2to1.StAct.pop f, q)))
-  | Turing.TM2.Stmt.load a _ =>
-      match deps with
-      | q :: _ => some (Turing.TM1.Stmt.load (fun _ => a) q)
-      | _ => none
-  | Turing.TM2.Stmt.branch f _ _ =>
-      match deps with
-      | q₁ :: q₂ :: _ => some (Turing.TM1.Stmt.branch (fun _ => f) q₁ q₂)
-      | _ => none
-  | Turing.TM2.Stmt.goto l =>
-      some (Turing.TM1.Stmt.goto (tm2to1NormalGotoPayload tc l))
-  | Turing.TM2.Stmt.halt =>
-      some Turing.TM1.Stmt.halt
+  let stmt := PartrecStartedTM2StmtNode.ofValidCode code
+  match PartrecStartedTM2StmtNode.ofStmtHead? stmt with
+  | some node => tm2to1TrNormalBodyForHead tc ((stmt, node), deps)
+  | none => none
 
 set_option linter.flexible false in
 theorem tm2to1TrNormalBody_toValidCode
@@ -6532,7 +6565,15 @@ theorem tm2to1TrNormalBody_toValidCode
       some (Turing.TM2to1.trNormal stmt) := by
   cases stmt <;>
     simp [tm2to1TrNormalBody, PartrecStartedTM2StmtNode.depValidCodes_toValidCode,
-      PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal]
+      PartrecStartedTM2StmtNode.ofValidCode_toValidCode, Turing.TM2to1.trNormal,
+      tm2to1TrNormalBodyForHead, PartrecStartedTM2StmtNode.ofStmtHead?,
+      PartrecStartedTM2StmtNode.ofStmtTail, PartrecStartedTM2StmtNode.ofStmt,
+      PartrecStartedTM2StmtNode.depValidCodeOfNodes_ofStmt,
+      PartrecStartedTM2StmtNode.ofValidCode_toValidCode]
+  · funext _a _s
+    rfl
+  · funext _a _s
+    rfl
   · funext _a _s
     rfl
   · funext _a _s
