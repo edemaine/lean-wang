@@ -3491,6 +3491,65 @@ theorem labelPositionCode_support_get?_of_statementAt?
     exact TM0Route.partrecStartedTM0LabelSupportList_get_position_of_statementAt?
       tc hstmt hv
 
+/--
+If the statement-support list has no duplicates, the rectangular
+statement/variable position is the first occurrence of its label in the support
+list.
+-/
+theorem labelPositionCode_minimal_of_statementList_nodup
+    (tc : Turing.ToPartrec.Code) {k i : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar}
+    (hnodup : (TM0Route.partrecStartedTM0StatementList tc).Nodup)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    ∀ m, m < labelPositionCode k i stmt v →
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠
+        some ((stmt, v) : SourceLabel tc) := by
+  by_cases hdefault : ((stmt, v) : SourceLabel tc) = sourceDefaultLabel tc
+  · simp [labelPositionCode, hdefault]
+  · intro m hm hget
+    have hcode :
+        labelPositionCode k i stmt v = 1 + k * TM0Route.partrecVarList.length + i := by
+      simp [labelPositionCode, hdefault]
+    rw [hcode] at hm
+    cases m with
+    | zero =>
+        rw [TM0Route.partrecStartedTM0LabelSupportList_get_zero] at hget
+        have hq : (default : SourceLabel tc) = ((stmt, v) : SourceLabel tc) :=
+          Option.some.inj hget
+        have hqDefault : ((stmt, v) : SourceLabel tc) = (default : SourceLabel tc) :=
+          hq.symm
+        exact hdefault (hqDefault.trans (sourceDefaultLabel_eq_default tc).symm)
+    | succ m =>
+        unfold TM0Route.partrecStartedTM0LabelSupportList at hget
+        simp only [List.getElem?_cons_succ] at hget
+        unfold TM0Route.partrecStartedTM0LabelList at hget
+        have hstmtList :
+            (TM0Route.partrecStartedTM0StatementList tc)[k]? = some stmt := by
+          simpa [TM0Route.partrecStartedTM0StatementAt?_eq_getElem? tc k] using hstmt
+        have hrectGet :
+            ((TM0Route.partrecStartedTM0StatementList tc).flatMap fun stmt =>
+              TM0Route.partrecVarList.map fun v =>
+                ((stmt, v) : SourceLabel tc))[k * TM0Route.partrecVarList.length + i]? =
+              some ((stmt, v) : SourceLabel tc) := by
+          exact TM0Route.flatMap_constMap_getElem?_of_getElem?
+            (TM0Route.partrecStartedTM0StatementList tc) TM0Route.partrecVarList
+            hstmtList hv
+        have hrectNodup :
+            ((TM0Route.partrecStartedTM0StatementList tc).flatMap fun stmt =>
+              TM0Route.partrecVarList.map fun v =>
+                ((stmt, v) : SourceLabel tc)).Nodup := by
+          simpa only [SProd.sprod, List.product] using
+            hnodup.product TM0Route.partrecVarList_nodup
+        rcases List.getElem?_eq_some_iff.1 hget with ⟨hmLen, hmGet⟩
+        rcases List.getElem?_eq_some_iff.1 hrectGet with ⟨hposLen, hposGet⟩
+        have hmEq : m = k * TM0Route.partrecVarList.length + i := by
+          exact (hrectNodup.getElem_inj_iff
+            (i := m) (hi := hmLen)
+            (j := k * TM0Route.partrecVarList.length + i) (hj := hposLen)).1 (by
+              exact hmGet.trans hposGet.symm)
+        omega
+
 private theorem idxOf_eq_of_getElem?_eq_some_of_forall_lt_ne
     {α : Type} [DecidableEq α] (xs : List α) {n : Nat} {x : α}
     (hget : xs[n]? = some x)
@@ -3608,6 +3667,32 @@ theorem labelAtByStatementFromWithPositionCode?_support_get?
               rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
               cases h
               exact labelPositionCode_support_get?_of_statementAt? tc hstmt hv
+
+theorem labelAtByStatementFromWithPositionCode?_minimal_of_statementList_nodup
+    (tc : Turing.ToPartrec.Code)
+    (hnodup : (TM0Route.partrecStartedTM0StatementList tc).Nodup)
+    {fuel k i : Nat} {q : SourceLabel tc × Nat}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q) :
+    ∀ m, m < q.2 →
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1 := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [labelAtByStatementFromWithPositionCode?_zero] at h
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hv] at h
+          exact ih h
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc k with
+          | none =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_none tc hv hstmt] at h
+              simp at h
+          | some stmt =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
+              cases h
+              exact labelPositionCode_minimal_of_statementList_nodup
+                tc hnodup hstmt hv
 
 theorem labelAtByStatementFromWithPositionCode?_code_eq_stateCode_of_minimal
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}

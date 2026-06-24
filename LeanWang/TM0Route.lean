@@ -6072,7 +6072,7 @@ private theorem flatMapConstMapAt?_eq_getElem? {α β : Type}
         rw [ih]
         simp [List.length_map]
 
-private theorem flatMap_constMap_getElem?_of_getElem? {α β : Type}
+theorem flatMap_constMap_getElem?_of_getElem? {α β : Type}
     (xs : List α) (ys : List β) {k i : Nat} {x : α} {y : β}
     (hx : xs[k]? = some x) (hy : ys[i]? = some y) :
     (xs.flatMap fun x => ys.map fun y => (x, y))[k * ys.length + i]? =

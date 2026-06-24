@@ -2513,6 +2513,19 @@ theorem sourceLabelAtByStatementFromWithPositionCode_support_get?
   TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_support_get?
     (NatPartrecToToPartrec.translate c) h
 
+theorem sourceLabelAtByStatementFromWithPositionCode_minimal_of_statementList_nodup
+    {c : Code} {fuel k i : Nat}
+    (hnodup : (TM0Route.partrecStartedTM0StatementList
+      (NatPartrecToToPartrec.translate c)).Nodup)
+    {q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat}
+    (h : TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i = some q) :
+    ∀ m, m < q.2 →
+      (TM0Route.partrecStartedTM0LabelSupportList
+        (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1 :=
+  TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_minimal_of_statementList_nodup
+    (NatPartrecToToPartrec.translate c) hnodup h
+
 theorem sourceLabelSupportList_get_position_of_statementAt?
     {c : Code} {block i : Nat}
     {stmt : Option (Turing.TM1.Stmt
@@ -3182,6 +3195,31 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows_minimal'
   (sourceProgramData_computable_of_source_positionCodeOneRows_minimal
     hvarRows hmin).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_positionCodeOneRows_minimal
+    hvarRows
+    (by
+      intro c i _hi q hq
+      exact sourceLabelAtByStatementFromWithPositionCode_minimal_of_statementList_nodup
+        (c := c) (hnodup c) hq)
+
+theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup'
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup
+    hvarRows hnodup).of_eq fun _ => rfl
+
 /--
 Primitive recursiveness of the source-level position-coded descriptor decoder,
 together with a proof that those descriptor rows generate the canonical folded
@@ -3280,6 +3318,28 @@ def sourceObligationsOfPositionCodeOneRowsMinimal
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_positionCodeOneRows_minimal'
       hvarRows hmin)
+    hcorrect
+
+/--
+Primitive recursiveness of the one-row position-code decoder and absence of
+duplicates in the translated TM0 statement-support list are enough to produce
+the source obligations needed by the final reduction.
+-/
+def sourceObligationsOfPositionCodeOneRowsStatementListNodup
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup'
+      hvarRows hnodup)
     hcorrect
 
 /--
@@ -3782,6 +3842,50 @@ theorem domino_problem_undecidable_of_scaffold_source_positionCodeOneRowsMinimal
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_source S hS
     (sourceObligationsOfPositionCodeOneRowsMinimal hvarRows hmin hcorrect)
+
+/--
+Encoded domino undecidability from a scaffold, primitive recursiveness of the
+one-row position-code descriptor decoder, no duplicate translated TM0 statement
+support entries, and normalized folded program-data correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_positionCodeOneRowsStatementListNodup
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfPositionCodeOneRowsStatementListNodup
+      hvarRows hnodup hcorrect)
+
+/--
+Unencoded domino undecidability from a scaffold, primitive recursiveness of the
+one-row position-code descriptor decoder, no duplicate translated TM0 statement
+support entries, and normalized folded program-data correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_positionCodeOneRowsStatementListNodup
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfPositionCodeOneRowsStatementListNodup
+      hvarRows hnodup hcorrect)
 
 /--
 Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
