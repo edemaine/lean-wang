@@ -300,10 +300,12 @@ folded simulation rows. The position-code itself is now default-aware:
 `sourceDefaultLabel` to state code `0`, and uses the shifted rectangular
 support-list position for all other decoded labels. This removes the immediate
 duplicate introduced by `default :: labelList` while preserving the proved
-state-membership and support-readback invariants. The remaining equality proof
-should use the row read-back invariant plus uniqueness for the nondefault TM0
-label support positions, or replace the semantic state-code dependency
-directly.
+state-membership and support-readback invariants. The canonical-code bridge is
+now factored through an explicit minimality invariant: if the support list reads
+back label `q` at code `n`, and no earlier support-list entry reads back `q`,
+then `stateCode q = n`. The next local proof is therefore to establish this
+minimality for every position-coded descriptor emitted by the offset decoder,
+which should turn the position-coded rows into the semantic state-code rows.
 
 Next implementation targets:
 
