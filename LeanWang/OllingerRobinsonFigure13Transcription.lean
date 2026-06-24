@@ -235,6 +235,24 @@ def fig13QuarterRoleEntries (roleRows : List TileQuarterRoles) :
     List (WangTile × CellRole) :=
   roleEntriesOfSpecs (fig13QuarterRoleSpecs roleRows)
 
+/--
+Read the role row at a Figure 13 index from a complete 92-row role table.
+
+This wrapper keeps later concrete-data proofs from having to carry the
+`roleRows.length = 92` index proof by hand.
+-/
+def fig13QuarterRoleRow
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (i : Fin 92) : TileQuarterRoles :=
+  roleRows.get ⟨i.val, by rw [hlen]; exact i.isLt⟩
+
+theorem fig13QuarterRoleRow_getElem?
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (i : Fin 92) :
+    roleRows[i.val]? = some (fig13QuarterRoleRow roleRows hlen i) := by
+  unfold fig13QuarterRoleRow
+  exact List.getElem?_eq_getElem (by rw [hlen]; exact i.isLt)
+
 theorem mem_fig13QuarterRoleSpecs_of_getElem?
     {roleRows : List TileQuarterRoles} {i : Fin 92}
     {roles : TileQuarterRoles} (q : Quadrant)
@@ -266,6 +284,73 @@ theorem fig13QuarterRoleEntries_lookup_corner_of_getElem?
     lookupRole (fig13QuarterRoleEntries roleRows) (fig13QuarterTile i q) =
       CellRole.corner := by
   rw [fig13QuarterRoleEntries_lookup_of_getElem? hlen hroles, hcorner]
+
+/--
+Finite boolean check that the given indexed quadrant is the only quadrant role
+marked as the distinguished corner in a complete 92-row Figure 13 role table.
+-/
+def fig13QuarterCornerPositionUniqueBool
+    (roleRows : List TileQuarterRoles)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant) : Bool :=
+  (List.range 92).all fun i =>
+    Quadrant.all.all fun q =>
+      match roleRows[i]? with
+      | some roles =>
+          decide (roles.roleAt q = CellRole.corner) ==
+            decide (i = cornerIndex.val ∧ q = cornerQuadrant)
+      | none => false
+
+theorem fig13QuarterCornerPositionUnique_of_bool
+    {roleRows : List TileQuarterRoles}
+    {cornerIndex : Fin 92} {cornerQuadrant : Quadrant}
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    ∀ (i : Fin 92) (roles : TileQuarterRoles) (q : Quadrant),
+      roleRows[i.val]? = some roles →
+        (roles.roleAt q = CellRole.corner ↔
+          i = cornerIndex ∧ q = cornerQuadrant) := by
+  intro i roles q hroles
+  unfold fig13QuarterCornerPositionUniqueBool at hcheck
+  have hrow := List.all_eq_true.1 hcheck i.val (List.mem_range.2 i.isLt)
+  have hrow' :
+      ∀ x ∈ Quadrant.all,
+        decide (roles.roleAt x = CellRole.corner) =
+          decide (i.val = cornerIndex.val ∧ x = cornerQuadrant) := by
+    simpa [hroles] using hrow
+  have hq := hrow' q (Quadrant.mem_all q)
+  have hdec :
+      decide (roles.roleAt q = CellRole.corner) =
+        decide (i.val = cornerIndex.val ∧ q = cornerQuadrant) :=
+    hq
+  constructor
+  · intro hrole
+    have hleft : decide (roles.roleAt q = CellRole.corner) = true :=
+      decide_eq_true hrole
+    have hright :
+        decide (i.val = cornerIndex.val ∧ q = cornerQuadrant) = true := by
+      simpa [hleft] using hdec.symm
+    rcases of_decide_eq_true hright with ⟨hi, hqcorner⟩
+    exact ⟨Fin.ext hi, hqcorner⟩
+  · rintro ⟨hi, hqcorner⟩
+    have hright :
+        decide (i.val = cornerIndex.val ∧ q = cornerQuadrant) = true :=
+      decide_eq_true ⟨congrArg Fin.val hi, hqcorner⟩
+    have hleft : decide (roles.roleAt q = CellRole.corner) = true := by
+      simpa [hright] using hdec
+    exact of_decide_eq_true hleft
+
+theorem fig13QuarterCornerRole_of_positionUniqueBool
+    {roleRows : List TileQuarterRoles} (hlen : roleRows.length = 92)
+    {cornerIndex : Fin 92} {cornerQuadrant : Quadrant}
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    (fig13QuarterRoleRow roleRows hlen cornerIndex).roleAt cornerQuadrant =
+      CellRole.corner := by
+  exact (fig13QuarterCornerPositionUnique_of_bool hcheck
+    cornerIndex (fig13QuarterRoleRow roleRows hlen cornerIndex) cornerQuadrant
+    (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)).2 ⟨rfl, rfl⟩
 
 theorem exists_of_mem_fig13QuarterRoleSpecs
     {roleRows : List TileQuarterRoles} {spec : RoleTileSpec}
@@ -381,6 +466,26 @@ def fig13QuarterFiniteCheckedTranscriptionOfPositionChecks
     (fig13QuarterRoleEntries_lookup_corner_of_getElem?
       hlen hcornerRow hcornerRole)
     (fig13QuarterRoleSpecs_cornerRoleUniqueBool_of_forall_getElem? hunique)
+
+/--
+Package complete Figure 13 quadrant roles from a single finite boolean
+unique-corner check.
+
+For the concrete Figure 13/Figure 18 table, this is the intended end point:
+the row length and boolean check should both be discharged by `decide`.
+-/
+def fig13QuarterFiniteCheckedTranscriptionOfUniqueBool
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    FiniteCheckedTranscription :=
+  fig13QuarterFiniteCheckedTranscriptionOfPositionChecks
+    roleRows hlen cornerIndex cornerQuadrant
+    (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)
+    (fig13QuarterCornerRole_of_positionUniqueBool hlen hcheck)
+    (fig13QuarterCornerPositionUnique_of_bool hcheck)
 
 @[simp]
 theorem fig13QuarterFiniteCheckedTranscription_specs
@@ -543,6 +648,53 @@ theorem fig13QuarterFiniteCheckedTranscriptionOfPositionChecks_presentation_tile
     (fig13QuarterRoleEntries_lookup_corner_of_getElem?
       hlen hcornerRow hcornerRole)
     (fig13QuarterRoleSpecs_cornerRoleUniqueBool_of_forall_getElem? hunique)
+
+@[simp]
+theorem fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_specs
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    (fig13QuarterFiniteCheckedTranscriptionOfUniqueBool
+      roleRows hlen cornerIndex cornerQuadrant hcheck).specs =
+      fig13QuarterRoleSpecs roleRows :=
+  fig13QuarterFiniteCheckedTranscriptionOfPositionChecks_specs
+    roleRows hlen cornerIndex cornerQuadrant
+    (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)
+    (fig13QuarterCornerRole_of_positionUniqueBool hlen hcheck)
+    (fig13QuarterCornerPositionUnique_of_bool hcheck)
+
+@[simp]
+theorem fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_cornerTile
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    (fig13QuarterFiniteCheckedTranscriptionOfUniqueBool
+      roleRows hlen cornerIndex cornerQuadrant hcheck).cornerTile =
+      fig13QuarterTile cornerIndex cornerQuadrant :=
+  fig13QuarterFiniteCheckedTranscriptionOfPositionChecks_cornerTile
+    roleRows hlen cornerIndex cornerQuadrant
+    (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)
+    (fig13QuarterCornerRole_of_positionUniqueBool hlen hcheck)
+    (fig13QuarterCornerPositionUnique_of_bool hcheck)
+
+theorem fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_presentation_tiles
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcheck :
+      fig13QuarterCornerPositionUniqueBool
+        roleRows cornerIndex cornerQuadrant = true) :
+    (fig13QuarterFiniteCheckedTranscriptionOfUniqueBool
+      roleRows hlen cornerIndex cornerQuadrant hcheck).presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  fig13QuarterFiniteCheckedTranscriptionOfPositionChecks_presentation_tiles
+    roleRows hlen cornerIndex cornerQuadrant
+    (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)
+    (fig13QuarterCornerRole_of_positionUniqueBool hlen hcheck)
+    (fig13QuarterCornerPositionUnique_of_bool hcheck)
 
 /--
 Attach a list of roles to a list of Wang tiles.  If the lists have different
