@@ -1061,6 +1061,20 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows
             (stmt := stmt) hv hstmt]
           simp [sourceSearchCodeOneRowsVar_stmt_some hstmt]
 
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_zero
+    (c : Code) (i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c 1 0 i = [] := by
+  rw [sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows]
+  cases h : TM0Route.partrecVarList[i]? with
+  | none => rfl
+  | some v => exact sourceSearchCodeOneRowsVar_zero c v
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_zero_primrec :
+    Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 0 p.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourceSimStepDataForLabelIndexFromWithSearchCode_one_zero p.1 p.2).symm
+
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_primrec_of_varRows
     (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
