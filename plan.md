@@ -268,6 +268,15 @@ the lightweight reduction packaging. A direct attempt made the reduction target
 impractically slow to rebuild. Keep the correctness field explicit here, or
 move any automatically generated source correctness package to a separate
 semantic/final module that is expected to import the compiler proof.
+`TM0FoldedReduction.sourceProgramData_correct_of_programData_tm0_correct` now
+packages the lightweight part of this semantic bridge: any theorem proving
+normalized `programData` correct for every `Turing.ToPartrec.Code` immediately
+composes with the source translation chain. The helper
+`sourceObligationsOfProgramData` packages that semantic theorem together with
+the remaining program-data computability proof. A trial build of a separate
+final module that imported `TM0FoldedCompiler` was interrupted after Lake spent
+5596 seconds compiling `TM0FoldedCompiler` without producing its `.olean`, so
+that final packaging should be treated as a heavyweight target.
 
 The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`

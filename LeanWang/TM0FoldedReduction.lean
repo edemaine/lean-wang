@@ -50,6 +50,48 @@ structure SourceObligations where
     (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
       (Nat.Partrec.Code.eval c 0).Dom
 
+/--
+Semantic source correctness follows from any folded finite-TM0 semantic theorem
+for the normalized program data, composed with the already-proved source-code
+translation chain.
+
+This keeps `TM0FoldedReduction` independent of the heavy folded simulation
+proof file: a final module can import that proof and supply `hcorrect` without
+making the reduction API itself expensive to rebuild.
+-/
+theorem sourceProgramData_correct_of_programData_tm0_correct
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom)
+    (c : Code) :
+    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
+      (Nat.Partrec.Code.eval c 0).Dom :=
+  (hcorrect (NatPartrecToToPartrec.translate c)).trans
+    ((TM0Route.partrecStartedTM0_eval_dom_iff_tm2
+        (NatPartrecToToPartrec.translate c)).trans
+      ((TM0Route.partrecStartedTM2_eval_dom_iff_partrec
+          (NatPartrecToToPartrec.translate c)).trans
+        (NatPartrecToToPartrec.translate_tm2_dom c)))
+
+/--
+Build the exact source obligations from the two facts that remain to be supplied
+by the folded finite-TM0 construction: source-level program-data computability
+and normalized program-data semantic correctness.
+-/
+def sourceObligationsOfProgramData
+    (hprogram : Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations where
+  program_computable := hprogram
+  correct := sourceProgramData_correct_of_programData_tm0_correct hcorrect
+
 /-- Broad folded-route obligations imply the source-code obligations actually used. -/
 def Obligations.toSource (h : Obligations) : SourceObligations where
   program_computable := by
