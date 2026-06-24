@@ -84,6 +84,66 @@ theorem sourceSimStepData_eq (c : Code) :
       TM0FoldedCompiler.simStepData (NatPartrecToToPartrec.translate c) :=
   rfl
 
+/-- Source-code statement-support count for the folded finite-TM0 route. -/
+def sourceStatementCount (c : Code) : Nat :=
+  TM0Route.partrecStartedTM0StatementCount (NatPartrecToToPartrec.translate c)
+
+/-- Source-code label count, excluding the forced default support label. -/
+def sourceLabelCount (c : Code) : Nat :=
+  TM0Route.partrecStartedTM0LabelCount (NatPartrecToToPartrec.translate c)
+
+/-- Source-code support-label count, including the forced default support label. -/
+def sourceLabelSupportCount (c : Code) : Nat :=
+  TM0Route.partrecStartedTM0LabelSupportCount (NatPartrecToToPartrec.translate c)
+
+/-- Source-code numeric folded state count. -/
+def sourceStateCount (c : Code) : Nat :=
+  TM0Route.partrecStartedTM0StateCount (NatPartrecToToPartrec.translate c)
+
+/-- Source-code numeric folded state list. -/
+def sourceStates (c : Code) : List Nat :=
+  TM0Route.partrecStartedTM0States (NatPartrecToToPartrec.translate c)
+
+theorem sourceStatementCount_eq (c : Code) :
+    sourceStatementCount c =
+      TM0Route.partrecStartedTM0StatementCount (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourceLabelCount_eq (c : Code) :
+    sourceLabelCount c =
+      TM0Route.partrecStartedTM0LabelCount (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourceStateCount_eq (c : Code) :
+    sourceStateCount c =
+      TM0Route.partrecStartedTM0StateCount (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourceStates_eq (c : Code) :
+    sourceStates c =
+      TM0Route.partrecStartedTM0States (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourceStatementCount_primrec : Primrec sourceStatementCount :=
+  TM0Route.partrecStartedTM0StatementCount_primrec.comp
+    NatPartrecToToPartrec.translate_primrec
+
+theorem sourceLabelCount_primrec : Primrec sourceLabelCount :=
+  TM0Route.partrecStartedTM0LabelCount_primrec.comp
+    NatPartrecToToPartrec.translate_primrec
+
+theorem sourceLabelSupportCount_primrec : Primrec sourceLabelSupportCount :=
+  TM0Route.partrecStartedTM0LabelSupportCount_primrec.comp
+    NatPartrecToToPartrec.translate_primrec
+
+theorem sourceStateCount_primrec : Primrec sourceStateCount :=
+  TM0Route.partrecStartedTM0StateCount_primrec.comp
+    NatPartrecToToPartrec.translate_primrec
+
+theorem sourceStates_primrec : Primrec sourceStates :=
+  TM0Route.partrecStartedTM0States_primrec.comp
+    NatPartrecToToPartrec.translate_primrec
+
 /--
 Source-code version of the fully offset descriptor decoder.
 
@@ -149,25 +209,19 @@ def sourceSimStepDataForLabelIndex
 
 /-- Source-code indexed descriptor list for the folded finite-TM0 reduction. -/
 def sourceSimStepDataByLabelIndex (c : Code) : List TM0FoldedCompiler.SimStepData :=
-  (List.range
-      (TM0Route.partrecStartedTM0LabelCount
-        (NatPartrecToToPartrec.translate c))).flatMap
+  (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndex c)
 
 /-- Source-code indexed descriptor list through the numeric-state decoder path. -/
 def sourceSimStepDataByLabelIndexWithCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
-  (List.range
-      (TM0Route.partrecStartedTM0LabelCount
-        (NatPartrecToToPartrec.translate c))).flatMap
+  (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithCode c)
 
 /-- Source-code indexed descriptor list through the position-coded decoder path. -/
 def sourceSimStepDataByLabelIndexWithPositionCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
-  (List.range
-      (TM0Route.partrecStartedTM0LabelCount
-        (NatPartrecToToPartrec.translate c))).flatMap
+  (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithPositionCode c)
 
 theorem sourceSimStepDataForLabelIndexStart_eq (c : Code) (i : Nat) :
@@ -237,13 +291,11 @@ theorem sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom
       sourceSimStepDataForLabelIndexStart p.1 p.2) := by
     have hfrom : Primrec (fun p : Code × Nat =>
         sourceSimStepDataForLabelIndexFrom p.1
-          (TM0Route.partrecStartedTM0StatementCount
-            (NatPartrecToToPartrec.translate p.1)) 0 p.2) :=
+          (sourceStatementCount p.1) 0 p.2) :=
       hindex.comp
       (Primrec.pair Primrec.fst
         (Primrec.pair
-          ((TM0Route.partrecStartedTM0StatementCount_primrec.comp
-              NatPartrecToToPartrec.translate_primrec).comp Primrec.fst)
+          (sourceStatementCount_primrec.comp Primrec.fst)
           (Primrec.pair (Primrec.const 0) Primrec.snd)))
     exact hfrom.of_eq fun p => by
       unfold sourceSimStepDataForLabelIndexStart sourceSimStepDataForLabelIndexFrom
@@ -254,9 +306,7 @@ theorem sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom
     hstart.of_eq fun p => sourceSimStepDataForLabelIndexStart_eq p.1 p.2
   unfold sourceSimStepDataByLabelIndex
   refine Primrec.list_flatMap
-    (Primrec.list_range.comp
-      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec))) ?_
+    (Primrec.list_range.comp sourceLabelCount_primrec) ?_
   apply Primrec₂.mk
   exact hlabel
 
@@ -270,9 +320,7 @@ theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexStartW
     Primrec sourceSimStepDataByLabelIndexWithCode := by
   unfold sourceSimStepDataByLabelIndexWithCode
   refine Primrec.list_flatMap
-    (Primrec.list_range.comp
-      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec))) ?_
+    (Primrec.list_range.comp sourceLabelCount_primrec) ?_
   apply Primrec₂.mk
   exact hindex
 
@@ -286,9 +334,7 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_start
     Primrec sourceSimStepDataByLabelIndexWithPositionCode := by
   unfold sourceSimStepDataByLabelIndexWithPositionCode
   refine Primrec.list_flatMap
-    (Primrec.list_range.comp
-      ((TM0Route.partrecStartedTM0LabelCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec))) ?_
+    (Primrec.list_range.comp sourceLabelCount_primrec) ?_
   apply Primrec₂.mk
   exact hindex
 
@@ -306,13 +352,11 @@ theorem sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWi
       sourceSimStepDataForLabelIndexStartWithCode p.1 p.2) := by
     have hfrom : Primrec (fun p : Code × Nat =>
         sourceSimStepDataForLabelIndexFromWithCode p.1
-          (TM0Route.partrecStartedTM0StatementCount
-            (NatPartrecToToPartrec.translate p.1)) 0 p.2) :=
+          (sourceStatementCount p.1) 0 p.2) :=
       hindex.comp
         (Primrec.pair Primrec.fst
           (Primrec.pair
-            ((TM0Route.partrecStartedTM0StatementCount_primrec.comp
-                NatPartrecToToPartrec.translate_primrec).comp Primrec.fst)
+            (sourceStatementCount_primrec.comp Primrec.fst)
             (Primrec.pair (Primrec.const 0) Primrec.snd)))
     exact hfrom.of_eq fun p => by
       unfold sourceSimStepDataForLabelIndexStartWithCode
@@ -335,13 +379,11 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_from
       sourceSimStepDataForLabelIndexStartWithPositionCode p.1 p.2) := by
     have hfrom : Primrec (fun p : Code × Nat =>
         sourceSimStepDataForLabelIndexFromWithPositionCode p.1
-          (TM0Route.partrecStartedTM0StatementCount
-            (NatPartrecToToPartrec.translate p.1)) 0 p.2) :=
+          (sourceStatementCount p.1) 0 p.2) :=
       hindex.comp
         (Primrec.pair Primrec.fst
           (Primrec.pair
-            ((TM0Route.partrecStartedTM0StatementCount_primrec.comp
-                NatPartrecToToPartrec.translate_primrec).comp Primrec.fst)
+            (sourceStatementCount_primrec.comp Primrec.fst)
             (Primrec.pair (Primrec.const 0) Primrec.snd)))
     exact hfrom.of_eq fun p => by
       unfold sourceSimStepDataForLabelIndexStartWithPositionCode
@@ -508,16 +550,14 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndex
     Computable sourceProgramData := by
   have hdata : Primrec (fun c : Code =>
       TM0FoldedCompiler.programDataOfStepData
-        (TM0Route.partrecStartedTM0StateCount
-          (NatPartrecToToPartrec.translate c))
+        (sourceStateCount c)
         (sourceSimStepDataByLabelIndex c)) := by
     exact TM0FoldedCompiler.programDataOfStepData_primrec.comp
       (Primrec.pair
-        (TM0Route.partrecStartedTM0StateCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec)
+        sourceStateCount_primrec
         hsteps)
   exact (hdata.of_eq fun c => by
-    unfold sourceProgramData TM0FoldedCompiler.programData
+    unfold sourceProgramData sourceStateCount TM0FoldedCompiler.programData
       TM0FoldedCompiler.programDataOfStepData
     rw [sourceSimStepDataByLabelIndex_eq c]
     rw [sourceSimStepData_eq c]
@@ -531,16 +571,14 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     Computable sourceProgramData := by
   have hdata : Primrec (fun c : Code =>
       TM0FoldedCompiler.programDataOfStepData
-        (TM0Route.partrecStartedTM0StateCount
-          (NatPartrecToToPartrec.translate c))
+        (sourceStateCount c)
         (sourceSimStepDataByLabelIndexWithCode c)) := by
     exact TM0FoldedCompiler.programDataOfStepData_primrec.comp
       (Primrec.pair
-        (TM0Route.partrecStartedTM0StateCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec)
+        sourceStateCount_primrec
         hsteps)
   exact (hdata.of_eq fun c => by
-    unfold sourceProgramData TM0FoldedCompiler.programData
+    unfold sourceProgramData sourceStateCount TM0FoldedCompiler.programData
       TM0FoldedCompiler.programDataOfStepData
     rw [sourceSimStepDataByLabelIndexWithCode_eq c]
     rw [sourceSimStepData_eq c]
@@ -560,16 +598,14 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithPositi
     Computable sourceProgramData := by
   have hdata : Primrec (fun c : Code =>
       TM0FoldedCompiler.programDataOfStepData
-        (TM0Route.partrecStartedTM0StateCount
-          (NatPartrecToToPartrec.translate c))
+        (sourceStateCount c)
         (sourceSimStepDataByLabelIndexWithPositionCode c)) := by
     exact TM0FoldedCompiler.programDataOfStepData_primrec.comp
       (Primrec.pair
-        (TM0Route.partrecStartedTM0StateCount_primrec.comp
-          NatPartrecToToPartrec.translate_primrec)
+        sourceStateCount_primrec
         hsteps)
   exact (hdata.of_eq fun c => by
-    unfold sourceProgramData TM0FoldedCompiler.programData
+    unfold sourceProgramData sourceStateCount TM0FoldedCompiler.programData
       TM0FoldedCompiler.programDataOfStepData
     rw [hrows c]).to_comp
 
