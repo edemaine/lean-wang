@@ -1162,6 +1162,31 @@ structure Figure18Certificate (table : Figure18RoleTable) : Prop where
   indexedRecognizable : HasFigure18IndexedActiveCornerWindows table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
+namespace Figure18Certificate
+
+def toPresentedCertificate
+    {table : Figure18RoleTable} (certificate : Figure18Certificate table) :
+    PresentedCertificate table.presentation where
+  recognizable :=
+    hasPresentedRecognizableFreeSquares_of_figure18Indexed
+      certificate.indexedRecognizable
+  corner_unique := by
+    simpa [Figure18RoleTable.presentation] using
+      table.finiteCheckedTranscription.sanityProp.corner_unique
+  realizes := certificate.realizes
+
+def toCertificate
+    {table : Figure18RoleTable} (certificate : Figure18Certificate table) :
+    Certificate table.presentation.toScaffold :=
+  certificate_of_presentedCertificate certificate.toPresentedCertificate
+
+theorem isScaffold
+    {table : Figure18RoleTable} (certificate : Figure18Certificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_certificate certificate.toCertificate
+
+end Figure18Certificate
+
 /--
 Geometric obligations for a concrete Figure 18 role table.
 
@@ -1199,14 +1224,15 @@ def presentation (I : Figure18Instance) : ScaffoldPresentation :=
 def checkedTranscription (I : Figure18Instance) :
     CheckedTranscription where
   finite := I.finite
-  recognizable :=
-    hasPresentedRecognizableFreeSquares_of_figure18Indexed
-      I.certificate.indexedRecognizable
+  recognizable := I.certificate.toPresentedCertificate.recognizable
   realizes := I.certificate.realizes
 
 def toPresentedInstance (I : Figure18Instance) :
     PresentedInstance :=
-  I.checkedTranscription.toCheckedPresentedInstance.toPresentedInstance
+  {
+    presentation := I.presentation
+    certificate := I.certificate.toPresentedCertificate
+  }
 
 @[simp]
 theorem checkedTranscription_finite (I : Figure18Instance) :
@@ -1224,7 +1250,7 @@ theorem presentation_tiles (I : Figure18Instance) :
 
 theorem isScaffold (I : Figure18Instance) :
     IsScaffold I.presentation.toScaffold :=
-  I.checkedTranscription.isScaffold
+  I.certificate.isScaffold
 
 end Figure18Instance
 
