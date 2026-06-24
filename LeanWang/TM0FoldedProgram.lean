@@ -4749,6 +4749,104 @@ theorem exists_labelAtByStatementFromWithPositionCode?_sourceDefault
         exact Prod.ext hqsource hqcode
       exact ⟨n, hnlt, hdecode.trans (congrArg some hqeq)⟩
 
+/-- First generated label-list index whose label is the forced source default. -/
+def sourceDefaultLabelIndex (tc : Turing.ToPartrec.Code) : Nat :=
+  (TM0Route.partrecStartedTM0LabelList tc).idxOf (default : SourceLabel tc)
+
+theorem sourceDefaultLabelIndex_lt_labelCount (tc : Turing.ToPartrec.Code) :
+    sourceDefaultLabelIndex tc < TM0Route.partrecStartedTM0LabelCount tc := by
+  unfold sourceDefaultLabelIndex
+  rw [← TM0Route.partrecStartedTM0LabelList_length tc]
+  exact List.idxOf_lt_length_iff.2 (default_mem_partrecStartedTM0LabelList tc)
+
+theorem partrecStartedTM0LabelList_get?_sourceDefaultLabelIndex
+    (tc : Turing.ToPartrec.Code) :
+    (TM0Route.partrecStartedTM0LabelList tc)[sourceDefaultLabelIndex tc]? =
+      some (default : SourceLabel tc) := by
+  unfold sourceDefaultLabelIndex
+  exact List.getElem?_idxOf (default_mem_partrecStartedTM0LabelList tc)
+
+theorem labelAtByStatementFromWithPositionCode?_sourceDefaultLabelIndex
+    (tc : Turing.ToPartrec.Code) :
+    labelAtByStatementFromWithPositionCode? tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0
+          (sourceDefaultLabelIndex tc) =
+      some (sourceDefaultLabel tc, 0) := by
+  have hlabelList := partrecStartedTM0LabelList_get?_sourceDefaultLabelIndex tc
+  have hlabel :
+      TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0
+            (sourceDefaultLabelIndex tc) =
+        some (default : SourceLabel tc) := by
+    rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq,
+      TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt,
+      TM0Route.partrecStartedTM0LabelAt?_eq_getElem?]
+    exact hlabelList
+  cases hdecode : labelAtByStatementFromWithPositionCode? tc
+      (TM0Route.partrecStartedTM0StatementCount tc) 0
+        (sourceDefaultLabelIndex tc) with
+  | none =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0
+          (sourceDefaultLabelIndex tc)
+      rw [hdecode] at hfst
+      simp [hlabel] at hfst
+  | some q =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0
+          (sourceDefaultLabelIndex tc)
+      rw [hdecode] at hfst
+      rw [hlabel] at hfst
+      have hqdefault : q.1 = (default : SourceLabel tc) :=
+        Option.some.inj hfst
+      have hqsource : q.1 = sourceDefaultLabel tc := by
+        simpa [sourceDefaultLabel_eq_default tc] using hqdefault
+      have hqcode :
+          q.2 = 0 :=
+        labelAtByStatementFromWithPositionCode?_code_eq_zero_of_sourceDefault
+          tc hdecode hqsource
+      have hqeq : q = (sourceDefaultLabel tc, 0) := by
+        exact Prod.ext hqsource hqcode
+      exact congrArg some hqeq
+
+theorem labelAtByStatementFromWithPositionCode?_prefix_sourceDefaultLabelIndex_code_ne_zero
+    (tc : Turing.ToPartrec.Code) {i : Nat} {q : SourceLabel tc × Nat}
+    (hi : i < sourceDefaultLabelIndex tc)
+    (hdecode : labelAtByStatementFromWithPositionCode? tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 i = some q) :
+    q.2 ≠ 0 := by
+  intro hzero
+  have hqget := labelAtByStatementFromWithPositionCode?_support_get? tc hdecode
+  rw [hzero] at hqget
+  rw [TM0Route.partrecStartedTM0LabelSupportList_get_zero] at hqget
+  have hqdefault : q.1 = (default : SourceLabel tc) :=
+    (Option.some.inj hqget).symm
+  have hlabelAt :
+      TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 i =
+        some q.1 := by
+    have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+      (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+    rw [hdecode] at hfst
+    exact hfst.symm
+  have hlabelList :
+      (TM0Route.partrecStartedTM0LabelList tc)[i]? =
+        some (default : SourceLabel tc) := by
+    rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq,
+      TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt,
+      TM0Route.partrecStartedTM0LabelAt?_eq_getElem?] at hlabelAt
+    simpa [hqdefault] using hlabelAt
+  have hmemTake :
+      (default : SourceLabel tc) ∈
+        (TM0Route.partrecStartedTM0LabelList tc).take (i + 1) := by
+    rw [List.mem_iff_getElem?]
+    exact ⟨i, by simpa [List.getElem?_take, Nat.lt_succ_self] using hlabelList⟩
+  have hidxLt :
+      sourceDefaultLabelIndex tc < i + 1 := by
+    unfold sourceDefaultLabelIndex
+    exact (List.mem_take_iff_idxOf_lt (default_mem_partrecStartedTM0LabelList tc)).1 hmemTake
+  omega
+
 theorem labelAtByStatementFromWithPositionCode?_label_eq_of_code_eq_stateCode
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
     {target : SourceLabel tc}
@@ -5864,6 +5962,46 @@ theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_support_s
       (tc := tc) (stmtOpt := stmtOpt) (v := v) (q' := q') (side := side)
       (marked := marked) (left := left) (right := right) (stmt := stmt) hstep)
 
+theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_sourceDefault_step
+    {tc : Turing.ToPartrec.Code} {q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        some (q', stmt)) :
+    (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side (sourceDefaultLabel tc))
+            (foldedSymbolCode marked left right)) =
+      some (simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt) := by
+  have htarget :
+      sourceDefaultLabel tc ∈ TM0Route.partrecStartedTM0LabelSupportList tc := by
+    simpa [sourceDefaultLabel_eq_default tc] using
+      TM0Route.partrecStartedTM0_default_mem_labelSupportList tc
+  have hstate : TM0FiniteCompiler.stateCode tc (sourceDefaultLabel tc) = 0 := by
+    simpa [sourceDefaultLabel_eq_default tc, TM0Route.partrecStartedTM0Start] using
+      TM0FiniteCompiler.stateCode_default tc
+  refine simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_index_decode
+    (tc := tc) (n := sourceDefaultLabelIndex tc)
+    (q := (sourceDefaultLabel tc, 0)) (target := sourceDefaultLabel tc)
+    (side := side) (marked := marked) (left := left) (right := right)
+    (sourceDefaultLabelIndex_lt_labelCount tc) ?_
+    (labelAtByStatementFromWithPositionCode?_sourceDefaultLabelIndex tc)
+    htarget ?_ ?_
+  · intro i hi r hr
+    rw [hstate]
+    exact labelAtByStatementFromWithPositionCode?_prefix_sourceDefaultLabelIndex_code_ne_zero
+      tc hi hr
+  · simp [hstate]
+  · have hcanonical :=
+      simRowsOfStepDataForStmtLabelWithCode_find?_of_step
+        (tc := tc) (stmtOpt := (sourceDefaultLabel tc).1)
+        (v := (sourceDefaultLabel tc).2) (q' := q') (side := side)
+        (marked := marked) (left := left) (right := right) (stmt := stmt)
+        (by simpa using hstep)
+    simpa using hcanonical
+
 theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_none_of_support_succ_no_step
     {tc : Turing.ToPartrec.Code} {n : Nat}
     {stmtOpt : Option (SourceStmt tc)} {v : PartrecVar}
@@ -6617,6 +6755,67 @@ theorem positionProgramData_step_sim_eq_some_of_support_succ_step
   constructor
   · exact hnext
   cases hstmt : (simRowOfStep tc side marked (stmtOpt, v) q' left right stmt).stmt with
+  | move m =>
+      simp
+  | write b =>
+      have hb : b ∈ foldedSymbolList := by
+        simpa [hstmt] using hwrite
+      simp [hb]
+
+theorem positionProgramData_transition?_sim_eq_some_of_sourceDefault_step
+    {tc : Turing.ToPartrec.Code} {q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        some (q', stmt)) :
+    (positionProgramData tc).transition?
+        (foldedSimStateCode tc side (sourceDefaultLabel tc))
+        (foldedSymbolCode marked left right) =
+      some (simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt) := by
+  rw [positionProgramData_transition?_sim_eq_generated]
+  exact simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_sourceDefault_step
+    (tc := tc) (q' := q') (side := side) (marked := marked)
+    (left := left) (right := right) (stmt := stmt) hstep
+
+theorem positionProgramData_step_sim_eq_some_of_sourceDefault_step
+    {tc : Turing.ToPartrec.Code} {q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        some (q', stmt)) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side (sourceDefaultLabel tc))
+        (foldedSymbolCode marked left right) =
+      some ((simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt).next,
+        (simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt).stmt) := by
+  have hfind := positionProgramData_transition?_sim_eq_some_of_sourceDefault_step
+    (tc := tc) (q' := q') (side := side) (marked := marked)
+    (left := left) (right := right) (stmt := stmt) hstep
+  have hqset : sourceDefaultLabel tc ∈ TM0Route.partrecStartedTM0Labels tc := by
+    exact (TM0Route.mem_partrecStartedTM0LabelList tc (sourceDefaultLabel tc)).1
+      (sourceDefaultLabel_mem_partrecStartedTM0LabelList tc)
+  have hq'set : q' ∈ TM0Route.partrecStartedTM0Labels tc :=
+    TM0FiniteCompiler.next_label_mem_of_step hqset hstep
+  have hq'list : q' ∈ TM0Route.partrecStartedTM0LabelList tc :=
+    (TM0Route.mem_partrecStartedTM0LabelList tc q').2 hq'set
+  have hnext :
+      (simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt).next ∈
+        foldedStateList tc :=
+    simRowOfStep_next_mem_states tc side marked (sourceDefaultLabel tc) hq'list
+      left right stmt
+  have hwrite := simRowOfStep_write_mem_symbols
+    tc side marked (sourceDefaultLabel tc) q' left right stmt
+  unfold PostProgram.step
+  rw [hfind]
+  simp only [positionProgramData, programDataOfStepData, programOfCountAndSimRows,
+    programOfCountAndRows, programOfParts, dite_eq_ite, Option.ite_none_right_eq_some]
+  constructor
+  · exact hnext
+  cases hstmt : (simRowOfStep tc side marked (sourceDefaultLabel tc) q' left right stmt).stmt with
   | move m =>
       simp
   | write b =>
