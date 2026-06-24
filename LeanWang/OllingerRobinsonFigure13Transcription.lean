@@ -323,6 +323,14 @@ def all : List Figure18Site :=
     Quadrant.all.map fun q => ({ index := i, quadrant := q } : Figure18Site)
 
 @[simp]
+theorem all_length : all.length = 368 := by
+  simp [all, Quadrant.all]
+
+@[simp]
+theorem all_tiles_length : (all.map tile).length = 368 := by
+  simp [all, Quadrant.all]
+
+@[simp]
 theorem tile_mk (index : Fin 92) (quadrant : Quadrant) :
     ({ index := index, quadrant := quadrant } : Figure18Site).tile =
       fig13QuarterTile index quadrant :=
@@ -344,6 +352,10 @@ theorem mem_all (site : Figure18Site) : site ∈ all := by
   unfold all
   exact List.mem_flatMap.2 ⟨i, List.mem_finRange i,
     List.mem_map.2 ⟨q, Quadrant.mem_all q, rfl⟩⟩
+
+theorem tile_mem_all_tiles (site : Figure18Site) :
+    site.tile ∈ all.map tile :=
+  List.mem_map.2 ⟨site, site.mem_all, rfl⟩
 
 end Figure18Site
 
@@ -953,6 +965,19 @@ theorem presentation_mem_iff_exists_site
   · exact table.exists_site_of_mem_presentation
   · rintro ⟨site, _hsite, rfl⟩
     exact table.presentation_mem_site site
+
+theorem presentation_mem_iff_mem_site_tiles
+    (table : Figure18RoleTable) (tile : WangTile) :
+    tile ∈ table.presentation.tiles ↔
+      tile ∈ Figure18Site.all.map Figure18Site.tile := by
+  constructor
+  · intro htile
+    rcases table.exists_site_of_mem_presentation htile with
+      ⟨site, hsite, htileSite⟩
+    exact List.mem_map.2 ⟨site, hsite, htileSite.symm⟩
+  · intro htile
+    rcases List.mem_map.1 htile with ⟨site, _hsite, htileSite⟩
+    exact htileSite ▸ table.presentation_mem_site site
 
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
