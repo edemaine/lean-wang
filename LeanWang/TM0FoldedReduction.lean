@@ -116,9 +116,18 @@ def sourceSimStepData (c : Code) : List TM0FoldedCompiler.SimStepData :=
 def sourceProgramData (c : Code) : FiniteTM0Program :=
   TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)
 
+/-- Source-code folded program generated from position-coded descriptors. -/
+def sourcePositionProgramData (c : Code) : FiniteTM0Program :=
+  TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)
+
 theorem sourceProgramData_eq (c : Code) :
     sourceProgramData c =
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c) :=
+  rfl
+
+theorem sourcePositionProgramData_eq (c : Code) :
+    sourcePositionProgramData c =
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c) :=
   rfl
 
 theorem sourceSimStepData_eq (c : Code) :
@@ -3432,6 +3441,38 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithPositi
     unfold sourceProgramData sourceStateCount TM0FoldedCompiler.programData
       TM0FoldedCompiler.programDataOfStepData
     rw [hrows c]).to_comp
+
+set_option maxHeartbeats 800000 in
+-- The final equality unfolds generated program data and the position-coded descriptor rows.
+/--
+The source-level position-coded indexed descriptor list directly computes the
+finite program generated from those descriptors.  No row-equivalence proof is
+needed here: extra noncanonical rows remain part of this generated program and
+are handled by separate semantic lookup lemmas.
+-/
+theorem sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
+    (hsteps : Primrec sourceSimStepDataByLabelIndexWithPositionCode) :
+    Computable sourcePositionProgramData := by
+  have hdata : Primrec (fun c : Code =>
+      TM0FoldedCompiler.programDataOfStepData
+        (sourceStateCount c)
+        (sourceSimStepDataByLabelIndexWithPositionCode c)) := by
+    exact TM0FoldedCompiler.programDataOfStepData_primrec.comp
+      (Primrec.pair
+        sourceStateCount_primrec
+        hsteps)
+  exact (hdata.of_eq fun c => by
+    unfold sourcePositionProgramData sourceStateCount
+      sourceSimStepDataByLabelIndexWithPositionCode
+      TM0FoldedCompiler.positionProgramData
+    rfl).to_comp
+
+theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
+    (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_from hindex)
 
 /--
 Primitive recursiveness of the source-level canonical numeric-state decoder is

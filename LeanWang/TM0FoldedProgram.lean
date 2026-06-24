@@ -4663,6 +4663,68 @@ theorem programData_eq_program (tc : Turing.ToPartrec.Code) :
   (program_eq_programOfCountAndSimRows tc).symm
 
 /--
+Finite folded program generated from position-coded descriptors.
+
+Unlike `programData`, this may contain extra noncanonical simulation rows when
+the statement support list has duplicates.  Those rows are intended to be
+handled semantically by proving that canonical execution never selects them.
+-/
+def positionProgramData (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
+  programDataOfStepData (TM0Route.partrecStartedTM0StateCount tc)
+    (simStepDataByLabelIndexWithPositionCode tc)
+
+theorem positionProgramData_eq_programOfCountAndSimRows
+    (tc : Turing.ToPartrec.Code) :
+    positionProgramData tc =
+      programOfCountAndSimRows (TM0Route.partrecStartedTM0StateCount tc)
+        (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)) := by
+  rfl
+
+theorem positionProgramData_primrec_of_simStepDataByLabelIndexWithPositionCode
+    (hsteps : Primrec simStepDataByLabelIndexWithPositionCode) :
+    Primrec positionProgramData := by
+  unfold positionProgramData
+  exact programDataOfStepData_primrec.comp
+    (Primrec.pair TM0Route.partrecStartedTM0StateCount_primrec hsteps)
+
+theorem positionProgramData_computable_of_simStepDataByLabelIndexWithPositionCode
+    (hsteps : Primrec simStepDataByLabelIndexWithPositionCode) :
+    Computable positionProgramData :=
+  (positionProgramData_primrec_of_simStepDataByLabelIndexWithPositionCode hsteps).to_comp
+
+theorem positionProgramData_primrec_of_simStepDataForLabelIndexStartWithPositionCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithPositionCode p.1 p.2)) :
+    Primrec positionProgramData :=
+  positionProgramData_primrec_of_simStepDataByLabelIndexWithPositionCode
+    (simStepDataByLabelIndexWithPositionCode_primrec_of_forLabelIndexStartWithPositionCode
+      hindex)
+
+theorem positionProgramData_computable_of_simStepDataForLabelIndexStartWithPositionCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithPositionCode p.1 p.2)) :
+    Computable positionProgramData :=
+  (positionProgramData_primrec_of_simStepDataForLabelIndexStartWithPositionCode hindex).to_comp
+
+theorem positionProgramData_primrec_of_simStepDataForLabelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec positionProgramData :=
+  positionProgramData_primrec_of_simStepDataForLabelIndexStartWithPositionCode <| by
+    unfold simStepDataForLabelIndexStartWithPositionCode
+    exact hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair
+          (TM0Route.partrecStartedTM0StatementCount_primrec.comp Primrec.fst)
+          (Primrec.pair (Primrec.const 0) Primrec.snd)))
+
+theorem positionProgramData_computable_of_simStepDataForLabelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable positionProgramData :=
+  (positionProgramData_primrec_of_simStepDataForLabelIndexFromWithPositionCode hindex).to_comp
+
+/--
 The remaining computability obligation for `programData` can be reduced to a
 primitive-recursive list of numeric step descriptors whose generated rows are
 exactly the semantic `simRows`.
