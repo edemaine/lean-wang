@@ -161,6 +161,37 @@ theorem mem_quarterRoleSpecsOfTiles_of_getElem?
               simp at htile hroles
               exact List.mem_append_right _ (ih htile hroles)
 
+theorem exists_of_mem_quarterRoleSpecsOfTiles
+    {tiles : TileSet} {roleRows : List TileQuarterRoles} {spec : RoleTileSpec}
+    (hspec : spec ∈ quarterRoleSpecsOfTiles tiles roleRows) :
+    ∃ (i : Nat) (tile : WangTile) (roles : TileQuarterRoles) (q : Quadrant),
+      tiles[i]? = some tile ∧
+        roleRows[i]? = some roles ∧
+        spec.tile = TileSubdivision.subdivideTileAt tile q ∧
+        spec.role = TileQuarterRoles.roleAt roles q := by
+  induction tiles generalizing roleRows with
+  | nil =>
+      cases roleRows <;> simp at hspec
+  | cons head tiles ih =>
+      cases roleRows with
+      | nil =>
+          simp at hspec
+      | cons headRoles roleRows =>
+          rw [quarterRoleSpecsOfTiles_cons_cons, List.mem_append] at hspec
+          rcases hspec with hhead | htail
+          · unfold TileQuarterRoles.toRoleSpecs at hhead
+            rcases List.mem_map.1 hhead with ⟨q, _hq, hspecq⟩
+            refine ⟨0, head, headRoles, q, ?_, ?_, ?_, ?_⟩
+            · rfl
+            · rfl
+            · exact congrArg RoleTileSpec.tile hspecq.symm
+            · exact congrArg RoleTileSpec.role hspecq.symm
+          · rcases ih htail with
+              ⟨i, tile, roles, q, htile, hroles, hspecTile, hspecRole⟩
+            refine ⟨i + 1, tile, roles, q, ?_, ?_, hspecTile, hspecRole⟩
+            · simpa using htile
+            · simpa using hroles
+
 /-- Figure 13 subdivided into quadrant role specs. -/
 def fig13QuarterRoleSpecs (roleRows : List TileQuarterRoles) :
     List RoleTileSpec :=
@@ -235,6 +266,64 @@ theorem fig13QuarterRoleEntries_lookup_corner_of_getElem?
     lookupRole (fig13QuarterRoleEntries roleRows) (fig13QuarterTile i q) =
       CellRole.corner := by
   rw [fig13QuarterRoleEntries_lookup_of_getElem? hlen hroles, hcorner]
+
+theorem exists_of_mem_fig13QuarterRoleSpecs
+    {roleRows : List TileQuarterRoles} {spec : RoleTileSpec}
+    (hspec : spec ∈ fig13QuarterRoleSpecs roleRows) :
+    ∃ (i : Fin 92) (roles : TileQuarterRoles) (q : Quadrant),
+      roleRows[i.val]? = some roles ∧
+        spec.tile = fig13QuarterTile i q ∧
+        spec.role = roles.roleAt q := by
+  unfold fig13QuarterRoleSpecs at hspec
+  rcases exists_of_mem_quarterRoleSpecsOfTiles hspec with
+    ⟨i, tile, roles, q, htile, hroles, hspecTile, hspecRole⟩
+  rcases List.getElem?_eq_some_iff.1 htile with ⟨hi, hget⟩
+  refine ⟨⟨i, by simpa [fig13Tiles_length] using hi⟩, roles, q, hroles, ?_, hspecRole⟩
+  unfold fig13QuarterTile fig13Tile
+  have htile' : tile = fig13Tiles.get ⟨i, by simpa [fig13Tiles_length] using hi⟩ := by
+    simpa [List.get_eq_getElem] using hget.symm
+  simpa [htile'] using hspecTile
+
+theorem fig13QuarterRoleSpecs_cornerRoleUniqueBool_of_forall_getElem?
+    {roleRows : List TileQuarterRoles}
+    {cornerIndex : Fin 92} {cornerQuadrant : Quadrant}
+    (hunique : ∀ (i : Fin 92) (roles : TileQuarterRoles) (q : Quadrant),
+      roleRows[i.val]? = some roles →
+        (roles.roleAt q = CellRole.corner ↔
+          i = cornerIndex ∧ q = cornerQuadrant)) :
+    cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+      (fig13QuarterTile cornerIndex cornerQuadrant) = true := by
+  apply cornerRoleUniqueBool_of_forall_mem
+  intro spec hspec
+  rcases exists_of_mem_fig13QuarterRoleSpecs hspec with
+    ⟨i, roles, q, hroles, hspecTile, hspecRole⟩
+  constructor
+  · intro hrole
+    rcases (hunique i roles q hroles).1 (hspecRole.symm.trans hrole) with
+      ⟨rfl, rfl⟩
+    exact hspecTile
+  · intro htile
+    have hparts :
+        fig13QuarterTile i q = fig13QuarterTile cornerIndex cornerQuadrant := by
+      exact hspecTile.symm.trans htile
+    unfold fig13QuarterTile fig13Tile at hparts
+    have hp := TileSubdivision.subdivideTileAt_eq_iff
+      (fig13Tiles.get ⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩)
+      (fig13Tiles.get ⟨cornerIndex.val, by simp [fig13Tiles_length, cornerIndex.isLt]⟩)
+      q cornerQuadrant |>.1 hparts
+    have hq : q = cornerQuadrant := hp.2
+    have hi : i = cornerIndex := by
+      apply Fin.ext
+      have htileEq := hp.1
+      have hnodup := fig13Tiles_nodup
+      have hidx :
+          (⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩ :
+              Fin fig13Tiles.length) =
+            ⟨cornerIndex.val,
+              by simp [fig13Tiles_length, cornerIndex.isLt]⟩ := by
+        exact (List.Nodup.get_inj_iff hnodup).1 htileEq
+      exact congrArg Fin.val hidx
+    exact hspecRole.trans ((hunique i roles q hroles).2 ⟨hi, hq⟩)
 
 /--
 Package complete Figure 13 quadrant roles as finite checked scaffold data from
