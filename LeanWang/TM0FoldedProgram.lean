@@ -1781,6 +1781,17 @@ theorem foldedSimStateCode_mem_states (tc : Turing.ToPartrec.Code)
       ((TM0Route.mem_partrecStartedTM0LabelList tc q).1 hq)
   · exact List.mem_map_of_mem (mem_foldSideList side)
 
+theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
+    foldedSimStartState tc ∈ foldedStateList tc := by
+  unfold foldedSimStartState foldedSimStartStateCode foldedSimStateOfCode
+    foldedStateList foldedStateListOfCodes foldedSimStateListOfCodes
+  rw [List.mem_append]
+  apply Or.inr
+  rw [List.mem_flatMap]
+  refine ⟨TM0Route.partrecStartedTM0Start,
+    TM0Route.partrecStartedTM0Start_mem_states tc, ?_⟩
+  exact List.mem_map_of_mem (mem_foldSideList FoldSide.right)
+
 theorem foldedStateList_primrec : Primrec foldedStateList := by
   unfold foldedStateList
   exact foldedStateListOfCodes_primrec.comp
@@ -1802,6 +1813,17 @@ def nextAfterOrigin : Nat :=
     initReturnState 0
   else
     initMoveRightState 0
+
+theorem partrecStartedTM0Input_length :
+    TM0Route.partrecStartedTM0Input.length = 1 := by
+  simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
+    Turing.TM2to1.trInit, Turing.PartrecToTM2.trList]
+
+theorem nextAfterOrigin_eq_initReturnState_zero :
+    nextAfterOrigin = initReturnState 0 := by
+  unfold nextAfterOrigin
+  rw [partrecStartedTM0Input_length]
+  simp
 
 /-- The state reached after writing the origin marker is in the folded state support. -/
 theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
@@ -2598,6 +2620,33 @@ theorem initReturnState_ne_foldedSimStateCode_data
     initReturnState i ≠ foldedSimStateCode tc side q := by
   intro h
   unfold initReturnState foldedSimStateCode taggedState stateTagReturn stateTagSim at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initReturnState_injective :
+    Function.Injective initReturnState := by
+  intro i j h
+  unfold initReturnState taggedState stateTagReturn at h
+  exact (Nat.pair_eq_pair.mp h).2
+
+theorem initWriteOriginState_ne_initReturnState (i : Nat) :
+    initWriteOriginState ≠ initReturnState i := by
+  intro h
+  unfold initWriteOriginState initReturnState taggedState stateTagInit stateTagReturn at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initMoveRightState_ne_initReturnState (i j : Nat) :
+    initMoveRightState i ≠ initReturnState j := by
+  intro h
+  unfold initMoveRightState initReturnState taggedState stateTagInit stateTagReturn at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initWriteRightState_ne_initReturnState (i j : Nat) :
+    initWriteRightState i ≠ initReturnState j := by
+  intro h
+  unfold initWriteRightState initReturnState taggedState stateTagInit stateTagReturn at h
   have htag := (Nat.pair_eq_pair.mp h).1
   omega
 

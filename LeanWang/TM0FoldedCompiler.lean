@@ -150,23 +150,6 @@ theorem foldedSimStateCode_mem_states (tc : Turing.ToPartrec.Code)
     TM0FiniteCompiler.stateCode_mem_states tc q hqLabels, ?_⟩
   simpa [foldedSimStateCode_eq_ofCode] using List.mem_map_of_mem (mem_foldSideList side)
 
-theorem foldedSimStartState_mem_states (tc : Turing.ToPartrec.Code) :
-    foldedSimStartState tc ∈ foldedStateList tc := by
-  unfold foldedSimStartState
-  exact foldedSimStateCode_mem_states tc FoldSide.right
-    (default_mem_partrecStartedTM0LabelList tc)
-
-theorem partrecStartedTM0Input_length :
-    TM0Route.partrecStartedTM0Input.length = 1 := by
-  simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
-    Turing.TM2to1.trInit, Turing.PartrecToTM2.trList]
-
-theorem nextAfterOrigin_eq_initReturnState_zero :
-    nextAfterOrigin = initReturnState 0 := by
-  unfold nextAfterOrigin
-  rw [partrecStartedTM0Input_length]
-  simp
-
 @[simp]
 theorem mkRow_matchesInput (state read next : Nat) (stmt : PostStmt) :
     (mkRow state read next stmt).matchesInput state read = true := by
@@ -240,13 +223,6 @@ theorem initWriteOriginState_ne_initWriteRightState (i : Nat) :
   have hpayload := (Nat.pair_eq_pair.mp h).2
   omega
 
-theorem initWriteOriginState_ne_initReturnState (i : Nat) :
-    initWriteOriginState ≠ initReturnState i := by
-  intro h
-  unfold initWriteOriginState initReturnState taggedState stateTagInit stateTagReturn at h
-  have htag := (Nat.pair_eq_pair.mp h).1
-  omega
-
 theorem initWriteOriginState_ne_foldedSimStateCode
     (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) :
     initWriteOriginState ≠ foldedSimStateCode tc side q := by
@@ -268,13 +244,6 @@ theorem initMoveRightState_ne_initWriteRightState (i j : Nat) :
   intro h
   unfold initMoveRightState initWriteRightState taggedState stateTagInit at h
   have hpayload := (Nat.pair_eq_pair.mp h).2
-  omega
-
-theorem initMoveRightState_ne_initReturnState (i j : Nat) :
-    initMoveRightState i ≠ initReturnState j := by
-  intro h
-  unfold initMoveRightState initReturnState taggedState stateTagInit stateTagReturn at h
-  have htag := (Nat.pair_eq_pair.mp h).1
   omega
 
 theorem initMoveRightState_ne_foldedSimStateCode
@@ -366,13 +335,6 @@ theorem initWriteRightState_injective :
   intro i j h
   unfold initWriteRightState taggedState stateTagInit at h
   have hpayload := (Nat.pair_eq_pair.mp h).2
-  omega
-
-theorem initWriteRightState_ne_initReturnState (i j : Nat) :
-    initWriteRightState i ≠ initReturnState j := by
-  intro h
-  unfold initWriteRightState initReturnState taggedState stateTagInit stateTagReturn at h
-  have htag := (Nat.pair_eq_pair.mp h).1
   omega
 
 theorem initWriteRightState_ne_foldedSimStateCode
@@ -470,12 +432,6 @@ theorem initMoveRightRows_find?_eq_none_of_foldedSimStateCode
       simp only [List.flatMap_cons]
       rw [find?_append_of_eq_none hhead]
       exact ih
-
-theorem initReturnState_injective :
-    Function.Injective initReturnState := by
-  intro i j h
-  unfold initReturnState taggedState stateTagReturn at h
-  exact (Nat.pair_eq_pair.mp h).2
 
 theorem initReturnState_ne_foldedSimStateCode
     (tc : Turing.ToPartrec.Code) (i : Nat) (side : FoldSide) (q : SourceLabel tc) :
