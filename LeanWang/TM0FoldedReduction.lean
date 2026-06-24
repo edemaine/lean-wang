@@ -1419,6 +1419,39 @@ theorem sourceStateCodeBySupportSearch_eq_stateCode_of_statementAt?
     ⟨1 + block * TM0Route.partrecVarList.length + i,
       sourceLabelSupportList_get_position_of_statementAt? hstmt hv⟩
 
+theorem sourceSimStepDataForLabelIndexStartWithCode_of_block_var_get?
+    {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hblock : block < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt) :
+    sourceSimStepDataForLabelIndexStartWithCode c
+        (TM0Route.partrecVarList.length * block + i) =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCode
+          (NatPartrecToToPartrec.translate c)
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        stmt v := by
+  rw [← sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode]
+  rw [sourceSimStepDataForLabelIndexStartWithSearchCode_of_block_var_get?
+    (c := c) (block := block) (i := i) (v := v) hblock hv hstmt]
+  have hcode := sourceStateCodeBySupportSearch_eq_stateCode_of_statementAt?
+    (c := c) (block := block) (i := i) (v := v) hstmt hv
+  simpa [sourceStatementCount] using congrArg
+    (fun n => TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+      (NatPartrecToToPartrec.translate c) n stmt v) hcode
+
 theorem sourceLabelAtByStatementFromWithPositionCode_eq_stateCode_of_minimal
     {c : Code} {fuel k i : Nat}
     (hmin : ∀ q :
