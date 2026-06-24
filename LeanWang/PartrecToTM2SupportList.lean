@@ -45,6 +45,19 @@ def trStmtsList : Λ' → List Λ'
   | Q@(Λ'.pred q₁ q₂) => Q :: (trStmtsList q₁ ++ unrev q₂ :: trStmtsList q₂)
   | Q@(Λ'.ret _) => [Q]
 
+theorem trStmtsList_getElem?_zero (q : Λ') :
+    (trStmtsList q)[0]? = some q := by
+  cases q <;> simp [trStmtsList]
+
+private theorem getElem?_append_zero_of_head {α : Type} {xs ys : List α} {x : α}
+    (h : xs[0]? = some x) :
+    (xs ++ ys)[0]? = some x := by
+  cases xs with
+  | nil =>
+      cases h
+  | cons y xs =>
+      simpa using h
+
 /-- Numeric length mirror of `trStmtsList`, avoiding an encoding of evaluator labels. -/
 def trStmtsLength : Λ' → Nat
   | Λ'.move _ _ _ q => 1 + trStmtsLength q
@@ -2633,6 +2646,17 @@ def codeSuppList' : ToPartrec.Code → Cont' → List Λ'
           (trStmtsList (Λ'.clear natEnd K'.main <| trNormal f (Cont'.fix f k)) ++
             [Λ'.ret k]))
 
+theorem codeSuppList'_getElem?_zero (c : ToPartrec.Code) (k : Cont') :
+    (codeSuppList' c k)[0]? = some (trNormal c k) := by
+  cases c <;> simp only [codeSuppList']
+  · exact trStmtsList_getElem?_zero _
+  · exact trStmtsList_getElem?_zero _
+  · exact trStmtsList_getElem?_zero _
+  · exact getElem?_append_zero_of_head (trStmtsList_getElem?_zero _)
+  · exact getElem?_append_zero_of_head (trStmtsList_getElem?_zero _)
+  · exact getElem?_append_zero_of_head (trStmtsList_getElem?_zero _)
+  · exact getElem?_append_zero_of_head (trStmtsList_getElem?_zero _)
+
 /-- Numeric length mirror of `codeSuppList'`. -/
 def codeSuppLength' : ToPartrec.Code → Cont' → Nat
   | c@ToPartrec.Code.zero', k => trStmtsLength (trNormal c k)
@@ -2988,6 +3012,11 @@ theorem mem_codeSuppList_iff {c : ToPartrec.Code} {k : Cont'} {q : Λ'} :
 /-- Executable list form of the evaluator label support for code `tc`. -/
 def labelList (tc : ToPartrec.Code) : List Λ' :=
   codeSuppList tc Cont'.halt
+
+theorem labelList_getElem?_zero (tc : ToPartrec.Code) :
+    (labelList tc)[0]? = some (PartrecToTM2Support.startLabel tc) := by
+  unfold labelList codeSuppList PartrecToTM2Support.startLabel
+  exact getElem?_append_zero_of_head (codeSuppList'_getElem?_zero tc Cont'.halt)
 
 theorem labelList_primrec_of_codeSuppList
     (h : Primrec₂ codeSuppList) :
