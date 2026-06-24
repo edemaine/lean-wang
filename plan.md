@@ -78,12 +78,12 @@ Completed proof layers:
 The remaining construction obligations are explicit Lean interfaces:
 
 ```lean
-structure TM0FoldedReduction.SourceObligations where
+structure TM0FoldedReduction.PositionSourceObligations where
   program_computable :
     Computable (fun c : Nat.Partrec.Code =>
-      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c))
   correct : forall c : Nat.Partrec.Code,
-    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
+    (TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
       (Nat.Partrec.Code.eval c 0).Dom
 
 def IsScaffold (S : Scaffold) : Prop :=
@@ -228,17 +228,17 @@ rewrites the started-TM1 label count through `labelCount` plus
 numeric support mirrors without first proving the full support list primitive
 recursive.
 
-There is now also a lighter source-level folded route in
+There is now also a lighter generated-position source-level folded route in
 `TM0FoldedReduction`. It records the exact obligations needed for the final
 undecidability reduction from `Nat.Partrec.Code`:
 
 ```lean
-structure TM0FoldedReduction.SourceObligations where
+structure TM0FoldedReduction.PositionSourceObligations where
   program_computable :
     Computable (fun c : Nat.Partrec.Code =>
-      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c))
   correct : forall c : Nat.Partrec.Code,
-    (TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
+    (TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)).HaltsEmpty <->
       (Nat.Partrec.Code.eval c 0).Dom
 ```
 
@@ -250,43 +250,40 @@ proof.  The remaining computational target can therefore be narrowed to
 computability of `TM0FoldedCompiler.program ∘ NatPartrecToToPartrec.translate`,
 rather than computability on arbitrary `Turing.ToPartrec.Code`.
 
-The lightweight source route now also has exact-shape computability corollaries
-for the `SourceObligations.program_computable` field. In particular,
-`sourceProgramData_computable_of_source_labelIndexFromWithSearchCode'` turns
-the remaining source-level bounded-search descriptor decoder proof directly
+The lightweight generated-position source route now also has exact-shape
+computability corollaries for the `PositionSourceObligations.program_computable`
+field. In particular,
+`sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode`
+turns the source-level position-coded descriptor decoder proof directly
 into
 
 ```lean
 Computable (fun c : Nat.Partrec.Code =>
-  TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+  TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c))
 ```
 
 without going through the broader `Turing.ToPartrec.Code` target.
 
 Do not import `TM0FoldedCompiler` into `TM0FoldedReduction` just to discharge
-`SourceObligations.correct`: that pulls the large folded semantic proof into
+`PositionSourceObligations.correct`: that pulls the large folded semantic proof into
 the lightweight reduction packaging. A direct attempt made the reduction target
 impractically slow to rebuild. Keep the correctness field explicit here, or
 move any automatically generated source correctness package to a separate
 semantic/final module that is expected to import the compiler proof.
-`TM0FoldedReduction.sourceProgramData_correct_of_programData_tm0_correct` now
-packages the lightweight part of this semantic bridge: any theorem proving
-normalized `programData` correct for every `Turing.ToPartrec.Code` immediately
+`TM0FoldedReduction.sourcePositionProgramData_correct_of_positionProgramData_tm0_correct`
+now packages the lightweight part of this semantic bridge: any theorem proving
+`positionProgramData` correct for every `Turing.ToPartrec.Code` immediately
 composes with the source translation chain. The helper
-`sourceObligationsOfProgramData` packages that semantic theorem together with
-the remaining program-data computability proof. A trial build of a separate
-final module that imported `TM0FoldedCompiler` was interrupted after Lake spent
-5596 seconds compiling `TM0FoldedCompiler` without producing its `.olean`, so
-that final packaging should be treated as a heavyweight target.
-The source-bounded-search route is now packaged all the way to the theorem
-surface: `sourceObligationsOfLabelIndexFromWithSearchCode` combines the
-remaining decoder primitive-recursive proof with normalized `programData`
-correctness, and
-`encoded_domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode`
-and
-`domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode`
-instantiate the final encoded and unencoded undecidability statements from
-those two facts.
+`positionSourceObligationsOfProgramData` packages that semantic theorem together
+with the remaining position-program-data computability proof. A trial build of
+a separate final module that imported `TM0FoldedCompiler` was interrupted after
+Lake spent 5596 seconds compiling `TM0FoldedCompiler` without producing its
+`.olean`, so that final packaging should be treated as a heavyweight target.
+The generated-position route is now packaged all the way to the theorem
+surface: `positionSourceObligationsOfLabelIndexFromWithPositionCode` combines
+the decoder primitive-recursive proof with `positionProgramData` correctness,
+and the `*_position_source_positionCode` theorem family instantiates the final
+encoded and unencoded undecidability statements from those two facts.
 
 The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`
@@ -365,25 +362,28 @@ arithmetic.
 
 Next implementation targets:
 
-1. Prove source-level computability of the folded finite-TM0 reduction:
+1. Prove source-level computability of the generated position-coded folded
+   finite-TM0 reduction:
 
    ```lean
    Computable (fun c : Nat.Partrec.Code =>
-     TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+     TM0FoldedCompiler.positionProgramData
+       (NatPartrecToToPartrec.translate c))
    ```
 
    This can use Mathlib's existing recursion theorem for `Nat.Partrec.Code`
    instead of first proving a general recursion theorem for
    `Turing.ToPartrec.Code`.
 2. Optionally strengthen the result to computability on all
-   `Turing.ToPartrec.Code` for a reusable folded-route corollary. This should
-   still feed the source-level theorem through `Obligations.toSource`, not
-   reintroduce a generic table-facing reduction interface.
+   `Turing.ToPartrec.Code` for a reusable folded-route corollary, but keep the
+   public domino theorem surface on `PositionSourceObligations`.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-4. Specialize the concrete folded-route/scaffold corollaries, in particular
-   `encoded_domino_problem_undecidable_of_scaffold_source` and
-   `domino_problem_undecidable_of_scaffold_source`, to those concrete
-   instances to recover the unconditional encoded and unencoded domino theorems.
+4. Specialize the concrete generated-position folded-route/scaffold
+   corollaries, in particular
+   `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`
+   and `domino_problem_undecidable_of_scaffold_position_source_positionCode`,
+   to those concrete instances to recover the unconditional encoded and
+   unencoded domino theorems.
 5. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0 instruction set is already close to the Wang-tile space-time
    simulation, so this should remove both the `PostProgram.toTableProgram`
