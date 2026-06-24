@@ -4771,6 +4771,44 @@ theorem sourceDefaultLabelIndex_lt_labelCount (tc : Turing.ToPartrec.Code) :
   rw [← TM0Route.partrecStartedTM0LabelList_length tc]
   exact List.idxOf_lt_length_iff.2 (default_mem_partrecStartedTM0LabelList tc)
 
+theorem exists_support_succ_of_labelList_ne_sourceDefault
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc)
+    (hneq : q ≠ sourceDefaultLabel tc) :
+    ∃ n, n < TM0Route.partrecStartedTM0LabelCount tc ∧
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some q ∧
+        TM0FiniteCompiler.stateCode tc q = n + 1 := by
+  have hqset : q ∈ TM0Route.partrecStartedTM0Labels tc :=
+    (TM0Route.mem_partrecStartedTM0LabelList tc q).1 hq
+  have hqSupport : q ∈ TM0Route.partrecStartedTM0LabelSupportList tc :=
+    TM0Route.mem_partrecStartedTM0LabelSupportList_of_mem_labels hqset
+  have hget :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[
+          TM0FiniteCompiler.stateCode tc q]? = some q := by
+    unfold TM0FiniteCompiler.stateCode
+    exact List.getElem?_idxOf hqSupport
+  have hneqDefault : q ≠ (default : SourceLabel tc) := by
+    intro hqDefault
+    exact hneq (by simpa [sourceDefaultLabel_eq_default tc] using hqDefault)
+  have hcodeNeZero : TM0FiniteCompiler.stateCode tc q ≠ 0 := by
+    have hneStart := TM0FiniteCompiler.stateCode_ne_start_of_mem_labels_ne_default
+      hqset hneqDefault
+    simpa [TM0Route.partrecStartedTM0Start] using hneStart
+  let n := TM0FiniteCompiler.stateCode tc q - 1
+  have hstate : TM0FiniteCompiler.stateCode tc q = n + 1 := by
+    unfold n
+    omega
+  have hcodeLt :
+      TM0FiniteCompiler.stateCode tc q < TM0Route.partrecStartedTM0StateCount tc := by
+    have hmem := TM0FiniteCompiler.stateCode_mem_states tc q hqset
+    simpa [TM0Route.partrecStartedTM0States] using hmem
+  have hn : n < TM0Route.partrecStartedTM0LabelCount tc := by
+    rw [TM0Route.partrecStartedTM0StateCount,
+      TM0Route.partrecStartedTM0LabelSupportCount] at hcodeLt
+    omega
+  refine ⟨n, hn, ?_, hstate⟩
+  simpa [hstate] using hget
+
 theorem partrecStartedTM0LabelList_get?_sourceDefaultLabelIndex
     (tc : Turing.ToPartrec.Code) :
     (TM0Route.partrecStartedTM0LabelList tc)[sourceDefaultLabelIndex tc]? =
@@ -6979,6 +7017,60 @@ theorem positionProgramData_step_sim_eq_none_of_support_succ_no_step
     (marked := marked) (left := left) (right := right)
     hn hsupport hstate hstep
   simp [PostProgram.step, hfind]
+
+theorem positionProgramData_step_sim_of_step
+    {tc : Turing.ToPartrec.Code}
+    {q q' : SourceLabel tc} {side : FoldSide} {marked : Bool}
+    {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc q (foldedRead side left right) =
+        some (q', stmt)) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) =
+      some ((simRowOfStep tc side marked q q' left right stmt).next,
+        (simRowOfStep tc side marked q q' left right stmt).stmt) := by
+  by_cases hdefault : q = sourceDefaultLabel tc
+  · subst q
+    exact positionProgramData_step_sim_eq_some_of_sourceDefault_step
+      (tc := tc) (q' := q') (side := side) (marked := marked)
+      (left := left) (right := right) (stmt := stmt) hstep
+  · rcases q with ⟨stmtOpt, v⟩
+    rcases exists_support_succ_of_labelList_ne_sourceDefault
+        (tc := tc) (q := (stmtOpt, v)) hq hdefault with
+      ⟨n, hn, hsupport, hstate⟩
+    exact positionProgramData_step_sim_eq_some_of_support_succ_step
+      (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v)
+      (q' := q') (side := side) (marked := marked)
+      (left := left) (right := right) (stmt := stmt)
+      hn hq hsupport hstate hstep
+
+theorem positionProgramData_step_sim_eq_none_of_no_step
+    {tc : Turing.ToPartrec.Code}
+    {q : SourceLabel tc} {side : FoldSide} {marked : Bool}
+    {left right : SourceSymbol}
+    (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc q (foldedRead side left right) =
+        none) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) =
+      none := by
+  by_cases hdefault : q = sourceDefaultLabel tc
+  · subst q
+    exact positionProgramData_step_sim_eq_none_of_sourceDefault_no_step
+      (tc := tc) (side := side) (marked := marked)
+      (left := left) (right := right) hstep
+  · rcases q with ⟨stmtOpt, v⟩
+    rcases exists_support_succ_of_labelList_ne_sourceDefault
+        (tc := tc) (q := (stmtOpt, v)) hq hdefault with
+      ⟨n, hn, hsupport, hstate⟩
+    exact positionProgramData_step_sim_eq_none_of_support_succ_no_step
+      (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v)
+      (side := side) (marked := marked) (left := left) (right := right)
+      hn hsupport hstate hstep
 
 end TM0FoldedCompiler
 
