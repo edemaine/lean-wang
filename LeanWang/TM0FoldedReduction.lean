@@ -4378,6 +4378,96 @@ def sourceObligationsOfPositionCodeInteriorRows
 
 /--
 Primitive recursiveness of the source-level position-coded descriptor decoder
+directly gives the generated-position source obligations.  Unlike
+`sourceObligationsOfLabelIndexFromWithPositionCode`, this packages
+`positionProgramData` itself and therefore does not require proving equality
+with the canonical folded row list.
+-/
+def positionSourceObligationsOfLabelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfProgramData
+    ((sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
+      hindex).of_eq fun _ => rfl)
+    hcorrect
+
+/--
+Primitive recursiveness of the generated position-code accumulator step gives
+the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfLabelIndexFromWithPositionCode
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step hstep)
+    hcorrect
+
+/--
+Primitive recursiveness of the generated one-row position-code decoder gives
+the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeOneRows
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfLabelIndexFromWithPositionCode
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRows
+      hvarRows)
+    hcorrect
+
+/--
+Primitive recursiveness of the generated bounded-interior position-code rows
+gives the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeBoundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeOneRows
+    (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hinterior)
+    hcorrect
+
+/--
+Primitive recursiveness of the generated interior position-code rows gives the
+generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeBoundedInteriorRows
+    (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
+    hcorrect
+
+/--
+Primitive recursiveness of the source-level position-coded descriptor decoder
 and first-occurrence minimality for every decoded support position are enough
 to produce the source obligations needed by the final reduction.
 -/
