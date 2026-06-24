@@ -39,6 +39,14 @@ abbrev SourceStmtNodes (tc : Turing.ToPartrec.Code) : Type :=
 abbrev EncodedTrAuxDep (tc : Turing.ToPartrec.Code) : Type :=
   SourceStmtNodes tc × PartrecVar × SourceSymbol
 
+/-- Mathlib's default/start label for the TM1-to-TM0 translated machine. -/
+def sourceDefaultLabel (tc : Turing.ToPartrec.Code) : SourceLabel tc :=
+  (some (TM0Route.partrecStartedTM1Machine tc default), default)
+
+theorem sourceDefaultLabel_eq_default (tc : Turing.ToPartrec.Code) :
+    sourceDefaultLabel tc = (default : SourceLabel tc) := by
+  rfl
+
 /-- Which half of a folded one-sided cell is the simulated two-sided head reading? -/
 inductive FoldSide where
   | left
@@ -3134,6 +3142,48 @@ def labelAtByStatementFromWithStateCode?
   (TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i).map
     fun q => (q, TM0FiniteCompiler.stateCode tc q)
 
+/--
+Position-code for the rectangular statement/variable label decoder.
+
+The support list is `default :: labelList`, while the rectangular label list
+itself starts with the same default label `(none, default)`.  To agree with the
+forced start/default state, that duplicated label is coded as `0`; all other
+rectangular positions use the shifted support-list position.
+-/
+def labelPositionCode {tc : Turing.ToPartrec.Code}
+    (k i : Nat) (stmt : Option (SourceStmt tc)) (v : PartrecVar) : Nat :=
+  if ((stmt, v) : SourceLabel tc) = sourceDefaultLabel tc then
+    0
+  else
+    1 + k * TM0Route.partrecVarList.length + i
+
+theorem labelPositionCode_primrec_fixed (tc : Turing.ToPartrec.Code)
+    [Primcodable (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)] :
+    Primrec (fun p : Nat × Nat × Option (SourceStmt tc) × PartrecVar =>
+      labelPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let rect : Nat × Nat × Option (SourceStmt tc) × PartrecVar → Nat := fun p =>
+    1 + p.1 * TM0Route.partrecVarList.length + p.2.1
+  have hrect : Primrec rect := by
+    exact Primrec.nat_add.comp
+      (Primrec.nat_add.comp (Primrec.const 1)
+        (Primrec.nat_mul.comp Primrec.fst
+          (Primrec.const TM0Route.partrecVarList.length)))
+      (Primrec.fst.comp Primrec.snd)
+  have hdefault : PrimrecPred
+      (fun p : Nat × Nat × Option (SourceStmt tc) × PartrecVar =>
+        ((p.2.2.1, p.2.2.2) : SourceLabel tc) = sourceDefaultLabel tc) :=
+    Primrec.eq.comp
+      (Primrec.pair (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+      (Primrec.const (sourceDefaultLabel tc))
+  exact (Primrec.ite hdefault
+    (Primrec.const 0) hrect).of_eq fun p => by
+      unfold labelPositionCode rect
+      rfl
+
 /-- One step of the position-coded offset label lookup. -/
 def labelAtByStatementFromWithPositionCodeStep?
     (tc : Turing.ToPartrec.Code)
@@ -3145,7 +3195,7 @@ def labelAtByStatementFromWithPositionCodeStep?
       match TM0Route.partrecVarList[s.2.2]? with
       | some v =>
           ((TM0Route.partrecStartedTM0StatementAt? tc s.2.1).map fun stmt =>
-            ((stmt, v), 1 + s.2.1 * TM0Route.partrecVarList.length + s.2.2),
+            ((stmt, v), labelPositionCode s.2.1 s.2.2 stmt v),
             s.2.1, s.2.2)
       | none =>
           (none, s.2.1 + 1, s.2.2 - TM0Route.partrecVarList.length)
@@ -3154,9 +3204,8 @@ def labelAtByStatementFromWithPositionCodeStep?
 Offset label lookup paired with the numeric position in the rectangular
 statement-by-variable enumeration, including the leading default state.
 
-This is the Nat-coded state identifier that should eventually replace the
-dependent `idxOf`-based state code once the support-list no-duplicate facts are
-available.
+The duplicated default label is mapped to state `0`; all other decoded
+statement/variable positions use their support-list position.
 -/
 def labelAtByStatementFromWithPositionCode?
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
@@ -3187,44 +3236,48 @@ theorem labelAtByStatementFromWithPositionCodeStep?_primrec_fixed
         (Primrec.nat_sub.comp hindex (Primrec.const TM0Route.partrecVarList.length)))
   have hsomeBlock : Primrec₂ (fun s : State => fun v : PartrecVar =>
       ((TM0Route.partrecStartedTM0StatementAt? tc (offset s)).map fun stmt =>
-        ((stmt, v), 1 + offset s * TM0Route.partrecVarList.length + index s),
+        ((stmt, v), labelPositionCode (offset s) (index s) stmt v),
         offset s, index s)) := by
     apply Primrec₂.mk
     let base : State × PartrecVar → State := fun p => p.1
     let vArg : State × PartrecVar → PartrecVar := fun p => p.2
-    let code : State × PartrecVar → Nat := fun p =>
-      1 + offset (base p) * TM0Route.partrecVarList.length + index (base p)
     have hbase : Primrec base := Primrec.fst
     have hvArg : Primrec vArg := Primrec.snd
     have hoffsetBase : Primrec (fun p : State × PartrecVar => offset (base p)) :=
       hoffset.comp hbase
     have hindexBase : Primrec (fun p : State × PartrecVar => index (base p)) :=
       hindex.comp hbase
-    have hcode : Primrec code := by
-      exact Primrec.nat_add.comp
-        (Primrec.nat_add.comp (Primrec.const 1)
-          (Primrec.nat_mul.comp hoffsetBase
-            (Primrec.const TM0Route.partrecVarList.length)))
-        hindexBase
     have hget : Primrec (fun p : State × PartrecVar =>
         TM0Route.partrecStartedTM0StatementAt? tc (offset (base p))) :=
       hstmt.comp hoffsetBase
     have hpair : Primrec₂ (fun p : State × PartrecVar =>
-        fun stmt : Option (SourceStmt tc) => ((stmt, vArg p), code p)) := by
+        fun stmt : Option (SourceStmt tc) =>
+          ((stmt, vArg p), labelPositionCode (offset (base p)) (index (base p)) stmt
+            (vArg p))) := by
       apply Primrec₂.mk
+      have hcode : Primrec (fun p : (State × PartrecVar) × Option (SourceStmt tc) =>
+          labelPositionCode (offset (base p.1)) (index (base p.1)) p.2 (vArg p.1)) := by
+        exact (labelPositionCode_primrec_fixed tc).comp
+          (Primrec.pair
+            (hoffsetBase.comp Primrec.fst)
+            (Primrec.pair
+              (hindexBase.comp Primrec.fst)
+              (Primrec.pair Primrec.snd (hvArg.comp Primrec.fst))))
       exact Primrec.pair
         (Primrec.pair Primrec.snd (hvArg.comp Primrec.fst))
-        (hcode.comp Primrec.fst)
+        hcode
     have hmap : Primrec (fun p : State × PartrecVar =>
         (TM0Route.partrecStartedTM0StatementAt? tc (offset (base p))).map
-          fun stmt => ((stmt, vArg p), code p)) :=
+          fun stmt =>
+            ((stmt, vArg p), labelPositionCode (offset (base p)) (index (base p)) stmt
+              (vArg p))) :=
       Primrec.option_map hget hpair
     exact Primrec.pair hmap (Primrec.pair hoffsetBase hindexBase)
   have hnone : Primrec (fun s : State =>
       match TM0Route.partrecVarList[index s]? with
       | some v =>
           ((TM0Route.partrecStartedTM0StatementAt? tc (offset s)).map fun stmt =>
-            ((stmt, v), 1 + offset s * TM0Route.partrecVarList.length + index s),
+            ((stmt, v), labelPositionCode (offset s) (index s) stmt v),
             offset s, index s)
       | none =>
           ((none : Option (SourceLabel tc × Nat)),
@@ -3312,21 +3365,54 @@ theorem labelAtByStatementFromWithPositionCode?_succ_of_stmt_some
     (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = some stmt) :
     labelAtByStatementFromWithPositionCode? tc (fuel + 1) k i =
       some ((((stmt, v) : SourceLabel tc),
-        1 + k * TM0Route.partrecVarList.length + i)) := by
+        labelPositionCode k i stmt v)) := by
   unfold labelAtByStatementFromWithPositionCode?
   rw [Function.iterate_succ_apply]
   unfold labelAtByStatementFromWithPositionCodeStep?
   simp only [hv, hstmt, Option.map_some]
   have hfixed := labelAtByStatementFromWithPositionCodeStep?_fixed_of_found
     tc ((((stmt, v) : SourceLabel tc),
-      1 + k * TM0Route.partrecVarList.length + i)) k i
+      labelPositionCode k i stmt v)) k i
   change ((labelAtByStatementFromWithPositionCodeStep? tc)^[fuel]
       (some ((((stmt, v) : SourceLabel tc),
-        1 + k * TM0Route.partrecVarList.length + i)), k, i)).1 =
+        labelPositionCode k i stmt v)), k, i)).1 =
     some ((((stmt, v) : SourceLabel tc),
-      1 + k * TM0Route.partrecVarList.length + i))
+      labelPositionCode k i stmt v))
   rw [Function.iterate_fixed hfixed fuel]
   rfl
+
+theorem labelPositionCode_mem_states_of_statementAt?
+    (tc : Turing.ToPartrec.Code) {k i : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    labelPositionCode k i stmt v ∈ TM0Route.partrecStartedTM0States tc := by
+  by_cases hdefault : ((stmt, v) : SourceLabel tc) = sourceDefaultLabel tc
+  · simpa [labelPositionCode, hdefault, TM0Route.partrecStartedTM0Start] using
+      TM0Route.partrecStartedTM0Start_mem_states tc
+  · rw [show labelPositionCode k i stmt v =
+        1 + k * TM0Route.partrecVarList.length + i by
+      simp [labelPositionCode, hdefault]]
+    exact TM0Route.partrecStartedTM0_position_mem_states_of_statementAt?
+      tc hstmt hv
+
+theorem labelPositionCode_support_get?_of_statementAt?
+    (tc : Turing.ToPartrec.Code) {k i : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc k = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    (TM0Route.partrecStartedTM0LabelSupportList tc)[labelPositionCode k i stmt v]? =
+      some ((stmt, v) : SourceLabel tc) := by
+  by_cases hdefault : ((stmt, v) : SourceLabel tc) = sourceDefaultLabel tc
+  · rw [show labelPositionCode k i stmt v = 0 by simp [labelPositionCode, hdefault]]
+    rw [TM0Route.partrecStartedTM0LabelSupportList_get_zero]
+    rw [← sourceDefaultLabel_eq_default tc]
+    exact congrArg some hdefault.symm
+  · rw [show labelPositionCode k i stmt v =
+        1 + k * TM0Route.partrecVarList.length + i by
+      simp [labelPositionCode, hdefault]]
+    exact TM0Route.partrecStartedTM0LabelSupportList_get_position_of_statementAt?
+      tc hstmt hv
 
 theorem labelAtByStatementFromWithPositionCode?_fst_eq
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
@@ -3371,8 +3457,7 @@ theorem labelAtByStatementFromWithPositionCode?_code_mem_states
           | some stmt =>
               rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
               cases h
-              exact TM0Route.partrecStartedTM0_position_mem_states_of_statementAt?
-                tc hstmt hv
+              exact labelPositionCode_mem_states_of_statementAt? tc hstmt hv
 
 theorem labelAtByStatementFromWithPositionCode?_support_get?
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
@@ -3394,8 +3479,7 @@ theorem labelAtByStatementFromWithPositionCode?_support_get?
           | some stmt =>
               rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
               cases h
-              exact TM0Route.partrecStartedTM0LabelSupportList_get_position_of_statementAt?
-                tc hstmt hv
+              exact labelPositionCode_support_get?_of_statementAt? tc hstmt hv
 
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
