@@ -91,10 +91,10 @@ def IsScaffold (S : Scaffold) : Prop :=
       forall n : Nat, 0 < n -> TileableFixedCornerSquare T seed n
 ```
 
-Mathematically, these obligations package computable reductions; the
-implementation side may still use "compiler"/"compilation" when describing the
-concrete construction of finite program data. In prose, "reduction" should be
-the default word for the mathematical notion.
+Mathematically, these obligations package computable reductions. In prose,
+"reduction" should be the default word for the mathematical notion; "program
+construction" is only for the concrete finite data generation inside that
+reduction.
 
 The only live machine-side source route now factors through Mathlib's TM2,
 TM1, and TM0 translations before entering the local folded one-sided TM0 model.
@@ -115,7 +115,8 @@ table-machine definitions remain live only because the current Wang-tile layer
 consumes `TableProgram`; they are fed by the concrete compatibility bridge
 `PostProgram.toTableProgram` until that layer is replaced by direct finite-TM0
 tiles. This bridge starts only after the source machine has already been
-reduced to finite one-sided TM0 data.
+reduced to finite one-sided TM0 data, so it is not a direct TM2-to-table
+reduction.
 Together these pieces feed the fixed-domino, fixed-corner, encoded scaffolded
 domino, and unencoded scaffolded domino theorem surfaces from the source-level
 folded finite-TM0 factorization using the concrete source-code translation into
@@ -150,7 +151,8 @@ started-TM2 label list and uses this explicit recursive support list instead
 of `Finset.toList` for downstream label enumeration; the resulting translated
 TM0 label list, support list, numeric state list, and state code are
 executable. This isolates the next computability step: prove or package
-computability of the folded program compiler itself.
+computability of the folded finite-TM0 program construction used by the
+reduction.
 
 The old direct finite-program construction from this route data has been
 removed because it was not the right semantic bridge: Mathlib TM0 has a
@@ -174,8 +176,9 @@ TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
 The remaining blocker for the source-level folded route is computability of
 `TM0FoldedCompiler.programData ∘ NatPartrecToToPartrec.translate`. The
 support-list and numeric state-code path is now executable; the next step is to
-remove or localize the file-wide noncomputable section in `TM0FoldedCompiler`
-and prove the resulting source program-data map computable.
+remove or localize the file-wide noncomputable section around the folded
+program construction and prove the resulting source program-data map
+computable.
 `TM0FoldedCompiler.programData` is a normalized form of `program` where the
 constant initial rows are exposed definitionally, with
 `TM0FoldedCompiler.programData_eq_program` relating it back to the semantic
@@ -261,7 +264,7 @@ Next implementation targets:
 2. Optionally strengthen the result to computability on all
    `Turing.ToPartrec.Code` for a reusable folded-route corollary. This should
    still feed the source-level theorem through `Obligations.toSource`, not
-   reintroduce a generic table-facing compiler interface.
+   reintroduce a generic table-facing reduction interface.
 3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
 4. Specialize the concrete folded-route/scaffold corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_source` and

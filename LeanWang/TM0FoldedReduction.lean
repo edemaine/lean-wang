@@ -38,9 +38,9 @@ structure Obligations where
 /--
 The exact obligations needed for the final reduction from `Nat.Partrec.Code`.
 
-This avoids asking for computability of the folded compiler on every
-`Turing.ToPartrec.Code`; the undecidability proof only uses codes reached by the
-computable translation `NatPartrecToToPartrec.translate`.
+This avoids asking for computability of the folded finite-program construction
+on every `Turing.ToPartrec.Code`; the undecidability proof only uses codes
+reached by the computable translation `NatPartrecToToPartrec.translate`.
 -/
 structure SourceObligations where
   program_computable :
@@ -378,7 +378,7 @@ theorem sourceProgramData_computable_of_global_simStepData'
 -- The source-level indexed descriptor list is enough for computability of the
 -- normalized folded finite-TM0 program data used by the final reduction.
 set_option maxHeartbeats 800000 in
--- The final equality unfolds normalized program data and the descriptor-row compiler.
+-- The final equality unfolds normalized program data and the descriptor rows.
 theorem sourceProgramData_computable_of_source_simStepDataByLabelIndex
     (hsteps : Primrec sourceSimStepDataByLabelIndex) :
     Computable sourceProgramData := by
@@ -401,7 +401,7 @@ theorem sourceProgramData_computable_of_source_simStepDataByLabelIndex
       (NatPartrecToToPartrec.translate c)]).to_comp
 
 set_option maxHeartbeats 800000 in
--- The final equality unfolds normalized program data and the descriptor-row compiler.
+-- The final equality unfolds normalized program data and the descriptor rows.
 theorem sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     (hsteps : Primrec sourceSimStepDataByLabelIndexWithCode) :
     Computable sourceProgramData := by

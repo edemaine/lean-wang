@@ -11,9 +11,9 @@ Executable list mirrors for Mathlib's `PartrecToTM2` support finsets.
 `PartrecToTM2Support.labelList` currently uses `Finset.toList`, which is
 noncomputable. This file mirrors Mathlib's recursive `trStmts₁`, `codeSupp'`,
 `contSupp`, and `codeSupp` definitions with explicit lists. The current TM0
-route has not yet been switched to these lists; keeping the mirror isolated
-lets us prove the list/finset correspondence without rebuilding the folded
-compiler on every intermediate edit.
+route uses these mirrors for executable support sizes and code-uniform lookup
+work. Keeping the mirror isolated lets us prove the list/finset correspondence
+without rebuilding the folded finite-TM0 reduction on every intermediate edit.
 -/
 
 namespace LeanWang

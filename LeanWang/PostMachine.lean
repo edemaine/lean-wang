@@ -956,7 +956,7 @@ def toTableProgram (P : PostProgram) : TableProgram where
   halt := tableHalt
   table := tableRows P
 
-/-- The finite-TM0-to-table data compiler is primitive recursive. -/
+/-- The finite-TM0-to-table data adapter is primitive recursive. -/
 theorem toTableProgram_primrec : Primrec toTableProgram := by
   unfold toTableProgram
   exact TableProgram.mk_primrec.comp
@@ -966,7 +966,7 @@ theorem toTableProgram_primrec : Primrec toTableProgram := by
           (Primrec.pair (tableRunState_primrec.comp start_primrec)
             (Primrec.pair (Primrec.const tableHalt) tableRows_primrec)))))
 
-/-- The finite-TM0-to-table data compiler is computable. -/
+/-- The finite-TM0-to-table data adapter is computable. -/
 theorem toTableProgram_computable : Computable toTableProgram :=
   toTableProgram_primrec.to_comp
 
