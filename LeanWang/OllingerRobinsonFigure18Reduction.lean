@@ -11,8 +11,8 @@ Reduction wrappers specialized to the concrete Figure 18 scaffold package.
 
 This module is intentionally thin: it keeps the large folded reduction modules
 unchanged while exposing theorem surfaces that take the eventual direct
-`Figure18Instance`, routed `Figure18RoutedInstance`, or flexible
-`Figure18FlexibleInstance` directly.
+`Figure18Instance`, indexed routed `Figure18IndexedRoutedInstance`, routed
+`Figure18RoutedInstance`, or flexible `Figure18FlexibleInstance` directly.
 -/
 
 noncomputable section
@@ -82,6 +82,66 @@ theorem domino_problem_undecidable_of_figure18_position_source_interiorRows
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
     I.toPresentedInstance hinterior hcorrect
+
+/--
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+an indexed routed free-coordinate certificate and generated position-coded
+source-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_indexed_routed_position_source
+    (I : OllingerRobinson.Figure18IndexedRoutedInstance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_checked_flexible_transcription_position_source
+    I.toFlexibleInstance.checkedFlexibleTranscription h
+
+/--
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with an indexed routed free-coordinate certificate and generated position-coded
+source-route obligations.
+-/
+theorem domino_problem_undecidable_of_figure18_indexed_routed_position_source
+    (I : OllingerRobinson.Figure18IndexedRoutedInstance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_checked_flexible_transcription_position_source
+    I.toFlexibleInstance.checkedFlexibleTranscription h
+
+/--
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+an indexed routed free-coordinate certificate and the generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
+    (I : OllingerRobinson.Figure18IndexedRoutedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+    I.toFlexibleInstance.checkedFlexibleTranscription hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with an indexed routed free-coordinate certificate and the generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
+    (I : OllingerRobinson.Figure18IndexedRoutedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+    I.toFlexibleInstance.checkedFlexibleTranscription hinterior hcorrect
 
 /--
 Encoded domino undecidability from a concrete Figure 18 scaffold instance with

@@ -1555,6 +1555,18 @@ structure Figure18RoutedCertificate (table : Figure18RoleTable) : Prop where
   routedForces : HasFigure18RoutedFixedCornerSquares table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
+/--
+Geometric obligations for a concrete Figure 18 role table using the indexed
+routed payload-square extraction.
+
+This is the preferred finite-data target: the free-coordinate proof names every
+routed scaffold site by Figure 13 index and quadrant, then converts through the
+ordinary routed certificate.
+-/
+structure Figure18IndexedRoutedCertificate (table : Figure18RoleTable) : Prop where
+  indexedRoutedForces : HasFigure18IndexedRoutedFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
 namespace Figure18Certificate
 
 def toFlexibleCertificate
@@ -1584,6 +1596,37 @@ theorem isScaffold
 
 end Figure18RoutedCertificate
 
+namespace Figure18IndexedRoutedCertificate
+
+def toRoutedCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18IndexedRoutedCertificate table) :
+    Figure18RoutedCertificate table where
+  routedForces :=
+    hasFigure18RoutedFixedCornerSquares_of_indexed
+      certificate.indexedRoutedForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18IndexedRoutedCertificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18IndexedRouted
+    certificate.indexedRoutedForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable}
+    (certificate : Figure18IndexedRoutedCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18IndexedRouted
+      certificate.indexedRoutedForces
+    realizes := certificate.realizes
+  }
+
+end Figure18IndexedRoutedCertificate
+
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
 the geometric flexible scaffold certificate.
@@ -1598,6 +1641,14 @@ Concrete Figure 18 scaffold package using the routed payload-square certificate.
 structure Figure18RoutedInstance where
   table : Figure18RoleTable
   certificate : Figure18RoutedCertificate table
+
+/--
+Concrete Figure 18 scaffold package using the indexed routed payload-square
+certificate.
+-/
+structure Figure18IndexedRoutedInstance where
+  table : Figure18RoleTable
+  certificate : Figure18IndexedRoutedCertificate table
 
 /--
 Concrete Figure 18 scaffold package using the direct indexed free-square
@@ -1680,6 +1731,44 @@ theorem isScaffold (I : Figure18RoutedInstance) :
   I.certificate.isScaffold
 
 end Figure18RoutedInstance
+
+namespace Figure18IndexedRoutedInstance
+
+def finite (I : Figure18IndexedRoutedInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18IndexedRoutedInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def toRoutedInstance (I : Figure18IndexedRoutedInstance) :
+    Figure18RoutedInstance where
+  table := I.table
+  certificate := I.certificate.toRoutedCertificate
+
+def toFlexibleInstance (I : Figure18IndexedRoutedInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toRoutedInstance_table (I : Figure18IndexedRoutedInstance) :
+    I.toRoutedInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18IndexedRoutedInstance) :
+    I.toFlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : Figure18IndexedRoutedInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18IndexedRoutedInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18IndexedRoutedInstance
 
 namespace Figure18FlexibleInstance
 
