@@ -317,6 +317,11 @@ namespace Figure18Site
 def tile (site : Figure18Site) : WangTile :=
   fig13QuarterTile site.index site.quadrant
 
+/-- All Figure 18 quadrant sites, ordered by Figure 13 tile index then quadrant. -/
+def all : List Figure18Site :=
+  (List.finRange 92).flatMap fun i =>
+    Quadrant.all.map fun q => ({ index := i, quadrant := q } : Figure18Site)
+
 @[simp]
 theorem tile_mk (index : Fin 92) (quadrant : Quadrant) :
     ({ index := index, quadrant := quadrant } : Figure18Site).tile =
@@ -333,6 +338,12 @@ theorem tile_injective :
     Function.Injective tile := by
   intro site other htile
   exact (tile_eq_iff site other).1 htile
+
+theorem mem_all (site : Figure18Site) : site ∈ all := by
+  rcases site with ⟨i, q⟩
+  unfold all
+  exact List.mem_flatMap.2 ⟨i, List.mem_finRange i,
+    List.mem_map.2 ⟨q, Quadrant.mem_all q, rfl⟩⟩
 
 end Figure18Site
 
@@ -924,6 +935,24 @@ theorem presentation_mem_iff_exists_fig13QuarterTile
   · exact table.exists_fig13QuarterTile_of_mem_presentation
   · rintro ⟨i, q, rfl⟩
     exact table.presentation_mem_fig13QuarterTile i q
+
+theorem exists_site_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ site : Figure18Site, site ∈ Figure18Site.all ∧ tile = site.tile := by
+  rcases table.exists_fig13QuarterTile_of_mem_presentation htile with
+    ⟨i, q, htileSite⟩
+  let site : Figure18Site := { index := i, quadrant := q }
+  exact ⟨site, Figure18Site.mem_all site, htileSite⟩
+
+theorem presentation_mem_iff_exists_site
+    (table : Figure18RoleTable) (tile : WangTile) :
+    tile ∈ table.presentation.tiles ↔
+      ∃ site : Figure18Site, site ∈ Figure18Site.all ∧ tile = site.tile := by
+  constructor
+  · exact table.exists_site_of_mem_presentation
+  · rintro ⟨site, _hsite, rfl⟩
+    exact table.presentation_mem_site site
 
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
