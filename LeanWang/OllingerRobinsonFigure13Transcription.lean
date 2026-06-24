@@ -1150,6 +1150,32 @@ theorem hasPresentedRecognizableFreeSquares_of_figure18Indexed
   rcases hwindow x hx n hn with ⟨window⟩
   exact ⟨window.toPresentedActiveCornerWindow⟩
 
+theorem hasRecognizableFreeSquares_of_figure18Indexed
+    {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindows table) :
+    HasRecognizableFreeSquares table.presentation.toScaffold := by
+  exact hasRecognizableFreeSquares_of_presented
+    (hasPresentedRecognizableFreeSquares_of_figure18Indexed hwindow)
+    (by
+      simpa [Figure18RoleTable.presentation] using
+        table.finiteCheckedTranscription.sanityProp.corner_unique)
+
+theorem forcesActiveCornerSquares_of_figure18Indexed
+    {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindows table) :
+    ForcesActiveCornerSquares table.presentation.toScaffold := by
+  exact forcesActiveCornerSquares_of_planeTilingForcesActiveCornerWindows
+    (planeTilingForcesActiveCornerWindows_of_hasActiveCornerBaseWindows
+      (planeTilingHasActiveCornerBaseWindows_of_hasRecognizableFreeSquares
+        (hasRecognizableFreeSquares_of_figure18Indexed hwindow)))
+
+theorem forcesFixedCornerSquares_of_figure18Indexed
+    {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindows table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_forcesActiveCornerSquares
+    (forcesActiveCornerSquares_of_figure18Indexed hwindow)
+
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
 recognizable-free-square route.
@@ -1196,6 +1222,17 @@ two non-finite scaffold facts still supplied by the Ollinger/Robinson argument.
 structure Figure18FlexibleCertificate (table : Figure18RoleTable) : Prop where
   forces : ForcesFixedCornerSquares table.presentation.toScaffold
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+namespace Figure18Certificate
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable} (certificate : Figure18Certificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18Indexed
+    certificate.indexedRecognizable
+  realizes := certificate.realizes
+
+end Figure18Certificate
 
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
@@ -1251,6 +1288,11 @@ theorem presentation_tiles (I : Figure18Instance) :
 theorem isScaffold (I : Figure18Instance) :
     IsScaffold I.presentation.toScaffold :=
   I.certificate.isScaffold
+
+def toFlexibleInstance (I : Figure18Instance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
 
 end Figure18Instance
 
