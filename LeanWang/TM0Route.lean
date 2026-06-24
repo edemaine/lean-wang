@@ -5485,6 +5485,16 @@ def tm1StatementSupportAt? {Γ Λ σ : Type}
   | i + 1 =>
       flatMapAt? labels (fun q => (tm1StmtSupportList (M q)).map some) i
 
+@[simp]
+theorem tm1StatementSupportAt?_zero {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) :
+    tm1StatementSupportAt? labels M 0 = some none := rfl
+
+theorem tm1StatementSupportAt?_succ {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) (i : Nat) :
+    tm1StatementSupportAt? labels M (i + 1) =
+      flatMapAt? labels (fun q => (tm1StmtSupportList (M q)).map some) i := rfl
+
 theorem tm1StatementSupportAt?_eq_getElem? {Γ Λ σ : Type}
     (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) (i : Nat) :
     tm1StatementSupportAt? labels M i =
@@ -5780,6 +5790,11 @@ def partrecStartedTM0StatementAt? (tc : Turing.ToPartrec.Code) (i : Nat) :
   tm1StatementSupportAt? (partrecStartedTM1LabelList tc)
     (partrecStartedTM1Machine tc) i
 
+@[simp]
+theorem partrecStartedTM0StatementAt?_zero (tc : Turing.ToPartrec.Code) :
+    partrecStartedTM0StatementAt? tc 0 = some none := by
+  rfl
+
 theorem partrecStartedTM0StatementAt?_eq_getElem?
     (tc : Turing.ToPartrec.Code) (i : Nat) :
     partrecStartedTM0StatementAt? tc i =
@@ -5858,6 +5873,11 @@ theorem partrecStartedTM0StatementCount_eq_weightData (tc : Turing.ToPartrec.Cod
   apply List.map_congr_left
   intro q _hq
   simpa [partrecTM1LabelStmtSupportWeight] using tm2to1LabelList_statementWeight q
+
+theorem partrecStartedTM0StatementCount_pos (tc : Turing.ToPartrec.Code) :
+    0 < partrecStartedTM0StatementCount tc := by
+  rw [partrecStartedTM0StatementCount_eq_weightData]
+  simp [partrecStartedTM0StatementCountWeightData]
 
 theorem partrecStartedTM0StatementCountWeightData_primrec
     (hweight :

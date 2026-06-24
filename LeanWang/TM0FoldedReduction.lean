@@ -151,6 +151,9 @@ theorem sourceStatementCount_eq (c : Code) :
       TM0Route.partrecStartedTM0StatementCount (NatPartrecToToPartrec.translate c) :=
   rfl
 
+theorem sourceStatementCount_pos (c : Code) : 0 < sourceStatementCount c :=
+  TM0Route.partrecStartedTM0StatementCount_pos (NatPartrecToToPartrec.translate c)
+
 theorem sourceLabelCount_eq (c : Code) :
     sourceLabelCount c =
       TM0Route.partrecStartedTM0LabelCount (NatPartrecToToPartrec.translate c) :=
@@ -342,6 +345,21 @@ theorem sourceLabelIndexStartSplit?_of_getElem?
   simpa using sourceLabelIndexFromSplit?_of_getElem?
     (fuel := sourceStatementCount c) (k := 0) (i := i) hblock hv
 
+theorem sourceLabelIndexStartSplit?_of_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceLabelIndexStartSplit? c i = some (0, v) := by
+  rcases List.getElem?_eq_some_iff.1 hv with ⟨hi, _hget⟩
+  have hdiv : i / TM0Route.partrecVarList.length = 0 := Nat.div_eq_of_lt hi
+  have hmod : i % TM0Route.partrecVarList.length = i := Nat.mod_eq_of_lt hi
+  have hblock : i / TM0Route.partrecVarList.length < sourceStatementCount c := by
+    simpa [hdiv] using sourceStatementCount_pos c
+  have hvmod :
+      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
+    simpa [hmod] using hv
+  simpa [hdiv, hmod] using
+    sourceLabelIndexStartSplit?_of_getElem? (c := c) (i := i) hblock hvmod
+
 theorem sourceLabelIndexStartSplit?_block_lt_of_lt_labelCount
     {c : Code} {i : Nat} (hi : i < sourceLabelCount c) :
     i / TM0Route.partrecVarList.length < sourceStatementCount c := by
@@ -487,6 +505,44 @@ theorem sourceLabelAtByStatementStartWithSearchCode?_of_split
                 (NatPartrecToToPartrec.translate c))))) := by
   unfold sourceLabelIndexStartSplit? at hsplit
   simpa using sourceLabelAtByStatementFromWithSearchCode?_of_split hsplit hstmt
+
+theorem sourceStatementAt_zero (c : Code) :
+    TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) 0 =
+      some (none : Option (Turing.TM1.Stmt
+        (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+        (Turing.TM2to1.Λ'
+          TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+          (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+          TM0Route.PartrecVar)
+        TM0Route.PartrecVar)) := by
+  exact TM0Route.partrecStartedTM0StatementAt?_zero (NatPartrecToToPartrec.translate c)
+
+theorem sourceLabelAtByStatementStartWithSearchCode?_of_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i =
+      some (((((none : Option (Turing.TM1.Stmt
+          (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+          (Turing.TM2to1.Λ'
+            TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+            (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+            TM0Route.PartrecVar)
+          TM0Route.PartrecVar)), v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))),
+        TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((none, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))) := by
+  exact sourceLabelAtByStatementStartWithSearchCode?_of_split
+    (sourceLabelIndexStartSplit?_of_var_get? (c := c) hv) (sourceStatementAt_zero c)
 
 theorem sourceLabelAtByStatementFromWithPositionCode?_of_split
     {c : Code} {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
@@ -687,6 +743,31 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
       stmt v
   unfold sourceLabelIndexStartSplit? at hsplit
   exact sourceSimStepDataForLabelIndexFromWithSearchCode_of_split hsplit hstmt
+
+theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithSearchCode c i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((none, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        (none : Option (Turing.TM1.Stmt
+          (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+          (Turing.TM2to1.Λ'
+            TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+            (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+            TM0Route.PartrecVar)
+          TM0Route.PartrecVar))
+        v := by
+  exact sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
+    (sourceLabelIndexStartSplit?_of_var_get? (c := c) hv) (sourceStatementAt_zero c)
 
 /-- Source-code version of the canonical position-coded offset-start decoder. -/
 def sourceSimStepDataForLabelIndexStartWithPositionCode
