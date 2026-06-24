@@ -4012,6 +4012,61 @@ theorem labelAtByStatementFromWithPositionCode?_support_get?
               cases h
               exact labelPositionCode_support_get?_of_statementAt? tc hstmt hv
 
+theorem labelAtByStatementFromWithPositionCode?_start_of_support_succ_stateCode
+    (tc : Turing.ToPartrec.Code) {n : Nat} {target : SourceLabel tc}
+    (hsupport :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some target)
+    (hstate : TM0FiniteCompiler.stateCode tc target = n + 1) :
+    ∃ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 n = some q ∧
+        q.1 = target ∧ q.2 = TM0FiniteCompiler.stateCode tc target := by
+  have hlabelList :
+      (TM0Route.partrecStartedTM0LabelList tc)[n]? = some target := by
+    unfold TM0Route.partrecStartedTM0LabelSupportList at hsupport
+    simpa using hsupport
+  have hlabel :
+      TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 n = some target := by
+    rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq,
+      TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt,
+      TM0Route.partrecStartedTM0LabelAt?_eq_getElem?]
+    exact hlabelList
+  cases hdecode : labelAtByStatementFromWithPositionCode? tc
+      (TM0Route.partrecStartedTM0StatementCount tc) 0 n with
+  | none =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 n
+      rw [hdecode] at hfst
+      simp [hlabel] at hfst
+  | some q =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 n
+      rw [hdecode] at hfst
+      rw [hlabel] at hfst
+      have hqtarget : q.1 = target := Option.some.inj hfst
+      have hqcode : q.2 = TM0FiniteCompiler.stateCode tc target := by
+        rcases labelAtByStatementFromWithPositionCode?_start_code_eq_zero_or_succ
+            tc hdecode with hzero | hsucc
+        · have hget := labelAtByStatementFromWithPositionCode?_support_get? tc hdecode
+          rw [hzero] at hget
+          rw [TM0Route.partrecStartedTM0LabelSupportList_get_zero] at hget
+          have hqdefault : q.1 =
+              (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) := by
+            exact (Option.some.inj hget).symm
+          have htargetDefault :
+              target =
+                (default : Turing.TM1to0.Λ' (TM0Route.partrecStartedTM1Machine tc)) := by
+            rw [← hqtarget]
+            exact hqdefault
+          have hstate0 := TM0FiniteCompiler.stateCode_default tc
+          rw [htargetDefault] at hstate
+          rw [hstate0] at hstate
+          unfold TM0Route.partrecStartedTM0Start at hstate
+          omega
+        · rw [hsucc, hstate]
+      exact ⟨q, rfl, hqtarget, hqcode⟩
+
 theorem labelAtByStatementFromWithPositionCode?_label_eq_of_code_eq_stateCode
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
     {target : SourceLabel tc}
@@ -4881,6 +4936,35 @@ theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_succ_code
   rw [hsucc]
   exact labelAtByStatementFromWithPositionCode?_start_currentCode_ne_succ_of_lt
     tc hi hr
+
+theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_support_succ_stateCode
+    {tc : Turing.ToPartrec.Code} {n : Nat} {target : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {e : PostTransition}
+    (hn : n < TM0Route.partrecStartedTM0LabelCount tc)
+    (hsupport :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some target)
+    (hstate : TM0FiniteCompiler.stateCode tc target = n + 1)
+    (hcanonical :
+      (simRowsOfStepData
+        (simStepDataForStmtLabelWithCode tc
+          (TM0FiniteCompiler.stateCode tc target) target.1 target.2)).find?
+          (fun e =>
+            e.matchesInput (foldedSimStateCode tc side target)
+              (foldedSymbolCode marked left right)) = some e) :
+    (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) =
+      some e := by
+  rcases labelAtByStatementFromWithPositionCode?_start_of_support_succ_stateCode
+      tc hsupport hstate with ⟨q, hdecode, _hqtarget, hqcode⟩
+  have htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc :=
+    List.mem_iff_getElem?.2 ⟨n + 1, hsupport⟩
+  exact simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_succ_code
+    (tc := tc) (n := n) (q := q) (target := target) (side := side)
+    (marked := marked) (left := left) (right := right)
+    hn hdecode htarget hqcode hstate hcanonical
 
 theorem simStepDataByLabelIndex_primrec_of_forLabelIndex
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
