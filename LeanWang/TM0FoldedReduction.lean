@@ -962,6 +962,21 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_statementCoun
             (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
               (NatPartrecToToPartrec.translate c) (by simpa [sourceStatementCount] using hk))
 
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_statementCount_add
+    (c : Code) (fuel offset i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c fuel
+      (sourceStatementCount c + offset) i = [] :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_statementCount_le
+    c fuel (sourceStatementCount c + offset) i (Nat.le_add_right _ _)
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_statementCount_add_primrec :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1
+        (sourceStatementCount p.1 + p.2.2.1) p.2.2.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourceSimStepDataForLabelIndexFromWithSearchCode_statementCount_add
+      p.1 p.2.1 p.2.2.1 p.2.2.2).symm
+
 def sourceSearchCodeOneRowsVar
     (c : Code) (k : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
@@ -995,6 +1010,17 @@ theorem sourceSearchCodeOneRowsVar_eq_nil_of_statementCount_le
   exact sourceSearchCodeOneRowsVar_stmt_none
     (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
       (NatPartrecToToPartrec.translate c) (by simpa [sourceStatementCount] using hk))
+
+theorem sourceSearchCodeOneRowsVar_statementCount_add
+    (c : Code) (offset : Nat) (v : TM0Route.PartrecVar) :
+    sourceSearchCodeOneRowsVar c (sourceStatementCount c + offset) v = [] :=
+  sourceSearchCodeOneRowsVar_eq_nil_of_statementCount_le v (Nat.le_add_right _ _)
+
+theorem sourceSearchCodeOneRowsVar_statementCount_add_primrec :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 (sourceStatementCount p.1 + p.2.1) p.2.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourceSearchCodeOneRowsVar_statementCount_add p.1 p.2.1 p.2.2).symm
 
 theorem sourceSearchCodeOneRowsVar_stmt_some
     {c : Code} {k : Nat} {v : TM0Route.PartrecVar}
