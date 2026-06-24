@@ -29,11 +29,66 @@ deriving DecidableEq, Repr
 
 namespace TileQuarterRoles
 
+def const (role : CellRole) : TileQuarterRoles where
+  southwest := role
+  southeast := role
+  northwest := role
+  northeast := role
+
+def ofQuadrants
+    (southwest southeast northwest northeast : CellRole) : TileQuarterRoles where
+  southwest := southwest
+  southeast := southeast
+  northwest := northwest
+  northeast := northeast
+
+def inactive : TileQuarterRoles :=
+  const CellRole.inactive
+
+def channel : TileQuarterRoles :=
+  const CellRole.channel
+
+def active : TileQuarterRoles :=
+  const CellRole.active
+
 def roleAt (roles : TileQuarterRoles) : Quadrant → CellRole
   | .southwest => roles.southwest
   | .southeast => roles.southeast
   | .northwest => roles.northwest
   | .northeast => roles.northeast
+
+@[simp]
+theorem roleAt_const (role : CellRole) (q : Quadrant) :
+    (const role).roleAt q = role := by
+  cases q <;> rfl
+
+@[simp]
+theorem roleAt_ofQuadrants_southwest
+    (southwest southeast northwest northeast : CellRole) :
+    (ofQuadrants southwest southeast northwest northeast).roleAt
+      Quadrant.southwest = southwest :=
+  rfl
+
+@[simp]
+theorem roleAt_ofQuadrants_southeast
+    (southwest southeast northwest northeast : CellRole) :
+    (ofQuadrants southwest southeast northwest northeast).roleAt
+      Quadrant.southeast = southeast :=
+  rfl
+
+@[simp]
+theorem roleAt_ofQuadrants_northwest
+    (southwest southeast northwest northeast : CellRole) :
+    (ofQuadrants southwest southeast northwest northeast).roleAt
+      Quadrant.northwest = northwest :=
+  rfl
+
+@[simp]
+theorem roleAt_ofQuadrants_northeast
+    (southwest southeast northwest northeast : CellRole) :
+    (ofQuadrants southwest southeast northwest northeast).roleAt
+      Quadrant.northeast = northeast :=
+  rfl
 
 /-- Expand one raw tile with quadrant roles into four role specs. -/
 def toRoleSpecs (tile : WangTile) (roles : TileQuarterRoles) : List RoleTileSpec :=
@@ -695,6 +750,90 @@ theorem fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_presentation_tiles
     (fig13QuarterRoleRow_getElem? roleRows hlen cornerIndex)
     (fig13QuarterCornerRole_of_positionUniqueBool hlen hcheck)
     (fig13QuarterCornerPositionUnique_of_bool hcheck)
+
+/--
+Concrete finite target for the Figure 18 interpretation of Figure 13.
+
+The rows are ordered like `fig13Tiles`; each row assigns roles to the four
+quarter-tiles of that raw tile.  The boolean certificate states that the
+declared indexed quadrant is exactly the unique `corner` quadrant.  Filling this
+structure with the paper-derived role table is the finite-data step before the
+geometric `forces`/`realizes` proofs.
+-/
+structure Figure18RoleTable where
+  roleRows : List TileQuarterRoles
+  cornerIndex : Fin 92
+  cornerQuadrant : Quadrant
+  length_eq : roleRows.length = 92
+  uniqueCorner :
+    fig13QuarterCornerPositionUniqueBool
+      roleRows cornerIndex cornerQuadrant = true
+
+namespace Figure18RoleTable
+
+def row (table : Figure18RoleTable) (i : Fin 92) : TileQuarterRoles :=
+  fig13QuarterRoleRow table.roleRows table.length_eq i
+
+def roleAt (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
+    CellRole :=
+  (table.row i).roleAt q
+
+def cornerTile (table : Figure18RoleTable) : WangTile :=
+  fig13QuarterTile table.cornerIndex table.cornerQuadrant
+
+def finiteCheckedTranscription (table : Figure18RoleTable) :
+    FiniteCheckedTranscription :=
+  fig13QuarterFiniteCheckedTranscriptionOfUniqueBool
+    table.roleRows table.length_eq table.cornerIndex table.cornerQuadrant
+    table.uniqueCorner
+
+def presentation (table : Figure18RoleTable) : ScaffoldPresentation :=
+  table.finiteCheckedTranscription.presentation
+
+@[simp]
+theorem finiteCheckedTranscription_specs (table : Figure18RoleTable) :
+    table.finiteCheckedTranscription.specs =
+      fig13QuarterRoleSpecs table.roleRows :=
+  fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_specs
+    table.roleRows table.length_eq table.cornerIndex table.cornerQuadrant
+    table.uniqueCorner
+
+@[simp]
+theorem finiteCheckedTranscription_cornerTile (table : Figure18RoleTable) :
+    table.finiteCheckedTranscription.cornerTile = table.cornerTile :=
+  fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_cornerTile
+    table.roleRows table.length_eq table.cornerIndex table.cornerQuadrant
+    table.uniqueCorner
+
+theorem finiteCheckedTranscription_presentation_tiles
+    (table : Figure18RoleTable) :
+    table.finiteCheckedTranscription.presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  fig13QuarterFiniteCheckedTranscriptionOfUniqueBool_presentation_tiles
+    table.roleRows table.length_eq table.cornerIndex table.cornerQuadrant
+    table.uniqueCorner
+
+theorem presentation_tiles (table : Figure18RoleTable) :
+    table.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  table.finiteCheckedTranscription_presentation_tiles
+
+theorem row_getElem? (table : Figure18RoleTable) (i : Fin 92) :
+    table.roleRows[i.val]? = some (table.row i) :=
+  fig13QuarterRoleRow_getElem? table.roleRows table.length_eq i
+
+theorem roleAt_corner (table : Figure18RoleTable) :
+    table.roleAt table.cornerIndex table.cornerQuadrant = CellRole.corner := by
+  exact fig13QuarterCornerRole_of_positionUniqueBool
+    table.length_eq table.uniqueCorner
+
+theorem roleAt_corner_iff (table : Figure18RoleTable)
+    (i : Fin 92) (q : Quadrant) :
+    table.roleAt i q = CellRole.corner ↔
+      i = table.cornerIndex ∧ q = table.cornerQuadrant := by
+  exact fig13QuarterCornerPositionUnique_of_bool table.uniqueCorner
+    i (table.row i) q (table.row_getElem? i)
+
+end Figure18RoleTable
 
 /--
 Attach a list of roles to a list of Wang tiles.  If the lists have different
