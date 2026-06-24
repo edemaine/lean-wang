@@ -353,6 +353,14 @@ recursive enumeration rather than a proven duplicate-free list, the bounded
 search-code decoder remains the canonical route for row equality. The
 position-code minimality proof should only be used after proving the relevant
 no-earlier-duplicate invariant for the raw support enumeration.
+The canonical bounded-search path now has the same split bridge as the
+position-coded path: `sourceLabelAtByStatementFromWithSearchCode?_of_split`
+and `sourceSimStepDataForLabelIndexFromWithSearchCode_of_split` turn the
+source arithmetic split plus a statement lookup into the exact
+bounded-search-coded label and descriptor rows. The remaining canonical
+computability work is therefore concentrated on a source-level executable
+statement lookup over encoded source codes, not on the flat label-index
+arithmetic.
 
 Next implementation targets:
 
