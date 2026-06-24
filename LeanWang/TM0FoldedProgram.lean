@@ -3619,6 +3619,35 @@ theorem labelAtByStatementFromWithPositionCode?_code_eq_stateCode_of_minimal
   exact stateCode_eq_of_support_get?_minimal
     (labelAtByStatementFromWithPositionCode?_support_get? tc h) hmin
 
+theorem labelAtByStatementFromWithPositionCode?_eq_stateCode_of_minimal
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat}
+    (hmin : ∀ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc fuel k i = some q →
+        ∀ m, m < q.2 →
+          (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1) :
+    labelAtByStatementFromWithPositionCode? tc fuel k i =
+      labelAtByStatementFromWithStateCode? tc fuel k i := by
+  unfold labelAtByStatementFromWithStateCode?
+  cases hq : labelAtByStatementFromWithPositionCode? tc fuel k i with
+  | none =>
+      have hnone :
+          TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i = none := by
+        have hmap := congrArg (Option.map Prod.fst) hq
+        simpa [labelAtByStatementFromWithPositionCode?_fst_eq tc fuel k i] using hmap
+      simp [hnone]
+  | some q =>
+      have hlabel :
+          TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc fuel k i = some q.1 := by
+        have hmap := congrArg (Option.map Prod.fst) hq
+        simpa [labelAtByStatementFromWithPositionCode?_fst_eq tc fuel k i] using hmap
+      have hcode : q.2 = TM0FiniteCompiler.stateCode tc q.1 :=
+        labelAtByStatementFromWithPositionCode?_code_eq_stateCode_of_minimal
+          tc hq (hmin q hq)
+      rcases q with ⟨qLabel, qCode⟩
+      change qCode = TM0FiniteCompiler.stateCode tc qLabel at hcode
+      subst qCode
+      simp [hlabel]
+
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
@@ -3764,6 +3793,17 @@ theorem simStepDataForLabelIndexFrom_eq_withCode
       rw [← simStepDataForStmtLabel_eq_of_label tc q,
         simStepDataForStmtLabel_eq_withCode tc q.1 q.2]
       rfl
+
+theorem simStepDataForLabelIndexFromWithPositionCode_eq_withCode_of_minimal
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat}
+    (hmin : ∀ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc fuel k i = some q →
+        ∀ m, m < q.2 →
+          (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1) :
+    simStepDataForLabelIndexFromWithPositionCode tc fuel k i =
+      simStepDataForLabelIndexFromWithCode tc fuel k i := by
+  unfold simStepDataForLabelIndexFromWithPositionCode simStepDataForLabelIndexFromWithCode
+  rw [labelAtByStatementFromWithPositionCode?_eq_stateCode_of_minimal tc hmin]
 
 /--
 Canonical offset start for `simStepDataForLabelIndexFrom`: scan from statement

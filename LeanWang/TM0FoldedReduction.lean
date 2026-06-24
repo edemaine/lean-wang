@@ -940,6 +940,22 @@ theorem sourceLabelAtByStatementFromWithPositionCode_support_get?
   TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_support_get?
     (NatPartrecToToPartrec.translate c) h
 
+theorem sourceLabelAtByStatementFromWithPositionCode_eq_stateCode_of_minimal
+    {c : Code} {fuel k i : Nat}
+    (hmin : ∀ q :
+        TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+      TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+          (NatPartrecToToPartrec.translate c) fuel k i = some q →
+        ∀ m, m < q.2 →
+          (TM0Route.partrecStartedTM0LabelSupportList
+            (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i =
+      TM0FoldedCompiler.labelAtByStatementFromWithStateCode?
+        (NatPartrecToToPartrec.translate c) fuel k i :=
+  TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_eq_stateCode_of_minimal
+    (NatPartrecToToPartrec.translate c) hmin
+
 theorem sourceMem_simStepDataForLabelIndexFromWithPositionCode_current_support_get?
     {c : Code} {fuel k i : Nat}
     {p : TM0FoldedCompiler.SimStepData}
@@ -951,6 +967,23 @@ theorem sourceMem_simStepDataForLabelIndexFromWithPositionCode_current_support_g
         (TM0Route.partrecStartedTM0LabelSupportList
           (NatPartrecToToPartrec.translate c))[p.2.2.1]? = some q.1 := by
   exact TM0FoldedCompiler.mem_simStepDataForLabelIndexFromWithPositionCode_current_support_get? h
+
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_withCode_of_minimal
+    {c : Code} {fuel k i : Nat}
+    (hmin : ∀ q :
+        TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+      TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+          (NatPartrecToToPartrec.translate c) fuel k i = some q →
+        ∀ m, m < q.2 →
+          (TM0Route.partrecStartedTM0LabelSupportList
+            (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i =
+      sourceSimStepDataForLabelIndexFromWithCode c fuel k i := by
+  unfold sourceSimStepDataForLabelIndexFromWithPositionCode
+    sourceSimStepDataForLabelIndexFromWithCode
+  exact
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode_eq_withCode_of_minimal
+      (NatPartrecToToPartrec.translate c) hmin
 
 theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
