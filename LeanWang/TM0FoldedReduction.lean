@@ -960,31 +960,38 @@ def sourceSearchCodeDecoderRows (s : SourceSearchCodeDecoderState) :
 def sourceSearchCodeDecoderInit (k i : Nat) : SourceSearchCodeDecoderState :=
   (k, i, none)
 
+def sourceSearchCodeDecoderStepVar
+    (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
+    SourceSearchCodeDecoderState :=
+  match TM0Route.partrecStartedTM0StatementAt?
+      (NatPartrecToToPartrec.translate c) k with
+  | none => (k, i, some [])
+  | some stmt =>
+      (k, i, some
+        (TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+          (NatPartrecToToPartrec.translate c)
+          (TM0FiniteCompiler.stateCodeBySupportSearch
+            (NatPartrecToToPartrec.translate c)
+            (TM0Route.partrecStartedTM0StatementCount
+              (NatPartrecToToPartrec.translate c))
+            ((stmt, v) :
+              Turing.TM1to0.Λ'
+                (TM0Route.partrecStartedTM1Machine
+                  (NatPartrecToToPartrec.translate c))))
+          stmt v))
+
+def sourceSearchCodeDecoderStepNone (c : Code) (k i : Nat) :
+    SourceSearchCodeDecoderState :=
+  match TM0Route.partrecVarList[i]? with
+  | none => (k + 1, i - TM0Route.partrecVarList.length, none)
+  | some v => sourceSearchCodeDecoderStepVar c k i v
+
 /-- One accumulator step for the source-level bounded-search descriptor decoder. -/
 def sourceSearchCodeDecoderStep (c : Code)
     (s : SourceSearchCodeDecoderState) : SourceSearchCodeDecoderState :=
   match s.2.2 with
   | some rows => (s.1, s.2.1, some rows)
-  | none =>
-      match TM0Route.partrecVarList[s.2.1]? with
-      | none => (s.1 + 1, s.2.1 - TM0Route.partrecVarList.length, none)
-      | some v =>
-          match TM0Route.partrecStartedTM0StatementAt?
-              (NatPartrecToToPartrec.translate c) s.1 with
-          | none => (s.1, s.2.1, some [])
-          | some stmt =>
-              (s.1, s.2.1, some
-                (TM0FoldedCompiler.simStepDataForStmtLabelWithCode
-                  (NatPartrecToToPartrec.translate c)
-                  (TM0FiniteCompiler.stateCodeBySupportSearch
-                    (NatPartrecToToPartrec.translate c)
-                    (TM0Route.partrecStartedTM0StatementCount
-                      (NatPartrecToToPartrec.translate c))
-                    ((stmt, v) :
-                      Turing.TM1to0.Λ'
-                        (TM0Route.partrecStartedTM1Machine
-                          (NatPartrecToToPartrec.translate c))))
-                  stmt v))
+  | none => sourceSearchCodeDecoderStepNone c s.1 s.2.1
 
 theorem sourceSearchCodeDecoderStep_resolved
     (c : Code) (k i : Nat) (rows : List TM0FoldedCompiler.SimStepData) :
@@ -996,7 +1003,7 @@ theorem sourceSearchCodeDecoderStep_var_none
     (hv : TM0Route.partrecVarList[i]? = none) :
     sourceSearchCodeDecoderStep c (k, i, none) =
       (k + 1, i - TM0Route.partrecVarList.length, none) := by
-  simp [sourceSearchCodeDecoderStep, hv]
+  simp [sourceSearchCodeDecoderStep, sourceSearchCodeDecoderStepNone, hv]
 
 theorem sourceSearchCodeDecoderStep_stmt_none
     {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
@@ -1005,7 +1012,8 @@ theorem sourceSearchCodeDecoderStep_stmt_none
         (NatPartrecToToPartrec.translate c) k = none) :
     sourceSearchCodeDecoderStep c (k, i, none) =
       (k, i, some []) := by
-  simp [sourceSearchCodeDecoderStep, hv, hstmt]
+  simp [sourceSearchCodeDecoderStep, sourceSearchCodeDecoderStepNone,
+    sourceSearchCodeDecoderStepVar, hv, hstmt]
 
 theorem sourceSearchCodeDecoderStep_stmt_some
     {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
@@ -1032,7 +1040,74 @@ theorem sourceSearchCodeDecoderStep_stmt_some
                 (TM0Route.partrecStartedTM1Machine
                   (NatPartrecToToPartrec.translate c))))
           stmt v)) := by
-  simp [sourceSearchCodeDecoderStep, hv, hstmt]
+  simp [sourceSearchCodeDecoderStep, sourceSearchCodeDecoderStepNone,
+    sourceSearchCodeDecoderStepVar, hv, hstmt]
+
+theorem sourceSearchCodeDecoderStepNone_primrec_of_stepVar
+    (hvar : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeDecoderStepVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourceSearchCodeDecoderStepNone p.1 p.2.1 p.2.2) := by
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun p : Code × Nat × Nat =>
+      (p.2.1 + 1, p.2.2 - TM0Route.partrecVarList.length,
+        (none : Option (List TM0FoldedCompiler.SimStepData)))) := by
+    exact Primrec.pair
+      (Primrec.succ.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec.pair
+        (Primrec.nat_sub.comp (Primrec.snd.comp Primrec.snd)
+          (Primrec.const TM0Route.partrecVarList.length))
+        (Primrec.const (none : Option (List TM0FoldedCompiler.SimStepData))))
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourceSearchCodeDecoderStepVar p.1 p.2.1 p.2.2 v) := by
+    apply Primrec₂.mk
+    exact hvar.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+          (Primrec.pair
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+            Primrec.snd)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2.2]? <;>
+      simp [sourceSearchCodeDecoderStepNone, h]
+
+theorem sourceSearchCodeDecoderStep_primrec_of_stepNone
+    (hnone : Primrec (fun p : Code × Nat × Nat =>
+      sourceSearchCodeDecoderStepNone p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2) := by
+  have hopt : Primrec (fun p : Code × SourceSearchCodeDecoderState => p.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  have hnoneCase : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStepNone p.1 p.2.1 p.2.2.1) := by
+    exact hnone.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair
+          (Primrec.fst.comp Primrec.snd)
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))))
+  have hsome : Primrec₂
+      (fun p : Code × SourceSearchCodeDecoderState =>
+        fun rows : List TM0FoldedCompiler.SimStepData =>
+          (p.2.1, p.2.2.1, some rows)) := by
+    apply Primrec₂.mk
+    exact Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+        (Primrec.option_some.comp Primrec.snd))
+  exact (Primrec.option_casesOn hopt hnoneCase hsome).of_eq fun p => by
+    cases h : p.2.2.2 <;> simp [sourceSearchCodeDecoderStep, h]
+
+theorem sourceSearchCodeDecoderStep_primrec_of_stepVar
+    (hvar : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeDecoderStepVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2) :=
+  sourceSearchCodeDecoderStep_primrec_of_stepNone
+    (sourceSearchCodeDecoderStepNone_primrec_of_stepVar hvar)
 
 def sourceSearchCodeDecoderStateFrom
     (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
