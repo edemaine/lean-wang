@@ -879,6 +879,85 @@ def ofFlatRoles
   length_eq := rowsOfFlatRoles_length flat
   uniqueCorner := hunique
 
+theorem rowsOfFlatRoles_getElem?
+    (flat : List CellRole) (i : Fin 92) :
+    (rowsOfFlatRoles flat)[i.val]? =
+      some (TileQuarterRoles.ofQuadrants
+        (flat.getD (4 * i.val) CellRole.inactive)
+        (flat.getD (4 * i.val + 1) CellRole.inactive)
+        (flat.getD (4 * i.val + 2) CellRole.inactive)
+        (flat.getD (4 * i.val + 3) CellRole.inactive)) := by
+  unfold rowsOfFlatRoles
+  simp [i.isLt]
+
+theorem ofFlatRoles_row
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (i : Fin 92) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).row i =
+      TileQuarterRoles.ofQuadrants
+        (flat.getD (4 * i.val) CellRole.inactive)
+        (flat.getD (4 * i.val + 1) CellRole.inactive)
+        (flat.getD (4 * i.val + 2) CellRole.inactive)
+        (flat.getD (4 * i.val + 3) CellRole.inactive) := by
+  have hrow :=
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).row_getElem? i
+  change (rowsOfFlatRoles flat)[i.val]? =
+      some ((ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).row i) at hrow
+  rw [rowsOfFlatRoles_getElem? flat i] at hrow
+  exact Option.some.inj hrow.symm
+
+theorem ofFlatRoles_roleAt_southwest
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (i : Fin 92) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).roleAt
+        i Quadrant.southwest =
+      flat.getD (4 * i.val) CellRole.inactive := by
+  simp [Figure18RoleTable.roleAt, ofFlatRoles_row]
+
+theorem ofFlatRoles_roleAt_southeast
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (i : Fin 92) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).roleAt
+        i Quadrant.southeast =
+      flat.getD (4 * i.val + 1) CellRole.inactive := by
+  simp [Figure18RoleTable.roleAt, ofFlatRoles_row]
+
+theorem ofFlatRoles_roleAt_northwest
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (i : Fin 92) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).roleAt
+        i Quadrant.northwest =
+      flat.getD (4 * i.val + 2) CellRole.inactive := by
+  simp [Figure18RoleTable.roleAt, ofFlatRoles_row]
+
+theorem ofFlatRoles_roleAt_northeast
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (i : Fin 92) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).roleAt
+        i Quadrant.northeast =
+      flat.getD (4 * i.val + 3) CellRole.inactive := by
+  simp [Figure18RoleTable.roleAt, ofFlatRoles_row]
+
 /--
 Smoke-test data for the finite Figure 18 table checker.
 
