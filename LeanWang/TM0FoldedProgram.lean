@@ -3703,6 +3703,12 @@ def simStepDataForLabelIndexStartWithCode (tc : Turing.ToPartrec.Code) (i : Nat)
   simStepDataForLabelIndexFromWithCode tc
     (TM0Route.partrecStartedTM0StatementCount tc) 0 i
 
+/-- Canonical offset start for the bounded-search numeric-state decoder. -/
+def simStepDataForLabelIndexStartWithSearchCode
+    (tc : Turing.ToPartrec.Code) (i : Nat) : List SimStepData :=
+  simStepDataForLabelIndexFromWithSearchCode tc
+    (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+
 /-- Canonical offset start for the position-coded offset decoder. -/
 def simStepDataForLabelIndexStartWithPositionCode
     (tc : Turing.ToPartrec.Code) (i : Nat) : List SimStepData :=
@@ -3739,6 +3745,14 @@ theorem simStepDataForLabelIndexStart_eq_withCode
       simStepDataForLabelIndexStartWithCode tc i := by
   unfold simStepDataForLabelIndexStart simStepDataForLabelIndexStartWithCode
   exact simStepDataForLabelIndexFrom_eq_withCode
+    tc (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+
+theorem simStepDataForLabelIndexStartWithSearchCode_eq_withCode
+    (tc : Turing.ToPartrec.Code) (i : Nat) :
+    simStepDataForLabelIndexStartWithSearchCode tc i =
+      simStepDataForLabelIndexStartWithCode tc i := by
+  unfold simStepDataForLabelIndexStartWithSearchCode simStepDataForLabelIndexStartWithCode
+  exact simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     tc (TM0Route.partrecStartedTM0StatementCount tc) 0 i
 
 theorem simStepDataForLabelIndexFrom_primrec_fixed_of_trAux
@@ -3926,6 +3940,16 @@ theorem simStepDataForLabelIndexStartWithCode_primrec_fixed_of_trAux
     (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
       (Primrec.pair (Primrec.const 0) Primrec.id))
 
+theorem simStepDataForLabelIndexStartWithSearchCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (simStepDataForLabelIndexStartWithSearchCode tc) := by
+  unfold simStepDataForLabelIndexStartWithSearchCode
+  exact (simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_trAux tc haux).comp
+    (Primrec.pair (Primrec.const (TM0Route.partrecStartedTM0StatementCount tc))
+      (Primrec.pair (Primrec.const 0) Primrec.id))
+
 theorem simStepDataForLabelIndexStartWithPositionCode_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
@@ -3950,6 +3974,13 @@ theorem simStepDataForLabelIndexStartWithCode_primrec_fixed_of_machine
   simStepDataForLabelIndexStartWithCode_primrec_fixed_of_trAux tc
     (trAux_primrec_fixed_of_machine tc hmachine)
 
+theorem simStepDataForLabelIndexStartWithSearchCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (simStepDataForLabelIndexStartWithSearchCode tc) :=
+  simStepDataForLabelIndexStartWithSearchCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
 theorem simStepDataForLabelIndexStartWithPositionCode_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
@@ -3967,6 +3998,12 @@ theorem simStepDataForLabelIndexStartWithCode_primrec_fixed
     (tc : Turing.ToPartrec.Code) :
     Primrec (simStepDataForLabelIndexStartWithCode tc) :=
   simStepDataForLabelIndexStartWithCode_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
+theorem simStepDataForLabelIndexStartWithSearchCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (simStepDataForLabelIndexStartWithSearchCode tc) :=
+  simStepDataForLabelIndexStartWithSearchCode_primrec_fixed_of_machine tc
     (TM0Route.partrecStartedTM1Machine_primrec tc)
 
 theorem simStepDataForLabelIndexStartWithPositionCode_primrec_fixed
@@ -4010,6 +4047,12 @@ def simStepDataByLabelIndexWithCode (tc : Turing.ToPartrec.Code) : List SimStepD
   (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
     (simStepDataForLabelIndexStartWithCode tc)
 
+/-- Indexed descriptor enumeration through the bounded-search decoder path. -/
+def simStepDataByLabelIndexWithSearchCode
+    (tc : Turing.ToPartrec.Code) : List SimStepData :=
+  (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
+    (simStepDataForLabelIndexStartWithSearchCode tc)
+
 /-- Indexed descriptor enumeration through the position-coded decoder path. -/
 def simStepDataByLabelIndexWithPositionCode
     (tc : Turing.ToPartrec.Code) : List SimStepData :=
@@ -4031,6 +4074,16 @@ theorem simStepDataByLabelIndexWithCode_primrec_of_forLabelIndexStartWithCode
       simStepDataForLabelIndexStartWithCode p.1 p.2)) :
     Primrec simStepDataByLabelIndexWithCode := by
   unfold simStepDataByLabelIndexWithCode
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp TM0Route.partrecStartedTM0LabelCount_primrec) ?_
+  apply Primrec₂.mk
+  exact hindex
+
+theorem simStepDataByLabelIndexWithSearchCode_primrec_of_forLabelIndexStartWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithSearchCode p.1 p.2)) :
+    Primrec simStepDataByLabelIndexWithSearchCode := by
+  unfold simStepDataByLabelIndexWithSearchCode
   refine Primrec.list_flatMap
     (Primrec.list_range.comp TM0Route.partrecStartedTM0LabelCount_primrec) ?_
   apply Primrec₂.mk
@@ -4083,6 +4136,15 @@ theorem simStepDataByLabelIndexWithCode_eq (tc : Turing.ToPartrec.Code) :
   apply List.flatMap_congr
   intro i _hi
   exact simStepDataForLabelIndexStartWithCode_eq tc i
+
+theorem simStepDataByLabelIndexWithSearchCode_eq (tc : Turing.ToPartrec.Code) :
+    simStepDataByLabelIndexWithSearchCode tc = simStepData tc := by
+  unfold simStepDataByLabelIndexWithSearchCode
+  rw [← simStepDataByLabelIndexWithCode_eq tc]
+  unfold simStepDataByLabelIndexWithCode
+  apply List.flatMap_congr
+  intro i _hi
+  exact simStepDataForLabelIndexStartWithSearchCode_eq_withCode tc i
 
 theorem simRows_eq_stepData (tc : Turing.ToPartrec.Code) :
     simRows tc = simRowsOfStepData (simStepData tc) := by
@@ -4272,6 +4334,17 @@ theorem programData_computable_of_simStepDataByLabelIndexWithCode
     Computable programData :=
   (programData_primrec_of_simStepDataByLabelIndexWithCode hsteps).to_comp
 
+theorem programData_primrec_of_simStepDataByLabelIndexWithSearchCode
+    (hsteps : Primrec simStepDataByLabelIndexWithSearchCode) :
+    Primrec programData :=
+  programData_primrec_of_stepData simStepDataByLabelIndexWithSearchCode hsteps fun tc => by
+    rw [simStepDataByLabelIndexWithSearchCode_eq, ← simRows_eq_stepData]
+
+theorem programData_computable_of_simStepDataByLabelIndexWithSearchCode
+    (hsteps : Primrec simStepDataByLabelIndexWithSearchCode) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataByLabelIndexWithSearchCode hsteps).to_comp
+
 /--
 Position-coded indexed descriptors are enough for computability once their
 generated rows are proved to be the semantic folded simulation rows. This
@@ -4339,6 +4412,24 @@ theorem programData_computable_of_simStepDataForLabelIndexStartWithCode
       simStepDataForLabelIndexStartWithCode p.1 p.2)) :
     Computable programData :=
   (programData_primrec_of_simStepDataForLabelIndexStartWithCode hindex).to_comp
+
+/--
+The bounded-search numeric-state offset-start decoder is enough for primitive
+recursiveness of normalized folded program data.
+-/
+theorem programData_primrec_of_simStepDataForLabelIndexStartWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithSearchCode p.1 p.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataByLabelIndexWithSearchCode
+    (simStepDataByLabelIndexWithSearchCode_primrec_of_forLabelIndexStartWithSearchCode
+      hindex)
+
+theorem programData_computable_of_simStepDataForLabelIndexStartWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+      simStepDataForLabelIndexStartWithSearchCode p.1 p.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndexStartWithSearchCode hindex).to_comp
 
 /--
 The position-coded offset-start descriptor decoder is enough for primitive
