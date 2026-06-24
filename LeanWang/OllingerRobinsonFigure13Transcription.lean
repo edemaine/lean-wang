@@ -993,6 +993,19 @@ theorem presentation_role_site
     table.presentation.role site.tile = table.roleAtSite site :=
   table.presentation_role_fig13QuarterTile site.index site.quadrant
 
+theorem presentation_role_of_eq_site
+    (table : Figure18RoleTable) {tile : WangTile} {site : Figure18Site}
+    (htile : tile = site.tile) :
+    table.presentation.role tile = table.roleAtSite site := by
+  rw [htile, table.presentation_role_site]
+
+theorem presentation_active_of_eq_site
+    (table : Figure18RoleTable) {tile : WangTile} {site : Figure18Site}
+    (htile : tile = site.tile) :
+    CellRole.isActive (table.presentation.role tile) =
+      CellRole.isActive (table.roleAtSite site) := by
+  rw [htile, table.presentation_role_site]
+
 theorem exists_fig13QuarterTile_role_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
     (htile : tile ∈ table.presentation.tiles) :
@@ -1002,6 +1015,29 @@ theorem exists_fig13QuarterTile_role_of_mem_presentation
   rcases table.exists_fig13QuarterTile_of_mem_presentation htile with
     ⟨i, q, rfl⟩
   exact ⟨i, q, rfl, table.presentation_role_fig13QuarterTile i q⟩
+
+theorem exists_site_role_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ site : Figure18Site, site ∈ Figure18Site.all ∧
+      tile = site.tile ∧
+        table.presentation.role tile = table.roleAtSite site := by
+  rcases table.exists_site_of_mem_presentation htile with
+    ⟨site, hsite, htileSite⟩
+  exact ⟨site, hsite, htileSite,
+    table.presentation_role_of_eq_site htileSite⟩
+
+theorem exists_site_active_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ site : Figure18Site, site ∈ Figure18Site.all ∧
+      tile = site.tile ∧
+        CellRole.isActive (table.presentation.role tile) =
+          CellRole.isActive (table.roleAtSite site) := by
+  rcases table.exists_site_of_mem_presentation htile with
+    ⟨site, hsite, htileSite⟩
+  exact ⟨site, hsite, htileSite,
+    table.presentation_active_of_eq_site htileSite⟩
 
 theorem roleAt_corner (table : Figure18RoleTable) :
     table.roleAt table.cornerIndex table.cornerQuadrant = CellRole.corner := by
@@ -1046,6 +1082,27 @@ theorem roleAtSite_corner_iff (table : Figure18RoleTable)
   cases site with
   | mk i q =>
       simp [roleAtSite, cornerSite, roleAt_corner_iff]
+
+theorem site_eq_cornerSite_of_presentation_role_corner
+    (table : Figure18RoleTable) {tile : WangTile} {site : Figure18Site}
+    (htile : tile = site.tile)
+    (hrole : table.presentation.role tile = CellRole.corner) :
+    site = table.cornerSite := by
+  have hsiteRole : table.roleAtSite site = CellRole.corner := by
+    rw [← table.presentation_role_of_eq_site htile]
+    exact hrole
+  exact (table.roleAtSite_corner_iff site).1 hsiteRole
+
+theorem exists_cornerSite_of_mem_presentation_role_corner
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles)
+    (hrole : table.presentation.role tile = CellRole.corner) :
+    ∃ site : Figure18Site, site ∈ Figure18Site.all ∧
+      tile = site.tile ∧ site = table.cornerSite := by
+  rcases table.exists_site_of_mem_presentation htile with
+    ⟨site, hsite, htileSite⟩
+  exact ⟨site, hsite, htileSite,
+    table.site_eq_cornerSite_of_presentation_role_corner htileSite hrole⟩
 
 theorem cornerTile_eq_cornerSite_tile (table : Figure18RoleTable) :
     table.cornerTile = table.cornerSite.tile :=
