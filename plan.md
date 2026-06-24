@@ -262,6 +262,22 @@ Computable (fun c : Nat.Partrec.Code =>
 
 without going through the broader `Turing.ToPartrec.Code` target.
 
+Do not import `TM0FoldedCompiler` into `TM0FoldedReduction` just to discharge
+`SourceObligations.correct`: that pulls the large folded semantic proof into
+the lightweight reduction packaging. A direct attempt made the reduction target
+impractically slow to rebuild. Keep the correctness field explicit here, or
+move any automatically generated source correctness package to a separate
+semantic/final module that is expected to import the compiler proof.
+
+The next computability proof still needs an explicitly source-indexed decoder.
+The available statement and label encoders in `TM0Route` prove many fixed-`tc`
+primitive-recursive facts, including the bounded-search decoder components, but
+they do not by themselves compose over the dependent family
+`tc = NatPartrecToToPartrec.translate c`. The next bridge should therefore
+construct the source-level statement/support lookup directly over encoded
+source codes, then connect it to the fixed-`tc` decoder by an extensional
+correctness theorem.
+
 There is also now a position-coded descriptor path in `TM0FoldedProgram`:
 `simStepDataForLabelIndexFromWithPositionCode` uses the explicit rectangular
 statement/variable position as the current-state code, and its fixed-code
