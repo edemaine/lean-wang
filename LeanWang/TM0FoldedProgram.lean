@@ -2170,6 +2170,20 @@ theorem simStepDataRow_matchesInput_of_currentCode_ne
   cases stmt <;> simp [simStepDataRow, simRowOfStepCode, mkRow,
     PostTransition.matchesInput, hstate]
 
+theorem simStepDataRow_matchesInput_of_currentCode_ne'
+    {tc : Turing.ToPartrec.Code} {p : SimStepData}
+    {side : FoldSide} {marked : Bool} {q : SourceLabel tc}
+    {left right : SourceSymbol}
+    (hcode : p.2.2.1 ≠ TM0FiniteCompiler.stateCode tc q) :
+    (simStepDataRow p).matchesInput
+        (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) = false := by
+  rcases p with ⟨side', marked', qCode, q'Code, left', right', stmt⟩
+  exact simStepDataRow_matchesInput_of_currentCode_ne
+    (tc := tc) (side := side) (side' := side') (marked := marked)
+    (marked' := marked') (qCode := qCode) (q'Code := q'Code) (q := q)
+    (left := left) (right := right) (left' := left') (right' := right')
+    (stmt := stmt) hcode
+
 set_option maxHeartbeats 800000 in
 -- The nested product selectors in this row-level primitive-recursive proof take
 -- longer than the default heartbeat budget to elaborate.
@@ -2342,6 +2356,33 @@ theorem simRowsOfStepData_primrec : Primrec simRowsOfStepData := by
 
 theorem simRowsOfStepData_computable : Computable simRowsOfStepData :=
   simRowsOfStepData_primrec.to_comp
+
+theorem simRowsOfStepData_find?_eq_none_of_forall_currentCode_ne
+    {tc : Turing.ToPartrec.Code} {steps : List SimStepData}
+    {side : FoldSide} {marked : Bool} {q : SourceLabel tc}
+    {left right : SourceSymbol}
+    (hcode : ∀ p ∈ steps, p.2.2.1 ≠ TM0FiniteCompiler.stateCode tc q) :
+    (simRowsOfStepData steps).find? (fun e =>
+        e.matchesInput (foldedSimStateCode tc side q) (foldedSymbolCode marked left right)) =
+      none := by
+  induction steps with
+  | nil =>
+      simp [simRowsOfStepData]
+  | cons p ps ih =>
+      have hhead :
+          (simStepDataRow p).matchesInput
+              (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) =
+            false :=
+        simStepDataRow_matchesInput_of_currentCode_ne' (hcode p (by simp))
+      have htail :
+          (simRowsOfStepData ps).find? (fun e =>
+              e.matchesInput (foldedSimStateCode tc side q)
+                (foldedSymbolCode marked left right)) = none := by
+        exact ih fun r hr => hcode r (by simp [hr])
+      change (simStepDataRow p :: simRowsOfStepData ps).find? (fun e =>
+          e.matchesInput (foldedSimStateCode tc side q)
+            (foldedSymbolCode marked left right)) = none
+      simp [hhead, htail]
 
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
