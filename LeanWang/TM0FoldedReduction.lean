@@ -883,6 +883,67 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_of_block_var_get?
   exact sourceSimStepDataForLabelIndexFromWithSearchCode_of_split
     (sourceLabelIndexFromSplit?_of_block_var_get? hblock hv) hstmt
 
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_zero
+    (c : Code) (k i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c 0 k i = [] := by
+  unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+  simp [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero]
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_var_none
+    {c : Code} {fuel k i : Nat}
+    (hv : TM0Route.partrecVarList[i]? = none) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c (fuel + 1) k i =
+      sourceSimStepDataForLabelIndexFromWithSearchCode c fuel (k + 1)
+        (i - TM0Route.partrecVarList.length) := by
+  unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+  rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_succ]
+  simp [hv]
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_none
+    {c : Code} {fuel k i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = none) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c (fuel + 1) k i = [] := by
+  unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+  rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_succ]
+  simp [hv, hstmt]
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
+    {c : Code} {fuel k i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = some stmt) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c (fuel + 1) k i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        stmt v := by
+  simpa using
+    sourceSimStepDataForLabelIndexFromWithSearchCode_of_block_var_get?
+      (c := c) (fuel := fuel + 1) (k := k) (block := 0)
+      (i := i) (v := v) (by omega) hv (by simpa using hstmt)
+
 /--
 Source-code version of the offset descriptor decoder whose current-state code
 is the explicit statement/variable position.
