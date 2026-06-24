@@ -944,6 +944,24 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
       (c := c) (fuel := fuel + 1) (k := k) (block := 0)
       (i := i) (v := v) (by omega) hv (by simpa using hstmt)
 
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_statementCount_le
+    (c : Code) (fuel k i : Nat) (hk : sourceStatementCount c ≤ k) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i = [] := by
+  induction fuel generalizing k i with
+  | zero =>
+      exact sourceSimStepDataForLabelIndexFromWithSearchCode_zero c k i
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_var_none
+            (c := c) (fuel := fuel) (k := k) (i := i) hv]
+          exact ih (k + 1) (i - TM0Route.partrecVarList.length) (by omega)
+      | some v =>
+          exact sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_none
+            (c := c) (fuel := fuel) (k := k) (i := i) (v := v) hv
+            (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
+              (NatPartrecToToPartrec.translate c) (by simpa [sourceStatementCount] using hk))
+
 def sourceSearchCodeOneRowsVar
     (c : Code) (k : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
