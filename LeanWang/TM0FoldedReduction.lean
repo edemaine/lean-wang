@@ -538,6 +538,37 @@ theorem sourceLabelAtByStatementStartWithSearchCode?_of_split
   unfold sourceLabelIndexStartSplit? at hsplit
   simpa using sourceLabelAtByStatementFromWithSearchCode?_of_split hsplit hstmt
 
+theorem sourceLabelAtByStatementStartWithSearchCode?_of_block_var_get?
+    {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hblock : block < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt) :
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0
+        (TM0Route.partrecVarList.length * block + i) =
+      some ((((stmt, v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))),
+        TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))) := by
+  exact sourceLabelAtByStatementStartWithSearchCode?_of_split
+    (sourceLabelIndexStartSplit?_of_block_var_get? (c := c) hblock hv) hstmt
+
 theorem sourceStatementAt_zero (c : Code) :
     TM0Route.partrecStartedTM0StatementAt?
         (NatPartrecToToPartrec.translate c) 0 =
@@ -823,6 +854,35 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
       stmt v
   unfold sourceLabelIndexStartSplit? at hsplit
   exact sourceSimStepDataForLabelIndexFromWithSearchCode_of_split hsplit hstmt
+
+theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_block_var_get?
+    {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hblock : block < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt) :
+    sourceSimStepDataForLabelIndexStartWithSearchCode c
+        (TM0Route.partrecVarList.length * block + i) =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        stmt v := by
+  exact sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
+    (sourceLabelIndexStartSplit?_of_block_var_get? (c := c) hblock hv) hstmt
 
 theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
