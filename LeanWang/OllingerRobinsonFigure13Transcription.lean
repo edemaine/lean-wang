@@ -835,6 +835,58 @@ theorem roleAt_corner_iff (table : Figure18RoleTable)
 
 end Figure18RoleTable
 
+namespace Figure18RoleTable
+
+/--
+Smoke-test data for the finite Figure 18 table checker.
+
+This is deliberately not the Ollinger/Robinson scaffold interpretation: it marks
+only one quadrant as `corner` and leaves every other quadrant inactive.  Its role
+is to exercise the finite `Figure18RoleTable` path with concrete data before the
+paper-derived role table is transcribed.
+-/
+def smokeRoleRows : List TileQuarterRoles :=
+  TileQuarterRoles.ofQuadrants
+      CellRole.corner CellRole.inactive CellRole.inactive CellRole.inactive ::
+    List.replicate 91 TileQuarterRoles.inactive
+
+@[simp]
+theorem smokeRoleRows_length : smokeRoleRows.length = 92 := by
+  decide
+
+def smokeCornerIndex : Fin 92 :=
+  ⟨0, by decide⟩
+
+def smokeCornerQuadrant : Quadrant :=
+  Quadrant.southwest
+
+theorem smokeUniqueCorner :
+    fig13QuarterCornerPositionUniqueBool
+      smokeRoleRows smokeCornerIndex smokeCornerQuadrant = true := by
+  decide
+
+/--
+Concrete finite smoke table for the checker.  It is useful for regression
+testing the finite transcription pipeline, but it has no geometric certificate.
+-/
+def smoke : Figure18RoleTable where
+  roleRows := smokeRoleRows
+  cornerIndex := smokeCornerIndex
+  cornerQuadrant := smokeCornerQuadrant
+  length_eq := smokeRoleRows_length
+  uniqueCorner := smokeUniqueCorner
+
+@[simp]
+theorem smoke_roleAt_corner :
+    smoke.roleAt smokeCornerIndex smokeCornerQuadrant = CellRole.corner :=
+  smoke.roleAt_corner
+
+theorem smoke_presentation_tiles :
+    smoke.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  smoke.presentation_tiles
+
+end Figure18RoleTable
+
 /--
 Geometric obligations for a concrete Figure 18 role table.
 
