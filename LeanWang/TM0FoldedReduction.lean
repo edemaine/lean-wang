@@ -3092,6 +3092,33 @@ theorem sourcePartrecVarIndex_getElem? (v : TM0Route.PartrecVar) :
     (p := fun w => decide (w = v)) hidx).1 rfl
   exact List.getElem?_eq_some_iff.2 ⟨hidx, of_decide_eq_true hfind.1⟩
 
+theorem sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows
+    (hrows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2) := by
+  have hidx : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePartrecVarIndex p.2.2) :=
+    sourcePartrecVarIndex_primrec.comp (Primrec.snd.comp Primrec.snd)
+  have hposition : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar
+        p.1 p.2.1 (sourcePartrecVarIndex p.2.2) p.2.2) :=
+    hrows.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair hidx (Primrec.snd.comp Primrec.snd))))
+  exact hposition.of_eq fun p => by
+    have hv :
+        TM0Route.partrecVarList[sourcePartrecVarIndex p.2.2]? =
+          some p.2.2 :=
+      sourcePartrecVarIndex_getElem? p.2.2
+    exact (sourceSearchCodeOneRowsVar_eq_positionCodeOneRowsIndexVar_of_statementList_nodup
+      (c := p.1) (k := p.2.1) (i := sourcePartrecVarIndex p.2.2)
+      (v := p.2.2) (hnodup p.1) hv).symm
+
 theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInteriorRows
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
@@ -3542,6 +3569,27 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeOneVarRows hvarRows).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_searchCodeOneVarRows
+    (sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows hvarRows hnodup)
+
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows'
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
+    hvarRows hnodup).of_eq fun _ => rfl
+
 theorem sourceProgramData_computable_of_source_boundedInteriorRows
     (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
@@ -3640,6 +3688,29 @@ def sourceObligationsOfSearchCodeOneVarRows
     SourceObligations :=
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_searchCodeOneVarRows' hvarRows)
+    hcorrect
+
+/--
+Primitive recursiveness of the one-row position-code decoder, plus statement
+support-list nodup, also supplies the variable-branch bounded-search row
+obligation. This is useful while the final theorem surface still exposes both
+decoder presentations.
+-/
+def sourceObligationsOfSearchCodeOneVarRowsPositionCodeOneRows
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows'
+      hvarRows hnodup)
     hcorrect
 
 /--
