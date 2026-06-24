@@ -306,6 +306,36 @@ theorem fig13QuarterTile_eq_iff (i j : Fin 92) (q r : Quadrant) :
   · rintro ⟨rfl, rfl⟩
     rfl
 
+/-- A single quadrant site in the Figure 18 interpretation of Figure 13. -/
+structure Figure18Site where
+  index : Fin 92
+  quadrant : Quadrant
+deriving DecidableEq, Repr
+
+namespace Figure18Site
+
+def tile (site : Figure18Site) : WangTile :=
+  fig13QuarterTile site.index site.quadrant
+
+@[simp]
+theorem tile_mk (index : Fin 92) (quadrant : Quadrant) :
+    ({ index := index, quadrant := quadrant } : Figure18Site).tile =
+      fig13QuarterTile index quadrant :=
+  rfl
+
+theorem tile_eq_iff (site other : Figure18Site) :
+    site.tile = other.tile ↔ site = other := by
+  cases site
+  cases other
+  simp [tile, fig13QuarterTile_eq_iff]
+
+theorem tile_injective :
+    Function.Injective tile := by
+  intro site other htile
+  exact (tile_eq_iff site other).1 htile
+
+end Figure18Site
+
 /-- Role lookup entries for a complete quadrant role transcription. -/
 def fig13QuarterRoleEntries (roleRows : List TileQuarterRoles) :
     List (WangTile × CellRole) :=
@@ -799,8 +829,16 @@ def roleAt (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     CellRole :=
   (table.row i).roleAt q
 
+def roleAtSite (table : Figure18RoleTable) (site : Figure18Site) :
+    CellRole :=
+  table.roleAt site.index site.quadrant
+
 def cornerTile (table : Figure18RoleTable) : WangTile :=
   fig13QuarterTile table.cornerIndex table.cornerQuadrant
+
+def cornerSite (table : Figure18RoleTable) : Figure18Site where
+  index := table.cornerIndex
+  quadrant := table.cornerQuadrant
 
 def finiteCheckedTranscription (table : Figure18RoleTable) :
     FiniteCheckedTranscription :=
@@ -861,6 +899,11 @@ theorem presentation_mem_fig13QuarterTile
       hspec, rfl⟩
   simpa [fig13QuarterRoleSpecs_tiles table.length_eq] using hmem
 
+theorem presentation_mem_site
+    (table : Figure18RoleTable) (site : Figure18Site) :
+    site.tile ∈ table.presentation.tiles :=
+  table.presentation_mem_fig13QuarterTile site.index site.quadrant
+
 theorem exists_fig13QuarterTile_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
     (htile : tile ∈ table.presentation.tiles) :
@@ -891,6 +934,11 @@ theorem presentation_role_fig13QuarterTile
     fig13QuarterRoleEntries_lookup_of_getElem?
       table.length_eq (table.row_getElem? i) (q := q)
 
+theorem presentation_role_site
+    (table : Figure18RoleTable) (site : Figure18Site) :
+    table.presentation.role site.tile = table.roleAtSite site :=
+  table.presentation_role_fig13QuarterTile site.index site.quadrant
+
 theorem exists_fig13QuarterTile_role_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
     (htile : tile ∈ table.presentation.tiles) :
@@ -906,6 +954,10 @@ theorem roleAt_corner (table : Figure18RoleTable) :
   exact fig13QuarterCornerRole_of_positionUniqueBool
     table.length_eq table.uniqueCorner
 
+theorem roleAtSite_corner (table : Figure18RoleTable) :
+    table.roleAtSite table.cornerSite = CellRole.corner :=
+  table.roleAt_corner
+
 theorem presentation_role_cornerTile (table : Figure18RoleTable) :
     table.presentation.role table.cornerTile = CellRole.corner := by
   rw [cornerTile, presentation_role_fig13QuarterTile, roleAt_corner]
@@ -915,6 +967,12 @@ theorem presentation_active_fig13QuarterTile
     CellRole.isActive (table.presentation.role (fig13QuarterTile i q)) =
       CellRole.isActive (table.roleAt i q) := by
   rw [presentation_role_fig13QuarterTile]
+
+theorem presentation_active_site
+    (table : Figure18RoleTable) (site : Figure18Site) :
+    CellRole.isActive (table.presentation.role site.tile) =
+      CellRole.isActive (table.roleAtSite site) := by
+  rw [presentation_role_site]
 
 theorem presentation_active_cornerTile (table : Figure18RoleTable) :
     CellRole.isActive (table.presentation.role table.cornerTile) = true := by
@@ -927,6 +985,17 @@ theorem roleAt_corner_iff (table : Figure18RoleTable)
       i = table.cornerIndex ∧ q = table.cornerQuadrant := by
   exact fig13QuarterCornerPositionUnique_of_bool table.uniqueCorner
     i (table.row i) q (table.row_getElem? i)
+
+theorem roleAtSite_corner_iff (table : Figure18RoleTable)
+    (site : Figure18Site) :
+    table.roleAtSite site = CellRole.corner ↔ site = table.cornerSite := by
+  cases site with
+  | mk i q =>
+      simp [roleAtSite, cornerSite, roleAt_corner_iff]
+
+theorem cornerTile_eq_cornerSite_tile (table : Figure18RoleTable) :
+    table.cornerTile = table.cornerSite.tile :=
+  rfl
 
 end Figure18RoleTable
 
@@ -1375,17 +1444,14 @@ structure Figure18IndexedRoutedFixedCornerSquare
     (n : Nat) (hn : 0 < n) where
   horizontalCoord : Fin n → Int
   verticalCoord : Fin n → Int
-  indexRect : Fin n → Fin n → Fin 92
-  quadrantRect : Fin n → Fin n → Quadrant
+  siteRect : Fin n → Fin n → Figure18Site
   payloadRect : Rectangle n n
   active : ∀ i : Fin n, ∀ j : Fin n,
-    CellRole.isActive (table.roleAt (indexRect i j) (quadrantRect i j)) = true
+    CellRole.isActive (table.roleAtSite (siteRect i j)) = true
   cornerRole :
-    table.roleAt (indexRect ⟨0, hn⟩ ⟨0, hn⟩)
-      (quadrantRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
+    table.roleAtSite (siteRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
   product : ∀ i : Fin n, ∀ j : Fin n,
-    WangTile.product (fig13QuarterTile (indexRect i j) (quadrantRect i j))
-        (payloadRect i j) =
+    WangTile.product (siteRect i j).tile (payloadRect i j) =
       (x (horizontalCoord i, verticalCoord j)).1
   hmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
     WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j)
@@ -1400,7 +1466,7 @@ def baseRect
     {n : Nat} {hn : 0 < n}
     (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
     Rectangle n n :=
-  fun i j => fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j)
+  fun i j => (window.siteRect i j).tile
 
 theorem baseRect_eq
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -1408,8 +1474,7 @@ theorem baseRect_eq
     {n : Nat} {hn : 0 < n}
     (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
     (i : Fin n) (j : Fin n) :
-    window.baseRect i j =
-      fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j) :=
+    window.baseRect i j = (window.siteRect i j).tile :=
   rfl
 
 def toRoutedFixedCornerSquare
@@ -1424,15 +1489,14 @@ def toRoutedFixedCornerSquare
   payloadRect := window.payloadRect
   mem := by
     intro i j
-    exact table.presentation_mem_fig13QuarterTile
-      (window.indexRect i j) (window.quadrantRect i j)
+    exact table.presentation_mem_site (window.siteRect i j)
   active := by
     intro i j
-    rw [window.baseRect_eq i j, table.presentation_role_fig13QuarterTile]
+    rw [window.baseRect_eq i j, table.presentation_role_site]
     exact window.active i j
   cornerRole := by
     rw [window.baseRect_eq ⟨0, hn⟩ ⟨0, hn⟩,
-      table.presentation_role_fig13QuarterTile]
+      table.presentation_role_site]
     exact window.cornerRole
   product := by
     intro i j
