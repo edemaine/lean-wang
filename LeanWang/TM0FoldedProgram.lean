@@ -1538,8 +1538,19 @@ theorem foldedSymbolCode_mem_symbols
 def foldedBlank : Nat :=
   foldedSymbolCode false default default
 
+/-- Blank folded cells belong to the finite folded alphabet. -/
+theorem foldedBlank_mem_symbols : foldedBlank ∈ foldedSymbolList := by
+  unfold foldedBlank
+  exact foldedSymbolCode_mem_symbols false default default
+
 def foldedOriginSymbol (a : SourceSymbol) : Nat :=
   foldedSymbolCode true default a
+
+/-- Marked origin cells belong to the finite folded alphabet. -/
+theorem foldedOriginSymbol_mem_symbols (a : SourceSymbol) :
+    foldedOriginSymbol a ∈ foldedSymbolList := by
+  unfold foldedOriginSymbol
+  exact foldedSymbolCode_mem_symbols true default a
 
 theorem foldedOriginSymbol_primrec : Primrec foldedOriginSymbol := by
   classical
@@ -1791,6 +1802,22 @@ def nextAfterOrigin : Nat :=
     initReturnState 0
   else
     initMoveRightState 0
+
+/-- The state reached after writing the origin marker is in the folded state support. -/
+theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
+    nextAfterOrigin ∈ foldedStateList tc := by
+  unfold nextAfterOrigin
+  by_cases h : TM0Route.partrecStartedTM0Input.length ≤ 1
+  · simp [h, foldedStateList, foldedStateListOfCodes, foldedInitStateList]
+  · have hlen : 0 < TM0Route.partrecStartedTM0Input.length := by omega
+    unfold foldedStateList foldedStateListOfCodes foldedInitStateList
+    rw [List.mem_append]
+    apply Or.inl
+    rw [List.mem_append]
+    apply Or.inr
+    rw [List.mem_flatMap]
+    refine ⟨0, List.mem_range.2 hlen, ?_⟩
+    simp [h]
 
 def mkRow (state read next : Nat) (stmt : PostStmt) : PostTransition where
   state := state
@@ -6432,6 +6459,37 @@ theorem positionProgramData_table (tc : Turing.ToPartrec.Code) :
     (positionProgramData tc).table =
       initRowsData ++ simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc) :=
   rfl
+
+/-- The generated position-coded program starts with the normalized origin row. -/
+theorem positionProgramData_transition?_start_blank (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).transition? foldedStartState foldedBlank =
+      some initWriteOriginRow := by
+  unfold PostProgram.transition?
+  change (initRowsData ++
+      simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+      (fun e => e.matchesInput foldedStartState foldedBlank) =
+    some initWriteOriginRow
+  apply find?_append_of_eq_some
+  have hmatch :
+      initWriteOriginRow.matchesInput foldedStartState foldedBlank = true := by
+    unfold initWriteOriginRow foldedStartState
+    simp [mkRow, PostTransition.matchesInput]
+  change (initWriteOriginRow ::
+      (initMoveRightRows ++ (initWriteRightRows ++ initReturnRowsData))).find?
+      (fun e => e.matchesInput foldedStartState foldedBlank) =
+    some initWriteOriginRow
+  simp [hmatch]
+
+/-- The first generated position-coded program step writes the folded origin. -/
+theorem positionProgramData_step_start_blank (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).step foldedStartState foldedBlank =
+      some (nextAfterOrigin, PostStmt.write (foldedOriginSymbol (inputSymbol 0))) := by
+  have hfind := positionProgramData_transition?_start_blank tc
+  have hnext : nextAfterOrigin ∈ foldedStateList tc :=
+    nextAfterOrigin_mem_states tc
+  have hwrite : foldedOriginSymbol (inputSymbol 0) ∈ foldedSymbolList :=
+    foldedOriginSymbol_mem_symbols (inputSymbol 0)
+  simp [PostProgram.step, hfind, initWriteOriginRow, mkRow, hnext, hwrite]
 
 theorem positionProgramData_eq_programOfCountAndSimRows
     (tc : Turing.ToPartrec.Code) :
