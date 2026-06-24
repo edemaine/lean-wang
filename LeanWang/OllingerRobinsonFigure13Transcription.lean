@@ -838,6 +838,48 @@ end Figure18RoleTable
 namespace Figure18RoleTable
 
 /--
+Convert a flat quarter-role transcription into the 92 raw-tile rows expected by
+`Figure18RoleTable`.
+
+The flat order is the same as `fig13QuarterRoleSpecs`: for each raw Figure 13
+tile in scan order, list southwest, southeast, northwest, then northeast.  The
+`getD` default is only for totality; `ofFlatRoles` below separately requires
+the intended length `368`.
+-/
+def rowsOfFlatRoles (flat : List CellRole) : List TileQuarterRoles :=
+  (List.range 92).map fun i =>
+    TileQuarterRoles.ofQuadrants
+      (flat.getD (4 * i) CellRole.inactive)
+      (flat.getD (4 * i + 1) CellRole.inactive)
+      (flat.getD (4 * i + 2) CellRole.inactive)
+      (flat.getD (4 * i + 3) CellRole.inactive)
+
+@[simp]
+theorem rowsOfFlatRoles_length (flat : List CellRole) :
+    (rowsOfFlatRoles flat).length = 92 := by
+  simp [rowsOfFlatRoles]
+
+/--
+Build a `Figure18RoleTable` from a flat quarter-role transcription.
+
+This is the intended constructor for a transcription read directly from the
+quarter-level Figure 18 picture: prove the flat list has exactly 368 entries and
+let the existing finite checker prove the unique-corner condition.
+-/
+def ofFlatRoles
+    (flat : List CellRole) (_hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true) :
+    Figure18RoleTable where
+  roleRows := rowsOfFlatRoles flat
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  length_eq := rowsOfFlatRoles_length flat
+  uniqueCorner := hunique
+
+/--
 Smoke-test data for the finite Figure 18 table checker.
 
 This is deliberately not the Ollinger/Robinson scaffold interpretation: it marks
@@ -850,9 +892,17 @@ def smokeRoleRows : List TileQuarterRoles :=
       CellRole.corner CellRole.inactive CellRole.inactive CellRole.inactive ::
     List.replicate 91 TileQuarterRoles.inactive
 
+def smokeFlatRoles : List CellRole :=
+  CellRole.corner :: List.replicate 367 CellRole.inactive
+
 @[simp]
 theorem smokeRoleRows_length : smokeRoleRows.length = 92 := by
   decide
+
+@[simp]
+theorem smokeFlatRoles_length : smokeFlatRoles.length = 368 := by
+  change (CellRole.corner :: List.replicate 367 CellRole.inactive).length = 368
+  rw [List.length_cons, List.length_replicate]
 
 def smokeCornerIndex : Fin 92 :=
   ⟨0, by decide⟩
