@@ -817,14 +817,43 @@ theorem presentation_tiles (table : Figure18RoleTable) :
     table.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
   table.finiteCheckedTranscription_presentation_tiles
 
+theorem presentation_tiles_nodup (table : Figure18RoleTable) :
+    table.presentation.tiles.Nodup := by
+  rw [table.presentation_tiles]
+  exact fig13SubdividedTiles_nodup
+
 theorem row_getElem? (table : Figure18RoleTable) (i : Fin 92) :
     table.roleRows[i.val]? = some (table.row i) :=
   fig13QuarterRoleRow_getElem? table.roleRows table.length_eq i
+
+theorem presentation_role_fig13QuarterTile
+    (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
+    table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
+  simpa [presentation, finiteCheckedTranscription,
+    FiniteCheckedTranscription.presentation, presentationOfSpecs,
+    fig13QuarterRoleEntries, roleAt] using
+    fig13QuarterRoleEntries_lookup_of_getElem?
+      table.length_eq (table.row_getElem? i) (q := q)
 
 theorem roleAt_corner (table : Figure18RoleTable) :
     table.roleAt table.cornerIndex table.cornerQuadrant = CellRole.corner := by
   exact fig13QuarterCornerRole_of_positionUniqueBool
     table.length_eq table.uniqueCorner
+
+theorem presentation_role_cornerTile (table : Figure18RoleTable) :
+    table.presentation.role table.cornerTile = CellRole.corner := by
+  rw [cornerTile, presentation_role_fig13QuarterTile, roleAt_corner]
+
+theorem presentation_active_fig13QuarterTile
+    (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
+    CellRole.isActive (table.presentation.role (fig13QuarterTile i q)) =
+      CellRole.isActive (table.roleAt i q) := by
+  rw [presentation_role_fig13QuarterTile]
+
+theorem presentation_active_cornerTile (table : Figure18RoleTable) :
+    CellRole.isActive (table.presentation.role table.cornerTile) = true := by
+  rw [presentation_role_cornerTile]
+  rfl
 
 theorem roleAt_corner_iff (table : Figure18RoleTable)
     (i : Fin 92) (q : Quadrant) :
