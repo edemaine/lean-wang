@@ -1567,6 +1567,22 @@ theorem foldedSimStateCode_eq_ofCode (tc : Turing.ToPartrec.Code)
       foldedSimStateOfCode side (TM0FiniteCompiler.stateCode tc q) := by
   rfl
 
+theorem foldedSimStateOfCode_eq_foldedSimStateCode_iff
+    {tc : Turing.ToPartrec.Code} {side side' : FoldSide} {qCode : Nat}
+    {q : SourceLabel tc} :
+    foldedSimStateOfCode side qCode = foldedSimStateCode tc side' q ↔
+      side = side' ∧ qCode = TM0FiniteCompiler.stateCode tc q := by
+  unfold foldedSimStateOfCode foldedSimStateCode taggedState
+  constructor
+  · intro h
+    have hpayload := (Nat.pair_eq_pair.mp h).2
+    have hparts := Nat.pair_eq_pair.mp hpayload
+    have hside : side = side' := by
+      cases side <;> cases side' <;> simp [FoldSide.code] at hparts ⊢
+    exact ⟨hside, hparts.2⟩
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
 theorem foldedSimStateCode_primrec_fixed (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
       (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
