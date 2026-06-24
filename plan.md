@@ -277,6 +277,15 @@ the remaining program-data computability proof. A trial build of a separate
 final module that imported `TM0FoldedCompiler` was interrupted after Lake spent
 5596 seconds compiling `TM0FoldedCompiler` without producing its `.olean`, so
 that final packaging should be treated as a heavyweight target.
+The source-bounded-search route is now packaged all the way to the theorem
+surface: `sourceObligationsOfLabelIndexFromWithSearchCode` combines the
+remaining decoder primitive-recursive proof with normalized `programData`
+correctness, and
+`encoded_domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode`
+and
+`domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode`
+instantiate the final encoded and unencoded undecidability statements from
+those two facts.
 
 The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`

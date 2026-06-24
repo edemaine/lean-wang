@@ -836,6 +836,24 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithSearchCode'
     fun _ => rfl
 
 /--
+The remaining bounded-search descriptor decoder proof, together with normalized
+folded program-data semantic correctness, gives the exact source obligations
+needed by the final reduction.
+-/
+def sourceObligationsOfLabelIndexFromWithSearchCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_labelIndexFromWithSearchCode' hindex)
+    hcorrect
+
+/--
 The source-level position-coded decoder is enough for computability once its
 generated indexed rows are proved to match the semantic folded simulation rows.
 -/
@@ -1031,6 +1049,40 @@ theorem domino_problem_undecidable_of_scaffold_source
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
     hdomino.of_eq fun c => sourceDominoReduction_correct hS h c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
+Encoded domino undecidability from the remaining source-level bounded-search
+descriptor decoder proof and normalized folded program-data correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithSearchCode hindex hcorrect)
+
+/--
+Unencoded domino undecidability from the remaining source-level bounded-search
+descriptor decoder proof and normalized folded program-data correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCode
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithSearchCode hindex hcorrect)
 
 /--
 Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
