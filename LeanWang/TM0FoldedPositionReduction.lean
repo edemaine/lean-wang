@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.TM0FoldedReduction
 import LeanWang.TM0FoldedPositionCorrect
+import LeanWang.OllingerRobinsonTranscription
 
 /-!
 Semantic final packaging for the generated position-coded folded reduction.
@@ -104,6 +105,32 @@ theorem domino_problem_undecidable_of_presented_flexible_position_source_positio
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_presented_flexible_position_source
     I (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
+/--
+Encoded domino undecidability from a checked flexible finite scaffold
+transcription and the generated interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorRowsCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
+    D.toPresentedFlexibleInstance hinterior
+
+/--
+Unencoded domino undecidability from a checked flexible finite scaffold
+transcription and the generated interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_checked_transcription_position_source_interiorRowsCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
+    D.toPresentedFlexibleInstance hinterior
 
 end TM0FoldedReduction
 
