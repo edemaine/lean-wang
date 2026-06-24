@@ -79,6 +79,32 @@ theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeInter
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
 
+/--
+Encoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the generated interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
+/--
+Unencoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the generated interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
 end TM0FoldedReduction
 
 end LeanWang
