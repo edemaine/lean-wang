@@ -249,6 +249,19 @@ proof.  The remaining computational target can therefore be narrowed to
 computability of `TM0FoldedCompiler.program ∘ NatPartrecToToPartrec.translate`,
 rather than computability on arbitrary `Turing.ToPartrec.Code`.
 
+The lightweight source route now also has exact-shape computability corollaries
+for the `SourceObligations.program_computable` field. In particular,
+`sourceProgramData_computable_of_source_labelIndexFromWithSearchCode'` turns
+the remaining source-level bounded-search descriptor decoder proof directly
+into
+
+```lean
+Computable (fun c : Nat.Partrec.Code =>
+  TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))
+```
+
+without going through the broader `Turing.ToPartrec.Code` target.
+
 Next implementation targets:
 
 1. Prove source-level computability of the folded finite-TM0 reduction:

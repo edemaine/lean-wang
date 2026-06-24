@@ -434,6 +434,13 @@ theorem sourceProgramData_computable_of_source_labelIndexStartWithCode
   sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     (sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexStartWithCode hindex)
 
+theorem sourceProgramData_computable_of_source_labelIndexStartWithCode'
+    (hindex : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithCode p.1 p.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_labelIndexStartWithCode hindex).of_eq fun _ => rfl
+
 /--
 The remaining source-level folded computability target: primitive recursiveness
 of the translated fully offset decoder implies computability of the normalized
@@ -445,6 +452,13 @@ theorem sourceProgramData_computable_of_source_labelIndexFrom
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_simStepDataByLabelIndex
     (sourceSimStepDataByLabelIndex_primrec_of_source_labelIndexFrom hindex)
+
+theorem sourceProgramData_computable_of_source_labelIndexFrom'
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFrom p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_labelIndexFrom hindex).of_eq fun _ => rfl
 
 /--
 The numeric-state source-level folded computability target. This is equivalent
@@ -458,6 +472,13 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithCode
   sourceProgramData_computable_of_source_simStepDataByLabelIndexWithCode
     (sourceSimStepDataByLabelIndexWithCode_primrec_of_source_labelIndexFromWithCode hindex)
 
+theorem sourceProgramData_computable_of_source_labelIndexFromWithCode'
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_labelIndexFromWithCode hindex).of_eq fun _ => rfl
+
 /--
 The source-level bounded-search decoder target is enough for computability of
 the normalized folded finite-TM0 program data.
@@ -468,6 +489,14 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_labelIndexFromWithCode
     (sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode hindex)
+
+theorem sourceProgramData_computable_of_source_labelIndexFromWithSearchCode'
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_labelIndexFromWithSearchCode hindex).of_eq
+    fun _ => rfl
 
 /--
 The current lowest-level folded computability target, phrased at source-code
