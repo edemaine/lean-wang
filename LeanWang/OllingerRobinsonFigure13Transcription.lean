@@ -314,6 +314,42 @@ deriving DecidableEq, Repr
 
 namespace Figure18Site
 
+def toPair (site : Figure18Site) : Fin 92 × Quadrant :=
+  (site.index, site.quadrant)
+
+def ofPair (p : Fin 92 × Quadrant) : Figure18Site where
+  index := p.1
+  quadrant := p.2
+
+def equivPair : Figure18Site ≃ Fin 92 × Quadrant where
+  toFun := toPair
+  invFun := ofPair
+  left_inv := by
+    intro site
+    cases site
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨i, q⟩
+    rfl
+
+instance instPrimcodable : Primcodable Figure18Site :=
+  Primcodable.ofEquiv (Fin 92 × Quadrant) equivPair
+
+theorem toPair_primrec : Primrec toPair := by
+  simpa [equivPair] using
+    (Primrec.of_equiv (e := equivPair) : Primrec equivPair)
+
+theorem ofPair_primrec : Primrec ofPair := by
+  simpa [equivPair] using
+    (Primrec.of_equiv_symm (e := equivPair) : Primrec equivPair.symm)
+
+theorem index_primrec : Primrec Figure18Site.index :=
+  Primrec.fst.comp toPair_primrec
+
+theorem quadrant_primrec : Primrec Figure18Site.quadrant :=
+  Primrec.snd.comp toPair_primrec
+
 def tile (site : Figure18Site) : WangTile :=
   fig13QuarterTile site.index site.quadrant
 
