@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.TM0FoldedProgram
-import LeanWang.Theorems
+import LeanWang.OllingerRobinsonScaffold
 import Mathlib.Computability.Reduce
 
 /-!
@@ -4818,6 +4818,26 @@ theorem domino_problem_undecidable_of_scaffold_position_source
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /--
+Encoded domino undecidability from a presented Ollinger/Robinson scaffold and
+the generated position-coded source-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_presented_position_source
+    (I : OllingerRobinson.PresentedInstance) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source
+    I.presentation.toScaffold I.isScaffold h
+
+/--
+Unencoded domino undecidability from a presented Ollinger/Robinson scaffold and
+the generated position-coded source-route obligations.
+-/
+theorem domino_problem_undecidable_of_presented_position_source
+    (I : OllingerRobinson.PresentedInstance) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source
+    I.presentation.toScaffold I.isScaffold h
+
+/--
 Encoded domino undecidability from a scaffold and the generated position-coded
 descriptor decoder.  This uses `positionProgramData` directly, so no
 row-equivalence proof against the canonical folded rows is required.
@@ -4991,6 +5011,40 @@ theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeInter
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRows
       hinterior hcorrect)
+
+/--
+Encoded domino undecidability from a presented Ollinger/Robinson scaffold and
+the generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
+    (I : OllingerRobinson.PresentedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
+    I.presentation.toScaffold I.isScaffold hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a presented Ollinger/Robinson scaffold and
+the generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
+    (I : OllingerRobinson.PresentedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
+    I.presentation.toScaffold I.isScaffold hinterior hcorrect
 
 end TM0FoldedReduction
 
