@@ -691,6 +691,43 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_eq (c : Code) :
         (NatPartrecToToPartrec.translate c) := by
   rfl
 
+theorem sourceSimStepDataByLabelIndexWithPositionCode_eq_withCode_of_minimal
+    (c : Code)
+    (hmin : ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    sourceSimStepDataByLabelIndexWithPositionCode c =
+      sourceSimStepDataByLabelIndexWithCode c := by
+  change TM0FoldedCompiler.simStepDataByLabelIndexWithPositionCode
+      (NatPartrecToToPartrec.translate c) =
+    TM0FoldedCompiler.simStepDataByLabelIndexWithCode
+      (NatPartrecToToPartrec.translate c)
+  exact
+    TM0FoldedCompiler.simStepDataByLabelIndexWithPositionCode_eq_withCode_of_minimal
+      (NatPartrecToToPartrec.translate c) hmin
+
+theorem sourceSimRowsOfStepDataByLabelIndexWithPositionCode_eq_of_minimal
+    (c : Code)
+    (hmin : ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    TM0FoldedCompiler.simRowsOfStepData
+        (sourceSimStepDataByLabelIndexWithPositionCode c) =
+      TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c) := by
+  rw [sourceSimStepDataByLabelIndexWithPositionCode_eq_withCode_of_minimal c hmin]
+  rw [sourceSimStepDataByLabelIndexWithCode_eq c]
+  rw [sourceSimStepData_eq c]
+  exact (TM0FoldedCompiler.simRows_eq_stepData
+    (NatPartrecToToPartrec.translate c)).symm
+
 /--
 Primitive recursiveness of the translated source-level offset decoder is enough
 for the source-level indexed descriptor list.
@@ -1256,6 +1293,41 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode
     hindex hrows).of_eq fun _ => rfl
+
+/--
+The position-coded source decoder gives program-data computability once each
+decoded position is known to be the first occurrence of that label in the
+support list.
+-/
+theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithPositionCode hindex
+    (fun c => sourceSimRowsOfStepDataByLabelIndexWithPositionCode_eq_of_minimal
+      c (hmin c))
+
+theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal'
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal
+    hindex hmin).of_eq fun _ => rfl
 
 /--
 The current lowest-level folded computability target, phrased at source-code

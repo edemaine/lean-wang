@@ -4263,10 +4263,56 @@ theorem simStepDataByLabelIndexWithSearchCode_eq (tc : Turing.ToPartrec.Code) :
   intro i _hi
   exact simStepDataForLabelIndexStartWithSearchCode_eq_withCode tc i
 
+theorem simStepDataForLabelIndexStartWithPositionCode_eq_withCode_of_minimal
+    (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hmin : ∀ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 i = some q →
+        ∀ m, m < q.2 →
+          (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1) :
+    simStepDataForLabelIndexStartWithPositionCode tc i =
+      simStepDataForLabelIndexStartWithCode tc i := by
+  unfold simStepDataForLabelIndexStartWithPositionCode
+    simStepDataForLabelIndexStartWithCode
+  exact simStepDataForLabelIndexFromWithPositionCode_eq_withCode_of_minimal
+    tc hmin
+
+theorem simStepDataByLabelIndexWithPositionCode_eq_withCode_of_minimal
+    (tc : Turing.ToPartrec.Code)
+    (hmin : ∀ i, i < TM0Route.partrecStartedTM0LabelCount tc →
+      ∀ q : SourceLabel tc × Nat,
+        labelAtByStatementFromWithPositionCode? tc
+            (TM0Route.partrecStartedTM0StatementCount tc) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1) :
+    simStepDataByLabelIndexWithPositionCode tc =
+      simStepDataByLabelIndexWithCode tc := by
+  unfold simStepDataByLabelIndexWithPositionCode simStepDataByLabelIndexWithCode
+  apply List.flatMap_congr
+  intro i hi
+  have hiCount : i < TM0Route.partrecStartedTM0LabelCount tc := by
+    simpa [List.mem_range] using hi
+  exact simStepDataForLabelIndexStartWithPositionCode_eq_withCode_of_minimal
+    tc (hmin i hiCount)
+
 theorem simRows_eq_stepData (tc : Turing.ToPartrec.Code) :
     simRows tc = simRowsOfStepData (simStepData tc) := by
   unfold simRows simStepData
   simp [simRowsForLabel_eq_stepData, simRowsOfStepData, List.map_flatMap]
+
+theorem simRowsOfStepDataByLabelIndexWithPositionCode_eq_of_minimal
+    (tc : Turing.ToPartrec.Code)
+    (hmin : ∀ i, i < TM0Route.partrecStartedTM0LabelCount tc →
+      ∀ q : SourceLabel tc × Nat,
+        labelAtByStatementFromWithPositionCode? tc
+            (TM0Route.partrecStartedTM0StatementCount tc) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList tc)[m]? ≠ some q.1) :
+    simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc) =
+      simRows tc := by
+  rw [simStepDataByLabelIndexWithPositionCode_eq_withCode_of_minimal tc hmin]
+  rw [simStepDataByLabelIndexWithCode_eq]
+  exact (simRows_eq_stepData tc).symm
 
 def programOfParts (qCodes : List Nat) (init sim : List PostTransition) : FiniteTM0Program where
   symbols := foldedSymbolList
