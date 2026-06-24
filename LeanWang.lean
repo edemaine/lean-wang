@@ -1,4 +1,5 @@
 import LeanWang.Basic
+import LeanWang.TileSubdivision
 import LeanWang.Compactness
 import LeanWang.Machine
 import LeanWang.MachineTiles
