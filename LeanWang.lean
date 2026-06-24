@@ -17,4 +17,5 @@ import LeanWang.Theorems
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.OllingerRobinsonTranscription
 import LeanWang.TM0FoldedReduction
+import LeanWang.TM0FoldedTranscriptionReduction
 import LeanWang.TM0FoldedPositionReduction
