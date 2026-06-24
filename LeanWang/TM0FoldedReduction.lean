@@ -1147,6 +1147,32 @@ theorem sourceSearchCodeDecoderStep_stmt_some
   simp [sourceSearchCodeDecoderStep, sourceSearchCodeDecoderStepNone,
     sourceSearchCodeDecoderStepVar, hv, hstmt]
 
+theorem sourceSearchCodeDecoderStepVar_eq_oneRows
+    (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
+    sourceSearchCodeDecoderStepVar c k i v =
+      (k, i, some (sourceSearchCodeOneRowsVar c k v)) := by
+  unfold sourceSearchCodeDecoderStepVar sourceSearchCodeOneRowsVar
+  cases TM0Route.partrecStartedTM0StatementAt? (NatPartrecToToPartrec.translate c) k <;> rfl
+
+theorem sourceSearchCodeDecoderStepVar_primrec_of_oneRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeDecoderStepVar p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  have hrows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2.2) :=
+    hvarRows.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
+  exact (Primrec.pair
+    (Primrec.fst.comp Primrec.snd)
+    (Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+      (Primrec.option_some.comp hrows))).of_eq fun p => by
+        exact (sourceSearchCodeDecoderStepVar_eq_oneRows
+          p.1 p.2.1 p.2.2.1 p.2.2.2).symm
+
 theorem sourceSearchCodeDecoderStepNone_primrec_of_stepVar
     (hvar : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeDecoderStepVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
@@ -1212,6 +1238,14 @@ theorem sourceSearchCodeDecoderStep_primrec_of_stepVar
       sourceSearchCodeDecoderStep p.1 p.2) :=
   sourceSearchCodeDecoderStep_primrec_of_stepNone
     (sourceSearchCodeDecoderStepNone_primrec_of_stepVar hvar)
+
+theorem sourceSearchCodeDecoderStep_primrec_of_oneVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2) :=
+  sourceSearchCodeDecoderStep_primrec_of_stepVar
+    (sourceSearchCodeDecoderStepVar_primrec_of_oneRows hvarRows)
 
 theorem sourceSearchCodeDecoderStepNone_eq_rows (c : Code) (k i : Nat) :
     sourceSearchCodeDecoderStepNone c k i =
