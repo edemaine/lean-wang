@@ -3928,6 +3928,68 @@ theorem labelAtByStatementFromWithPositionCode?_code_mem_states
               cases h
               exact labelPositionCode_mem_states_of_statementAt? tc hstmt hv
 
+theorem labelAtByStatementFromWithPositionCode?_code_eq_zero_or_rect
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q) :
+    q.2 = 0 ∨ q.2 = 1 + k * TM0Route.partrecVarList.length + i := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [labelAtByStatementFromWithPositionCode?_zero] at h
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hv] at h
+          rcases ih h with hzero | hrect
+          · exact Or.inl hzero
+          · right
+            have hle : TM0Route.partrecVarList.length ≤ i := by
+              rw [List.getElem?_eq_none_iff] at hv
+              exact hv
+            have hlen : 0 < TM0Route.partrecVarList.length := by
+              simp [TM0Route.partrecVarList]
+            calc
+              q.2 = 1 + (k + 1) * TM0Route.partrecVarList.length +
+                  (i - TM0Route.partrecVarList.length) := hrect
+              _ = 1 + (k * TM0Route.partrecVarList.length +
+                    TM0Route.partrecVarList.length) +
+                  (i - TM0Route.partrecVarList.length) := by
+                    rw [Nat.succ_mul]
+              _ = 1 + k * TM0Route.partrecVarList.length + i := by
+                    omega
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc k with
+          | none =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_none tc hv hstmt] at h
+              simp at h
+          | some stmt =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
+              cases h
+              by_cases hdefault : ((stmt, v) : SourceLabel tc) = sourceDefaultLabel tc
+              · left
+                simp [labelPositionCode, hdefault]
+              · right
+                simp [labelPositionCode, hdefault]
+
+theorem labelAtByStatementFromWithPositionCode?_start_code_eq_zero_or_succ
+    (tc : Turing.ToPartrec.Code) {fuel i : Nat} {q : SourceLabel tc × Nat}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel 0 i = some q) :
+    q.2 = 0 ∨ q.2 = i + 1 := by
+  rcases labelAtByStatementFromWithPositionCode?_code_eq_zero_or_rect tc h with
+    hzero | hrect
+  · exact Or.inl hzero
+  · right
+    omega
+
+theorem labelAtByStatementFromWithPositionCode?_start_currentCode_ne_succ_of_lt
+    (tc : Turing.ToPartrec.Code) {fuel i n : Nat} {q : SourceLabel tc × Nat}
+    (hi : i < n)
+    (h : labelAtByStatementFromWithPositionCode? tc fuel 0 i = some q) :
+    q.2 ≠ n + 1 := by
+  rcases labelAtByStatementFromWithPositionCode?_start_code_eq_zero_or_succ tc h with
+    hzero | hsucc
+  · omega
+  · omega
+
 theorem labelAtByStatementFromWithPositionCode?_support_get?
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
     (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q) :
@@ -4787,6 +4849,38 @@ theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_index_dec
   rw [simRowsOfStepDataForPositionCodeStart_find?_eq_target
     hdecode htarget hcode]
   exact hcanonical
+
+theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_succ_code
+    {tc : Turing.ToPartrec.Code} {n : Nat}
+    {q : SourceLabel tc × Nat} {target : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {e : PostTransition}
+    (hn : n < TM0Route.partrecStartedTM0LabelCount tc)
+    (hdecode : labelAtByStatementFromWithPositionCode? tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 n = some q)
+    (htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc)
+    (hcode : q.2 = TM0FiniteCompiler.stateCode tc target)
+    (hsucc : TM0FiniteCompiler.stateCode tc target = n + 1)
+    (hcanonical :
+      (simRowsOfStepData
+        (simStepDataForStmtLabelWithCode tc
+          (TM0FiniteCompiler.stateCode tc target) target.1 target.2)).find?
+          (fun e =>
+            e.matchesInput (foldedSimStateCode tc side target)
+              (foldedSymbolCode marked left right)) = some e) :
+    (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) =
+      some e := by
+  refine simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_index_decode
+    (tc := tc) (n := n) (q := q) (target := target) (side := side)
+    (marked := marked) (left := left) (right := right)
+    hn ?_ hdecode htarget hcode hcanonical
+  intro i hi r hr
+  rw [hsucc]
+  exact labelAtByStatementFromWithPositionCode?_start_currentCode_ne_succ_of_lt
+    tc hi hr
 
 theorem simStepDataByLabelIndex_primrec_of_forLabelIndex
     (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat =>
