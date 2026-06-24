@@ -5485,6 +5485,11 @@ def tm1StatementSupportAt? {Γ Λ σ : Type}
   | i + 1 =>
       flatMapAt? labels (fun q => (tm1StmtSupportList (M q)).map some) i
 
+theorem tm1StmtSupportList_getElem?_zero {Γ Λ σ : Type}
+    (stmt : Turing.TM1.Stmt Γ Λ σ) :
+    (tm1StmtSupportList stmt)[0]? = some stmt := by
+  cases stmt <;> simp [tm1StmtSupportList]
+
 @[simp]
 theorem tm1StatementSupportAt?_zero {Γ Λ σ : Type}
     (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) :
@@ -5494,6 +5499,33 @@ theorem tm1StatementSupportAt?_succ {Γ Λ σ : Type}
     (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) (i : Nat) :
     tm1StatementSupportAt? labels M (i + 1) =
       flatMapAt? labels (fun q => (tm1StmtSupportList (M q)).map some) i := rfl
+
+theorem tm1StatementSupportAt?_succ_of_head_getElem?
+    {Γ Λ σ : Type} (q : Λ) (qs : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ)
+    {i : Nat} {stmt : Turing.TM1.Stmt Γ Λ σ}
+    (hstmt : (tm1StmtSupportList (M q))[i]? = some stmt) :
+    tm1StatementSupportAt? (q :: qs) M (i + 1) = some (some stmt) := by
+  unfold tm1StatementSupportAt? flatMapAt?
+  simp [hstmt]
+
+theorem tm1StatementSupportAt?_one_of_cons
+    {Γ Λ σ : Type} (q : Λ) (qs : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) :
+    tm1StatementSupportAt? (q :: qs) M 1 = some (some (M q)) := by
+  simpa using tm1StatementSupportAt?_succ_of_head_getElem?
+    (q := q) (qs := qs) (M := M) (i := 0)
+    (tm1StmtSupportList_getElem?_zero (M q))
+
+theorem tm1StatementSupportAt?_one_of_getElem?_zero
+    {Γ Λ σ : Type} {labels : List Λ} {M : Λ → Turing.TM1.Stmt Γ Λ σ} {q : Λ}
+    (hlabel : labels[0]? = some q) :
+    tm1StatementSupportAt? labels M 1 = some (some (M q)) := by
+  cases labels with
+  | nil =>
+      cases hlabel
+  | cons q' qs =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hlabel
+      subst q
+      exact tm1StatementSupportAt?_one_of_cons q' qs M
 
 theorem tm1StatementSupportAt?_eq_getElem? {Γ Λ σ : Type}
     (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) (i : Nat) :
@@ -5794,6 +5826,15 @@ def partrecStartedTM0StatementAt? (tc : Turing.ToPartrec.Code) (i : Nat) :
 theorem partrecStartedTM0StatementAt?_zero (tc : Turing.ToPartrec.Code) :
     partrecStartedTM0StatementAt? tc 0 = some none := by
   rfl
+
+theorem partrecStartedTM0StatementAt?_one_of_label_getElem?_zero
+    {tc : Turing.ToPartrec.Code}
+    {q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar}
+    (hlabel : (partrecStartedTM1LabelList tc)[0]? = some q) :
+    partrecStartedTM0StatementAt? tc 1 =
+      some (some (partrecStartedTM1Machine tc q)) := by
+  unfold partrecStartedTM0StatementAt?
+  exact tm1StatementSupportAt?_one_of_getElem?_zero hlabel
 
 theorem partrecStartedTM0StatementAt?_eq_getElem?
     (tc : Turing.ToPartrec.Code) (i : Nat) :
