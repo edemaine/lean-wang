@@ -1206,6 +1206,47 @@ structure Figure18RoutedFixedCornerSquare
 
 namespace Figure18RoutedFixedCornerSquare
 
+theorem payload_mem
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18RoutedFixedCornerSquare table x n hn)
+    (i : Fin n) (j : Fin n) :
+    window.payloadRect i j ∈ T := by
+  apply payload_mem_of_active_product_mem_combineWithScaffold
+    (S := table.presentation.toScaffold)
+    (base := window.baseRect i j)
+  · exact window.active i j
+  · rw [window.product i j]
+    exact (x (window.horizontalCoord i, window.verticalCoord j)).2
+
+theorem base_corner
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18RoutedFixedCornerSquare table x n hn) :
+    window.baseRect ⟨0, hn⟩ ⟨0, hn⟩ = table.presentation.toScaffold.corner := by
+  change window.baseRect ⟨0, hn⟩ ⟨0, hn⟩ = table.presentation.cornerTile
+  exact table.finiteCheckedTranscription.sanityProp.corner_unique
+    (window.baseRect ⟨0, hn⟩ ⟨0, hn⟩)
+    (window.mem ⟨0, hn⟩ ⟨0, hn⟩)
+    window.cornerRole
+
+theorem payload_corner_of_product
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18RoutedFixedCornerSquare table x n hn) :
+    window.payloadRect ⟨0, hn⟩ ⟨0, hn⟩ = seed := by
+  apply payload_eq_seed_of_active_corner_product_mem_combineWithScaffold
+    (S := table.presentation.toScaffold)
+    (base := window.baseRect ⟨0, hn⟩ ⟨0, hn⟩)
+  · exact window.active ⟨0, hn⟩ ⟨0, hn⟩
+  · exact window.base_corner
+  · rw [window.product ⟨0, hn⟩ ⟨0, hn⟩]
+    exact (x (window.horizontalCoord ⟨0, hn⟩,
+      window.verticalCoord ⟨0, hn⟩)).2
+
 theorem tileable
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
@@ -1213,6 +1254,69 @@ theorem tileable
     (window : Figure18RoutedFixedCornerSquare table x n hn) :
     TileableFixedCornerSquare T seed n :=
   ⟨hn, window.payloadRect, window.payloadValid, window.payloadCorner⟩
+
+/--
+Build a routed fixed-corner square from the geometric routing data.
+
+The local Figure 18 proof should supply the selected coordinates, scaffold
+sites, payload decoding, and routed horizontal/vertical payload matches. Payload
+membership and the lower-left seed condition are then consequences of the
+combined scaffold tileset and the corner-role uniqueness check.
+-/
+def ofRoutedMatches
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} (hn : 0 < n)
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (baseRect payloadRect : Rectangle n n)
+    (mem : ∀ i : Fin n, ∀ j : Fin n, baseRect i j ∈ table.presentation.tiles)
+    (active : ∀ i : Fin n, ∀ j : Fin n,
+      CellRole.isActive (table.presentation.role (baseRect i j)) = true)
+    (cornerRole :
+      table.presentation.role (baseRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner)
+    (product : ∀ i : Fin n, ∀ j : Fin n,
+      WangTile.product (baseRect i j) (payloadRect i j) =
+        (x (horizontalCoord i, verticalCoord j)).1)
+    (hmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j))
+    (vmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      WangTile.VMatches (payloadRect i j) (payloadRect i ⟨j.val + 1, hj⟩)) :
+    Figure18RoutedFixedCornerSquare table x n hn where
+  horizontalCoord := horizontalCoord
+  verticalCoord := verticalCoord
+  baseRect := baseRect
+  payloadRect := payloadRect
+  mem := mem
+  active := active
+  cornerRole := cornerRole
+  product := product
+  payloadValid := by
+    constructor
+    · intro i j
+      apply payload_mem_of_active_product_mem_combineWithScaffold
+        (S := table.presentation.toScaffold)
+        (base := baseRect i j)
+      · exact active i j
+      · rw [product i j]
+        exact (x (horizontalCoord i, verticalCoord j)).2
+    constructor
+    · exact hmatch
+    · exact vmatch
+  payloadCorner := by
+    have hcornerBase :
+        baseRect ⟨0, hn⟩ ⟨0, hn⟩ = table.presentation.toScaffold.corner := by
+      change baseRect ⟨0, hn⟩ ⟨0, hn⟩ = table.presentation.cornerTile
+      exact table.finiteCheckedTranscription.sanityProp.corner_unique
+        (baseRect ⟨0, hn⟩ ⟨0, hn⟩)
+        (mem ⟨0, hn⟩ ⟨0, hn⟩)
+        cornerRole
+    apply payload_eq_seed_of_active_corner_product_mem_combineWithScaffold
+      (S := table.presentation.toScaffold)
+      (base := baseRect ⟨0, hn⟩ ⟨0, hn⟩)
+    · exact active ⟨0, hn⟩ ⟨0, hn⟩
+    · exact hcornerBase
+    · rw [product ⟨0, hn⟩ ⟨0, hn⟩]
+      exact (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)).2
 
 end Figure18RoutedFixedCornerSquare
 
