@@ -148,11 +148,6 @@ theorem initReturnState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
   refine ⟨i, List.mem_range.2 hi, ?_⟩
   simp
 
-theorem default_mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
-    (default : SourceLabel tc) ∈ TM0Route.partrecStartedTM0LabelList tc := by
-  exact (TM0Route.mem_partrecStartedTM0LabelList tc default).2
-    (TM0Route.partrecStartedTM0_supports tc).1
-
 theorem foldedSimStateCode_mem_states (tc : Turing.ToPartrec.Code)
     (side : FoldSide) {q : SourceLabel tc}
     (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc) :

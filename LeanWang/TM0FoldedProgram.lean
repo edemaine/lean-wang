@@ -48,6 +48,25 @@ theorem sourceDefaultLabel_eq_default (tc : Turing.ToPartrec.Code) :
     sourceDefaultLabel tc = (default : SourceLabel tc) := by
   rfl
 
+theorem default_mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+    (default : SourceLabel tc) ∈ TM0Route.partrecStartedTM0LabelList tc := by
+  exact (TM0Route.mem_partrecStartedTM0LabelList tc default).2
+    (TM0Route.partrecStartedTM0_supports tc).1
+
+theorem sourceDefaultLabel_mem_partrecStartedTM0LabelList (tc : Turing.ToPartrec.Code) :
+    sourceDefaultLabel tc ∈ TM0Route.partrecStartedTM0LabelList tc := by
+  rw [sourceDefaultLabel_eq_default]
+  exact default_mem_partrecStartedTM0LabelList tc
+
+theorem exists_partrecStartedTM0LabelList_get?_default (tc : Turing.ToPartrec.Code) :
+    ∃ n, n < TM0Route.partrecStartedTM0LabelCount tc ∧
+      (TM0Route.partrecStartedTM0LabelList tc)[n]? = some (default : SourceLabel tc) := by
+  rcases List.mem_iff_getElem?.1 (default_mem_partrecStartedTM0LabelList tc) with
+    ⟨n, hn⟩
+  refine ⟨n, ?_, hn⟩
+  rw [← TM0Route.partrecStartedTM0LabelList_length tc]
+  exact List.getElem?_eq_some_iff.1 hn |>.1
+
 /-- Which half of a folded one-sided cell is the simulated two-sided head reading? -/
 inductive FoldSide where
   | left
@@ -4590,6 +4609,29 @@ theorem labelAtByStatementFromWithPositionCode?_start_currentCode_ne_succ_of_lt
   · omega
   · omega
 
+theorem labelAtByStatementFromWithPositionCode?_code_eq_zero_of_sourceDefault
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q)
+    (hq : q.1 = sourceDefaultLabel tc) :
+    q.2 = 0 := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [labelAtByStatementFromWithPositionCode?_zero] at h
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hv] at h
+          exact ih h
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc k with
+          | none =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_none tc hv hstmt] at h
+              simp at h
+          | some stmt =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
+              cases h
+              simpa [labelPositionCode, hq]
+
 theorem labelAtByStatementFromWithPositionCode?_support_get?
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
     (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q) :
@@ -4666,6 +4708,46 @@ theorem labelAtByStatementFromWithPositionCode?_start_of_support_succ_stateCode
           omega
         · rw [hsucc, hstate]
       exact ⟨q, rfl, hqtarget, hqcode⟩
+
+theorem exists_labelAtByStatementFromWithPositionCode?_sourceDefault
+    (tc : Turing.ToPartrec.Code) :
+    ∃ n, n < TM0Route.partrecStartedTM0LabelCount tc ∧
+      labelAtByStatementFromWithPositionCode? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 n =
+        some (sourceDefaultLabel tc, 0) := by
+  rcases exists_partrecStartedTM0LabelList_get?_default tc with
+    ⟨n, hnlt, hlabelList⟩
+  have hlabel :
+      TM0Route.partrecStartedTM0LabelAtByStatementFrom? tc
+          (TM0Route.partrecStartedTM0StatementCount tc) 0 n =
+        some (default : SourceLabel tc) := by
+    rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq,
+      TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt,
+      TM0Route.partrecStartedTM0LabelAt?_eq_getElem?]
+    exact hlabelList
+  cases hdecode : labelAtByStatementFromWithPositionCode? tc
+      (TM0Route.partrecStartedTM0StatementCount tc) 0 n with
+  | none =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 n
+      rw [hdecode] at hfst
+      simp [hlabel] at hfst
+  | some q =>
+      have hfst := labelAtByStatementFromWithPositionCode?_fst_eq tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 n
+      rw [hdecode] at hfst
+      rw [hlabel] at hfst
+      have hqdefault : q.1 = (default : SourceLabel tc) :=
+        Option.some.inj hfst
+      have hqsource : q.1 = sourceDefaultLabel tc := by
+        simpa [sourceDefaultLabel_eq_default tc] using hqdefault
+      have hqcode :
+          q.2 = 0 :=
+        labelAtByStatementFromWithPositionCode?_code_eq_zero_of_sourceDefault
+          tc hdecode hqsource
+      have hqeq : q = (sourceDefaultLabel tc, 0) := by
+        exact Prod.ext hqsource hqcode
+      exact ⟨n, hnlt, hdecode.trans (congrArg some hqeq)⟩
 
 theorem labelAtByStatementFromWithPositionCode?_label_eq_of_code_eq_stateCode
     (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
