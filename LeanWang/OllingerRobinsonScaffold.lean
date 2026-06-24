@@ -95,6 +95,14 @@ theorem isActive_corner : isActive corner = true :=
 theorem isCorner_corner : isCorner corner = true :=
   rfl
 
+theorem isActive_eq_true_iff (r : CellRole) :
+    isActive r = true ↔ r = active ∨ r = corner := by
+  cases r <;> simp [isActive]
+
+theorem isCorner_eq_true_iff (r : CellRole) :
+    isCorner r = true ↔ r = corner := by
+  cases r <;> simp [isCorner]
+
 end CellRole
 
 /--
@@ -160,6 +168,39 @@ structure ActiveCornerWindow (S : Scaffold) {T : TileSet} {seed : WangTile}
       (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
 
 /--
+Role-level active square window for a presented scaffold.
+
+Finite verification over a concrete tile list should prove this form: active
+cells and the distinguished corner are recognized by the presentation's role
+decoder. It converts directly to `ActiveCornerWindow P.toScaffold`.
+-/
+structure PresentedActiveCornerWindow (P : ScaffoldPresentation)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  origin : Int × Int
+  baseRect : Rectangle n n
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (P.role (baseRect i j)) = true
+  corner : P.role (baseRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
+  product : ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+    WangTile.product (baseRect i j) payload =
+      (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
+
+def activeCornerWindowOfPresentedActiveCornerWindow
+    {P : ScaffoldPresentation} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (hwindow : PresentedActiveCornerWindow P x n hn)
+    (hcorner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile) :
+    ActiveCornerWindow P.toScaffold x n hn where
+  origin := hwindow.origin
+  baseRect := hwindow.baseRect
+  active := hwindow.active
+  corner := hcorner_unique (hwindow.baseRect ⟨0, hn⟩ ⟨0, hn⟩) hwindow.corner
+  product := hwindow.product
+
+/--
 The local recognizability/free-square fact expected from the
 Ollinger/Robinson scaffold.
 
@@ -172,6 +213,29 @@ def HasRecognizableFreeSquares (S : Scaffold) : Prop :=
     (x : Int × Int → TileIn (combineWithScaffold S T seed)),
     ValidPlaneTiling (combineWithScaffold S T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n, Nonempty (ActiveCornerWindow S x n hn)
+
+/--
+Role-level recognizability for a presented scaffold.
+
+The extra uniqueness premise in `PresentedCertificate` states that the tile
+with role `corner` is exactly `P.cornerTile`, so role-level corner recognition
+matches the abstract scaffold corner field.
+-/
+def HasPresentedRecognizableFreeSquares (P : ScaffoldPresentation) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold P.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (PresentedActiveCornerWindow P x n hn)
+
+theorem hasRecognizableFreeSquares_of_presented
+    {P : ScaffoldPresentation}
+    (hS : HasPresentedRecognizableFreeSquares P)
+    (hcorner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile) :
+    HasRecognizableFreeSquares P.toScaffold := by
+  intro T seed x hx n hn
+  rcases hS x hx n hn with ⟨window⟩
+  exact ⟨activeCornerWindowOfPresentedActiveCornerWindow window hcorner_unique⟩
 
 theorem planeTilingHasActiveCornerBaseWindows_of_hasRecognizableFreeSquares
     {S : Scaffold} (hS : HasRecognizableFreeSquares S) :
@@ -191,6 +255,19 @@ structure Certificate (S : Scaffold) : Prop where
   recognizable : HasRecognizableFreeSquares S
   realizes : RealizesActiveCornerSquares S
 
+/-- Certificate stated against a typed scaffold presentation. -/
+structure PresentedCertificate (P : ScaffoldPresentation) : Prop where
+  recognizable : HasPresentedRecognizableFreeSquares P
+  corner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile
+  realizes : RealizesActiveCornerSquares P.toScaffold
+
+theorem certificate_of_presentedCertificate
+    {P : ScaffoldPresentation} (hP : PresentedCertificate P) :
+    Certificate P.toScaffold where
+  recognizable := hasRecognizableFreeSquares_of_presented
+    hP.recognizable hP.corner_unique
+  realizes := hP.realizes
+
 /-- A certified scaffold satisfies the abstract scaffold interface. -/
 theorem isScaffold_of_certificate {S : Scaffold} (hS : Certificate S) :
     IsScaffold S := by
@@ -206,10 +283,20 @@ structure Instance where
   scaffold : Scaffold
   certificate : Certificate scaffold
 
+/-- Package for a concrete scaffold given by typed finite tile data. -/
+structure PresentedInstance where
+  presentation : ScaffoldPresentation
+  certificate : PresentedCertificate presentation
+
 /-- The packaged concrete scaffold provides the abstract reduction hypothesis. -/
 theorem Instance.isScaffold (I : Instance) :
     IsScaffold I.scaffold :=
   isScaffold_of_certificate I.certificate
+
+/-- The packaged presented scaffold provides the abstract reduction hypothesis. -/
+theorem PresentedInstance.isScaffold (I : PresentedInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  isScaffold_of_certificate (certificate_of_presentedCertificate I.certificate)
 
 end OllingerRobinson
 end LeanWang
