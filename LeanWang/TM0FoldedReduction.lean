@@ -301,6 +301,13 @@ theorem sourceLabelIndexFromSplit?_stmtIndex_lt
   rw [hstmt]
   omega
 
+theorem sourceLabelIndexFromSplit?_lt_bound
+    {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v)) :
+    i < fuel * TM0Route.partrecVarList.length := by
+  rcases sourceLabelIndexFromSplit?_eq_some h with ⟨_hstmt, hblock, _hv⟩
+  exact (Nat.div_lt_iff_lt_mul sourcePartrecVarList_length_pos).1 hblock
+
 theorem sourceLabelIndexStartSplit?_stmtIndex_lt
     {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
     (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
@@ -355,6 +362,30 @@ theorem sourceLabelIndexStartSplit?_exists_of_lt_labelCount
     simp [v, List.getElem?_eq_getElem (l := TM0Route.partrecVarList) hmod]
   exact ⟨i / TM0Route.partrecVarList.length, v,
     sourceLabelIndexStartSplit?_of_getElem? hblock hv⟩
+
+theorem sourceLabelIndexStartSplit?_lt_labelCount
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
+    i < sourceLabelCount c := by
+  unfold sourceLabelIndexStartSplit? at h
+  rw [sourceLabelCount_eq_statementCount_mul]
+  exact sourceLabelIndexFromSplit?_lt_bound h
+
+theorem sourceLabelIndexStartSplit?_isSome_iff_lt_labelCount
+    {c : Code} {i : Nat} :
+    (sourceLabelIndexStartSplit? c i).isSome ↔ i < sourceLabelCount c := by
+  constructor
+  · intro hsome
+    cases h : sourceLabelIndexStartSplit? c i with
+    | none =>
+        simp [h] at hsome
+    | some q =>
+        exact sourceLabelIndexStartSplit?_lt_labelCount (c := c) (i := i)
+          (stmtIndex := q.1) (v := q.2) h
+  · intro hi
+    rcases sourceLabelIndexStartSplit?_exists_of_lt_labelCount hi with
+      ⟨stmtIndex, v, hsplit⟩
+    simp [hsplit]
 
 /--
 Source-code version of the fully offset descriptor decoder.
