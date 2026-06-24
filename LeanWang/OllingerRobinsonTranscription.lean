@@ -25,8 +25,23 @@ deriving DecidableEq, Repr
 
 namespace RoleTileSpec
 
+/-- Readable constructor for transcribing a tile by edge colors and role. -/
+def ofEdges (role : CellRole) (n s e w : Nat) : RoleTileSpec where
+  tile := { n := n, s := s, e := e, w := w }
+  role := role
+
 def toPair (spec : RoleTileSpec) : WangTile × CellRole :=
   (spec.tile, spec.role)
+
+@[simp]
+theorem ofEdges_tile (role : CellRole) (n s e w : Nat) :
+    (ofEdges role n s e w).tile = { n := n, s := s, e := e, w := w } :=
+  rfl
+
+@[simp]
+theorem ofEdges_role (role : CellRole) (n s e w : Nat) :
+    (ofEdges role n s e w).role = role :=
+  rfl
 
 @[simp]
 theorem toPair_fst (spec : RoleTileSpec) :
@@ -39,6 +54,10 @@ theorem toPair_snd (spec : RoleTileSpec) :
   rfl
 
 end RoleTileSpec
+
+/-- Shorthand for one row of concrete scaffold data: role followed by edge colors. -/
+def spec (role : CellRole) (n s e w : Nat) : RoleTileSpec :=
+  RoleTileSpec.ofEdges role n s e w
 
 /--
 Finite role lookup used by a concrete scaffold transcription.
@@ -138,6 +157,76 @@ theorem lookupRole_eq_role_of_mem_of_nodupTilesBool
     lookupRole (roleEntriesOfSpecs specs) spec.tile = spec.role :=
   lookupRole_eq_role_of_mem_of_nodup (nodupTiles_of_nodupTilesBool hcheck) hspec
 
+theorem mem_tilesOfSpecs_of_lookupRole_eq_corner
+    {specs : List RoleTileSpec} {tile : WangTile}
+    (hlookup : lookupRole (roleEntriesOfSpecs specs) tile = CellRole.corner) :
+    tile ∈ tilesOfSpecs specs := by
+  induction specs with
+  | nil =>
+      simp at hlookup
+  | cons head tail ih =>
+      by_cases htile : tile = head.tile
+      · simp [tilesOfSpecs, htile]
+      · have htail : lookupRole (roleEntriesOfSpecs tail) tile = CellRole.corner := by
+          simpa [roleEntriesOfSpecs, RoleTileSpec.toPair, lookupRole, htile] using hlookup
+        have hmemTail : tile ∈ tilesOfSpecs tail := ih htail
+        rcases mem_tilesOfSpecs.1 hmemTail with ⟨spec, hspec, hspecTile⟩
+        exact mem_tilesOfSpecs.2 ⟨spec, List.mem_cons_of_mem head hspec, hspecTile⟩
+
+/-!
+The following checker is intentionally role-level, not presentation-level.  For
+the concrete Figure 13 list, it lets the data say directly that the only tile
+declared with role `corner` is the distinguished corner tile.  Together with
+the no-duplicate-tile check, this implies the presentation's finite sanity
+condition.
+-/
+
+def cornerRoleUniqueBool (specs : List RoleTileSpec) (cornerTile : WangTile) :
+    Bool :=
+  specs.all fun spec =>
+    decide (spec.role = CellRole.corner) == decide (spec.tile = cornerTile)
+
+private theorem cornerRoleUniqueBool_mem_eq
+    {specs : List RoleTileSpec} {cornerTile : WangTile}
+    (hcheck : cornerRoleUniqueBool specs cornerTile = true)
+    {spec : RoleTileSpec} (hspec : spec ∈ specs) :
+    decide (spec.role = CellRole.corner) = decide (spec.tile = cornerTile) := by
+  unfold cornerRoleUniqueBool at hcheck
+  have hall := List.all_eq_true.1 hcheck spec hspec
+  cases hleft : decide (spec.role = CellRole.corner) <;>
+    cases hright : decide (spec.tile = cornerTile) <;>
+      simp [hleft, hright] at hall ⊢
+
+theorem spec_tile_eq_corner_of_cornerRoleUniqueBool
+    {specs : List RoleTileSpec} {cornerTile : WangTile}
+    (hcheck : cornerRoleUniqueBool specs cornerTile = true)
+    {spec : RoleTileSpec} (hspec : spec ∈ specs)
+    (hrole : spec.role = CellRole.corner) :
+    spec.tile = cornerTile := by
+  have heq := cornerRoleUniqueBool_mem_eq hcheck hspec
+  have hleft : decide (spec.role = CellRole.corner) = true :=
+    decide_eq_true hrole
+  have hright : decide (spec.tile = cornerTile) = true := by
+    simpa [hleft] using heq.symm
+  exact of_decide_eq_true hright
+
+theorem cornerRoleUnique_of_nodupTilesBool
+    {specs : List RoleTileSpec} {cornerTile : WangTile}
+    (hnodup : nodupTilesBool specs = true)
+    (hunique : cornerRoleUniqueBool specs cornerTile = true) :
+    ∀ tile : WangTile, tile ∈ tilesOfSpecs specs →
+      lookupRole (roleEntriesOfSpecs specs) tile = CellRole.corner →
+        tile = cornerTile := by
+  intro tile htile hrole
+  rcases mem_tilesOfSpecs.1 htile with ⟨spec, hspec, hspecTile⟩
+  have hlookup := lookupRole_eq_role_of_mem_of_nodupTilesBool hnodup hspec
+  have hspecRole : spec.role = CellRole.corner := by
+    have hlookupTile : lookupRole (roleEntriesOfSpecs specs) tile = spec.role := by
+      simpa [hspecTile] using hlookup
+    exact hlookupTile.symm.trans hrole
+  exact hspecTile.symm.trans
+    (spec_tile_eq_corner_of_cornerRoleUniqueBool hunique hspec hspecRole)
+
 /--
 Turn a finite role transcription into a scaffold presentation.
 
@@ -177,6 +266,32 @@ theorem presentationOfSpecs_cornerTile
     (presentationOfSpecs specs cornerTile hcorner).cornerTile = cornerTile :=
   rfl
 
+theorem sanityBool_of_specChecks
+    {specs : List RoleTileSpec} {cornerTile : WangTile}
+    (hcorner : lookupRole (roleEntriesOfSpecs specs) cornerTile = CellRole.corner)
+    (hnodup : nodupTilesBool specs = true)
+    (hunique : cornerRoleUniqueBool specs cornerTile = true) :
+    (presentationOfSpecs specs cornerTile hcorner).sanityBool = true := by
+  unfold ScaffoldPresentation.sanityBool
+  rw [Bool.and_eq_true]
+  constructor
+  · apply decide_eq_true
+    exact mem_tilesOfSpecs_of_lookupRole_eq_corner hcorner
+  · unfold ScaffoldPresentation.cornerUniqueBool
+    rw [List.all_eq_true]
+    intro tile htile
+    have hunique' := cornerRoleUnique_of_nodupTilesBool hnodup hunique
+    rw [beq_iff_eq]
+    apply Bool.decide_congr
+    constructor
+    · intro hrole
+      have htileCorner : tile = cornerTile :=
+        hunique' tile (by simpa [presentationOfSpecs] using htile)
+          (by simpa [presentationOfSpecs] using hrole)
+      simpa [presentationOfSpecs] using htileCorner
+    · intro htileCorner
+      simpa [presentationOfSpecs, htileCorner] using hcorner
+
 /--
 Finite checks for a transcribed scaffold tile list, before the geometric
 recognizability and realization facts are supplied.
@@ -193,6 +308,23 @@ structure FiniteCheckedTranscription where
   nodup : nodupTilesBool specs = true
   sanity :
     (presentationOfSpecs specs cornerTile corner_role).sanityBool = true
+
+/--
+Package a concrete role transcription from the finite checks that are easiest
+to audit on the raw list: the declared corner decodes as a corner, tiles are
+not duplicated, and no other listed tile is declared as the corner.
+-/
+def finiteCheckedTranscriptionOfSpecChecks
+    (specs : List RoleTileSpec) (cornerTile : WangTile)
+    (hcorner : lookupRole (roleEntriesOfSpecs specs) cornerTile = CellRole.corner)
+    (hnodup : nodupTilesBool specs = true)
+    (hunique : cornerRoleUniqueBool specs cornerTile = true) :
+    FiniteCheckedTranscription where
+  specs := specs
+  cornerTile := cornerTile
+  corner_role := hcorner
+  nodup := hnodup
+  sanity := sanityBool_of_specChecks hcorner hnodup hunique
 
 namespace FiniteCheckedTranscription
 
