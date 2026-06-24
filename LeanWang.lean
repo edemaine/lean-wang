@@ -15,6 +15,7 @@ import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
 import LeanWang.OllingerRobinsonScaffold
+import LeanWang.OllingerRobinsonFigure13
 import LeanWang.OllingerRobinsonTranscription
 import LeanWang.TM0FoldedReduction
 import LeanWang.TM0FoldedTranscriptionReduction
