@@ -3977,6 +3977,21 @@ theorem programData_computable_of_simStepDataForLabelIndexFromWithCode
     Computable programData :=
   (programData_primrec_of_simStepDataForLabelIndexFromWithCode hindex).to_comp
 
+theorem programData_primrec_of_simStepDataForLabelIndexFromWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec programData :=
+  programData_primrec_of_simStepDataForLabelIndexFromWithCode
+    (hindex.of_eq fun p =>
+      simStepDataForLabelIndexFromWithSearchCode_eq_withCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+theorem programData_computable_of_simStepDataForLabelIndexFromWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable programData :=
+  (programData_primrec_of_simStepDataForLabelIndexFromWithSearchCode hindex).to_comp
+
 theorem programData_symbols (tc : Turing.ToPartrec.Code) :
     (programData tc).symbols = foldedSymbolList :=
   rfl

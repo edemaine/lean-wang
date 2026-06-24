@@ -507,6 +507,22 @@ theorem sourceProgramData_computable_of_global_labelIndexFromWithCode'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_global_labelIndexFromWithCode hindex).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_global_labelIndexFromWithSearchCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable sourceProgramData :=
+  (TM0FoldedCompiler.programData_computable_of_simStepDataForLabelIndexFromWithSearchCode
+    hindex).comp NatPartrecToToPartrec.translate_computable
+
+theorem sourceProgramData_computable_of_global_labelIndexFromWithSearchCode'
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_global_labelIndexFromWithSearchCode hindex).of_eq fun _ => rfl
+
 /-- Fixed-domino instance produced directly from a source partial-recursive code. -/
 def sourceFixedDominoReduction (_h : SourceObligations) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData
