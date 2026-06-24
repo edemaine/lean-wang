@@ -335,6 +335,24 @@ theorem certificate_of_presentedCertificate
     hP.recognizable hP.corner_unique
   realizes := hP.realizes
 
+theorem presentedCertificate_of_sanity
+    {P : ScaffoldPresentation} (hP : P.Sanity)
+    (hrecognizable : HasPresentedRecognizableFreeSquares P)
+    (hrealizes : RealizesActiveCornerSquares P.toScaffold) :
+    PresentedCertificate P where
+  recognizable := hrecognizable
+  corner_unique := hP.corner_unique
+  realizes := hrealizes
+
+theorem presentedCertificate_of_sanityBool
+    {P : ScaffoldPresentation} (hcheck : P.sanityBool = true)
+    (hrecognizable : HasPresentedRecognizableFreeSquares P)
+    (hrealizes : RealizesActiveCornerSquares P.toScaffold) :
+    PresentedCertificate P :=
+  presentedCertificate_of_sanity
+    (ScaffoldPresentation.sanity_of_sanityBool hcheck)
+    hrecognizable hrealizes
+
 /-- A certified scaffold satisfies the abstract scaffold interface. -/
 theorem isScaffold_of_certificate {S : Scaffold} (hS : Certificate S) :
     IsScaffold S := by
@@ -355,6 +373,16 @@ structure PresentedInstance where
   presentation : ScaffoldPresentation
   certificate : PresentedCertificate presentation
 
+/--
+Package for a concrete scaffold whose finite sanity obligations are discharged
+by `ScaffoldPresentation.sanityBool`.
+-/
+structure CheckedPresentedInstance where
+  presentation : ScaffoldPresentation
+  sanity : presentation.sanityBool = true
+  recognizable : HasPresentedRecognizableFreeSquares presentation
+  realizes : RealizesActiveCornerSquares presentation.toScaffold
+
 /-- The packaged concrete scaffold provides the abstract reduction hypothesis. -/
 theorem Instance.isScaffold (I : Instance) :
     IsScaffold I.scaffold :=
@@ -364,6 +392,20 @@ theorem Instance.isScaffold (I : Instance) :
 theorem PresentedInstance.isScaffold (I : PresentedInstance) :
     IsScaffold I.presentation.toScaffold :=
   isScaffold_of_certificate (certificate_of_presentedCertificate I.certificate)
+
+def CheckedPresentedInstance.toPresentedInstance (I : CheckedPresentedInstance) :
+    PresentedInstance where
+  presentation := I.presentation
+  certificate := presentedCertificate_of_sanityBool
+    I.sanity I.recognizable I.realizes
+
+/--
+The checked finite-data package provides the abstract scaffold reduction
+hypothesis.
+-/
+theorem CheckedPresentedInstance.isScaffold (I : CheckedPresentedInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.toPresentedInstance.isScaffold
 
 end OllingerRobinson
 end LeanWang
