@@ -301,6 +301,11 @@ The flat label-index arithmetic has now been separated out in
 decode the non-dependent statement offset and `PartrecVar` slot from the flat
 label index, so the remaining source decoder work can focus on turning the
 statement offset into executable TM0 statement data and then generating rows.
+They now also package the range facts needed by the indexed descriptor list:
+successful started splits imply `i < sourceLabelCount c`, every
+`i < sourceLabelCount c` has a successful started split, and
+`sourceLabelIndexStartSplit?_isSome_iff_lt_labelCount` states the exact
+success range.
 
 There is also now a position-coded descriptor path in `TM0FoldedProgram`:
 `simStepDataForLabelIndexFromWithPositionCode` uses the explicit rectangular
