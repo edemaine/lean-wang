@@ -1477,6 +1477,24 @@ theorem baseRect_eq
     window.baseRect i j = (window.siteRect i j).tile :=
   rfl
 
+theorem corner_site
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    window.siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite :=
+  (table.roleAtSite_corner_iff (window.siteRect ⟨0, hn⟩ ⟨0, hn⟩)).1
+    window.cornerRole
+
+theorem base_corner
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    window.baseRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerTile := by
+  rw [window.baseRect_eq, window.corner_site]
+  exact table.cornerTile_eq_cornerSite_tile.symm
+
 def toRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
@@ -1504,6 +1522,31 @@ def toRoutedFixedCornerSquare
   hmatch := window.hmatch
   vmatch := window.vmatch
 
+theorem payload_mem
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (i : Fin n) (j : Fin n) :
+    window.payloadRect i j ∈ T :=
+  window.toRoutedFixedCornerSquare.payload_mem i j
+
+theorem payload_corner_of_product
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    window.payloadRect ⟨0, hn⟩ ⟨0, hn⟩ = seed :=
+  window.toRoutedFixedCornerSquare.payload_corner_of_product
+
+theorem payload_valid
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    ValidRectangle T window.payloadRect :=
+  window.toRoutedFixedCornerSquare.payload_valid
+
 theorem tileable
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
@@ -1511,6 +1554,41 @@ theorem tileable
     (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
     TileableFixedCornerSquare T seed n :=
   window.toRoutedFixedCornerSquare.tileable
+
+/--
+Build an indexed routed fixed-corner square when the geometric proof identifies
+the lower-left site as the table's distinguished corner site directly.
+-/
+def ofSiteMatches
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} (hn : 0 < n)
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (siteRect : Fin n → Fin n → Figure18Site)
+    (payloadRect : Rectangle n n)
+    (active : ∀ i : Fin n, ∀ j : Fin n,
+      CellRole.isActive (table.roleAtSite (siteRect i j)) = true)
+    (cornerSite :
+      siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite)
+    (product : ∀ i : Fin n, ∀ j : Fin n,
+      WangTile.product (siteRect i j).tile (payloadRect i j) =
+        (x (horizontalCoord i, verticalCoord j)).1)
+    (hmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j))
+    (vmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      WangTile.VMatches (payloadRect i j) (payloadRect i ⟨j.val + 1, hj⟩)) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn where
+  horizontalCoord := horizontalCoord
+  verticalCoord := verticalCoord
+  siteRect := siteRect
+  payloadRect := payloadRect
+  active := active
+  cornerRole := by
+    rw [cornerSite]
+    exact table.roleAtSite_corner
+  product := product
+  hmatch := hmatch
+  vmatch := vmatch
 
 end Figure18IndexedRoutedFixedCornerSquare
 
