@@ -8,8 +8,8 @@ import LeanWang.Machine
 /-!
 Finite one-sided TM0-style machines.
 
-This is deliberately closer to Mathlib's `TM0` than the older `TableProgram`
-target: each transition either moves the head or writes one symbol, and halting
+This is deliberately closer to Mathlib's `TM0` than the table-machine backend:
+each transition either moves the head or writes one symbol, and halting
 is represented by absence of a transition. The original Post-style names remain
 for existing proofs; the preferred public name for the program type is
 `FiniteTM0Program`.

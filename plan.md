@@ -45,7 +45,7 @@ Completed proof layers:
 - concrete Wang tiles, finite rectangles, plane and quarter-plane tiling notions;
 - compactness and fixed-corner square compactness variants;
 - the concrete one-tape `Machine` and finite `TableProgram` models, still used
-  by the current Wang-tile backend;
+  by the current Wang-tile backend, not by the source-level reduction;
 - the machine-to-Wang fixed-domino construction;
 - computable table-tile data decoding, including the initial-row and normal-row
   tile membership bridges;
@@ -69,8 +69,9 @@ Completed proof layers:
   `Nat`-valued control-state indices for the start, halt, and supported label
   statements, plus one-step/reachable label-closure lemmas for runs starting
   from `PartrecToTM2.init tc [0]`.
-- the direct `PartrecToTM2` table-machine construction is not part of the
-  current route. The preferred machine-side proof now has one semantic route:
+- any direct `PartrecToTM2` table-machine construction is outside the current
+  route and should remain deleted. The preferred machine-side proof now has one
+  semantic route:
   Mathlib code, to `ToPartrec.Code`, through Mathlib's TM2-to-TM1-to-TM0
   translations, then into the local folded finite one-sided TM0 model.
 

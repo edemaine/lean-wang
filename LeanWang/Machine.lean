@@ -502,7 +502,7 @@ end TableMachine
 Raw finite machine data, without support proofs.
 
 This is retained for the current table-machine Wang-tile backend, not as a
-direct TM2 reduction target. `toTableMachine` adds the distinguished
+source-level reduction target. `toTableMachine` adds the distinguished
 blank/start/halt symbols to the supports, and the guarded table semantics keeps
 all transitions inside those finite supports.
 -/
