@@ -5410,6 +5410,26 @@ def tm1StatementSupportList {Γ Λ σ : Type}
     List (Option (Turing.TM1.Stmt Γ Λ σ)) :=
   none :: labels.flatMap fun q => (tm1StmtSupportList (M q)).map some
 
+theorem tm1StatementSupportList_nodup_of_pairwise_disjoint {Γ Λ σ : Type}
+    (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ)
+    (hstmt : ∀ q ∈ labels, (tm1StmtSupportList (M q)).Nodup)
+    (hdisj : labels.Pairwise fun q₁ q₂ =>
+      List.Disjoint (tm1StmtSupportList (M q₁)) (tm1StmtSupportList (M q₂))) :
+    (tm1StatementSupportList labels M).Nodup := by
+  unfold tm1StatementSupportList
+  rw [List.nodup_cons]
+  constructor
+  · simp
+  · refine List.nodup_flatMap.2 ⟨?_, ?_⟩
+    · intro q hq
+      exact (hstmt q hq).map (fun _ _ h => Option.some.inj h)
+    · refine hdisj.imp ?_
+      intro q₁ q₂ hq x hx₁ hx₂
+      rcases List.mem_map.1 hx₁ with ⟨s₁, hs₁, rfl⟩
+      rcases List.mem_map.1 hx₂ with ⟨s₂, hs₂, hs_eq⟩
+      cases hs_eq
+      exact hq hs₁ hs₂
+
 /-- Numeric length mirror of `tm1StatementSupportList`. -/
 def tm1StatementSupportLength {Γ Λ σ : Type}
     (labels : List Λ) (M : Λ → Turing.TM1.Stmt Γ Λ σ) : Nat :=
