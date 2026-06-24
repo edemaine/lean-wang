@@ -1022,6 +1022,32 @@ theorem sourceSearchCodeOneRowsVar_statementCount_add_primrec :
   exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
     (sourceSearchCodeOneRowsVar_statementCount_add p.1 p.2.1 p.2.2).symm
 
+def sourceSearchCodeInteriorRowsVar
+    (c : Code) (j : Nat) (v : TM0Route.PartrecVar) :
+    List TM0FoldedCompiler.SimStepData :=
+  sourceSearchCodeOneRowsVar c (j + 1) v
+
+def sourceSearchCodeBoundedInteriorRowsVar
+    (c : Code) (j : Nat) (v : TM0Route.PartrecVar) :
+    List TM0FoldedCompiler.SimStepData :=
+  if j + 1 < sourceStatementCount c then
+    sourceSearchCodeInteriorRowsVar c j v
+  else
+    []
+
+theorem sourceSearchCodeBoundedInteriorRowsVar_eq_interior
+    {c : Code} {j : Nat} {v : TM0Route.PartrecVar}
+    (hj : j + 1 < sourceStatementCount c) :
+    sourceSearchCodeBoundedInteriorRowsVar c j v =
+      sourceSearchCodeInteriorRowsVar c j v := by
+  simp [sourceSearchCodeBoundedInteriorRowsVar, hj]
+
+theorem sourceSearchCodeBoundedInteriorRowsVar_eq_nil
+    {c : Code} {j : Nat} {v : TM0Route.PartrecVar}
+    (hj : ¬ j + 1 < sourceStatementCount c) :
+    sourceSearchCodeBoundedInteriorRowsVar c j v = [] := by
+  simp [sourceSearchCodeBoundedInteriorRowsVar, hj]
+
 theorem sourceSearchCodeOneRowsVar_stmt_some
     {c : Code} {k : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
@@ -1088,6 +1114,47 @@ theorem sourceSearchCodeOneRowsVar_zero_primrec :
       sourceSearchCodeOneRowsVar p.1 0 p.2) := by
   exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
     (sourceSearchCodeOneRowsVar_zero p.1 p.2).symm
+
+theorem sourceSearchCodeOneRowsVar_eq_boundedInterior
+    (c : Code) (k : Nat) (v : TM0Route.PartrecVar) :
+    sourceSearchCodeOneRowsVar c k v =
+      if k = 0 then
+        []
+      else
+        sourceSearchCodeBoundedInteriorRowsVar c (k - 1) v := by
+  by_cases hzero : k = 0
+  · simp [hzero, sourceSearchCodeOneRowsVar_zero]
+  · by_cases hlt : k < sourceStatementCount c
+    · have hkpred : k - 1 + 1 = k := Nat.sub_one_add_one hzero
+      simp [hzero, sourceSearchCodeBoundedInteriorRowsVar,
+        sourceSearchCodeInteriorRowsVar, hkpred, hlt]
+    · have hle : sourceStatementCount c ≤ k := Nat.le_of_not_gt hlt
+      have hrows : sourceSearchCodeOneRowsVar c k v = [] :=
+        sourceSearchCodeOneRowsVar_eq_nil_of_statementCount_le v hle
+      have hkpred : k - 1 + 1 = k := Nat.sub_one_add_one hzero
+      simp [hzero, sourceSearchCodeBoundedInteriorRowsVar, hkpred, hlt, hrows]
+
+theorem sourceSearchCodeOneRowsVar_primrec_of_boundedInterior
+    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2) := by
+  have hzero : PrimrecPred (fun p : Code × Nat × TM0Route.PartrecVar =>
+      p.2.1 = 0) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 0)
+  have hnil : Primrec (fun _p : Code × Nat × TM0Route.PartrecVar =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hkPred : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      p.2.1 - 1) :=
+    Primrec.nat_sub.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 1)
+  have helse : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 (p.2.1 - 1) p.2.2) :=
+    hinterior.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair hkPred (Primrec.snd.comp Primrec.snd)))
+  exact (Primrec.ite hzero hnil helse).of_eq fun p => by
+    exact (sourceSearchCodeOneRowsVar_eq_boundedInterior p.1 p.2.1 p.2.2).symm
 
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows
     (c : Code) (k i : Nat) :
@@ -3153,6 +3220,20 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeOneVarRows hvarRows).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_boundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_searchCodeOneVarRows
+    (sourceSearchCodeOneRowsVar_primrec_of_boundedInterior hinterior)
+
+theorem sourceProgramData_computable_of_source_boundedInteriorRows'
+    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_boundedInteriorRows hinterior).of_eq fun _ => rfl
+
 /--
 The remaining bounded-search descriptor decoder proof, together with normalized
 folded program-data semantic correctness, gives the exact source obligations
@@ -3223,6 +3304,24 @@ def sourceObligationsOfSearchCodeOneVarRows
     SourceObligations :=
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_searchCodeOneVarRows' hvarRows)
+    hcorrect
+
+/--
+Primitive recursiveness of the bounded interior one-row decoder, together with
+normalized folded program-data semantic correctness, gives the exact source
+obligations needed by the final reduction.
+-/
+def sourceObligationsOfSearchCodeBoundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_boundedInteriorRows' hinterior)
     hcorrect
 
 /--
