@@ -303,9 +303,11 @@ duplicate introduced by `default :: labelList` while preserving the proved
 state-membership and support-readback invariants. The canonical-code bridge is
 now factored through an explicit minimality invariant: if the support list reads
 back label `q` at code `n`, and no earlier support-list entry reads back `q`,
-then `stateCode q = n`. The next local proof is therefore to establish this
-minimality for every position-coded descriptor emitted by the offset decoder,
-which should turn the position-coded rows into the semantic state-code rows.
+then `stateCode q = n`. Because the current TM1 statement support list is a raw
+recursive enumeration rather than a proven duplicate-free list, the bounded
+search-code decoder remains the canonical route for row equality. The
+position-code minimality proof should only be used after proving the relevant
+no-earlier-duplicate invariant for the raw support enumeration.
 
 Next implementation targets:
 

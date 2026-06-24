@@ -3848,6 +3848,21 @@ theorem simStepDataForLabelIndexFromWithCode_primrec_fixed
   simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine tc
     (TM0Route.partrecStartedTM1Machine_primrec tc)
 
+theorem simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithSearchCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
+theorem simStepDataForLabelIndexFromWithSearchCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithSearchCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
 theorem simStepDataForLabelIndexFromWithPositionCode_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
