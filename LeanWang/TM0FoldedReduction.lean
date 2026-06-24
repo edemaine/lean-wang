@@ -187,6 +187,66 @@ theorem sourceStates_primrec : Primrec sourceStates :=
     NatPartrecToToPartrec.translate_primrec
 
 /--
+Arithmetic decoder for the flat TM0 label index used by the source route.
+
+The dependent label decoder in `TM0Route` enumerates statement support blocks,
+one block for each `PartrecVar`. This helper exposes just the non-dependent
+index arithmetic: a flat offset `i` names statement offset `k + i / |vars|`
+and variable slot `i % |vars|`, provided the bounded statement fuel reaches
+that block.
+-/
+def sourceLabelIndexFromSplit? (fuel k i : Nat) : Option (Nat × TM0Route.PartrecVar) :=
+  let width := TM0Route.partrecVarList.length
+  let block := i / width
+  if block < fuel then
+    (TM0Route.partrecVarList[i % width]?).map fun v => (k + block, v)
+  else
+    none
+
+/-- Started arithmetic decoder for source-level flat TM0 label indices. -/
+def sourceLabelIndexStartSplit? (c : Code) (i : Nat) :
+    Option (Nat × TM0Route.PartrecVar) :=
+  sourceLabelIndexFromSplit? (sourceStatementCount c) 0 i
+
+theorem sourceLabelIndexFromSplit?_primrec :
+    Primrec (fun p : Nat × Nat × Nat =>
+      sourceLabelIndexFromSplit? p.1 p.2.1 p.2.2) := by
+  let width : Nat := TM0Route.partrecVarList.length
+  let fuel : Nat × Nat × Nat → Nat := fun p => p.1
+  let kFn : Nat × Nat × Nat → Nat := fun p => p.2.1
+  let iFn : Nat × Nat × Nat → Nat := fun p => p.2.2
+  let block : Nat × Nat × Nat → Nat := fun p => iFn p / width
+  let slot : Nat × Nat × Nat → Nat := fun p => iFn p % width
+  have hfuel : Primrec fuel := Primrec.fst
+  have hk : Primrec kFn := Primrec.fst.comp Primrec.snd
+  have hi : Primrec iFn := Primrec.snd.comp Primrec.snd
+  have hblock : Primrec block := Primrec.nat_div.comp hi (Primrec.const width)
+  have hslot : Primrec slot := Primrec.nat_mod.comp hi (Primrec.const width)
+  have hwithin : PrimrecPred (fun p : Nat × Nat × Nat => block p < fuel p) :=
+    Primrec.nat_lt.comp hblock hfuel
+  have hlookup : Primrec (fun p : Nat × Nat × Nat =>
+      TM0Route.partrecVarList[slot p]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp hslot
+  have hsome : Primrec₂ (fun p : Nat × Nat × Nat => fun v : TM0Route.PartrecVar =>
+      (kFn p + block p, v)) := by
+    apply Primrec₂.mk
+    exact Primrec.pair
+      (Primrec.nat_add.comp (hk.comp Primrec.fst) (hblock.comp Primrec.fst))
+      Primrec.snd
+  have hthen : Primrec (fun p : Nat × Nat × Nat =>
+      (TM0Route.partrecVarList[slot p]?).map fun v => (kFn p + block p, v)) :=
+    Primrec.option_map hlookup hsome
+  exact (Primrec.ite hwithin hthen (Primrec.const none)).of_eq fun p => by
+    simp [sourceLabelIndexFromSplit?, width, fuel, kFn, iFn, block, slot]
+
+theorem sourceLabelIndexStartSplit?_primrec :
+    Primrec (fun p : Code × Nat => sourceLabelIndexStartSplit? p.1 p.2) := by
+  unfold sourceLabelIndexStartSplit?
+  exact sourceLabelIndexFromSplit?_primrec.comp
+    (Primrec.pair (sourceStatementCount_primrec.comp Primrec.fst)
+      (Primrec.pair (Primrec.const 0) Primrec.snd))
+
+/--
 Source-code version of the fully offset descriptor decoder.
 
 This is the computability target that the final reduction actually needs:

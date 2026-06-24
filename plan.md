@@ -295,6 +295,12 @@ they do not by themselves compose over the dependent family
 construct the source-level statement/support lookup directly over encoded
 source codes, then connect it to the fixed-`tc` decoder by an extensional
 correctness theorem.
+The flat label-index arithmetic has now been separated out in
+`TM0FoldedReduction.sourceLabelIndexFromSplit?` and the started wrapper
+`sourceLabelIndexStartSplit?`, with primitive-recursive proofs. These helpers
+decode the non-dependent statement offset and `PartrecVar` slot from the flat
+label index, so the remaining source decoder work can focus on turning the
+statement offset into executable TM0 statement data and then generating rows.
 
 There is also now a position-coded descriptor path in `TM0FoldedProgram`:
 `simStepDataForLabelIndexFromWithPositionCode` uses the explicit rectangular
