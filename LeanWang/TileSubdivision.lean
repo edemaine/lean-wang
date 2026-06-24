@@ -83,6 +83,18 @@ private def bitCode (b : Bool) : Nat :=
 private def tileCode (t : WangTile) : Nat :=
   Nat.pair t.n (Nat.pair t.s (Nat.pair t.e t.w))
 
+private theorem bitCode_primrec : Primrec (fun b : Bool => bitCode b) := by
+  exact (Primrec.cond (α := Bool) (σ := Nat) Primrec.id
+    (Primrec.const (α := Bool) (1 : Nat))
+    (Primrec.const (α := Bool) (0 : Nat))).of_eq fun b => by
+      cases b <;> rfl
+
+private theorem tileCode_primrec : Primrec (fun t : WangTile => tileCode t) := by
+  unfold tileCode
+  exact Primrec₂.natPair.comp WangTile.n_primrec
+    (Primrec₂.natPair.comp WangTile.s_primrec
+      (Primrec₂.natPair.comp WangTile.e_primrec WangTile.w_primrec))
+
 set_option linter.flexible false in
 private theorem tileCode_injective : Function.Injective tileCode := by
   intro t u h
@@ -95,17 +107,55 @@ private theorem tileCode_injective : Function.Injective tileCode := by
 def horizontalEdgeColor (x : Bool) (color : Nat) : Nat :=
   Nat.pair 0 (Nat.pair (bitCode x) color)
 
+theorem horizontalEdgeColor_primrec :
+    Primrec (fun p : Bool × Nat => horizontalEdgeColor p.1 p.2) := by
+  unfold horizontalEdgeColor
+  exact Primrec₂.natPair.comp (Primrec.const (α := Bool × Nat) (0 : Nat))
+    (Primrec₂.natPair.comp (bitCode_primrec.comp Primrec.fst) Primrec.snd)
+
+theorem horizontalEdgeColor_primrec₂ : Primrec₂ horizontalEdgeColor :=
+  Primrec₂.mk horizontalEdgeColor_primrec
+
 /-- Vertical macro-edge colors are split by south/north half. -/
 def verticalEdgeColor (y : Bool) (color : Nat) : Nat :=
   Nat.pair 1 (Nat.pair (bitCode y) color)
+
+theorem verticalEdgeColor_primrec :
+    Primrec (fun p : Bool × Nat => verticalEdgeColor p.1 p.2) := by
+  unfold verticalEdgeColor
+  exact Primrec₂.natPair.comp (Primrec.const (α := Bool × Nat) (1 : Nat))
+    (Primrec₂.natPair.comp (bitCode_primrec.comp Primrec.fst) Primrec.snd)
+
+theorem verticalEdgeColor_primrec₂ : Primrec₂ verticalEdgeColor :=
+  Primrec₂.mk verticalEdgeColor_primrec
 
 /-- Internal vertical seam color between west and east quadrants. -/
 def internalVerticalColor (t : WangTile) (y : Bool) : Nat :=
   Nat.pair 2 (Nat.pair (bitCode y) (tileCode t))
 
+theorem internalVerticalColor_primrec :
+    Primrec (fun p : WangTile × Bool => internalVerticalColor p.1 p.2) := by
+  unfold internalVerticalColor
+  exact Primrec₂.natPair.comp (Primrec.const (α := WangTile × Bool) (2 : Nat))
+    (Primrec₂.natPair.comp (bitCode_primrec.comp Primrec.snd)
+      (tileCode_primrec.comp Primrec.fst))
+
+theorem internalVerticalColor_primrec₂ : Primrec₂ internalVerticalColor :=
+  Primrec₂.mk internalVerticalColor_primrec
+
 /-- Internal horizontal seam color between south and north quadrants. -/
 def internalHorizontalColor (t : WangTile) (x : Bool) : Nat :=
   Nat.pair 3 (Nat.pair (bitCode x) (tileCode t))
+
+theorem internalHorizontalColor_primrec :
+    Primrec (fun p : WangTile × Bool => internalHorizontalColor p.1 p.2) := by
+  unfold internalHorizontalColor
+  exact Primrec₂.natPair.comp (Primrec.const (α := WangTile × Bool) (3 : Nat))
+    (Primrec₂.natPair.comp (bitCode_primrec.comp Primrec.snd)
+      (tileCode_primrec.comp Primrec.fst))
+
+theorem internalHorizontalColor_primrec₂ : Primrec₂ internalHorizontalColor :=
+  Primrec₂.mk internalHorizontalColor_primrec
 
 /-- The quadrant tile of `t` in the 2x2 subdivision. -/
 def subdivideTileAt (t : WangTile) : Quadrant → WangTile
