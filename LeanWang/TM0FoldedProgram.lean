@@ -6407,6 +6407,32 @@ def positionProgramData (tc : Turing.ToPartrec.Code) : FiniteTM0Program :=
   programDataOfStepData (TM0Route.partrecStartedTM0StateCount tc)
     (simStepDataByLabelIndexWithPositionCode tc)
 
+@[simp]
+theorem positionProgramData_symbols (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).symbols = foldedSymbolList :=
+  rfl
+
+@[simp]
+theorem positionProgramData_states (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).states = foldedStateList tc :=
+  rfl
+
+@[simp]
+theorem positionProgramData_blank (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).blank = foldedBlank :=
+  rfl
+
+@[simp]
+theorem positionProgramData_start (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).start = foldedStartState :=
+  rfl
+
+@[simp]
+theorem positionProgramData_table (tc : Turing.ToPartrec.Code) :
+    (positionProgramData tc).table =
+      initRowsData ++ simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc) :=
+  rfl
+
 theorem positionProgramData_eq_programOfCountAndSimRows
     (tc : Turing.ToPartrec.Code) :
     positionProgramData tc =
