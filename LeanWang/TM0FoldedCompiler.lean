@@ -71,17 +71,6 @@ theorem foldedSymbolCode_mem_symbols
   cases marked <;>
     simp [TM0Route.mem_partrecStartedTM0SymbolList]
 
-/-- Blank folded cell away from the origin. -/
-theorem foldedBlank_mem_symbols : foldedBlank ∈ foldedSymbolList := by
-  unfold foldedBlank
-  exact foldedSymbolCode_mem_symbols false default default
-
-/-- Initial origin cell when the Mathlib input head reads `a`. -/
-theorem foldedOriginSymbol_mem_symbols (a : SourceSymbol) :
-    foldedOriginSymbol a ∈ foldedSymbolList := by
-  unfold foldedOriginSymbol
-  exact foldedSymbolCode_mem_symbols true default a
-
 theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
     foldedWrite side new left right ∈ foldedSymbolList := by
   cases side <;> simp [foldedWrite, foldedSymbolCode_mem_symbols]
@@ -177,14 +166,6 @@ theorem nextAfterOrigin_eq_initReturnState_zero :
   unfold nextAfterOrigin
   rw [partrecStartedTM0Input_length]
   simp
-
-theorem nextAfterOrigin_mem_states (tc : Turing.ToPartrec.Code) :
-    nextAfterOrigin ∈ foldedStateList tc := by
-  unfold nextAfterOrigin
-  by_cases h : TM0Route.partrecStartedTM0Input.length ≤ 1
-  · simp [h, initReturnState_zero_mem_states tc]
-  · have hlen : 0 < TM0Route.partrecStartedTM0Input.length := by omega
-    simp [h, initMoveRightState_mem_states (tc := tc) hlen]
 
 @[simp]
 theorem mkRow_matchesInput (state read next : Nat) (stmt : PostStmt) :
