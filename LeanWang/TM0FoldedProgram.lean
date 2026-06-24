@@ -2514,6 +2514,18 @@ private theorem find?_eq_none_of_forall_matchesInput_false
         exact h e (by simp [he])
       simp [hhead, htail]
 
+private theorem find?_flatMap_eq_none_of_forall
+    {α β : Type} {xs : List α} {f : α → List β} {p : β → Bool}
+    (h : ∀ x, x ∈ xs → (f x).find? p = none) :
+    (xs.flatMap f).find? p = none := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      simp only [List.flatMap_cons]
+      rw [find?_append_of_eq_none (h x (by simp))]
+      exact ih fun y hy => h y (by simp [hy])
+
 private theorem flatMap_range_split {α : Type} (f : Nat → List α) {n count : Nat}
     (hn : n < count) :
     (List.range count).flatMap f =
@@ -6002,6 +6014,77 @@ theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_some_of_sourceDef
         (by simpa using hstep)
     simpa using hcanonical
 
+theorem simRowsOfStepDataForLabelIndexStartWithPositionCode_find?_eq_none_of_sourceDefault_no_step
+    {tc : Turing.ToPartrec.Code} {i : Nat}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        none) :
+    (simRowsOfStepData (simStepDataForLabelIndexStartWithPositionCode tc i)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side (sourceDefaultLabel tc))
+            (foldedSymbolCode marked left right)) =
+      none := by
+  have htarget :
+      sourceDefaultLabel tc ∈ TM0Route.partrecStartedTM0LabelSupportList tc := by
+    simpa [sourceDefaultLabel_eq_default tc] using
+      TM0Route.partrecStartedTM0_default_mem_labelSupportList tc
+  have hstate : TM0FiniteCompiler.stateCode tc (sourceDefaultLabel tc) = 0 := by
+    simpa [sourceDefaultLabel_eq_default tc, TM0Route.partrecStartedTM0Start] using
+      TM0FiniteCompiler.stateCode_default tc
+  unfold simStepDataForLabelIndexStartWithPositionCode
+  cases hdecode : labelAtByStatementFromWithPositionCode? tc
+      (TM0Route.partrecStartedTM0StatementCount tc) 0 i with
+  | none =>
+      simp [simStepDataForLabelIndexFromWithPositionCode, hdecode, simRowsOfStepData]
+  | some q =>
+      by_cases hcode : q.2 = TM0FiniteCompiler.stateCode tc (sourceDefaultLabel tc)
+      · rw [simRowsOfStepDataForPositionCode_find?_eq_target
+          (tc := tc) (fuel := TM0Route.partrecStartedTM0StatementCount tc)
+          (k := 0) (i := i) (q := q) (target := sourceDefaultLabel tc)
+          (side := side) (marked := marked) (left := left) (right := right)
+          hdecode htarget hcode]
+        exact simRowsOfStepDataForStmtLabelWithCode_find?_eq_none_of_no_step
+          (tc := tc) (stmtOpt := (sourceDefaultLabel tc).1)
+          (v := (sourceDefaultLabel tc).2) (side := side)
+          (marked := marked) (left := left) (right := right)
+          (by simpa using hstep)
+      · exact simRowsOfStepDataForLabelIndexFromWithPositionCode_find?_eq_none_of_currentCode_ne
+          (tc := tc) (fuel := TM0Route.partrecStartedTM0StatementCount tc)
+          (k := 0) (i := i) (target := sourceDefaultLabel tc)
+          (side := side) (marked := marked) (left := left) (right := right)
+          (by
+            intro r hr
+            rw [hdecode] at hr
+            cases hr
+            exact hcode)
+
+theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_none_of_sourceDefault_no_step
+    {tc : Turing.ToPartrec.Code}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        none) :
+    (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side (sourceDefaultLabel tc))
+            (foldedSymbolCode marked left right)) =
+      none := by
+  unfold simStepDataByLabelIndexWithPositionCode
+  rw [show simRowsOfStepData
+        ((List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
+          (simStepDataForLabelIndexStartWithPositionCode tc)) =
+      (List.range (TM0Route.partrecStartedTM0LabelCount tc)).flatMap
+        (fun i => simRowsOfStepData
+          (simStepDataForLabelIndexStartWithPositionCode tc i)) by
+    simp [simRowsOfStepData, List.map_flatMap]]
+  exact find?_flatMap_eq_none_of_forall (fun i _hi =>
+    simRowsOfStepDataForLabelIndexStartWithPositionCode_find?_eq_none_of_sourceDefault_no_step
+      (tc := tc) (i := i) (side := side) (marked := marked)
+      (left := left) (right := right) hstep)
+
 theorem simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_none_of_support_succ_no_step
     {tc : Turing.ToPartrec.Code} {n : Nat}
     {stmtOpt : Option (SourceStmt tc)} {v : PartrecVar}
@@ -6822,6 +6905,38 @@ theorem positionProgramData_step_sim_eq_some_of_sourceDefault_step
       have hb : b ∈ foldedSymbolList := by
         simpa [hstmt] using hwrite
       simp [hb]
+
+theorem positionProgramData_transition?_sim_eq_none_of_sourceDefault_no_step
+    {tc : Turing.ToPartrec.Code}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        none) :
+    (positionProgramData tc).transition?
+        (foldedSimStateCode tc side (sourceDefaultLabel tc))
+        (foldedSymbolCode marked left right) =
+      none := by
+  rw [positionProgramData_transition?_sim_eq_generated]
+  exact simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_none_of_sourceDefault_no_step
+    (tc := tc) (side := side) (marked := marked)
+    (left := left) (right := right) hstep
+
+theorem positionProgramData_step_sim_eq_none_of_sourceDefault_no_step
+    {tc : Turing.ToPartrec.Code}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (sourceDefaultLabel tc)
+          (foldedRead side left right) =
+        none) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side (sourceDefaultLabel tc))
+        (foldedSymbolCode marked left right) =
+      none := by
+  have hfind := positionProgramData_transition?_sim_eq_none_of_sourceDefault_no_step
+    (tc := tc) (side := side) (marked := marked)
+    (left := left) (right := right) hstep
+  simp [PostProgram.step, hfind]
 
 theorem positionProgramData_transition?_sim_eq_none_of_support_succ_no_step
     {tc : Turing.ToPartrec.Code} {n : Nat}
