@@ -1723,6 +1723,11 @@ def mkRow (state read next : Nat) (stmt : PostStmt) : PostTransition where
   next := next
   stmt := stmt
 
+theorem mkRow_matchesInput_of_state_ne_data {state state' read read' next : Nat}
+    {stmt : PostStmt} (hstate : state ≠ state') :
+    (mkRow state read next stmt).matchesInput state' read' = false := by
+  simp [mkRow, PostTransition.matchesInput, hstate]
+
 theorem mkRow_primrec :
     Primrec (fun p : Nat × Nat × Nat × PostStmt =>
       mkRow p.1 p.2.1 p.2.2.1 p.2.2.2) := by
@@ -2397,6 +2402,139 @@ private theorem find?_append_of_eq_none {α : Type} {xs ys : List α} {p : α �
         have hxs : xs.find? p = none := by
           simpa [hx] using h
         simpa [hx] using ih hxs
+
+theorem initWriteOriginState_ne_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) :
+    initWriteOriginState ≠ foldedSimStateCode tc side q := by
+  intro h
+  unfold initWriteOriginState foldedSimStateCode taggedState stateTagInit stateTagSim at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initMoveRightState_ne_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (i : Nat) (side : FoldSide) (q : SourceLabel tc) :
+    initMoveRightState i ≠ foldedSimStateCode tc side q := by
+  intro h
+  unfold initMoveRightState foldedSimStateCode taggedState stateTagInit stateTagSim at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initWriteRightState_ne_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (i : Nat) (side : FoldSide) (q : SourceLabel tc) :
+    initWriteRightState i ≠ foldedSimStateCode tc side q := by
+  intro h
+  unfold initWriteRightState foldedSimStateCode taggedState stateTagInit stateTagSim at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initReturnState_ne_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (i : Nat) (side : FoldSide) (q : SourceLabel tc) :
+    initReturnState i ≠ foldedSimStateCode tc side q := by
+  intro h
+  unfold initReturnState foldedSimStateCode taggedState stateTagReturn stateTagSim at h
+  have htag := (Nat.pair_eq_pair.mp h).1
+  omega
+
+theorem initMoveRightRows_find?_eq_none_of_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) (read : Nat) :
+    initMoveRightRows.find?
+        (fun e => e.matchesInput (foldedSimStateCode tc side q) read) =
+      none := by
+  unfold initMoveRightRows
+  induction List.range (TM0Route.partrecStartedTM0Input.length - 1) with
+  | nil =>
+      simp
+  | cons j indices ih =>
+      have hhead :
+          (foldedSymbolList.map fun r => initMoveRightRow j r).find?
+              (fun e => e.matchesInput (foldedSimStateCode tc side q) read) = none := by
+        have hstate : initMoveRightState j ≠ foldedSimStateCode tc side q :=
+          initMoveRightState_ne_foldedSimStateCode_data tc j side q
+        induction foldedSymbolList with
+        | nil =>
+            simp
+        | cons r reads ihReads =>
+            have hmiss :
+                (initMoveRightRow j r).matchesInput
+                    (foldedSimStateCode tc side q) read = false :=
+              mkRow_matchesInput_of_state_ne_data hstate
+            simp [hmiss, ihReads]
+      simp only [List.flatMap_cons]
+      rw [find?_append_of_eq_none hhead]
+      exact ih
+
+theorem initWriteRightRows_find?_eq_none_of_foldedSimStateCode_data
+    (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) (read : Nat) :
+    initWriteRightRows.find?
+        (fun e => e.matchesInput (foldedSimStateCode tc side q) read) =
+      none := by
+  unfold initWriteRightRows
+  induction List.range (TM0Route.partrecStartedTM0Input.length - 1) with
+  | nil =>
+      simp
+  | cons j indices ih =>
+      have hstate : initWriteRightState j ≠ foldedSimStateCode tc side q :=
+        initWriteRightState_ne_foldedSimStateCode_data tc j side q
+      have hmiss :
+          (initWriteRightRow j).matchesInput (foldedSimStateCode tc side q) read = false :=
+        mkRow_matchesInput_of_state_ne_data hstate
+      simp [hmiss, ih]
+
+theorem initReturnRowsData_find?_eq_none_of_foldedSimStateCode
+    (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) (read : Nat) :
+    initReturnRowsData.find?
+        (fun e => e.matchesInput (foldedSimStateCode tc side q) read) =
+      none := by
+  unfold initReturnRowsData
+  induction initReturnIndexList with
+  | nil =>
+      simp
+  | cons i indices ih =>
+      have hhead :
+          (foldedSymbolList.map fun r => initReturnRow default i r).find?
+              (fun e => e.matchesInput (foldedSimStateCode tc side q) read) = none := by
+        have hstate : initReturnState i ≠ foldedSimStateCode tc side q :=
+          initReturnState_ne_foldedSimStateCode_data tc i side q
+        induction foldedSymbolList with
+        | nil =>
+            simp
+        | cons r reads ihReads =>
+            have hmiss :
+                (initReturnRow default i r).matchesInput
+                    (foldedSimStateCode tc side q) read = false := by
+              by_cases hi0 : i = 0
+              · subst i
+                exact mkRow_matchesInput_of_state_ne_data hstate
+              · unfold initReturnRow
+                rw [if_neg hi0]
+                exact mkRow_matchesInput_of_state_ne_data hstate
+            simp [hmiss, ihReads]
+      simp only [List.flatMap_cons]
+      rw [find?_append_of_eq_none hhead]
+      exact ih
+
+theorem initRowsData_find?_eq_none_of_foldedSimStateCode
+    (tc : Turing.ToPartrec.Code) (side : FoldSide) (q : SourceLabel tc) (read : Nat) :
+    initRowsData.find?
+        (fun e => e.matchesInput (foldedSimStateCode tc side q) read) =
+      none := by
+  have horigin :
+      initWriteOriginRow.matchesInput (foldedSimStateCode tc side q) read = false := by
+    unfold initWriteOriginRow
+    exact mkRow_matchesInput_of_state_ne_data
+      (initWriteOriginState_ne_foldedSimStateCode_data tc side q)
+  have hmove := initMoveRightRows_find?_eq_none_of_foldedSimStateCode_data tc side q read
+  have hwrite := initWriteRightRows_find?_eq_none_of_foldedSimStateCode_data tc side q read
+  have hreturn := initReturnRowsData_find?_eq_none_of_foldedSimStateCode tc side q read
+  unfold initRowsData
+  have htail :
+      (initMoveRightRows ++ (initWriteRightRows ++ initReturnRowsData)).find?
+          (fun e => e.matchesInput (foldedSimStateCode tc side q) read) =
+        none := by
+    rw [find?_append_of_eq_none hmove]
+    rw [find?_append_of_eq_none hwrite]
+    exact hreturn
+  simpa [horigin] using htail
 
 theorem simRowsOfStepData_find?_append_eq_of_forall_currentCode_ne
     {tc : Turing.ToPartrec.Code} {pref suffix : List SimStepData}
@@ -5054,6 +5192,30 @@ theorem positionProgramData_eq_appendSimRows_programHeader
       appendSimRows (programHeader tc)
         (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)) := by
   rfl
+
+theorem positionProgramData_transition?_sim_eq_generated
+    {tc : Turing.ToPartrec.Code}
+    {q : SourceLabel tc} {side : FoldSide} {marked : Bool}
+    {left right : SourceSymbol} :
+    (positionProgramData tc).transition? (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) =
+      (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side q)
+            (foldedSymbolCode marked left right)) := by
+  have hinit := initRowsData_find?_eq_none_of_foldedSimStateCode tc side q
+    (foldedSymbolCode marked left right)
+  unfold PostProgram.transition?
+  change (initRowsData ++
+      simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side q)
+            (foldedSymbolCode marked left right)) =
+      (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side q)
+            (foldedSymbolCode marked left right))
+  exact find?_append_of_eq_none hinit
 
 end TM0FoldedCompiler
 
