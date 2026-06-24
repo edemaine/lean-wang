@@ -2985,6 +2985,14 @@ theorem simStepDataForStmtLabel_eq_withCode
   intro side _hside
   exact simStepDataForStmtMarked_eq_withCode tc stmt v side
 
+theorem simStepDataForStmtLabelWithCode_none
+    (tc : Turing.ToPartrec.Code) (qCode : Nat) (v : PartrecVar) :
+    simStepDataForStmtLabelWithCode tc qCode none v = [] := by
+  unfold simStepDataForStmtLabelWithCode simStepDataForStmtMarkedWithCode
+    simStepDataForStmtLeftSymbolsWithCode simStepDataForStmtRightSymbolsWithCode
+    simStepDataOfStmtTransitionWithCode sourceMachineStepOfStmt
+  simp
+
 theorem simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux
     (tc : Turing.ToPartrec.Code)
     (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>

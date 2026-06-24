@@ -995,6 +995,34 @@ theorem sourceSearchCodeOneRowsVar_stmt_some
         stmt v := by
   simp [sourceSearchCodeOneRowsVar, hstmt]
 
+theorem sourceSearchCodeOneRowsVar_zero
+    (c : Code) (v : TM0Route.PartrecVar) :
+    sourceSearchCodeOneRowsVar c 0 v = [] := by
+  rw [sourceSearchCodeOneRowsVar_stmt_some (sourceStatementAt_zero c)]
+  exact TM0FoldedCompiler.simStepDataForStmtLabelWithCode_none
+    (NatPartrecToToPartrec.translate c)
+    (TM0FiniteCompiler.stateCodeBySupportSearch
+      (NatPartrecToToPartrec.translate c)
+      (TM0Route.partrecStartedTM0StatementCount
+        (NatPartrecToToPartrec.translate c))
+      (((none : Option (Turing.TM1.Stmt
+          (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+          (Turing.TM2to1.Λ'
+            TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+            (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+            TM0Route.PartrecVar)
+          TM0Route.PartrecVar)), v) :
+        Turing.TM1to0.Λ'
+          (TM0Route.partrecStartedTM1Machine
+            (NatPartrecToToPartrec.translate c))))
+    v
+
+theorem sourceSearchCodeOneRowsVar_zero_primrec :
+    Primrec (fun p : Code × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 0 p.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourceSearchCodeOneRowsVar_zero p.1 p.2).symm
+
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows
     (c : Code) (k i : Nat) :
     sourceSimStepDataForLabelIndexFromWithSearchCode c 1 k i =
