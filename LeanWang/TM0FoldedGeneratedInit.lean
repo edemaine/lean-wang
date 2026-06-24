@@ -339,6 +339,14 @@ theorem positionProgramData_runEmpty_two (tc : Turing.ToPartrec.Code) :
     positionProgramData_runEmpty_one]
   exact positionProgramData_nextID_after_origin tc
 
+theorem positionProgramData_runEmpty_add_two
+    (tc : Turing.ToPartrec.Code) (n : Nat) :
+    (positionProgramData tc).runEmpty (n + 2) =
+      Nat.iterate (positionProgramData tc).nextID n
+        ((positionProgramData tc).runEmpty 2) := by
+  unfold PostProgram.runEmpty
+  rw [Function.iterate_add_apply]
+
 end TM0FoldedCompiler
 
 end LeanWang
