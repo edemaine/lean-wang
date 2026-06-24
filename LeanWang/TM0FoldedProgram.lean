@@ -3011,6 +3011,67 @@ theorem simStepDataForStmtLabelWithCode_primrec_fixed
   simStepDataForStmtLabelWithCode_primrec_fixed_of_machine tc
     (TM0Route.partrecStartedTM1Machine_primrec tc)
 
+theorem simStepDataOfStmtTransitionWithCode_currentCode
+    {tc : Turing.ToPartrec.Code} {qCode : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar} {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {p : SimStepData}
+    (h : simStepDataOfStmtTransitionWithCode tc qCode stmt v side marked left right =
+      some p) :
+    p.2.2.1 = qCode := by
+  unfold simStepDataOfStmtTransitionWithCode at h
+  cases hstep : sourceMachineStepOfStmt tc stmt v (foldedRead side left right) with
+  | none =>
+      simp [hstep] at h
+  | some step =>
+      rcases step with ⟨q', tm0Stmt⟩
+      have hp :
+          simStepDataOfStepCode side marked qCode
+            (TM0FiniteCompiler.stateCode tc q') left right tm0Stmt = p := by
+        simpa [hstep] using h
+      rw [← hp]
+      rfl
+
+theorem mem_simStepDataForStmtRightSymbolsWithCode_currentCode
+    {tc : Turing.ToPartrec.Code} {qCode : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar} {side : FoldSide} {marked : Bool} {left : SourceSymbol}
+    {p : SimStepData}
+    (h : p ∈ simStepDataForStmtRightSymbolsWithCode tc qCode stmt v side marked left) :
+    p.2.2.1 = qCode := by
+  unfold simStepDataForStmtRightSymbolsWithCode at h
+  rw [List.mem_filterMap] at h
+  rcases h with ⟨right, _hright, hright⟩
+  exact simStepDataOfStmtTransitionWithCode_currentCode hright
+
+theorem mem_simStepDataForStmtLeftSymbolsWithCode_currentCode
+    {tc : Turing.ToPartrec.Code} {qCode : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar} {side : FoldSide} {marked : Bool} {p : SimStepData}
+    (h : p ∈ simStepDataForStmtLeftSymbolsWithCode tc qCode stmt v side marked) :
+    p.2.2.1 = qCode := by
+  unfold simStepDataForStmtLeftSymbolsWithCode at h
+  rw [List.mem_flatMap] at h
+  rcases h with ⟨left, _hleft, hleft⟩
+  exact mem_simStepDataForStmtRightSymbolsWithCode_currentCode hleft
+
+theorem mem_simStepDataForStmtMarkedWithCode_currentCode
+    {tc : Turing.ToPartrec.Code} {qCode : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar} {side : FoldSide} {p : SimStepData}
+    (h : p ∈ simStepDataForStmtMarkedWithCode tc qCode stmt v side) :
+    p.2.2.1 = qCode := by
+  unfold simStepDataForStmtMarkedWithCode at h
+  rw [List.mem_flatMap] at h
+  rcases h with ⟨marked, _hmarked, hmarked⟩
+  exact mem_simStepDataForStmtLeftSymbolsWithCode_currentCode hmarked
+
+theorem mem_simStepDataForStmtLabelWithCode_currentCode
+    {tc : Turing.ToPartrec.Code} {qCode : Nat} {stmt : Option (SourceStmt tc)}
+    {v : PartrecVar} {p : SimStepData}
+    (h : p ∈ simStepDataForStmtLabelWithCode tc qCode stmt v) :
+    p.2.2.1 = qCode := by
+  unfold simStepDataForStmtLabelWithCode at h
+  rw [List.mem_flatMap] at h
+  rcases h with ⟨side, _hside, hside⟩
+  exact mem_simStepDataForStmtMarkedWithCode_currentCode hside
+
 theorem simStepDataForStmtLabel_eq_of_label (tc : Turing.ToPartrec.Code)
     (q : SourceLabel tc) :
     simStepDataForStmtLabel tc q.1 q.2 = simStepDataForLabel tc q := by
@@ -3438,6 +3499,27 @@ def simStepDataForLabelIndexFromWithPositionCode
     List SimStepData :=
   (labelAtByStatementFromWithPositionCode? tc fuel k i).elim []
     (fun q => simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2)
+
+theorem mem_simStepDataForLabelIndexFromWithPositionCode_current_support_get?
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat} {p : SimStepData}
+    (h : p ∈ simStepDataForLabelIndexFromWithPositionCode tc fuel k i) :
+    ∃ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc fuel k i = some q ∧
+        p.2.2.1 = q.2 ∧
+        (TM0Route.partrecStartedTM0LabelSupportList tc)[p.2.2.1]? = some q.1 := by
+  unfold simStepDataForLabelIndexFromWithPositionCode at h
+  cases hq : labelAtByStatementFromWithPositionCode? tc fuel k i with
+  | none =>
+      rw [hq] at h
+      cases h
+  | some q =>
+      have hmem : p ∈ simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2 := by
+        simpa [hq] using h
+      have hcode : p.2.2.1 = q.2 :=
+        mem_simStepDataForStmtLabelWithCode_currentCode hmem
+      refine ⟨q, rfl, hcode, ?_⟩
+      rw [hcode]
+      exact labelAtByStatementFromWithPositionCode?_support_get? tc hq
 
 theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :

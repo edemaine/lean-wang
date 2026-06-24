@@ -281,6 +281,12 @@ The second invariant is also in place: the produced position code reads back to
 the decoded label in `partrecStartedTM0LabelSupportList`, via
 `labelAtByStatementFromWithPositionCode?_support_get?` and the source wrapper
 `sourceLabelAtByStatementFromWithPositionCode_support_get?`.
+This has now been lifted from the label decoder to generated descriptor rows:
+every descriptor emitted by `simStepDataForLabelIndexFromWithPositionCode`
+carries the decoded position code as its current-state field, and that field
+reads back to the decoded label in `partrecStartedTM0LabelSupportList`; the
+source-level wrapper is
+`sourceMem_simStepDataForLabelIndexFromWithPositionCode_current_support_get?`.
 
 Next implementation targets:
 
