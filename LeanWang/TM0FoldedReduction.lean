@@ -1435,6 +1435,14 @@ theorem sourceSearchCodeDecoder_primrec_of_step
     unfold sourceSearchCodeDecoder
     rfl
 
+theorem sourceSearchCodeDecoder_primrec_of_oneVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSearchCodeDecoder p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  sourceSearchCodeDecoder_primrec_of_step
+    (sourceSearchCodeDecoderStep_primrec_of_oneVarRows hvarRows)
+
 theorem sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode
     (c : Code) (fuel k i : Nat) :
     sourceSearchCodeDecoder c fuel k i =
@@ -1451,6 +1459,15 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step
   (sourceSearchCodeDecoder_primrec_of_step hstep).of_eq fun p =>
     sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode
       p.1 p.2.1 p.2.2.1 p.2.2.2
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step
+    (sourceSearchCodeDecoderStep_primrec_of_oneVarRows hvarRows)
 
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneRows
     (hrows : Primrec (fun p : Code × Nat × Nat =>
