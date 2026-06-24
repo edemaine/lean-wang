@@ -1177,6 +1177,66 @@ theorem forcesFixedCornerSquares_of_figure18Indexed
     (forcesActiveCornerSquares_of_figure18Indexed hwindow)
 
 /--
+Payload square extracted from the routed Figure 18 free coordinates.
+
+The paper's free square is described by selected horizontal coordinates `H` and
+vertical coordinates `V` inside a scaffold square.  The payload cells need not be
+a contiguous rectangle of scaffold cells; the missing adjacencies are routed
+through obstructed rows and columns.  This structure records the resulting
+payload rectangle together with the scaffold sites from which it is read.
+-/
+structure Figure18RoutedFixedCornerSquare
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  baseRect : Rectangle n n
+  payloadRect : Rectangle n n
+  mem : ∀ i : Fin n, ∀ j : Fin n, baseRect i j ∈ table.presentation.tiles
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.presentation.role (baseRect i j)) = true
+  cornerRole :
+    table.presentation.role (baseRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
+  product : ∀ i : Fin n, ∀ j : Fin n,
+    WangTile.product (baseRect i j) (payloadRect i j) =
+      (x (horizontalCoord i, verticalCoord j)).1
+  payloadValid : ValidRectangle T payloadRect
+  payloadCorner : payloadRect ⟨0, hn⟩ ⟨0, hn⟩ = seed
+
+namespace Figure18RoutedFixedCornerSquare
+
+theorem tileable
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18RoutedFixedCornerSquare table x n hn) :
+    TileableFixedCornerSquare T seed n :=
+  ⟨hn, window.payloadRect, window.payloadValid, window.payloadCorner⟩
+
+end Figure18RoutedFixedCornerSquare
+
+/--
+Every combined plane tiling contains arbitrarily large routed payload squares
+with the requested lower-left seed.
+-/
+def HasFigure18RoutedFixedCornerSquares (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18RoutedFixedCornerSquare table x n hn)
+
+theorem forcesFixedCornerSquares_of_figure18Routed
+    {table : Figure18RoleTable}
+    (hrouted : HasFigure18RoutedFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold := by
+  intro T seed htiles n hn
+  rcases htiles with ⟨x, hx⟩
+  rcases hrouted x hx n hn with ⟨window⟩
+  exact window.tileable
+
+/--
 Geometric obligations for a concrete Figure 18 role table using the direct
 recognizable-free-square route.
 
@@ -1223,6 +1283,14 @@ structure Figure18FlexibleCertificate (table : Figure18RoleTable) : Prop where
   forces : ForcesFixedCornerSquares table.presentation.toScaffold
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
+/--
+Geometric obligations for a concrete Figure 18 role table using the routed
+payload-square extraction from the paper's selected free coordinates.
+-/
+structure Figure18RoutedCertificate (table : Figure18RoleTable) : Prop where
+  routedForces : HasFigure18RoutedFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
 namespace Figure18Certificate
 
 def toFlexibleCertificate
@@ -1234,6 +1302,24 @@ def toFlexibleCertificate
 
 end Figure18Certificate
 
+namespace Figure18RoutedCertificate
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable} (certificate : Figure18RoutedCertificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18Routed certificate.routedForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable} (certificate : Figure18RoutedCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18Routed certificate.routedForces
+    realizes := certificate.realizes
+  }
+
+end Figure18RoutedCertificate
+
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
 the geometric flexible scaffold certificate.
@@ -1241,6 +1327,13 @@ the geometric flexible scaffold certificate.
 structure Figure18FlexibleInstance where
   table : Figure18RoleTable
   certificate : Figure18FlexibleCertificate table
+
+/--
+Concrete Figure 18 scaffold package using the routed payload-square certificate.
+-/
+structure Figure18RoutedInstance where
+  table : Figure18RoleTable
+  certificate : Figure18RoutedCertificate table
 
 /--
 Concrete Figure 18 scaffold package using the direct indexed free-square
@@ -1295,6 +1388,34 @@ def toFlexibleInstance (I : Figure18Instance) :
   certificate := I.certificate.toFlexibleCertificate
 
 end Figure18Instance
+
+namespace Figure18RoutedInstance
+
+def finite (I : Figure18RoutedInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18RoutedInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def toFlexibleInstance (I : Figure18RoutedInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18RoutedInstance) :
+    I.toFlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : Figure18RoutedInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18RoutedInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18RoutedInstance
 
 namespace Figure18FlexibleInstance
 
