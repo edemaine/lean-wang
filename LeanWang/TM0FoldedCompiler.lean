@@ -2746,20 +2746,14 @@ theorem program_haltsEmpty_iff_tm0_eval_dom (tc : Turing.ToPartrec.Code) :
   exact ⟨tm0_eval_dom_of_program_haltsEmpty tc,
     program_haltsEmpty_of_tm0_eval_dom tc⟩
 
-theorem program_haltsEmpty_iff_startedTM2_eval_dom (tc : Turing.ToPartrec.Code) :
-    (program tc).HaltsEmpty ↔
-      (Turing.TM2.eval (TM0Route.partrecStartedTM2 tc)
-        Turing.PartrecToTM2.K'.main TM0Route.partrecStartedTM2Input).Dom := by
-  exact (program_haltsEmpty_iff_tm0_eval_dom tc).trans
-    (TM0Route.partrecStartedTM0_eval_dom_iff_tm2 tc)
-
 theorem program_haltsEmpty_iff_partrec_eval_dom (tc : Turing.ToPartrec.Code) :
     (program tc).HaltsEmpty ↔
       (StateTransition.eval
         (Turing.TM2.step TM0Route.partrecTM2)
         (TM0Route.partrecInit tc)).Dom := by
-  exact (program_haltsEmpty_iff_startedTM2_eval_dom tc).trans
-    (TM0Route.partrecStartedTM2_eval_dom_iff_partrec tc)
+  exact (program_haltsEmpty_iff_tm0_eval_dom tc).trans
+    ((TM0Route.partrecStartedTM0_eval_dom_iff_tm2 tc).trans
+      (TM0Route.partrecStartedTM2_eval_dom_iff_partrec tc))
 
 theorem FoldedConfigRel_state_some {tc : Turing.ToPartrec.Code}
     {cfg : Turing.TM0.Cfg SourceSymbol (SourceLabel tc)} {id : PostID}

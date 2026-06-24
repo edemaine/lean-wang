@@ -2384,6 +2384,37 @@ theorem simRowsOfStepData_find?_eq_none_of_forall_currentCode_ne
             (foldedSymbolCode marked left right)) = none
       simp [hhead, htail]
 
+private theorem find?_append_of_eq_none {α : Type} {xs ys : List α} {p : α → Bool}
+    (h : xs.find? p = none) :
+    (xs ++ ys).find? p = ys.find? p := by
+  induction xs with
+  | nil =>
+      rfl
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · simp [hx] at h
+      · simp [hx]
+        have hxs : xs.find? p = none := by
+          simpa [hx] using h
+        simpa [hx] using ih hxs
+
+theorem simRowsOfStepData_find?_append_eq_of_forall_currentCode_ne
+    {tc : Turing.ToPartrec.Code} {pref suffix : List SimStepData}
+    {side : FoldSide} {marked : Bool} {q : SourceLabel tc}
+    {left right : SourceSymbol}
+    (hcode : ∀ p ∈ pref, p.2.2.1 ≠ TM0FiniteCompiler.stateCode tc q) :
+    (simRowsOfStepData (pref ++ suffix)).find? (fun e =>
+        e.matchesInput (foldedSimStateCode tc side q) (foldedSymbolCode marked left right)) =
+      (simRowsOfStepData suffix).find? (fun e =>
+        e.matchesInput (foldedSimStateCode tc side q) (foldedSymbolCode marked left right)) := by
+  rw [show simRowsOfStepData (pref ++ suffix) =
+      simRowsOfStepData pref ++ simRowsOfStepData suffix by
+    simp [simRowsOfStepData]]
+  exact find?_append_of_eq_none
+    (simRowsOfStepData_find?_eq_none_of_forall_currentCode_ne
+      (tc := tc) (steps := pref) (side := side) (marked := marked) (q := q)
+      (left := left) (right := right) hcode)
+
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
     (q q' : SourceLabel tc) (left right : SourceSymbol)
