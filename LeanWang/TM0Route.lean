@@ -6195,6 +6195,51 @@ private theorem flatMapConstMapAtByGetFrom?_eq_byGet {α β : Type}
           rw [ih (k + 1) (i - ys.length)]
           simp [Nat.add_comm, Nat.add_left_comm]
 
+private theorem flatMapConstMapAtByGetFrom?_of_div_mod {α β : Type}
+    (get : Nat → Option α) (ys : List β) (hys : 0 < ys.length)
+    {fuel k i : Nat} {x : α} {y : β}
+    (hblock : i / ys.length < fuel)
+    (hy : ys[i % ys.length]? = some y)
+    (hx : get (k + i / ys.length) = some x) :
+    flatMapConstMapAtByGetFrom? get ys fuel k i = some (x, y) := by
+  induction fuel generalizing k i with
+  | zero =>
+      exact False.elim (Nat.not_lt_zero _ hblock)
+  | succ fuel ih =>
+      unfold flatMapConstMapAtByGetFrom?
+      by_cases hi : i < ys.length
+      · have hdiv : i / ys.length = 0 := Nat.div_eq_of_lt hi
+        have hmod : i % ys.length = i := Nat.mod_eq_of_lt hi
+        have hyi : ys[i]? = some y := by simpa [hmod] using hy
+        rw [hyi]
+        simpa [hdiv] using hx
+      · have hle : ys.length ≤ i := le_of_not_gt hi
+        have hynone : ys[i]? = none := by
+          rw [List.getElem?_eq_none_iff]
+          exact hle
+        rw [hynone]
+        have hdiv :
+            i / ys.length = (i - ys.length) / ys.length + 1 := by
+          calc
+            i / ys.length = ((i - ys.length) + ys.length) / ys.length := by
+              rw [Nat.sub_add_cancel hle]
+            _ = (i - ys.length) / ys.length + 1 := by
+              rw [Nat.add_div_right _ hys]
+        have hblock' : (i - ys.length) / ys.length < fuel := by
+          have hsucc : (i - ys.length) / ys.length + 1 < fuel + 1 := by
+            simpa [hdiv] using hblock
+          exact Nat.succ_lt_succ_iff.1 hsucc
+        have hmod : (i - ys.length) % ys.length = i % ys.length := by
+          rw [← Nat.add_mod_right (i - ys.length) ys.length]
+          have hsum : i - ys.length + ys.length = i := Nat.sub_add_cancel hle
+          rw [hsum]
+        have hy' : ys[(i - ys.length) % ys.length]? = some y := by
+          simpa [hmod] using hy
+        have hx' :
+            get (k + 1 + (i - ys.length) / ys.length) = some x := by
+          simpa [hdiv, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hx
+        exact ih (k := k + 1) hblock' hy' hx'
+
 /--
 Structural decoder for the flat TM0 label index. The label list is a rectangular
 expansion of statement support by the fixed `partrecVarList`; this function
@@ -6224,6 +6269,23 @@ def partrecStartedTM0LabelAtByStatementFrom?
     Option (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) :=
   flatMapConstMapAtByGetFrom? (partrecStartedTM0StatementAt? tc)
     partrecVarList fuel k i
+
+theorem partrecStartedTM0LabelAtByStatementFrom?_of_div_mod
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)}
+    {v : PartrecVar}
+    (hblock : i / partrecVarList.length < fuel)
+    (hv : partrecVarList[i % partrecVarList.length]? = some v)
+    (hstmt : partrecStartedTM0StatementAt? tc (k + i / partrecVarList.length) =
+      some stmt) :
+    partrecStartedTM0LabelAtByStatementFrom? tc fuel k i = some (stmt, v) := by
+  unfold partrecStartedTM0LabelAtByStatementFrom?
+  exact flatMapConstMapAtByGetFrom?_of_div_mod
+    (partrecStartedTM0StatementAt? tc) partrecVarList
+    (by simp [partrecVarList]) hblock hv hstmt
 
 theorem partrecStartedTM0LabelAtByStatementFrom?_zero
     (tc : Turing.ToPartrec.Code) (k i : Nat) :

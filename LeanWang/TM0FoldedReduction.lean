@@ -387,6 +387,48 @@ theorem sourceLabelIndexStartSplit?_isSome_iff_lt_labelCount
       ⟨stmtIndex, v, hsplit⟩
     simp [hsplit]
 
+theorem sourceLabelAtByStatementFrom?_of_split
+    {c : Code} {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+        (NatPartrecToToPartrec.translate c) fuel k i =
+      some ((stmt, v) :
+        Turing.TM1to0.Λ'
+          (TM0Route.partrecStartedTM1Machine (NatPartrecToToPartrec.translate c))) := by
+  rcases sourceLabelIndexFromSplit?_eq_some hsplit with ⟨hstmtIndex, hblock, hv⟩
+  exact TM0Route.partrecStartedTM0LabelAtByStatementFrom?_of_div_mod
+    (NatPartrecToToPartrec.translate c) hblock hv (by simpa [hstmtIndex] using hstmt)
+
+theorem sourceLabelAtByStatementStart?_of_split
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexStartSplit? c i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    TM0Route.partrecStartedTM0LabelAtByStatement?
+        (NatPartrecToToPartrec.translate c) i =
+      some ((stmt, v) :
+        Turing.TM1to0.Λ'
+          (TM0Route.partrecStartedTM1Machine (NatPartrecToToPartrec.translate c))) := by
+  unfold sourceLabelIndexStartSplit? at hsplit
+  rw [← TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
+  exact sourceLabelAtByStatementFrom?_of_split hsplit hstmt
+
 /--
 Source-code version of the fully offset descriptor decoder.
 
