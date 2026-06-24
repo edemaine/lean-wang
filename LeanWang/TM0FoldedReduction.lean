@@ -944,6 +944,104 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
       (c := c) (fuel := fuel + 1) (k := k) (block := 0)
       (i := i) (v := v) (by omega) hv (by simpa using hstmt)
 
+def sourceSearchCodeOneRowsVar
+    (c : Code) (k : Nat) (v : TM0Route.PartrecVar) :
+    List TM0FoldedCompiler.SimStepData :=
+  match TM0Route.partrecStartedTM0StatementAt?
+      (NatPartrecToToPartrec.translate c) k with
+  | none => []
+  | some stmt =>
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        stmt v
+
+theorem sourceSearchCodeOneRowsVar_stmt_none
+    {c : Code} {k : Nat} {v : TM0Route.PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = none) :
+    sourceSearchCodeOneRowsVar c k v = [] := by
+  simp [sourceSearchCodeOneRowsVar, hstmt]
+
+theorem sourceSearchCodeOneRowsVar_stmt_some
+    {c : Code} {k : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = some stmt) :
+    sourceSearchCodeOneRowsVar c k v =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCodeBySupportSearch
+          (NatPartrecToToPartrec.translate c)
+          (TM0Route.partrecStartedTM0StatementCount
+            (NatPartrecToToPartrec.translate c))
+          ((stmt, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        stmt v := by
+  simp [sourceSearchCodeOneRowsVar, hstmt]
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows
+    (c : Code) (k i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c 1 k i =
+      match TM0Route.partrecVarList[i]? with
+      | none => []
+      | some v => sourceSearchCodeOneRowsVar c k v := by
+  cases hv : TM0Route.partrecVarList[i]? with
+  | none =>
+      rw [sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_var_none
+        (c := c) (fuel := 0) (k := k) (i := i) hv]
+      simp [sourceSimStepDataForLabelIndexFromWithSearchCode_zero]
+  | some v =>
+      cases hstmt : TM0Route.partrecStartedTM0StatementAt?
+          (NatPartrecToToPartrec.translate c) k with
+      | none =>
+          rw [sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_none
+            (c := c) (fuel := 0) (k := k) (i := i) (v := v) hv hstmt]
+          simp [sourceSearchCodeOneRowsVar_stmt_none hstmt]
+      | some stmt =>
+          rw [sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
+            (c := c) (fuel := 0) (k := k) (i := i) (v := v)
+            (stmt := stmt) hv hstmt]
+          simp [sourceSearchCodeOneRowsVar_stmt_some hstmt]
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_primrec_of_varRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 p.2.1 p.2.2) := by
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun _p : Code × Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 v) := by
+    apply Primrec₂.mk
+    exact hvarRows.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+          Primrec.snd))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    rw [sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows]
+    cases TM0Route.partrecVarList[p.2.2]? <;> rfl
+
 /-- State for the source-level bounded-search descriptor decoder.
 
 The first two fields are the current statement offset and variable-list offset.
@@ -2463,6 +2561,20 @@ theorem sourceProgramData_computable_of_source_searchCodeOneRows'
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeOneRows hrows).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_searchCodeOneRows
+    (sourceSimStepDataForLabelIndexFromWithSearchCode_one_primrec_of_varRows hvarRows)
+
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_searchCodeOneVarRows hvarRows).of_eq fun _ => rfl
+
 /--
 The remaining bounded-search descriptor decoder proof, together with normalized
 folded program-data semantic correctness, gives the exact source obligations
@@ -2515,6 +2627,24 @@ def sourceObligationsOfSearchCodeOneRows
     SourceObligations :=
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_searchCodeOneRows' hrows)
+    hcorrect
+
+/--
+Primitive recursiveness of the variable-branch one-fuel bounded-search row
+decoder, together with normalized folded program-data semantic correctness,
+gives the exact source obligations needed by the final reduction.
+-/
+def sourceObligationsOfSearchCodeOneVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_searchCodeOneVarRows' hvarRows)
     hcorrect
 
 /--
@@ -2854,6 +2984,42 @@ theorem domino_problem_undecidable_of_scaffold_source_searchCodeOneRows
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_source S hS
     (sourceObligationsOfSearchCodeOneRows hrows hcorrect)
+
+/--
+Encoded domino undecidability from a scaffold, primitive recursiveness of the
+variable-branch one-fuel bounded-search row decoder, and normalized folded
+program-data correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_searchCodeOneVarRows
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfSearchCodeOneVarRows hvarRows hcorrect)
+
+/--
+Unencoded domino undecidability from a scaffold, primitive recursiveness of the
+variable-branch one-fuel bounded-search row decoder, and normalized folded
+program-data correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_searchCodeOneVarRows
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfSearchCodeOneVarRows hvarRows hcorrect)
 
 /--
 Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
