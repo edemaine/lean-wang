@@ -2926,6 +2926,118 @@ theorem sourceStateCodeBySupportSearch_eq_stateCode_of_statementAt?
     ⟨1 + block * TM0Route.partrecVarList.length + i,
       sourceLabelSupportList_get_position_of_statementAt? hstmt hv⟩
 
+theorem sourceSearchCodeOneRowsVar_eq_positionCodeOneRowsIndexVar_of_statementList_nodup
+    {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
+    (hnodup : (TM0Route.partrecStartedTM0StatementList
+      (NatPartrecToToPartrec.translate c)).Nodup)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSearchCodeOneRowsVar c k v =
+      sourcePositionCodeOneRowsIndexVar c k i v := by
+  cases hstmt : TM0Route.partrecStartedTM0StatementAt?
+      (NatPartrecToToPartrec.translate c) k with
+  | none =>
+      rw [sourceSearchCodeOneRowsVar_stmt_none hstmt,
+        sourcePositionCodeOneRowsIndexVar_stmt_none hstmt]
+  | some stmt =>
+      rw [sourceSearchCodeOneRowsVar_stmt_some hstmt,
+        sourcePositionCodeOneRowsIndexVar_stmt_some hstmt]
+      have hsearch := sourceStateCodeBySupportSearch_eq_stateCode_of_statementAt?
+        (c := c) (block := k) (i := i) (v := v) hstmt hv
+      have hmin :
+          ∀ m, m < TM0FoldedCompiler.labelPositionCode k i stmt v →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠
+                some ((stmt, v) :
+                  Turing.TM1to0.Λ'
+                    (TM0Route.partrecStartedTM1Machine
+                      (NatPartrecToToPartrec.translate c))) :=
+        TM0FoldedCompiler.labelPositionCode_minimal_of_statementList_nodup
+          (NatPartrecToToPartrec.translate c) hnodup hstmt hv
+      have hposition :
+          TM0FoldedCompiler.labelPositionCode k i stmt v =
+            TM0FiniteCompiler.stateCode
+              (NatPartrecToToPartrec.translate c)
+              ((stmt, v) :
+                Turing.TM1to0.Λ'
+                  (TM0Route.partrecStartedTM1Machine
+                    (NatPartrecToToPartrec.translate c))) :=
+        TM0FoldedCompiler.labelPositionCode_eq_stateCode_of_minimal
+          (NatPartrecToToPartrec.translate c) hstmt hv hmin
+      have hcode :
+          TM0FiniteCompiler.stateCodeBySupportSearch
+              (NatPartrecToToPartrec.translate c)
+              (sourceStatementCount c)
+              ((stmt, v) :
+                Turing.TM1to0.Λ'
+                  (TM0Route.partrecStartedTM1Machine
+                    (NatPartrecToToPartrec.translate c))) =
+            TM0FoldedCompiler.labelPositionCode k i stmt v :=
+        hsearch.trans hposition.symm
+      exact congrArg
+        (fun qCode => TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+          (NatPartrecToToPartrec.translate c) qCode stmt v) hcode
+
+theorem sourceSearchCodeBoundedInteriorRowsVar_eq_positionCodeBoundedInteriorRowsIndexVar
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hnodup : (TM0Route.partrecStartedTM0StatementList
+      (NatPartrecToToPartrec.translate c)).Nodup)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSearchCodeBoundedInteriorRowsVar c j v =
+      sourcePositionCodeBoundedInteriorRowsIndexVar c j i v := by
+  by_cases hlt : j + 1 < sourceStatementCount c
+  · rw [sourceSearchCodeBoundedInteriorRowsVar_eq_interior hlt,
+      sourcePositionCodeBoundedInteriorRowsIndexVar_eq_interior hlt]
+    exact sourceSearchCodeOneRowsVar_eq_positionCodeOneRowsIndexVar_of_statementList_nodup
+      (c := c) (k := j + 1) (i := i) (v := v) hnodup hv
+  · rw [sourceSearchCodeBoundedInteriorRowsVar_eq_nil hlt,
+      sourcePositionCodeBoundedInteriorRowsIndexVar_eq_nil hlt]
+
+def sourcePartrecVarIndex (v : TM0Route.PartrecVar) : Nat :=
+  TM0Route.partrecVarList.findIdx fun w => decide (w = v)
+
+theorem sourcePartrecVarIndex_primrec : Primrec sourcePartrecVarIndex := by
+  unfold sourcePartrecVarIndex
+  exact Primrec.list_findIdx₁ (l := TM0Route.partrecVarList)
+    (Primrec.beq.comp₂ Primrec₂.right Primrec₂.left)
+
+theorem sourcePartrecVarIndex_getElem? (v : TM0Route.PartrecVar) :
+    TM0Route.partrecVarList[sourcePartrecVarIndex v]? = some v := by
+  unfold sourcePartrecVarIndex
+  have hmem : v ∈ TM0Route.partrecVarList := TM0Route.mem_partrecVarList v
+  have hidx : TM0Route.partrecVarList.findIdx (fun w => decide (w = v)) <
+      TM0Route.partrecVarList.length := by
+    exact List.findIdx_lt_length_of_exists ⟨v, hmem, by simp⟩
+  have hfind := (List.findIdx_eq (xs := TM0Route.partrecVarList)
+    (p := fun w => decide (w = v)) hidx).1 rfl
+  exact List.getElem?_eq_some_iff.2 ⟨hidx, of_decide_eq_true hfind.1⟩
+
+theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2) := by
+  have hidx : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePartrecVarIndex p.2.2) :=
+    sourcePartrecVarIndex_primrec.comp (Primrec.snd.comp Primrec.snd)
+  have hposition : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar
+        p.1 p.2.1 (sourcePartrecVarIndex p.2.2) p.2.2) :=
+    hinterior.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair hidx (Primrec.snd.comp Primrec.snd))))
+  exact hposition.of_eq fun p => by
+    have hv :
+        TM0Route.partrecVarList[sourcePartrecVarIndex p.2.2]? =
+          some p.2.2 :=
+      sourcePartrecVarIndex_getElem? p.2.2
+    exact (sourceSearchCodeBoundedInteriorRowsVar_eq_positionCodeBoundedInteriorRowsIndexVar
+      (c := p.1) (j := p.2.1) (i := sourcePartrecVarIndex p.2.2)
+      (v := p.2.2) (hnodup p.1) hv).symm
+
 theorem sourceSimStepDataForLabelIndexStartWithCode_of_block_var_get?
     {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
