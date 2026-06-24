@@ -285,6 +285,27 @@ def fig13Tile (i : Fin 92) : WangTile :=
 def fig13QuarterTile (i : Fin 92) (q : Quadrant) : WangTile :=
   TileSubdivision.subdivideTileAt (fig13Tile i) q
 
+theorem fig13QuarterTile_eq_iff (i j : Fin 92) (q r : Quadrant) :
+    fig13QuarterTile i q = fig13QuarterTile j r ↔ i = j ∧ q = r := by
+  unfold fig13QuarterTile fig13Tile
+  constructor
+  · intro h
+    have hparts := TileSubdivision.subdivideTileAt_eq_iff
+      (fig13Tiles.get ⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩)
+      (fig13Tiles.get ⟨j.val, by simp [fig13Tiles_length, j.isLt]⟩)
+      q r |>.1 h
+    constructor
+    · apply Fin.ext
+      have hidx :
+          (⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩ :
+              Fin fig13Tiles.length) =
+            ⟨j.val, by simp [fig13Tiles_length, j.isLt]⟩ := by
+        exact (List.Nodup.get_inj_iff fig13Tiles_nodup).1 hparts.1
+      exact congrArg Fin.val hidx
+    · exact hparts.2
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
 /-- Role lookup entries for a complete quadrant role transcription. -/
 def fig13QuarterRoleEntries (roleRows : List TileQuarterRoles) :
     List (WangTile × CellRole) :=
@@ -840,6 +861,27 @@ theorem presentation_mem_fig13QuarterTile
       hspec, rfl⟩
   simpa [fig13QuarterRoleSpecs_tiles table.length_eq] using hmem
 
+theorem exists_fig13QuarterTile_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ i : Fin 92, ∃ q : Quadrant, tile = fig13QuarterTile i q := by
+  have htile' : tile ∈ tilesOfSpecs (fig13QuarterRoleSpecs table.roleRows) := by
+    rw [fig13QuarterRoleSpecs_tiles table.length_eq]
+    simpa [table.presentation_tiles] using htile
+  rcases mem_tilesOfSpecs.1 htile' with ⟨spec, hspec, hspecTile⟩
+  rcases exists_of_mem_fig13QuarterRoleSpecs hspec with
+    ⟨i, _roles, q, _hroles, hspecQuarter, _hspecRole⟩
+  exact ⟨i, q, hspecTile.symm.trans hspecQuarter⟩
+
+theorem presentation_mem_iff_exists_fig13QuarterTile
+    (table : Figure18RoleTable) (tile : WangTile) :
+    tile ∈ table.presentation.tiles ↔
+      ∃ i : Fin 92, ∃ q : Quadrant, tile = fig13QuarterTile i q := by
+  constructor
+  · exact table.exists_fig13QuarterTile_of_mem_presentation
+  · rintro ⟨i, q, rfl⟩
+    exact table.presentation_mem_fig13QuarterTile i q
+
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
@@ -848,6 +890,16 @@ theorem presentation_role_fig13QuarterTile
     fig13QuarterRoleEntries, roleAt] using
     fig13QuarterRoleEntries_lookup_of_getElem?
       table.length_eq (table.row_getElem? i) (q := q)
+
+theorem exists_fig13QuarterTile_role_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ i : Fin 92, ∃ q : Quadrant,
+      tile = fig13QuarterTile i q ∧
+        table.presentation.role tile = table.roleAt i q := by
+  rcases table.exists_fig13QuarterTile_of_mem_presentation htile with
+    ⟨i, q, rfl⟩
+  exact ⟨i, q, rfl, table.presentation_role_fig13QuarterTile i q⟩
 
 theorem roleAt_corner (table : Figure18RoleTable) :
     table.roleAt table.cornerIndex table.cornerQuadrant = CellRole.corner := by
