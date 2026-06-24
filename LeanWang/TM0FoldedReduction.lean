@@ -51,6 +51,23 @@ structure SourceObligations where
       (Nat.Partrec.Code.eval c 0).Dom
 
 /--
+Source-level obligations for the generated position-coded folded program.
+
+This is the same reduction interface as `SourceObligations`, but it uses
+`positionProgramData` directly. It is intended for the generated descriptor
+route, where semantic correctness is proved by showing canonical execution
+selects the generated rows, rather than by proving the generated row list is
+equal to the canonical row list.
+-/
+structure PositionSourceObligations where
+  program_computable :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c))
+  correct : ∀ c : Code,
+    (TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
+      (Nat.Partrec.Code.eval c 0).Dom
+
+/--
 Semantic source correctness follows from any folded finite-TM0 semantic theorem
 for the normalized program data, composed with the already-proved source-code
 translation chain.
@@ -91,6 +108,43 @@ def sourceObligationsOfProgramData
     SourceObligations where
   program_computable := hprogram
   correct := sourceProgramData_correct_of_programData_tm0_correct hcorrect
+
+/--
+Semantic source correctness for the generated position-coded program, composed
+with the already-proved source-code translation chain.
+-/
+theorem sourcePositionProgramData_correct_of_positionProgramData_tm0_correct
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom)
+    (c : Code) :
+    (TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)).HaltsEmpty ↔
+      (Nat.Partrec.Code.eval c 0).Dom :=
+  (hcorrect (NatPartrecToToPartrec.translate c)).trans
+    ((TM0Route.partrecStartedTM0_eval_dom_iff_tm2
+        (NatPartrecToToPartrec.translate c)).trans
+      ((TM0Route.partrecStartedTM2_eval_dom_iff_partrec
+          (NatPartrecToToPartrec.translate c)).trans
+        (NatPartrecToToPartrec.translate_tm2_dom c)))
+
+/--
+Build the generated-position source obligations from source-level program-data
+computability and semantic correctness against Mathlib's translated TM0
+evaluator.
+-/
+def positionSourceObligationsOfProgramData
+    (hprogram : Computable (fun c : Code =>
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations where
+  program_computable := hprogram
+  correct := sourcePositionProgramData_correct_of_positionProgramData_tm0_correct hcorrect
 
 /-- Broad folded-route obligations imply the source-code obligations actually used. -/
 def Obligations.toSource (h : Obligations) : SourceObligations where
@@ -4587,6 +4641,38 @@ theorem sourceFixedDominoReduction_correct (h : SourceObligations) (c : Code) :
   rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
   rw [h.correct c]
 
+/--
+Fixed-domino instance produced directly from the generated position-coded
+folded program for a source partial-recursive code.
+-/
+def sourcePositionFixedDominoReduction
+    (_h : PositionSourceObligations) (c : Code) : TileSet × WangTile :=
+  tableProgramFixedDominoData
+    (PostProgram.toTableProgram
+      (TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)))
+
+theorem sourcePositionFixedDominoReduction_computable
+    (h : PositionSourceObligations) :
+    Computable (sourcePositionFixedDominoReduction h) := by
+  exact tableProgramFixedDominoData_computable.comp
+    (PostProgram.toTableProgram_computable.comp h.program_computable)
+
+theorem sourcePositionFixedDominoReduction_correct
+    (h : PositionSourceObligations) (c : Code) :
+    TilesQuarterWithSeed (sourcePositionFixedDominoReduction h c).1
+        (sourcePositionFixedDominoReduction h c).2 ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  unfold sourcePositionFixedDominoReduction
+  rw [tableProgramFixedDominoData_seed_eq]
+  rw [tilesQuarterWithSeed_congr
+    (tableProgramFixedDominoData_mem_iff
+      (PostProgram.toTableProgram
+        (TM0FoldedCompiler.positionProgramData
+          (NatPartrecToToPartrec.translate c))))]
+  rw [tableProgramFixedDomino_correct]
+  rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
+  rw [h.correct c]
+
 /-- Final scaffolded tileset produced directly from a source partial-recursive code. -/
 def sourceDominoReduction (S : Scaffold) (h : SourceObligations) (c : Code) : TileSet :=
   combineWithScaffold S (sourceFixedDominoReduction h c).1
@@ -4608,6 +4694,34 @@ theorem sourceDominoReduction_correct
         (sourceFixedDominoReduction h c).2).symm.trans
           (sourceFixedDominoReduction_correct h c))
 
+/--
+Final scaffolded tileset produced from the generated position-coded folded
+program for a source partial-recursive code.
+-/
+def sourcePositionDominoReduction
+    (S : Scaffold) (h : PositionSourceObligations) (c : Code) : TileSet :=
+  combineWithScaffold S (sourcePositionFixedDominoReduction h c).1
+    (sourcePositionFixedDominoReduction h c).2
+
+theorem sourcePositionDominoReduction_computable
+    (S : Scaffold) (h : PositionSourceObligations) :
+    Computable (sourcePositionDominoReduction S h) := by
+  exact (combineWithScaffold_computable S).comp
+    (sourcePositionFixedDominoReduction_computable h)
+
+theorem sourcePositionDominoReduction_correct
+    {S : Scaffold} (hS : IsScaffold S) (h : PositionSourceObligations) (c : Code) :
+    TilesPlane (sourcePositionDominoReduction S h c) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  rw [sourcePositionDominoReduction]
+  exact (scaffold_reduction_correct hS
+    (sourcePositionFixedDominoReduction h c).1
+    (sourcePositionFixedDominoReduction h c).2).trans
+      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
+        (sourcePositionFixedDominoReduction h c).1
+        (sourcePositionFixedDominoReduction h c).2).symm.trans
+          (sourcePositionFixedDominoReduction_correct h c))
+
 /-- Encoded version of the source-code folded reduction. -/
 def sourceDominoReductionCode
     (S : Scaffold) (h : SourceObligations) (c : Code) : Nat :=
@@ -4624,6 +4738,23 @@ theorem sourceDominoReductionCode_correct
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [sourceDominoReductionCode, decodeTileSet_encodeTileSet]
   exact sourceDominoReduction_correct hS h c
+
+/-- Encoded version of the generated position-coded source folded reduction. -/
+def sourcePositionDominoReductionCode
+    (S : Scaffold) (h : PositionSourceObligations) (c : Code) : Nat :=
+  encodeTileSet (sourcePositionDominoReduction S h c)
+
+theorem sourcePositionDominoReductionCode_computable
+    (S : Scaffold) (h : PositionSourceObligations) :
+    Computable (sourcePositionDominoReductionCode S h) := by
+  exact encodeTileSet_computable.comp (sourcePositionDominoReduction_computable S h)
+
+theorem sourcePositionDominoReductionCode_correct
+    {S : Scaffold} (hS : IsScaffold S) (h : PositionSourceObligations) (c : Code) :
+    TilesPlane (decodeTileSet (sourcePositionDominoReductionCode S h c)) ↔
+      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
+  rw [sourcePositionDominoReductionCode, decodeTileSet_encodeTileSet]
+  exact sourcePositionDominoReduction_correct hS h c
 
 /--
 Encoded domino undecidability from the exact source-code folded-route
@@ -4643,6 +4774,23 @@ theorem encoded_domino_problem_undecidable_of_scaffold_source
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /--
+Encoded domino undecidability from the generated position-coded source-route
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source
+    (S : Scaffold) (hS : IsScaffold S) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  intro hdec
+  have hencoded : ComputablePred
+      (fun c : Code => TilesPlane (decodeTileSet (sourcePositionDominoReductionCode S h c))) :=
+    ComputablePred.computable_of_manyOneReducible
+      (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
+        (sourcePositionDominoReductionCode_computable S h)) hdec
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    hencoded.of_eq fun c => sourcePositionDominoReductionCode_correct hS h c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
 Unencoded domino undecidability from the exact source-code folded-route
 obligations.
 -/
@@ -4657,6 +4805,23 @@ theorem domino_problem_undecidable_of_scaffold_source
         (sourceDominoReduction_computable S h)) hdec
   have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
     hdomino.of_eq fun c => sourceDominoReduction_correct hS h c
+  exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
+
+/--
+Unencoded domino undecidability from the generated position-coded source-route
+obligations.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source
+    (S : Scaffold) (hS : IsScaffold S) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  intro hdec
+  have hdomino : ComputablePred
+      (fun c : Code => TilesPlane (sourcePositionDominoReduction S h c)) :=
+    ComputablePred.computable_of_manyOneReducible
+      (ManyOneReducible.mk (fun T : TileSet => TilesPlane T)
+        (sourcePositionDominoReduction_computable S h)) hdec
+  have hnonhalting : ComputablePred fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom :=
+    hdomino.of_eq fun c => sourcePositionDominoReduction_correct hS h c
   exact ComputablePred.halting_problem 0 ((hnonhalting.not).of_eq fun _ => not_not)
 
 /--
