@@ -944,6 +944,106 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
       (c := c) (fuel := fuel + 1) (k := k) (block := 0)
       (i := i) (v := v) (by omega) hv (by simpa using hstmt)
 
+/-- State for the source-level bounded-search descriptor decoder.
+
+The first two fields are the current statement offset and variable-list offset.
+The optional row list records that the decoder has already resolved; `none`
+means the scan should continue with the next statement block.
+-/
+abbrev SourceSearchCodeDecoderState :=
+  Nat × Nat × Option (List TM0FoldedCompiler.SimStepData)
+
+def sourceSearchCodeDecoderRows (s : SourceSearchCodeDecoderState) :
+    List TM0FoldedCompiler.SimStepData :=
+  s.2.2.getD []
+
+def sourceSearchCodeDecoderInit (k i : Nat) : SourceSearchCodeDecoderState :=
+  (k, i, none)
+
+/-- One accumulator step for the source-level bounded-search descriptor decoder. -/
+def sourceSearchCodeDecoderStep (c : Code)
+    (s : SourceSearchCodeDecoderState) : SourceSearchCodeDecoderState :=
+  match s.2.2 with
+  | some rows => (s.1, s.2.1, some rows)
+  | none =>
+      match TM0Route.partrecVarList[s.2.1]? with
+      | none => (s.1 + 1, s.2.1 - TM0Route.partrecVarList.length, none)
+      | some v =>
+          match TM0Route.partrecStartedTM0StatementAt?
+              (NatPartrecToToPartrec.translate c) s.1 with
+          | none => (s.1, s.2.1, some [])
+          | some stmt =>
+              (s.1, s.2.1, some
+                (TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+                  (NatPartrecToToPartrec.translate c)
+                  (TM0FiniteCompiler.stateCodeBySupportSearch
+                    (NatPartrecToToPartrec.translate c)
+                    (TM0Route.partrecStartedTM0StatementCount
+                      (NatPartrecToToPartrec.translate c))
+                    ((stmt, v) :
+                      Turing.TM1to0.Λ'
+                        (TM0Route.partrecStartedTM1Machine
+                          (NatPartrecToToPartrec.translate c))))
+                  stmt v))
+
+def sourceSearchCodeDecoderState (c : Code) (fuel k i : Nat) :
+    SourceSearchCodeDecoderState :=
+  fuel.rec (sourceSearchCodeDecoderInit k i)
+    (fun _ s => sourceSearchCodeDecoderStep c s)
+
+def sourceSearchCodeDecoder (c : Code) (fuel k i : Nat) :
+    List TM0FoldedCompiler.SimStepData :=
+  sourceSearchCodeDecoderRows (sourceSearchCodeDecoderState c fuel k i)
+
+theorem sourceSearchCodeDecoderRows_primrec :
+    Primrec sourceSearchCodeDecoderRows := by
+  unfold sourceSearchCodeDecoderRows
+  have hopt : Primrec (fun s : SourceSearchCodeDecoderState => s.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  have hnone : Primrec (fun _s : SourceSearchCodeDecoderState =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂
+      (fun _s : SourceSearchCodeDecoderState =>
+        fun rows : List TM0FoldedCompiler.SimStepData => rows) :=
+    Primrec₂.right
+  exact (Primrec.option_casesOn hopt hnone hsome).of_eq fun s => by
+    cases s.2.2 <;> rfl
+
+set_option maxHeartbeats 800000 in
+-- The final equality unfolds the `nat_rec'` accumulator over nested product projections.
+theorem sourceSearchCodeDecoder_primrec_of_step
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSearchCodeDecoder p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  let fuel : Code × Nat × Nat × Nat → Nat := fun p => p.2.1
+  let kFn : Code × Nat × Nat × Nat → Nat := fun p => p.2.2.1
+  let iFn : Code × Nat × Nat × Nat → Nat := fun p => p.2.2.2
+  have hfuel : Primrec fuel := Primrec.fst.comp Primrec.snd
+  have hk : Primrec kFn := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hi : Primrec iFn := Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  have hbase : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSearchCodeDecoderInit (kFn p) (iFn p)) := by
+    unfold sourceSearchCodeDecoderInit
+    exact Primrec.pair hk (Primrec.pair hi (Primrec.const none))
+  have hiterStep : Primrec₂
+      (fun p : Code × Nat × Nat × Nat =>
+        fun s : Nat × SourceSearchCodeDecoderState =>
+          sourceSearchCodeDecoderStep p.1 s.2) := by
+    apply Primrec₂.mk
+    exact hstep.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.snd.comp Primrec.snd))
+  have hstate : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSearchCodeDecoderState p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+    exact (Primrec.nat_rec' hfuel hbase hiterStep).of_eq fun p => by
+      unfold sourceSearchCodeDecoderState sourceSearchCodeDecoderInit fuel kFn iFn
+      rfl
+  exact (sourceSearchCodeDecoderRows_primrec.comp hstate).of_eq fun p => by
+    unfold sourceSearchCodeDecoder
+    rfl
+
 /--
 Source-code version of the offset descriptor decoder whose current-state code
 is the explicit statement/variable position.
