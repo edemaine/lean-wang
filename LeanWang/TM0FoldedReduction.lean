@@ -2279,6 +2279,20 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithSearchCode'
   (sourceProgramData_computable_of_source_labelIndexFromWithSearchCode hindex).of_eq
     fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_searchCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
+    (sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step hstep)
+
+theorem sourceProgramData_computable_of_source_searchCodeDecoderStep'
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_searchCodeDecoderStep hstep).of_eq fun _ => rfl
+
 /--
 The remaining bounded-search descriptor decoder proof, together with normalized
 folded program-data semantic correctness, gives the exact source obligations
@@ -2295,6 +2309,24 @@ def sourceObligationsOfLabelIndexFromWithSearchCode
     SourceObligations :=
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_labelIndexFromWithSearchCode' hindex)
+    hcorrect
+
+/--
+Primitive recursiveness of the accumulator step for the bounded-search
+descriptor decoder, together with normalized folded program-data semantic
+correctness, gives the exact source obligations needed by the final reduction.
+-/
+def sourceObligationsOfSearchCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_searchCodeDecoderStep' hstep)
     hcorrect
 
 /--
@@ -2562,6 +2594,42 @@ theorem domino_problem_undecidable_of_scaffold_source_labelIndexFromWithSearchCo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_source S hS
     (sourceObligationsOfLabelIndexFromWithSearchCode hindex hcorrect)
+
+/--
+Encoded domino undecidability from a scaffold, the accumulator-step
+primitive-recursiveness of the bounded-search descriptor decoder, and
+normalized folded program-data correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_searchCodeDecoderStep
+    (S : Scaffold) (hS : IsScaffold S)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfSearchCodeDecoderStep hstep hcorrect)
+
+/--
+Unencoded domino undecidability from a scaffold, the accumulator-step
+primitive-recursiveness of the bounded-search descriptor decoder, and
+normalized folded program-data correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_searchCodeDecoderStep
+    (S : Scaffold) (hS : IsScaffold S)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfSearchCodeDecoderStep hstep hcorrect)
 
 /--
 Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
