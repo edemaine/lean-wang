@@ -1363,6 +1363,94 @@ def ofRoutedMatches
 end Figure18RoutedFixedCornerSquare
 
 /--
+Indexed version of `Figure18RoutedFixedCornerSquare`.
+
+This is the finite-data-facing target for the Figure 18 geometric argument:
+each scaffold site is identified by its raw Figure 13 tile index and quadrant,
+so role facts can be discharged by lookup in the concrete role table.
+-/
+structure Figure18IndexedRoutedFixedCornerSquare
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  indexRect : Fin n → Fin n → Fin 92
+  quadrantRect : Fin n → Fin n → Quadrant
+  payloadRect : Rectangle n n
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.roleAt (indexRect i j) (quadrantRect i j)) = true
+  cornerRole :
+    table.roleAt (indexRect ⟨0, hn⟩ ⟨0, hn⟩)
+      (quadrantRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
+  product : ∀ i : Fin n, ∀ j : Fin n,
+    WangTile.product (fig13QuarterTile (indexRect i j) (quadrantRect i j))
+        (payloadRect i j) =
+      (x (horizontalCoord i, verticalCoord j)).1
+  hmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j)
+  vmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    WangTile.VMatches (payloadRect i j) (payloadRect i ⟨j.val + 1, hj⟩)
+
+namespace Figure18IndexedRoutedFixedCornerSquare
+
+def baseRect
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    Rectangle n n :=
+  fun i j => fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j)
+
+theorem baseRect_eq
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (i : Fin n) (j : Fin n) :
+    window.baseRect i j =
+      fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j) :=
+  rfl
+
+def toRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    Figure18RoutedFixedCornerSquare table x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  baseRect := window.baseRect
+  payloadRect := window.payloadRect
+  mem := by
+    intro i j
+    exact table.presentation_mem_fig13QuarterTile
+      (window.indexRect i j) (window.quadrantRect i j)
+  active := by
+    intro i j
+    rw [window.baseRect_eq i j, table.presentation_role_fig13QuarterTile]
+    exact window.active i j
+  cornerRole := by
+    rw [window.baseRect_eq ⟨0, hn⟩ ⟨0, hn⟩,
+      table.presentation_role_fig13QuarterTile]
+    exact window.cornerRole
+  product := by
+    intro i j
+    simpa [baseRect_eq] using window.product i j
+  hmatch := window.hmatch
+  vmatch := window.vmatch
+
+theorem tileable
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    TileableFixedCornerSquare T seed n :=
+  window.toRoutedFixedCornerSquare.tileable
+
+end Figure18IndexedRoutedFixedCornerSquare
+
+/--
 Every combined plane tiling contains arbitrarily large routed payload squares
 with the requested lower-left seed.
 -/
@@ -1373,6 +1461,29 @@ def HasFigure18RoutedFixedCornerSquares (table : Figure18RoleTable) : Prop :=
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18RoutedFixedCornerSquare table x n hn)
 
+/--
+Finite-coordinate form of `HasFigure18RoutedFixedCornerSquares`.
+
+This is usually the most convenient target for a concrete Figure 18 proof: it
+avoids arbitrary presentation tiles by naming each routed scaffold cell with a
+Figure 13 index and quadrant.
+-/
+def HasFigure18IndexedRoutedFixedCornerSquares
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18IndexedRoutedFixedCornerSquare table x n hn)
+
+theorem hasFigure18RoutedFixedCornerSquares_of_indexed
+    {table : Figure18RoleTable}
+    (hindexed : HasFigure18IndexedRoutedFixedCornerSquares table) :
+    HasFigure18RoutedFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hindexed x hx n hn with ⟨window⟩
+  exact ⟨window.toRoutedFixedCornerSquare⟩
+
 theorem forcesFixedCornerSquares_of_figure18Routed
     {table : Figure18RoleTable}
     (hrouted : HasFigure18RoutedFixedCornerSquares table) :
@@ -1381,6 +1492,13 @@ theorem forcesFixedCornerSquares_of_figure18Routed
   rcases htiles with ⟨x, hx⟩
   rcases hrouted x hx n hn with ⟨window⟩
   exact window.tileable
+
+theorem forcesFixedCornerSquares_of_figure18IndexedRouted
+    {table : Figure18RoleTable}
+    (hindexed : HasFigure18IndexedRoutedFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18Routed
+    (hasFigure18RoutedFixedCornerSquares_of_indexed hindexed)
 
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
