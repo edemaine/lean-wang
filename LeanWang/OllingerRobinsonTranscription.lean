@@ -186,6 +186,17 @@ def cornerRoleUniqueBool (specs : List RoleTileSpec) (cornerTile : WangTile) :
   specs.all fun spec =>
     decide (spec.role = CellRole.corner) == decide (spec.tile = cornerTile)
 
+theorem cornerRoleUniqueBool_of_forall_mem
+    {specs : List RoleTileSpec} {cornerTile : WangTile}
+    (hunique : ∀ spec : RoleTileSpec, spec ∈ specs →
+      (spec.role = CellRole.corner ↔ spec.tile = cornerTile)) :
+    cornerRoleUniqueBool specs cornerTile = true := by
+  unfold cornerRoleUniqueBool
+  rw [List.all_eq_true]
+  intro spec hspec
+  rw [beq_iff_eq]
+  exact Bool.decide_congr (hunique spec hspec)
+
 private theorem cornerRoleUniqueBool_mem_eq
     {specs : List RoleTileSpec} {cornerTile : WangTile}
     (hcheck : cornerRoleUniqueBool specs cornerTile = true)

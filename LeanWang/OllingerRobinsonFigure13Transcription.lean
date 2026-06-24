@@ -51,6 +51,13 @@ theorem tilesOfSpecs_toRoleSpecs (tile : WangTile) (roles : TileQuarterRoles) :
       TileSubdivision.subdivideTile tile := by
   simp [toRoleSpecs, TileSubdivision.subdivideTile, tilesOfSpecs]
 
+theorem mem_toRoleSpecs (tile : WangTile) (roles : TileQuarterRoles)
+    (q : Quadrant) :
+    ({ tile := TileSubdivision.subdivideTileAt tile q
+       role := roles.roleAt q } : RoleTileSpec) ∈ roles.toRoleSpecs tile := by
+  unfold toRoleSpecs
+  exact List.mem_map.2 ⟨q, Quadrant.mem_all q, rfl⟩
+
 end TileQuarterRoles
 
 /--
@@ -123,6 +130,37 @@ theorem quarterRoleSpecsOfTiles_length_eq_four_mul
           have htail : roleRows.length = tiles.length := Nat.succ.inj hlen
           simp [ih htail, Nat.mul_succ, Nat.add_comm]
 
+set_option linter.flexible false in
+theorem mem_quarterRoleSpecsOfTiles_of_getElem?
+    {tiles : TileSet} {roleRows : List TileQuarterRoles}
+    {i : Nat} {tile : WangTile} {roles : TileQuarterRoles} (q : Quadrant)
+    (htile : tiles[i]? = some tile)
+    (hroles : roleRows[i]? = some roles) :
+    ({ tile := TileSubdivision.subdivideTileAt tile q
+       role := roles.roleAt q } : RoleTileSpec) ∈
+      quarterRoleSpecsOfTiles tiles roleRows := by
+  revert roleRows i
+  induction tiles with
+  | nil =>
+      intro roleRows i htile hroles
+      simp at htile
+  | cons head tiles ih =>
+      intro roleRows i htile hroles
+      cases roleRows with
+      | nil =>
+          cases i <;> simp at hroles
+      | cons headRoles roleRows =>
+          cases i with
+          | zero =>
+              simp at htile hroles
+              subst head
+              subst headRoles
+              exact List.mem_append_left _
+                (TileQuarterRoles.mem_toRoleSpecs tile roles q)
+          | succ i =>
+              simp at htile hroles
+              exact List.mem_append_right _ (ih htile hroles)
+
 /-- Figure 13 subdivided into quadrant role specs. -/
 def fig13QuarterRoleSpecs (roleRows : List TileQuarterRoles) :
     List RoleTileSpec :=
@@ -165,6 +203,38 @@ def fig13QuarterTile (i : Fin 92) (q : Quadrant) : WangTile :=
 def fig13QuarterRoleEntries (roleRows : List TileQuarterRoles) :
     List (WangTile × CellRole) :=
   roleEntriesOfSpecs (fig13QuarterRoleSpecs roleRows)
+
+theorem mem_fig13QuarterRoleSpecs_of_getElem?
+    {roleRows : List TileQuarterRoles} {i : Fin 92}
+    {roles : TileQuarterRoles} (q : Quadrant)
+    (hroles : roleRows[i.val]? = some roles) :
+    ({ tile := fig13QuarterTile i q
+       role := roles.roleAt q } : RoleTileSpec) ∈
+      fig13QuarterRoleSpecs roleRows := by
+  unfold fig13QuarterRoleSpecs fig13QuarterTile fig13Tile
+  exact mem_quarterRoleSpecsOfTiles_of_getElem? q
+    (List.getElem?_eq_getElem (by simp [fig13Tiles_length, i.isLt]))
+    hroles
+
+theorem fig13QuarterRoleEntries_lookup_of_getElem?
+    {roleRows : List TileQuarterRoles} (hlen : roleRows.length = 92)
+    {i : Fin 92} {roles : TileQuarterRoles} {q : Quadrant}
+    (hroles : roleRows[i.val]? = some roles) :
+    lookupRole (fig13QuarterRoleEntries roleRows) (fig13QuarterTile i q) =
+      roles.roleAt q := by
+  have hmem := mem_fig13QuarterRoleSpecs_of_getElem? (roleRows := roleRows)
+    (i := i) (roles := roles) q hroles
+  exact lookupRole_eq_role_of_mem_of_nodupTilesBool
+    (fig13QuarterRoleSpecs_nodupTilesBool hlen) hmem
+
+theorem fig13QuarterRoleEntries_lookup_corner_of_getElem?
+    {roleRows : List TileQuarterRoles} (hlen : roleRows.length = 92)
+    {i : Fin 92} {roles : TileQuarterRoles} {q : Quadrant}
+    (hroles : roleRows[i.val]? = some roles)
+    (hcorner : roles.roleAt q = CellRole.corner) :
+    lookupRole (fig13QuarterRoleEntries roleRows) (fig13QuarterTile i q) =
+      CellRole.corner := by
+  rw [fig13QuarterRoleEntries_lookup_of_getElem? hlen hroles, hcorner]
 
 /--
 Package complete Figure 13 quadrant roles as finite checked scaffold data from
