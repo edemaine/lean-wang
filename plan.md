@@ -272,6 +272,11 @@ source primitive-recursive bridge. This gives a cleaner possible decoder target
 than support-search state codes, but it still needs an equivalence proof showing
 that the position code agrees with the state code used by the current folded
 state list before it can feed `sourceProgramData_computable_of_source_*`.
+The first invariant for that route is now proved: successful statement/variable
+position decoding produces a code in `partrecStartedTM0States`, both globally
+(`labelAtByStatementFromWithPositionCode?_code_mem_states`) and through the
+source wrapper
+`sourceLabelAtByStatementFromWithPositionCode_code_mem_states`.
 
 Next implementation targets:
 

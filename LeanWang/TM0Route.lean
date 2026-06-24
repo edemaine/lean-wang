@@ -6643,6 +6643,37 @@ theorem partrecStartedTM0LabelSupportList_get_position_of_statementAt?
   rw [hpos]
   exact hlabel
 
+theorem partrecStartedTM0_position_mem_states_of_statementAt?
+    (tc : Turing.ToPartrec.Code) {k i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+      (Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol (StartedLabel tc) PartrecVar)
+      PartrecVar)}
+    {v : PartrecVar}
+    (hstmt : partrecStartedTM0StatementAt? tc k = some stmt)
+    (hv : partrecVarList[i]? = some v) :
+    1 + k * partrecVarList.length + i ∈ partrecStartedTM0States tc := by
+  rw [partrecStartedTM0States]
+  rw [List.mem_range]
+  rw [partrecStartedTM0StateCount, partrecStartedTM0LabelSupportCount,
+    partrecStartedTM0LabelCount]
+  have hk : k < partrecStartedTM0StatementCount tc := by
+    rw [← partrecStartedTM0StatementList_length tc]
+    rw [partrecStartedTM0StatementAt?_eq_getElem?] at hstmt
+    exact List.getElem?_eq_some_iff.1 hstmt |>.1
+  have hi : i < partrecVarList.length := by
+    exact List.getElem?_eq_some_iff.1 hv |>.1
+  have hblock : k * partrecVarList.length + i < (k + 1) * partrecVarList.length := by
+    calc
+      k * partrecVarList.length + i < k * partrecVarList.length + partrecVarList.length :=
+        Nat.add_lt_add_left hi (k * partrecVarList.length)
+      _ = (k + 1) * partrecVarList.length := by
+        rw [Nat.succ_mul]
+  have hnext : (k + 1) * partrecVarList.length ≤
+      partrecStartedTM0StatementCount tc * partrecVarList.length := by
+    exact Nat.mul_le_mul_right partrecVarList.length (Nat.succ_le_of_lt hk)
+  omega
+
 /-- Numeric code for a supported translated TM0 state. -/
 def partrecStartedTM0StateCodeOfMem (tc : Turing.ToPartrec.Code)
     (q : Turing.TM1to0.Λ' (partrecStartedTM1Machine tc))

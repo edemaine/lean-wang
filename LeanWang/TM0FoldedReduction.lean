@@ -355,6 +355,15 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global
         unfold sourceSimStepDataForLabelIndexFromWithPositionCode
         rfl
 
+theorem sourceLabelAtByStatementFromWithPositionCode_code_mem_states
+    {c : Code} {fuel k i : Nat}
+    {q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat}
+    (h : TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i = some q) :
+    q.2 ∈ TM0Route.partrecStartedTM0States (NatPartrecToToPartrec.translate c) :=
+  TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_code_mem_states
+    (NatPartrecToToPartrec.translate c) h
+
 theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :

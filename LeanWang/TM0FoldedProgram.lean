@@ -3290,6 +3290,29 @@ theorem labelAtByStatementFromWithPositionCode?_fst_eq
               rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt]
               rfl
 
+theorem labelAtByStatementFromWithPositionCode?_code_mem_states
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q) :
+    q.2 ∈ TM0Route.partrecStartedTM0States tc := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [labelAtByStatementFromWithPositionCode?_zero] at h
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hv] at h
+          exact ih h
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc k with
+          | none =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_none tc hv hstmt] at h
+              simp at h
+          | some stmt =>
+              rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some tc hv hstmt] at h
+              cases h
+              exact TM0Route.partrecStartedTM0_position_mem_states_of_statementAt?
+                tc hstmt hv
+
 theorem labelAtByStatementFromWithStateCode?_primrec_fixed
     (tc : Turing.ToPartrec.Code)
     [Primcodable (Turing.TM1.Stmt
