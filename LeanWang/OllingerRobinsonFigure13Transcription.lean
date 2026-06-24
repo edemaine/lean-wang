@@ -836,6 +836,64 @@ theorem roleAt_corner_iff (table : Figure18RoleTable)
 end Figure18RoleTable
 
 /--
+Geometric obligations for a concrete Figure 18 role table.
+
+The finite data and sanity checks live in `Figure18RoleTable`; these are the
+two non-finite scaffold facts still supplied by the Ollinger/Robinson argument.
+-/
+structure Figure18FlexibleCertificate (table : Figure18RoleTable) : Prop where
+  forces : ForcesFixedCornerSquares table.presentation.toScaffold
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+/--
+Concrete Figure 18 scaffold package: a checked finite role table together with
+the geometric flexible scaffold certificate.
+-/
+structure Figure18FlexibleInstance where
+  table : Figure18RoleTable
+  certificate : Figure18FlexibleCertificate table
+
+namespace Figure18FlexibleInstance
+
+def finite (I : Figure18FlexibleInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18FlexibleInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def checkedFlexibleTranscription (I : Figure18FlexibleInstance) :
+    CheckedFlexibleTranscription where
+  finite := I.finite
+  forces := I.certificate.forces
+  realizes := I.certificate.realizes
+
+def toPresentedFlexibleInstance (I : Figure18FlexibleInstance) :
+    PresentedFlexibleInstance :=
+  I.checkedFlexibleTranscription.toPresentedFlexibleInstance
+
+@[simp]
+theorem checkedFlexibleTranscription_finite
+    (I : Figure18FlexibleInstance) :
+    I.checkedFlexibleTranscription.finite = I.finite :=
+  rfl
+
+@[simp]
+theorem checkedFlexibleTranscription_presentation
+    (I : Figure18FlexibleInstance) :
+    I.checkedFlexibleTranscription.presentation = I.presentation :=
+  rfl
+
+theorem presentation_tiles (I : Figure18FlexibleInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18FlexibleInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.checkedFlexibleTranscription.isScaffold
+
+end Figure18FlexibleInstance
+
+/--
 Attach a list of roles to a list of Wang tiles.  If the lists have different
 lengths, extra entries on either side are ignored; the completeness lemma below
 is the intended way to use this with `fig13Tiles`.
