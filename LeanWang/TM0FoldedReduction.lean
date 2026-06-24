@@ -348,51 +348,49 @@ theorem sourceLabelIndexStartSplit?_of_getElem?
   simpa using sourceLabelIndexFromSplit?_of_getElem?
     (fuel := sourceStatementCount c) (k := 0) (i := i) hblock hv
 
+theorem sourceLabelIndexStartSplit?_of_block_var_get?
+    {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
+    (hblock : block < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceLabelIndexStartSplit? c (TM0Route.partrecVarList.length * block + i) =
+      some (block, v) := by
+  rcases List.getElem?_eq_some_iff.1 hv with ⟨hi, _hget⟩
+  have hwidth : 0 < TM0Route.partrecVarList.length := sourcePartrecVarList_length_pos
+  have hdiv :
+      (TM0Route.partrecVarList.length * block + i) /
+          TM0Route.partrecVarList.length = block := by
+    rw [Nat.mul_add_div hwidth]
+    simp [Nat.div_eq_of_lt hi]
+  have hmod :
+      (TM0Route.partrecVarList.length * block + i) %
+          TM0Route.partrecVarList.length = i := by
+    rw [Nat.mul_add_mod]
+    exact Nat.mod_eq_of_lt hi
+  have hvmod :
+      (TM0Route.partrecVarList)[
+          (TM0Route.partrecVarList.length * block + i) %
+            TM0Route.partrecVarList.length]? = some v := by
+    simpa [hmod] using hv
+  simpa [hdiv] using
+    sourceLabelIndexStartSplit?_of_getElem?
+      (c := c) (i := TM0Route.partrecVarList.length * block + i)
+      (by simpa [hdiv] using hblock) hvmod
+
 theorem sourceLabelIndexStartSplit?_of_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
     (hv : TM0Route.partrecVarList[i]? = some v) :
     sourceLabelIndexStartSplit? c i = some (0, v) := by
-  rcases List.getElem?_eq_some_iff.1 hv with ⟨hi, _hget⟩
-  have hdiv : i / TM0Route.partrecVarList.length = 0 := Nat.div_eq_of_lt hi
-  have hmod : i % TM0Route.partrecVarList.length = i := Nat.mod_eq_of_lt hi
-  have hblock : i / TM0Route.partrecVarList.length < sourceStatementCount c := by
-    simpa [hdiv] using sourceStatementCount_pos c
-  have hvmod :
-      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
-    simpa [hmod] using hv
-  simpa [hdiv, hmod] using
-    sourceLabelIndexStartSplit?_of_getElem? (c := c) (i := i) hblock hvmod
+  simpa using
+    sourceLabelIndexStartSplit?_of_block_var_get? (c := c) (block := 0)
+      (i := i) (v := v) (sourceStatementCount_pos c) hv
 
 theorem sourceLabelIndexStartSplit?_of_one_add_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
     (hv : TM0Route.partrecVarList[i]? = some v) :
     sourceLabelIndexStartSplit? c (TM0Route.partrecVarList.length + i) = some (1, v) := by
-  rcases List.getElem?_eq_some_iff.1 hv with ⟨hi, _hget⟩
-  have hwidth : 0 < TM0Route.partrecVarList.length := sourcePartrecVarList_length_pos
-  have hdiv :
-      (TM0Route.partrecVarList.length + i) / TM0Route.partrecVarList.length = 1 := by
-    rw [show TM0Route.partrecVarList.length + i =
-        i + TM0Route.partrecVarList.length by omega]
-    rw [Nat.add_div_right _ hwidth]
-    simp [Nat.div_eq_of_lt hi]
-  have hmod :
-      (TM0Route.partrecVarList.length + i) % TM0Route.partrecVarList.length = i := by
-    rw [show TM0Route.partrecVarList.length + i =
-        i + TM0Route.partrecVarList.length by omega]
-    rw [Nat.add_mod_right]
-    exact Nat.mod_eq_of_lt hi
-  have hblock :
-      (TM0Route.partrecVarList.length + i) / TM0Route.partrecVarList.length <
-        sourceStatementCount c := by
-    simpa [hdiv] using sourceStatementCount_one_lt c
-  have hvmod :
-      (TM0Route.partrecVarList)[
-          (TM0Route.partrecVarList.length + i) % TM0Route.partrecVarList.length]? =
-        some v := by
-    simpa [hmod] using hv
-  simpa [hdiv] using
-    sourceLabelIndexStartSplit?_of_getElem?
-      (c := c) (i := TM0Route.partrecVarList.length + i) hblock hvmod
+  simpa [Nat.mul_one] using
+    sourceLabelIndexStartSplit?_of_block_var_get? (c := c) (block := 1)
+      (i := i) (v := v) (sourceStatementCount_one_lt c) hv
 
 theorem sourceLabelIndexStartSplit?_block_lt_of_lt_labelCount
     {c : Code} {i : Nat} (hi : i < sourceLabelCount c) :
