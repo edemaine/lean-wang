@@ -3917,6 +3917,23 @@ theorem labelAtByStatementFromWithPositionCode?_support_get?
               cases h
               exact labelPositionCode_support_get?_of_statementAt? tc hstmt hv
 
+theorem labelAtByStatementFromWithPositionCode?_label_eq_of_code_eq_stateCode
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat} {q : SourceLabel tc × Nat}
+    {target : SourceLabel tc}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q)
+    (htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc)
+    (hcode : q.2 = TM0FiniteCompiler.stateCode tc target) :
+    q.1 = target := by
+  have hqget := labelAtByStatementFromWithPositionCode?_support_get? tc h
+  have htargetget :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[
+          TM0FiniteCompiler.stateCode tc target]? = some target := by
+    unfold TM0FiniteCompiler.stateCode
+    exact List.getElem?_idxOf htarget
+  rw [hcode] at hqget
+  rw [htargetget] at hqget
+  exact (Option.some.inj hqget).symm
+
 theorem labelAtByStatementFromWithPositionCode?_minimal_of_statementList_nodup
     (tc : Turing.ToPartrec.Code)
     (hnodup : (TM0Route.partrecStartedTM0StatementList tc).Nodup)
@@ -4142,6 +4159,22 @@ theorem simRowsOfStepDataForLabelIndexFromWithPositionCode_find?_eq_none_of_curr
       mem_simStepDataForLabelIndexFromWithPositionCode_currentCode_ne
         (tc := tc) (fuel := fuel) (k := k) (i := i)
         (target := target) hcode hp)
+
+theorem simStepDataForLabelIndexFromWithPositionCode_eq_target_of_currentCode_eq_stateCode
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat}
+    {q : SourceLabel tc × Nat} {target : SourceLabel tc}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q)
+    (htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc)
+    (hcode : q.2 = TM0FiniteCompiler.stateCode tc target) :
+    simStepDataForLabelIndexFromWithPositionCode tc fuel k i =
+      simStepDataForStmtLabelWithCode tc
+        (TM0FiniteCompiler.stateCode tc target) target.1 target.2 := by
+  have hlabel :=
+    labelAtByStatementFromWithPositionCode?_label_eq_of_code_eq_stateCode
+      tc h htarget hcode
+  unfold simStepDataForLabelIndexFromWithPositionCode
+  rw [h]
+  simp [hlabel, hcode]
 
 theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
