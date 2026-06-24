@@ -5048,6 +5048,13 @@ theorem programDataFromSimRows_eq_programData (tc : Turing.ToPartrec.Code) :
     programDataFromSimRows tc = programData tc :=
   (programData_eq_appendSimRows_programHeader tc).symm
 
+theorem positionProgramData_eq_appendSimRows_programHeader
+    (tc : Turing.ToPartrec.Code) :
+    positionProgramData tc =
+      appendSimRows (programHeader tc)
+        (simRowsOfStepData (simStepDataByLabelIndexWithPositionCode tc)) := by
+  rfl
+
 end TM0FoldedCompiler
 
 end LeanWang
