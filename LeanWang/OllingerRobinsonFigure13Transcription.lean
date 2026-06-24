@@ -826,6 +826,20 @@ theorem row_getElem? (table : Figure18RoleTable) (i : Fin 92) :
     table.roleRows[i.val]? = some (table.row i) :=
   fig13QuarterRoleRow_getElem? table.roleRows table.length_eq i
 
+theorem presentation_mem_fig13QuarterTile
+    (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
+    fig13QuarterTile i q ∈ table.presentation.tiles := by
+  rw [table.presentation_tiles]
+  have hspec := mem_fig13QuarterRoleSpecs_of_getElem? (roleRows := table.roleRows)
+    (i := i) (roles := table.row i) q (table.row_getElem? i)
+  have hmem : fig13QuarterTile i q ∈
+      tilesOfSpecs (fig13QuarterRoleSpecs table.roleRows) := by
+    exact mem_tilesOfSpecs.2 ⟨
+      ({ tile := fig13QuarterTile i q
+         role := (table.row i).roleAt q } : RoleTileSpec),
+      hspec, rfl⟩
+  simpa [fig13QuarterRoleSpecs_tiles table.length_eq] using hmem
+
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
@@ -1046,6 +1060,109 @@ theorem smoke_presentation_tiles :
 end Figure18RoleTable
 
 /--
+Role-table-indexed active square window for the Figure 18 scaffold.
+
+This is a concrete local target for the free-square part of the
+Ollinger/Robinson argument: instead of producing arbitrary scaffold tiles, the
+geometric proof may identify each cell by a raw Figure 13 tile index and one of
+its four Figure 18 quadrants.  The conversion below turns this indexed witness
+into the presentation-level window expected by the abstract scaffold interface.
+-/
+structure Figure18IndexedActiveCornerWindow
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  origin : Int × Int
+  indexRect : Fin n → Fin n → Fin 92
+  quadrantRect : Fin n → Fin n → Quadrant
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.roleAt (indexRect i j) (quadrantRect i j)) = true
+  corner :
+    table.roleAt (indexRect ⟨0, hn⟩ ⟨0, hn⟩)
+      (quadrantRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
+  product : ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+    WangTile.product (fig13QuarterTile (indexRect i j) (quadrantRect i j)) payload =
+      (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
+
+namespace Figure18IndexedActiveCornerWindow
+
+def baseRect
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn) :
+    Rectangle n n :=
+  fun i j => fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j)
+
+theorem baseRect_eq
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (i : Fin n) (j : Fin n) :
+    window.baseRect i j =
+      fig13QuarterTile (window.indexRect i j) (window.quadrantRect i j) :=
+  rfl
+
+def toPresentedActiveCornerWindow
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn) :
+    PresentedActiveCornerWindow table.presentation x n hn where
+  origin := window.origin
+  baseRect := window.baseRect
+  mem := by
+    intro i j
+    exact table.presentation_mem_fig13QuarterTile
+      (window.indexRect i j) (window.quadrantRect i j)
+  active := by
+    intro i j
+    rw [window.baseRect_eq i j, table.presentation_role_fig13QuarterTile]
+    exact window.active i j
+  corner := by
+    rw [window.baseRect_eq ⟨0, hn⟩ ⟨0, hn⟩,
+      table.presentation_role_fig13QuarterTile]
+    exact window.corner
+  product := by
+    intro i j
+    simpa [baseRect_eq] using window.product i j
+
+end Figure18IndexedActiveCornerWindow
+
+/--
+Every combined plane tiling contains arbitrarily large active-corner windows
+whose scaffold cells are identified by Figure 13 indices and Figure 18
+quadrants.
+-/
+def HasFigure18IndexedActiveCornerWindows (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18IndexedActiveCornerWindow table x n hn)
+
+theorem hasPresentedRecognizableFreeSquares_of_figure18Indexed
+    {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindows table) :
+    HasPresentedRecognizableFreeSquares table.presentation := by
+  intro T seed x hx n hn
+  rcases hwindow x hx n hn with ⟨window⟩
+  exact ⟨window.toPresentedActiveCornerWindow⟩
+
+/--
+Geometric obligations for a concrete Figure 18 role table using the direct
+recognizable-free-square route.
+
+This is stronger and more structured than `Figure18FlexibleCertificate`: it is
+the right target if the Ollinger/Robinson free-square proof can identify a
+literal indexed active block.
+-/
+structure Figure18Certificate (table : Figure18RoleTable) : Prop where
+  indexedRecognizable : HasFigure18IndexedActiveCornerWindows table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+/--
 Geometric obligations for a concrete Figure 18 role table.
 
 The finite data and sanity checks live in `Figure18RoleTable`; these are the
@@ -1062,6 +1179,54 @@ the geometric flexible scaffold certificate.
 structure Figure18FlexibleInstance where
   table : Figure18RoleTable
   certificate : Figure18FlexibleCertificate table
+
+/--
+Concrete Figure 18 scaffold package using the direct indexed free-square
+certificate.
+-/
+structure Figure18Instance where
+  table : Figure18RoleTable
+  certificate : Figure18Certificate table
+
+namespace Figure18Instance
+
+def finite (I : Figure18Instance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18Instance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def checkedTranscription (I : Figure18Instance) :
+    CheckedTranscription where
+  finite := I.finite
+  recognizable :=
+    hasPresentedRecognizableFreeSquares_of_figure18Indexed
+      I.certificate.indexedRecognizable
+  realizes := I.certificate.realizes
+
+def toPresentedInstance (I : Figure18Instance) :
+    PresentedInstance :=
+  I.checkedTranscription.toCheckedPresentedInstance.toPresentedInstance
+
+@[simp]
+theorem checkedTranscription_finite (I : Figure18Instance) :
+    I.checkedTranscription.finite = I.finite :=
+  rfl
+
+@[simp]
+theorem checkedTranscription_presentation (I : Figure18Instance) :
+    I.checkedTranscription.presentation = I.presentation :=
+  rfl
+
+theorem presentation_tiles (I : Figure18Instance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18Instance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.checkedTranscription.isScaffold
+
+end Figure18Instance
 
 namespace Figure18FlexibleInstance
 
