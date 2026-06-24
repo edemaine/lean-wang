@@ -962,6 +962,34 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_split
   unfold sourceLabelIndexStartSplit? at hsplit
   exact sourceSimStepDataForLabelIndexFromWithPositionCode_of_split hsplit hstmt
 
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
+    {c : Code} {block i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hblock : block < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c
+        (TM0Route.partrecVarList.length * block + i) =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode block i stmt v) stmt v := by
+  rcases List.getElem?_eq_some_iff.1 hv with ⟨hi, _hget⟩
+  have hmod :
+      (TM0Route.partrecVarList.length * block + i) %
+          TM0Route.partrecVarList.length = i := by
+    rw [Nat.mul_add_mod]
+    exact Nat.mod_eq_of_lt hi
+  rw [sourceSimStepDataForLabelIndexStartWithPositionCode_of_split
+    (sourceLabelIndexStartSplit?_of_block_var_get? (c := c) hblock hv) hstmt]
+  simp [hmod]
+
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
