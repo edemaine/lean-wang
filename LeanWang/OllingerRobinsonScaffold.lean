@@ -147,6 +147,15 @@ theorem toScaffold_corner_active (P : ScaffoldPresentation) :
     P.toScaffold.active P.toScaffold.corner = true := by
   simp [P.corner_role]
 
+/-- Finite check that the declared corner tile occurs in the scaffold tile list. -/
+def cornerMemBool (P : ScaffoldPresentation) : Bool :=
+  decide (P.cornerTile ∈ P.tiles)
+
+theorem corner_mem_of_cornerMemBool {P : ScaffoldPresentation}
+    (hcheck : P.cornerMemBool = true) :
+    P.cornerTile ∈ P.tiles := by
+  exact of_decide_eq_true hcheck
+
 /--
 Finite check that the distinguished corner role occurs only on `cornerTile`
 inside the scaffold tile list.
@@ -175,6 +184,30 @@ theorem cornerUnique_of_cornerUniqueBool {P : ScaffoldPresentation}
   have hright : decide (tile = P.cornerTile) = true := by
     simpa [hleft] using heq.symm
   exact of_decide_eq_true hright
+
+/-- Basic finite sanity conditions for a scaffold presentation. -/
+structure Sanity (P : ScaffoldPresentation) : Prop where
+  corner_mem : P.cornerTile ∈ P.tiles
+  corner_unique : ∀ tile : WangTile, tile ∈ P.tiles →
+    P.role tile = CellRole.corner → tile = P.cornerTile
+
+/-- Boolean version of `Sanity`, intended for concrete finite scaffold data. -/
+def sanityBool (P : ScaffoldPresentation) : Bool :=
+  P.cornerMemBool && P.cornerUniqueBool
+
+theorem sanity_of_sanityBool {P : ScaffoldPresentation}
+    (hcheck : P.sanityBool = true) :
+    Sanity P := by
+  unfold sanityBool at hcheck
+  cases hmem : P.cornerMemBool <;> cases hunique : P.cornerUniqueBool <;>
+    simp [hmem, hunique] at hcheck
+  exact ⟨corner_mem_of_cornerMemBool hmem,
+    cornerUnique_of_cornerUniqueBool hunique⟩
+
+theorem toScaffold_corner_mem_of_sanity {P : ScaffoldPresentation}
+    (hP : P.Sanity) :
+    P.toScaffold.corner ∈ P.toScaffold.tiles := by
+  simpa using hP.corner_mem
 
 end ScaffoldPresentation
 
