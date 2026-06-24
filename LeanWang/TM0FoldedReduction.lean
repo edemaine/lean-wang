@@ -3063,6 +3063,16 @@ theorem sourceSearchCodeBoundedInteriorRowsVar_eq_positionCodeBoundedInteriorRow
   · rw [sourceSearchCodeBoundedInteriorRowsVar_eq_nil hlt,
       sourcePositionCodeBoundedInteriorRowsIndexVar_eq_nil hlt]
 
+theorem sourceSearchCodeInteriorRowsVar_eq_positionCodeInteriorRowsIndexVar
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hnodup : (TM0Route.partrecStartedTM0StatementList
+      (NatPartrecToToPartrec.translate c)).Nodup)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSearchCodeInteriorRowsVar c j v =
+      sourcePositionCodeInteriorRowsIndexVar c j i v :=
+  sourceSearchCodeOneRowsVar_eq_positionCodeOneRowsIndexVar_of_statementList_nodup
+    (c := c) (k := j + 1) (i := i) (v := v) hnodup hv
+
 def sourcePartrecVarIndex (v : TM0Route.PartrecVar) : Nat :=
   TM0Route.partrecVarList.findIdx fun w => decide (w = v)
 
@@ -3106,6 +3116,33 @@ theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInt
           some p.2.2 :=
       sourcePartrecVarIndex_getElem? p.2.2
     exact (sourceSearchCodeBoundedInteriorRowsVar_eq_positionCodeBoundedInteriorRowsIndexVar
+      (c := p.1) (j := p.2.1) (i := sourcePartrecVarIndex p.2.2)
+      (v := p.2.2) (hnodup p.1) hv).symm
+
+theorem sourceSearchCodeInteriorRowsVar_primrec_of_positionCodeInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2) := by
+  have hidx : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePartrecVarIndex p.2.2) :=
+    sourcePartrecVarIndex_primrec.comp (Primrec.snd.comp Primrec.snd)
+  have hposition : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar
+        p.1 p.2.1 (sourcePartrecVarIndex p.2.2) p.2.2) :=
+    hinterior.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair hidx (Primrec.snd.comp Primrec.snd))))
+  exact hposition.of_eq fun p => by
+    have hv :
+        TM0Route.partrecVarList[sourcePartrecVarIndex p.2.2]? =
+          some p.2.2 :=
+      sourcePartrecVarIndex_getElem? p.2.2
+    exact (sourceSearchCodeInteriorRowsVar_eq_positionCodeInteriorRowsIndexVar
       (c := p.1) (j := p.2.1) (i := sourcePartrecVarIndex p.2.2)
       (v := p.2.2) (hnodup p.1) hv).symm
 
