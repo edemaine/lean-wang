@@ -1521,6 +1521,56 @@ theorem sourceSimStepDataForLabelIndexStartWithCode_of_block_var_get?
     (fun n => TM0FoldedCompiler.simStepDataForStmtLabelWithCode
       (NatPartrecToToPartrec.translate c) n stmt v) hcode
 
+theorem sourceSimStepDataForLabelIndexStartWithCode_of_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithCode c i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCode
+          (NatPartrecToToPartrec.translate c)
+          (((none : Option (Turing.TM1.Stmt
+            (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+            (Turing.TM2to1.Λ'
+              TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+              (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+              TM0Route.PartrecVar)
+            TM0Route.PartrecVar)), v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        (none : Option (Turing.TM1.Stmt
+          (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+          (Turing.TM2to1.Λ'
+            TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+            (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+            TM0Route.PartrecVar)
+          TM0Route.PartrecVar))
+        v := by
+  simpa using
+    sourceSimStepDataForLabelIndexStartWithCode_of_block_var_get?
+      (c := c) (block := 0) (i := i) (v := v)
+      (sourceStatementCount_pos c) hv (sourceStatementAt_zero c)
+
+theorem sourceSimStepDataForLabelIndexStartWithCode_of_one_add_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithCode c
+        (TM0Route.partrecVarList.length + i) =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FiniteCompiler.stateCode
+          (NatPartrecToToPartrec.translate c)
+          ((sourceStatementOne c, v) :
+            Turing.TM1to0.Λ'
+              (TM0Route.partrecStartedTM1Machine
+                (NatPartrecToToPartrec.translate c))))
+        (sourceStatementOne c) v := by
+  simpa [Nat.mul_one] using
+    sourceSimStepDataForLabelIndexStartWithCode_of_block_var_get?
+      (c := c) (block := 1) (i := i) (v := v)
+      (sourceStatementCount_one_lt c) hv (sourceStatementAt_one c)
+
 theorem sourceLabelAtByStatementFromWithPositionCode_eq_stateCode_of_minimal
     {c : Code} {fuel k i : Nat}
     (hmin : ∀ q :
