@@ -2711,6 +2711,56 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_mi
     hindex hmin).of_eq fun _ => rfl
 
 /--
+Primitive recursiveness of the source-level position-coded descriptor decoder,
+together with a proof that those descriptor rows generate the canonical folded
+simulation rows and normalized folded program-data semantic correctness, gives
+the exact source obligations needed by the final reduction.
+-/
+def sourceObligationsOfLabelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode'
+      hindex hrows)
+    hcorrect
+
+/--
+Primitive recursiveness of the source-level position-coded descriptor decoder
+and first-occurrence minimality for every decoded support position are enough
+to produce the source obligations needed by the final reduction.
+-/
+def sourceObligationsOfLabelIndexFromWithPositionCodeMinimal
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal'
+      hindex hmin)
+    hcorrect
+
+/--
 The current lowest-level folded computability target, phrased at source-code
 level: primitive recursiveness of the fully offset label-index descriptor
 decoder implies computability of the normalized folded finite-TM0 program data
@@ -3020,6 +3070,102 @@ theorem domino_problem_undecidable_of_scaffold_source_searchCodeOneVarRows
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_source S hS
     (sourceObligationsOfSearchCodeOneVarRows hvarRows hcorrect)
+
+/--
+Encoded domino undecidability from a scaffold, primitive recursiveness of the
+source-level position-coded descriptor decoder, a row-equivalence proof for
+the generated position-coded rows, and normalized folded program-data
+correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_positionCode
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithPositionCode hindex hrows hcorrect)
+
+/--
+Unencoded domino undecidability from a scaffold, primitive recursiveness of the
+source-level position-coded descriptor decoder, a row-equivalence proof for
+the generated position-coded rows, and normalized folded program-data
+correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_positionCode
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithPositionCode hindex hrows hcorrect)
+
+/--
+Encoded domino undecidability from a scaffold, primitive recursiveness of the
+source-level position-coded descriptor decoder, first-occurrence minimality for
+the decoded support positions, and normalized folded program-data correctness.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_source_positionCodeMinimal
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithPositionCodeMinimal hindex hmin hcorrect)
+
+/--
+Unencoded domino undecidability from a scaffold, primitive recursiveness of the
+source-level position-coded descriptor decoder, first-occurrence minimality for
+the decoded support positions, and normalized folded program-data correctness.
+-/
+theorem domino_problem_undecidable_of_scaffold_source_positionCodeMinimal
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_source S hS
+    (sourceObligationsOfLabelIndexFromWithPositionCodeMinimal hindex hmin hcorrect)
 
 /--
 Encoded domino undecidability from a scaffold and the folded finite-TM0 route,
