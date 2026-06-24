@@ -1731,6 +1731,14 @@ theorem sourcePositionCodeOneRowsIndexVar_stmt_none
     sourcePositionCodeOneRowsIndexVar c k i v = [] := by
   simp [sourcePositionCodeOneRowsIndexVar, hstmt]
 
+theorem sourcePositionCodeOneRowsIndexVar_eq_nil_of_statementCount_le
+    {c : Code} {k i : Nat} (v : TM0Route.PartrecVar)
+    (hk : sourceStatementCount c ≤ k) :
+    sourcePositionCodeOneRowsIndexVar c k i v = [] := by
+  exact sourcePositionCodeOneRowsIndexVar_stmt_none
+    (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
+      (NatPartrecToToPartrec.translate c) (by simpa [sourceStatementCount] using hk))
+
 theorem sourcePositionCodeOneRowsIndexVar_stmt_some
     {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
@@ -1748,6 +1756,100 @@ theorem sourcePositionCodeOneRowsIndexVar_stmt_some
         (TM0FoldedCompiler.labelPositionCode k i stmt v)
         stmt v := by
   simp [sourcePositionCodeOneRowsIndexVar, hstmt]
+
+theorem sourcePositionCodeOneRowsIndexVar_zero
+    (c : Code) (i : Nat) (v : TM0Route.PartrecVar) :
+    sourcePositionCodeOneRowsIndexVar c 0 i v = [] := by
+  rw [sourcePositionCodeOneRowsIndexVar_stmt_some (sourceStatementAt_zero c)]
+  exact TM0FoldedCompiler.simStepDataForStmtLabelWithCode_none
+    (NatPartrecToToPartrec.translate c)
+    (TM0FoldedCompiler.labelPositionCode 0 i
+      (none : Option (Turing.TM1.Stmt
+        (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+        (Turing.TM2to1.Λ'
+          TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+          (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+          TM0Route.PartrecVar)
+        TM0Route.PartrecVar))
+      v)
+    v
+
+theorem sourcePositionCodeOneRowsIndexVar_zero_primrec :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 0 p.2.1 p.2.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourcePositionCodeOneRowsIndexVar_zero p.1 p.2.1 p.2.2).symm
+
+def sourcePositionCodeInteriorRowsIndexVar
+    (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
+    List TM0FoldedCompiler.SimStepData :=
+  sourcePositionCodeOneRowsIndexVar c (j + 1) i v
+
+def sourcePositionCodeBoundedInteriorRowsIndexVar
+    (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
+    List TM0FoldedCompiler.SimStepData :=
+  if j + 1 < sourceStatementCount c then
+    sourcePositionCodeInteriorRowsIndexVar c j i v
+  else
+    []
+
+theorem sourcePositionCodeBoundedInteriorRowsIndexVar_eq_interior
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hj : j + 1 < sourceStatementCount c) :
+    sourcePositionCodeBoundedInteriorRowsIndexVar c j i v =
+      sourcePositionCodeInteriorRowsIndexVar c j i v := by
+  simp [sourcePositionCodeBoundedInteriorRowsIndexVar, hj]
+
+theorem sourcePositionCodeBoundedInteriorRowsIndexVar_eq_nil
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hj : ¬ j + 1 < sourceStatementCount c) :
+    sourcePositionCodeBoundedInteriorRowsIndexVar c j i v = [] := by
+  simp [sourcePositionCodeBoundedInteriorRowsIndexVar, hj]
+
+theorem sourcePositionCodeOneRowsIndexVar_eq_boundedInterior
+    (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
+    sourcePositionCodeOneRowsIndexVar c k i v =
+      if k = 0 then
+        []
+      else
+        sourcePositionCodeBoundedInteriorRowsIndexVar c (k - 1) i v := by
+  by_cases hzero : k = 0
+  · simp [hzero, sourcePositionCodeOneRowsIndexVar_zero]
+  · by_cases hlt : k < sourceStatementCount c
+    · have hkpred : k - 1 + 1 = k := Nat.sub_one_add_one hzero
+      simp [hzero, sourcePositionCodeBoundedInteriorRowsIndexVar,
+        sourcePositionCodeInteriorRowsIndexVar, hkpred, hlt]
+    · have hle : sourceStatementCount c ≤ k := Nat.le_of_not_gt hlt
+      have hrows : sourcePositionCodeOneRowsIndexVar c k i v = [] :=
+        sourcePositionCodeOneRowsIndexVar_eq_nil_of_statementCount_le v hle
+      have hkpred : k - 1 + 1 = k := Nat.sub_one_add_one hzero
+      simp [hzero, sourcePositionCodeBoundedInteriorRowsIndexVar, hkpred, hlt, hrows]
+
+theorem sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  have hzero : PrimrecPred (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      p.2.1 = 0) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 0)
+  have hnil : Primrec (fun _p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hkPred : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      p.2.1 - 1) :=
+    Primrec.nat_sub.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 1)
+  have helse : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 (p.2.1 - 1) p.2.2.1 p.2.2.2) :=
+    hinterior.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair hkPred
+          (Primrec.pair
+            (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+  exact (Primrec.ite hzero hnil helse).of_eq fun p => by
+    exact (sourcePositionCodeOneRowsIndexVar_eq_boundedInterior
+      p.1 p.2.1 p.2.2.1 p.2.2.2).symm
 
 theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows
     (c : Code) (k i : Nat) :
@@ -3382,6 +3484,30 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows'
   (sourceProgramData_computable_of_source_positionCodeOneRows
     hvarRows hrows).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_positionCodeOneRows
+    (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hinterior)
+    hrows
+
+theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows'
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows
+    hinterior hrows).of_eq fun _ => rfl
+
 /--
 The position-coded source decoder gives program-data computability once each
 decoded position is known to be the first occurrence of that label in the
@@ -3478,6 +3604,28 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementList
   (sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup
     hvarRows hnodup).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup
+    (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hinterior)
+    hnodup
+
+theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup'
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup
+    hinterior hnodup).of_eq fun _ => rfl
+
 /--
 Primitive recursiveness of the source-level position-coded descriptor decoder,
 together with a proof that those descriptor rows generate the canonical folded
@@ -3524,6 +3672,30 @@ def sourceObligationsOfPositionCodeOneRows
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_positionCodeOneRows'
       hvarRows hrows)
+    hcorrect
+
+/--
+Primitive recursiveness of the bounded interior one-row position-code decoder,
+together with a proof that the generated position-coded rows match the
+canonical folded simulation rows, gives the exact source obligations needed by
+the final reduction.
+-/
+def sourceObligationsOfPositionCodeBoundedInteriorRows
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows'
+      hinterior hrows)
     hcorrect
 
 /--
@@ -3598,6 +3770,28 @@ def sourceObligationsOfPositionCodeOneRowsStatementListNodup
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup'
       hvarRows hnodup)
+    hcorrect
+
+/--
+Primitive recursiveness of the bounded interior one-row position-code decoder
+and absence of duplicates in the translated TM0 statement-support list are
+enough to produce the source obligations needed by the final reduction.
+-/
+def sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup'
+      hinterior hnodup)
     hcorrect
 
 /--
