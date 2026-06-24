@@ -6026,6 +6026,14 @@ theorem partrecStartedTM0StatementList_length (tc : Turing.ToPartrec.Code) :
   simp [partrecStartedTM0StatementList, partrecStartedTM0StatementCount,
     tm1StatementSupportList_length, partrecStartedTM0StatementSupportLength_eq_raw]
 
+theorem partrecStartedTM0StatementAt?_eq_none_of_count_le
+    (tc : Turing.ToPartrec.Code) {i : Nat}
+    (hi : partrecStartedTM0StatementCount tc ≤ i) :
+    partrecStartedTM0StatementAt? tc i = none := by
+  rw [partrecStartedTM0StatementAt?_eq_getElem?]
+  rw [List.getElem?_eq_none_iff]
+  simpa [partrecStartedTM0StatementList_length] using hi
+
 theorem partrecStartedTM0StatementCount_one_lt (tc : Turing.ToPartrec.Code) :
     1 < partrecStartedTM0StatementCount tc := by
   have hstmt := partrecStartedTM0StatementAt?_one tc

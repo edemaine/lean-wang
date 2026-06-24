@@ -970,6 +970,14 @@ theorem sourceSearchCodeOneRowsVar_stmt_none
     sourceSearchCodeOneRowsVar c k v = [] := by
   simp [sourceSearchCodeOneRowsVar, hstmt]
 
+theorem sourceSearchCodeOneRowsVar_eq_nil_of_statementCount_le
+    {c : Code} {k : Nat} (v : TM0Route.PartrecVar)
+    (hk : sourceStatementCount c ≤ k) :
+    sourceSearchCodeOneRowsVar c k v = [] := by
+  exact sourceSearchCodeOneRowsVar_stmt_none
+    (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
+      (NatPartrecToToPartrec.translate c) (by simpa [sourceStatementCount] using hk))
+
 theorem sourceSearchCodeOneRowsVar_stmt_some
     {c : Code} {k : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
