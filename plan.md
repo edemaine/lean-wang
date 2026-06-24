@@ -262,6 +262,17 @@ Computable (fun c : Nat.Partrec.Code =>
 
 without going through the broader `Turing.ToPartrec.Code` target.
 
+There is also now a position-coded descriptor path in `TM0FoldedProgram`:
+`simStepDataForLabelIndexFromWithPositionCode` uses the explicit rectangular
+statement/variable position as the current-state code, and its fixed-code
+primitive-recursive proof is in place. `TM0FoldedReduction` exposes the matching
+source wrapper
+`sourceSimStepDataForLabelIndexFromWithPositionCode` and the usual global-to-
+source primitive-recursive bridge. This gives a cleaner possible decoder target
+than support-search state codes, but it still needs an equivalence proof showing
+that the position code agrees with the state code used by the current folded
+state list before it can feed `sourceProgramData_computable_of_source_*`.
+
 Next implementation targets:
 
 1. Prove source-level computability of the folded finite-TM0 reduction:

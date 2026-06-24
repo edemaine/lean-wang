@@ -3378,6 +3378,21 @@ def simStepDataForLabelIndexFromWithSearchCode
   (labelAtByStatementFromWithSearchCode? tc fuel k i).elim []
     (fun q => simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2)
 
+/--
+Offset label-index decoder using the explicit rectangular statement/variable
+position as the numeric current-state code.
+
+This is not used by the semantic route yet: it records the cleaner numeric
+decoder target where the state code is computed directly from the decoded
+statement offset and variable index rather than by searching the finite support
+list.
+-/
+def simStepDataForLabelIndexFromWithPositionCode
+    (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
+    List SimStepData :=
+  (labelAtByStatementFromWithPositionCode? tc fuel k i).elim []
+    (fun q => simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2)
+
 theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
     simStepDataForLabelIndexFromWithSearchCode tc fuel k i =
@@ -3516,6 +3531,29 @@ theorem simStepDataForLabelIndexFromWithSearchCode_primrec_fixed_of_trAux
     unfold simStepDataForLabelIndexFromWithSearchCode
     cases labelAtByStatementFromWithSearchCode? tc p.1 p.2.1 p.2.2 <;> rfl
 
+theorem simStepDataForLabelIndexFromWithPositionCode_primrec_fixed_of_trAux
+    (tc : Turing.ToPartrec.Code)
+    (haux : Primrec (fun p : SourceStmt tc × PartrecVar × SourceSymbol =>
+      Turing.TM1to0.trAux (TM0Route.partrecStartedTM1Machine tc) p.2.2 p.1 p.2.1)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithPositionCode tc p.1 p.2.1 p.2.2) := by
+  have hlookup := labelAtByStatementFromWithPositionCode?_primrec_fixed tc
+  have hlabel := simStepDataForStmtLabelWithCode_primrec_fixed_of_trAux tc haux
+  have hnone : Primrec (fun _p : Nat × Nat × Nat => ([] : List SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun _p : Nat × Nat × Nat => fun q : SourceLabel tc × Nat =>
+      simStepDataForStmtLabelWithCode tc q.2 q.1.1 q.1.2) := by
+    apply Primrec₂.mk
+    exact hlabel.comp
+      (Primrec.pair
+        (Primrec.snd.comp Primrec.snd)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.fst.comp Primrec.snd))
+          (Primrec.snd.comp (Primrec.fst.comp Primrec.snd))))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    unfold simStepDataForLabelIndexFromWithPositionCode
+    cases labelAtByStatementFromWithPositionCode? tc p.1 p.2.1 p.2.2 <;> rfl
+
 theorem simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine
     (tc : Turing.ToPartrec.Code)
     (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
@@ -3529,6 +3567,21 @@ theorem simStepDataForLabelIndexFromWithCode_primrec_fixed
     Primrec (fun p : Nat × Nat × Nat =>
       simStepDataForLabelIndexFromWithCode tc p.1 p.2.1 p.2.2) :=
   simStepDataForLabelIndexFromWithCode_primrec_fixed_of_machine tc
+    (TM0Route.partrecStartedTM1Machine_primrec tc)
+
+theorem simStepDataForLabelIndexFromWithPositionCode_primrec_fixed_of_machine
+    (tc : Turing.ToPartrec.Code)
+    (hmachine : Primrec (TM0Route.partrecStartedTM1Machine tc)) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithPositionCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithPositionCode_primrec_fixed_of_trAux tc
+    (trAux_primrec_fixed_of_machine tc hmachine)
+
+theorem simStepDataForLabelIndexFromWithPositionCode_primrec_fixed
+    (tc : Turing.ToPartrec.Code) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      simStepDataForLabelIndexFromWithPositionCode tc p.1 p.2.1 p.2.2) :=
+  simStepDataForLabelIndexFromWithPositionCode_primrec_fixed_of_machine tc
     (TM0Route.partrecStartedTM1Machine_primrec tc)
 
 theorem simStepDataForLabelIndexFrom_primrec_fixed_of_machine

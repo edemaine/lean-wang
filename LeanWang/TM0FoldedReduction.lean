@@ -114,6 +114,15 @@ def sourceSimStepDataForLabelIndexFromWithSearchCode
   TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
     (NatPartrecToToPartrec.translate c) fuel k i
 
+/--
+Source-code version of the offset descriptor decoder whose current-state code
+is the explicit statement/variable position.
+-/
+def sourceSimStepDataForLabelIndexFromWithPositionCode
+    (c : Code) (fuel k i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+    (NatPartrecToToPartrec.translate c) fuel k i
+
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -331,6 +340,19 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_global
       (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
       Primrec.snd)).of_eq fun p => by
         unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+        rfl
+
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexFromWithPositionCode
         rfl
 
 theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
