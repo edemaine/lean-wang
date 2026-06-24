@@ -3381,6 +3381,83 @@ theorem labelAtByStatementFromWithPositionCode?_succ_of_stmt_some
   rw [Function.iterate_fixed hfixed fuel]
   rfl
 
+theorem labelAtByStatementFromWithPositionCode?_of_div_mod
+    (tc : Turing.ToPartrec.Code) {fuel k i : Nat}
+    {stmt : Option (SourceStmt tc)} {v : PartrecVar}
+    (hblock : i / TM0Route.partrecVarList.length < fuel)
+    (hv : TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt? tc
+        (k + i / TM0Route.partrecVarList.length) = some stmt) :
+    labelAtByStatementFromWithPositionCode? tc fuel k i =
+      some ((((stmt, v) : SourceLabel tc),
+        labelPositionCode (k + i / TM0Route.partrecVarList.length)
+          (i % TM0Route.partrecVarList.length) stmt v)) := by
+  induction fuel generalizing k i with
+  | zero =>
+      exact False.elim (Nat.not_lt_zero _ hblock)
+  | succ fuel ih =>
+      by_cases hi : i < TM0Route.partrecVarList.length
+      · have hdiv : i / TM0Route.partrecVarList.length = 0 := Nat.div_eq_of_lt hi
+        have hmod : i % TM0Route.partrecVarList.length = i := Nat.mod_eq_of_lt hi
+        have hvi : TM0Route.partrecVarList[i]? = some v := by
+          simpa [hmod] using hv
+        rw [labelAtByStatementFromWithPositionCode?_succ_of_stmt_some
+          (tc := tc) (fuel := fuel) (k := k) (i := i) (v := v)
+          (stmt := stmt) hvi (by simpa [hdiv] using hstmt)]
+        · simp [hdiv, hmod]
+      · have hle : TM0Route.partrecVarList.length ≤ i := le_of_not_gt hi
+        have hvnone : TM0Route.partrecVarList[i]? = none := by
+          rw [List.getElem?_eq_none_iff]
+          exact hle
+        rw [labelAtByStatementFromWithPositionCode?_succ_of_var_none tc hvnone]
+        have hlen : 0 < TM0Route.partrecVarList.length := by
+          simp [TM0Route.partrecVarList]
+        have hdiv :
+            i / TM0Route.partrecVarList.length =
+              (i - TM0Route.partrecVarList.length) /
+                  TM0Route.partrecVarList.length + 1 := by
+          calc
+            i / TM0Route.partrecVarList.length =
+                ((i - TM0Route.partrecVarList.length) +
+                    TM0Route.partrecVarList.length) /
+                  TM0Route.partrecVarList.length := by
+              rw [Nat.sub_add_cancel hle]
+            _ = (i - TM0Route.partrecVarList.length) /
+                  TM0Route.partrecVarList.length + 1 := by
+              rw [Nat.add_div_right _ hlen]
+        have hblock' :
+            (i - TM0Route.partrecVarList.length) /
+                TM0Route.partrecVarList.length < fuel := by
+          have hsucc :
+              (i - TM0Route.partrecVarList.length) /
+                  TM0Route.partrecVarList.length + 1 < fuel + 1 := by
+            simpa [hdiv] using hblock
+          exact Nat.succ_lt_succ_iff.1 hsucc
+        have hmod :
+            (i - TM0Route.partrecVarList.length) %
+                TM0Route.partrecVarList.length =
+              i % TM0Route.partrecVarList.length := by
+          rw [← Nat.add_mod_right (i - TM0Route.partrecVarList.length)
+            TM0Route.partrecVarList.length]
+          have hsum :
+              i - TM0Route.partrecVarList.length +
+                  TM0Route.partrecVarList.length = i :=
+            Nat.sub_add_cancel hle
+          rw [hsum]
+        have hv' :
+            TM0Route.partrecVarList[
+              (i - TM0Route.partrecVarList.length) %
+                TM0Route.partrecVarList.length]? = some v := by
+          simpa [hmod] using hv
+        have hstmt' :
+            TM0Route.partrecStartedTM0StatementAt? tc
+                (k + 1 +
+                  (i - TM0Route.partrecVarList.length) /
+                    TM0Route.partrecVarList.length) = some stmt := by
+          simpa [hdiv, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstmt
+        simpa [hdiv, hmod, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
+          ih (k := k + 1) hblock' hv' hstmt'
+
 theorem labelPositionCode_mem_states_of_statementAt?
     (tc : Turing.ToPartrec.Code) {k i : Nat} {stmt : Option (SourceStmt tc)}
     {v : PartrecVar}

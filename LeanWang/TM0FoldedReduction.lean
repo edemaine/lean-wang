@@ -429,6 +429,56 @@ theorem sourceLabelAtByStatementStart?_of_split
   rw [← TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
   exact sourceLabelAtByStatementFrom?_of_split hsplit hstmt
 
+theorem sourceLabelAtByStatementFromWithPositionCode?_of_split
+    {c : Code} {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i =
+      some ((((stmt, v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))),
+        TM0FoldedCompiler.labelPositionCode stmtIndex
+          (i % TM0Route.partrecVarList.length) stmt v)) := by
+  rcases sourceLabelIndexFromSplit?_eq_some hsplit with ⟨hstmtIndex, hblock, hv⟩
+  simpa [hstmtIndex] using
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_of_div_mod
+      (NatPartrecToToPartrec.translate c) hblock hv
+      (by simpa [hstmtIndex] using hstmt)
+
+theorem sourceLabelAtByStatementStartWithPositionCode?_of_split
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexStartSplit? c i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i =
+      some ((((stmt, v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))),
+        TM0FoldedCompiler.labelPositionCode stmtIndex
+          (i % TM0Route.partrecVarList.length) stmt v)) := by
+  unfold sourceLabelIndexStartSplit? at hsplit
+  simpa using
+    sourceLabelAtByStatementFromWithPositionCode?_of_split hsplit hstmt
+
 /--
 Source-code version of the fully offset descriptor decoder.
 
@@ -468,6 +518,28 @@ def sourceSimStepDataForLabelIndexFromWithPositionCode
   TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
     (NatPartrecToToPartrec.translate c) fuel k i
 
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_of_split
+    {c : Code} {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode stmtIndex
+          (i % TM0Route.partrecVarList.length) stmt v) stmt v := by
+  unfold sourceSimStepDataForLabelIndexFromWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+  rw [sourceLabelAtByStatementFromWithPositionCode?_of_split hsplit hstmt]
+  rfl
+
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -491,6 +563,34 @@ def sourceSimStepDataForLabelIndexStartWithPositionCode
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
     (NatPartrecToToPartrec.translate c) i
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_split
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hsplit : sourceLabelIndexStartSplit? c i = some (stmtIndex, v))
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) stmtIndex = some stmt) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode stmtIndex
+          (i % TM0Route.partrecVarList.length) stmt v) stmt v := by
+  unfold sourceSimStepDataForLabelIndexStartWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
+  change sourceSimStepDataForLabelIndexFromWithPositionCode c
+      (sourceStatementCount c) 0 i =
+    TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+      (NatPartrecToToPartrec.translate c)
+      (TM0FoldedCompiler.labelPositionCode stmtIndex
+        (i % TM0Route.partrecVarList.length) stmt v) stmt v
+  unfold sourceLabelIndexStartSplit? at hsplit
+  exact sourceSimStepDataForLabelIndexFromWithPositionCode_of_split hsplit hstmt
 
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
