@@ -6006,6 +6006,14 @@ theorem partrecStartedTM0StatementList_length (tc : Turing.ToPartrec.Code) :
   simp [partrecStartedTM0StatementList, partrecStartedTM0StatementCount,
     tm1StatementSupportList_length, partrecStartedTM0StatementSupportLength_eq_raw]
 
+theorem partrecStartedTM0StatementCount_one_lt (tc : Turing.ToPartrec.Code) :
+    1 < partrecStartedTM0StatementCount tc := by
+  have hstmt := partrecStartedTM0StatementAt?_one tc
+  rw [partrecStartedTM0StatementAt?_eq_getElem?] at hstmt
+  have hlen : 1 < (partrecStartedTM0StatementList tc).length :=
+    (List.getElem?_eq_some_iff.1 hstmt).1
+  simpa [partrecStartedTM0StatementList_length] using hlen
+
 theorem mem_partrecStartedTM0StatementList (tc : Turing.ToPartrec.Code)
     (stmt : Option (Turing.TM1.Stmt
       (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
