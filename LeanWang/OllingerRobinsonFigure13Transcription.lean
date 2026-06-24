@@ -142,6 +142,17 @@ theorem fig13QuarterRoleSpecs_length
     quarterRoleSpecsOfTiles_length_eq_four_mul
       (tiles := fig13Tiles) (roleRows := roleRows) (by simpa using hlen)
 
+theorem fig13SubdividedTiles_nodup :
+    (TileSubdivision.subdivideTileSet fig13Tiles).Nodup :=
+  TileSubdivision.subdivideTileSet_nodup_of_nodup fig13Tiles_nodup
+
+theorem fig13QuarterRoleSpecs_nodupTilesBool
+    {roleRows : List TileQuarterRoles} (hlen : roleRows.length = 92) :
+    nodupTilesBool (fig13QuarterRoleSpecs roleRows) = true := by
+  apply decide_eq_true
+  rw [fig13QuarterRoleSpecs_tiles hlen]
+  exact fig13SubdividedTiles_nodup
+
 /--
 Attach a list of roles to a list of Wang tiles.  If the lists have different
 lengths, extra entries on either side are ignored; the completeness lemma below

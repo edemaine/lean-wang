@@ -83,6 +83,14 @@ private def bitCode (b : Bool) : Nat :=
 private def tileCode (t : WangTile) : Nat :=
   Nat.pair t.n (Nat.pair t.s (Nat.pair t.e t.w))
 
+set_option linter.flexible false in
+private theorem tileCode_injective : Function.Injective tileCode := by
+  intro t u h
+  cases t
+  cases u
+  simp [tileCode, Nat.pair_eq_pair] at h ⊢
+  exact h
+
 /-- Horizontal macro-edge colors are split by west/east half. -/
 def horizontalEdgeColor (x : Bool) (color : Nat) : Nat :=
   Nat.pair 0 (Nat.pair (bitCode x) color)
@@ -188,6 +196,66 @@ theorem vMatches_northeast_southeast_of_vMatches {lower upper : WangTile}
     WangTile.VMatches
       (subdivideTileAt lower .northeast) (subdivideTileAt upper .southeast) := by
   simpa [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor] using h
+
+set_option linter.flexible false in
+theorem subdivideTileAt_pair_injective :
+    Function.Injective (fun p : WangTile × Quadrant => subdivideTileAt p.1 p.2) := by
+  intro p q h
+  rcases p with ⟨t, qt⟩
+  rcases q with ⟨u, qu⟩
+  cases qt <;> cases qu <;> cases t <;> cases u <;>
+    simp [subdivideTileAt, horizontalEdgeColor, verticalEdgeColor,
+      internalVerticalColor, internalHorizontalColor, bitCode, tileCode,
+      Nat.pair_eq_pair] at h ⊢
+  all_goals
+    try exact h
+    try exact h.1
+    try exact h.2.1
+
+theorem subdivideTileAt_eq_iff (t u : WangTile) (q r : Quadrant) :
+    subdivideTileAt t q = subdivideTileAt u r ↔ t = u ∧ q = r := by
+  constructor
+  · intro h
+    have hp : (t, q) = (u, r) :=
+      subdivideTileAt_pair_injective h
+    exact ⟨congrArg Prod.fst hp, congrArg Prod.snd hp⟩
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
+theorem subdivideTile_nodup (t : WangTile) :
+    (subdivideTile t).Nodup := by
+  unfold subdivideTile
+  apply List.Nodup.map
+  · intro q r h
+    exact (subdivideTileAt_eq_iff t t q r).1 h |>.2
+  · decide
+
+theorem subdivideTile_disjoint_subdivideTileSet_of_not_mem
+    {t : WangTile} {T : TileSet} (hnot : t ∉ T) :
+    (subdivideTile t).Disjoint (subdivideTileSet T) := by
+  intro x hx hy
+  rw [subdivideTile] at hx
+  rcases List.mem_map.1 hx with ⟨q, _hq, hxq⟩
+  rw [subdivideTileSet, List.mem_flatMap] at hy
+  rcases hy with ⟨u, hu, hyu⟩
+  rw [subdivideTile] at hyu
+  rcases List.mem_map.1 hyu with ⟨r, _hr, hyr⟩
+  have hpair : (t, q) = (u, r) :=
+    subdivideTileAt_pair_injective (hxq.trans hyr.symm)
+  have htu : t = u := congrArg Prod.fst hpair
+  exact hnot (htu.symm ▸ hu)
+
+theorem subdivideTileSet_nodup_of_nodup {T : TileSet}
+    (hT : T.Nodup) :
+    (subdivideTileSet T).Nodup := by
+  induction T with
+  | nil =>
+      simp [subdivideTileSet]
+  | cons t T ih =>
+      simp only [subdivideTileSet_cons]
+      rw [List.nodup_cons] at hT
+      exact List.Nodup.append (subdivideTile_nodup t) (ih hT.2)
+        (subdivideTile_disjoint_subdivideTileSet_of_not_mem hT.1)
 
 end TileSubdivision
 
