@@ -2155,6 +2155,21 @@ def simStepDataRow (p : SimStepData) : PostTransition :=
   simRowOfStepCode p.1 p.2.1 p.2.2.1 p.2.2.2.1
     p.2.2.2.2.1 p.2.2.2.2.2.1 p.2.2.2.2.2.2
 
+theorem simStepDataRow_matchesInput_of_currentCode_ne
+    {tc : Turing.ToPartrec.Code}
+    {side side' : FoldSide} {marked marked' : Bool}
+    {qCode q'Code : Nat} {q : SourceLabel tc}
+    {left right left' right' : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hcode : qCode ≠ TM0FiniteCompiler.stateCode tc q) :
+    (simStepDataRow (side', marked', qCode, q'Code, left', right', stmt)).matchesInput
+        (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) = false := by
+  have hstate : foldedSimStateOfCode side' qCode ≠ foldedSimStateCode tc side q := by
+    intro h
+    exact hcode (foldedSimStateOfCode_eq_foldedSimStateCode_iff.1 h).2
+  cases stmt <;> simp [simStepDataRow, simRowOfStepCode, mkRow,
+    PostTransition.matchesInput, hstate]
+
 set_option maxHeartbeats 800000 in
 -- The nested product selectors in this row-level primitive-recursive proof take
 -- longer than the default heartbeat budget to elaborate.
