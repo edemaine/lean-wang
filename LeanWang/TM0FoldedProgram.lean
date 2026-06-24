@@ -3968,6 +3968,43 @@ theorem mem_simStepDataForLabelIndexFromWithPositionCode_current_support_get?
       rw [hcode]
       exact labelAtByStatementFromWithPositionCode?_support_get? tc hq
 
+theorem mem_simStepDataForLabelIndexFromWithPositionCode_currentCode_ne
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat} {target : SourceLabel tc}
+    {p : SimStepData}
+    (hcode : ∀ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc fuel k i = some q →
+        q.2 ≠ TM0FiniteCompiler.stateCode tc target)
+    (h : p ∈ simStepDataForLabelIndexFromWithPositionCode tc fuel k i) :
+    p.2.2.1 ≠ TM0FiniteCompiler.stateCode tc target := by
+  rcases mem_simStepDataForLabelIndexFromWithPositionCode_current_support_get?
+      (tc := tc) (fuel := fuel) (k := k) (i := i) h with
+    ⟨q, hq, hpcode, _hget⟩
+  rw [hpcode]
+  exact hcode q hq
+
+theorem simRowsOfStepDataForLabelIndexFromWithPositionCode_find?_eq_none_of_currentCode_ne
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat}
+    {side : FoldSide} {marked : Bool} {target : SourceLabel tc}
+    {left right : SourceSymbol}
+    (hcode : ∀ q : SourceLabel tc × Nat,
+      labelAtByStatementFromWithPositionCode? tc fuel k i = some q →
+        q.2 ≠ TM0FiniteCompiler.stateCode tc target) :
+    (simRowsOfStepData
+        (simStepDataForLabelIndexFromWithPositionCode tc fuel k i)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) =
+      none := by
+  exact simRowsOfStepData_find?_eq_none_of_forall_currentCode_ne
+    (tc := tc)
+    (steps := simStepDataForLabelIndexFromWithPositionCode tc fuel k i)
+    (side := side) (marked := marked) (q := target)
+    (left := left) (right := right)
+    (fun p hp =>
+      mem_simStepDataForLabelIndexFromWithPositionCode_currentCode_ne
+        (tc := tc) (fuel := fuel) (k := k) (i := i)
+        (target := target) hcode hp)
+
 theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
     simStepDataForLabelIndexFromWithSearchCode tc fuel k i =
