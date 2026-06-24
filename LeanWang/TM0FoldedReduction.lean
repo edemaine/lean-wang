@@ -1034,10 +1034,74 @@ theorem sourceSearchCodeDecoderStep_stmt_some
           stmt v)) := by
   simp [sourceSearchCodeDecoderStep, hv, hstmt]
 
+def sourceSearchCodeDecoderStateFrom
+    (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
+    SourceSearchCodeDecoderState :=
+  fuel.rec s (fun _ s => sourceSearchCodeDecoderStep c s)
+
+theorem sourceSearchCodeDecoderStateFrom_succ_eq_step
+    (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
+    sourceSearchCodeDecoderStateFrom c (fuel + 1) s =
+      sourceSearchCodeDecoderStateFrom c fuel (sourceSearchCodeDecoderStep c s) := by
+  induction fuel generalizing s with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      change sourceSearchCodeDecoderStep c
+          (sourceSearchCodeDecoderStateFrom c (fuel + 1) s) =
+        sourceSearchCodeDecoderStep c
+          (sourceSearchCodeDecoderStateFrom c fuel
+          (sourceSearchCodeDecoderStep c s))
+      rw [ih]
+
+theorem sourceSearchCodeDecoderStateFrom_resolved
+    (c : Code) (fuel k i : Nat) (rows : List TM0FoldedCompiler.SimStepData) :
+    sourceSearchCodeDecoderStateFrom c fuel (k, i, some rows) =
+      (k, i, some rows) := by
+  induction fuel with
+  | zero =>
+      rfl
+  | succ fuel ih =>
+      change sourceSearchCodeDecoderStep c
+          (sourceSearchCodeDecoderStateFrom c fuel (k, i, some rows)) =
+        (k, i, some rows)
+      rw [ih]
+      exact sourceSearchCodeDecoderStep_resolved c k i rows
+
+theorem sourceSearchCodeDecoderRows_stateFrom_none_eq
+    (c : Code) (fuel k i : Nat) :
+    sourceSearchCodeDecoderRows
+        (sourceSearchCodeDecoderStateFrom c fuel (k, i, none)) =
+      sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i := by
+  induction fuel generalizing k i with
+  | zero =>
+      simp [sourceSearchCodeDecoderStateFrom, sourceSearchCodeDecoderRows,
+        sourceSimStepDataForLabelIndexFromWithSearchCode_zero]
+  | succ fuel ih =>
+      rw [sourceSearchCodeDecoderStateFrom_succ_eq_step]
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [sourceSearchCodeDecoderStep_var_none hv]
+          rw [ih]
+          rw [sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_var_none hv]
+      | some v =>
+          cases hstmt : TM0Route.partrecStartedTM0StatementAt?
+              (NatPartrecToToPartrec.translate c) k with
+          | none =>
+              rw [sourceSearchCodeDecoderStep_stmt_none hv hstmt]
+              rw [sourceSearchCodeDecoderStateFrom_resolved]
+              simp [sourceSearchCodeDecoderRows,
+                sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_none hv hstmt]
+          | some stmt =>
+              rw [sourceSearchCodeDecoderStep_stmt_some hv hstmt]
+              rw [sourceSearchCodeDecoderStateFrom_resolved]
+              simp [sourceSearchCodeDecoderRows,
+                sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
+                  hv hstmt]
+
 def sourceSearchCodeDecoderState (c : Code) (fuel k i : Nat) :
     SourceSearchCodeDecoderState :=
-  fuel.rec (sourceSearchCodeDecoderInit k i)
-    (fun _ s => sourceSearchCodeDecoderStep c s)
+  sourceSearchCodeDecoderStateFrom c fuel (sourceSearchCodeDecoderInit k i)
 
 def sourceSearchCodeDecoder (c : Code) (fuel k i : Nat) :
     List TM0FoldedCompiler.SimStepData :=
@@ -1091,6 +1155,23 @@ theorem sourceSearchCodeDecoder_primrec_of_step
   exact (sourceSearchCodeDecoderRows_primrec.comp hstate).of_eq fun p => by
     unfold sourceSearchCodeDecoder
     rfl
+
+theorem sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode
+    (c : Code) (fuel k i : Nat) :
+    sourceSearchCodeDecoder c fuel k i =
+      sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i := by
+  unfold sourceSearchCodeDecoder sourceSearchCodeDecoderState sourceSearchCodeDecoderInit
+  exact sourceSearchCodeDecoderRows_stateFrom_none_eq c fuel k i
+
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourceSearchCodeDecoderStep p.1 p.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  (sourceSearchCodeDecoder_primrec_of_step hstep).of_eq fun p =>
+    sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode
+      p.1 p.2.1 p.2.2.1 p.2.2.2
 
 /--
 Source-code version of the offset descriptor decoder whose current-state code
