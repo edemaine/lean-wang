@@ -1347,6 +1347,78 @@ theorem sourceLabelAtByStatementFromWithPositionCode_support_get?
   TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_support_get?
     (NatPartrecToToPartrec.translate c) h
 
+theorem sourceLabelSupportList_get_position_of_statementAt?
+    {c : Code} {block i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    {v : TM0Route.PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    (TM0Route.partrecStartedTM0LabelSupportList
+      (NatPartrecToToPartrec.translate c))[
+        1 + block * TM0Route.partrecVarList.length + i]? =
+      some ((stmt, v) :
+        Turing.TM1to0.Λ'
+          (TM0Route.partrecStartedTM1Machine
+            (NatPartrecToToPartrec.translate c))) :=
+  TM0Route.partrecStartedTM0LabelSupportList_get_position_of_statementAt?
+    (NatPartrecToToPartrec.translate c) hstmt hv
+
+theorem sourcePosition_mem_states_of_statementAt?
+    {c : Code} {block i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    {v : TM0Route.PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    1 + block * TM0Route.partrecVarList.length + i ∈
+      TM0Route.partrecStartedTM0States (NatPartrecToToPartrec.translate c) :=
+  TM0Route.partrecStartedTM0_position_mem_states_of_statementAt?
+    (NatPartrecToToPartrec.translate c) hstmt hv
+
+theorem sourceStateCodeBySupportSearch_eq_stateCode_of_statementAt?
+    {c : Code} {block i : Nat}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    {v : TM0Route.PartrecVar}
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) block = some stmt)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    TM0FiniteCompiler.stateCodeBySupportSearch
+        (NatPartrecToToPartrec.translate c)
+        (sourceStatementCount c)
+        ((stmt, v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))) =
+      TM0FiniteCompiler.stateCode
+        (NatPartrecToToPartrec.translate c)
+        ((stmt, v) :
+          Turing.TM1to0.Λ'
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c))) := by
+  apply TM0FiniteCompiler.stateCodeBySupportSearch_eq_stateCode
+  exact List.mem_iff_getElem?.2
+    ⟨1 + block * TM0Route.partrecVarList.length + i,
+      sourceLabelSupportList_get_position_of_statementAt? hstmt hv⟩
+
 theorem sourceLabelAtByStatementFromWithPositionCode_eq_stateCode_of_minimal
     {c : Code} {fuel k i : Nat}
     (hmin : ∀ q :
