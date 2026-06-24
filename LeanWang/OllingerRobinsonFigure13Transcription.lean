@@ -235,6 +235,80 @@ theorem fig13QuarterFiniteCheckedTranscription_presentation_tiles
       TileSubdivision.subdivideTileSet fig13Tiles := by
   simp [FiniteCheckedTranscription.presentation, fig13QuarterRoleSpecs_tiles hlen]
 
+@[simp]
+theorem fig13QuarterFiniteCheckedTranscriptionAt_specs
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcorner :
+      lookupRole (fig13QuarterRoleEntries roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = CellRole.corner)
+    (hunique :
+      cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = true) :
+    (fig13QuarterFiniteCheckedTranscriptionAt
+      roleRows hlen cornerIndex cornerQuadrant hcorner hunique).specs =
+      fig13QuarterRoleSpecs roleRows :=
+  rfl
+
+@[simp]
+theorem fig13QuarterFiniteCheckedTranscriptionAt_cornerTile
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcorner :
+      lookupRole (fig13QuarterRoleEntries roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = CellRole.corner)
+    (hunique :
+      cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = true) :
+    (fig13QuarterFiniteCheckedTranscriptionAt
+      roleRows hlen cornerIndex cornerQuadrant hcorner hunique).cornerTile =
+      fig13QuarterTile cornerIndex cornerQuadrant :=
+  rfl
+
+theorem fig13QuarterFiniteCheckedTranscriptionAt_presentation_tiles
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcorner :
+      lookupRole (fig13QuarterRoleEntries roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = CellRole.corner)
+    (hunique :
+      cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = true) :
+    (fig13QuarterFiniteCheckedTranscriptionAt
+      roleRows hlen cornerIndex cornerQuadrant hcorner hunique).presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  fig13QuarterFiniteCheckedTranscription_presentation_tiles
+    roleRows hlen (fig13QuarterTile cornerIndex cornerQuadrant) hcorner hunique
+
+theorem fig13QuarterFiniteCheckedTranscriptionAt_nodup
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcorner :
+      lookupRole (fig13QuarterRoleEntries roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = CellRole.corner)
+    (hunique :
+      cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = true) :
+    (fig13QuarterFiniteCheckedTranscriptionAt
+      roleRows hlen cornerIndex cornerQuadrant hcorner hunique).nodup =
+      fig13QuarterRoleSpecs_nodupTilesBool hlen :=
+  rfl
+
+theorem fig13QuarterFiniteCheckedTranscriptionAt_sanity
+    (roleRows : List TileQuarterRoles) (hlen : roleRows.length = 92)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hcorner :
+      lookupRole (fig13QuarterRoleEntries roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = CellRole.corner)
+    (hunique :
+      cornerRoleUniqueBool (fig13QuarterRoleSpecs roleRows)
+        (fig13QuarterTile cornerIndex cornerQuadrant) = true) :
+    (fig13QuarterFiniteCheckedTranscriptionAt
+      roleRows hlen cornerIndex cornerQuadrant hcorner hunique).sanity =
+      sanityBool_of_specChecks hcorner
+        (fig13QuarterRoleSpecs_nodupTilesBool hlen) hunique :=
+  rfl
+
 /--
 Attach a list of roles to a list of Wang tiles.  If the lists have different
 lengths, extra entries on either side are ignored; the completeness lemma below
