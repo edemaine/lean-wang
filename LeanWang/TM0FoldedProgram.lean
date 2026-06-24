@@ -6542,6 +6542,48 @@ theorem positionProgramData_step_sim_eq_some_of_support_succ_step
         simpa [hstmt] using hwrite
       simp [hb]
 
+theorem positionProgramData_transition?_sim_eq_none_of_support_succ_no_step
+    {tc : Turing.ToPartrec.Code} {n : Nat}
+    {stmtOpt : Option (SourceStmt tc)} {v : PartrecVar}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hn : n < TM0Route.partrecStartedTM0LabelCount tc)
+    (hsupport :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some (stmtOpt, v))
+    (hstate : TM0FiniteCompiler.stateCode tc (stmtOpt, v) = n + 1)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (stmtOpt, v) (foldedRead side left right) =
+        none) :
+    (positionProgramData tc).transition?
+        (foldedSimStateCode tc side (stmtOpt, v))
+        (foldedSymbolCode marked left right) =
+      none := by
+  rw [positionProgramData_transition?_sim_eq_generated]
+  exact simRowsOfStepDataByLabelIndexWithPositionCode_find?_eq_none_of_support_succ_no_step
+    (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v) (side := side)
+    (marked := marked) (left := left) (right := right)
+    hn hsupport hstate hstep
+
+theorem positionProgramData_step_sim_eq_none_of_support_succ_no_step
+    {tc : Turing.ToPartrec.Code} {n : Nat}
+    {stmtOpt : Option (SourceStmt tc)} {v : PartrecVar}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (hn : n < TM0Route.partrecStartedTM0LabelCount tc)
+    (hsupport :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some (stmtOpt, v))
+    (hstate : TM0FiniteCompiler.stateCode tc (stmtOpt, v) = n + 1)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (stmtOpt, v) (foldedRead side left right) =
+        none) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side (stmtOpt, v))
+        (foldedSymbolCode marked left right) =
+      none := by
+  have hfind := positionProgramData_transition?_sim_eq_none_of_support_succ_no_step
+    (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v) (side := side)
+    (marked := marked) (left := left) (right := right)
+    hn hsupport hstate hstep
+  simp [PostProgram.step, hfind]
+
 end TM0FoldedCompiler
 
 end LeanWang
