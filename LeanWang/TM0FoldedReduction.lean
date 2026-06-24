@@ -246,6 +246,116 @@ theorem sourceLabelIndexStartSplit?_primrec :
     (Primrec.pair (sourceStatementCount_primrec.comp Primrec.fst)
       (Primrec.pair (Primrec.const 0) Primrec.snd))
 
+theorem sourceLabelIndexFromSplit?_eq_some
+    {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v)) :
+    stmtIndex = k + i / TM0Route.partrecVarList.length ∧
+      i / TM0Route.partrecVarList.length < fuel ∧
+      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
+  unfold sourceLabelIndexFromSplit? at h
+  by_cases hblock : i / TM0Route.partrecVarList.length < fuel
+  · rw [if_pos hblock] at h
+    cases hvar : TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? with
+    | none =>
+        simp [hvar] at h
+    | some v' =>
+        have hpair :
+            (k + i / TM0Route.partrecVarList.length, v') = (stmtIndex, v) := by
+          simpa [hvar] using h
+        have hstmt : k + i / TM0Route.partrecVarList.length = stmtIndex :=
+          congrArg Prod.fst hpair
+        have hv' : v' = v := congrArg Prod.snd hpair
+        exact ⟨hstmt.symm, hblock, by simp [hv']⟩
+  · rw [if_neg hblock] at h
+    simp at h
+
+theorem sourceLabelCount_eq_statementCount_mul (c : Code) :
+    sourceLabelCount c =
+      sourceStatementCount c * TM0Route.partrecVarList.length := by
+  rfl
+
+theorem sourcePartrecVarList_length_pos :
+    0 < TM0Route.partrecVarList.length := by
+  simp [TM0Route.partrecVarList]
+
+theorem sourceLabelIndexFromSplit?_of_getElem?
+    {fuel k i : Nat} {v : TM0Route.PartrecVar}
+    (hblock : i / TM0Route.partrecVarList.length < fuel)
+    (hv : TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v) :
+    sourceLabelIndexFromSplit? fuel k i =
+      some (k + i / TM0Route.partrecVarList.length, v) := by
+  simp [sourceLabelIndexFromSplit?, hblock, hv]
+
+theorem sourceLabelIndexFromSplit?_var_mem
+    {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v)) :
+    v ∈ TM0Route.partrecVarList := by
+  rcases sourceLabelIndexFromSplit?_eq_some h with ⟨_hstmt, _hblock, hv⟩
+  exact List.mem_iff_getElem?.2 ⟨i % TM0Route.partrecVarList.length, hv⟩
+
+theorem sourceLabelIndexFromSplit?_stmtIndex_lt
+    {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v)) :
+    stmtIndex < k + fuel := by
+  rcases sourceLabelIndexFromSplit?_eq_some h with ⟨hstmt, hblock, _hv⟩
+  rw [hstmt]
+  omega
+
+theorem sourceLabelIndexStartSplit?_stmtIndex_lt
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
+    stmtIndex < sourceStatementCount c := by
+  unfold sourceLabelIndexStartSplit? at h
+  have hlt := sourceLabelIndexFromSplit?_stmtIndex_lt h
+  simpa using hlt
+
+theorem sourceLabelIndexStartSplit?_eq_some
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
+    stmtIndex = i / TM0Route.partrecVarList.length ∧
+      i / TM0Route.partrecVarList.length < sourceStatementCount c ∧
+      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
+  unfold sourceLabelIndexStartSplit? at h
+  simpa using sourceLabelIndexFromSplit?_eq_some h
+
+theorem sourceLabelIndexStartSplit?_var_mem
+    {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
+    (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
+    v ∈ TM0Route.partrecVarList := by
+  unfold sourceLabelIndexStartSplit? at h
+  exact sourceLabelIndexFromSplit?_var_mem h
+
+theorem sourceLabelIndexStartSplit?_of_getElem?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hblock : i / TM0Route.partrecVarList.length < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v) :
+    sourceLabelIndexStartSplit? c i =
+      some (i / TM0Route.partrecVarList.length, v) := by
+  unfold sourceLabelIndexStartSplit?
+  simpa using sourceLabelIndexFromSplit?_of_getElem?
+    (fuel := sourceStatementCount c) (k := 0) (i := i) hblock hv
+
+theorem sourceLabelIndexStartSplit?_block_lt_of_lt_labelCount
+    {c : Code} {i : Nat} (hi : i < sourceLabelCount c) :
+    i / TM0Route.partrecVarList.length < sourceStatementCount c := by
+  rw [sourceLabelCount_eq_statementCount_mul] at hi
+  exact (Nat.div_lt_iff_lt_mul sourcePartrecVarList_length_pos).2 hi
+
+theorem sourceLabelIndexStartSplit?_exists_of_lt_labelCount
+    {c : Code} {i : Nat} (hi : i < sourceLabelCount c) :
+    ∃ stmtIndex v, sourceLabelIndexStartSplit? c i = some (stmtIndex, v) := by
+  have hblock := sourceLabelIndexStartSplit?_block_lt_of_lt_labelCount hi
+  have hmod :
+      i % TM0Route.partrecVarList.length < TM0Route.partrecVarList.length :=
+    Nat.mod_lt i sourcePartrecVarList_length_pos
+  let v : TM0Route.PartrecVar :=
+    TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]'hmod
+  have hv :
+      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
+    simp [v, List.getElem?_eq_getElem (l := TM0Route.partrecVarList) hmod]
+  exact ⟨i / TM0Route.partrecVarList.length, v,
+    sourceLabelIndexStartSplit?_of_getElem? hblock hv⟩
+
 /--
 Source-code version of the fully offset descriptor decoder.
 
