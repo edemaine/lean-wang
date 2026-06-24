@@ -1506,6 +1506,16 @@ def foldedSymbolList : List Nat :=
       TM0Route.partrecStartedTM0SymbolList.map fun right =>
         foldedSymbolCode marked left right
 
+theorem foldedSymbolCode_mem_symbols
+    (marked : Bool) (left right : SourceSymbol) :
+    foldedSymbolCode marked left right ∈ foldedSymbolList := by
+  unfold foldedSymbolList
+  rw [List.mem_flatMap]
+  refine ⟨marked, by cases marked <;> simp, ?_⟩
+  rw [List.mem_flatMap]
+  refine ⟨left, TM0Route.mem_partrecStartedTM0SymbolList left, ?_⟩
+  exact List.mem_map_of_mem (TM0Route.mem_partrecStartedTM0SymbolList right)
+
 def foldedBlank : Nat :=
   foldedSymbolCode false default default
 
@@ -1533,6 +1543,10 @@ def foldedWrite (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   | FoldSide.left => foldedSymbolCode false new right
   | FoldSide.right => foldedSymbolCode false left new
 
+theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
+    foldedWrite side new left right ∈ foldedSymbolList := by
+  cases side <;> simp [foldedWrite, foldedSymbolCode_mem_symbols]
+
 theorem foldedWrite_primrec :
     Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
       foldedWrite p.1 p.2.1 p.2.2.1 p.2.2.2) := by
@@ -1544,6 +1558,10 @@ def foldedWriteMarked (side : FoldSide) (new left right : SourceSymbol) : Nat :=
   match side with
   | FoldSide.left => foldedSymbolCode true new right
   | FoldSide.right => foldedSymbolCode true left new
+
+theorem foldedWriteMarked_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
+    foldedWriteMarked side new left right ∈ foldedSymbolList := by
+  cases side <;> simp [foldedWriteMarked, foldedSymbolCode_mem_symbols]
 
 theorem foldedWriteMarked_primrec :
     Primrec (fun p : FoldSide × SourceSymbol × SourceSymbol × SourceSymbol =>
@@ -1719,6 +1737,19 @@ theorem foldedStateListForCount_primrec : Primrec foldedStateListForCount := by
 
 def foldedStateList (tc : Turing.ToPartrec.Code) : List Nat :=
   foldedStateListOfCodes (TM0Route.partrecStartedTM0States tc)
+
+theorem foldedSimStateCode_mem_states (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) {q : SourceLabel tc}
+    (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc) :
+    foldedSimStateCode tc side q ∈ foldedStateList tc := by
+  unfold foldedStateList foldedStateListOfCodes foldedSimStateListOfCodes
+  rw [List.mem_append]
+  apply Or.inr
+  rw [List.mem_flatMap]
+  refine ⟨TM0FiniteCompiler.stateCode tc q, ?_, ?_⟩
+  · exact TM0FiniteCompiler.stateCode_mem_states tc q
+      ((TM0Route.mem_partrecStartedTM0LabelList tc q).1 hq)
+  · exact List.mem_map_of_mem (mem_foldSideList side)
 
 theorem foldedStateList_primrec : Primrec foldedStateList := by
   unfold foldedStateList
@@ -2678,6 +2709,50 @@ theorem simRowOfStep_matchesInput_of_read_ne {tc : Turing.ToPartrec.Code}
     (simRowOfStep tc side marked' q q' left' right' stmt).matchesInput
         (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) = false := by
   cases stmt <;> exact mkRow_matchesInput_of_read_ne hread
+
+theorem foldedWriteForStmt_mem_symbols
+    (side : FoldSide) (marked : Bool) (new left right : SourceSymbol) :
+    foldedWriteForStmt side marked new left right ∈ foldedSymbolList := by
+  unfold foldedWriteForStmt
+  by_cases h : marked
+  · simp [h, foldedWriteMarked_mem_symbols]
+  · simp [h, foldedWrite_mem_symbols]
+
+theorem simRowOfStep_next_mem_states (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q : SourceLabel tc) {q' : SourceLabel tc}
+    (hq' : q' ∈ TM0Route.partrecStartedTM0LabelList tc)
+    (left right : SourceSymbol) (stmt : Turing.TM0.Stmt SourceSymbol) :
+    (simRowOfStep tc side marked q q' left right stmt).next ∈ foldedStateList tc := by
+  cases stmt with
+  | move dir =>
+      simp [simRowOfStep, mkRow,
+        foldedSimStateCode_mem_states tc (foldedMoveNextSide side marked dir) hq']
+  | write new =>
+      simp [simRowOfStep, mkRow, foldedSimStateCode_mem_states tc side hq']
+
+theorem foldedMoveStmt_write_mem_symbols
+    (side : FoldSide) (marked : Bool) (cell : Nat) (dir : Turing.Dir)
+    (hcell : cell ∈ foldedSymbolList) :
+    match foldedMoveStmt side marked cell dir with
+    | PostStmt.move _ => True
+    | PostStmt.write b => b ∈ foldedSymbolList := by
+  cases side <;> cases marked <;> cases dir <;> simp [foldedMoveStmt, hcell]
+
+theorem simRowOfStep_write_mem_symbols (tc : Turing.ToPartrec.Code)
+    (side : FoldSide) (marked : Bool)
+    (q q' : SourceLabel tc) (left right : SourceSymbol)
+    (stmt : Turing.TM0.Stmt SourceSymbol) :
+    match (simRowOfStep tc side marked q q' left right stmt).stmt with
+    | PostStmt.move _ => True
+    | PostStmt.write b => b ∈ foldedSymbolList := by
+  cases stmt with
+  | move dir =>
+      exact foldedMoveStmt_write_mem_symbols side marked
+        (foldedSymbolCode marked left right) dir
+        (foldedSymbolCode_mem_symbols marked left right)
+  | write new =>
+      exact foldedWriteForStmt_mem_symbols side marked new left right
 
 theorem simTransitionOfStep_eq_some_of_step {tc : Turing.ToPartrec.Code}
     {q q' : SourceLabel tc} {side : FoldSide} {marked : Bool}
@@ -6219,6 +6294,54 @@ theorem positionProgramData_transition?_sim_eq_some_of_support_succ_step
     (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v) (q' := q') (side := side)
     (marked := marked) (left := left) (right := right) (stmt := stmt)
     hn hsupport hstate hstep
+
+theorem positionProgramData_step_sim_eq_some_of_support_succ_step
+    {tc : Turing.ToPartrec.Code} {n : Nat}
+    {stmtOpt : Option (SourceStmt tc)} {v : PartrecVar} {q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hn : n < TM0Route.partrecStartedTM0LabelCount tc)
+    (hqlist : (stmtOpt, v) ∈ TM0Route.partrecStartedTM0LabelList tc)
+    (hsupport :
+      (TM0Route.partrecStartedTM0LabelSupportList tc)[n + 1]? = some (stmtOpt, v))
+    (hstate : TM0FiniteCompiler.stateCode tc (stmtOpt, v) = n + 1)
+    (hstep :
+      TM0Route.partrecStartedTM0Machine tc (stmtOpt, v) (foldedRead side left right) =
+        some (q', stmt)) :
+    (positionProgramData tc).step
+        (foldedSimStateCode tc side (stmtOpt, v))
+        (foldedSymbolCode marked left right) =
+      some ((simRowOfStep tc side marked (stmtOpt, v) q' left right stmt).next,
+        (simRowOfStep tc side marked (stmtOpt, v) q' left right stmt).stmt) := by
+  have hfind := positionProgramData_transition?_sim_eq_some_of_support_succ_step
+    (tc := tc) (n := n) (stmtOpt := stmtOpt) (v := v) (q' := q') (side := side)
+    (marked := marked) (left := left) (right := right) (stmt := stmt)
+    hn hsupport hstate hstep
+  have hqset : (stmtOpt, v) ∈ TM0Route.partrecStartedTM0Labels tc :=
+    (TM0Route.mem_partrecStartedTM0LabelList tc (stmtOpt, v)).1 hqlist
+  have hq'set : q' ∈ TM0Route.partrecStartedTM0Labels tc :=
+    TM0FiniteCompiler.next_label_mem_of_step hqset hstep
+  have hq'list : q' ∈ TM0Route.partrecStartedTM0LabelList tc :=
+    (TM0Route.mem_partrecStartedTM0LabelList tc q').2 hq'set
+  have hnext :
+      (simRowOfStep tc side marked (stmtOpt, v) q' left right stmt).next ∈
+        foldedStateList tc :=
+    simRowOfStep_next_mem_states tc side marked (stmtOpt, v) hq'list left right stmt
+  have hwrite := simRowOfStep_write_mem_symbols
+    tc side marked (stmtOpt, v) q' left right stmt
+  unfold PostProgram.step
+  rw [hfind]
+  simp only [positionProgramData, programDataOfStepData, programOfCountAndSimRows,
+    programOfCountAndRows, programOfParts, dite_eq_ite, Option.ite_none_right_eq_some]
+  constructor
+  · exact hnext
+  cases hstmt : (simRowOfStep tc side marked (stmtOpt, v) q' left right stmt).stmt with
+  | move m =>
+      simp
+  | write b =>
+      have hb : b ∈ foldedSymbolList := by
+        simpa [hstmt] using hwrite
+      simp [hb]
 
 end TM0FoldedCompiler
 
