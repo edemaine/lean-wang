@@ -63,6 +63,16 @@ def equivBits : Quadrant ≃ Bool × Bool where
 instance instPrimcodable : Primcodable Quadrant :=
   Primcodable.ofEquiv (Bool × Bool) equivBits
 
+theorem toBits_primrec : Primrec toBits := by
+  simpa [equivBits] using
+    (Primrec.of_equiv (e := equivBits) : Primrec equivBits)
+
+theorem xBit_primrec : Primrec xBit :=
+  Primrec.fst.comp toBits_primrec
+
+theorem yBit_primrec : Primrec yBit :=
+  Primrec.snd.comp toBits_primrec
+
 def all : List Quadrant :=
   [southwest, southeast, northwest, northeast]
 
@@ -179,6 +189,68 @@ def subdivideTileAt (t : WangTile) : Quadrant → WangTile
         s := internalHorizontalColor t true
         e := verticalEdgeColor true t.e
         w := internalVerticalColor t true }
+
+theorem subdivideTileAt_primrec :
+    Primrec (fun p : WangTile × Quadrant => subdivideTileAt p.1 p.2) := by
+  let t : WangTile × Quadrant → WangTile := fun p => p.1
+  let x : WangTile × Quadrant → Bool := fun p => p.2.xBit
+  let y : WangTile × Quadrant → Bool := fun p => p.2.yBit
+  let nFn : WangTile × Quadrant → Nat := fun p =>
+    bif y p then horizontalEdgeColor (x p) (t p).n
+    else internalHorizontalColor (t p) (x p)
+  let sFn : WangTile × Quadrant → Nat := fun p =>
+    bif y p then internalHorizontalColor (t p) (x p)
+    else horizontalEdgeColor (x p) (t p).s
+  let eFn : WangTile × Quadrant → Nat := fun p =>
+    bif x p then verticalEdgeColor (y p) (t p).e
+    else internalVerticalColor (t p) (y p)
+  let wFn : WangTile × Quadrant → Nat := fun p =>
+    bif x p then internalVerticalColor (t p) (y p)
+    else verticalEdgeColor (y p) (t p).w
+  have ht : Primrec t := Primrec.fst
+  have hx : Primrec x := Quadrant.xBit_primrec.comp Primrec.snd
+  have hy : Primrec y := Quadrant.yBit_primrec.comp Primrec.snd
+  have hnH : Primrec
+      (fun p : WangTile × Quadrant => horizontalEdgeColor (x p) (t p).n) :=
+    horizontalEdgeColor_primrec₂.comp hx (WangTile.n_primrec.comp ht)
+  have hnI : Primrec
+      (fun p : WangTile × Quadrant => internalHorizontalColor (t p) (x p)) :=
+    internalHorizontalColor_primrec₂.comp ht hx
+  have hn : Primrec nFn := Primrec.cond hy hnH hnI
+  have hsI : Primrec
+      (fun p : WangTile × Quadrant => internalHorizontalColor (t p) (x p)) :=
+    internalHorizontalColor_primrec₂.comp ht hx
+  have hsH : Primrec
+      (fun p : WangTile × Quadrant => horizontalEdgeColor (x p) (t p).s) :=
+    horizontalEdgeColor_primrec₂.comp hx (WangTile.s_primrec.comp ht)
+  have hs : Primrec sFn := Primrec.cond hy hsI hsH
+  have heV : Primrec
+      (fun p : WangTile × Quadrant => verticalEdgeColor (y p) (t p).e) :=
+    verticalEdgeColor_primrec₂.comp hy (WangTile.e_primrec.comp ht)
+  have heI : Primrec
+      (fun p : WangTile × Quadrant => internalVerticalColor (t p) (y p)) :=
+    internalVerticalColor_primrec₂.comp ht hy
+  have he : Primrec eFn := Primrec.cond hx heV heI
+  have hwI : Primrec
+      (fun p : WangTile × Quadrant => internalVerticalColor (t p) (y p)) :=
+    internalVerticalColor_primrec₂.comp ht hy
+  have hwV : Primrec
+      (fun p : WangTile × Quadrant => verticalEdgeColor (y p) (t p).w) :=
+    verticalEdgeColor_primrec₂.comp hy (WangTile.w_primrec.comp ht)
+  have hw : Primrec wFn := Primrec.cond hx hwI hwV
+  have htuple : Primrec
+      (fun p : WangTile × Quadrant => (nFn p, sFn p, eFn p, wFn p)) :=
+    Primrec.pair hn (Primrec.pair hs (Primrec.pair he hw))
+  have htile : Primrec
+      (fun p : WangTile × Quadrant =>
+        WangTile.ofTuple (nFn p, sFn p, eFn p, wFn p)) :=
+    WangTile.ofTuple_primrec.comp htuple
+  exact htile.of_eq fun p => by
+    rcases p with ⟨tile, q⟩
+    cases q <;> rfl
+
+theorem subdivideTileAt_primrec₂ : Primrec₂ subdivideTileAt :=
+  Primrec₂.mk subdivideTileAt_primrec
 
 /-- The four quadrant tiles of one Wang tile. -/
 def subdivideTile (t : WangTile) : TileSet :=

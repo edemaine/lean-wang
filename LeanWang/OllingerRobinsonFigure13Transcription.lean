@@ -281,6 +281,16 @@ theorem fig13QuarterRoleSpecs_nodupTilesBool
 def fig13Tile (i : Fin 92) : WangTile :=
   fig13Tiles.get ⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩
 
+theorem fig13Tile_primrec : Primrec fig13Tile := by
+  let defaultTile : WangTile := { n := 0, s := 0, e := 0, w := 0 }
+  have hgetD : Primrec (fun i : Fin 92 => fig13Tiles.getD i.val defaultTile) := by
+    exact (Primrec.list_getD defaultTile).comp
+      (Primrec.const fig13Tiles) Primrec.encode
+  exact hgetD.of_eq fun i => by
+    unfold fig13Tile
+    rw [List.getD_eq_getElem (hn := by simp [fig13Tiles_length, i.isLt])]
+    rfl
+
 /-- A named quadrant tile in the subdivided Figure 13 scaffold. -/
 def fig13QuarterTile (i : Fin 92) (q : Quadrant) : WangTile :=
   TileSubdivision.subdivideTileAt (fig13Tile i) q
@@ -352,6 +362,11 @@ theorem quadrant_primrec : Primrec Figure18Site.quadrant :=
 
 def tile (site : Figure18Site) : WangTile :=
   fig13QuarterTile site.index site.quadrant
+
+theorem tile_primrec : Primrec tile := by
+  unfold tile fig13QuarterTile
+  exact TileSubdivision.subdivideTileAt_primrec₂.comp
+    (fig13Tile_primrec.comp index_primrec) quadrant_primrec
 
 /-- All Figure 18 quadrant sites, ordered by Figure 13 tile index then quadrant. -/
 def all : List Figure18Site :=
