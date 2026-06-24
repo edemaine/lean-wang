@@ -3035,8 +3035,8 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows
     (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
     Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_searchCodeOneRows
-    (sourceSimStepDataForLabelIndexFromWithSearchCode_one_primrec_of_varRows hvarRows)
+  sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
+    (sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneVarRows hvarRows)
 
 theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
     (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
