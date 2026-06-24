@@ -147,6 +147,35 @@ theorem toScaffold_corner_active (P : ScaffoldPresentation) :
     P.toScaffold.active P.toScaffold.corner = true := by
   simp [P.corner_role]
 
+/--
+Finite check that the distinguished corner role occurs only on `cornerTile`
+inside the scaffold tile list.
+-/
+def cornerUniqueBool (P : ScaffoldPresentation) : Bool :=
+  P.tiles.all fun tile =>
+    decide (P.role tile = CellRole.corner) == decide (tile = P.cornerTile)
+
+private theorem cornerUniqueBool_mem_eq {P : ScaffoldPresentation} {tile : WangTile}
+    (hcheck : P.cornerUniqueBool = true) (htile : tile ∈ P.tiles) :
+    decide (P.role tile = CellRole.corner) = decide (tile = P.cornerTile) := by
+  unfold cornerUniqueBool at hcheck
+  have hall := List.all_eq_true.1 hcheck tile htile
+  cases hleft : decide (P.role tile = CellRole.corner) <;>
+    cases hright : decide (tile = P.cornerTile) <;>
+      simp [hleft, hright] at hall ⊢
+
+theorem cornerUnique_of_cornerUniqueBool {P : ScaffoldPresentation}
+    (hcheck : P.cornerUniqueBool = true) :
+    ∀ tile : WangTile, tile ∈ P.tiles →
+      P.role tile = CellRole.corner → tile = P.cornerTile := by
+  intro tile htile hcorner
+  have heq := cornerUniqueBool_mem_eq (P := P) (tile := tile) hcheck htile
+  have hleft : decide (P.role tile = CellRole.corner) = true := by
+    exact decide_eq_true hcorner
+  have hright : decide (tile = P.cornerTile) = true := by
+    simpa [hleft] using heq.symm
+  exact of_decide_eq_true hright
+
 end ScaffoldPresentation
 
 /--
@@ -180,6 +209,7 @@ structure PresentedActiveCornerWindow (P : ScaffoldPresentation)
     (n : Nat) (hn : 0 < n) where
   origin : Int × Int
   baseRect : Rectangle n n
+  mem : ∀ i : Fin n, ∀ j : Fin n, baseRect i j ∈ P.tiles
   active : ∀ i : Fin n, ∀ j : Fin n,
     CellRole.isActive (P.role (baseRect i j)) = true
   corner : P.role (baseRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner
@@ -192,12 +222,14 @@ def activeCornerWindowOfPresentedActiveCornerWindow
     {x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed)}
     {n : Nat} {hn : 0 < n}
     (hwindow : PresentedActiveCornerWindow P x n hn)
-    (hcorner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile) :
+    (hcorner_unique : ∀ tile : WangTile, tile ∈ P.tiles →
+      P.role tile = CellRole.corner → tile = P.cornerTile) :
     ActiveCornerWindow P.toScaffold x n hn where
   origin := hwindow.origin
   baseRect := hwindow.baseRect
   active := hwindow.active
-  corner := hcorner_unique (hwindow.baseRect ⟨0, hn⟩ ⟨0, hn⟩) hwindow.corner
+  corner := hcorner_unique (hwindow.baseRect ⟨0, hn⟩ ⟨0, hn⟩)
+    (hwindow.mem ⟨0, hn⟩ ⟨0, hn⟩) hwindow.corner
   product := hwindow.product
 
 /--
@@ -217,9 +249,9 @@ def HasRecognizableFreeSquares (S : Scaffold) : Prop :=
 /--
 Role-level recognizability for a presented scaffold.
 
-The extra uniqueness premise in `PresentedCertificate` states that the tile
-with role `corner` is exactly `P.cornerTile`, so role-level corner recognition
-matches the abstract scaffold corner field.
+The extra uniqueness premise in `PresentedCertificate` states that the only
+tile in `P.tiles` with role `corner` is `P.cornerTile`, so role-level corner
+recognition matches the abstract scaffold corner field.
 -/
 def HasPresentedRecognizableFreeSquares (P : ScaffoldPresentation) : Prop :=
   ∀ {T : TileSet} {seed : WangTile}
@@ -231,7 +263,8 @@ def HasPresentedRecognizableFreeSquares (P : ScaffoldPresentation) : Prop :=
 theorem hasRecognizableFreeSquares_of_presented
     {P : ScaffoldPresentation}
     (hS : HasPresentedRecognizableFreeSquares P)
-    (hcorner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile) :
+    (hcorner_unique : ∀ tile : WangTile, tile ∈ P.tiles →
+      P.role tile = CellRole.corner → tile = P.cornerTile) :
     HasRecognizableFreeSquares P.toScaffold := by
   intro T seed x hx n hn
   rcases hS x hx n hn with ⟨window⟩
@@ -258,7 +291,8 @@ structure Certificate (S : Scaffold) : Prop where
 /-- Certificate stated against a typed scaffold presentation. -/
 structure PresentedCertificate (P : ScaffoldPresentation) : Prop where
   recognizable : HasPresentedRecognizableFreeSquares P
-  corner_unique : ∀ tile : WangTile, P.role tile = CellRole.corner → tile = P.cornerTile
+  corner_unique : ∀ tile : WangTile, tile ∈ P.tiles →
+    P.role tile = CellRole.corner → tile = P.cornerTile
   realizes : RealizesActiveCornerSquares P.toScaffold
 
 theorem certificate_of_presentedCertificate
