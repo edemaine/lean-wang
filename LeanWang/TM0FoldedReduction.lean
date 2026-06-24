@@ -990,6 +990,47 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
     (sourceLabelIndexStartSplit?_of_block_var_get? (c := c) hblock hv) hstmt]
   simp [hmod]
 
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode 0 i
+          (none : Option (Turing.TM1.Stmt
+            (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+            (Turing.TM2to1.Λ'
+              TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+              (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+              TM0Route.PartrecVar)
+            TM0Route.PartrecVar)) v)
+        (none : Option (Turing.TM1.Stmt
+          (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+          (Turing.TM2to1.Λ'
+            TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+            (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+            TM0Route.PartrecVar)
+          TM0Route.PartrecVar))
+        v := by
+  simpa using
+    sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
+      (c := c) (block := 0) (i := i) (v := v)
+      (sourceStatementCount_pos c) hv (sourceStatementAt_zero c)
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c
+        (TM0Route.partrecVarList.length + i) =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode 1 i (sourceStatementOne c) v)
+        (sourceStatementOne c) v := by
+  simpa [Nat.mul_one] using
+    sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
+      (c := c) (block := 1) (i := i) (v := v)
+      (sourceStatementCount_one_lt c) hv (sourceStatementAt_one c)
+
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
