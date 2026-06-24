@@ -84,6 +84,19 @@ def tilesOfSpecs (specs : List RoleTileSpec) : TileSet :=
 def roleEntriesOfSpecs (specs : List RoleTileSpec) : List (WangTile × CellRole) :=
   specs.map RoleTileSpec.toPair
 
+/-!
+The tile list in Figure 13 is meant to be a set.  Keeping this as a separate
+finite check catches accidental duplicate transcriptions before the more
+semantic scaffold obligations are attempted.
+-/
+def nodupTilesBool (specs : List RoleTileSpec) : Bool :=
+  decide (List.Nodup (tilesOfSpecs specs))
+
+theorem nodupTiles_of_nodupTilesBool {specs : List RoleTileSpec}
+    (hcheck : nodupTilesBool specs = true) :
+    List.Nodup (tilesOfSpecs specs) := by
+  exact of_decide_eq_true hcheck
+
 @[simp]
 theorem mem_tilesOfSpecs {specs : List RoleTileSpec} {tile : WangTile} :
     tile ∈ tilesOfSpecs specs ↔ ∃ spec ∈ specs, spec.tile = tile := by
@@ -98,6 +111,32 @@ theorem roleEntriesOfSpecs_nil :
 theorem roleEntriesOfSpecs_cons (spec : RoleTileSpec) (specs : List RoleTileSpec) :
     roleEntriesOfSpecs (spec :: specs) = spec.toPair :: roleEntriesOfSpecs specs :=
   rfl
+
+theorem lookupRole_eq_role_of_mem_of_nodup
+    {specs : List RoleTileSpec} (hnodup : List.Nodup (tilesOfSpecs specs))
+    {spec : RoleTileSpec} (hspec : spec ∈ specs) :
+    lookupRole (roleEntriesOfSpecs specs) spec.tile = spec.role := by
+  induction specs with
+  | nil =>
+      cases hspec
+  | cons head tail ih =>
+      simp only [tilesOfSpecs, List.map_cons, List.nodup_cons] at hnodup
+      simp only [List.mem_cons] at hspec
+      rcases hspec with hhead | htail
+      · subst head
+        simp [lookupRole]
+      · have hne : spec.tile ≠ head.tile := by
+          intro heq
+          have hmemTail : spec.tile ∈ tilesOfSpecs tail := by
+            exact (mem_tilesOfSpecs.2 ⟨spec, htail, rfl⟩)
+          exact hnodup.1 (by simpa [heq] using hmemTail)
+        simpa [lookupRole, hne] using ih hnodup.2 htail
+
+theorem lookupRole_eq_role_of_mem_of_nodupTilesBool
+    {specs : List RoleTileSpec} (hcheck : nodupTilesBool specs = true)
+    {spec : RoleTileSpec} (hspec : spec ∈ specs) :
+    lookupRole (roleEntriesOfSpecs specs) spec.tile = spec.role :=
+  lookupRole_eq_role_of_mem_of_nodup (nodupTiles_of_nodupTilesBool hcheck) hspec
 
 /--
 Turn a finite role transcription into a scaffold presentation.
