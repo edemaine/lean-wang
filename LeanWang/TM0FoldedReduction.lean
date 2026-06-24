@@ -5128,7 +5128,8 @@ theorem domino_problem_undecidable_of_checked_position_source_positionCodeInteri
 Encoded domino undecidability from a flexibly certified presented
 Ollinger/Robinson scaffold and the generated interior position-code rows.
 -/
-theorem encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRows
+theorem
+encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedFlexibleInstance)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
