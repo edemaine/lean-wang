@@ -315,6 +315,24 @@ theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global
         unfold sourceSimStepDataForLabelIndexFromWithCode
         rfl
 
+/--
+The older global bounded-search offset-decoder target implies the
+source-specific bounded-search decoder target by precomposing with the source
+translation.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_global
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2) := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+        rfl
+
 theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
