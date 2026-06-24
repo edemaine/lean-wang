@@ -10,8 +10,8 @@ import LeanWang.TM0FoldedTranscriptionReduction
 Reduction wrappers specialized to the concrete Figure 18 scaffold package.
 
 This module is intentionally thin: it keeps the large folded reduction modules
-unchanged while exposing theorem surfaces that take the eventual
-`Figure18FlexibleInstance` directly.
+unchanged while exposing theorem surfaces that take the eventual direct
+`Figure18Instance` or flexible `Figure18FlexibleInstance` directly.
 -/
 
 noncomputable section
@@ -23,8 +23,68 @@ namespace TM0FoldedReduction
 open Nat.Partrec (Code)
 
 /--
-Encoded domino undecidability from a concrete Figure 18 scaffold instance and
-generated position-coded source-route obligations.
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+an indexed free-square certificate and generated position-coded source-route
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_position_source
+    (I : OllingerRobinson.Figure18Instance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_position_source
+    I.toPresentedInstance h
+
+/--
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with an indexed free-square certificate and generated position-coded
+source-route obligations.
+-/
+theorem domino_problem_undecidable_of_figure18_position_source
+    (I : OllingerRobinson.Figure18Instance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_position_source
+    I.toPresentedInstance h
+
+/--
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+an indexed free-square certificate and the generated interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_position_source_interiorRows
+    (I : OllingerRobinson.Figure18Instance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
+    I.toPresentedInstance hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with an indexed free-square certificate and the generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_figure18_position_source_interiorRows
+    (I : OllingerRobinson.Figure18Instance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
+    I.toPresentedInstance hinterior hcorrect
+
+/--
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+a flexible certificate and generated position-coded source-route obligations.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_flexible_position_source
     (I : OllingerRobinson.Figure18FlexibleInstance)
@@ -34,8 +94,9 @@ theorem encoded_domino_problem_undecidable_of_figure18_flexible_position_source
     I.checkedFlexibleTranscription h
 
 /--
-Unencoded domino undecidability from a concrete Figure 18 scaffold instance and
-generated position-coded source-route obligations.
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with a flexible certificate and generated position-coded source-route
+obligations.
 -/
 theorem domino_problem_undecidable_of_figure18_flexible_position_source
     (I : OllingerRobinson.Figure18FlexibleInstance)
@@ -45,8 +106,8 @@ theorem domino_problem_undecidable_of_figure18_flexible_position_source
     I.checkedFlexibleTranscription h
 
 /--
-Encoded domino undecidability from a concrete Figure 18 scaffold instance and
-the generated interior position-code rows.
+Encoded domino undecidability from a concrete Figure 18 scaffold instance with
+a flexible certificate and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
     (I : OllingerRobinson.Figure18FlexibleInstance)
@@ -62,8 +123,8 @@ theorem encoded_domino_problem_undecidable_of_figure18_flexible_position_source_
     I.checkedFlexibleTranscription hinterior hcorrect
 
 /--
-Unencoded domino undecidability from a concrete Figure 18 scaffold instance and
-the generated interior position-code rows.
+Unencoded domino undecidability from a concrete Figure 18 scaffold instance
+with a flexible certificate and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
     (I : OllingerRobinson.Figure18FlexibleInstance)
