@@ -277,6 +277,10 @@ position decoding produces a code in `partrecStartedTM0States`, both globally
 (`labelAtByStatementFromWithPositionCode?_code_mem_states`) and through the
 source wrapper
 `sourceLabelAtByStatementFromWithPositionCode_code_mem_states`.
+The second invariant is also in place: the produced position code reads back to
+the decoded label in `partrecStartedTM0LabelSupportList`, via
+`labelAtByStatementFromWithPositionCode?_support_get?` and the source wrapper
+`sourceLabelAtByStatementFromWithPositionCode_support_get?`.
 
 Next implementation targets:
 

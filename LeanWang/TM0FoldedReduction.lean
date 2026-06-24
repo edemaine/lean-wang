@@ -364,6 +364,16 @@ theorem sourceLabelAtByStatementFromWithPositionCode_code_mem_states
   TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_code_mem_states
     (NatPartrecToToPartrec.translate c) h
 
+theorem sourceLabelAtByStatementFromWithPositionCode_support_get?
+    {c : Code} {fuel k i : Nat}
+    {q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat}
+    (h : TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i = some q) :
+    (TM0Route.partrecStartedTM0LabelSupportList
+        (NatPartrecToToPartrec.translate c))[q.2]? = some q.1 :=
+  TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_support_get?
+    (NatPartrecToToPartrec.translate c) h
+
 theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_source_searchCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
