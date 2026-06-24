@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.TM0FoldedProgram
+import LeanWang.TM0FoldedPositionCorrect
 import LeanWang.OllingerRobinsonScaffold
 import Mathlib.Computability.Reduce
 
@@ -136,15 +137,11 @@ evaluator.
 -/
 def positionSourceObligationsOfProgramData
     (hprogram : Computable (fun c : Code =>
-      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c))) :
     PositionSourceObligations where
   program_computable := hprogram
-  correct := sourcePositionProgramData_correct_of_positionProgramData_tm0_correct hcorrect
+  correct := sourcePositionProgramData_correct_of_positionProgramData_tm0_correct
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 /-- Broad folded-route obligations imply the source-code obligations actually used. -/
 def Obligations.toSource (h : Obligations) : SourceObligations where
@@ -4385,17 +4382,11 @@ with the canonical folded row list.
 -/
 def positionSourceObligationsOfLabelIndexFromWithPositionCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
   positionSourceObligationsOfProgramData
     ((sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
       hindex).of_eq fun _ => rfl)
-    hcorrect
 
 /--
 Primitive recursiveness of the generated position-code accumulator step gives
@@ -4403,16 +4394,10 @@ the generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeDecoderStep
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeDecoderStep p.1 p.2)) :
     PositionSourceObligations :=
   positionSourceObligationsOfLabelIndexFromWithPositionCode
     (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step hstep)
-    hcorrect
 
 /--
 Primitive recursiveness of the generated one-row position-code decoder gives
@@ -4420,17 +4405,11 @@ the generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeOneRows
     (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
   positionSourceObligationsOfLabelIndexFromWithPositionCode
     (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRows
       hvarRows)
-    hcorrect
 
 /--
 Primitive recursiveness of the generated bounded-interior position-code rows
@@ -4438,16 +4417,10 @@ gives the generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeBoundedInteriorRows
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeOneRows
     (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hinterior)
-    hcorrect
 
 /--
 Primitive recursiveness of the generated interior position-code rows gives the
@@ -4455,16 +4428,10 @@ generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeInteriorRows
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeBoundedInteriorRows
     (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
-    hcorrect
 
 /--
 Primitive recursiveness of the source-level position-coded descriptor decoder
@@ -4867,15 +4834,10 @@ row-equivalence proof against the canonical folded rows is required.
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode
     (S : Scaffold) (hS : IsScaffold S)
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfLabelIndexFromWithPositionCode hindex hcorrect)
+    (positionSourceObligationsOfLabelIndexFromWithPositionCode hindex)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated
@@ -4884,15 +4846,10 @@ position-coded descriptor decoder.
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCode
     (S : Scaffold) (hS : IsScaffold S)
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfLabelIndexFromWithPositionCode hindex hcorrect)
+    (positionSourceObligationsOfLabelIndexFromWithPositionCode hindex)
 
 /--
 Encoded domino undecidability from a scaffold and the generated position-code
@@ -4901,15 +4858,10 @@ accumulator step.
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeDecoderStep
     (S : Scaffold) (hS : IsScaffold S)
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeDecoderStep p.1 p.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeDecoderStep hstep hcorrect)
+    (positionSourceObligationsOfPositionCodeDecoderStep hstep)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated position-code
@@ -4918,15 +4870,10 @@ accumulator step.
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeDecoderStep
     (S : Scaffold) (hS : IsScaffold S)
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeDecoderStep p.1 p.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeDecoderStep hstep hcorrect)
+    (positionSourceObligationsOfPositionCodeDecoderStep hstep)
 
 /--
 Encoded domino undecidability from a scaffold and the generated one-row
@@ -4935,15 +4882,10 @@ position-code decoder.
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeOneRows
     (S : Scaffold) (hS : IsScaffold S)
     (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeOneRows hvarRows hcorrect)
+    (positionSourceObligationsOfPositionCodeOneRows hvarRows)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated one-row
@@ -4952,15 +4894,10 @@ position-code decoder.
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeOneRows
     (S : Scaffold) (hS : IsScaffold S)
     (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeOneRows hvarRows hcorrect)
+    (positionSourceObligationsOfPositionCodeOneRows hvarRows)
 
 /--
 Encoded domino undecidability from a scaffold and the generated bounded
@@ -4969,16 +4906,11 @@ interior position-code rows.
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeBoundedRows
     (S : Scaffold) (hS : IsScaffold S)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeBoundedInteriorRows
-      hinterior hcorrect)
+      hinterior)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated bounded
@@ -4987,16 +4919,11 @@ interior position-code rows.
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeBoundedRows
     (S : Scaffold) (hS : IsScaffold S)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeBoundedInteriorRows
-      hinterior hcorrect)
+      hinterior)
 
 /--
 Encoded domino undecidability from a scaffold and the generated interior
@@ -5005,16 +4932,11 @@ position-code rows.
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
     (S : Scaffold) (hS : IsScaffold S)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRows
-      hinterior hcorrect)
+      hinterior)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated interior
@@ -5023,16 +4945,11 @@ position-code rows.
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
     (S : Scaffold) (hS : IsScaffold S)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRows
-      hinterior hcorrect)
+      hinterior)
 
 /--
 Encoded domino undecidability from a presented Ollinger/Robinson scaffold and
@@ -5041,15 +4958,10 @@ the generated interior position-code rows.
 theorem encoded_domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedInstance)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
-    I.presentation.toScaffold I.isScaffold hinterior hcorrect
+    I.presentation.toScaffold I.isScaffold hinterior
 
 /--
 Unencoded domino undecidability from a presented Ollinger/Robinson scaffold and
@@ -5058,15 +4970,10 @@ the generated interior position-code rows.
 theorem domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedInstance)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
-    I.presentation.toScaffold I.isScaffold hinterior hcorrect
+    I.presentation.toScaffold I.isScaffold hinterior
 
 /--
 Encoded domino undecidability from a checked finite-data
@@ -5075,15 +4982,10 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 theorem encoded_domino_problem_undecidable_of_checked_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.CheckedPresentedInstance)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
-    I.toPresentedInstance hinterior hcorrect
+    I.toPresentedInstance hinterior
 
 /--
 Unencoded domino undecidability from a checked finite-data
@@ -5092,15 +4994,10 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 theorem domino_problem_undecidable_of_checked_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.CheckedPresentedInstance)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
-    I.toPresentedInstance hinterior hcorrect
+    I.toPresentedInstance hinterior
 
 end TM0FoldedReduction
 
