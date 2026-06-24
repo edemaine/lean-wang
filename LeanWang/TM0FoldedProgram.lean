@@ -4176,6 +4176,27 @@ theorem simStepDataForLabelIndexFromWithPositionCode_eq_target_of_currentCode_eq
   rw [h]
   simp [hlabel, hcode]
 
+theorem simRowsOfStepDataForPositionCode_find?_eq_target
+    {tc : Turing.ToPartrec.Code} {fuel k i : Nat}
+    {q : SourceLabel tc × Nat} {target : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (h : labelAtByStatementFromWithPositionCode? tc fuel k i = some q)
+    (htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc)
+    (hcode : q.2 = TM0FiniteCompiler.stateCode tc target) :
+    (simRowsOfStepData
+        (simStepDataForLabelIndexFromWithPositionCode tc fuel k i)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) =
+      (simRowsOfStepData
+        (simStepDataForStmtLabelWithCode tc
+          (TM0FiniteCompiler.stateCode tc target) target.1 target.2)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) := by
+  rw [simStepDataForLabelIndexFromWithPositionCode_eq_target_of_currentCode_eq_stateCode
+    h htarget hcode]
+
 theorem simStepDataForLabelIndexFromWithSearchCode_eq_withCode
     (tc : Turing.ToPartrec.Code) (fuel k i : Nat) :
     simStepDataForLabelIndexFromWithSearchCode tc fuel k i =
@@ -4235,6 +4256,28 @@ def simStepDataForLabelIndexStartWithPositionCode
     (tc : Turing.ToPartrec.Code) (i : Nat) : List SimStepData :=
   simStepDataForLabelIndexFromWithPositionCode tc
     (TM0Route.partrecStartedTM0StatementCount tc) 0 i
+
+theorem simRowsOfStepDataForPositionCodeStart_find?_eq_target
+    {tc : Turing.ToPartrec.Code} {i : Nat}
+    {q : SourceLabel tc × Nat} {target : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    (h : labelAtByStatementFromWithPositionCode? tc
+        (TM0Route.partrecStartedTM0StatementCount tc) 0 i = some q)
+    (htarget : target ∈ TM0Route.partrecStartedTM0LabelSupportList tc)
+    (hcode : q.2 = TM0FiniteCompiler.stateCode tc target) :
+    (simRowsOfStepData
+        (simStepDataForLabelIndexStartWithPositionCode tc i)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) =
+      (simRowsOfStepData
+        (simStepDataForStmtLabelWithCode tc
+          (TM0FiniteCompiler.stateCode tc target) target.1 target.2)).find?
+        (fun e =>
+          e.matchesInput (foldedSimStateCode tc side target)
+            (foldedSymbolCode marked left right)) := by
+  unfold simStepDataForLabelIndexStartWithPositionCode
+  exact simRowsOfStepDataForPositionCode_find?_eq_target h htarget hcode
 
 theorem simStepDataForLabelIndex_eq_labelAt
     (tc : Turing.ToPartrec.Code) (i : Nat) :
