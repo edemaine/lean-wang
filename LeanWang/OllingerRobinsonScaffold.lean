@@ -250,6 +250,30 @@ structure PresentedActiveCornerWindow (P : ScaffoldPresentation)
     WangTile.product (baseRect i j) payload =
       (x (origin.1 + Int.ofNat i.val, origin.2 + Int.ofNat j.val)).1
 
+/--
+Unpacked role-level form of a recognizable active-corner window.
+
+This is the intended target for the concrete Ollinger/Robinson free-subsquare
+argument: from a plane tiling of the combined scaffold/payload tileset, find a
+translated square of scaffold tiles, prove all its cells are active, identify the
+lower-left corner role, and show that these scaffold tiles are the base layer of
+the combined tiling.
+-/
+def HasPresentedActiveCornerBaseWindows (P : ScaffoldPresentation) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold P.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ origin : Int × Int, ∃ baseRect : Rectangle n n,
+          (∀ i : Fin n, ∀ j : Fin n, baseRect i j ∈ P.tiles) ∧
+            (∀ i : Fin n, ∀ j : Fin n,
+              CellRole.isActive (P.role (baseRect i j)) = true) ∧
+            P.role (baseRect ⟨0, hn⟩ ⟨0, hn⟩) = CellRole.corner ∧
+            ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+              WangTile.product (baseRect i j) payload =
+                (x (origin.1 + Int.ofNat i.val,
+                  origin.2 + Int.ofNat j.val)).1
+
 def activeCornerWindowOfPresentedActiveCornerWindow
     {P : ScaffoldPresentation} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold P.toScaffold T seed)}
@@ -292,6 +316,22 @@ def HasPresentedRecognizableFreeSquares (P : ScaffoldPresentation) : Prop :=
     ValidPlaneTiling (combineWithScaffold P.toScaffold T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (PresentedActiveCornerWindow P x n hn)
+
+theorem hasPresentedRecognizableFreeSquares_of_hasPresentedActiveCornerBaseWindows
+    {P : ScaffoldPresentation}
+    (hP : HasPresentedActiveCornerBaseWindows P) :
+    HasPresentedRecognizableFreeSquares P := by
+  intro T seed x hx n hn
+  rcases hP x hx n hn with
+    ⟨origin, baseRect, hmem, hactive, hcorner, hproduct⟩
+  exact ⟨{
+    origin := origin
+    baseRect := baseRect
+    mem := hmem
+    active := hactive
+    corner := hcorner
+    product := hproduct
+  }⟩
 
 theorem hasRecognizableFreeSquares_of_presented
     {P : ScaffoldPresentation}
