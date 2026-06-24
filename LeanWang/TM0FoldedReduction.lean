@@ -986,6 +986,54 @@ def sourceSearchCodeDecoderStep (c : Code)
                           (NatPartrecToToPartrec.translate c))))
                   stmt v))
 
+theorem sourceSearchCodeDecoderStep_resolved
+    (c : Code) (k i : Nat) (rows : List TM0FoldedCompiler.SimStepData) :
+    sourceSearchCodeDecoderStep c (k, i, some rows) = (k, i, some rows) := by
+  rfl
+
+theorem sourceSearchCodeDecoderStep_var_none
+    {c : Code} {k i : Nat}
+    (hv : TM0Route.partrecVarList[i]? = none) :
+    sourceSearchCodeDecoderStep c (k, i, none) =
+      (k + 1, i - TM0Route.partrecVarList.length, none) := by
+  simp [sourceSearchCodeDecoderStep, hv]
+
+theorem sourceSearchCodeDecoderStep_stmt_none
+    {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = none) :
+    sourceSearchCodeDecoderStep c (k, i, none) =
+      (k, i, some []) := by
+  simp [sourceSearchCodeDecoderStep, hv, hstmt]
+
+theorem sourceSearchCodeDecoderStep_stmt_some
+    {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
+    {stmt : Option (Turing.TM1.Stmt
+      (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+      (Turing.TM2to1.Λ'
+        TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+        (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+        TM0Route.PartrecVar)
+      TM0Route.PartrecVar)}
+    (hv : TM0Route.partrecVarList[i]? = some v)
+    (hstmt : TM0Route.partrecStartedTM0StatementAt?
+        (NatPartrecToToPartrec.translate c) k = some stmt) :
+    sourceSearchCodeDecoderStep c (k, i, none) =
+      (k, i, some
+        (TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+          (NatPartrecToToPartrec.translate c)
+          (TM0FiniteCompiler.stateCodeBySupportSearch
+            (NatPartrecToToPartrec.translate c)
+            (TM0Route.partrecStartedTM0StatementCount
+              (NatPartrecToToPartrec.translate c))
+            ((stmt, v) :
+              Turing.TM1to0.Λ'
+                (TM0Route.partrecStartedTM1Machine
+                  (NatPartrecToToPartrec.translate c))))
+          stmt v)) := by
+  simp [sourceSearchCodeDecoderStep, hv, hstmt]
+
 def sourceSearchCodeDecoderState (c : Code) (fuel k i : Nat) :
     SourceSearchCodeDecoderState :=
   fuel.rec (sourceSearchCodeDecoderInit k i)
