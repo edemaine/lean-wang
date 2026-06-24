@@ -405,6 +405,20 @@ def RealizesActiveCornerSquares (S : Scaffold) : Prop :=
     (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
       TilesPlane (combineWithScaffold S T seed)
 
+/--
+Forward half of the scaffold reduction, stated directly at the payload-square
+level.
+
+This is more flexible than `ForcesActiveCornerSquares`: a concrete scaffold may
+route payload adjacencies through channels or other non-contiguous geometry, as
+in the Robinson/Ollinger free-subsquare construction, without first exposing a
+literal contiguous active block of scaffold cells.
+-/
+def ForcesFixedCornerSquares (S : Scaffold) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile},
+    TilesPlane (combineWithScaffold S T seed) →
+      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
+
 theorem all_fixedCornerSquares_of_tilesPlane_combineWithScaffold
     {S : Scaffold} (hS : ForcesActiveCornerSquares S)
     {T : TileSet} {seed : WangTile}
@@ -414,6 +428,12 @@ theorem all_fixedCornerSquares_of_tilesPlane_combineWithScaffold
   rcases hS h n hn with ⟨rect, baseRect, payloadRect, hlayers, hactive, hcorner⟩
   exact tileableFixedCornerSquare_payload_of_validCombinedRectangleLayers_of_active_corner
     hn hlayers hactive hcorner
+
+theorem forcesFixedCornerSquares_of_forcesActiveCornerSquares
+    {S : Scaffold} (hS : ForcesActiveCornerSquares S) :
+    ForcesFixedCornerSquares S := by
+  intro T seed htiles n hn
+  exact all_fixedCornerSquares_of_tilesPlane_combineWithScaffold hS htiles n hn
 
 theorem combineWithScaffold_primrec (S : Scaffold) :
     Primrec (fun p : TileSet × WangTile => combineWithScaffold S p.1 p.2) := by
@@ -448,17 +468,25 @@ def IsScaffold (S : Scaffold) : Prop :=
     TilesPlane (combineWithScaffold S T seed) ↔
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
 
+theorem isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    {S : Scaffold}
+    (hrealizes : RealizesActiveCornerSquares S)
+    (hforces : ForcesFixedCornerSquares S) :
+    IsScaffold S := by
+  intro T seed
+  constructor
+  · intro htiles
+    exact hforces htiles
+  · intro hsquares
+    exact hrealizes T seed hsquares
+
 theorem isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
     {S : Scaffold}
     (hrealizes : RealizesActiveCornerSquares S)
     (hforces : ForcesActiveCornerSquares S) :
     IsScaffold S := by
-  intro T seed
-  constructor
-  · intro htiles
-    exact all_fixedCornerSquares_of_tilesPlane_combineWithScaffold hforces htiles
-  · intro hsquares
-    exact hrealizes T seed hsquares
+  exact isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    hrealizes (forcesFixedCornerSquares_of_forcesActiveCornerSquares hforces)
 
 /-- The empty scaffold example; useful only as a minimal data sanity check. -/
 def emptyScaffoldExample : Scaffold where

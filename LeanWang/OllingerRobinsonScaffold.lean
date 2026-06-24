@@ -361,6 +361,19 @@ structure Certificate (S : Scaffold) : Prop where
   recognizable : HasRecognizableFreeSquares S
   realizes : RealizesActiveCornerSquares S
 
+/--
+Flexible scaffold certificate for constructions whose free payload square is
+not literally a contiguous active block of scaffold cells.
+
+The Robinson/Ollinger argument can be formalized against `forces`: every tiling
+of the combined scaffold/payload tileset directly yields arbitrarily large
+fixed-corner payload squares, possibly after routing adjacencies through
+channels. This is enough for the abstract reduction together with `realizes`.
+-/
+structure FlexibleCertificate (S : Scaffold) : Prop where
+  forces : ForcesFixedCornerSquares S
+  realizes : RealizesActiveCornerSquares S
+
 /-- Certificate stated against a typed scaffold presentation. -/
 structure PresentedCertificate (P : ScaffoldPresentation) : Prop where
   recognizable : HasPresentedRecognizableFreeSquares P
@@ -368,11 +381,22 @@ structure PresentedCertificate (P : ScaffoldPresentation) : Prop where
     P.role tile = CellRole.corner → tile = P.cornerTile
   realizes : RealizesActiveCornerSquares P.toScaffold
 
+/-- Flexible certificate stated against a typed scaffold presentation. -/
+structure PresentedFlexibleCertificate (P : ScaffoldPresentation) : Prop where
+  forces : ForcesFixedCornerSquares P.toScaffold
+  realizes : RealizesActiveCornerSquares P.toScaffold
+
 theorem certificate_of_presentedCertificate
     {P : ScaffoldPresentation} (hP : PresentedCertificate P) :
     Certificate P.toScaffold where
   recognizable := hasRecognizableFreeSquares_of_presented
     hP.recognizable hP.corner_unique
+  realizes := hP.realizes
+
+theorem flexibleCertificate_of_presentedFlexibleCertificate
+    {P : ScaffoldPresentation} (hP : PresentedFlexibleCertificate P) :
+    FlexibleCertificate P.toScaffold where
+  forces := hP.forces
   realizes := hP.realizes
 
 theorem presentedCertificate_of_sanity
@@ -403,15 +427,32 @@ theorem isScaffold_of_certificate {S : Scaffold} (hS : Certificate S) :
         (planeTilingHasActiveCornerBaseWindows_of_hasRecognizableFreeSquares
           hS.recognizable)))
 
+/-- A flexibly certified scaffold satisfies the abstract scaffold interface. -/
+theorem isScaffold_of_flexibleCertificate {S : Scaffold}
+    (hS : FlexibleCertificate S) :
+    IsScaffold S :=
+  isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    hS.realizes hS.forces
+
 /-- Package for the eventual concrete Ollinger/Robinson scaffold instance. -/
 structure Instance where
   scaffold : Scaffold
   certificate : Certificate scaffold
 
+/-- Package for a concrete scaffold with the flexible certificate shape. -/
+structure FlexibleInstance where
+  scaffold : Scaffold
+  certificate : FlexibleCertificate scaffold
+
 /-- Package for a concrete scaffold given by typed finite tile data. -/
 structure PresentedInstance where
   presentation : ScaffoldPresentation
   certificate : PresentedCertificate presentation
+
+/-- Package for a presented concrete scaffold with the flexible certificate shape. -/
+structure PresentedFlexibleInstance where
+  presentation : ScaffoldPresentation
+  certificate : PresentedFlexibleCertificate presentation
 
 /--
 Package for a concrete scaffold whose finite sanity obligations are discharged
@@ -428,10 +469,21 @@ theorem Instance.isScaffold (I : Instance) :
     IsScaffold I.scaffold :=
   isScaffold_of_certificate I.certificate
 
+/-- The flexibly packaged concrete scaffold provides the abstract reduction hypothesis. -/
+theorem FlexibleInstance.isScaffold (I : FlexibleInstance) :
+    IsScaffold I.scaffold :=
+  isScaffold_of_flexibleCertificate I.certificate
+
 /-- The packaged presented scaffold provides the abstract reduction hypothesis. -/
 theorem PresentedInstance.isScaffold (I : PresentedInstance) :
     IsScaffold I.presentation.toScaffold :=
   isScaffold_of_certificate (certificate_of_presentedCertificate I.certificate)
+
+/-- The flexibly packaged presented scaffold provides the abstract reduction hypothesis. -/
+theorem PresentedFlexibleInstance.isScaffold (I : PresentedFlexibleInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate
+    (flexibleCertificate_of_presentedFlexibleCertificate I.certificate)
 
 def CheckedPresentedInstance.toPresentedInstance (I : CheckedPresentedInstance) :
     PresentedInstance where

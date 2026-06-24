@@ -247,6 +247,18 @@ structure CheckedTranscription where
   realizes :
     RealizesActiveCornerSquares finite.presentation.toScaffold
 
+/--
+Checked finite transcription plus the flexible geometric certificate shape.
+
+This is likely the better target for the Robinson/Ollinger Figure 18 argument:
+the finite Figure 13 data is checked once, and the geometric proof may directly
+extract payload fixed-corner squares through the scaffold channels.
+-/
+structure CheckedFlexibleTranscription where
+  finite : FiniteCheckedTranscription
+  forces : ForcesFixedCornerSquares finite.presentation.toScaffold
+  realizes : RealizesActiveCornerSquares finite.presentation.toScaffold
+
 namespace CheckedTranscription
 
 def presentation (D : CheckedTranscription) : ScaffoldPresentation :=
@@ -264,6 +276,25 @@ theorem isScaffold (D : CheckedTranscription) :
   D.toCheckedPresentedInstance.isScaffold
 
 end CheckedTranscription
+
+namespace CheckedFlexibleTranscription
+
+def presentation (D : CheckedFlexibleTranscription) : ScaffoldPresentation :=
+  D.finite.presentation
+
+def toPresentedFlexibleInstance (D : CheckedFlexibleTranscription) :
+    PresentedFlexibleInstance where
+  presentation := D.presentation
+  certificate := {
+    forces := D.forces
+    realizes := D.realizes
+  }
+
+theorem isScaffold (D : CheckedFlexibleTranscription) :
+    IsScaffold D.presentation.toScaffold :=
+  D.toPresentedFlexibleInstance.isScaffold
+
+end CheckedFlexibleTranscription
 
 end OllingerRobinson
 end LeanWang
