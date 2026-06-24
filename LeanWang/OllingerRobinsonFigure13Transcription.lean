@@ -322,6 +322,9 @@ def all : List Figure18Site :=
   (List.finRange 92).flatMap fun i =>
     Quadrant.all.map fun q => ({ index := i, quadrant := q } : Figure18Site)
 
+def ofTile? (tile : WangTile) : Option Figure18Site :=
+  all.find? fun site => site.tile = tile
+
 @[simp]
 theorem all_length : all.length = 368 := by
   simp [all, Quadrant.all]
@@ -356,6 +359,39 @@ theorem mem_all (site : Figure18Site) : site ∈ all := by
 theorem tile_mem_all_tiles (site : Figure18Site) :
     site.tile ∈ all.map tile :=
   List.mem_map.2 ⟨site, site.mem_all, rfl⟩
+
+theorem ofTile?_eq_some_tile {tile : WangTile} {site : Figure18Site}
+    (h : ofTile? tile = some site) :
+    site.tile = tile := by
+  unfold ofTile? at h
+  exact of_decide_eq_true
+    (List.find?_some (p := fun site : Figure18Site => site.tile = tile) h)
+
+theorem ofTile?_eq_some_mem {tile : WangTile} {site : Figure18Site}
+    (h : ofTile? tile = some site) :
+    site ∈ all := by
+  unfold ofTile? at h
+  exact List.mem_of_find?_eq_some h
+
+theorem ofTile?_isSome_of_mem_all_tiles {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    (ofTile? tile).isSome = true := by
+  unfold ofTile?
+  rw [List.find?_isSome]
+  rcases List.mem_map.1 hmem with ⟨site, hsite, htile⟩
+  exact ⟨site, hsite, decide_eq_true htile⟩
+
+theorem exists_ofTile?_eq_some_of_mem_all_tiles {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    ∃ site : Figure18Site,
+      ofTile? tile = some site ∧ site ∈ all ∧ site.tile = tile := by
+  have hsome := ofTile?_isSome_of_mem_all_tiles hmem
+  cases hfind : ofTile? tile with
+  | none =>
+      simp [hfind] at hsome
+  | some site =>
+      exact ⟨site, rfl, ofTile?_eq_some_mem hfind,
+        ofTile?_eq_some_tile hfind⟩
 
 end Figure18Site
 
@@ -979,6 +1015,13 @@ theorem presentation_mem_iff_mem_site_tiles
     rcases List.mem_map.1 htile with ⟨site, _hsite, htileSite⟩
     exact htileSite ▸ table.presentation_mem_site site
 
+theorem siteOfTile?_isSome_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    (Figure18Site.ofTile? tile).isSome = true :=
+  Figure18Site.ofTile?_isSome_of_mem_all_tiles
+    ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
+
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
@@ -1026,6 +1069,20 @@ theorem exists_site_role_of_mem_presentation
     ⟨site, hsite, htileSite⟩
   exact ⟨site, hsite, htileSite,
     table.presentation_role_of_eq_site htileSite⟩
+
+theorem exists_siteOfTile?_role_of_mem_presentation
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    ∃ site : Figure18Site,
+      Figure18Site.ofTile? tile = some site ∧
+        site ∈ Figure18Site.all ∧
+          tile = site.tile ∧
+            table.presentation.role tile = table.roleAtSite site := by
+  rcases Figure18Site.exists_ofTile?_eq_some_of_mem_all_tiles
+      ((table.presentation_mem_iff_mem_site_tiles tile).1 htile) with
+    ⟨site, hdecode, hsite, hsiteTile⟩
+  exact ⟨site, hdecode, hsite, hsiteTile.symm,
+    table.presentation_role_of_eq_site hsiteTile.symm⟩
 
 theorem exists_site_active_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
