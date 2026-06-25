@@ -640,6 +640,68 @@ structure CompatibleLayerComponentRectangle
 
 namespace CompatibleLayerComponentRectangle
 
+def hBoundaryBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) : Bool :=
+  (List.finRange w).all fun i =>
+    if hi : i.val + 1 < w then
+      (List.finRange h).all fun j =>
+        decide <| (C.blockGrid i j).hBoundaryMatches
+          (C.blockGrid ⟨i.val + 1, hi⟩ j)
+    else
+      true
+
+def vBoundaryBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) : Bool :=
+  (List.finRange h).all fun j =>
+    if hj : j.val + 1 < h then
+      (List.finRange w).all fun i =>
+        decide <| (C.blockGrid i j).vBoundaryMatches
+          (C.blockGrid i ⟨j.val + 1, hj⟩)
+    else
+      true
+
+def compatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) : Bool :=
+  hBoundaryBool C && vBoundaryBool C
+
+theorem hBoundary_of_hBoundaryBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (hcheck : hBoundaryBool C = true) :
+    ∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+      (C.blockGrid i j).hBoundaryMatches (C.blockGrid ⟨i.val + 1, hi⟩ j) := by
+  intro i j hi
+  unfold hBoundaryBool at hcheck
+  have hiCheck := List.all_eq_true.1 hcheck i (List.mem_finRange i)
+  simp [hi] at hiCheck
+  simpa using hiCheck j
+
+theorem vBoundary_of_vBoundaryBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (hcheck : vBoundaryBool C = true) :
+    ∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      (C.blockGrid i j).vBoundaryMatches (C.blockGrid i ⟨j.val + 1, hj⟩) := by
+  intro i j hj
+  unfold vBoundaryBool at hcheck
+  have hjCheck := List.all_eq_true.1 hcheck j (List.mem_finRange j)
+  simp [hj] at hjCheck
+  simpa using hjCheck i
+
+theorem of_compatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (hcheck : compatibleBool C = true) :
+    CompatibleLayerComponentRectangle C := by
+  rw [compatibleBool, Bool.and_eq_true] at hcheck
+  exact {
+    hBoundary := hBoundary_of_hBoundaryBool hcheck.1
+    vBoundary := vBoundary_of_vBoundaryBool hcheck.2
+  }
+
 theorem cell_compatible
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
     {C : LayerComponentRectangle D R layer}
@@ -716,6 +778,22 @@ abbrev CompatibleTypedLayerComponentRectangle
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
     (C : TypedLayerComponentRectangle D R layer) : Prop :=
   CompatibleLayerComponentRectangle C.toLayerComponentRectangle
+
+namespace TypedLayerComponentRectangle
+
+def compatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) : Bool :=
+  CompatibleLayerComponentRectangle.compatibleBool C.toLayerComponentRectangle
+
+theorem compatible_of_compatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : TypedLayerComponentRectangle D R layer}
+    (hcheck : C.compatibleBool = true) :
+    CompatibleTypedLayerComponentRectangle C :=
+  CompatibleLayerComponentRectangle.of_compatibleBool hcheck
+
+end TypedLayerComponentRectangle
 
 /--
 All three Figure 16 layer-component rectangles over the same Figure 18 site

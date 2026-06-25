@@ -432,6 +432,14 @@ def vBoundaryMatches (lower upper : Block) : Prop :=
   WangTile.VMatches (Symbol.tile lower.northwest) (Symbol.tile upper.southwest) ∧
   WangTile.VMatches (Symbol.tile lower.northeast) (Symbol.tile upper.southeast)
 
+instance (left right : Block) : Decidable (left.hBoundaryMatches right) := by
+  unfold hBoundaryMatches
+  infer_instance
+
+instance (lower upper : Block) : Decidable (lower.vBoundaryMatches upper) := by
+  unfold vBoundaryMatches
+  infer_instance
+
 theorem hBoundaryMatches_of_boundary
     {left right : Block}
     (hsouth : WangTile.HMatches (Symbol.tile left.southeast) (Symbol.tile right.southwest))
