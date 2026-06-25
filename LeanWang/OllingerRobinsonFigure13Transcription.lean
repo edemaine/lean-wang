@@ -1945,6 +1945,37 @@ def roleOfActiveSites
   else if site ∈ activeSites then CellRole.active
   else CellRole.inactive
 
+@[simp]
+theorem roleOfActiveSites_corner
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    roleOfActiveSites activeSites cornerSite cornerSite = CellRole.corner := by
+  simp [roleOfActiveSites]
+
+theorem roleOfActiveSites_of_mem_of_ne
+    {activeSites : List Figure18Site} {cornerSite site : Figure18Site}
+    (hmem : site ∈ activeSites) (hne : site ≠ cornerSite) :
+    roleOfActiveSites activeSites cornerSite site = CellRole.active := by
+  simp [roleOfActiveSites, hne, hmem]
+
+theorem roleOfActiveSites_of_not_mem_of_ne
+    {activeSites : List Figure18Site} {cornerSite site : Figure18Site}
+    (hmem : site ∉ activeSites) (hne : site ≠ cornerSite) :
+    roleOfActiveSites activeSites cornerSite site = CellRole.inactive := by
+  simp [roleOfActiveSites, hne, hmem]
+
+theorem isActive_roleOfActiveSites_iff
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
+    CellRole.isActive (roleOfActiveSites activeSites cornerSite site) = true ↔
+      site = cornerSite ∨ site ∈ activeSites := by
+  by_cases hcorner : site = cornerSite
+  · subst hcorner
+    simp
+  · by_cases hmem : site ∈ activeSites
+    · simp [roleOfActiveSites_of_mem_of_ne hmem hcorner, hmem,
+        CellRole.isActive]
+    · simp [roleOfActiveSites_of_not_mem_of_ne hmem hcorner, hcorner, hmem,
+        CellRole.isActive]
+
 /--
 Flat 368-entry role transcription generated from a finite active-site list.
 
@@ -1964,6 +1995,29 @@ theorem flatRolesOfActiveSites_length
     (flatRolesOfActiveSites activeSites cornerSite).length = 368 := by
   rw [flatRolesOfActiveSites]
   exact List.length_ofFn
+
+theorem flatRoleAt_flatRolesOfActiveSites
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
+    flatRoleAt (flatRolesOfActiveSites activeSites cornerSite) site =
+      roleOfActiveSites activeSites cornerSite site := by
+  unfold flatRoleAt flatRolesOfActiveSites
+  rw [List.getD_eq_getElem]
+  · rw [List.getElem_ofFn]
+    exact congrArg (roleOfActiveSites activeSites cornerSite)
+      (Figure18Site.siteOfFlatIndex_flatIndex site)
+  · rw [List.length_ofFn]
+    exact site.flatIndex_lt
+
+theorem mem_activeFlatSites_flatRolesOfActiveSites_iff
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
+    site ∈ activeFlatSites (flatRolesOfActiveSites activeSites cornerSite) ↔
+      site = cornerSite ∨ site ∈ activeSites := by
+  rw [mem_activeFlatSites, flatRoleAt_flatRolesOfActiveSites,
+    isActive_roleOfActiveSites_iff]
+  constructor
+  · exact And.right
+  · intro hsite
+    exact ⟨Figure18Site.mem_all site, hsite⟩
 
 /--
 First-class flat Figure 18 role transcription.
@@ -2009,6 +2063,27 @@ def ofActiveSites
   cornerQuadrant := cornerSite.quadrant
   length_eq := flatRolesOfActiveSites_length activeSites cornerSite
   uniqueCorner := hunique
+
+set_option maxRecDepth 4096 in
+theorem ofActiveSites_flat
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    (ofActiveSites activeSites cornerSite hunique).flat =
+      flatRolesOfActiveSites activeSites cornerSite :=
+  rfl
+
+set_option maxRecDepth 4096 in
+theorem ofActiveSites_cornerSite
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    (ofActiveSites activeSites cornerSite hunique).cornerSite = cornerSite := by
+  rfl
 
 @[simp]
 theorem toRoleTable_roleRows (table : FlatRoleTable) :
@@ -2073,6 +2148,49 @@ theorem corner_mem_activeSites (table : FlatRoleTable) :
     table.cornerSite ∈ table.activeSites :=
   corner_mem_activeFlatSites_ofFlatRoles table.flat table.length_eq
     table.cornerIndex table.cornerQuadrant table.uniqueCorner
+
+theorem ofActiveSites_roleAtSite
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    (ofActiveSites activeSites cornerSite hunique).toRoleTable.roleAtSite site =
+      roleOfActiveSites activeSites cornerSite site := by
+  rw [roleAtSite_eq_flatRoleAt, ofActiveSites_flat,
+    flatRoleAt_flatRolesOfActiveSites activeSites cornerSite site]
+
+theorem mem_ofActiveSites_activeSites_iff
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    site ∈ (ofActiveSites activeSites cornerSite hunique).activeSites ↔
+      site = cornerSite ∨ site ∈ activeSites := by
+  rw [FlatRoleTable.activeSites, ofActiveSites_flat,
+    mem_activeFlatSites_flatRolesOfActiveSites_iff]
+
+theorem mem_ofActiveSites_activeSites_of_mem
+    {activeSites : List Figure18Site} {cornerSite site : Figure18Site}
+    {hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true}
+    (hmem : site ∈ activeSites) :
+    site ∈ (ofActiveSites activeSites cornerSite hunique).activeSites := by
+  exact (mem_ofActiveSites_activeSites_iff
+    activeSites cornerSite site hunique).2 (Or.inr hmem)
+
+theorem corner_mem_ofActiveSites_activeSites
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    cornerSite ∈ (ofActiveSites activeSites cornerSite hunique).activeSites := by
+  exact (mem_ofActiveSites_activeSites_iff
+    activeSites cornerSite cornerSite hunique).2 (Or.inl rfl)
 
 end FlatRoleTable
 
