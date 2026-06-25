@@ -2683,6 +2683,46 @@ def HasFigure18AdjacentProductWitnessFixedCornerSquares
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18AdjacentProductWitnessFixedCornerSquare table x n hn)
 
+/--
+Decoded-site form of `HasFigure18AdjacentProductWitnessFixedCornerSquares`.
+
+This is the intended finite geometric target for the concrete Figure 18
+scaffold.  The selected combined-tiling coordinates are checked by decoding
+their scaffold component to a `Figure18Site`; the payload witness then follows
+from membership in the combined tileset.
+-/
+def HasFigure18DecodedSiteFixedCornerSquares
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ horizontalCoord : Fin n → Int, ∃ verticalCoord : Fin n → Int,
+          (∀ i : Fin n, ∀ hi : i.val + 1 < n,
+            horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1) ∧
+          (∀ j : Fin n, ∀ hj : j.val + 1 < n,
+            verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+            Figure18Site.hCompatible
+              (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+              (table.combinedSite
+                (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) =
+              true) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+            Figure18Site.vCompatible
+              (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+              (table.combinedSite
+                (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) =
+              true) ∧
+          (∀ i : Fin n, ∀ j : Fin n,
+            CellRole.isActive
+              (table.roleAtSite
+                (table.combinedSite (x (horizontalCoord i, verticalCoord j)))) =
+              true) ∧
+          table.combinedSite
+              (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+            table.cornerSite
+
 namespace Figure18AdjacentProductWitnessFixedCornerSquare
 
 /--
@@ -2766,6 +2806,18 @@ theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
   rcases hproduct x hx n hn with ⟨window⟩
   exact ⟨window.toAdjacentCompatibleFixedCornerSquare⟩
 
+theorem hasFigure18AdjacentProductWitnessFixedCornerSquares_of_decodedSite
+    {table : Figure18RoleTable}
+    (hdecoded : HasFigure18DecodedSiteFixedCornerSquares table) :
+    HasFigure18AdjacentProductWitnessFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hdecoded x hx n hn with
+    ⟨horizontalCoord, verticalCoord, horizontalCoord_succ,
+      verticalCoord_succ, hcompatible, vcompatible, active, cornerSite⟩
+  exact ⟨Figure18AdjacentProductWitnessFixedCornerSquare.ofCombinedSites hn
+    horizontalCoord verticalCoord horizontalCoord_succ verticalCoord_succ
+    hcompatible vcompatible active cornerSite⟩
+
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible
     {table : Figure18RoleTable}
     (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
@@ -2819,6 +2871,14 @@ theorem forcesFixedCornerSquares_of_figure18AdjacentProductWitness
     ForcesFixedCornerSquares table.presentation.toScaffold :=
   forcesFixedCornerSquares_of_figure18AdjacentCompatible
     (hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness hproduct)
+
+theorem forcesFixedCornerSquares_of_figure18DecodedSite
+    {table : Figure18RoleTable}
+    (hdecoded : HasFigure18DecodedSiteFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18AdjacentProductWitness
+    (hasFigure18AdjacentProductWitnessFixedCornerSquares_of_decodedSite
+      hdecoded)
 
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
@@ -2901,6 +2961,14 @@ selected coordinates and pointwise payload witnesses.
 -/
 structure Figure18AdjacentProductWitnessCertificate (table : Figure18RoleTable) : Prop where
   productForces : HasFigure18AdjacentProductWitnessFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+/--
+Geometric obligations for a concrete Figure 18 role table using decoded
+combined-tiling sites.
+-/
+structure Figure18DecodedSiteCertificate (table : Figure18RoleTable) : Prop where
+  decodedForces : HasFigure18DecodedSiteFixedCornerSquares table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
 namespace Figure18Certificate
@@ -3025,6 +3093,37 @@ theorem isScaffold
 
 end Figure18AdjacentProductWitnessCertificate
 
+namespace Figure18DecodedSiteCertificate
+
+def toAdjacentProductWitnessCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18DecodedSiteCertificate table) :
+    Figure18AdjacentProductWitnessCertificate table where
+  productForces :=
+    hasFigure18AdjacentProductWitnessFixedCornerSquares_of_decodedSite
+      certificate.decodedForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18DecodedSiteCertificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18DecodedSite
+    certificate.decodedForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable}
+    (certificate : Figure18DecodedSiteCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18DecodedSite
+      certificate.decodedForces
+    realizes := certificate.realizes
+  }
+
+end Figure18DecodedSiteCertificate
+
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
 the geometric flexible scaffold certificate.
@@ -3063,6 +3162,13 @@ pointwise payload witnesses.
 structure Figure18AdjacentProductWitnessInstance where
   table : Figure18RoleTable
   certificate : Figure18AdjacentProductWitnessCertificate table
+
+/--
+Concrete Figure 18 scaffold package using decoded combined-tiling sites.
+-/
+structure Figure18DecodedSiteInstance where
+  table : Figure18RoleTable
+  certificate : Figure18DecodedSiteCertificate table
 
 /--
 Concrete Figure 18 scaffold package using the direct indexed free-square
@@ -3260,6 +3366,45 @@ theorem isScaffold (I : Figure18AdjacentProductWitnessInstance) :
   I.certificate.isScaffold
 
 end Figure18AdjacentProductWitnessInstance
+
+namespace Figure18DecodedSiteInstance
+
+def finite (I : Figure18DecodedSiteInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18DecodedSiteInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def toAdjacentProductWitnessInstance (I : Figure18DecodedSiteInstance) :
+    Figure18AdjacentProductWitnessInstance where
+  table := I.table
+  certificate := I.certificate.toAdjacentProductWitnessCertificate
+
+def toFlexibleInstance (I : Figure18DecodedSiteInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toAdjacentProductWitnessInstance_table
+    (I : Figure18DecodedSiteInstance) :
+    I.toAdjacentProductWitnessInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18DecodedSiteInstance) :
+    I.toFlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : Figure18DecodedSiteInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18DecodedSiteInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18DecodedSiteInstance
 
 namespace Figure18FlexibleInstance
 
