@@ -924,6 +924,81 @@ theorem hasFigure18IndexedRoutedFixedCornerSquares_of_layerStack
   rcases hrouted x hx n hn with ⟨window⟩
   exact ⟨window.window⟩
 
+/--
+Layered certificate for the direct indexed-active Figure 18 route.
+
+The layered fields are the stronger finite-data target; `toFigure18Certificate`
+forgets the layer data and reuses the existing scaffold certificate pipeline.
+-/
+structure LayeredFigure18Certificate
+    (D : Transcription) (table : Figure18RoleTable) : Prop where
+  indexedRecognizable :
+    HasFigure18IndexedActiveCornerWindowsWithLayerStack D table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+namespace LayeredFigure18Certificate
+
+def toFigure18Certificate
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18Certificate D table) :
+    Figure18Certificate table where
+  indexedRecognizable :=
+    hasFigure18IndexedActiveCornerWindows_of_layerStack
+      certificate.indexedRecognizable
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18Certificate D table) :
+    IsScaffold table.presentation.toScaffold :=
+  certificate.toFigure18Certificate.isScaffold
+
+end LayeredFigure18Certificate
+
+/--
+Layered certificate for the indexed-routed Figure 18 route.
+
+This is the preferred certificate shape for the Ollinger/Robinson scaffold once
+the concrete Figure 13 layer transcription and routed free-coordinate proof are
+filled in.
+-/
+structure LayeredFigure18IndexedRoutedCertificate
+    (D : Transcription) (table : Figure18RoleTable) : Prop where
+  indexedRoutedForces :
+    HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack D table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+namespace LayeredFigure18IndexedRoutedCertificate
+
+def toFigure18IndexedRoutedCertificate
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18IndexedRoutedCertificate D table) :
+    Figure18IndexedRoutedCertificate table where
+  indexedRoutedForces :=
+    hasFigure18IndexedRoutedFixedCornerSquares_of_layerStack
+      certificate.indexedRoutedForces
+  realizes := certificate.realizes
+
+def toFigure18RoutedCertificate
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18IndexedRoutedCertificate D table) :
+    Figure18RoutedCertificate table :=
+  certificate.toFigure18IndexedRoutedCertificate.toRoutedCertificate
+
+def toFigure18FlexibleCertificate
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18IndexedRoutedCertificate D table) :
+    Figure18FlexibleCertificate table :=
+  certificate.toFigure18IndexedRoutedCertificate.toFlexibleCertificate
+
+theorem isScaffold
+    {D : Transcription} {table : Figure18RoleTable}
+    (certificate : LayeredFigure18IndexedRoutedCertificate D table) :
+    IsScaffold table.presentation.toScaffold :=
+  certificate.toFigure18IndexedRoutedCertificate.isScaffold
+
+end LayeredFigure18IndexedRoutedCertificate
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
