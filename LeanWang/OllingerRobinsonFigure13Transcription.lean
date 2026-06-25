@@ -2685,6 +2685,56 @@ def HasFigure18AdjacentProductWitnessFixedCornerSquares
 
 namespace Figure18AdjacentProductWitnessFixedCornerSquare
 
+/--
+Build a product-witness square directly from the Figure 18 sites decoded at the
+selected combined-tiling coordinates.
+
+This is the closest interface to the geometric extraction: once selected
+coordinates are known, the base site and payload witness at each coordinate are
+read from the combined tile itself.
+-/
+noncomputable def ofCombinedSites
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} (hn : 0 < n)
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+      horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1)
+    (verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1)
+    (hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible
+        (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+        (table.combinedSite
+          (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) = true)
+    (vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible
+        (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+        (table.combinedSite
+          (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) = true)
+    (active : ∀ i : Fin n, ∀ j : Fin n,
+      CellRole.isActive
+        (table.roleAtSite
+          (table.combinedSite (x (horizontalCoord i, verticalCoord j)))) = true)
+    (cornerSite :
+      table.combinedSite
+          (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+        table.cornerSite) :
+    Figure18AdjacentProductWitnessFixedCornerSquare table x n hn where
+  horizontalCoord := horizontalCoord
+  verticalCoord := verticalCoord
+  siteRect := fun i j =>
+    table.combinedSite (x (horizontalCoord i, verticalCoord j))
+  horizontalCoord_succ := horizontalCoord_succ
+  verticalCoord_succ := verticalCoord_succ
+  hcompatible := hcompatible
+  vcompatible := vcompatible
+  active := active
+  cornerSite := cornerSite
+  productWitness := by
+    intro i j
+    exact table.combinedSite_product (x (horizontalCoord i, verticalCoord j))
+
 noncomputable def toAdjacentCompatibleFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
