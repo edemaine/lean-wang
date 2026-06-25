@@ -802,6 +802,143 @@ theorem domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_inter
     certificate.toLayeredFigure18IndexedRoutedInstance hinterior hcorrect
 
 /--
+Encoded domino undecidability from checked raw layered scaffold data, its direct
+layered geometric certificate, and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_checked_raw_layered_scaffold_position_source
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.Certificate) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_layered_figure18_scaffold_data_position_source
+    data.toLayeredFigure18ScaffoldData certificate h
+
+/--
+Unencoded domino undecidability from checked raw layered scaffold data, its
+direct layered geometric certificate, and generated position-coded source-route
+obligations.
+-/
+theorem domino_problem_undecidable_of_checked_raw_layered_scaffold_position_source
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.Certificate) (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_layered_figure18_scaffold_data_position_source
+    data.toLayeredFigure18ScaffoldData certificate h
+
+/--
+Encoded domino undecidability from checked raw layered scaffold data, its direct
+layered geometric certificate, and the generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checked_raw_layered_scaffold_interiorRows
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.Certificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_layered_figure18_scaffold_data_interiorRows
+    data.toLayeredFigure18ScaffoldData certificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from checked raw layered scaffold data, its
+direct layered geometric certificate, and the generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_checked_raw_layered_scaffold_interiorRows
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.Certificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_layered_figure18_scaffold_data_interiorRows
+    data.toLayeredFigure18ScaffoldData certificate hinterior hcorrect
+
+/--
+Encoded domino undecidability from checked raw layered scaffold data, its
+indexed-routed layered geometric certificate, and generated position-coded
+source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_checked_raw_indexed_routed_position_source
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_position_source
+    data.toLayeredFigure18ScaffoldData certificate h
+
+/--
+Unencoded domino undecidability from checked raw layered scaffold data, its
+indexed-routed layered geometric certificate, and generated position-coded
+source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_checked_raw_indexed_routed_position_source
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_position_source
+    data.toLayeredFigure18ScaffoldData certificate h
+
+/--
+Encoded domino undecidability from checked raw layered scaffold data, its
+indexed-routed layered geometric certificate, and the generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_checked_raw_indexed_routed_interiorRows
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_interiorRows
+    data.toLayeredFigure18ScaffoldData certificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from checked raw layered scaffold data, its
+indexed-routed layered geometric certificate, and the generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_checked_raw_indexed_routed_interiorRows
+    (data :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
+    (certificate : data.IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_interiorRows
+    data.toLayeredFigure18ScaffoldData certificate hinterior hcorrect
+
+/--
 Encoded domino undecidability from a concrete flat Figure 18 scaffold instance
 with an active-site free-coordinate certificate and generated position-coded
 source-route obligations.

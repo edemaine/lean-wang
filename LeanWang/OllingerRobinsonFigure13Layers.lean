@@ -2105,6 +2105,57 @@ theorem isScaffold
 
 end IndexedRoutedCertificate
 
+namespace CheckedRawData
+
+/-- Direct layered certificate attached to checked raw scaffold data. -/
+abbrev Certificate (data : CheckedRawData) : Prop :=
+  data.toLayeredFigure18ScaffoldData.Certificate
+
+/-- Preferred indexed-routed certificate attached to checked raw scaffold data. -/
+abbrev IndexedRoutedCertificate (data : CheckedRawData) : Prop :=
+  data.toLayeredFigure18ScaffoldData.IndexedRoutedCertificate
+
+def toLayeredFigure18Instance
+    {data : CheckedRawData} (certificate : data.Certificate) :
+    LayeredFigure18Instance :=
+  certificate.toLayeredFigure18Instance
+
+def toFigure18Instance
+    {data : CheckedRawData} (certificate : data.Certificate) :
+    Figure18Instance :=
+  certificate.toFigure18Instance
+
+theorem isScaffold
+    {data : CheckedRawData} (certificate : data.Certificate) :
+    IsScaffold data.toLayeredFigure18ScaffoldData.scaffold :=
+  certificate.isScaffold
+
+def toLayeredFigure18IndexedRoutedInstance
+    {data : CheckedRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    LayeredFigure18IndexedRoutedInstance :=
+  certificate.toLayeredFigure18IndexedRoutedInstance
+
+def toFigure18IndexedRoutedInstance
+    {data : CheckedRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    Figure18IndexedRoutedInstance :=
+  certificate.toFigure18IndexedRoutedInstance
+
+def toFigure18FlexibleInstance
+    {data : CheckedRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    Figure18FlexibleInstance :=
+  certificate.toFigure18FlexibleInstance
+
+theorem isScaffold_indexedRouted
+    {data : CheckedRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    IsScaffold data.toLayeredFigure18ScaffoldData.scaffold :=
+  certificate.isScaffold
+
+end CheckedRawData
+
 end LayeredFigure18ScaffoldData
 
 end Figure13Layers
