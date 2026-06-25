@@ -640,6 +640,29 @@ theorem flatIndex_mk_northeast (i : Fin 92) :
       4 * i.val + 3 := by
   rfl
 
+def quadrantOfFlatOffset (offset : Nat) : Quadrant :=
+  match offset with
+  | 0 => Quadrant.southwest
+  | 1 => Quadrant.southeast
+  | 2 => Quadrant.northwest
+  | _ => Quadrant.northeast
+
+def siteOfFlatIndex (k : Fin 368) : Figure18Site where
+  index := ⟨k.val / 4, by omega⟩
+  quadrant := quadrantOfFlatOffset (k.val % 4)
+
+theorem flatIndex_lt (site : Figure18Site) : site.flatIndex < 368 := by
+  rcases site with ⟨i, q⟩
+  cases q <;> simp [flatIndex, quadrantOffset] <;> omega
+
+theorem siteOfFlatIndex_flatIndex (site : Figure18Site) :
+    siteOfFlatIndex ⟨site.flatIndex, site.flatIndex_lt⟩ = site := by
+  rcases site with ⟨i, q⟩
+  cases q <;>
+    simp [siteOfFlatIndex, flatIndex, quadrantOffset, quadrantOfFlatOffset,
+      Nat.mul_add_div, Nat.mul_add_mod_self_left, Nat.div_eq_of_lt,
+      Nat.mod_eq_of_lt]
+
 end Figure18Site
 
 /-- Role lookup entries for a complete quadrant role transcription. -/
@@ -1909,6 +1932,40 @@ theorem corner_mem_activeFlatSites_ofFlatRoles
       rfl⟩
 
 /--
+Role assignment generated from a finite list of active Figure 18 sites and a
+distinguished corner site.
+
+The corner test comes first, so including the corner in `activeSites` is
+harmless.
+-/
+def roleOfActiveSites
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
+    CellRole :=
+  if site = cornerSite then CellRole.corner
+  else if site ∈ activeSites then CellRole.active
+  else CellRole.inactive
+
+/--
+Flat 368-entry role transcription generated from a finite active-site list.
+
+This is the intended concrete-data shape for the Figure 18 scaffold: transcribe
+only the active sites and the distinguished corner, then let this definition
+expand them into the flat role list consumed by `FlatRoleTable`.
+-/
+def flatRolesOfActiveSites
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    List CellRole :=
+  List.ofFn fun k : Fin 368 =>
+    roleOfActiveSites activeSites cornerSite (Figure18Site.siteOfFlatIndex k)
+
+@[simp]
+theorem flatRolesOfActiveSites_length
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    (flatRolesOfActiveSites activeSites cornerSite).length = 368 := by
+  rw [flatRolesOfActiveSites]
+  exact List.length_ofFn
+
+/--
 First-class flat Figure 18 role transcription.
 
 This is the intended finite-data container for the paper-derived 368-entry role
@@ -1939,6 +1996,19 @@ def activeSites (table : FlatRoleTable) : List Figure18Site :=
 
 def cornerSites (table : FlatRoleTable) : List Figure18Site :=
   cornerFlatSites table.flat
+
+def ofActiveSites
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles (flatRolesOfActiveSites activeSites cornerSite))
+        cornerSite.index cornerSite.quadrant = true) :
+    FlatRoleTable where
+  flat := flatRolesOfActiveSites activeSites cornerSite
+  cornerIndex := cornerSite.index
+  cornerQuadrant := cornerSite.quadrant
+  length_eq := flatRolesOfActiveSites_length activeSites cornerSite
+  uniqueCorner := hunique
 
 @[simp]
 theorem toRoleTable_roleRows (table : FlatRoleTable) :
