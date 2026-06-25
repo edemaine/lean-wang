@@ -21,6 +21,62 @@ namespace LeanWang
 namespace OllingerRobinson
 namespace Figure13Layers
 
+/-- Which of the three Figure 16 layers a component belongs to. -/
+inductive Layer where
+  | thin
+  | thick
+  | black
+deriving DecidableEq, Repr
+
+/-- A single Figure 16 layer component appearing in a raw Figure 13 tile. -/
+inductive LayerComponent where
+  | thin (component : Figure16.Thin)
+  | thick (component : Figure16.Thick)
+  | black (component : Figure16.Black)
+deriving DecidableEq, Repr
+
+namespace LayerComponent
+
+def layer : LayerComponent → Layer
+  | .thin _ => .thin
+  | .thick _ => .thick
+  | .black _ => .black
+
+def symbol : LayerComponent → Figure16.Symbol
+  | .thin component => .thin component
+  | .thick component => .thick component
+  | .black component => .black component
+
+def ruleSource : LayerComponent → Figure16.RuleSource
+  | .thin component => .l2Component1 component
+  | .thick component => .l2Component2 component
+  | .black component => .l3 component
+
+def block (component : LayerComponent) : Figure16.Block :=
+  component.ruleSource.block
+
+theorem symbol_mem_all (component : LayerComponent) :
+    component.symbol ∈ Figure16.Symbol.all :=
+  Figure16.Symbol.mem_all component.symbol
+
+theorem ruleSource_mem_all (component : LayerComponent) :
+    component.ruleSource ∈ Figure16.RuleSource.all :=
+  Figure16.RuleSource.mem_all component.ruleSource
+
+theorem exists_substitutionRule (component : LayerComponent) :
+    ∃ rule : Figure16.SubstitutionRule,
+      rule ∈ Figure16.substitutionRules ∧
+        rule.source = component.ruleSource ∧ rule.block = component.block := by
+  refine ⟨Figure16.SubstitutionRule.ofSource component.ruleSource,
+    Figure16.SubstitutionRule.ofSource_mem component.ruleSource, rfl, ?_⟩
+  rfl
+
+theorem block_validRectangle_symbolTileSet (component : LayerComponent) :
+    ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
+  exact component.ruleSource.block_validRectangle_symbolTileSet
+
+end LayerComponent
+
 /-- The layer components visible in one raw Figure 13 tile. -/
 structure Components where
   thin : Option Figure16.Thin
@@ -35,16 +91,19 @@ def empty : Components where
   thick := none
   black := none
 
-def symbols (components : Components) : List Figure16.Symbol :=
+def toLayerComponents (components : Components) : List LayerComponent :=
   (match components.thin with
     | none => []
-    | some component => [Figure16.Symbol.thin component]) ++
+    | some component => [LayerComponent.thin component]) ++
   (match components.thick with
     | none => []
-    | some component => [Figure16.Symbol.thick component]) ++
+    | some component => [LayerComponent.thick component]) ++
   (match components.black with
     | none => []
-    | some component => [Figure16.Symbol.black component])
+    | some component => [LayerComponent.black component])
+
+def symbols (components : Components) : List Figure16.Symbol :=
+  components.toLayerComponents.map LayerComponent.symbol
 
 /--
 Figure 16 substitution rules directly selected by the components of a Figure 13
@@ -52,47 +111,57 @@ tile.  The `phi_L1(*)` rule is global background data and is kept separately
 from component-indexed tile rows.
 -/
 def ruleSources (components : Components) : List Figure16.RuleSource :=
-  (match components.thin with
-    | none => []
-    | some component => [Figure16.RuleSource.l2Component1 component]) ++
-  (match components.thick with
-    | none => []
-    | some component => [Figure16.RuleSource.l2Component2 component]) ++
-  (match components.black with
-    | none => []
-    | some component => [Figure16.RuleSource.l3 component])
+  components.toLayerComponents.map LayerComponent.ruleSource
 
 def ruleBlocks (components : Components) : List Figure16.Block :=
-  components.ruleSources.map Figure16.RuleSource.block
+  components.toLayerComponents.map LayerComponent.block
+
+theorem layer_nodup (components : Components) :
+    (components.toLayerComponents.map LayerComponent.layer).Nodup := by
+  rcases components with ⟨thin, thick, black⟩
+  cases thin <;> cases thick <;> cases black <;>
+    simp [toLayerComponents, LayerComponent.layer]
+
+theorem mem_ruleSources_iff_exists_layerComponent
+    {components : Components} {source : Figure16.RuleSource} :
+    source ∈ components.ruleSources ↔
+      ∃ component : LayerComponent,
+        component ∈ components.toLayerComponents ∧
+          component.ruleSource = source := by
+  simp [ruleSources]
 
 theorem mem_ruleSources_all
     {components : Components} {source : Figure16.RuleSource}
     (hsource : source ∈ components.ruleSources) :
     source ∈ Figure16.RuleSource.all := by
-  rcases components with ⟨thin, thick, black⟩
-  cases thin <;> cases thick <;> cases black <;>
-    simp [ruleSources, Figure16.RuleSource.mem_all] at hsource ⊢
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  exact component.ruleSource_mem_all
 
 theorem exists_substitutionRule_of_mem_ruleSources
     {components : Components} {source : Figure16.RuleSource}
-    (_hsource : source ∈ components.ruleSources) :
+    (hsource : source ∈ components.ruleSources) :
     ∃ rule : Figure16.SubstitutionRule,
       rule ∈ Figure16.substitutionRules ∧ rule.source = source ∧
         rule.block = source.block := by
-  refine ⟨Figure16.SubstitutionRule.ofSource source,
-    Figure16.SubstitutionRule.ofSource_mem source, rfl, rfl⟩
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  simpa [LayerComponent.block] using component.exists_substitutionRule
 
 theorem validRectangle_of_mem_ruleSources
     {components : Components} {source : Figure16.RuleSource}
-    (_hsource : source ∈ components.ruleSources) :
+    (hsource : source ∈ components.ruleSources) :
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle := by
-  exact source.block_validRectangle_symbolTileSet
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  exact component.block_validRectangle_symbolTileSet
 
 theorem mem_symbols_all
     {components : Components} {symbol : Figure16.Symbol}
-    (_hsymbol : symbol ∈ components.symbols) :
+    (hsymbol : symbol ∈ components.symbols) :
     symbol ∈ Figure16.Symbol.all := by
-  exact Figure16.Symbol.mem_all symbol
+  rcases List.mem_map.1 hsymbol with ⟨component, _hcomponent, rfl⟩
+  exact component.symbol_mem_all
 
 end Components
 
@@ -109,6 +178,13 @@ def rawTile (tile : LayeredTile) : WangTile :=
 
 def ruleSources (tile : LayeredTile) : List Figure16.RuleSource :=
   tile.components.ruleSources
+
+def layerComponents (tile : LayeredTile) : List LayerComponent :=
+  tile.components.toLayerComponents
+
+theorem layer_nodup (tile : LayeredTile) :
+    (tile.layerComponents.map LayerComponent.layer).Nodup :=
+  tile.components.layer_nodup
 
 theorem mem_ruleSources_all
     {tile : LayeredTile} {source : Figure16.RuleSource}
@@ -139,6 +215,10 @@ def ruleSourcesAt (D : Transcription) (index : Fin 92) :
     List Figure16.RuleSource :=
   (D.componentsAt index).ruleSources
 
+def layerComponentsAt (D : Transcription) (index : Fin 92) :
+    List LayerComponent :=
+  (D.componentsAt index).toLayerComponents
+
 def specs (D : Transcription) : List LayeredTile :=
   (List.finRange 92).map D.layeredTileAt
 
@@ -159,6 +239,15 @@ theorem layeredTileAt_mem_specs (D : Transcription) (index : Fin 92) :
 theorem layeredTileAt_rawTile (D : Transcription) (index : Fin 92) :
     (D.layeredTileAt index).rawTile = fig13Tile index :=
   rfl
+
+theorem layerComponentsAt_eq_layeredTileAt
+    (D : Transcription) (index : Fin 92) :
+    D.layerComponentsAt index = (D.layeredTileAt index).layerComponents :=
+  rfl
+
+theorem layerComponentsAt_layer_nodup (D : Transcription) (index : Fin 92) :
+    ((D.layerComponentsAt index).map LayerComponent.layer).Nodup :=
+  (D.componentsAt index).layer_nodup
 
 theorem mem_ruleSourcesAt_all
     (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
