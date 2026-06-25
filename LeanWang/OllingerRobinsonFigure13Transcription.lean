@@ -434,6 +434,34 @@ theorem tileIndex_lt_length_of_mem_all_tiles {tile : WangTile}
   rcases List.mem_map.1 hmem with ⟨site, hsite, htile⟩
   exact List.findIdx_lt_length_of_exists ⟨site, hsite, decide_eq_true htile⟩
 
+/--
+Recover the Figure 18 site for a tile known to belong to the finite site tile
+list, using the primitive-recursive numeric search `tileIndex`.
+-/
+def siteOfTile (tile : WangTile) (hmem : tile ∈ all.map Figure18Site.tile) :
+    Figure18Site :=
+  all[tileIndex tile]'(tileIndex_lt_length_of_mem_all_tiles hmem)
+
+theorem siteOfTile_mem_all {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    siteOfTile tile hmem ∈ all := by
+  unfold siteOfTile
+  exact List.getElem_mem (tileIndex_lt_length_of_mem_all_tiles hmem)
+
+theorem siteOfTile_tile {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    (siteOfTile tile hmem).tile = tile := by
+  unfold siteOfTile tileIndex
+  exact of_decide_eq_true (List.findIdx_getElem
+    (xs := all) (p := fun site : Figure18Site => decide (site.tile = tile))
+    (w := tileIndex_lt_length_of_mem_all_tiles hmem))
+
+theorem siteOfTile_getElem? {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    all[tileIndex tile]? = some (siteOfTile tile hmem) := by
+  unfold siteOfTile
+  exact List.getElem?_eq_getElem (tileIndex_lt_length_of_mem_all_tiles hmem)
+
 theorem ofTile?_eq_some_tile {tile : WangTile} {site : Figure18Site}
     (h : ofTile? tile = some site) :
     site.tile = tile := by
@@ -1089,6 +1117,38 @@ theorem presentation_mem_iff_mem_site_tiles
     rcases List.mem_map.1 htile with ⟨site, _hsite, htileSite⟩
     exact htileSite ▸ table.presentation_mem_site site
 
+/--
+Decode a scaffold presentation tile back to its Figure 18 site using the
+finite numeric site search.
+-/
+def siteOfPresentationTile
+    (table : Figure18RoleTable) (tile : WangTile)
+    (htile : tile ∈ table.presentation.tiles) : Figure18Site :=
+  Figure18Site.siteOfTile tile
+    ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
+
+theorem siteOfPresentationTile_mem_all
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    table.siteOfPresentationTile tile htile ∈ Figure18Site.all :=
+  Figure18Site.siteOfTile_mem_all
+    ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
+
+theorem siteOfPresentationTile_tile
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    (table.siteOfPresentationTile tile htile).tile = tile :=
+  Figure18Site.siteOfTile_tile
+    ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
+
+theorem siteOfPresentationTile_getElem?
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    Figure18Site.all[Figure18Site.tileIndex tile]? =
+      some (table.siteOfPresentationTile tile htile) :=
+  Figure18Site.siteOfTile_getElem?
+    ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
+
 theorem siteOfTile?_isSome_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
     (htile : tile ∈ table.presentation.tiles) :
@@ -1122,6 +1182,22 @@ theorem presentation_active_of_eq_site
     CellRole.isActive (table.presentation.role tile) =
       CellRole.isActive (table.roleAtSite site) := by
   rw [htile, table.presentation_role_site]
+
+theorem presentation_role_siteOfPresentationTile
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    table.presentation.role tile =
+      table.roleAtSite (table.siteOfPresentationTile tile htile) :=
+  table.presentation_role_of_eq_site
+    (table.siteOfPresentationTile_tile htile).symm
+
+theorem presentation_active_siteOfPresentationTile
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles) :
+    CellRole.isActive (table.presentation.role tile) =
+      CellRole.isActive
+        (table.roleAtSite (table.siteOfPresentationTile tile htile)) := by
+  rw [table.presentation_role_siteOfPresentationTile htile]
 
 theorem exists_fig13QuarterTile_role_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
@@ -1223,6 +1299,14 @@ theorem site_eq_cornerSite_of_presentation_role_corner
     rw [← table.presentation_role_of_eq_site htile]
     exact hrole
   exact (table.roleAtSite_corner_iff site).1 hsiteRole
+
+theorem siteOfPresentationTile_eq_cornerSite_of_role_corner
+    (table : Figure18RoleTable) {tile : WangTile}
+    (htile : tile ∈ table.presentation.tiles)
+    (hrole : table.presentation.role tile = CellRole.corner) :
+    table.siteOfPresentationTile tile htile = table.cornerSite :=
+  table.site_eq_cornerSite_of_presentation_role_corner
+    (table.siteOfPresentationTile_tile htile).symm hrole
 
 theorem exists_cornerSite_of_mem_presentation_role_corner
     (table : Figure18RoleTable) {tile : WangTile}
@@ -1737,6 +1821,36 @@ theorem base_corner
   rw [window.baseRect_eq, window.corner_site]
   exact table.cornerTile_eq_cornerSite_tile.symm
 
+/--
+Reindex a routed fixed-corner square by decoding each scaffold base tile back
+to its concrete Figure 18 site.
+-/
+def ofRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18RoutedFixedCornerSquare table x n hn) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  siteRect := fun i j =>
+    table.siteOfPresentationTile (window.baseRect i j) (window.mem i j)
+  payloadRect := window.payloadRect
+  active := by
+    intro i j
+    rw [← table.presentation_active_siteOfPresentationTile (window.mem i j)]
+    exact window.active i j
+  cornerRole := by
+    rw [← table.presentation_role_siteOfPresentationTile
+      (window.mem ⟨0, hn⟩ ⟨0, hn⟩)]
+    exact window.cornerRole
+  product := by
+    intro i j
+    rw [table.siteOfPresentationTile_tile (window.mem i j)]
+    exact window.product i j
+  hmatch := window.hmatch
+  vmatch := window.vmatch
+
 def toRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
@@ -1859,6 +1973,14 @@ def HasFigure18IndexedRoutedFixedCornerSquares
     ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18IndexedRoutedFixedCornerSquare table x n hn)
+
+theorem hasFigure18IndexedRoutedFixedCornerSquares_of_routed
+    {table : Figure18RoleTable}
+    (hrouted : HasFigure18RoutedFixedCornerSquares table) :
+    HasFigure18IndexedRoutedFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hrouted x hx n hn with ⟨window⟩
+  exact ⟨Figure18IndexedRoutedFixedCornerSquare.ofRoutedFixedCornerSquare window⟩
 
 theorem hasFigure18RoutedFixedCornerSquares_of_indexed
     {table : Figure18RoleTable}
