@@ -12,9 +12,11 @@ notes.
 The figure draws each Wang edge as a small rendered pattern.  The natural
 numbers below are identifiers for the distinct edge patterns in the rendered
 Figure 13 tile grid, ordered by first occurrence while scanning tiles from top
-to bottom and left to right.  This module intentionally records only the raw
-Wang tiles; the scaffold roles used by the reduction are added in the
-transcription layer once the active/corner payload interpretation is fixed.
+to bottom and left to right.  An indexed rendering of this tile order is in
+[figures/figure13-indexed.png](../figures/figure13-indexed.png).  This module
+intentionally records only the raw Wang tiles; the scaffold roles used by the
+reduction are added in the transcription layer once the active/corner payload
+interpretation is fixed.
 -/
 
 namespace LeanWang
