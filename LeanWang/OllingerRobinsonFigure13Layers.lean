@@ -810,6 +810,58 @@ structure LayerStackRectangle
 
 namespace LayerStackRectangle
 
+def ofCompatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : LayerComponentRectangle D R .thin)
+    (thick : LayerComponentRectangle D R .thick)
+    (black : LayerComponentRectangle D R .black)
+    (hthin : CompatibleLayerComponentRectangle.compatibleBool thin = true)
+    (hthick : CompatibleLayerComponentRectangle.compatibleBool thick = true)
+    (hblack : CompatibleLayerComponentRectangle.compatibleBool black = true) :
+    LayerStackRectangle D R where
+  thin := thin
+  thick := thick
+  black := black
+  thinCompatible := CompatibleLayerComponentRectangle.of_compatibleBool hthin
+  thickCompatible := CompatibleLayerComponentRectangle.of_compatibleBool hthick
+  blackCompatible := CompatibleLayerComponentRectangle.of_compatibleBool hblack
+
+@[simp]
+theorem ofCompatibleBool_thin
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : LayerComponentRectangle D R .thin)
+    (thick : LayerComponentRectangle D R .thick)
+    (black : LayerComponentRectangle D R .black)
+    (hthin : CompatibleLayerComponentRectangle.compatibleBool thin = true)
+    (hthick : CompatibleLayerComponentRectangle.compatibleBool thick = true)
+    (hblack : CompatibleLayerComponentRectangle.compatibleBool black = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).thin = thin :=
+  rfl
+
+@[simp]
+theorem ofCompatibleBool_thick
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : LayerComponentRectangle D R .thin)
+    (thick : LayerComponentRectangle D R .thick)
+    (black : LayerComponentRectangle D R .black)
+    (hthin : CompatibleLayerComponentRectangle.compatibleBool thin = true)
+    (hthick : CompatibleLayerComponentRectangle.compatibleBool thick = true)
+    (hblack : CompatibleLayerComponentRectangle.compatibleBool black = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).thick = thick :=
+  rfl
+
+@[simp]
+theorem ofCompatibleBool_black
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : LayerComponentRectangle D R .thin)
+    (thick : LayerComponentRectangle D R .thick)
+    (black : LayerComponentRectangle D R .black)
+    (hthin : CompatibleLayerComponentRectangle.compatibleBool thin = true)
+    (hthick : CompatibleLayerComponentRectangle.compatibleBool thick = true)
+    (hblack : CompatibleLayerComponentRectangle.compatibleBool black = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).black = black :=
+  rfl
+
 def componentRect
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
     (S : LayerStackRectangle D R) : Layer → Fin w → Fin h → LayerComponent
@@ -899,6 +951,58 @@ structure TypedLayerStackRectangle
   blackCompatible : CompatibleTypedLayerComponentRectangle black
 
 namespace TypedLayerStackRectangle
+
+def ofCompatibleBool
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : TypedLayerComponentRectangle D R .thin)
+    (thick : TypedLayerComponentRectangle D R .thick)
+    (black : TypedLayerComponentRectangle D R .black)
+    (hthin : thin.compatibleBool = true)
+    (hthick : thick.compatibleBool = true)
+    (hblack : black.compatibleBool = true) :
+    TypedLayerStackRectangle D R where
+  thin := thin
+  thick := thick
+  black := black
+  thinCompatible := TypedLayerComponentRectangle.compatible_of_compatibleBool hthin
+  thickCompatible := TypedLayerComponentRectangle.compatible_of_compatibleBool hthick
+  blackCompatible := TypedLayerComponentRectangle.compatible_of_compatibleBool hblack
+
+@[simp]
+theorem ofCompatibleBool_thin
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : TypedLayerComponentRectangle D R .thin)
+    (thick : TypedLayerComponentRectangle D R .thick)
+    (black : TypedLayerComponentRectangle D R .black)
+    (hthin : thin.compatibleBool = true)
+    (hthick : thick.compatibleBool = true)
+    (hblack : black.compatibleBool = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).thin = thin :=
+  rfl
+
+@[simp]
+theorem ofCompatibleBool_thick
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : TypedLayerComponentRectangle D R .thin)
+    (thick : TypedLayerComponentRectangle D R .thick)
+    (black : TypedLayerComponentRectangle D R .black)
+    (hthin : thin.compatibleBool = true)
+    (hthick : thick.compatibleBool = true)
+    (hblack : black.compatibleBool = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).thick = thick :=
+  rfl
+
+@[simp]
+theorem ofCompatibleBool_black
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (thin : TypedLayerComponentRectangle D R .thin)
+    (thick : TypedLayerComponentRectangle D R .thick)
+    (black : TypedLayerComponentRectangle D R .black)
+    (hthin : thin.compatibleBool = true)
+    (hthick : thick.compatibleBool = true)
+    (hblack : black.compatibleBool = true) :
+    (ofCompatibleBool thin thick black hthin hthick hblack).black = black :=
+  rfl
 
 def toLayerStackRectangle
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
