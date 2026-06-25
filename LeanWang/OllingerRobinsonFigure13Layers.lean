@@ -1090,6 +1090,135 @@ theorem isScaffold (I : LayeredFigure18IndexedRoutedInstance) :
 
 end LayeredFigure18IndexedRoutedInstance
 
+/--
+Concrete Figure 18 scaffold data together with the 92-row Figure 13 layer
+transcription.
+
+This is the combined Lean target for the Ollinger/Robinson scaffold
+instantiation: `scaffoldData` records the checked active quarter-sites and
+corner, while `layerData` records the Figure 13 decomposition into the Figure
+16 layer components.
+-/
+structure LayeredFigure18ScaffoldData where
+  layerData : Transcription
+  scaffoldData : Figure18ScaffoldData
+
+namespace LayeredFigure18ScaffoldData
+
+def activeSiteData (D : LayeredFigure18ScaffoldData) :
+    Figure18Site.CheckedNatSpecs :=
+  D.scaffoldData.activeSiteData
+
+def activeSites (D : LayeredFigure18ScaffoldData) : List Figure18Site :=
+  D.scaffoldData.activeSites
+
+def cornerSite (D : LayeredFigure18ScaffoldData) : Figure18Site :=
+  D.scaffoldData.cornerSite
+
+def flatTable (D : LayeredFigure18ScaffoldData) :
+    Figure18RoleTable.FlatRoleTable :=
+  D.scaffoldData.table
+
+def table (D : LayeredFigure18ScaffoldData) : Figure18RoleTable :=
+  D.flatTable.toRoleTable
+
+def finite (D : LayeredFigure18ScaffoldData) :
+    FiniteCheckedTranscription :=
+  D.table.finiteCheckedTranscription
+
+def presentation (D : LayeredFigure18ScaffoldData) :
+    ScaffoldPresentation :=
+  D.table.presentation
+
+def scaffold (D : LayeredFigure18ScaffoldData) : Scaffold :=
+  D.presentation.toScaffold
+
+theorem activeSites_eq (D : LayeredFigure18ScaffoldData) :
+    D.activeSites = D.activeSiteData.sites :=
+  rfl
+
+@[simp]
+theorem flatTable_cornerSite (D : LayeredFigure18ScaffoldData) :
+    D.flatTable.cornerSite = D.cornerSite :=
+  rfl
+
+theorem presentation_tiles (D : LayeredFigure18ScaffoldData) :
+    D.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles := by
+  simpa [presentation, table, flatTable, Figure18ScaffoldData.presentation,
+    Figure18ScaffoldData.table, figure18ScaffoldTiles] using
+    D.scaffoldData.presentation_tiles
+
+theorem scaffold_tiles (D : LayeredFigure18ScaffoldData) :
+    D.scaffold.tiles = TileSubdivision.subdivideTileSet fig13Tiles := by
+  simpa [scaffold] using D.presentation_tiles
+
+/-- Direct indexed-active layered geometric certificate for layered scaffold data. -/
+structure Certificate (D : LayeredFigure18ScaffoldData) : Prop where
+  certificate : LayeredFigure18Certificate D.layerData D.table
+
+namespace Certificate
+
+def toLayeredFigure18Instance
+    {D : LayeredFigure18ScaffoldData} (certificate : D.Certificate) :
+    LayeredFigure18Instance where
+  layerData := D.layerData
+  table := D.table
+  certificate := certificate.certificate
+
+def toFigure18Instance
+    {D : LayeredFigure18ScaffoldData} (certificate : D.Certificate) :
+    Figure18Instance :=
+  certificate.toLayeredFigure18Instance.toFigure18Instance
+
+theorem isScaffold
+    {D : LayeredFigure18ScaffoldData} (certificate : D.Certificate) :
+    IsScaffold D.scaffold := by
+  change IsScaffold certificate.toLayeredFigure18Instance.presentation.toScaffold
+  exact certificate.toLayeredFigure18Instance.isScaffold
+
+end Certificate
+
+/--
+Preferred indexed-routed layered geometric certificate for layered scaffold
+data.
+-/
+structure IndexedRoutedCertificate (D : LayeredFigure18ScaffoldData) : Prop where
+  certificate : LayeredFigure18IndexedRoutedCertificate D.layerData D.table
+
+namespace IndexedRoutedCertificate
+
+def toLayeredFigure18IndexedRoutedInstance
+    {D : LayeredFigure18ScaffoldData}
+    (certificate : D.IndexedRoutedCertificate) :
+    LayeredFigure18IndexedRoutedInstance where
+  layerData := D.layerData
+  table := D.table
+  certificate := certificate.certificate
+
+def toFigure18IndexedRoutedInstance
+    {D : LayeredFigure18ScaffoldData}
+    (certificate : D.IndexedRoutedCertificate) :
+    Figure18IndexedRoutedInstance :=
+  certificate.toLayeredFigure18IndexedRoutedInstance.toFigure18IndexedRoutedInstance
+
+def toFigure18FlexibleInstance
+    {D : LayeredFigure18ScaffoldData}
+    (certificate : D.IndexedRoutedCertificate) :
+    Figure18FlexibleInstance :=
+  certificate.toLayeredFigure18IndexedRoutedInstance.toFigure18FlexibleInstance
+
+theorem isScaffold
+    {D : LayeredFigure18ScaffoldData}
+    (certificate : D.IndexedRoutedCertificate) :
+    IsScaffold D.scaffold := by
+  change IsScaffold
+    certificate.toLayeredFigure18IndexedRoutedInstance.presentation.toScaffold
+  exact certificate.toLayeredFigure18IndexedRoutedInstance.isScaffold
+
+end IndexedRoutedCertificate
+
+end LayeredFigure18ScaffoldData
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
