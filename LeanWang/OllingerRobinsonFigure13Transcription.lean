@@ -2138,6 +2138,66 @@ def ofAdjacentCompatibleSites
 end Figure18IndexedRoutedFixedCornerSquare
 
 /--
+Adjacent-compatible selected-coordinate square for the Figure 18 scaffold.
+
+This is the scaffold-instantiation target closest to the local geometric
+argument: identify selected horizontal and vertical coordinates, decode the
+Figure 18 site at each selected crossing, prove adjacent selected coordinates
+are actual neighbors in the plane, and verify Figure 18 site compatibility.
+Payload edge matches are deliberately not fields; they are derived from these
+facts and the validity of the combined tiling.
+-/
+structure Figure18AdjacentCompatibleFixedCornerSquare
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  siteRect : Fin n → Fin n → Figure18Site
+  payloadRect : Rectangle n n
+  horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+    horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1
+  verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1
+  hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    Figure18Site.hCompatible (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true
+  vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    Figure18Site.vCompatible (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite
+  product : ∀ i : Fin n, ∀ j : Fin n,
+    WangTile.product (siteRect i j).tile (payloadRect i j) =
+      (x (horizontalCoord i, verticalCoord j)).1
+
+namespace Figure18AdjacentCompatibleFixedCornerSquare
+
+def toIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18AdjacentCompatibleFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn :=
+  Figure18IndexedRoutedFixedCornerSquare.ofAdjacentCompatibleSites hx hn
+    window.horizontalCoord window.verticalCoord window.siteRect window.payloadRect
+    window.horizontalCoord_succ window.verticalCoord_succ
+    window.hcompatible window.vcompatible window.active
+    window.cornerSite window.product
+
+theorem tileable
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18AdjacentCompatibleFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x) :
+    TileableFixedCornerSquare T seed n :=
+  (window.toIndexedRoutedFixedCornerSquare hx).tileable
+
+end Figure18AdjacentCompatibleFixedCornerSquare
+
+/--
 Every combined plane tiling contains arbitrarily large routed payload squares
 with the requested lower-left seed.
 -/
@@ -2162,6 +2222,29 @@ def HasFigure18IndexedRoutedFixedCornerSquares
     ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18IndexedRoutedFixedCornerSquare table x n hn)
+
+/--
+Finite selected-coordinate form of `HasFigure18IndexedRoutedFixedCornerSquares`.
+
+This is the preferred target for the local Figure 18 scaffold proof when the
+selected coordinates are adjacent in the ambient plane. It avoids asking the
+geometric proof to provide payload edge matches directly.
+-/
+def HasFigure18AdjacentCompatibleFixedCornerSquares
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18AdjacentCompatibleFixedCornerSquare table x n hn)
+
+theorem hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible
+    {table : Figure18RoleTable}
+    (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
+    HasFigure18IndexedRoutedFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hadjacent x hx n hn with ⟨window⟩
+  exact ⟨window.toIndexedRoutedFixedCornerSquare hx⟩
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_routed
     {table : Figure18RoleTable}
@@ -2194,6 +2277,13 @@ theorem forcesFixedCornerSquares_of_figure18IndexedRouted
     ForcesFixedCornerSquares table.presentation.toScaffold :=
   forcesFixedCornerSquares_of_figure18Routed
     (hasFigure18RoutedFixedCornerSquares_of_indexed hindexed)
+
+theorem forcesFixedCornerSquares_of_figure18AdjacentCompatible
+    {table : Figure18RoleTable}
+    (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18IndexedRouted
+    (hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible hadjacent)
 
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
@@ -2262,6 +2352,14 @@ structure Figure18IndexedRoutedCertificate (table : Figure18RoleTable) : Prop wh
   indexedRoutedForces : HasFigure18IndexedRoutedFixedCornerSquares table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
+/--
+Geometric obligations for a concrete Figure 18 role table using adjacent
+selected coordinates and finite Figure 18 site compatibility.
+-/
+structure Figure18AdjacentCompatibleCertificate (table : Figure18RoleTable) : Prop where
+  adjacentForces : HasFigure18AdjacentCompatibleFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
 namespace Figure18Certificate
 
 def toFlexibleCertificate
@@ -2321,6 +2419,37 @@ theorem isScaffold
   }
 
 end Figure18IndexedRoutedCertificate
+
+namespace Figure18AdjacentCompatibleCertificate
+
+def toIndexedRoutedCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentCompatibleCertificate table) :
+    Figure18IndexedRoutedCertificate table where
+  indexedRoutedForces :=
+    hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible
+      certificate.adjacentForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentCompatibleCertificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18AdjacentCompatible
+    certificate.adjacentForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentCompatibleCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18AdjacentCompatible
+      certificate.adjacentForces
+    realizes := certificate.realizes
+  }
+
+end Figure18AdjacentCompatibleCertificate
 
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
