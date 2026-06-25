@@ -2006,6 +2006,48 @@ theorem tileable
     TileableFixedCornerSquare T seed n :=
   window.toRoutedFixedCornerSquare.tileable
 
+theorem payload_hMatches_of_validPlaneTiling
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    {p : Int × Int} {leftSite rightSite : Figure18Site}
+    {payloadLeft payloadRight : WangTile}
+    (hcompat : Figure18Site.hCompatible leftSite rightSite = true)
+    (hleft :
+      WangTile.product leftSite.tile payloadLeft = (x p).1)
+    (hright :
+      WangTile.product rightSite.tile payloadRight = (x (p.1 + 1, p.2)).1) :
+    WangTile.HMatches payloadLeft payloadRight := by
+  have _hbase : WangTile.HMatches leftSite.tile rightSite.tile :=
+    Figure18Site.hMatches_of_hCompatible hcompat
+  have hproduct : WangTile.HMatches
+      (WangTile.product leftSite.tile payloadLeft)
+      (WangTile.product rightSite.tile payloadRight) := by
+    simpa [← hleft, ← hright] using hx.1 p
+  exact (WangTile.HMatches_product_iff
+    leftSite.tile payloadLeft rightSite.tile payloadRight).1 hproduct |>.2
+
+theorem payload_vMatches_of_validPlaneTiling
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    {p : Int × Int} {lowerSite upperSite : Figure18Site}
+    {payloadLower payloadUpper : WangTile}
+    (hcompat : Figure18Site.vCompatible lowerSite upperSite = true)
+    (hlower :
+      WangTile.product lowerSite.tile payloadLower = (x p).1)
+    (hupper :
+      WangTile.product upperSite.tile payloadUpper = (x (p.1, p.2 + 1)).1) :
+    WangTile.VMatches payloadLower payloadUpper := by
+  have _hbase : WangTile.VMatches lowerSite.tile upperSite.tile :=
+    Figure18Site.vMatches_of_vCompatible hcompat
+  have hproduct : WangTile.VMatches
+      (WangTile.product lowerSite.tile payloadLower)
+      (WangTile.product upperSite.tile payloadUpper) := by
+    simpa [← hlower, ← hupper] using hx.2 p
+  exact (WangTile.VMatches_product_iff
+    lowerSite.tile payloadLower upperSite.tile payloadUpper).1 hproduct |>.2
+
 /--
 Build an indexed routed fixed-corner square when the geometric proof identifies
 the lower-left site as the table's distinguished corner site directly.
@@ -2040,6 +2082,58 @@ def ofSiteMatches
   product := product
   hmatch := hmatch
   vmatch := vmatch
+
+/--
+Build an indexed routed fixed-corner square from adjacent selected coordinates.
+
+Here the geometric proof supplies compatible Figure 18 base sites at adjacent
+selected plane coordinates. The payload horizontal and vertical matches are then
+forced by validity of the combined tiling and the product decomposition.
+-/
+def ofAdjacentCompatibleSites
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    {n : Nat} (hn : 0 < n)
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (siteRect : Fin n → Fin n → Figure18Site)
+    (payloadRect : Rectangle n n)
+    (horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+      horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1)
+    (verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1)
+    (hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true)
+    (vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+    (active : ∀ i : Fin n, ∀ j : Fin n,
+      CellRole.isActive (table.roleAtSite (siteRect i j)) = true)
+    (cornerSite :
+      siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite)
+    (product : ∀ i : Fin n, ∀ j : Fin n,
+      WangTile.product (siteRect i j).tile (payloadRect i j) =
+        (x (horizontalCoord i, verticalCoord j)).1) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn :=
+  ofSiteMatches hn horizontalCoord verticalCoord siteRect payloadRect
+    active cornerSite product
+    (by
+      intro i j hi
+      exact payload_hMatches_of_validPlaneTiling hx
+        (p := (horizontalCoord i, verticalCoord j))
+        (hcompatible i j hi)
+        (product i j)
+        (by
+          simpa [horizontalCoord_succ i hi] using
+            product ⟨i.val + 1, hi⟩ j))
+    (by
+      intro i j hj
+      exact payload_vMatches_of_validPlaneTiling hx
+        (p := (horizontalCoord i, verticalCoord j))
+        (vcompatible i j hj)
+        (product i j)
+        (by
+          simpa [verticalCoord_succ j hj] using
+            product i ⟨j.val + 1, hj⟩))
 
 end Figure18IndexedRoutedFixedCornerSquare
 
