@@ -2264,17 +2264,9 @@ def smokeRoleRows : List TileQuarterRoles :=
       CellRole.corner CellRole.inactive CellRole.inactive CellRole.inactive ::
     List.replicate 91 TileQuarterRoles.inactive
 
-def smokeFlatRoles : List CellRole :=
-  CellRole.corner :: List.replicate 367 CellRole.inactive
-
 @[simp]
 theorem smokeRoleRows_length : smokeRoleRows.length = 92 := by
   decide
-
-@[simp]
-theorem smokeFlatRoles_length : smokeFlatRoles.length = 368 := by
-  change (CellRole.corner :: List.replicate 367 CellRole.inactive).length = 368
-  rw [List.length_cons, List.length_replicate]
 
 def smokeCornerIndex : Fin 92 :=
   ⟨0, by decide⟩
@@ -2282,22 +2274,17 @@ def smokeCornerIndex : Fin 92 :=
 def smokeCornerQuadrant : Quadrant :=
   Quadrant.southwest
 
+def smokeCornerSite : Figure18Site where
+  index := smokeCornerIndex
+  quadrant := smokeCornerQuadrant
+
+def smokeActiveSites : List Figure18Site :=
+  []
+
 theorem smokeUniqueCorner :
     fig13QuarterCornerPositionUniqueBool
       smokeRoleRows smokeCornerIndex smokeCornerQuadrant = true := by
   decide
-
-set_option maxRecDepth 4096 in
-theorem rowsOfFlatRoles_smokeFlatRoles :
-    rowsOfFlatRoles smokeFlatRoles = smokeRoleRows := by
-  unfold rowsOfFlatRoles smokeFlatRoles smokeRoleRows
-  decide
-
-theorem smokeFlatUniqueCorner :
-    fig13QuarterCornerPositionUniqueBool
-      (rowsOfFlatRoles smokeFlatRoles) smokeCornerIndex smokeCornerQuadrant = true := by
-  rw [rowsOfFlatRoles_smokeFlatRoles]
-  exact smokeUniqueCorner
 
 /--
 Concrete finite smoke table for the checker.  It is useful for regression
@@ -2310,12 +2297,8 @@ def smoke : Figure18RoleTable where
   length_eq := smokeRoleRows_length
   uniqueCorner := smokeUniqueCorner
 
-def smokeFlat : FlatRoleTable where
-  flat := smokeFlatRoles
-  cornerIndex := smokeCornerIndex
-  cornerQuadrant := smokeCornerQuadrant
-  length_eq := smokeFlatRoles_length
-  uniqueCorner := smokeFlatUniqueCorner
+def smokeFlat : FlatRoleTable :=
+  FlatRoleTable.ofActiveSites smokeActiveSites smokeCornerSite
 
 @[simp]
 theorem smoke_roleAt_corner :
@@ -2326,19 +2309,33 @@ theorem smoke_presentation_tiles :
     smoke.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
   smoke.presentation_tiles
 
+@[simp]
+theorem smoke_cornerSite :
+    smoke.cornerSite = smokeCornerSite :=
+  rfl
+
+@[simp]
+theorem smokeFlat_cornerSite :
+    smokeFlat.cornerSite = smokeCornerSite :=
+  rfl
+
 theorem smoke_flatRoleAt_corner :
-    flatRoleAt smokeFlatRoles smoke.cornerSite = CellRole.corner := by
+    flatRoleAt smokeFlat.flat smoke.cornerSite = CellRole.corner := by
+  rw [smoke_cornerSite, smokeFlat, FlatRoleTable.ofActiveSites_flat,
+    flatRoleAt_flatRolesOfActiveSites]
   rfl
 
 theorem smoke_flatRoleAt_second_site :
-    flatRoleAt smokeFlatRoles
+    flatRoleAt smokeFlat.flat
       ({ index := ⟨0, by decide⟩, quadrant := Quadrant.southeast } : Figure18Site) =
         CellRole.inactive := by
+  rw [smokeFlat, FlatRoleTable.ofActiveSites_flat,
+    flatRoleAt_flatRolesOfActiveSites]
   rfl
 
 theorem smokeFlat_corner_mem_activeSites :
     smokeFlat.cornerSite ∈ smokeFlat.activeSites :=
-  smokeFlat.corner_mem_activeSites
+  FlatRoleTable.corner_mem_ofActiveSites_activeSites smokeActiveSites smokeCornerSite
 
 end Figure18RoleTable
 
