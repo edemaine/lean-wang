@@ -454,6 +454,99 @@ theorem componentAtSiteLayer_block_validRectangle
 
 end Transcription
 
+/-- A rectangle of Figure 18 quarter-sites. -/
+abbrev SiteRectangle (w h : Nat) := Fin w → Fin h → Figure18Site
+
+namespace SiteRectangle
+
+def indexRect {w h : Nat} (R : SiteRectangle w h) : Fin w → Fin h → Fin 92 :=
+  fun i j => (R i j).index
+
+def quadrantRect {w h : Nat} (R : SiteRectangle w h) : Fin w → Fin h → Quadrant :=
+  fun i j => (R i j).quadrant
+
+def tileRect {w h : Nat} (R : SiteRectangle w h) : Rectangle w h :=
+  fun i j => (R i j).tile
+
+def rawTileRect {w h : Nat} (R : SiteRectangle w h) : Rectangle w h :=
+  fun i j => (R i j).rawTile
+
+theorem tileRect_eq {w h : Nat} (R : SiteRectangle w h)
+    (i : Fin w) (j : Fin h) :
+    R.tileRect i j =
+      fig13QuarterTile (R.indexRect i j) (R.quadrantRect i j) :=
+  rfl
+
+theorem rawTileRect_eq {w h : Nat} (R : SiteRectangle w h)
+    (i : Fin w) (j : Fin h) :
+    R.rawTileRect i j = fig13Tile (R.indexRect i j) :=
+  rfl
+
+end SiteRectangle
+
+/--
+A rectangle of Figure 18 sites together with the component selected in one
+Figure 16 layer at every site.
+-/
+structure LayerComponentRectangle
+    (D : Transcription) {w h : Nat} (R : SiteRectangle w h)
+    (layer : Layer) where
+  componentRect : Fin w → Fin h → LayerComponent
+  lookup : ∀ i : Fin w, ∀ j : Fin h,
+    D.componentAtSiteLayer (R i j) layer = some (componentRect i j)
+
+namespace LayerComponentRectangle
+
+def symbolRect
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) :
+    Fin w → Fin h → Figure16.Symbol :=
+  fun i j => (C.componentRect i j).symbol
+
+def blockGrid
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) :
+    Figure16.BlockGrid w h :=
+  fun i j => (C.componentRect i j).block
+
+def ruleSourceRect
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) :
+    Fin w → Fin h → Figure16.RuleSource :=
+  fun i j => (C.componentRect i j).ruleSource
+
+theorem component_layer
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    (C.componentRect i j).layer = layer :=
+  D.componentAtSiteLayer_layer (C.lookup i j)
+
+theorem component_mem_site
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    C.componentRect i j ∈ D.layerComponentsAtSite (R i j) :=
+  D.componentAtSiteLayer_mem (C.lookup i j)
+
+theorem ruleSource_mem_all
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    C.ruleSourceRect i j ∈ Figure16.RuleSource.all :=
+  (C.componentRect i j).ruleSource_mem_all
+
+theorem block_validRectangle_symbolTileSet
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    ValidRectangle Figure16.Symbol.tileSet (C.blockGrid i j).rectangle :=
+  (C.componentRect i j).block_validRectangle_symbolTileSet
+
+theorem symbol_mem_all
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    C.symbolRect i j ∈ Figure16.Symbol.all :=
+  (C.componentRect i j).symbol_mem_all
+
+end LayerComponentRectangle
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
