@@ -1228,6 +1228,32 @@ def blackLookupBool {w h : Nat}
     (D : Transcription) (data : CheckedLayerStackRectangle w h) : Bool :=
   data.black.lookupBool D data.sites
 
+def lookupBool {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h) : Bool :=
+  (data.thinLookupBool D && data.thickLookupBool D) &&
+    data.blackLookupBool D
+
+theorem thinLookupBool_of_lookupBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    (hcheck : data.lookupBool D = true) :
+    data.thinLookupBool D = true := by
+  rw [lookupBool, Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  exact hcheck.1.1
+
+theorem thickLookupBool_of_lookupBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    (hcheck : data.lookupBool D = true) :
+    data.thickLookupBool D = true := by
+  rw [lookupBool, Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  exact hcheck.1.2
+
+theorem blackLookupBool_of_lookupBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    (hcheck : data.lookupBool D = true) :
+    data.blackLookupBool D = true := by
+  rw [lookupBool, Bool.and_eq_true] at hcheck
+  exact hcheck.2
+
 def thinRectangle {w h : Nat}
     (D : Transcription) (data : CheckedLayerStackRectangle w h)
     (hlookup : data.thinLookupBool D = true) :
@@ -1245,6 +1271,40 @@ def blackRectangle {w h : Nat}
     (hlookup : data.blackLookupBool D = true) :
     TypedLayerComponentRectangle D data.siteRectangle .black :=
   data.black.toTypedLayerComponentRectangle D data.sites hlookup
+
+def compatibleBool {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hlookup : data.lookupBool D = true) : Bool :=
+  ((data.thinRectangle D (thinLookupBool_of_lookupBool hlookup)).compatibleBool &&
+    (data.thickRectangle D (thickLookupBool_of_lookupBool hlookup)).compatibleBool) &&
+      (data.blackRectangle D (blackLookupBool_of_lookupBool hlookup)).compatibleBool
+
+theorem thinCompatibleBool_of_compatibleBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    {hlookup : data.lookupBool D = true}
+    (hcheck : data.compatibleBool D hlookup = true) :
+    (data.thinRectangle D (thinLookupBool_of_lookupBool hlookup)).compatibleBool =
+      true := by
+  rw [compatibleBool, Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  exact hcheck.1.1
+
+theorem thickCompatibleBool_of_compatibleBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    {hlookup : data.lookupBool D = true}
+    (hcheck : data.compatibleBool D hlookup = true) :
+    (data.thickRectangle D (thickLookupBool_of_lookupBool hlookup)).compatibleBool =
+      true := by
+  rw [compatibleBool, Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  exact hcheck.1.2
+
+theorem blackCompatibleBool_of_compatibleBool {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    {hlookup : data.lookupBool D = true}
+    (hcheck : data.compatibleBool D hlookup = true) :
+    (data.blackRectangle D (blackLookupBool_of_lookupBool hlookup)).compatibleBool =
+      true := by
+  rw [compatibleBool, Bool.and_eq_true] at hcheck
+  exact hcheck.2
 
 def toTypedLayerStackRectangle {w h : Nat}
     (D : Transcription) (data : CheckedLayerStackRectangle w h)
@@ -1305,6 +1365,19 @@ theorem toTypedLayerStackRectangle_black
       hthinCompatible hthickCompatible hblackCompatible).black =
       data.blackRectangle D hblackLookup :=
   rfl
+
+def toTypedLayerStackRectangleOfChecks {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hlookup : data.lookupBool D = true)
+    (hcompatible : data.compatibleBool D hlookup = true) :
+    TypedLayerStackRectangle D data.siteRectangle :=
+  data.toTypedLayerStackRectangle D
+    (thinLookupBool_of_lookupBool hlookup)
+    (thickLookupBool_of_lookupBool hlookup)
+    (blackLookupBool_of_lookupBool hlookup)
+    (thinCompatibleBool_of_compatibleBool hcompatible)
+    (thickCompatibleBool_of_compatibleBool hcompatible)
+    (blackCompatibleBool_of_compatibleBool hcompatible)
 
 end CheckedLayerStackRectangle
 
