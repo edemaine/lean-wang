@@ -1368,6 +1368,96 @@ theorem combinedSite_product
   rw [table.combinedSite_tile tile]
   exact hproduct
 
+theorem combinedSite_hCompatible_of_validPlaneTiling
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (p : Int × Int) :
+    Figure18Site.hCompatible
+      (table.combinedSite (x p))
+      (table.combinedSite (x (p.1 + 1, p.2))) = true := by
+  rcases table.combinedSite_product (x p) with
+    ⟨payloadLeft, hleft⟩
+  rcases table.combinedSite_product (x (p.1 + 1, p.2)) with
+    ⟨payloadRight, hright⟩
+  apply Figure18Site.hCompatible_of_hMatches
+  have hproduct : WangTile.HMatches
+      (WangTile.product (table.combinedSite (x p)).tile payloadLeft)
+      (WangTile.product
+        (table.combinedSite (x (p.1 + 1, p.2))).tile payloadRight) := by
+    simpa [← hleft, ← hright] using hx.1 p
+  exact (WangTile.HMatches_product_iff
+    (table.combinedSite (x p)).tile payloadLeft
+    (table.combinedSite (x (p.1 + 1, p.2))).tile payloadRight).1
+      hproduct |>.1
+
+theorem combinedSite_vCompatible_of_validPlaneTiling
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (p : Int × Int) :
+    Figure18Site.vCompatible
+      (table.combinedSite (x p))
+      (table.combinedSite (x (p.1, p.2 + 1))) = true := by
+  rcases table.combinedSite_product (x p) with
+    ⟨payloadLower, hlower⟩
+  rcases table.combinedSite_product (x (p.1, p.2 + 1)) with
+    ⟨payloadUpper, hupper⟩
+  apply Figure18Site.vCompatible_of_vMatches
+  have hproduct : WangTile.VMatches
+      (WangTile.product (table.combinedSite (x p)).tile payloadLower)
+      (WangTile.product
+        (table.combinedSite (x (p.1, p.2 + 1))).tile payloadUpper) := by
+    simpa [← hlower, ← hupper] using hx.2 p
+  exact (WangTile.VMatches_product_iff
+    (table.combinedSite (x p)).tile payloadLower
+    (table.combinedSite (x (p.1, p.2 + 1))).tile payloadUpper).1
+      hproduct |>.1
+
+theorem combinedSite_hCompatible_of_selectedCoords
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x)
+    {n : Nat}
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+      horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1)
+    (i : Fin n) (j : Fin n) (hi : i.val + 1 < n) :
+    Figure18Site.hCompatible
+      (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+      (table.combinedSite
+        (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) = true := by
+  have hcompat :=
+    table.combinedSite_hCompatible_of_validPlaneTiling hx
+      (horizontalCoord i, verticalCoord j)
+  simpa [horizontalCoord_succ i hi] using hcompat
+
+theorem combinedSite_vCompatible_of_selectedCoords
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x)
+    {n : Nat}
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1)
+    (i : Fin n) (j : Fin n) (hj : j.val + 1 < n) :
+    Figure18Site.vCompatible
+      (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+      (table.combinedSite
+        (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) = true := by
+  have vcompat :=
+    table.combinedSite_vCompatible_of_validPlaneTiling hx
+      (horizontalCoord i, verticalCoord j)
+  simpa [verticalCoord_succ j hj] using vcompat
+
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
