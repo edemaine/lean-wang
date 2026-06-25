@@ -637,6 +637,95 @@ theorem expanded_vMatches_boundary
 
 end CompatibleLayerComponentRectangle
 
+/--
+All three Figure 16 layer-component rectangles over the same Figure 18 site
+rectangle, with compatibility certificates for each induced macroblock grid.
+-/
+structure LayerStackRectangle
+    (D : Transcription) {w h : Nat} (R : SiteRectangle w h) where
+  thin : LayerComponentRectangle D R .thin
+  thick : LayerComponentRectangle D R .thick
+  black : LayerComponentRectangle D R .black
+  thinCompatible : CompatibleLayerComponentRectangle thin
+  thickCompatible : CompatibleLayerComponentRectangle thick
+  blackCompatible : CompatibleLayerComponentRectangle black
+
+namespace LayerStackRectangle
+
+def componentRect
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) : Layer → Fin w → Fin h → LayerComponent
+  | .thin => S.thin.componentRect
+  | .thick => S.thick.componentRect
+  | .black => S.black.componentRect
+
+def blockGrid
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer) : Figure16.BlockGrid w h :=
+  match layer with
+  | .thin => S.thin.blockGrid
+  | .thick => S.thick.blockGrid
+  | .black => S.black.blockGrid
+
+theorem component_layer
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer) (i : Fin w) (j : Fin h) :
+    (S.componentRect layer i j).layer = layer := by
+  cases layer
+  · exact S.thin.component_layer i j
+  · exact S.thick.component_layer i j
+  · exact S.black.component_layer i j
+
+theorem blockGrid_compatible
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer) :
+    Figure16.BlockGrid.Compatible (S.blockGrid layer) := by
+  cases layer
+  · exact S.thinCompatible.blockGrid_compatible
+  · exact S.thickCompatible.blockGrid_compatible
+  · exact S.blackCompatible.blockGrid_compatible
+
+theorem expandedTile_mem_symbolTileSet
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer)
+    (i : Fin w) (j : Fin h) (di dj : Fin 2) :
+    Figure16.BlockGrid.expandedTile (S.blockGrid layer) i j di dj ∈
+      Figure16.Symbol.tileSet := by
+  cases layer
+  · exact S.thinCompatible.expandedTile_mem_symbolTileSet i j di dj
+  · exact S.thickCompatible.expandedTile_mem_symbolTileSet i j di dj
+  · exact S.blackCompatible.expandedTile_mem_symbolTileSet i j di dj
+
+theorem expanded_hMatches_boundary
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer)
+    (i : Fin w) (j : Fin h) (hi : i.val + 1 < w) (dj : Fin 2) :
+    WangTile.HMatches
+      (Figure16.BlockGrid.expandedTile (S.blockGrid layer)
+        i j ⟨1, by decide⟩ dj)
+      (Figure16.BlockGrid.expandedTile (S.blockGrid layer)
+        ⟨i.val + 1, hi⟩ j ⟨0, by decide⟩ dj) := by
+  cases layer
+  · exact S.thinCompatible.expanded_hMatches_boundary i j hi dj
+  · exact S.thickCompatible.expanded_hMatches_boundary i j hi dj
+  · exact S.blackCompatible.expanded_hMatches_boundary i j hi dj
+
+theorem expanded_vMatches_boundary
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer)
+    (i : Fin w) (j : Fin h) (hj : j.val + 1 < h) (di : Fin 2) :
+    WangTile.VMatches
+      (Figure16.BlockGrid.expandedTile (S.blockGrid layer)
+        i j di ⟨1, by decide⟩)
+      (Figure16.BlockGrid.expandedTile (S.blockGrid layer)
+        i ⟨j.val + 1, hj⟩ di ⟨0, by decide⟩) := by
+  cases layer
+  · exact S.thinCompatible.expanded_vMatches_boundary i j hj di
+  · exact S.thickCompatible.expanded_vMatches_boundary i j hj di
+  · exact S.blackCompatible.expanded_vMatches_boundary i j hj di
+
+end LayerStackRectangle
+
 /-- Site rectangle extracted from an indexed active-corner window. -/
 def siteRectangleOfIndexedActiveCornerWindow
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -699,6 +788,15 @@ abbrev CompatibleIndexedActiveCornerWindowLayerComponents
     (C : IndexedActiveCornerWindowLayerComponents D window layer) : Prop :=
   CompatibleLayerComponentRectangle C
 
+abbrev IndexedActiveCornerWindowLayerStack
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn) : Type :=
+  LayerStackRectangle D
+    (siteRectangleOfIndexedActiveCornerWindow window)
+
 /-- Site rectangle extracted from an indexed routed fixed-corner square. -/
 def siteRectangleOfIndexedRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -745,6 +843,15 @@ abbrev CompatibleIndexedRoutedFixedCornerSquareLayerComponents
     {layer : Layer}
     (C : IndexedRoutedFixedCornerSquareLayerComponents D window layer) : Prop :=
   CompatibleLayerComponentRectangle C
+
+abbrev IndexedRoutedFixedCornerSquareLayerStack
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) : Type :=
+  LayerStackRectangle D
+    (siteRectangleOfIndexedRoutedFixedCornerSquare window)
 
 end Figure13Layers
 end OllingerRobinson
