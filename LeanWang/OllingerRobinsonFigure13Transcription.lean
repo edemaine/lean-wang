@@ -720,6 +720,59 @@ theorem length_sitesOfNatSpecs_of_natSpecsValidBool
         ⟨hi, htail⟩
       simp [sitesOfNatSpecs, ofNat?_eq_some_of_lt q hi, ih htail]
 
+theorem mem_sitesOfNatSpecs_of_mem
+    {specs : List (Nat × Quadrant)} {i : Nat} {q : Quadrant}
+    (hcheck : natSpecsValidBool specs = true)
+    (hmem : (i, q) ∈ specs) :
+    ∃ h : i < 92,
+      ({ index := ⟨i, h⟩, quadrant := q } : Figure18Site) ∈
+        sitesOfNatSpecs specs := by
+  induction specs with
+  | nil =>
+      simp at hmem
+  | cons spec specs ih =>
+      rcases spec with ⟨j, r⟩
+      rcases natSpecsValidBool_cons (i := j) (q := r) hcheck with
+        ⟨hj, htail⟩
+      rcases List.mem_cons.1 hmem with hhead | htailMem
+      · cases hhead
+        exact ⟨hj, by simp [sitesOfNatSpecs, ofNat?_eq_some_of_lt q hj]⟩
+      · rcases ih htail htailMem with ⟨hi, hsite⟩
+        exact ⟨hi, by
+          simp [sitesOfNatSpecs, ofNat?_eq_some_of_lt r hj, hsite]⟩
+
+theorem mem_spec_of_mem_sitesOfNatSpecs
+    {specs : List (Nat × Quadrant)} {site : Figure18Site}
+    (hcheck : natSpecsValidBool specs = true)
+    (hmem : site ∈ sitesOfNatSpecs specs) :
+    (site.index.val, site.quadrant) ∈ specs := by
+  induction specs with
+  | nil =>
+      simp [sitesOfNatSpecs] at hmem
+  | cons spec specs ih =>
+      rcases spec with ⟨i, q⟩
+      rcases natSpecsValidBool_cons (i := i) (q := q) hcheck with
+        ⟨hi, htail⟩
+      simp only [sitesOfNatSpecs, ofNat?_eq_some_of_lt q hi,
+        List.mem_cons] at hmem ⊢
+      rcases hmem with hsite | htailMem
+      · left
+        cases hsite
+        rfl
+      · right
+        exact ih htail htailMem
+
+theorem mem_sitesOfNatSpecs_iff_of_natSpecsValidBool
+    {specs : List (Nat × Quadrant)}
+    (hcheck : natSpecsValidBool specs = true) (site : Figure18Site) :
+    site ∈ sitesOfNatSpecs specs ↔
+      (site.index.val, site.quadrant) ∈ specs := by
+  constructor
+  · exact mem_spec_of_mem_sitesOfNatSpecs hcheck
+  · intro hmem
+    rcases mem_sitesOfNatSpecs_of_mem hcheck hmem with ⟨hi, hsite⟩
+    simpa using hsite
+
 /-- Checked raw data for a finite list of Figure 18 sites. -/
 structure CheckedNatSpecs where
   specs : List (Nat × Quadrant)
@@ -733,6 +786,25 @@ def sites (data : CheckedNatSpecs) : List Figure18Site :=
 theorem sites_length (data : CheckedNatSpecs) :
     data.sites.length = data.specs.length :=
   length_sitesOfNatSpecs_of_natSpecsValidBool data.valid
+
+theorem mem_sites_of_mem_specs
+    (data : CheckedNatSpecs) {i : Nat} {q : Quadrant}
+    (hmem : (i, q) ∈ data.specs) :
+    ∃ h : i < 92,
+      ({ index := ⟨i, h⟩, quadrant := q } : Figure18Site) ∈
+        data.sites :=
+  mem_sitesOfNatSpecs_of_mem data.valid hmem
+
+theorem mem_specs_of_mem_sites
+    (data : CheckedNatSpecs) {site : Figure18Site}
+    (hmem : site ∈ data.sites) :
+    (site.index.val, site.quadrant) ∈ data.specs :=
+  mem_spec_of_mem_sitesOfNatSpecs data.valid hmem
+
+theorem mem_sites_iff (data : CheckedNatSpecs) (site : Figure18Site) :
+    site ∈ data.sites ↔
+      (site.index.val, site.quadrant) ∈ data.specs :=
+  mem_sitesOfNatSpecs_iff_of_natSpecsValidBool data.valid site
 
 end CheckedNatSpecs
 
