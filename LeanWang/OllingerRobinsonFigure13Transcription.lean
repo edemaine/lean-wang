@@ -2918,6 +2918,22 @@ structure Figure18IndexedRoutedInstance where
   certificate : Figure18IndexedRoutedCertificate table
 
 /--
+Concrete Figure 18 scaffold package using adjacent selected coordinates and
+finite Figure 18 site compatibility.
+-/
+structure Figure18AdjacentCompatibleInstance where
+  table : Figure18RoleTable
+  certificate : Figure18AdjacentCompatibleCertificate table
+
+/--
+Concrete Figure 18 scaffold package using adjacent selected coordinates and
+pointwise payload witnesses.
+-/
+structure Figure18AdjacentProductWitnessInstance where
+  table : Figure18RoleTable
+  certificate : Figure18AdjacentProductWitnessCertificate table
+
+/--
 Concrete Figure 18 scaffold package using the direct indexed free-square
 certificate.
 -/
@@ -3036,6 +3052,83 @@ theorem isScaffold (I : Figure18IndexedRoutedInstance) :
   I.certificate.isScaffold
 
 end Figure18IndexedRoutedInstance
+
+namespace Figure18AdjacentCompatibleInstance
+
+def finite (I : Figure18AdjacentCompatibleInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18AdjacentCompatibleInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def toIndexedRoutedInstance (I : Figure18AdjacentCompatibleInstance) :
+    Figure18IndexedRoutedInstance where
+  table := I.table
+  certificate := I.certificate.toIndexedRoutedCertificate
+
+def toFlexibleInstance (I : Figure18AdjacentCompatibleInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toIndexedRoutedInstance_table (I : Figure18AdjacentCompatibleInstance) :
+    I.toIndexedRoutedInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18AdjacentCompatibleInstance) :
+    I.toFlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : Figure18AdjacentCompatibleInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18AdjacentCompatibleInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18AdjacentCompatibleInstance
+
+namespace Figure18AdjacentProductWitnessInstance
+
+def finite (I : Figure18AdjacentProductWitnessInstance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : Figure18AdjacentProductWitnessInstance) : ScaffoldPresentation :=
+  I.table.presentation
+
+def toAdjacentCompatibleInstance (I : Figure18AdjacentProductWitnessInstance) :
+    Figure18AdjacentCompatibleInstance where
+  table := I.table
+  certificate := I.certificate.toAdjacentCompatibleCertificate
+
+def toFlexibleInstance (I : Figure18AdjacentProductWitnessInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toAdjacentCompatibleInstance_table
+    (I : Figure18AdjacentProductWitnessInstance) :
+    I.toAdjacentCompatibleInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18AdjacentProductWitnessInstance) :
+    I.toFlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : Figure18AdjacentProductWitnessInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.presentation_tiles
+
+theorem isScaffold (I : Figure18AdjacentProductWitnessInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18AdjacentProductWitnessInstance
 
 namespace Figure18FlexibleInstance
 
