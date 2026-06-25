@@ -669,6 +669,57 @@ theorem mk_eq_iff (i : Fin 92) (q : Quadrant) (site : Figure18Site) :
   cases site
   simp
 
+/-- Decode an ordinary natural-number tile index and quadrant as a Figure 18 site. -/
+def ofNat? (i : Nat) (q : Quadrant) : Option Figure18Site :=
+  if h : i < 92 then some ({ index := ⟨i, h⟩, quadrant := q } : Figure18Site)
+  else none
+
+@[simp]
+theorem ofNat?_eq_some_of_lt {i : Nat} (q : Quadrant) (h : i < 92) :
+    ofNat? i q = some ({ index := ⟨i, h⟩, quadrant := q } : Figure18Site) := by
+  simp [ofNat?, h]
+
+@[simp]
+theorem ofNat?_eq_none_of_not_lt {i : Nat} (q : Quadrant) (h : ¬ i < 92) :
+    ofNat? i q = none := by
+  simp [ofNat?, h]
+
+/--
+Decode a list of ordinary indexed quadrant specs.
+
+Concrete Figure 18 data should pair this with `natSpecsValidBool`, so that an
+out-of-range raw tile index is caught by a small finite check.
+-/
+def sitesOfNatSpecs : List (Nat × Quadrant) → List Figure18Site
+  | [] => []
+  | (i, q) :: specs =>
+      match ofNat? i q with
+      | some site => site :: sitesOfNatSpecs specs
+      | none => sitesOfNatSpecs specs
+
+/-- Finite check that all raw Figure 18 site specs use valid Figure 13 indices. -/
+def natSpecsValidBool (specs : List (Nat × Quadrant)) : Bool :=
+  specs.all fun spec => decide (spec.1 < 92)
+
+theorem natSpecsValidBool_cons {i : Nat} {q : Quadrant}
+    {specs : List (Nat × Quadrant)}
+    (hcheck : natSpecsValidBool ((i, q) :: specs) = true) :
+    i < 92 ∧ natSpecsValidBool specs = true := by
+  simpa [natSpecsValidBool] using hcheck
+
+theorem length_sitesOfNatSpecs_of_natSpecsValidBool
+    {specs : List (Nat × Quadrant)}
+    (hcheck : natSpecsValidBool specs = true) :
+    (sitesOfNatSpecs specs).length = specs.length := by
+  induction specs with
+  | nil =>
+      rfl
+  | cons spec specs ih =>
+      rcases spec with ⟨i, q⟩
+      rcases natSpecsValidBool_cons (i := i) (q := q) hcheck with
+        ⟨hi, htail⟩
+      simp [sitesOfNatSpecs, ofNat?_eq_some_of_lt q hi, ih htail]
+
 end Figure18Site
 
 /-- Role lookup entries for a complete quadrant role transcription. -/
@@ -2278,8 +2329,20 @@ def smokeCornerSite : Figure18Site where
   index := smokeCornerIndex
   quadrant := smokeCornerQuadrant
 
-def smokeActiveSites : List Figure18Site :=
+def smokeActiveSiteSpecs : List (Nat × Quadrant) :=
   []
+
+def smokeActiveSites : List Figure18Site :=
+  Figure18Site.sitesOfNatSpecs smokeActiveSiteSpecs
+
+theorem smokeActiveSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool smokeActiveSiteSpecs = true :=
+  rfl
+
+theorem smokeActiveSites_length :
+    smokeActiveSites.length = smokeActiveSiteSpecs.length :=
+  Figure18Site.length_sitesOfNatSpecs_of_natSpecsValidBool
+    smokeActiveSiteSpecs_valid
 
 theorem smokeUniqueCorner :
     fig13QuarterCornerPositionUniqueBool
