@@ -376,6 +376,22 @@ def all : List Figure18Site :=
 def ofTile? (tile : WangTile) : Option Figure18Site :=
   all.find? fun site => site.tile = tile
 
+/-- Index of the first Figure 18 site with the given tile, or `all.length`. -/
+def tileIndex (tile : WangTile) : Nat :=
+  all.findIdx fun site => decide (site.tile = tile)
+
+theorem tileIndex_primrec : Primrec tileIndex := by
+  let pred : WangTile → Figure18Site → Bool := fun tile site => decide (site.tile = tile)
+  have hleft : Primrec (fun p : WangTile × Figure18Site => (p.2).tile) :=
+    tile_primrec.comp (Primrec.snd (α := WangTile) (β := Figure18Site))
+  have hright : Primrec (fun p : WangTile × Figure18Site => p.1) :=
+    Primrec.fst
+  have hpredUncurried : Primrec (fun p : WangTile × Figure18Site => pred p.1 p.2) := by
+    exact Primrec.eq.decide.comp hleft hright
+  have hpred : Primrec₂ pred := Primrec₂.mk hpredUncurried
+  exact (Primrec.list_findIdx₁ hpred all).of_eq fun tile => by
+    rfl
+
 @[simp]
 theorem all_length : all.length = 368 := by
   simp [all, Quadrant.all]
@@ -410,6 +426,13 @@ theorem mem_all (site : Figure18Site) : site ∈ all := by
 theorem tile_mem_all_tiles (site : Figure18Site) :
     site.tile ∈ all.map tile :=
   List.mem_map.2 ⟨site, site.mem_all, rfl⟩
+
+theorem tileIndex_lt_length_of_mem_all_tiles {tile : WangTile}
+    (hmem : tile ∈ all.map Figure18Site.tile) :
+    tileIndex tile < all.length := by
+  unfold tileIndex
+  rcases List.mem_map.1 hmem with ⟨site, hsite, htile⟩
+  exact List.findIdx_lt_length_of_exists ⟨site, hsite, decide_eq_true htile⟩
 
 theorem ofTile?_eq_some_tile {tile : WangTile} {site : Figure18Site}
     (h : ofTile? tile = some site) :
