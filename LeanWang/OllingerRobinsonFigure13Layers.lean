@@ -28,6 +28,18 @@ inductive Layer where
   | black
 deriving DecidableEq, Repr
 
+namespace Layer
+
+def all : List Layer := [.thin, .thick, .black]
+
+theorem mem_all (layer : Layer) : layer ∈ all := by
+  cases layer <;> decide
+
+theorem all_nodup : all.Nodup := by
+  decide
+
+end Layer
+
 /-- A single Figure 16 layer component appearing in a raw Figure 13 tile. -/
 inductive LayerComponent where
   | thin (component : Figure16.Thin)
@@ -102,6 +114,11 @@ def toLayerComponents (components : Components) : List LayerComponent :=
     | none => []
     | some component => [LayerComponent.black component])
 
+def componentAtLayer (components : Components) : Layer → Option LayerComponent
+  | .thin => components.thin.map LayerComponent.thin
+  | .thick => components.thick.map LayerComponent.thick
+  | .black => components.black.map LayerComponent.black
+
 def symbols (components : Components) : List Figure16.Symbol :=
   components.toLayerComponents.map LayerComponent.symbol
 
@@ -121,6 +138,60 @@ theorem layer_nodup (components : Components) :
   rcases components with ⟨thin, thick, black⟩
   cases thin <;> cases thick <;> cases black <;>
     simp [toLayerComponents, LayerComponent.layer]
+
+theorem componentAtLayer_eq_some_iff
+    {components : Components} {layer : Layer} {component : LayerComponent} :
+    components.componentAtLayer layer = some component ↔
+      component ∈ components.toLayerComponents ∧ component.layer = layer := by
+  rcases components with ⟨thin, thick, black⟩
+  cases layer <;> cases thin <;> cases thick <;> cases black <;>
+    cases component <;>
+    simp [componentAtLayer, toLayerComponents, LayerComponent.layer, eq_comm]
+
+theorem componentAtLayer_mem
+    {components : Components} {layer : Layer} {component : LayerComponent}
+    (hcomponent : components.componentAtLayer layer = some component) :
+    component ∈ components.toLayerComponents :=
+  (componentAtLayer_eq_some_iff.1 hcomponent).1
+
+theorem componentAtLayer_layer
+    {components : Components} {layer : Layer} {component : LayerComponent}
+    (hcomponent : components.componentAtLayer layer = some component) :
+    component.layer = layer :=
+  (componentAtLayer_eq_some_iff.1 hcomponent).2
+
+theorem componentAtLayer_eq_some_of_mem
+    {components : Components} {component : LayerComponent}
+    (hcomponent : component ∈ components.toLayerComponents) :
+    components.componentAtLayer component.layer = some component := by
+  rw [componentAtLayer_eq_some_iff]
+  exact ⟨hcomponent, rfl⟩
+
+theorem eq_of_mem_same_layer
+    {components : Components} {left right : LayerComponent}
+    (hleft : left ∈ components.toLayerComponents)
+    (hright : right ∈ components.toLayerComponents)
+    (hlayer : left.layer = right.layer) :
+    left = right := by
+  have hleftLookup := componentAtLayer_eq_some_of_mem hleft
+  have hrightLookup := componentAtLayer_eq_some_of_mem hright
+  rw [hlayer, hrightLookup] at hleftLookup
+  simpa using hleftLookup.symm
+
+theorem componentAtLayer_isSome_iff_exists
+    {components : Components} {layer : Layer} :
+    (components.componentAtLayer layer).isSome ↔
+      ∃ component : LayerComponent,
+        component ∈ components.toLayerComponents ∧ component.layer = layer := by
+  constructor
+  · intro hsome
+    rcases hcomponent : components.componentAtLayer layer with _ | component
+    · simp [hcomponent] at hsome
+    · exact ⟨component, componentAtLayer_eq_some_iff.1 hcomponent⟩
+  · rintro ⟨component, hcomponent, hlayer⟩
+    rw [← hlayer]
+    rw [componentAtLayer_eq_some_of_mem hcomponent]
+    rfl
 
 theorem mem_ruleSources_iff_exists_layerComponent
     {components : Components} {source : Figure16.RuleSource} :
@@ -182,9 +253,18 @@ def ruleSources (tile : LayeredTile) : List Figure16.RuleSource :=
 def layerComponents (tile : LayeredTile) : List LayerComponent :=
   tile.components.toLayerComponents
 
+def componentAtLayer (tile : LayeredTile) (layer : Layer) : Option LayerComponent :=
+  tile.components.componentAtLayer layer
+
 theorem layer_nodup (tile : LayeredTile) :
     (tile.layerComponents.map LayerComponent.layer).Nodup :=
   tile.components.layer_nodup
+
+theorem componentAtLayer_eq_some_iff
+    {tile : LayeredTile} {layer : Layer} {component : LayerComponent} :
+    tile.componentAtLayer layer = some component ↔
+      component ∈ tile.layerComponents ∧ component.layer = layer :=
+  Components.componentAtLayer_eq_some_iff
 
 theorem mem_ruleSources_all
     {tile : LayeredTile} {source : Figure16.RuleSource}
@@ -219,6 +299,10 @@ def layerComponentsAt (D : Transcription) (index : Fin 92) :
     List LayerComponent :=
   (D.componentsAt index).toLayerComponents
 
+def componentAtLayerAt (D : Transcription) (index : Fin 92)
+    (layer : Layer) : Option LayerComponent :=
+  (D.componentsAt index).componentAtLayer layer
+
 def specs (D : Transcription) : List LayeredTile :=
   (List.finRange 92).map D.layeredTileAt
 
@@ -248,6 +332,19 @@ theorem layerComponentsAt_eq_layeredTileAt
 theorem layerComponentsAt_layer_nodup (D : Transcription) (index : Fin 92) :
     ((D.layerComponentsAt index).map LayerComponent.layer).Nodup :=
   (D.componentsAt index).layer_nodup
+
+theorem componentAtLayerAt_eq_layeredTileAt
+    (D : Transcription) (index : Fin 92) (layer : Layer) :
+    D.componentAtLayerAt index layer =
+      (D.layeredTileAt index).componentAtLayer layer :=
+  rfl
+
+theorem componentAtLayerAt_eq_some_iff
+    {D : Transcription} {index : Fin 92} {layer : Layer}
+    {component : LayerComponent} :
+    D.componentAtLayerAt index layer = some component ↔
+      component ∈ D.layerComponentsAt index ∧ component.layer = layer :=
+  Components.componentAtLayer_eq_some_iff
 
 theorem mem_ruleSourcesAt_all
     (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
