@@ -358,6 +358,100 @@ theorem validRectangle_of_mem_ruleSourcesAt
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   Components.validRectangle_of_mem_ruleSources hsource
 
+/--
+Layer components at a Figure 18 quarter-site.  The layer annotation belongs to
+the underlying raw Figure 13 tile, so this intentionally depends only on
+`site.index`, not on `site.quadrant`.
+-/
+def componentsAtSite (D : Transcription) (site : Figure18Site) : Components :=
+  D.componentsAt site.index
+
+def layeredTileAtSite (D : Transcription) (site : Figure18Site) : LayeredTile :=
+  D.layeredTileAt site.index
+
+def layerComponentsAtSite (D : Transcription) (site : Figure18Site) :
+    List LayerComponent :=
+  D.layerComponentsAt site.index
+
+def componentAtSiteLayer (D : Transcription) (site : Figure18Site)
+    (layer : Layer) : Option LayerComponent :=
+  D.componentAtLayerAt site.index layer
+
+def ruleSourcesAtSite (D : Transcription) (site : Figure18Site) :
+    List Figure16.RuleSource :=
+  D.ruleSourcesAt site.index
+
+theorem componentsAtSite_eq_index (D : Transcription) (site : Figure18Site) :
+    D.componentsAtSite site = D.componentsAt site.index :=
+  rfl
+
+theorem layeredTileAtSite_eq_index (D : Transcription) (site : Figure18Site) :
+    D.layeredTileAtSite site = D.layeredTileAt site.index :=
+  rfl
+
+theorem layerComponentsAtSite_eq_index (D : Transcription) (site : Figure18Site) :
+    D.layerComponentsAtSite site = D.layerComponentsAt site.index :=
+  rfl
+
+theorem componentAtSiteLayer_eq_index
+    (D : Transcription) (site : Figure18Site) (layer : Layer) :
+    D.componentAtSiteLayer site layer =
+      D.componentAtLayerAt site.index layer :=
+  rfl
+
+theorem ruleSourcesAtSite_eq_index (D : Transcription) (site : Figure18Site) :
+    D.ruleSourcesAtSite site = D.ruleSourcesAt site.index :=
+  rfl
+
+theorem layeredTileAtSite_rawTile (D : Transcription) (site : Figure18Site) :
+    (D.layeredTileAtSite site).rawTile = site.rawTile :=
+  rfl
+
+theorem layerComponentsAtSite_layer_nodup
+    (D : Transcription) (site : Figure18Site) :
+    ((D.layerComponentsAtSite site).map LayerComponent.layer).Nodup :=
+  D.layerComponentsAt_layer_nodup site.index
+
+theorem componentAtSiteLayer_eq_some_iff
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent} :
+    D.componentAtSiteLayer site layer = some component ↔
+      component ∈ D.layerComponentsAtSite site ∧ component.layer = layer :=
+  D.componentAtLayerAt_eq_some_iff
+
+theorem componentAtSiteLayer_mem
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (hcomponent : D.componentAtSiteLayer site layer = some component) :
+    component ∈ D.layerComponentsAtSite site :=
+  (componentAtSiteLayer_eq_some_iff.1 hcomponent).1
+
+theorem componentAtSiteLayer_layer
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (hcomponent : D.componentAtSiteLayer site layer = some component) :
+    component.layer = layer :=
+  (componentAtSiteLayer_eq_some_iff.1 hcomponent).2
+
+theorem mem_ruleSourcesAtSite_all
+    (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAtSite site) :
+    source ∈ Figure16.RuleSource.all :=
+  D.mem_ruleSourcesAt_all site.index hsource
+
+theorem validRectangle_of_mem_ruleSourcesAtSite
+    (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAtSite site) :
+    ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
+  D.validRectangle_of_mem_ruleSourcesAt site.index hsource
+
+theorem componentAtSiteLayer_block_validRectangle
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (_hcomponent : D.componentAtSiteLayer site layer = some component) :
+    ValidRectangle Figure16.Symbol.tileSet component.block.rectangle :=
+  component.block_validRectangle_symbolTileSet
+
 end Transcription
 
 end Figure13Layers
