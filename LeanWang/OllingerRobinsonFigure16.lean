@@ -523,17 +523,35 @@ theorem compatible_of_mem_allSubstitutionBlocks
 theorem phiL1Star_compatible : phiL1Star.Compatible := by
   decide
 
+theorem phiL1Star_validRectangle :
+    ValidRectangle phiL1Star.tileSet phiL1Star.rectangle :=
+  Block.validRectangle_of_compatible phiL1Star_compatible
+
 theorem phiL2Component1_compatible (component : Thin) :
     (phiL2Component1 component).Compatible := by
   cases component <;> decide
+
+theorem phiL2Component1_validRectangle (component : Thin) :
+    ValidRectangle (phiL2Component1 component).tileSet
+      (phiL2Component1 component).rectangle :=
+  Block.validRectangle_of_compatible (phiL2Component1_compatible component)
 
 theorem phiL2Component2_compatible (component : Thick) :
     (phiL2Component2 component).Compatible := by
   cases component <;> decide
 
+theorem phiL2Component2_validRectangle (component : Thick) :
+    ValidRectangle (phiL2Component2 component).tileSet
+      (phiL2Component2 component).rectangle :=
+  Block.validRectangle_of_compatible (phiL2Component2_compatible component)
+
 theorem phiL3_compatible (component : Black) :
     (phiL3 component).Compatible := by
   cases component <;> decide
+
+theorem phiL3_validRectangle (component : Black) :
+    ValidRectangle (phiL3 component).tileSet (phiL3 component).rectangle :=
+  Block.validRectangle_of_compatible (phiL3_compatible component)
 
 end Figure16
 end OllingerRobinson
