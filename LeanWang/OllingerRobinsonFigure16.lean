@@ -493,6 +493,88 @@ def phiL3 : Black → Block
   | .d => .mkRows .L3d .L3a .L3d .L3c
   | .e => .mkRows .L3e .L3a .L3e .L3c
 
+/-- Domain of the finite Figure 16 substitution rule table. -/
+inductive RuleSource where
+  | l1Star
+  | l2Component1 (component : Thin)
+  | l2Component2 (component : Thick)
+  | l3 (component : Black)
+deriving DecidableEq, Repr
+
+namespace RuleSource
+
+def all : List RuleSource :=
+  .l1Star ::
+    (Thin.all.map .l2Component1) ++
+      (Thick.all.map .l2Component2) ++
+        (Black.all.map .l3)
+
+def block : RuleSource → Block
+  | .l1Star => phiL1Star
+  | .l2Component1 component => phiL2Component1 component
+  | .l2Component2 component => phiL2Component2 component
+  | .l3 component => phiL3 component
+
+theorem mem_all (source : RuleSource) : source ∈ all := by
+  cases source with
+  | l1Star =>
+      decide
+  | l2Component1 component =>
+      cases component <;> decide
+  | l2Component2 component =>
+      cases component <;> decide
+  | l3 component =>
+      cases component <;> decide
+
+theorem all_nodup : all.Nodup := by
+  decide
+
+end RuleSource
+
+/-- One row of the finite Figure 16 substitution table. -/
+structure SubstitutionRule where
+  source : RuleSource
+  block : Block
+deriving DecidableEq, Repr
+
+namespace SubstitutionRule
+
+def ofSource (source : RuleSource) : SubstitutionRule where
+  source := source
+  block := source.block
+
+@[simp]
+theorem ofSource_source (source : RuleSource) :
+    (ofSource source).source = source :=
+  rfl
+
+@[simp]
+theorem ofSource_block (source : RuleSource) :
+    (ofSource source).block = source.block :=
+  rfl
+
+end SubstitutionRule
+
+/-- The complete finite Figure 16 substitution table. -/
+def substitutionRules : List SubstitutionRule :=
+  RuleSource.all.map SubstitutionRule.ofSource
+
+def substitutionRuleSources : List RuleSource :=
+  substitutionRules.map SubstitutionRule.source
+
+theorem substitutionRuleSources_eq_all :
+    substitutionRuleSources = RuleSource.all := by
+  decide
+
+theorem substitutionRuleSources_nodup :
+    substitutionRuleSources.Nodup := by
+  simpa [substitutionRuleSources_eq_all] using RuleSource.all_nodup
+
+theorem mem_substitutionRules_iff {rule : SubstitutionRule} :
+    rule ∈ substitutionRules ↔ ∃ source : RuleSource,
+      source ∈ RuleSource.all ∧ SubstitutionRule.ofSource source = rule := by
+  simp [substitutionRules]
+
 /-- Named block used only for finite checks and readable diagnostics. -/
 structure NamedBlock where
   name : String
@@ -612,6 +694,47 @@ theorem phiL3_validRectangle (component : Black) :
 theorem phiL3_validRectangle_symbolTileSet (component : Black) :
     ValidRectangle Symbol.tileSet (phiL3 component).rectangle :=
   Block.validRectangle_symbolTileSet_of_compatible (phiL3_compatible component)
+
+namespace RuleSource
+
+theorem block_compatible (source : RuleSource) : source.block.Compatible := by
+  cases source with
+  | l1Star =>
+      exact phiL1Star_compatible
+  | l2Component1 component =>
+      exact phiL2Component1_compatible component
+  | l2Component2 component =>
+      exact phiL2Component2_compatible component
+  | l3 component =>
+      exact phiL3_compatible component
+
+theorem block_validRectangle_symbolTileSet (source : RuleSource) :
+    ValidRectangle Symbol.tileSet source.block.rectangle :=
+  Block.validRectangle_symbolTileSet_of_compatible source.block_compatible
+
+end RuleSource
+
+namespace SubstitutionRule
+
+theorem block_eq_source_block {rule : SubstitutionRule}
+    (h : rule ∈ substitutionRules) :
+    rule.block = rule.source.block := by
+  rcases mem_substitutionRules_iff.1 h with ⟨source, _hsource, rfl⟩
+  rfl
+
+theorem block_compatible {rule : SubstitutionRule}
+    (h : rule ∈ substitutionRules) :
+    rule.block.Compatible := by
+  rw [block_eq_source_block h]
+  exact rule.source.block_compatible
+
+theorem block_validRectangle_symbolTileSet {rule : SubstitutionRule}
+    (h : rule ∈ substitutionRules) :
+    ValidRectangle Symbol.tileSet rule.block.rectangle := by
+  rw [block_eq_source_block h]
+  exact rule.source.block_validRectangle_symbolTileSet
+
+end SubstitutionRule
 
 end Figure16
 end OllingerRobinson
