@@ -1818,6 +1818,18 @@ theorem smokeUniqueCorner :
       smokeRoleRows smokeCornerIndex smokeCornerQuadrant = true := by
   decide
 
+set_option maxRecDepth 4096 in
+theorem rowsOfFlatRoles_smokeFlatRoles :
+    rowsOfFlatRoles smokeFlatRoles = smokeRoleRows := by
+  unfold rowsOfFlatRoles smokeFlatRoles smokeRoleRows
+  decide
+
+theorem smokeFlatUniqueCorner :
+    fig13QuarterCornerPositionUniqueBool
+      (rowsOfFlatRoles smokeFlatRoles) smokeCornerIndex smokeCornerQuadrant = true := by
+  rw [rowsOfFlatRoles_smokeFlatRoles]
+  exact smokeUniqueCorner
+
 /--
 Concrete finite smoke table for the checker.  It is useful for regression
 testing the finite transcription pipeline, but it has no geometric certificate.
@@ -1828,6 +1840,13 @@ def smoke : Figure18RoleTable where
   cornerQuadrant := smokeCornerQuadrant
   length_eq := smokeRoleRows_length
   uniqueCorner := smokeUniqueCorner
+
+def smokeFlat : FlatRoleTable where
+  flat := smokeFlatRoles
+  cornerIndex := smokeCornerIndex
+  cornerQuadrant := smokeCornerQuadrant
+  length_eq := smokeFlatRoles_length
+  uniqueCorner := smokeFlatUniqueCorner
 
 @[simp]
 theorem smoke_roleAt_corner :
@@ -1847,6 +1866,10 @@ theorem smoke_flatRoleAt_second_site :
       ({ index := ⟨0, by decide⟩, quadrant := Quadrant.southeast } : Figure18Site) =
         CellRole.inactive := by
   rfl
+
+theorem smokeFlat_corner_mem_activeSites :
+    smokeFlat.cornerSite ∈ smokeFlat.activeSites :=
+  smokeFlat.corner_mem_activeSites
 
 end Figure18RoleTable
 
