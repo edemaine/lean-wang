@@ -2090,6 +2090,43 @@ def zipComponentRows :
         zipComponentRows thins thicks blacks
   | _, _, _ => []
 
+theorem zipComponentRows_getElem?_eq_some_of_getElem?
+    {thins : List (Option Figure16.Thin)}
+    {thicks : List (Option Figure16.Thick)}
+    {blacks : List (Option Figure16.Black)}
+    {i : Nat}
+    {thin : Option Figure16.Thin}
+    {thick : Option Figure16.Thick}
+    {black : Option Figure16.Black}
+    (hthin : thins[i]? = some thin)
+    (hthick : thicks[i]? = some thick)
+    (hblack : blacks[i]? = some black) :
+    (zipComponentRows thins thicks blacks)[i]? =
+      some (Components.ofOptions thin thick black) := by
+  revert thicks blacks i
+  induction thins with
+  | nil =>
+      intro thicks blacks i hthin hthick hblack
+      cases i <;> cases hthin
+  | cons thinHead thins ih =>
+      intro thicks blacks i hthin hthick hblack
+      cases thicks with
+      | nil =>
+          cases i <;> cases hthick
+      | cons thickHead thicks =>
+          cases blacks with
+          | nil =>
+              cases i <;> cases hblack
+          | cons blackHead blacks =>
+              cases i with
+              | zero =>
+                  cases hthin
+                  cases hthick
+                  cases hblack
+                  rfl
+              | succ i =>
+                  exact ih hthin hthick hblack
+
 theorem zipComponentRows_length_of_lengths
     {thins : List (Option Figure16.Thin)}
     {thicks : List (Option Figure16.Thick)}
@@ -2148,6 +2185,18 @@ structure CheckedSeparateLayerRows where
 
 namespace CheckedSeparateLayerRows
 
+def thinAt (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    Option Figure16.Thin :=
+  rows.thins.get ⟨index.val, by simp [rows.thins_length, index.isLt]⟩
+
+def thickAt (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    Option Figure16.Thick :=
+  rows.thicks.get ⟨index.val, by simp [rows.thicks_length, index.isLt]⟩
+
+def blackAt (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    Option Figure16.Black :=
+  rows.blacks.get ⟨index.val, by simp [rows.blacks_length, index.isLt]⟩
+
 def layerRows (rows : CheckedSeparateLayerRows) : List Components :=
   zipComponentRows rows.thins rows.thicks rows.blacks
 
@@ -2164,6 +2213,64 @@ def layerData (rows : CheckedSeparateLayerRows) : Transcription where
 @[simp]
 theorem layerData_rows (rows : CheckedSeparateLayerRows) :
     rows.layerData.rows = rows.layerRows :=
+  rfl
+
+theorem thins_getElem?_thinAt
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    rows.thins[index.val]? = some (rows.thinAt index) := by
+  unfold thinAt
+  exact List.getElem?_eq_getElem (by simp [rows.thins_length, index.isLt])
+
+theorem thicks_getElem?_thickAt
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    rows.thicks[index.val]? = some (rows.thickAt index) := by
+  unfold thickAt
+  exact List.getElem?_eq_getElem (by simp [rows.thicks_length, index.isLt])
+
+theorem blacks_getElem?_blackAt
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    rows.blacks[index.val]? = some (rows.blackAt index) := by
+  unfold blackAt
+  exact List.getElem?_eq_getElem (by simp [rows.blacks_length, index.isLt])
+
+theorem layerRows_getElem?_components
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    rows.layerRows[index.val]? =
+      some (Components.ofOptions (rows.thinAt index) (rows.thickAt index)
+        (rows.blackAt index)) :=
+  zipComponentRows_getElem?_eq_some_of_getElem?
+    (rows.thins_getElem?_thinAt index)
+    (rows.thicks_getElem?_thickAt index)
+    (rows.blacks_getElem?_blackAt index)
+
+theorem layerData_componentsAt
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    rows.layerData.componentsAt index =
+      Components.ofOptions (rows.thinAt index) (rows.thickAt index)
+        (rows.blackAt index) := by
+  have hcomponents := rows.layerData.rows_getElem?_componentsAt index
+  rw [layerData_rows, rows.layerRows_getElem?_components] at hcomponents
+  exact (Option.some.inj hcomponents).symm
+
+@[simp]
+theorem layerData_componentsAt_thin
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    (rows.layerData.componentsAt index).thin = rows.thinAt index := by
+  rw [rows.layerData_componentsAt]
+  rfl
+
+@[simp]
+theorem layerData_componentsAt_thick
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    (rows.layerData.componentsAt index).thick = rows.thickAt index := by
+  rw [rows.layerData_componentsAt]
+  rfl
+
+@[simp]
+theorem layerData_componentsAt_black
+    (rows : CheckedSeparateLayerRows) (index : Fin 92) :
+    (rows.layerData.componentsAt index).black = rows.blackAt index := by
+  rw [rows.layerData_componentsAt]
   rfl
 
 def toCheckedRawData
