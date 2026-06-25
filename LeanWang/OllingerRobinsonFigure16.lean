@@ -67,6 +67,28 @@ def all : List ThickLine := [.r0, .r1, .r2, .r3, .g0, .g1, .g2, .g3]
 
 end ThickLine
 
+/--
+A formal sum of two distinct thick-line atoms in Figure 16.
+
+The order records the atom placements used by `phiL2Component2`: `first` is the
+northwest atom and `second` is the southeast atom.  As a geometric sum this
+order is not intended to carry extra meaning.
+-/
+structure ThickLineSum where
+  first : ThickLine
+  second : ThickLine
+  distinct : first ≠ second
+
+namespace ThickLineSum
+
+def mkDistinct (first second : ThickLine) (distinct : first ≠ second) :
+    ThickLineSum where
+  first := first
+  second := second
+  distinct := distinct
+
+end ThickLineSum
+
 /-- Black layer components. -/
 inductive Black where
   | a
@@ -130,6 +152,45 @@ def L3c : Symbol := .black .c
 def L3d : Symbol := .black .d
 def L3e : Symbol := .black .e
 
+end Symbol
+
+namespace Thick
+
+/--
+The `L2e`-`L2p` components are sums of two distinct thick-line atoms.
+
+The first four `L2` components are corner components rather than two-line sums,
+so they return `none`.
+-/
+def lineSum? : Thick → Option ThickLineSum
+  | .a => none
+  | .b => none
+  | .c => none
+  | .d => none
+  | .e => some <| ThickLineSum.mkDistinct .r0 .r1 (by decide)
+  | .f => some <| ThickLineSum.mkDistinct .r2 .r1 (by decide)
+  | .g => some <| ThickLineSum.mkDistinct .r2 .r3 (by decide)
+  | .h => some <| ThickLineSum.mkDistinct .r0 .r3 (by decide)
+  | .i => some <| ThickLineSum.mkDistinct .g0 .r3 (by decide)
+  | .j => some <| ThickLineSum.mkDistinct .r0 .g1 (by decide)
+  | .k => some <| ThickLineSum.mkDistinct .g2 .r1 (by decide)
+  | .l => some <| ThickLineSum.mkDistinct .r2 .g3 (by decide)
+  | .m => some <| ThickLineSum.mkDistinct .g0 .g1 (by decide)
+  | .n => some <| ThickLineSum.mkDistinct .g2 .g1 (by decide)
+  | .o => some <| ThickLineSum.mkDistinct .g2 .g3 (by decide)
+  | .p => some <| ThickLineSum.mkDistinct .g0 .g3 (by decide)
+
+def hasLineSum (component : Thick) : Prop :=
+  component.lineSum?.isSome
+
+instance (component : Thick) : Decidable component.hasLineSum := by
+  unfold hasLineSum
+  infer_instance
+
+end Thick
+
+namespace Symbol
+
 private def t (n s e w : Nat) : WangTile where
   n := n
   s := s
@@ -179,6 +240,13 @@ def tile : Symbol → WangTile
   | .black .e => t 56 56 59 63
 
 end Symbol
+
+namespace ThickLineSum
+
+def symbols (sum : ThickLineSum) : Symbol × Symbol :=
+  (.line sum.first, .line sum.second)
+
+end ThickLineSum
 
 /-- A displayed `2 × 2` Figure 16 block, listed north row then south row. -/
 structure Block where
@@ -246,6 +314,37 @@ def phiL2Component2 : Thick → Block
   | .n => .mkRows .G2 .blank .L2n .G1
   | .o => .mkRows .G2 .blank .L2o .G3
   | .p => .mkRows .G0 .blank .L2p .G3
+
+namespace Thick
+
+def lineSumBlock? (component : Thick) : Option Block :=
+  component.lineSum?.map fun sum =>
+    .mkRows (Symbol.line sum.first) .blank (.thick component)
+      (Symbol.line sum.second)
+
+theorem phiL2Component2_eq_lineSumBlock_of_lineSum
+    {component : Thick} {sum : ThickLineSum}
+    (h : component.lineSum? = some sum) :
+    phiL2Component2 component =
+      .mkRows (Symbol.line sum.first) .blank (.thick component)
+        (Symbol.line sum.second) := by
+  cases component <;>
+    simp [lineSum?, ThickLineSum.mkDistinct] at h
+  all_goals
+    subst sum
+    rfl
+
+theorem lineSumBlock?_eq_some_phiL2Component2
+    {component : Thick} (h : component.hasLineSum) :
+    component.lineSumBlock? = some (phiL2Component2 component) := by
+  cases component <;>
+    simp [hasLineSum, lineSumBlock?, lineSum?, ThickLineSum.mkDistinct,
+      phiL2Component2, Symbol.R0, Symbol.R1, Symbol.R2, Symbol.R3,
+      Symbol.G0, Symbol.G1, Symbol.G2, Symbol.G3, Symbol.L2e, Symbol.L2f,
+      Symbol.L2g, Symbol.L2h, Symbol.L2i, Symbol.L2j, Symbol.L2k,
+      Symbol.L2l, Symbol.L2m, Symbol.L2n, Symbol.L2o, Symbol.L2p] at h ⊢
+
+end Thick
 
 /-- `phi_L3`, applied to a black-layer component. -/
 def phiL3 : Black → Block
