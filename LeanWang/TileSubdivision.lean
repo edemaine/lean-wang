@@ -320,6 +320,36 @@ theorem vMatches_northeast_southeast_of_vMatches {lower upper : WangTile}
   simpa [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor] using h
 
 set_option linter.flexible false in
+theorem hMatches_subdivideTileAt_iff
+    (left right : WangTile) (q r : Quadrant) :
+    WangTile.HMatches (subdivideTileAt left q) (subdivideTileAt right r) ↔
+      match q, r with
+      | .southwest, .southeast => left = right
+      | .northwest, .northeast => left = right
+      | .southeast, .southwest => WangTile.HMatches left right
+      | .northeast, .northwest => WangTile.HMatches left right
+      | _, _ => False := by
+  cases q <;> cases r <;> cases left <;> cases right <;>
+    simp [WangTile.HMatches, subdivideTileAt, horizontalEdgeColor,
+      verticalEdgeColor, internalVerticalColor, internalHorizontalColor,
+      bitCode, tileCode, Nat.pair_eq_pair]
+
+set_option linter.flexible false in
+theorem vMatches_subdivideTileAt_iff
+    (lower upper : WangTile) (q r : Quadrant) :
+    WangTile.VMatches (subdivideTileAt lower q) (subdivideTileAt upper r) ↔
+      match q, r with
+      | .southwest, .northwest => lower = upper
+      | .southeast, .northeast => lower = upper
+      | .northwest, .southwest => WangTile.VMatches lower upper
+      | .northeast, .southeast => WangTile.VMatches lower upper
+      | _, _ => False := by
+  cases q <;> cases r <;> cases lower <;> cases upper <;>
+    simp [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor,
+      verticalEdgeColor, internalVerticalColor, internalHorizontalColor,
+      bitCode, tileCode, Nat.pair_eq_pair]
+
+set_option linter.flexible false in
 theorem subdivideTileAt_pair_injective :
     Function.Injective (fun p : WangTile × Quadrant => subdivideTileAt p.1 p.2) := by
   intro p q h

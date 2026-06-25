@@ -291,6 +291,21 @@ theorem fig13Tile_primrec : Primrec fig13Tile := by
     rw [List.getD_eq_getElem (hn := by simp [fig13Tiles_length, i.isLt])]
     rfl
 
+theorem fig13Tile_injective : Function.Injective fig13Tile := by
+  intro i j h
+  unfold fig13Tile at h
+  apply Fin.ext
+  have hidx :
+      (⟨i.val, by simp [fig13Tiles_length, i.isLt]⟩ :
+          Fin fig13Tiles.length) =
+        ⟨j.val, by simp [fig13Tiles_length, j.isLt]⟩ := by
+    exact (List.Nodup.get_inj_iff fig13Tiles_nodup).1 h
+  exact congrArg Fin.val hidx
+
+theorem fig13Tile_eq_iff (i j : Fin 92) :
+    fig13Tile i = fig13Tile j ↔ i = j :=
+  ⟨fun h => fig13Tile_injective h, fun h => h ▸ rfl⟩
+
 /-- A named quadrant tile in the subdivided Figure 13 scaffold. -/
 def fig13QuarterTile (i : Fin 92) (q : Quadrant) : WangTile :=
   TileSubdivision.subdivideTileAt (fig13Tile i) q
@@ -425,6 +440,18 @@ theorem hMatches_of_hCompatible {left right : Figure18Site}
   · exact TileSubdivision.hMatches_northeast_northwest_of_hMatches h
 
 set_option linter.flexible false in
+theorem hCompatible_of_hMatches {left right : Figure18Site}
+    (h : WangTile.HMatches left.tile right.tile) :
+    hCompatible left right = true := by
+  rcases left with ⟨li, lq⟩
+  rcases right with ⟨ri, rq⟩
+  cases lq <;> cases rq <;>
+    simp [hCompatible, tile, rawTile, fig13QuarterTile,
+      TileSubdivision.hMatches_subdivideTileAt_iff,
+      fig13Tile_eq_iff] at h ⊢
+  all_goals exact h
+
+set_option linter.flexible false in
 theorem vMatches_of_vCompatible {lower upper : Figure18Site}
     (h : vCompatible lower upper = true) :
     WangTile.VMatches lower.tile upper.tile := by
@@ -438,6 +465,18 @@ theorem vMatches_of_vCompatible {lower upper : Figure18Site}
     exact TileSubdivision.vMatches_southeast_northeast (fig13Tile li)
   · exact TileSubdivision.vMatches_northwest_southwest_of_vMatches h
   · exact TileSubdivision.vMatches_northeast_southeast_of_vMatches h
+
+set_option linter.flexible false in
+theorem vCompatible_of_vMatches {lower upper : Figure18Site}
+    (h : WangTile.VMatches lower.tile upper.tile) :
+    vCompatible lower upper = true := by
+  rcases lower with ⟨li, lq⟩
+  rcases upper with ⟨ri, rq⟩
+  cases lq <;> cases rq <;>
+    simp [vCompatible, tile, rawTile, fig13QuarterTile,
+      TileSubdivision.vMatches_subdivideTileAt_iff,
+      fig13Tile_eq_iff] at h ⊢
+  all_goals exact h
 
 /-- All Figure 18 quadrant sites, ordered by Figure 13 tile index then quadrant. -/
 def all : List Figure18Site :=
