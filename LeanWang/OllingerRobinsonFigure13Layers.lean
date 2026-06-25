@@ -133,6 +133,43 @@ def empty : Components where
   thick := none
   black := none
 
+def ofOptions
+    (thin : Option Figure16.Thin)
+    (thick : Option Figure16.Thick)
+    (black : Option Figure16.Black) : Components where
+  thin := thin
+  thick := thick
+  black := black
+
+def ofAll
+    (thin : Figure16.Thin) (thick : Figure16.Thick)
+    (black : Figure16.Black) : Components :=
+  ofOptions (some thin) (some thick) (some black)
+
+@[simp]
+theorem ofOptions_thin
+    (thin : Option Figure16.Thin)
+    (thick : Option Figure16.Thick)
+    (black : Option Figure16.Black) :
+    (ofOptions thin thick black).thin = thin :=
+  rfl
+
+@[simp]
+theorem ofOptions_thick
+    (thin : Option Figure16.Thin)
+    (thick : Option Figure16.Thick)
+    (black : Option Figure16.Black) :
+    (ofOptions thin thick black).thick = thick :=
+  rfl
+
+@[simp]
+theorem ofOptions_black
+    (thin : Option Figure16.Thin)
+    (thick : Option Figure16.Thick)
+    (black : Option Figure16.Black) :
+    (ofOptions thin thick black).black = black :=
+  rfl
+
 def toLayerComponents (components : Components) : List LayerComponent :=
   (match components.thin with
     | none => []
@@ -2039,6 +2076,126 @@ theorem cornerSite_quadrant (data : CheckedRawData) :
   rfl
 
 end CheckedRawData
+
+/--
+Zip three separately transcribed Figure 16 layer rows into Figure 13 component
+rows.  This is intentionally truncating like `List.zip`: the checked wrapper
+below supplies equal 92-entry lengths before the result is used as raw data.
+-/
+def zipComponentRows :
+    List (Option Figure16.Thin) → List (Option Figure16.Thick) →
+      List (Option Figure16.Black) → List Components
+  | thin :: thins, thick :: thicks, black :: blacks =>
+      Components.ofOptions thin thick black ::
+        zipComponentRows thins thicks blacks
+  | _, _, _ => []
+
+theorem zipComponentRows_length_of_lengths
+    {thins : List (Option Figure16.Thin)}
+    {thicks : List (Option Figure16.Thick)}
+    {blacks : List (Option Figure16.Black)}
+    {n : Nat}
+    (hthin : thins.length = n)
+    (hthick : thicks.length = n)
+    (hblack : blacks.length = n) :
+    (zipComponentRows thins thicks blacks).length = n := by
+  revert thicks blacks n
+  induction thins with
+  | nil =>
+      intro thicks blacks n hthin hthick hblack
+      cases n
+      · rfl
+      · simp at hthin
+  | cons thin thins ih =>
+      intro thicks blacks n hthin hthick hblack
+      cases thicks with
+      | nil =>
+          cases n
+          · simp at hthin
+          · simp at hthick
+      | cons thick thicks =>
+          cases blacks with
+          | nil =>
+              cases n
+              · simp at hthin
+              · simp at hblack
+          | cons black blacks =>
+              cases n
+              case zero =>
+                simp at hthin
+              case succ n =>
+                change
+                  (Components.ofOptions thin thick black ::
+                    zipComponentRows thins thicks blacks).length =
+                      Nat.succ n
+                rw [List.length_cons]
+                exact congrArg Nat.succ
+                  (ih (Nat.succ.inj hthin) (Nat.succ.inj hthick)
+                    (Nat.succ.inj hblack))
+
+/--
+Checked Figure 13 layer transcription entered as three separate 92-entry layer
+lists.  This is the Lean data-entry form closest to Figure 16: first transcribe
+the thin `L1` labels, then the thick `L2` labels, then the black `L3` labels.
+-/
+structure CheckedSeparateLayerRows where
+  thins : List (Option Figure16.Thin)
+  thins_length : thins.length = 92
+  thicks : List (Option Figure16.Thick)
+  thicks_length : thicks.length = 92
+  blacks : List (Option Figure16.Black)
+  blacks_length : blacks.length = 92
+
+namespace CheckedSeparateLayerRows
+
+def layerRows (rows : CheckedSeparateLayerRows) : List Components :=
+  zipComponentRows rows.thins rows.thicks rows.blacks
+
+@[simp]
+theorem layerRows_length (rows : CheckedSeparateLayerRows) :
+    rows.layerRows.length = 92 :=
+  zipComponentRows_length_of_lengths rows.thins_length rows.thicks_length
+    rows.blacks_length
+
+def layerData (rows : CheckedSeparateLayerRows) : Transcription where
+  rows := rows.layerRows
+  length_eq := rows.layerRows_length
+
+@[simp]
+theorem layerData_rows (rows : CheckedSeparateLayerRows) :
+    rows.layerData.rows = rows.layerRows :=
+  rfl
+
+def toCheckedRawData
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    CheckedRawData where
+  layerRows := rows.layerRows
+  layerRows_length := rows.layerRows_length
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+
+@[simp]
+theorem toCheckedRawData_layerRows
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (rows.toCheckedRawData activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).layerRows =
+        rows.layerRows :=
+  rfl
+
+end CheckedSeparateLayerRows
 
 /-- Direct indexed-active layered geometric certificate for layered scaffold data. -/
 structure Certificate (D : LayeredFigure18ScaffoldData) : Prop where
