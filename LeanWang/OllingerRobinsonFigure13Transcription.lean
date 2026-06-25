@@ -3538,6 +3538,21 @@ structure Figure18FlatDecodedSiteCertificate
     table.toRoleTable.presentation.toScaffold
 
 /--
+Geometric obligations for a concrete Figure 18 active-site list.
+
+This is the most direct finite-data target for a transcription of Figure 18:
+the flat role table is generated from a listed set of usable quarter-sites and
+a distinguished corner site.
+-/
+structure Figure18ListedActiveSiteCertificate
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop where
+  listedActiveForces :
+    HasFigure18ListedActiveSiteFixedCornerSquares activeSites cornerSite
+  realizes : RealizesActiveCornerSquares
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable.presentation.toScaffold
+
+/--
 Geometric obligations for a concrete flat Figure 18 table using selected
 decoded active sites.
 -/
@@ -3731,6 +3746,47 @@ theorem isScaffold
 
 end Figure18FlatDecodedSiteCertificate
 
+namespace Figure18ListedActiveSiteCertificate
+
+def toFlatActiveSiteCertificate
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (certificate :
+      Figure18ListedActiveSiteCertificate activeSites cornerSite) :
+    Figure18FlatActiveSiteCertificate
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites activeSites cornerSite) where
+  flatActiveForces :=
+    hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite
+      certificate.listedActiveForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (certificate :
+      Figure18ListedActiveSiteCertificate activeSites cornerSite) :
+    Figure18FlexibleCertificate
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable where
+  forces := forcesFixedCornerSquares_of_figure18FlatActiveSite
+    (hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite
+      certificate.listedActiveForces)
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (certificate :
+      Figure18ListedActiveSiteCertificate activeSites cornerSite) :
+    IsScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18FlatActiveSite
+      (hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite
+        certificate.listedActiveForces)
+    realizes := certificate.realizes
+  }
+
+end Figure18ListedActiveSiteCertificate
+
 namespace Figure18FlatActiveSiteCertificate
 
 def toFlatDecodedSiteCertificate
@@ -3823,6 +3879,15 @@ selected decoded active sites.
 structure Figure18FlatActiveSiteInstance where
   table : Figure18RoleTable.FlatRoleTable
   certificate : Figure18FlatActiveSiteCertificate table
+
+/--
+Concrete Figure 18 scaffold package generated from a finite list of active
+quarter-sites and a distinguished corner site.
+-/
+structure Figure18ListedActiveSiteInstance where
+  activeSites : List Figure18Site
+  cornerSite : Figure18Site
+  certificate : Figure18ListedActiveSiteCertificate activeSites cornerSite
 
 /--
 Concrete Figure 18 scaffold package using the direct indexed free-square
@@ -4137,6 +4202,51 @@ theorem isScaffold (I : Figure18FlatActiveSiteInstance) :
   I.certificate.isScaffold
 
 end Figure18FlatActiveSiteInstance
+
+namespace Figure18ListedActiveSiteInstance
+
+def table (I : Figure18ListedActiveSiteInstance) :
+    Figure18RoleTable.FlatRoleTable :=
+  Figure18RoleTable.FlatRoleTable.ofActiveSites I.activeSites I.cornerSite
+
+def finite (I : Figure18ListedActiveSiteInstance) : FiniteCheckedTranscription :=
+  I.table.toRoleTable.finiteCheckedTranscription
+
+def presentation (I : Figure18ListedActiveSiteInstance) :
+    ScaffoldPresentation :=
+  I.table.toRoleTable.presentation
+
+def toFlatActiveSiteInstance (I : Figure18ListedActiveSiteInstance) :
+    Figure18FlatActiveSiteInstance where
+  table := I.table
+  certificate := I.certificate.toFlatActiveSiteCertificate
+
+def toFlexibleInstance (I : Figure18ListedActiveSiteInstance) :
+    Figure18FlexibleInstance where
+  table := I.table.toRoleTable
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toFlatActiveSiteInstance_table
+    (I : Figure18ListedActiveSiteInstance) :
+    I.toFlatActiveSiteInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table
+    (I : Figure18ListedActiveSiteInstance) :
+    I.toFlexibleInstance.table = I.table.toRoleTable :=
+  rfl
+
+theorem presentation_tiles (I : Figure18ListedActiveSiteInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.toRoleTable.presentation_tiles
+
+theorem isScaffold (I : Figure18ListedActiveSiteInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18ListedActiveSiteInstance
 
 namespace Figure18FlexibleInstance
 
