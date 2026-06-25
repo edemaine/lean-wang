@@ -1699,6 +1699,90 @@ theorem corner_mem_activeFlatSites_ofFlatRoles
       rfl⟩
 
 /--
+First-class flat Figure 18 role transcription.
+
+This is the intended finite-data container for the paper-derived 368-entry role
+list. The `uniqueCorner` field is the mechanical checker that the declared
+corner site is exactly the unique `corner` role in the flat transcription.
+-/
+structure FlatRoleTable where
+  flat : List CellRole
+  cornerIndex : Fin 92
+  cornerQuadrant : Quadrant
+  length_eq : flat.length = 368
+  uniqueCorner :
+    fig13QuarterCornerPositionUniqueBool
+      (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true
+
+namespace FlatRoleTable
+
+def toRoleTable (table : FlatRoleTable) : Figure18RoleTable :=
+  ofFlatRoles table.flat table.length_eq table.cornerIndex
+    table.cornerQuadrant table.uniqueCorner
+
+def cornerSite (table : FlatRoleTable) : Figure18Site where
+  index := table.cornerIndex
+  quadrant := table.cornerQuadrant
+
+def activeSites (table : FlatRoleTable) : List Figure18Site :=
+  activeFlatSites table.flat
+
+def cornerSites (table : FlatRoleTable) : List Figure18Site :=
+  cornerFlatSites table.flat
+
+@[simp]
+theorem toRoleTable_roleRows (table : FlatRoleTable) :
+    table.toRoleTable.roleRows = rowsOfFlatRoles table.flat :=
+  rfl
+
+@[simp]
+theorem toRoleTable_cornerIndex (table : FlatRoleTable) :
+    table.toRoleTable.cornerIndex = table.cornerIndex :=
+  rfl
+
+@[simp]
+theorem toRoleTable_cornerQuadrant (table : FlatRoleTable) :
+    table.toRoleTable.cornerQuadrant = table.cornerQuadrant :=
+  rfl
+
+@[simp]
+theorem toRoleTable_cornerSite (table : FlatRoleTable) :
+    table.toRoleTable.cornerSite = table.cornerSite :=
+  rfl
+
+theorem roleAtSite_eq_flatRoleAt
+    (table : FlatRoleTable) (site : Figure18Site) :
+    table.toRoleTable.roleAtSite site = flatRoleAt table.flat site :=
+  ofFlatRoles_roleAtSite table.flat table.length_eq table.cornerIndex
+    table.cornerQuadrant table.uniqueCorner site
+
+theorem flatRoleAt_corner_iff
+    (table : FlatRoleTable) (site : Figure18Site) :
+    flatRoleAt table.flat site = CellRole.corner ↔ site = table.cornerSite :=
+  ofFlatRoles_flatRoleAt_corner_iff table.flat table.length_eq
+    table.cornerIndex table.cornerQuadrant table.uniqueCorner site
+
+theorem isCorner_flatRoleAt_iff
+    (table : FlatRoleTable) (site : Figure18Site) :
+    CellRole.isCorner (flatRoleAt table.flat site) = true ↔
+      site = table.cornerSite :=
+  ofFlatRoles_isCorner_flatRoleAt_iff table.flat table.length_eq
+    table.cornerIndex table.cornerQuadrant table.uniqueCorner site
+
+theorem mem_cornerSites_iff
+    (table : FlatRoleTable) (site : Figure18Site) :
+    site ∈ table.cornerSites ↔ site = table.cornerSite :=
+  mem_cornerFlatSites_ofFlatRoles_iff table.flat table.length_eq
+    table.cornerIndex table.cornerQuadrant table.uniqueCorner site
+
+theorem corner_mem_activeSites (table : FlatRoleTable) :
+    table.cornerSite ∈ table.activeSites :=
+  corner_mem_activeFlatSites_ofFlatRoles table.flat table.length_eq
+    table.cornerIndex table.cornerQuadrant table.uniqueCorner
+
+end FlatRoleTable
+
+/--
 Smoke-test data for the finite Figure 18 table checker.
 
 This is deliberately not the Ollinger/Robinson scaffold interpretation: it marks
