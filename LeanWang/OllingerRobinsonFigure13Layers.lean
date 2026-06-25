@@ -556,6 +556,22 @@ theorem toSiteRectangle_quadrant {w h : Nat}
     (data.toSiteRectangle i j).quadrant = (data.specAt i j).2 :=
   rfl
 
+def matchesSiteRectangleBool {w h : Nat}
+    (data : CheckedNatSiteRectangle w h) (R : SiteRectangle w h) : Bool :=
+  (List.finRange w).all fun i =>
+    (List.finRange h).all fun j =>
+      decide <| data.toSiteRectangle i j = R i j
+
+theorem toSiteRectangle_eq_of_matchesSiteRectangleBool {w h : Nat}
+    {data : CheckedNatSiteRectangle w h} {R : SiteRectangle w h}
+    (hcheck : data.matchesSiteRectangleBool R = true) :
+    data.toSiteRectangle = R := by
+  funext i j
+  unfold matchesSiteRectangleBool at hcheck
+  have hiCheck := List.all_eq_true.1 hcheck i (List.mem_finRange i)
+  have hjCheck := List.all_eq_true.1 hiCheck j (List.mem_finRange j)
+  exact of_decide_eq_true hjCheck
+
 end CheckedNatSiteRectangle
 
 /--
@@ -1490,6 +1506,42 @@ theorem ofTyped_window
     (ofTyped window layerStack).window = window :=
   rfl
 
+def ofChecked
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedActiveCornerWindow window) = true)
+    (hlookup : data.lookupBool D = true)
+    (hcompatible : data.compatibleBool D hlookup = true) :
+    Figure18IndexedActiveCornerWindowWithLayerStack D table x n hn where
+  window := window
+  layerStack := by
+    have hsiteEq :
+        data.siteRectangle = siteRectangleOfIndexedActiveCornerWindow window :=
+      CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool hsite
+    change LayerStackRectangle D (siteRectangleOfIndexedActiveCornerWindow window)
+    rw [← hsiteEq]
+    exact (data.toTypedLayerStackRectangleOfChecks D hlookup hcompatible).toLayerStackRectangle
+
+@[simp]
+theorem ofChecked_window
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedActiveCornerWindow window) = true)
+    (hlookup : data.lookupBool D = true)
+    (hcompatible : data.compatibleBool D hlookup = true) :
+    (ofChecked window data hsite hlookup hcompatible).window = window :=
+  rfl
+
 end Figure18IndexedActiveCornerWindowWithLayerStack
 
 /--
@@ -1607,6 +1659,42 @@ theorem ofTyped_window
     (layerStack : TypedLayerStackRectangle D
       (siteRectangleOfIndexedRoutedFixedCornerSquare window)) :
     (ofTyped window layerStack).window = window :=
+  rfl
+
+def ofChecked
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window) = true)
+    (hlookup : data.lookupBool D = true)
+    (hcompatible : data.compatibleBool D hlookup = true) :
+    Figure18IndexedRoutedFixedCornerSquareWithLayerStack D table x n hn where
+  window := window
+  layerStack := by
+    have hsiteEq :
+        data.siteRectangle = siteRectangleOfIndexedRoutedFixedCornerSquare window :=
+      CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool hsite
+    change LayerStackRectangle D (siteRectangleOfIndexedRoutedFixedCornerSquare window)
+    rw [← hsiteEq]
+    exact (data.toTypedLayerStackRectangleOfChecks D hlookup hcompatible).toLayerStackRectangle
+
+@[simp]
+theorem ofChecked_window
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window) = true)
+    (hlookup : data.lookupBool D = true)
+    (hcompatible : data.compatibleBool D hlookup = true) :
+    (ofChecked window data hsite hlookup hcompatible).window = window :=
   rfl
 
 end Figure18IndexedRoutedFixedCornerSquareWithLayerStack
