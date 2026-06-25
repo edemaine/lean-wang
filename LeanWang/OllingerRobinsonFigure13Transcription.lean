@@ -1856,6 +1856,20 @@ theorem mem_cornerSites_iff
   mem_cornerFlatSites_ofFlatRoles_iff table.flat table.length_eq
     table.cornerIndex table.cornerQuadrant table.uniqueCorner site
 
+theorem mem_activeSites_iff
+    (table : FlatRoleTable) (site : Figure18Site) :
+    site ∈ table.activeSites ↔
+      site ∈ Figure18Site.all ∧
+        CellRole.isActive (table.toRoleTable.roleAtSite site) = true := by
+  rw [FlatRoleTable.activeSites, mem_activeFlatSites,
+    table.roleAtSite_eq_flatRoleAt]
+
+theorem isActive_toRoleTable_of_mem_activeSites
+    (table : FlatRoleTable) {site : Figure18Site}
+    (hmem : site ∈ table.activeSites) :
+    CellRole.isActive (table.toRoleTable.roleAtSite site) = true :=
+  (table.mem_activeSites_iff site).1 hmem |>.2
+
 theorem corner_mem_activeSites (table : FlatRoleTable) :
     table.cornerSite ∈ table.activeSites :=
   corner_mem_activeFlatSites_ofFlatRoles table.flat table.length_eq
@@ -2723,6 +2737,49 @@ def HasFigure18DecodedSiteFixedCornerSquares
               (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
             table.cornerSite
 
+/--
+Flat-table decoded-site form of the Figure 18 square obligation.
+
+This is the finite-data target for a concrete 368-entry role transcription:
+the geometric proof only has to show that selected decoded scaffold sites lie
+in the flat table's active-site list, with the lower-left site equal to the
+flat table's distinguished corner.  Role lookup is handled by the conversion to
+`HasFigure18DecodedSiteFixedCornerSquares`.
+-/
+def HasFigure18FlatDecodedSiteFixedCornerSquares
+    (table : Figure18RoleTable.FlatRoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)),
+    ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ horizontalCoord : Fin n → Int, ∃ verticalCoord : Fin n → Int,
+          (∀ i : Fin n, ∀ hi : i.val + 1 < n,
+            horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1) ∧
+          (∀ j : Fin n, ∀ hj : j.val + 1 < n,
+            verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+            Figure18Site.hCompatible
+              (table.toRoleTable.combinedSite
+                (x (horizontalCoord i, verticalCoord j)))
+              (table.toRoleTable.combinedSite
+                (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) =
+              true) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+            Figure18Site.vCompatible
+              (table.toRoleTable.combinedSite
+                (x (horizontalCoord i, verticalCoord j)))
+              (table.toRoleTable.combinedSite
+                (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) =
+              true) ∧
+          (∀ i : Fin n, ∀ j : Fin n,
+            table.toRoleTable.combinedSite
+              (x (horizontalCoord i, verticalCoord j)) ∈ table.activeSites) ∧
+          table.toRoleTable.combinedSite
+              (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+            table.cornerSite
+
 namespace Figure18AdjacentProductWitnessFixedCornerSquare
 
 /--
@@ -2818,6 +2875,21 @@ theorem hasFigure18AdjacentProductWitnessFixedCornerSquares_of_decodedSite
     horizontalCoord verticalCoord horizontalCoord_succ verticalCoord_succ
     hcompatible vcompatible active cornerSite⟩
 
+theorem hasFigure18DecodedSiteFixedCornerSquares_of_flatDecodedSite
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hflat : HasFigure18FlatDecodedSiteFixedCornerSquares table) :
+    HasFigure18DecodedSiteFixedCornerSquares table.toRoleTable := by
+  intro T seed x hx n hn
+  rcases hflat x hx n hn with
+    ⟨horizontalCoord, verticalCoord, horizontalCoord_succ,
+      verticalCoord_succ, hcompatible, vcompatible, activeSites,
+      cornerSite⟩
+  refine ⟨horizontalCoord, verticalCoord, horizontalCoord_succ,
+    verticalCoord_succ, hcompatible, vcompatible, ?_, ?_⟩
+  · intro i j
+    exact table.isActive_toRoleTable_of_mem_activeSites (activeSites i j)
+  · simpa using cornerSite
+
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible
     {table : Figure18RoleTable}
     (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
@@ -2879,6 +2951,13 @@ theorem forcesFixedCornerSquares_of_figure18DecodedSite
   forcesFixedCornerSquares_of_figure18AdjacentProductWitness
     (hasFigure18AdjacentProductWitnessFixedCornerSquares_of_decodedSite
       hdecoded)
+
+theorem forcesFixedCornerSquares_of_figure18FlatDecodedSite
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hflat : HasFigure18FlatDecodedSiteFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.toRoleTable.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18DecodedSite
+    (hasFigure18DecodedSiteFixedCornerSquares_of_flatDecodedSite hflat)
 
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
@@ -2970,6 +3049,16 @@ combined-tiling sites.
 structure Figure18DecodedSiteCertificate (table : Figure18RoleTable) : Prop where
   decodedForces : HasFigure18DecodedSiteFixedCornerSquares table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+/--
+Geometric obligations for a concrete flat Figure 18 table using decoded
+combined-tiling sites.
+-/
+structure Figure18FlatDecodedSiteCertificate
+    (table : Figure18RoleTable.FlatRoleTable) : Prop where
+  flatDecodedForces : HasFigure18FlatDecodedSiteFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares
+    table.toRoleTable.presentation.toScaffold
 
 namespace Figure18Certificate
 
@@ -3124,6 +3213,37 @@ theorem isScaffold
 
 end Figure18DecodedSiteCertificate
 
+namespace Figure18FlatDecodedSiteCertificate
+
+def toDecodedSiteCertificate
+    {table : Figure18RoleTable.FlatRoleTable}
+    (certificate : Figure18FlatDecodedSiteCertificate table) :
+    Figure18DecodedSiteCertificate table.toRoleTable where
+  decodedForces :=
+    hasFigure18DecodedSiteFixedCornerSquares_of_flatDecodedSite
+      certificate.flatDecodedForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable.FlatRoleTable}
+    (certificate : Figure18FlatDecodedSiteCertificate table) :
+    Figure18FlexibleCertificate table.toRoleTable where
+  forces := forcesFixedCornerSquares_of_figure18FlatDecodedSite
+    certificate.flatDecodedForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable.FlatRoleTable}
+    (certificate : Figure18FlatDecodedSiteCertificate table) :
+    IsScaffold table.toRoleTable.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18FlatDecodedSite
+      certificate.flatDecodedForces
+    realizes := certificate.realizes
+  }
+
+end Figure18FlatDecodedSiteCertificate
+
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
 the geometric flexible scaffold certificate.
@@ -3169,6 +3289,14 @@ Concrete Figure 18 scaffold package using decoded combined-tiling sites.
 structure Figure18DecodedSiteInstance where
   table : Figure18RoleTable
   certificate : Figure18DecodedSiteCertificate table
+
+/--
+Concrete Figure 18 scaffold package using a flat role transcription and decoded
+combined-tiling sites.
+-/
+structure Figure18FlatDecodedSiteInstance where
+  table : Figure18RoleTable.FlatRoleTable
+  certificate : Figure18FlatDecodedSiteCertificate table
 
 /--
 Concrete Figure 18 scaffold package using the direct indexed free-square
@@ -3405,6 +3533,45 @@ theorem isScaffold (I : Figure18DecodedSiteInstance) :
   I.certificate.isScaffold
 
 end Figure18DecodedSiteInstance
+
+namespace Figure18FlatDecodedSiteInstance
+
+def finite (I : Figure18FlatDecodedSiteInstance) : FiniteCheckedTranscription :=
+  I.table.toRoleTable.finiteCheckedTranscription
+
+def presentation (I : Figure18FlatDecodedSiteInstance) :
+    ScaffoldPresentation :=
+  I.table.toRoleTable.presentation
+
+def toDecodedSiteInstance (I : Figure18FlatDecodedSiteInstance) :
+    Figure18DecodedSiteInstance where
+  table := I.table.toRoleTable
+  certificate := I.certificate.toDecodedSiteCertificate
+
+def toFlexibleInstance (I : Figure18FlatDecodedSiteInstance) :
+    Figure18FlexibleInstance where
+  table := I.table.toRoleTable
+  certificate := I.certificate.toFlexibleCertificate
+
+@[simp]
+theorem toDecodedSiteInstance_table (I : Figure18FlatDecodedSiteInstance) :
+    I.toDecodedSiteInstance.table = I.table.toRoleTable :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table (I : Figure18FlatDecodedSiteInstance) :
+    I.toFlexibleInstance.table = I.table.toRoleTable :=
+  rfl
+
+theorem presentation_tiles (I : Figure18FlatDecodedSiteInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.toRoleTable.presentation_tiles
+
+theorem isScaffold (I : Figure18FlatDecodedSiteInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18FlatDecodedSiteInstance
 
 namespace Figure18FlexibleInstance
 
