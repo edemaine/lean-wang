@@ -722,6 +722,12 @@ theorem block_eq_source_block {rule : SubstitutionRule}
   rcases mem_substitutionRules_iff.1 h with ⟨source, _hsource, rfl⟩
   rfl
 
+theorem source_mem_all {rule : SubstitutionRule}
+    (h : rule ∈ substitutionRules) :
+    rule.source ∈ RuleSource.all := by
+  rcases mem_substitutionRules_iff.1 h with ⟨source, hsource, rfl⟩
+  simpa using hsource
+
 theorem block_compatible {rule : SubstitutionRule}
     (h : rule ∈ substitutionRules) :
     rule.block.Compatible := by
@@ -734,7 +740,101 @@ theorem block_validRectangle_symbolTileSet {rule : SubstitutionRule}
   rw [block_eq_source_block h]
   exact rule.source.block_validRectangle_symbolTileSet
 
+theorem ofSource_mem (source : RuleSource) :
+    ofSource source ∈ substitutionRules := by
+  simp [substitutionRules, RuleSource.mem_all]
+
+theorem mem_substitutionRules_iff_source_and_block {rule : SubstitutionRule} :
+    rule ∈ substitutionRules ↔
+      rule.source ∈ RuleSource.all ∧ rule.block = rule.source.block := by
+  constructor
+  · intro h
+    exact ⟨source_mem_all h, block_eq_source_block h⟩
+  · rintro ⟨hsource, hblock⟩
+    rcases rule with ⟨source, block⟩
+    simp only at hsource hblock
+    subst block
+    exact List.mem_map.2 ⟨source, hsource, rfl⟩
+
+theorem eq_of_mem_same_source {rule other : SubstitutionRule}
+    (hrule : rule ∈ substitutionRules) (hother : other ∈ substitutionRules)
+    (hsource : rule.source = other.source) :
+    rule = other := by
+  rcases rule with ⟨ruleSource, ruleBlock⟩
+  rcases other with ⟨otherSource, otherBlock⟩
+  simp only at hsource
+  subst otherSource
+  have hruleBlock : ruleBlock = ruleSource.block :=
+    block_eq_source_block (rule := ⟨ruleSource, ruleBlock⟩) hrule
+  have hotherBlock : otherBlock = ruleSource.block :=
+    block_eq_source_block (rule := ⟨ruleSource, otherBlock⟩) hother
+  subst ruleBlock
+  subst otherBlock
+  rfl
+
+theorem eq_of_mem_source {rule : SubstitutionRule}
+    (hmem : rule ∈ substitutionRules) {source : RuleSource}
+    (hsource : rule.source = source) :
+    rule = ofSource source := by
+  exact eq_of_mem_same_source hmem (ofSource_mem source) hsource
+
+theorem exists_unique_for_source (source : RuleSource) :
+    ∃! rule : SubstitutionRule, rule ∈ substitutionRules ∧ rule.source = source := by
+  refine ⟨ofSource source, ⟨ofSource_mem source, rfl⟩, ?_⟩
+  intro rule hrule
+  exact eq_of_mem_source hrule.1 hrule.2
+
 end SubstitutionRule
+
+/--
+The certified finite Figure 16 substitution table.
+
+This packages the human Figure 16 transcription as the Lean object later
+scaffold arguments should consume: the listed source rules are complete and
+nonduplicated, and every expansion is a valid `2 × 2` Wang rectangle over the
+shared component-symbol tileset.
+-/
+structure CertifiedSubstitutionTable where
+  rules : List SubstitutionRule
+  complete : rules.map SubstitutionRule.source = RuleSource.all
+  nodupSources : (rules.map SubstitutionRule.source).Nodup
+  valid : ∀ {rule : SubstitutionRule}, rule ∈ rules →
+    ValidRectangle Symbol.tileSet rule.block.rectangle
+
+namespace CertifiedSubstitutionTable
+
+theorem source_mem_all
+    (table : CertifiedSubstitutionTable) {rule : SubstitutionRule}
+    (hmem : rule ∈ table.rules) :
+    rule.source ∈ RuleSource.all := by
+  rw [← table.complete]
+  exact List.mem_map.2 ⟨rule, hmem, rfl⟩
+
+theorem source_nodup_on_rules
+    (table : CertifiedSubstitutionTable) :
+    (table.rules.map SubstitutionRule.source).Nodup :=
+  table.nodupSources
+
+end CertifiedSubstitutionTable
+
+/-- Figure 16 substitution rules with their finite certification. -/
+def certifiedSubstitutionTable : CertifiedSubstitutionTable where
+  rules := substitutionRules
+  complete := substitutionRuleSources_eq_all
+  nodupSources := substitutionRuleSources_nodup
+  valid := by
+    intro rule hmem
+    exact SubstitutionRule.block_validRectangle_symbolTileSet hmem
+
+@[simp]
+theorem certifiedSubstitutionTable_rules :
+    certifiedSubstitutionTable.rules = substitutionRules :=
+  rfl
+
+@[simp]
+theorem certifiedSubstitutionTable_complete :
+    certifiedSubstitutionTable.rules.map SubstitutionRule.source = RuleSource.all :=
+  substitutionRuleSources_eq_all
 
 end Figure16
 end OllingerRobinson
