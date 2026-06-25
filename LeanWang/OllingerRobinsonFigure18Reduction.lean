@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinsonFigure13Transcription
+import LeanWang.OllingerRobinsonFigure13Layers
 import LeanWang.TM0FoldedTranscriptionReduction
 
 /-!
@@ -11,8 +11,9 @@ Reduction wrappers specialized to the concrete Figure 18 scaffold package.
 
 This module is intentionally thin: it keeps the large folded reduction modules
 unchanged while exposing theorem surfaces that take the eventual direct
-`Figure18Instance`, product-witness `Figure18AdjacentProductWitnessInstance`,
-adjacent-compatible `Figure18AdjacentCompatibleInstance`, indexed routed
+`Figure18Instance`, layered Figure 18 instances, product-witness
+`Figure18AdjacentProductWitnessInstance`, adjacent-compatible
+`Figure18AdjacentCompatibleInstance`, indexed routed
 `Figure18IndexedRoutedInstance`, routed `Figure18RoutedInstance`, or flexible
 `Figure18FlexibleInstance` directly.
 -/
@@ -86,6 +87,66 @@ theorem domino_problem_undecidable_of_figure18_position_source_interiorRows
     I.toPresentedInstance hinterior hcorrect
 
 /--
+Encoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed free-square certificate and generated position-coded
+source-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_layered_figure18_position_source
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_position_source
+    I.toFigure18Instance h
+
+/--
+Unencoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed free-square certificate and generated position-coded
+source-route obligations.
+-/
+theorem domino_problem_undecidable_of_layered_figure18_position_source
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_position_source
+    I.toFigure18Instance h
+
+/--
+Encoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed free-square certificate and the generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_layered_figure18_position_source_interiorRows
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_position_source_interiorRows
+    I.toFigure18Instance hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed free-square certificate and the generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_layered_figure18_position_source_interiorRows
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_position_source_interiorRows
+    I.toFigure18Instance hinterior hcorrect
+
+/--
 Encoded domino undecidability from a concrete Figure 18 scaffold instance with
 an indexed routed free-coordinate certificate and generated position-coded
 source-route obligations.
@@ -144,6 +205,66 @@ theorem domino_problem_undecidable_of_figure18_indexed_routed_position_source_in
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
     I.toFlexibleInstance.checkedFlexibleTranscription hinterior hcorrect
+
+/--
+Encoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed routed free-coordinate certificate and generated
+position-coded source-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_layered_figure18_indexed_routed_position_source
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_indexed_routed_position_source
+    I.toFigure18IndexedRoutedInstance h
+
+/--
+Unencoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed routed free-coordinate certificate and generated
+position-coded source-route obligations.
+-/
+theorem domino_problem_undecidable_of_layered_figure18_indexed_routed_position_source
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_indexed_routed_position_source
+    I.toFigure18IndexedRoutedInstance h
+
+/--
+Encoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed routed free-coordinate certificate and the generated
+interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_layered_figure18_indexed_routed_interiorRows
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
+    I.toFigure18IndexedRoutedInstance hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a layered concrete Figure 18 scaffold
+instance with an indexed routed free-coordinate certificate and the generated
+interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_layered_figure18_indexed_routed_position_source_interiorRows
+    (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
+    I.toFigure18IndexedRoutedInstance hinterior hcorrect
 
 /--
 Encoded domino undecidability from a concrete Figure 18 scaffold instance with
