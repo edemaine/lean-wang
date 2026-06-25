@@ -55,30 +55,6 @@ theorem foldedSymbolCode_injective :
   cases hright
   rfl
 
-theorem foldedSymbolCode_eq {marked marked' : Bool} {left right left' right' : SourceSymbol}
-    (h : foldedSymbolCode marked left right = foldedSymbolCode marked' left' right') :
-    marked = marked' ∧ left = left' ∧ right = right' := by
-  have hp :
-      (marked, left, right) = (marked', left', right') :=
-    foldedSymbolCode_injective h
-  cases hp
-  exact ⟨rfl, rfl, rfl⟩
-
-theorem foldedSymbolCode_mem_symbols
-    (marked : Bool) (left right : SourceSymbol) :
-    foldedSymbolCode marked left right ∈ foldedSymbolList := by
-  unfold foldedSymbolList
-  cases marked <;>
-    simp [TM0Route.mem_partrecStartedTM0SymbolList]
-
-theorem foldedWrite_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
-    foldedWrite side new left right ∈ foldedSymbolList := by
-  cases side <;> simp [foldedWrite, foldedSymbolCode_mem_symbols]
-
-theorem foldedWriteMarked_mem_symbols (side : FoldSide) (new left right : SourceSymbol) :
-    foldedWriteMarked side new left right ∈ foldedSymbolList := by
-  cases side <;> simp [foldedWriteMarked, foldedSymbolCode_mem_symbols]
-
 theorem foldedSimStateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
     {side side' : FoldSide} {q q' : SourceLabel tc}
     (hq : q ∈ TM0Route.partrecStartedTM0LabelList tc)
@@ -101,16 +77,17 @@ theorem foldedSimStateCode_injective_on_labels {tc : Turing.ToPartrec.Code}
 /-- First prelude state: write the marked origin cell. -/
 theorem foldedStartState_mem_states (tc : Turing.ToPartrec.Code) :
     foldedStartState ∈ foldedStateList tc := by
-  simp [foldedStateList, foldedInitStateList, foldedStartState, initWriteOriginState]
+  simp [foldedStateList, foldedStateListOfCodes, foldedInitStateList,
+    foldedStartState, initWriteOriginState]
 
 theorem initReturnState_zero_mem_states (tc : Turing.ToPartrec.Code) :
     initReturnState 0 ∈ foldedStateList tc := by
-  simp [foldedStateList, foldedInitStateList]
+  simp [foldedStateList, foldedStateListOfCodes, foldedInitStateList]
 
 theorem initMoveRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
     (hi : i < TM0Route.partrecStartedTM0Input.length) :
     initMoveRightState i ∈ foldedStateList tc := by
-  unfold foldedStateList foldedInitStateList
+  unfold foldedStateList foldedStateListOfCodes foldedInitStateList
   apply List.mem_append_left
   apply List.mem_append_right
   rw [List.mem_flatMap]
@@ -120,7 +97,7 @@ theorem initMoveRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
 theorem initWriteRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
     (hi : i < TM0Route.partrecStartedTM0Input.length) :
     initWriteRightState i ∈ foldedStateList tc := by
-  unfold foldedStateList foldedInitStateList
+  unfold foldedStateList foldedStateListOfCodes foldedInitStateList
   apply List.mem_append_left
   apply List.mem_append_right
   rw [List.mem_flatMap]
@@ -130,7 +107,7 @@ theorem initWriteRightState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
 theorem initReturnState_mem_states {tc : Turing.ToPartrec.Code} {i : Nat}
     (hi : i < TM0Route.partrecStartedTM0Input.length) :
     initReturnState i ∈ foldedStateList tc := by
-  unfold foldedStateList foldedInitStateList
+  unfold foldedStateList foldedStateListOfCodes foldedInitStateList
   apply List.mem_append_left
   apply List.mem_append_right
   rw [List.mem_flatMap]
