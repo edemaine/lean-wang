@@ -547,6 +547,96 @@ theorem symbol_mem_all
 
 end LayerComponentRectangle
 
+/--
+Boundary certificate for the Figure 16 block grid induced by a layer-component
+rectangle.
+
+The per-cell block compatibility follows from the certified Figure 16
+substitution table; the two fields here are exactly the remaining neighbor
+checks needed to expand the macroblocks into a valid component grid.
+-/
+structure CompatibleLayerComponentRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) where
+  hBoundary : ∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+    (C.blockGrid i j).hBoundaryMatches (C.blockGrid ⟨i.val + 1, hi⟩ j)
+  vBoundary : ∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+    (C.blockGrid i j).vBoundaryMatches (C.blockGrid i ⟨j.val + 1, hj⟩)
+
+namespace CompatibleLayerComponentRectangle
+
+theorem cell_compatible
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (_certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) :
+    (C.blockGrid i j).Compatible :=
+  (C.componentRect i j).ruleSource.block_compatible
+
+theorem blockGrid_compatible
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C) :
+    Figure16.BlockGrid.Compatible C.blockGrid := by
+  exact ⟨certificate.cell_compatible, certificate.hBoundary, certificate.vBoundary⟩
+
+theorem expandedTile_mem_symbolTileSet
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (_certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) (di dj : Fin 2) :
+    Figure16.BlockGrid.expandedTile C.blockGrid i j di dj ∈
+      Figure16.Symbol.tileSet :=
+  Figure16.BlockGrid.expandedTile_mem_symbolTileSet C.blockGrid i j di dj
+
+theorem expanded_hMatches_within
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) (dj : Fin 2) :
+    WangTile.HMatches
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j ⟨0, by decide⟩ dj)
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j ⟨1, by decide⟩ dj) :=
+  Figure16.BlockGrid.expanded_hMatches_within
+    certificate.blockGrid_compatible i j dj
+
+theorem expanded_hMatches_boundary
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) (hi : i.val + 1 < w) (dj : Fin 2) :
+    WangTile.HMatches
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j ⟨1, by decide⟩ dj)
+      (Figure16.BlockGrid.expandedTile C.blockGrid
+        ⟨i.val + 1, hi⟩ j ⟨0, by decide⟩ dj) :=
+  Figure16.BlockGrid.expanded_hMatches_boundary
+    certificate.blockGrid_compatible i j hi dj
+
+theorem expanded_vMatches_within
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) (di : Fin 2) :
+    WangTile.VMatches
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j di ⟨0, by decide⟩)
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j di ⟨1, by decide⟩) :=
+  Figure16.BlockGrid.expanded_vMatches_within
+    certificate.blockGrid_compatible i j di
+
+theorem expanded_vMatches_boundary
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C)
+    (i : Fin w) (j : Fin h) (hj : j.val + 1 < h) (di : Fin 2) :
+    WangTile.VMatches
+      (Figure16.BlockGrid.expandedTile C.blockGrid i j di ⟨1, by decide⟩)
+      (Figure16.BlockGrid.expandedTile C.blockGrid
+        i ⟨j.val + 1, hj⟩ di ⟨0, by decide⟩) :=
+  Figure16.BlockGrid.expanded_vMatches_boundary
+    certificate.blockGrid_compatible i j hj di
+
+end CompatibleLayerComponentRectangle
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
