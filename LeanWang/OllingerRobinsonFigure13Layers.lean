@@ -999,6 +999,97 @@ theorem isScaffold
 
 end LayeredFigure18IndexedRoutedCertificate
 
+/-- Concrete Figure 18 package using a layered direct indexed-active certificate. -/
+structure LayeredFigure18Instance where
+  layerData : Transcription
+  table : Figure18RoleTable
+  certificate : LayeredFigure18Certificate layerData table
+
+namespace LayeredFigure18Instance
+
+def toFigure18Instance (I : LayeredFigure18Instance) :
+    Figure18Instance where
+  table := I.table
+  certificate := I.certificate.toFigure18Certificate
+
+def finite (I : LayeredFigure18Instance) : FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : LayeredFigure18Instance) : ScaffoldPresentation :=
+  I.table.presentation
+
+theorem presentation_tiles (I : LayeredFigure18Instance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.toFigure18Instance.presentation_tiles
+
+theorem isScaffold (I : LayeredFigure18Instance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.toFigure18Instance.isScaffold
+
+end LayeredFigure18Instance
+
+/--
+Concrete Figure 18 package using the preferred layered indexed-routed
+certificate shape.
+-/
+structure LayeredFigure18IndexedRoutedInstance where
+  layerData : Transcription
+  table : Figure18RoleTable
+  certificate : LayeredFigure18IndexedRoutedCertificate layerData table
+
+namespace LayeredFigure18IndexedRoutedInstance
+
+def toFigure18IndexedRoutedInstance
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    Figure18IndexedRoutedInstance where
+  table := I.table
+  certificate := I.certificate.toFigure18IndexedRoutedCertificate
+
+def toFigure18RoutedInstance
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    Figure18RoutedInstance where
+  table := I.table
+  certificate := I.certificate.toFigure18RoutedCertificate
+
+def toFigure18FlexibleInstance
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    Figure18FlexibleInstance where
+  table := I.table
+  certificate := I.certificate.toFigure18FlexibleCertificate
+
+def finite (I : LayeredFigure18IndexedRoutedInstance) :
+    FiniteCheckedTranscription :=
+  I.table.finiteCheckedTranscription
+
+def presentation (I : LayeredFigure18IndexedRoutedInstance) :
+    ScaffoldPresentation :=
+  I.table.presentation
+
+theorem toFigure18IndexedRoutedInstance_table
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    I.toFigure18IndexedRoutedInstance.table = I.table :=
+  rfl
+
+theorem toFigure18RoutedInstance_table
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    I.toFigure18RoutedInstance.table = I.table :=
+  rfl
+
+theorem toFigure18FlexibleInstance_table
+    (I : LayeredFigure18IndexedRoutedInstance) :
+    I.toFigure18FlexibleInstance.table = I.table :=
+  rfl
+
+theorem presentation_tiles (I : LayeredFigure18IndexedRoutedInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.toFigure18IndexedRoutedInstance.presentation_tiles
+
+theorem isScaffold (I : LayeredFigure18IndexedRoutedInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.toFigure18IndexedRoutedInstance.isScaffold
+
+end LayeredFigure18IndexedRoutedInstance
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
