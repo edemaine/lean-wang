@@ -299,6 +299,87 @@ theorem east_vMatches {B : Block} (h : B.Compatible) :
     WangTile.VMatches (Symbol.tile B.southeast) (Symbol.tile B.northeast) :=
   h.2.2.2
 
+/-- Read a block entry by rectangle coordinates: `i = 0` is west, `j = 0` is south. -/
+def entry (B : Block) (i j : Fin 2) : Symbol :=
+  if j.val = 0 then
+    if i.val = 0 then B.southwest else B.southeast
+  else
+    if i.val = 0 then B.northwest else B.northeast
+
+@[simp]
+theorem entry_southwest (B : Block) :
+    B.entry ⟨0, by decide⟩ ⟨0, by decide⟩ = B.southwest := by
+  simp [entry]
+
+@[simp]
+theorem entry_southeast (B : Block) :
+    B.entry ⟨1, by decide⟩ ⟨0, by decide⟩ = B.southeast := by
+  simp [entry]
+
+@[simp]
+theorem entry_northwest (B : Block) :
+    B.entry ⟨0, by decide⟩ ⟨1, by decide⟩ = B.northwest := by
+  simp [entry]
+
+@[simp]
+theorem entry_northeast (B : Block) :
+    B.entry ⟨1, by decide⟩ ⟨1, by decide⟩ = B.northeast := by
+  simp [entry]
+
+/-- The four Wang tiles appearing in a block. -/
+def tileSet (B : Block) : TileSet := [
+  Symbol.tile B.southwest,
+  Symbol.tile B.southeast,
+  Symbol.tile B.northwest,
+  Symbol.tile B.northeast
+]
+
+/-- The block as a `2 × 2` Wang-tile rectangle. -/
+def rectangle (B : Block) : Rectangle 2 2 :=
+  fun i j => Symbol.tile (B.entry i j)
+
+theorem rectangle_mem_tileSet (B : Block) (i j : Fin 2) :
+    B.rectangle i j ∈ B.tileSet := by
+  rcases i with ⟨i, hi⟩
+  rcases j with ⟨j, hj⟩
+  have hi_cases : i = 0 ∨ i = 1 := by omega
+  have hj_cases : j = 0 ∨ j = 1 := by omega
+  rcases hi_cases with rfl | rfl <;>
+    rcases hj_cases with rfl | rfl <;>
+      simp [rectangle, entry, tileSet]
+
+theorem rectangle_hMatches_of_compatible {B : Block} (h : B.Compatible)
+    (i j : Fin 2) (hi : i.val + 1 < 2) :
+    WangTile.HMatches (B.rectangle i j) (B.rectangle ⟨i.val + 1, hi⟩ j) := by
+  rcases i with ⟨i, hi_lt⟩
+  rcases j with ⟨j, hj_lt⟩
+  simp at hi
+  have hi_zero : i = 0 := by omega
+  have hj_cases : j = 0 ∨ j = 1 := by omega
+  subst i
+  rcases hj_cases with rfl | rfl
+  · simpa [rectangle, entry] using Block.south_hMatches h
+  · simpa [rectangle, entry] using Block.north_hMatches h
+
+theorem rectangle_vMatches_of_compatible {B : Block} (h : B.Compatible)
+    (i j : Fin 2) (hj : j.val + 1 < 2) :
+    WangTile.VMatches (B.rectangle i j) (B.rectangle i ⟨j.val + 1, hj⟩) := by
+  rcases i with ⟨i, hi_lt⟩
+  rcases j with ⟨j, hj_lt⟩
+  simp at hj
+  have hi_cases : i = 0 ∨ i = 1 := by omega
+  have hj_zero : j = 0 := by omega
+  subst j
+  rcases hi_cases with rfl | rfl
+  · simpa [rectangle, entry] using Block.west_vMatches h
+  · simpa [rectangle, entry] using Block.east_vMatches h
+
+theorem validRectangle_of_compatible {B : Block} (h : B.Compatible) :
+    ValidRectangle B.tileSet B.rectangle := by
+  refine ⟨rectangle_mem_tileSet B, ?_, ?_⟩
+  · exact rectangle_hMatches_of_compatible h
+  · exact rectangle_vMatches_of_compatible h
+
 end Block
 
 /-- `phi_L1(*)`. -/
