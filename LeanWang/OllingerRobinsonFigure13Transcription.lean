@@ -2445,6 +2445,51 @@ structure Figure18AdjacentCompatibleFixedCornerSquare
 
 namespace Figure18AdjacentCompatibleFixedCornerSquare
 
+/--
+Build an adjacent-compatible fixed-corner square from pointwise payload
+decompositions.
+
+This is the shape a geometric scaffold proof naturally gets after selecting
+the relevant Figure 18 sites in a combined tiling: each selected site has some
+payload component.  The constructor packages those witnesses into the
+`payloadRect` field expected by the routed-square interface.
+-/
+noncomputable def ofProductWitnesses
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} (hn : 0 < n)
+    (horizontalCoord : Fin n → Int) (verticalCoord : Fin n → Int)
+    (siteRect : Fin n → Fin n → Figure18Site)
+    (horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+      horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1)
+    (verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1)
+    (hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true)
+    (vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+    (active : ∀ i : Fin n, ∀ j : Fin n,
+      CellRole.isActive (table.roleAtSite (siteRect i j)) = true)
+    (cornerSite :
+      siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite)
+    (productWitness : ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+      WangTile.product (siteRect i j).tile payload =
+        (x (horizontalCoord i, verticalCoord j)).1) :
+    Figure18AdjacentCompatibleFixedCornerSquare table x n hn where
+  horizontalCoord := horizontalCoord
+  verticalCoord := verticalCoord
+  siteRect := siteRect
+  payloadRect := fun i j => Classical.choose (productWitness i j)
+  horizontalCoord_succ := horizontalCoord_succ
+  verticalCoord_succ := verticalCoord_succ
+  hcompatible := hcompatible
+  vcompatible := vcompatible
+  active := active
+  cornerSite := cornerSite
+  product := by
+    intro i j
+    exact Classical.choose_spec (productWitness i j)
+
 def toIndexedRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
