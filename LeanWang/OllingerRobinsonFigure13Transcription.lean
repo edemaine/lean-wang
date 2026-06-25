@@ -1262,6 +1262,73 @@ theorem siteOfTile?_isSome_of_mem_presentation
   Figure18Site.ofTile?_isSome_of_mem_all_tiles
     ((table.presentation_mem_iff_mem_site_tiles tile).1 htile)
 
+/--
+Decode the scaffold layer of one tile in a scaffold/payload product.
+
+This is a single-cell helper for the Figure 18 geometric extraction: membership
+in `combineWithScaffold` gives some presentation tile and payload whose product
+is the observed combined tile.
+-/
+theorem exists_base_payload_of_mem_combineWithScaffold
+    (table : Figure18RoleTable) {T : TileSet} {seed tile : WangTile}
+    (htile : tile ∈ combineWithScaffold table.presentation.toScaffold T seed) :
+    ∃ base : WangTile, base ∈ table.presentation.tiles ∧
+      ∃ payload : WangTile, WangTile.product base payload = tile := by
+  rcases mem_combineWithScaffold_iff.1 htile with
+    ⟨base, hbase, payload, _hactiveMem, _hinactive, hproduct⟩
+  exact ⟨base, hbase, payload, hproduct⟩
+
+noncomputable def combinedBaseTile
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    WangTile :=
+  Classical.choose
+    (table.exists_base_payload_of_mem_combineWithScaffold tile.2)
+
+theorem combinedBaseTile_mem
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    table.combinedBaseTile tile ∈ table.presentation.tiles :=
+  (Classical.choose_spec
+    (table.exists_base_payload_of_mem_combineWithScaffold tile.2)).1
+
+theorem combinedBaseTile_product
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    ∃ payload : WangTile,
+      WangTile.product (table.combinedBaseTile tile) payload = tile.1 :=
+  (Classical.choose_spec
+    (table.exists_base_payload_of_mem_combineWithScaffold tile.2)).2
+
+noncomputable def combinedSite
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    Figure18Site :=
+  table.siteOfPresentationTile
+    (table.combinedBaseTile tile) (table.combinedBaseTile_mem tile)
+
+theorem combinedSite_tile
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    (table.combinedSite tile).tile = table.combinedBaseTile tile :=
+  table.siteOfPresentationTile_tile (table.combinedBaseTile_mem tile)
+
+theorem combinedSite_mem_all
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    table.combinedSite tile ∈ Figure18Site.all :=
+  table.siteOfPresentationTile_mem_all (table.combinedBaseTile_mem tile)
+
+theorem combinedSite_product
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    ∃ payload : WangTile,
+      WangTile.product (table.combinedSite tile).tile payload = tile.1 := by
+  rcases table.combinedBaseTile_product tile with ⟨payload, hproduct⟩
+  refine ⟨payload, ?_⟩
+  rw [table.combinedSite_tile tile]
+  exact hproduct
+
 theorem presentation_role_fig13QuarterTile
     (table : Figure18RoleTable) (i : Fin 92) (q : Quadrant) :
     table.presentation.role (fig13QuarterTile i q) = table.roleAt i q := by
@@ -1304,6 +1371,20 @@ theorem presentation_active_siteOfPresentationTile
       CellRole.isActive
         (table.roleAtSite (table.siteOfPresentationTile tile htile)) := by
   rw [table.presentation_role_siteOfPresentationTile htile]
+
+theorem presentation_role_combinedBaseTile
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    table.presentation.role (table.combinedBaseTile tile) =
+      table.roleAtSite (table.combinedSite tile) :=
+  table.presentation_role_siteOfPresentationTile (table.combinedBaseTile_mem tile)
+
+theorem presentation_active_combinedBaseTile
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    CellRole.isActive (table.presentation.role (table.combinedBaseTile tile)) =
+      CellRole.isActive (table.roleAtSite (table.combinedSite tile)) := by
+  rw [table.presentation_role_combinedBaseTile tile]
 
 theorem hMatches_of_siteOfPresentationTile_hCompatible
     (table : Figure18RoleTable) {left right : WangTile}
