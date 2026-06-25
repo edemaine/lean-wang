@@ -1597,6 +1597,49 @@ theorem ofFlatRoles_roleAtSite
       ofFlatRoles_roleAt_southwest, ofFlatRoles_roleAt_southeast,
       ofFlatRoles_roleAt_northwest, ofFlatRoles_roleAt_northeast]
 
+theorem ofFlatRoles_flatRoleAt_corner_iff
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (site : Figure18Site) :
+    flatRoleAt flat site = CellRole.corner ↔
+      site = ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site) := by
+  let table : Figure18RoleTable :=
+    ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique
+  have hrole : table.roleAtSite site = flatRoleAt flat site :=
+    ofFlatRoles_roleAtSite flat hflat cornerIndex cornerQuadrant hunique site
+  rw [← hrole]
+  simpa [table, Figure18RoleTable.cornerSite, ofFlatRoles] using
+    table.roleAtSite_corner_iff site
+
+theorem ofFlatRoles_flatRoleAt_corner
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true) :
+    flatRoleAt flat
+        ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site) =
+      CellRole.corner := by
+  exact (ofFlatRoles_flatRoleAt_corner_iff
+    flat hflat cornerIndex cornerQuadrant hunique
+    ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site)).2 rfl
+
+theorem ofFlatRoles_isCorner_flatRoleAt_iff
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (site : Figure18Site) :
+    CellRole.isCorner (flatRoleAt flat site) = true ↔
+      site = ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site) := by
+  rw [CellRole.isCorner_eq_true_iff]
+  exact ofFlatRoles_flatRoleAt_corner_iff
+    flat hflat cornerIndex cornerQuadrant hunique site
+
 /--
 The active Figure 18 sites selected by a flat role transcription.
 
@@ -1623,6 +1666,37 @@ theorem mem_cornerFlatSites {flat : List CellRole} {site : Figure18Site} :
       site ∈ Figure18Site.all ∧
         CellRole.isCorner (flatRoleAt flat site) = true := by
   simp [cornerFlatSites]
+
+theorem mem_cornerFlatSites_ofFlatRoles_iff
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (site : Figure18Site) :
+    site ∈ cornerFlatSites flat ↔
+      site = ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site) := by
+  rw [mem_cornerFlatSites,
+    ofFlatRoles_isCorner_flatRoleAt_iff flat hflat cornerIndex cornerQuadrant hunique]
+  constructor
+  · exact And.right
+  · intro hsite
+    exact ⟨Figure18Site.mem_all site, hsite⟩
+
+theorem corner_mem_activeFlatSites_ofFlatRoles
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true) :
+    ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site) ∈
+      activeFlatSites flat := by
+  rw [mem_activeFlatSites]
+  exact ⟨Figure18Site.mem_all
+      ({ index := cornerIndex, quadrant := cornerQuadrant } : Figure18Site),
+    by
+      rw [ofFlatRoles_flatRoleAt_corner flat hflat cornerIndex cornerQuadrant hunique]
+      rfl⟩
 
 /--
 Smoke-test data for the finite Figure 18 table checker.
