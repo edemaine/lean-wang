@@ -1951,6 +1951,95 @@ theorem scaffold_tiles (D : LayeredFigure18ScaffoldData) :
     D.scaffold.tiles = TileSubdivision.subdivideTileSet fig13Tiles := by
   simpa [scaffold] using D.presentation_tiles
 
+/--
+Checked raw input for the concrete layered Figure 18 scaffold data.
+
+This is the compact data-entry shape for the final transcription: `layerRows`
+is the 92-row Figure 13 layer decomposition, `activeSiteSpecs` is the finite
+list of active Figure 18 quarter-sites, and `cornerIndex`/`cornerQuadrant`
+select the distinguished lower-left corner site.
+-/
+structure CheckedRawData where
+  layerRows : List Components
+  layerRows_length : layerRows.length = 92
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+
+namespace CheckedRawData
+
+def layerData (data : CheckedRawData) : Transcription where
+  rows := data.layerRows
+  length_eq := data.layerRows_length
+
+def activeSiteData (data : CheckedRawData) :
+    Figure18Site.CheckedNatSpecs where
+  specs := data.activeSiteSpecs
+  valid := data.activeSiteSpecs_valid
+
+theorem cornerIndex_lt (data : CheckedRawData) :
+    data.cornerIndex < 92 :=
+  of_decide_eq_true data.cornerIndex_valid
+
+def cornerSite (data : CheckedRawData) : Figure18Site where
+  index := ⟨data.cornerIndex, data.cornerIndex_lt⟩
+  quadrant := data.cornerQuadrant
+
+def scaffoldData (data : CheckedRawData) : Figure18ScaffoldData where
+  activeSiteData := data.activeSiteData
+  cornerSite := data.cornerSite
+
+def toLayeredFigure18ScaffoldData (data : CheckedRawData) :
+    LayeredFigure18ScaffoldData where
+  layerData := data.layerData
+  scaffoldData := data.scaffoldData
+
+@[simp]
+theorem toLayeredFigure18ScaffoldData_layerData
+    (data : CheckedRawData) :
+    data.toLayeredFigure18ScaffoldData.layerData = data.layerData :=
+  rfl
+
+@[simp]
+theorem toLayeredFigure18ScaffoldData_scaffoldData
+    (data : CheckedRawData) :
+    data.toLayeredFigure18ScaffoldData.scaffoldData = data.scaffoldData :=
+  rfl
+
+@[simp]
+theorem toLayeredFigure18ScaffoldData_activeSiteData
+    (data : CheckedRawData) :
+    data.toLayeredFigure18ScaffoldData.activeSiteData =
+      data.activeSiteData :=
+  rfl
+
+@[simp]
+theorem toLayeredFigure18ScaffoldData_cornerSite
+    (data : CheckedRawData) :
+    data.toLayeredFigure18ScaffoldData.cornerSite = data.cornerSite :=
+  rfl
+
+theorem layerData_rows (data : CheckedRawData) :
+    data.layerData.rows = data.layerRows :=
+  rfl
+
+theorem activeSiteData_specs (data : CheckedRawData) :
+    data.activeSiteData.specs = data.activeSiteSpecs :=
+  rfl
+
+theorem cornerSite_index_val (data : CheckedRawData) :
+    data.cornerSite.index.val = data.cornerIndex :=
+  rfl
+
+theorem cornerSite_quadrant (data : CheckedRawData) :
+    data.cornerSite.quadrant = data.cornerQuadrant :=
+  rfl
+
+end CheckedRawData
+
 /-- Direct indexed-active layered geometric certificate for layered scaffold data. -/
 structure Certificate (D : LayeredFigure18ScaffoldData) : Prop where
   certificate : LayeredFigure18Certificate D.layerData D.table
