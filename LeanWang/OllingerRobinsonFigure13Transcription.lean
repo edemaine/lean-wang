@@ -720,6 +720,22 @@ theorem length_sitesOfNatSpecs_of_natSpecsValidBool
         ⟨hi, htail⟩
       simp [sitesOfNatSpecs, ofNat?_eq_some_of_lt q hi, ih htail]
 
+/-- Checked raw data for a finite list of Figure 18 sites. -/
+structure CheckedNatSpecs where
+  specs : List (Nat × Quadrant)
+  valid : natSpecsValidBool specs = true
+
+namespace CheckedNatSpecs
+
+def sites (data : CheckedNatSpecs) : List Figure18Site :=
+  sitesOfNatSpecs data.specs
+
+theorem sites_length (data : CheckedNatSpecs) :
+    data.sites.length = data.specs.length :=
+  length_sitesOfNatSpecs_of_natSpecsValidBool data.valid
+
+end CheckedNatSpecs
+
 end Figure18Site
 
 /-- Role lookup entries for a complete quadrant role transcription. -/
@@ -2332,17 +2348,16 @@ def smokeCornerSite : Figure18Site where
 def smokeActiveSiteSpecs : List (Nat × Quadrant) :=
   []
 
-def smokeActiveSites : List Figure18Site :=
-  Figure18Site.sitesOfNatSpecs smokeActiveSiteSpecs
+def smokeActiveSiteData : Figure18Site.CheckedNatSpecs where
+  specs := smokeActiveSiteSpecs
+  valid := rfl
 
-theorem smokeActiveSiteSpecs_valid :
-    Figure18Site.natSpecsValidBool smokeActiveSiteSpecs = true :=
-  rfl
+def smokeActiveSites : List Figure18Site :=
+  smokeActiveSiteData.sites
 
 theorem smokeActiveSites_length :
     smokeActiveSites.length = smokeActiveSiteSpecs.length :=
-  Figure18Site.length_sitesOfNatSpecs_of_natSpecsValidBool
-    smokeActiveSiteSpecs_valid
+  smokeActiveSiteData.sites_length
 
 theorem smokeUniqueCorner :
     fig13QuarterCornerPositionUniqueBool
