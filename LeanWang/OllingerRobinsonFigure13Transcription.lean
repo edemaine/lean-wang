@@ -566,6 +566,41 @@ theorem exists_ofTile?_eq_some_of_mem_all_tiles {tile : WangTile}
       exact ⟨site, rfl, ofTile?_eq_some_mem hfind,
         ofTile?_eq_some_tile hfind⟩
 
+/-- Offset of a quadrant in the flat Figure 18 role transcription order. -/
+def quadrantOffset : Quadrant → Nat
+  | .southwest => 0
+  | .southeast => 1
+  | .northwest => 2
+  | .northeast => 3
+
+/-- Index of a Figure 18 site in the flat role transcription order. -/
+def flatIndex (site : Figure18Site) : Nat :=
+  4 * site.index.val + quadrantOffset site.quadrant
+
+@[simp]
+theorem flatIndex_mk_southwest (i : Fin 92) :
+    ({ index := i, quadrant := Quadrant.southwest } : Figure18Site).flatIndex =
+      4 * i.val := by
+  rfl
+
+@[simp]
+theorem flatIndex_mk_southeast (i : Fin 92) :
+    ({ index := i, quadrant := Quadrant.southeast } : Figure18Site).flatIndex =
+      4 * i.val + 1 := by
+  rfl
+
+@[simp]
+theorem flatIndex_mk_northwest (i : Fin 92) :
+    ({ index := i, quadrant := Quadrant.northwest } : Figure18Site).flatIndex =
+      4 * i.val + 2 := by
+  rfl
+
+@[simp]
+theorem flatIndex_mk_northeast (i : Fin 92) :
+    ({ index := i, quadrant := Quadrant.northeast } : Figure18Site).flatIndex =
+      4 * i.val + 3 := by
+  rfl
+
 end Figure18Site
 
 /-- Role lookup entries for a complete quadrant role transcription. -/
@@ -1543,6 +1578,52 @@ theorem ofFlatRoles_roleAt_northeast
       flat.getD (4 * i.val + 3) CellRole.inactive := by
   simp [Figure18RoleTable.roleAt, ofFlatRoles_row]
 
+/-- Role lookup in a flat Figure 18 transcription, indexed by concrete site. -/
+def flatRoleAt (flat : List CellRole) (site : Figure18Site) : CellRole :=
+  flat.getD site.flatIndex CellRole.inactive
+
+theorem ofFlatRoles_roleAtSite
+    (flat : List CellRole) (hflat : flat.length = 368)
+    (cornerIndex : Fin 92) (cornerQuadrant : Quadrant)
+    (hunique :
+      fig13QuarterCornerPositionUniqueBool
+        (rowsOfFlatRoles flat) cornerIndex cornerQuadrant = true)
+    (site : Figure18Site) :
+    (ofFlatRoles flat hflat cornerIndex cornerQuadrant hunique).roleAtSite site =
+      flatRoleAt flat site := by
+  rcases site with ⟨i, q⟩
+  cases q <;>
+    simp [Figure18RoleTable.roleAtSite, flatRoleAt,
+      ofFlatRoles_roleAt_southwest, ofFlatRoles_roleAt_southeast,
+      ofFlatRoles_roleAt_northwest, ofFlatRoles_roleAt_northeast]
+
+/--
+The active Figure 18 sites selected by a flat role transcription.
+
+This is a finite data view used by the concrete scaffold proof: after the paper
+role table is transcribed, this list exposes exactly the sites where payload
+tiles may be read.
+-/
+def activeFlatSites (flat : List CellRole) : List Figure18Site :=
+  Figure18Site.all.filter fun site =>
+    CellRole.isActive (flatRoleAt flat site)
+
+def cornerFlatSites (flat : List CellRole) : List Figure18Site :=
+  Figure18Site.all.filter fun site =>
+    CellRole.isCorner (flatRoleAt flat site)
+
+theorem mem_activeFlatSites {flat : List CellRole} {site : Figure18Site} :
+    site ∈ activeFlatSites flat ↔
+      site ∈ Figure18Site.all ∧
+        CellRole.isActive (flatRoleAt flat site) = true := by
+  simp [activeFlatSites]
+
+theorem mem_cornerFlatSites {flat : List CellRole} {site : Figure18Site} :
+    site ∈ cornerFlatSites flat ↔
+      site ∈ Figure18Site.all ∧
+        CellRole.isCorner (flatRoleAt flat site) = true := by
+  simp [cornerFlatSites]
+
 /--
 Smoke-test data for the finite Figure 18 table checker.
 
@@ -1598,6 +1679,16 @@ theorem smoke_roleAt_corner :
 theorem smoke_presentation_tiles :
     smoke.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
   smoke.presentation_tiles
+
+theorem smoke_flatRoleAt_corner :
+    flatRoleAt smokeFlatRoles smoke.cornerSite = CellRole.corner := by
+  rfl
+
+theorem smoke_flatRoleAt_second_site :
+    flatRoleAt smokeFlatRoles
+      ({ index := ⟨0, by decide⟩, quadrant := Quadrant.southeast } : Figure18Site) =
+        CellRole.inactive := by
+  rfl
 
 end Figure18RoleTable
 
