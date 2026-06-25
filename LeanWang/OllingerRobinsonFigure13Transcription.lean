@@ -2417,6 +2417,13 @@ theorem smokeFlat_corner_mem_activeSites :
 
 end Figure18RoleTable
 
+/-- The concrete Figure 18 scaffold tile set: quarters of the Figure 13 tiles. -/
+def figure18ScaffoldTiles : TileSet :=
+  TileSubdivision.subdivideTileSet fig13Tiles
+
+theorem figure18ScaffoldTiles_nodup : figure18ScaffoldTiles.Nodup := by
+  exact TileSubdivision.subdivideTileSet_nodup_of_nodup fig13Tiles_nodup
+
 /--
 Role-table-indexed active square window for the Figure 18 scaffold.
 
@@ -3978,6 +3985,121 @@ structure Figure18CheckedListedActiveSiteInstance where
     Figure18ListedActiveSiteCertificate activeSiteData.sites cornerSite
 
 /--
+Concrete Figure 18 scaffold data before the geometric proof is supplied.
+
+This is the Lean-facing target for transcribing Figure 18 from the paper: a
+checked finite list of usable active quarter-sites, together with the
+distinguished lower-left corner quarter-site.  The local free-square invariant
+and the realization invariant below are the two remaining non-finite scaffold
+facts needed to turn this data into `Figure18CheckedListedActiveSiteInstance`.
+-/
+structure Figure18ScaffoldData where
+  activeSiteData : Figure18Site.CheckedNatSpecs
+  cornerSite : Figure18Site
+
+namespace Figure18ScaffoldData
+
+def activeSites (D : Figure18ScaffoldData) : List Figure18Site :=
+  D.activeSiteData.sites
+
+def table (D : Figure18ScaffoldData) :
+    Figure18RoleTable.FlatRoleTable :=
+  Figure18RoleTable.FlatRoleTable.ofActiveSites D.activeSites D.cornerSite
+
+def finite (D : Figure18ScaffoldData) :
+    FiniteCheckedTranscription :=
+  D.table.toRoleTable.finiteCheckedTranscription
+
+def presentation (D : Figure18ScaffoldData) :
+    ScaffoldPresentation :=
+  D.table.toRoleTable.presentation
+
+def scaffold (D : Figure18ScaffoldData) : Scaffold :=
+  D.presentation.toScaffold
+
+def tiles (D : Figure18ScaffoldData) : TileSet :=
+  D.presentation.tiles
+
+def HasLocalFreeSquareInvariant (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18ListedActiveSiteFixedCornerSquares D.activeSites D.cornerSite
+
+def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
+  RealizesActiveCornerSquares D.scaffold
+
+/--
+The two geometric facts still needed after the finite Figure 18 active-site
+data has been transcribed.
+-/
+structure Certificate (D : Figure18ScaffoldData) : Prop where
+  localFreeSquares : D.HasLocalFreeSquareInvariant
+  realizes : D.HasRealizationInvariant
+
+theorem activeSites_length (D : Figure18ScaffoldData) :
+    D.activeSites.length = D.activeSiteData.specs.length :=
+  D.activeSiteData.sites_length
+
+@[simp]
+theorem table_cornerSite (D : Figure18ScaffoldData) :
+    D.table.cornerSite = D.cornerSite :=
+  rfl
+
+theorem presentation_tiles (D : Figure18ScaffoldData) :
+    D.presentation.tiles = figure18ScaffoldTiles := by
+  simpa [presentation, figure18ScaffoldTiles] using
+    D.table.toRoleTable.presentation_tiles
+
+theorem scaffold_tiles (D : Figure18ScaffoldData) :
+    D.scaffold.tiles = figure18ScaffoldTiles := by
+  simpa [scaffold] using D.presentation_tiles
+
+theorem tiles_eq (D : Figure18ScaffoldData) :
+    D.tiles = figure18ScaffoldTiles :=
+  D.presentation_tiles
+
+theorem corner_mem_table_activeSites (D : Figure18ScaffoldData) :
+    D.cornerSite ∈ D.table.activeSites :=
+  Figure18RoleTable.FlatRoleTable.corner_mem_ofActiveSites_activeSites
+    D.activeSites D.cornerSite
+
+theorem activeSite_mem_table_activeSites_of_mem
+    {D : Figure18ScaffoldData} {site : Figure18Site}
+    (hmem : site ∈ D.activeSites) :
+    site ∈ D.table.activeSites :=
+  Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_of_mem hmem
+
+def Certificate.toListedActiveSiteCertificate
+    {D : Figure18ScaffoldData} (certificate : D.Certificate) :
+    Figure18ListedActiveSiteCertificate D.activeSites D.cornerSite where
+  listedActiveForces := certificate.localFreeSquares
+  realizes := by
+    simpa [HasRealizationInvariant, scaffold, presentation, table]
+      using certificate.realizes
+
+def toCheckedListedActiveSiteInstance
+    (D : Figure18ScaffoldData) (certificate : D.Certificate) :
+    Figure18CheckedListedActiveSiteInstance where
+  activeSiteData := D.activeSiteData
+  cornerSite := D.cornerSite
+  certificate := by
+    simpa [activeSites] using certificate.toListedActiveSiteCertificate
+
+@[simp]
+theorem toCheckedListedActiveSiteInstance_activeSiteData
+    (D : Figure18ScaffoldData) (certificate : D.Certificate) :
+    (D.toCheckedListedActiveSiteInstance certificate).activeSiteData =
+      D.activeSiteData :=
+  rfl
+
+@[simp]
+theorem toCheckedListedActiveSiteInstance_cornerSite
+    (D : Figure18ScaffoldData) (certificate : D.Certificate) :
+    (D.toCheckedListedActiveSiteInstance certificate).cornerSite =
+      D.cornerSite :=
+  rfl
+
+end Figure18ScaffoldData
+
+/--
 Concrete Figure 18 scaffold package using the direct indexed free-square
 certificate.
 -/
@@ -4404,6 +4526,21 @@ theorem isScaffold (I : Figure18CheckedListedActiveSiteInstance) :
   I.certificate.isScaffold
 
 end Figure18CheckedListedActiveSiteInstance
+
+namespace Figure18ScaffoldData
+
+theorem Certificate.isScaffold
+    {D : Figure18ScaffoldData} (certificate : D.Certificate) :
+    IsScaffold D.scaffold := by
+  simpa [toCheckedListedActiveSiteInstance, activeSites, scaffold, presentation, table,
+    Figure18CheckedListedActiveSiteInstance.presentation,
+    Figure18CheckedListedActiveSiteInstance.table,
+    Figure18CheckedListedActiveSiteInstance.activeSites,
+    Figure18ListedActiveSiteInstance.presentation,
+    Figure18ListedActiveSiteInstance.table]
+    using (D.toCheckedListedActiveSiteInstance certificate).isScaffold
+
+end Figure18ScaffoldData
 
 namespace Figure18FlexibleInstance
 
