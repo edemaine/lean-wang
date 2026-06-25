@@ -152,6 +152,18 @@ def L3c : Symbol := .black .c
 def L3d : Symbol := .black .d
 def L3e : Symbol := .black .e
 
+def all : List Symbol := [
+  .blank,
+  L1a, L1b, L1c, L1d,
+  L2a, L2b, L2c, L2d,
+  L2e, L2f, L2g, L2h,
+  L2i, L2j, L2k, L2l,
+  L2m, L2n, L2o, L2p,
+  R0, R1, R2, R3,
+  G0, G1, G2, G3,
+  L3a, L3b, L3c, L3d, L3e
+]
+
 end Symbol
 
 namespace Thick
@@ -238,6 +250,26 @@ def tile : Symbol → WangTile
   | .black .c => t 57 61 59 59
   | .black .d => t 57 57 59 62
   | .black .e => t 56 56 59 63
+
+def tileSet : TileSet :=
+  all.map tile
+
+theorem mem_all (symbol : Symbol) : symbol ∈ all := by
+  cases symbol with
+  | blank =>
+      decide
+  | thin component =>
+      cases component <;> decide
+  | thick component =>
+      cases component <;> decide
+  | line component =>
+      cases component <;> decide
+  | black component =>
+      cases component <;> decide
+
+theorem tile_mem_tileSet (symbol : Symbol) :
+    tile symbol ∈ tileSet :=
+  List.mem_map.2 ⟨symbol, mem_all symbol, rfl⟩
 
 end Symbol
 
@@ -377,6 +409,16 @@ theorem rectangle_vMatches_of_compatible {B : Block} (h : B.Compatible)
 theorem validRectangle_of_compatible {B : Block} (h : B.Compatible) :
     ValidRectangle B.tileSet B.rectangle := by
   refine ⟨rectangle_mem_tileSet B, ?_, ?_⟩
+  · exact rectangle_hMatches_of_compatible h
+  · exact rectangle_vMatches_of_compatible h
+
+theorem rectangle_mem_symbolTileSet (B : Block) (i j : Fin 2) :
+    B.rectangle i j ∈ Symbol.tileSet :=
+  Symbol.tile_mem_tileSet (B.entry i j)
+
+theorem validRectangle_symbolTileSet_of_compatible {B : Block} (h : B.Compatible) :
+    ValidRectangle Symbol.tileSet B.rectangle := by
+  refine ⟨rectangle_mem_symbolTileSet B, ?_, ?_⟩
   · exact rectangle_hMatches_of_compatible h
   · exact rectangle_vMatches_of_compatible h
 
@@ -527,6 +569,10 @@ theorem phiL1Star_validRectangle :
     ValidRectangle phiL1Star.tileSet phiL1Star.rectangle :=
   Block.validRectangle_of_compatible phiL1Star_compatible
 
+theorem phiL1Star_validRectangle_symbolTileSet :
+    ValidRectangle Symbol.tileSet phiL1Star.rectangle :=
+  Block.validRectangle_symbolTileSet_of_compatible phiL1Star_compatible
+
 theorem phiL2Component1_compatible (component : Thin) :
     (phiL2Component1 component).Compatible := by
   cases component <;> decide
@@ -535,6 +581,11 @@ theorem phiL2Component1_validRectangle (component : Thin) :
     ValidRectangle (phiL2Component1 component).tileSet
       (phiL2Component1 component).rectangle :=
   Block.validRectangle_of_compatible (phiL2Component1_compatible component)
+
+theorem phiL2Component1_validRectangle_symbolTileSet (component : Thin) :
+    ValidRectangle Symbol.tileSet (phiL2Component1 component).rectangle :=
+  Block.validRectangle_symbolTileSet_of_compatible
+    (phiL2Component1_compatible component)
 
 theorem phiL2Component2_compatible (component : Thick) :
     (phiL2Component2 component).Compatible := by
@@ -545,6 +596,11 @@ theorem phiL2Component2_validRectangle (component : Thick) :
       (phiL2Component2 component).rectangle :=
   Block.validRectangle_of_compatible (phiL2Component2_compatible component)
 
+theorem phiL2Component2_validRectangle_symbolTileSet (component : Thick) :
+    ValidRectangle Symbol.tileSet (phiL2Component2 component).rectangle :=
+  Block.validRectangle_symbolTileSet_of_compatible
+    (phiL2Component2_compatible component)
+
 theorem phiL3_compatible (component : Black) :
     (phiL3 component).Compatible := by
   cases component <;> decide
@@ -552,6 +608,10 @@ theorem phiL3_compatible (component : Black) :
 theorem phiL3_validRectangle (component : Black) :
     ValidRectangle (phiL3 component).tileSet (phiL3 component).rectangle :=
   Block.validRectangle_of_compatible (phiL3_compatible component)
+
+theorem phiL3_validRectangle_symbolTileSet (component : Black) :
+    ValidRectangle Symbol.tileSet (phiL3 component).rectangle :=
+  Block.validRectangle_symbolTileSet_of_compatible (phiL3_compatible component)
 
 end Figure16
 end OllingerRobinson
