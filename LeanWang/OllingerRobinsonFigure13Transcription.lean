@@ -2443,6 +2443,38 @@ structure Figure18AdjacentCompatibleFixedCornerSquare
     WangTile.product (siteRect i j).tile (payloadRect i j) =
       (x (horizontalCoord i, verticalCoord j)).1
 
+/--
+Adjacent-compatible selected-coordinate square with pointwise payload
+decompositions instead of a preassembled payload rectangle.
+
+This is the most direct local extraction target from a combined tiling: for
+each selected coordinate, identify the Figure 18 base site and show that the
+combined tile has some payload component over that site.  The payload rectangle
+is chosen later when converting to `Figure18AdjacentCompatibleFixedCornerSquare`.
+-/
+structure Figure18AdjacentProductWitnessFixedCornerSquare
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  siteRect : Fin n → Fin n → Figure18Site
+  horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+    horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1
+  verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1
+  hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    Figure18Site.hCompatible (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true
+  vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    Figure18Site.vCompatible (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite
+  productWitness : ∀ i : Fin n, ∀ j : Fin n, ∃ payload : WangTile,
+    WangTile.product (siteRect i j).tile payload =
+      (x (horizontalCoord i, verticalCoord j)).1
+
 namespace Figure18AdjacentCompatibleFixedCornerSquare
 
 /--
@@ -2555,6 +2587,54 @@ def HasFigure18AdjacentCompatibleFixedCornerSquares
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18AdjacentCompatibleFixedCornerSquare table x n hn)
 
+/--
+Pointwise-payload-witness form of `HasFigure18AdjacentCompatibleFixedCornerSquares`.
+
+This is the intended statement for the local Figure 18 geometric extraction
+when payload components are obtained cell by cell from membership in the
+combined tileset.
+-/
+def HasFigure18AdjacentProductWitnessFixedCornerSquares
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18AdjacentProductWitnessFixedCornerSquare table x n hn)
+
+namespace Figure18AdjacentProductWitnessFixedCornerSquare
+
+noncomputable def toAdjacentCompatibleFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18AdjacentProductWitnessFixedCornerSquare table x n hn) :
+    Figure18AdjacentCompatibleFixedCornerSquare table x n hn :=
+  Figure18AdjacentCompatibleFixedCornerSquare.ofProductWitnesses hn
+    window.horizontalCoord window.verticalCoord window.siteRect
+    window.horizontalCoord_succ window.verticalCoord_succ
+    window.hcompatible window.vcompatible window.active
+    window.cornerSite window.productWitness
+
+theorem tileable
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18AdjacentProductWitnessFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x) :
+    TileableFixedCornerSquare T seed n :=
+  window.toAdjacentCompatibleFixedCornerSquare.tileable hx
+
+end Figure18AdjacentProductWitnessFixedCornerSquare
+
+theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
+    {table : Figure18RoleTable}
+    (hproduct : HasFigure18AdjacentProductWitnessFixedCornerSquares table) :
+    HasFigure18AdjacentCompatibleFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hproduct x hx n hn with ⟨window⟩
+  exact ⟨window.toAdjacentCompatibleFixedCornerSquare⟩
+
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible
     {table : Figure18RoleTable}
     (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
@@ -2601,6 +2681,13 @@ theorem forcesFixedCornerSquares_of_figure18AdjacentCompatible
     ForcesFixedCornerSquares table.presentation.toScaffold :=
   forcesFixedCornerSquares_of_figure18IndexedRouted
     (hasFigure18IndexedRoutedFixedCornerSquares_of_adjacentCompatible hadjacent)
+
+theorem forcesFixedCornerSquares_of_figure18AdjacentProductWitness
+    {table : Figure18RoleTable}
+    (hproduct : HasFigure18AdjacentProductWitnessFixedCornerSquares table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18AdjacentCompatible
+    (hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness hproduct)
 
 /--
 Geometric obligations for a concrete Figure 18 role table using the direct
@@ -2675,6 +2762,14 @@ selected coordinates and finite Figure 18 site compatibility.
 -/
 structure Figure18AdjacentCompatibleCertificate (table : Figure18RoleTable) : Prop where
   adjacentForces : HasFigure18AdjacentCompatibleFixedCornerSquares table
+  realizes : RealizesActiveCornerSquares table.presentation.toScaffold
+
+/--
+Geometric obligations for a concrete Figure 18 role table using adjacent
+selected coordinates and pointwise payload witnesses.
+-/
+structure Figure18AdjacentProductWitnessCertificate (table : Figure18RoleTable) : Prop where
+  productForces : HasFigure18AdjacentProductWitnessFixedCornerSquares table
   realizes : RealizesActiveCornerSquares table.presentation.toScaffold
 
 namespace Figure18Certificate
@@ -2767,6 +2862,37 @@ theorem isScaffold
   }
 
 end Figure18AdjacentCompatibleCertificate
+
+namespace Figure18AdjacentProductWitnessCertificate
+
+def toAdjacentCompatibleCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentProductWitnessCertificate table) :
+    Figure18AdjacentCompatibleCertificate table where
+  adjacentForces :=
+    hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
+      certificate.productForces
+  realizes := certificate.realizes
+
+def toFlexibleCertificate
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentProductWitnessCertificate table) :
+    Figure18FlexibleCertificate table where
+  forces := forcesFixedCornerSquares_of_figure18AdjacentProductWitness
+    certificate.productForces
+  realizes := certificate.realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable}
+    (certificate : Figure18AdjacentProductWitnessCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := forcesFixedCornerSquares_of_figure18AdjacentProductWitness
+      certificate.productForces
+    realizes := certificate.realizes
+  }
+
+end Figure18AdjacentProductWitnessCertificate
 
 /--
 Concrete Figure 18 scaffold package: a checked finite role table together with
