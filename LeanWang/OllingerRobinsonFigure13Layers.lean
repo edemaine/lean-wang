@@ -558,6 +558,69 @@ theorem toSiteRectangle_quadrant {w h : Nat}
 
 end CheckedNatSiteRectangle
 
+/--
+Flat checked data for a rectangle of Figure 16 components in one layer.
+
+The list uses the same row-major order as `CheckedNatSiteRectangle`: `i + w * j`.
+-/
+structure CheckedLayerComponentRectangle (w h : Nat) (layer : Layer) where
+  specs : List layer.Component
+  length_eq : specs.length = w * h
+
+namespace CheckedLayerComponentRectangle
+
+def flatIndex {w h : Nat} {layer : Layer}
+    (_data : CheckedLayerComponentRectangle w h layer)
+    (i : Fin w) (j : Fin h) : Nat :=
+  i.val + w * j.val
+
+theorem flatIndex_lt {w h : Nat} {layer : Layer}
+    (data : CheckedLayerComponentRectangle w h layer)
+    (i : Fin w) (j : Fin h) :
+    data.flatIndex i j < data.specs.length := by
+  rw [data.length_eq]
+  unfold flatIndex
+  have hrow : i.val + w * j.val < w + w * j.val :=
+    Nat.add_lt_add_right i.isLt (w * j.val)
+  have hrow' : w + w * j.val = w * (j.val + 1) := by
+    rw [Nat.mul_succ]
+    exact Nat.add_comm _ _
+  have hj : j.val + 1 ≤ h := Nat.succ_le_of_lt j.isLt
+  calc
+    i.val + w * j.val < w + w * j.val := hrow
+    _ = w * (j.val + 1) := hrow'
+    _ ≤ w * h := Nat.mul_le_mul_left w hj
+
+def componentAt {w h : Nat} {layer : Layer}
+    (data : CheckedLayerComponentRectangle w h layer)
+    (i : Fin w) (j : Fin h) : layer.Component :=
+  data.specs.get ⟨data.flatIndex i j, data.flatIndex_lt i j⟩
+
+def lookupBool
+    {w h : Nat} {layer : Layer}
+    (D : Transcription) (siteData : CheckedNatSiteRectangle w h)
+    (data : CheckedLayerComponentRectangle w h layer) : Bool :=
+  (List.finRange w).all fun i =>
+    (List.finRange h).all fun j =>
+      decide <| D.componentAtSiteLayer (siteData.toSiteRectangle i j) layer =
+        some (LayerComponent.ofLayer layer (data.componentAt i j))
+
+theorem lookup_of_lookupBool
+    {w h : Nat} {layer : Layer}
+    {D : Transcription} {siteData : CheckedNatSiteRectangle w h}
+    {data : CheckedLayerComponentRectangle w h layer}
+    (hcheck : lookupBool D siteData data = true) :
+    ∀ i : Fin w, ∀ j : Fin h,
+      D.componentAtSiteLayer (siteData.toSiteRectangle i j) layer =
+        some (LayerComponent.ofLayer layer (data.componentAt i j)) := by
+  intro i j
+  unfold lookupBool at hcheck
+  have hiCheck := List.all_eq_true.1 hcheck i (List.mem_finRange i)
+  have hjCheck := List.all_eq_true.1 hiCheck j (List.mem_finRange j)
+  exact of_decide_eq_true hjCheck
+
+end CheckedLayerComponentRectangle
+
 namespace SiteRectangle
 
 def indexRect {w h : Nat} (R : SiteRectangle w h) : Fin w → Fin h → Fin 92 :=
@@ -692,6 +755,30 @@ def blockGrid
   C.toLayerComponentRectangle.blockGrid
 
 end TypedLayerComponentRectangle
+
+namespace CheckedLayerComponentRectangle
+
+def toTypedLayerComponentRectangle
+    {w h : Nat} {layer : Layer}
+    (D : Transcription) (siteData : CheckedNatSiteRectangle w h)
+    (data : CheckedLayerComponentRectangle w h layer)
+    (hcheck : lookupBool D siteData data = true) :
+    TypedLayerComponentRectangle D siteData.toSiteRectangle layer where
+  componentRect := data.componentAt
+  lookup := lookup_of_lookupBool hcheck
+
+@[simp]
+theorem toTypedLayerComponentRectangle_componentRect
+    {w h : Nat} {layer : Layer}
+    (D : Transcription) (siteData : CheckedNatSiteRectangle w h)
+    (data : CheckedLayerComponentRectangle w h layer)
+    (hcheck : lookupBool D siteData data = true)
+    (i : Fin w) (j : Fin h) :
+    (data.toTypedLayerComponentRectangle D siteData hcheck).componentRect i j =
+      data.componentAt i j :=
+  rfl
+
+end CheckedLayerComponentRectangle
 
 /--
 Boundary certificate for the Figure 16 block grid induced by a layer-component
@@ -1108,6 +1195,118 @@ theorem toLayerStackRectangle_black
   rfl
 
 end TypedLayerStackRectangle
+
+/--
+Flat checked data for all three Figure 16 layers over one Figure 18 site
+rectangle.
+
+This is the intended concrete entry point for local Figure 18 scaffold
+certificates: `sites` records the Figure 13 tile/quadrant at each position, and
+the three component lists record the matching `L1`, `L2`, and `L3` labels.
+-/
+structure CheckedLayerStackRectangle (w h : Nat) where
+  sites : CheckedNatSiteRectangle w h
+  thin : CheckedLayerComponentRectangle w h .thin
+  thick : CheckedLayerComponentRectangle w h .thick
+  black : CheckedLayerComponentRectangle w h .black
+
+namespace CheckedLayerStackRectangle
+
+def siteRectangle {w h : Nat} (data : CheckedLayerStackRectangle w h) :
+    SiteRectangle w h :=
+  data.sites.toSiteRectangle
+
+def thinLookupBool {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h) : Bool :=
+  data.thin.lookupBool D data.sites
+
+def thickLookupBool {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h) : Bool :=
+  data.thick.lookupBool D data.sites
+
+def blackLookupBool {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h) : Bool :=
+  data.black.lookupBool D data.sites
+
+def thinRectangle {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hlookup : data.thinLookupBool D = true) :
+    TypedLayerComponentRectangle D data.siteRectangle .thin :=
+  data.thin.toTypedLayerComponentRectangle D data.sites hlookup
+
+def thickRectangle {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hlookup : data.thickLookupBool D = true) :
+    TypedLayerComponentRectangle D data.siteRectangle .thick :=
+  data.thick.toTypedLayerComponentRectangle D data.sites hlookup
+
+def blackRectangle {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hlookup : data.blackLookupBool D = true) :
+    TypedLayerComponentRectangle D data.siteRectangle .black :=
+  data.black.toTypedLayerComponentRectangle D data.sites hlookup
+
+def toTypedLayerStackRectangle {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hthinLookup : data.thinLookupBool D = true)
+    (hthickLookup : data.thickLookupBool D = true)
+    (hblackLookup : data.blackLookupBool D = true)
+    (hthinCompatible : (data.thinRectangle D hthinLookup).compatibleBool = true)
+    (hthickCompatible : (data.thickRectangle D hthickLookup).compatibleBool = true)
+    (hblackCompatible : (data.blackRectangle D hblackLookup).compatibleBool = true) :
+    TypedLayerStackRectangle D data.siteRectangle :=
+  TypedLayerStackRectangle.ofCompatibleBool
+    (data.thinRectangle D hthinLookup)
+    (data.thickRectangle D hthickLookup)
+    (data.blackRectangle D hblackLookup)
+    hthinCompatible hthickCompatible hblackCompatible
+
+@[simp]
+theorem toTypedLayerStackRectangle_thin
+    {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hthinLookup : data.thinLookupBool D = true)
+    (hthickLookup : data.thickLookupBool D = true)
+    (hblackLookup : data.blackLookupBool D = true)
+    (hthinCompatible : (data.thinRectangle D hthinLookup).compatibleBool = true)
+    (hthickCompatible : (data.thickRectangle D hthickLookup).compatibleBool = true)
+    (hblackCompatible : (data.blackRectangle D hblackLookup).compatibleBool = true) :
+    (data.toTypedLayerStackRectangle D hthinLookup hthickLookup hblackLookup
+      hthinCompatible hthickCompatible hblackCompatible).thin =
+      data.thinRectangle D hthinLookup :=
+  rfl
+
+@[simp]
+theorem toTypedLayerStackRectangle_thick
+    {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hthinLookup : data.thinLookupBool D = true)
+    (hthickLookup : data.thickLookupBool D = true)
+    (hblackLookup : data.blackLookupBool D = true)
+    (hthinCompatible : (data.thinRectangle D hthinLookup).compatibleBool = true)
+    (hthickCompatible : (data.thickRectangle D hthickLookup).compatibleBool = true)
+    (hblackCompatible : (data.blackRectangle D hblackLookup).compatibleBool = true) :
+    (data.toTypedLayerStackRectangle D hthinLookup hthickLookup hblackLookup
+      hthinCompatible hthickCompatible hblackCompatible).thick =
+      data.thickRectangle D hthickLookup :=
+  rfl
+
+@[simp]
+theorem toTypedLayerStackRectangle_black
+    {w h : Nat}
+    (D : Transcription) (data : CheckedLayerStackRectangle w h)
+    (hthinLookup : data.thinLookupBool D = true)
+    (hthickLookup : data.thickLookupBool D = true)
+    (hblackLookup : data.blackLookupBool D = true)
+    (hthinCompatible : (data.thinRectangle D hthinLookup).compatibleBool = true)
+    (hthickCompatible : (data.thickRectangle D hthickLookup).compatibleBool = true)
+    (hblackCompatible : (data.blackRectangle D hblackLookup).compatibleBool = true) :
+    (data.toTypedLayerStackRectangle D hthinLookup hthickLookup hblackLookup
+      hthinCompatible hthickCompatible hblackCompatible).black =
+      data.blackRectangle D hblackLookup :=
+  rfl
+
+end CheckedLayerStackRectangle
 
 /-- Site rectangle extracted from an indexed active-corner window. -/
 def siteRectangleOfIndexedActiveCornerWindow
