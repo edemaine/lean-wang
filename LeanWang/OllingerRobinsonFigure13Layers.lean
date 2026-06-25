@@ -797,6 +797,41 @@ abbrev IndexedActiveCornerWindowLayerStack
   LayerStackRectangle D
     (siteRectangleOfIndexedActiveCornerWindow window)
 
+/--
+An indexed active-corner window together with compatible Figure 13/16 layer
+data over the same site rectangle.
+-/
+structure Figure18IndexedActiveCornerWindowWithLayerStack
+    (D : Transcription) (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  window : Figure18IndexedActiveCornerWindow table x n hn
+  layerStack : IndexedActiveCornerWindowLayerStack D window
+
+/--
+Layered strengthening of `HasFigure18IndexedActiveCornerWindows`.
+
+This is the intended finite-data target for the recognizable-free-square side:
+each extracted Figure 18 active window also carries compatible Figure 16 layer
+data.
+-/
+def HasFigure18IndexedActiveCornerWindowsWithLayerStack
+    (D : Transcription) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18IndexedActiveCornerWindowWithLayerStack D table x n hn)
+
+theorem hasFigure18IndexedActiveCornerWindows_of_layerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindowsWithLayerStack D table) :
+    HasFigure18IndexedActiveCornerWindows table := by
+  intro T seed x hx n hn
+  rcases hwindow x hx n hn with ⟨window⟩
+  exact ⟨window.window⟩
+
 /-- Site rectangle extracted from an indexed routed fixed-corner square. -/
 def siteRectangleOfIndexedRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -852,6 +887,42 @@ abbrev IndexedRoutedFixedCornerSquareLayerStack
     (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) : Type :=
   LayerStackRectangle D
     (siteRectangleOfIndexedRoutedFixedCornerSquare window)
+
+/--
+An indexed routed fixed-corner square together with compatible Figure 13/16
+layer data over its routed site rectangle.
+-/
+structure Figure18IndexedRoutedFixedCornerSquareWithLayerStack
+    (D : Transcription) (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  window : Figure18IndexedRoutedFixedCornerSquare table x n hn
+  layerStack : IndexedRoutedFixedCornerSquareLayerStack D window
+
+/--
+Layered strengthening of `HasFigure18IndexedRoutedFixedCornerSquares`.
+
+This is the intended finite-data target for the routed-forcing side: each
+routed payload square also carries compatible Figure 16 layer data on the
+scaffold sites used to read the payload.
+-/
+def HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack
+    (D : Transcription) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18IndexedRoutedFixedCornerSquareWithLayerStack
+          D table x n hn)
+
+theorem hasFigure18IndexedRoutedFixedCornerSquares_of_layerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hrouted : HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack D table) :
+    HasFigure18IndexedRoutedFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hrouted x hx n hn with ⟨window⟩
+  exact ⟨window.window⟩
 
 end Figure13Layers
 end OllingerRobinson
