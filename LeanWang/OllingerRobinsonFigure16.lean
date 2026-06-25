@@ -283,6 +283,22 @@ theorem compatible_of_compatibleBool {B : Block} (h : B.compatibleBool = true) :
   unfold compatibleBool at h
   exact of_decide_eq_true h
 
+theorem north_hMatches {B : Block} (h : B.Compatible) :
+    WangTile.HMatches (Symbol.tile B.northwest) (Symbol.tile B.northeast) :=
+  h.1
+
+theorem south_hMatches {B : Block} (h : B.Compatible) :
+    WangTile.HMatches (Symbol.tile B.southwest) (Symbol.tile B.southeast) :=
+  h.2.1
+
+theorem west_vMatches {B : Block} (h : B.Compatible) :
+    WangTile.VMatches (Symbol.tile B.southwest) (Symbol.tile B.northwest) :=
+  h.2.2.1
+
+theorem east_vMatches {B : Block} (h : B.Compatible) :
+    WangTile.VMatches (Symbol.tile B.southeast) (Symbol.tile B.northeast) :=
+  h.2.2.2
+
 end Block
 
 /-- `phi_L1(*)`. -/
@@ -422,6 +438,21 @@ theorem compatible_of_mem_allSubstitutionBlocks
   unfold allSubstitutionBlocksCompatibleBool at hall
   have hentryBool := List.all_eq_true.1 hall entry hentry
   exact Block.compatible_of_compatibleBool hentryBool
+
+theorem phiL1Star_compatible : phiL1Star.Compatible := by
+  decide
+
+theorem phiL2Component1_compatible (component : Thin) :
+    (phiL2Component1 component).Compatible := by
+  cases component <;> decide
+
+theorem phiL2Component2_compatible (component : Thick) :
+    (phiL2Component2 component).Compatible := by
+  cases component <;> decide
+
+theorem phiL3_compatible (component : Black) :
+    (phiL3 component).Compatible := by
+  cases component <;> decide
 
 end Figure16
 end OllingerRobinson
