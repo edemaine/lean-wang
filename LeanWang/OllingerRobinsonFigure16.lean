@@ -422,7 +422,121 @@ theorem validRectangle_symbolTileSet_of_compatible {B : Block} (h : B.Compatible
   · exact rectangle_hMatches_of_compatible h
   · exact rectangle_vMatches_of_compatible h
 
+/-- East-west compatibility between adjacent `2 × 2` blocks. -/
+def hBoundaryMatches (left right : Block) : Prop :=
+  WangTile.HMatches (Symbol.tile left.southeast) (Symbol.tile right.southwest) ∧
+  WangTile.HMatches (Symbol.tile left.northeast) (Symbol.tile right.northwest)
+
+/-- North-south compatibility between adjacent `2 × 2` blocks. -/
+def vBoundaryMatches (lower upper : Block) : Prop :=
+  WangTile.VMatches (Symbol.tile lower.northwest) (Symbol.tile upper.southwest) ∧
+  WangTile.VMatches (Symbol.tile lower.northeast) (Symbol.tile upper.southeast)
+
+theorem hBoundaryMatches_of_boundary
+    {left right : Block}
+    (hsouth : WangTile.HMatches (Symbol.tile left.southeast) (Symbol.tile right.southwest))
+    (hnorth : WangTile.HMatches (Symbol.tile left.northeast) (Symbol.tile right.northwest)) :
+    left.hBoundaryMatches right := by
+  exact ⟨hsouth, hnorth⟩
+
+theorem vBoundaryMatches_of_boundary
+    {lower upper : Block}
+    (hwest : WangTile.VMatches (Symbol.tile lower.northwest) (Symbol.tile upper.southwest))
+    (heast : WangTile.VMatches (Symbol.tile lower.northeast) (Symbol.tile upper.southeast)) :
+    lower.vBoundaryMatches upper := by
+  exact ⟨hwest, heast⟩
+
 end Block
+
+/--
+A grid of Figure 16 substitution blocks, before expanding each block into its
+four component symbols.
+-/
+abbrev BlockGrid (w h : Nat) := Fin w → Fin h → Block
+
+namespace BlockGrid
+
+/--
+Compatibility condition for a grid of Figure 16 blocks.  Each block has valid
+internal seams, and neighboring blocks agree across their shared boundaries.
+-/
+def Compatible {w h : Nat} (G : BlockGrid w h) : Prop :=
+  (∀ i : Fin w, ∀ j : Fin h, (G i j).Compatible) ∧
+  (∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+    (G i j).hBoundaryMatches (G ⟨i.val + 1, hi⟩ j)) ∧
+  (∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+    (G i j).vBoundaryMatches (G i ⟨j.val + 1, hj⟩))
+
+def expandedSymbol {w h : Nat} (G : BlockGrid w h)
+    (i : Fin w) (j : Fin h) (di dj : Fin 2) : Symbol :=
+  (G i j).entry di dj
+
+def expandedTile {w h : Nat} (G : BlockGrid w h)
+    (i : Fin w) (j : Fin h) (di dj : Fin 2) : WangTile :=
+  Symbol.tile (expandedSymbol G i j di dj)
+
+theorem expandedTile_mem_symbolTileSet {w h : Nat} (G : BlockGrid w h)
+    (i : Fin w) (j : Fin h) (di dj : Fin 2) :
+    expandedTile G i j di dj ∈ Symbol.tileSet :=
+  Symbol.tile_mem_tileSet (expandedSymbol G i j di dj)
+
+theorem expanded_hMatches_within {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) (i : Fin w) (j : Fin h) (dj : Fin 2) :
+    WangTile.HMatches
+      (expandedTile G i j ⟨0, by decide⟩ dj)
+      (expandedTile G i j ⟨1, by decide⟩ dj) := by
+  rcases dj with ⟨dj, hdj⟩
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdj_cases with rfl | rfl
+  · simpa [expandedTile, expandedSymbol, Block.entry] using
+      Block.south_hMatches (hG.1 i j)
+  · simpa [expandedTile, expandedSymbol, Block.entry] using
+      Block.north_hMatches (hG.1 i j)
+
+theorem expanded_hMatches_boundary {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) (i : Fin w) (j : Fin h)
+    (hi : i.val + 1 < w) (dj : Fin 2) :
+    WangTile.HMatches
+      (expandedTile G i j ⟨1, by decide⟩ dj)
+      (expandedTile G ⟨i.val + 1, hi⟩ j ⟨0, by decide⟩ dj) := by
+  rcases dj with ⟨dj, hdj⟩
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  have hboundary := hG.2.1 i j hi
+  rcases hdj_cases with rfl | rfl
+  · simpa [expandedTile, expandedSymbol, Block.entry, Block.hBoundaryMatches] using
+      hboundary.1
+  · simpa [expandedTile, expandedSymbol, Block.entry, Block.hBoundaryMatches] using
+      hboundary.2
+
+theorem expanded_vMatches_within {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) (i : Fin w) (j : Fin h) (di : Fin 2) :
+    WangTile.VMatches
+      (expandedTile G i j di ⟨0, by decide⟩)
+      (expandedTile G i j di ⟨1, by decide⟩) := by
+  rcases di with ⟨di, hdi⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  rcases hdi_cases with rfl | rfl
+  · simpa [expandedTile, expandedSymbol, Block.entry] using
+      Block.west_vMatches (hG.1 i j)
+  · simpa [expandedTile, expandedSymbol, Block.entry] using
+      Block.east_vMatches (hG.1 i j)
+
+theorem expanded_vMatches_boundary {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) (i : Fin w) (j : Fin h)
+    (hj : j.val + 1 < h) (di : Fin 2) :
+    WangTile.VMatches
+      (expandedTile G i j di ⟨1, by decide⟩)
+      (expandedTile G i ⟨j.val + 1, hj⟩ di ⟨0, by decide⟩) := by
+  rcases di with ⟨di, hdi⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hboundary := hG.2.2 i j hj
+  rcases hdi_cases with rfl | rfl
+  · simpa [expandedTile, expandedSymbol, Block.entry, Block.vBoundaryMatches] using
+      hboundary.1
+  · simpa [expandedTile, expandedSymbol, Block.entry, Block.vBoundaryMatches] using
+      hboundary.2
+
+end BlockGrid
 
 /-- `phi_L1(*)`. -/
 def phiL1Star : Block :=
