@@ -2496,6 +2496,50 @@ def figure18ScaffoldTiles : TileSet :=
 theorem figure18ScaffoldTiles_nodup : figure18ScaffoldTiles.Nodup := by
   exact TileSubdivision.subdivideTileSet_nodup_of_nodup fig13Tiles_nodup
 
+theorem mem_figure18ScaffoldTiles_iff {tile : WangTile} :
+    tile ∈ figure18ScaffoldTiles ↔
+      tile ∈ Figure18Site.all.map Figure18Site.tile := by
+  constructor
+  · intro htile
+    rw [figure18ScaffoldTiles, TileSubdivision.subdivideTileSet,
+      List.mem_flatMap] at htile
+    rcases htile with ⟨raw, hraw, hsub⟩
+    rcases List.mem_iff_get.1 hraw with ⟨k, hrawk⟩
+    have hk : k.val < 92 := by
+      simpa [fig13Tiles_length] using k.isLt
+    let i : Fin 92 := ⟨k.val, hk⟩
+    have hraw_eq : raw = fig13Tile i := by
+      unfold fig13Tile i
+      simpa [List.get_eq_getElem] using hrawk.symm
+    rw [TileSubdivision.subdivideTile] at hsub
+    rcases List.mem_map.1 hsub with ⟨q, hq, htileq⟩
+    exact List.mem_map.2
+      ⟨({ index := i, quadrant := q } : Figure18Site),
+        Figure18Site.mem_all _, by
+          simpa [Figure18Site.tile, fig13QuarterTile, hraw_eq] using htileq⟩
+  · intro htile
+    rcases List.mem_map.1 htile with ⟨site, _hsite, htileSite⟩
+    rw [figure18ScaffoldTiles, TileSubdivision.subdivideTileSet,
+      List.mem_flatMap]
+    refine ⟨site.rawTile, ?_, ?_⟩
+    · unfold Figure18Site.rawTile fig13Tile
+      exact List.getElem_mem _
+    · rw [TileSubdivision.subdivideTile]
+      exact List.mem_map.2
+        ⟨site.quadrant, Quadrant.mem_all site.quadrant, by
+          simpa [Figure18Site.tile_eq_subdivideTileAt_rawTile] using htileSite⟩
+
+theorem mem_figure18ScaffoldTiles_of_site (site : Figure18Site) :
+    site.tile ∈ figure18ScaffoldTiles :=
+  mem_figure18ScaffoldTiles_iff.2 site.tile_mem_all_tiles
+
+theorem exists_site_of_mem_figure18ScaffoldTiles {tile : WangTile}
+    (htile : tile ∈ figure18ScaffoldTiles) :
+    ∃ site : Figure18Site, site ∈ Figure18Site.all ∧ site.tile = tile := by
+  rcases List.mem_map.1 (mem_figure18ScaffoldTiles_iff.1 htile) with
+    ⟨site, hsite, htileSite⟩
+  exact ⟨site, hsite, htileSite⟩
+
 /--
 Role-table-indexed active square window for the Figure 18 scaffold.
 
