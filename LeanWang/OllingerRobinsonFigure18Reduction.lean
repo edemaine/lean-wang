@@ -501,6 +501,62 @@ theorem domino_problem_undecidable_of_figure18_checked_listed_active_site_interi
     I.toFlexibleInstance.checkedFlexibleTranscription hinterior hcorrect
 
 /--
+Encoded domino undecidability from concrete Figure 18 scaffold data, its two
+geometric invariants, and generated position-coded source-route obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_scaffold_data_position_source
+    (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_checked_listed_active_site_position_source
+    (D.toCheckedListedActiveSiteInstance certificate) h
+
+/--
+Unencoded domino undecidability from concrete Figure 18 scaffold data, its two
+geometric invariants, and generated position-coded source-route obligations.
+-/
+theorem domino_problem_undecidable_of_figure18_scaffold_data_position_source
+    (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_checked_listed_active_site_position_source
+    (D.toCheckedListedActiveSiteInstance certificate) h
+
+/--
+Encoded domino undecidability from concrete Figure 18 scaffold data, its two
+geometric invariants, and the generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18_scaffold_data_interiorRows
+    (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure18_checked_listed_active_site_interiorRows
+    (D.toCheckedListedActiveSiteInstance certificate) hinterior hcorrect
+
+/--
+Unencoded domino undecidability from concrete Figure 18 scaffold data, its two
+geometric invariants, and the generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure18_scaffold_data_interiorRows
+    (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure18_checked_listed_active_site_interiorRows
+    (D.toCheckedListedActiveSiteInstance certificate) hinterior hcorrect
+
+/--
 Encoded domino undecidability from a concrete flat Figure 18 scaffold instance
 with an active-site free-coordinate certificate and generated position-coded
 source-route obligations.
