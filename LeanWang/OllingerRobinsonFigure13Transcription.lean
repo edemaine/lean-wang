@@ -363,10 +363,81 @@ theorem quadrant_primrec : Primrec Figure18Site.quadrant :=
 def tile (site : Figure18Site) : WangTile :=
   fig13QuarterTile site.index site.quadrant
 
+def rawTile (site : Figure18Site) : WangTile :=
+  fig13Tile site.index
+
 theorem tile_primrec : Primrec tile := by
   unfold tile fig13QuarterTile
   exact TileSubdivision.subdivideTileAt_primrec₂.comp
     (fig13Tile_primrec.comp index_primrec) quadrant_primrec
+
+theorem rawTile_primrec : Primrec rawTile :=
+  fig13Tile_primrec.comp index_primrec
+
+@[simp]
+theorem tile_eq_subdivideTileAt_rawTile (site : Figure18Site) :
+    site.tile = TileSubdivision.subdivideTileAt site.rawTile site.quadrant := by
+  rfl
+
+/--
+Finite east-neighbor relation between Figure 18 sites.
+
+The true cases are exactly the two internal west/east seams of one Figure 13
+tile and the two east-boundary crossings between horizontally matching raw
+Figure 13 tiles.
+-/
+def hCompatible (left right : Figure18Site) : Bool :=
+  match left.quadrant, right.quadrant with
+  | .southwest, .southeast => decide (left.index = right.index)
+  | .northwest, .northeast => decide (left.index = right.index)
+  | .southeast, .southwest => decide (WangTile.HMatches left.rawTile right.rawTile)
+  | .northeast, .northwest => decide (WangTile.HMatches left.rawTile right.rawTile)
+  | _, _ => false
+
+/--
+Finite north-neighbor relation between Figure 18 sites.
+
+The true cases are exactly the two internal south/north seams of one Figure 13
+tile and the two north-boundary crossings between vertically matching raw
+Figure 13 tiles.
+-/
+def vCompatible (lower upper : Figure18Site) : Bool :=
+  match lower.quadrant, upper.quadrant with
+  | .southwest, .northwest => decide (lower.index = upper.index)
+  | .southeast, .northeast => decide (lower.index = upper.index)
+  | .northwest, .southwest => decide (WangTile.VMatches lower.rawTile upper.rawTile)
+  | .northeast, .southeast => decide (WangTile.VMatches lower.rawTile upper.rawTile)
+  | _, _ => false
+
+set_option linter.flexible false in
+theorem hMatches_of_hCompatible {left right : Figure18Site}
+    (h : hCompatible left right = true) :
+    WangTile.HMatches left.tile right.tile := by
+  rcases left with ⟨li, lq⟩
+  rcases right with ⟨ri, rq⟩
+  cases lq <;> cases rq <;>
+    simp [hCompatible, tile, rawTile, fig13QuarterTile] at h ⊢
+  · subst ri
+    exact TileSubdivision.hMatches_southwest_southeast (fig13Tile li)
+  · exact TileSubdivision.hMatches_southeast_southwest_of_hMatches h
+  · subst ri
+    exact TileSubdivision.hMatches_northwest_northeast (fig13Tile li)
+  · exact TileSubdivision.hMatches_northeast_northwest_of_hMatches h
+
+set_option linter.flexible false in
+theorem vMatches_of_vCompatible {lower upper : Figure18Site}
+    (h : vCompatible lower upper = true) :
+    WangTile.VMatches lower.tile upper.tile := by
+  rcases lower with ⟨li, lq⟩
+  rcases upper with ⟨ri, rq⟩
+  cases lq <;> cases rq <;>
+    simp [vCompatible, tile, rawTile, fig13QuarterTile] at h ⊢
+  · subst ri
+    exact TileSubdivision.vMatches_southwest_northwest (fig13Tile li)
+  · subst ri
+    exact TileSubdivision.vMatches_southeast_northeast (fig13Tile li)
+  · exact TileSubdivision.vMatches_northwest_southwest_of_vMatches h
+  · exact TileSubdivision.vMatches_northeast_southeast_of_vMatches h
 
 /-- All Figure 18 quadrant sites, ordered by Figure 13 tile index then quadrant. -/
 def all : List Figure18Site :=
@@ -1198,6 +1269,30 @@ theorem presentation_active_siteOfPresentationTile
       CellRole.isActive
         (table.roleAtSite (table.siteOfPresentationTile tile htile)) := by
   rw [table.presentation_role_siteOfPresentationTile htile]
+
+theorem hMatches_of_siteOfPresentationTile_hCompatible
+    (table : Figure18RoleTable) {left right : WangTile}
+    (hleft : left ∈ table.presentation.tiles)
+    (hright : right ∈ table.presentation.tiles)
+    (hcompat : Figure18Site.hCompatible
+      (table.siteOfPresentationTile left hleft)
+      (table.siteOfPresentationTile right hright) = true) :
+    WangTile.HMatches left right := by
+  have hmatch := Figure18Site.hMatches_of_hCompatible hcompat
+  rwa [table.siteOfPresentationTile_tile hleft,
+    table.siteOfPresentationTile_tile hright] at hmatch
+
+theorem vMatches_of_siteOfPresentationTile_vCompatible
+    (table : Figure18RoleTable) {lower upper : WangTile}
+    (hlower : lower ∈ table.presentation.tiles)
+    (hupper : upper ∈ table.presentation.tiles)
+    (hcompat : Figure18Site.vCompatible
+      (table.siteOfPresentationTile lower hlower)
+      (table.siteOfPresentationTile upper hupper) = true) :
+    WangTile.VMatches lower upper := by
+  have hmatch := Figure18Site.vMatches_of_vCompatible hcompat
+  rwa [table.siteOfPresentationTile_tile hlower,
+    table.siteOfPresentationTile_tile hupper] at hmatch
 
 theorem exists_fig13QuarterTile_role_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
