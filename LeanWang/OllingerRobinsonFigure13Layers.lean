@@ -487,6 +487,77 @@ end Transcription
 /-- A rectangle of Figure 18 quarter-sites. -/
 abbrev SiteRectangle (w h : Nat) := Fin w → Fin h → Figure18Site
 
+/--
+Flat checked data for a rectangle of Figure 18 quarter-sites.
+
+The list is read row-major with `i + w * j`: west-to-east inside each row, and
+south-to-north across rows.  Each entry stores the raw Figure 13 tile index and
+the Figure 18 quadrant.
+-/
+structure CheckedNatSiteRectangle (w h : Nat) where
+  specs : List (Nat × Quadrant)
+  length_eq : specs.length = w * h
+  valid : specs.all (fun spec => decide (spec.1 < 92)) = true
+
+namespace CheckedNatSiteRectangle
+
+def flatIndex {w h : Nat} (_data : CheckedNatSiteRectangle w h)
+    (i : Fin w) (j : Fin h) : Nat :=
+  i.val + w * j.val
+
+theorem flatIndex_lt {w h : Nat} (data : CheckedNatSiteRectangle w h)
+    (i : Fin w) (j : Fin h) :
+    data.flatIndex i j < data.specs.length := by
+  rw [data.length_eq]
+  unfold flatIndex
+  have hrow : i.val + w * j.val < w + w * j.val :=
+    Nat.add_lt_add_right i.isLt (w * j.val)
+  have hrow' : w + w * j.val = w * (j.val + 1) := by
+    rw [Nat.mul_succ]
+    exact Nat.add_comm _ _
+  have hj : j.val + 1 ≤ h := Nat.succ_le_of_lt j.isLt
+  calc
+    i.val + w * j.val < w + w * j.val := hrow
+    _ = w * (j.val + 1) := hrow'
+    _ ≤ w * h := Nat.mul_le_mul_left w hj
+
+def specAt {w h : Nat} (data : CheckedNatSiteRectangle w h)
+    (i : Fin w) (j : Fin h) : Nat × Quadrant :=
+  data.specs.get ⟨data.flatIndex i j, data.flatIndex_lt i j⟩
+
+theorem specAt_mem {w h : Nat} (data : CheckedNatSiteRectangle w h)
+    (i : Fin w) (j : Fin h) :
+    data.specAt i j ∈ data.specs :=
+  List.get_mem data.specs ⟨data.flatIndex i j, data.flatIndex_lt i j⟩
+
+theorem specAt_index_lt {w h : Nat} (data : CheckedNatSiteRectangle w h)
+    (i : Fin w) (j : Fin h) :
+    (data.specAt i j).1 < 92 := by
+  have hcheck := List.all_eq_true.1 data.valid
+    (data.specAt i j) (data.specAt_mem i j)
+  exact of_decide_eq_true hcheck
+
+def toSiteRectangle {w h : Nat} (data : CheckedNatSiteRectangle w h) :
+    SiteRectangle w h :=
+  fun i j => {
+    index := ⟨(data.specAt i j).1, data.specAt_index_lt i j⟩
+    quadrant := (data.specAt i j).2
+  }
+
+@[simp]
+theorem toSiteRectangle_index_val {w h : Nat}
+    (data : CheckedNatSiteRectangle w h) (i : Fin w) (j : Fin h) :
+    (data.toSiteRectangle i j).index.val = (data.specAt i j).1 :=
+  rfl
+
+@[simp]
+theorem toSiteRectangle_quadrant {w h : Nat}
+    (data : CheckedNatSiteRectangle w h) (i : Fin w) (j : Fin h) :
+    (data.toSiteRectangle i j).quadrant = (data.specAt i j).2 :=
+  rfl
+
+end CheckedNatSiteRectangle
+
 namespace SiteRectangle
 
 def indexRect {w h : Nat} (R : SiteRectangle w h) : Fin w → Fin h → Fin 92 :=
