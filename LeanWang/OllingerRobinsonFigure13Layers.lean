@@ -32,6 +32,11 @@ namespace Layer
 
 def all : List Layer := [.thin, .thick, .black]
 
+def Component : Layer → Type
+  | .thin => Figure16.Thin
+  | .thick => Figure16.Thick
+  | .black => Figure16.Black
+
 theorem mem_all (layer : Layer) : layer ∈ all := by
   cases layer <;> decide
 
@@ -48,6 +53,11 @@ inductive LayerComponent where
 deriving DecidableEq, Repr
 
 namespace LayerComponent
+
+def ofLayer : (layer : Layer) → layer.Component → LayerComponent
+  | .thin, component => .thin component
+  | .thick, component => .thick component
+  | .black, component => .black component
 
 def layer : LayerComponent → Layer
   | .thin _ => .thin
@@ -86,6 +96,26 @@ theorem exists_substitutionRule (component : LayerComponent) :
 theorem block_validRectangle_symbolTileSet (component : LayerComponent) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
   exact component.ruleSource.block_validRectangle_symbolTileSet
+
+@[simp]
+theorem ofLayer_layer (layer : Layer) (component : layer.Component) :
+    (ofLayer layer component).layer = layer := by
+  cases layer <;> rfl
+
+@[simp]
+theorem ofLayer_thin (component : Figure16.Thin) :
+    ofLayer .thin component = .thin component :=
+  rfl
+
+@[simp]
+theorem ofLayer_thick (component : Figure16.Thick) :
+    ofLayer .thick component = .thick component :=
+  rfl
+
+@[simp]
+theorem ofLayer_black (component : Figure16.Black) :
+    ofLayer .black component = .black component :=
+  rfl
 
 end LayerComponent
 
@@ -548,6 +578,51 @@ theorem symbol_mem_all
 end LayerComponentRectangle
 
 /--
+Layer-component rectangle using the native component type for the selected
+layer.  This is a data-entry adapter for Figure 16 transcriptions: thin-layer
+rectangles contain `Figure16.Thin`, thick-layer rectangles contain
+`Figure16.Thick`, and black-layer rectangles contain `Figure16.Black`.
+-/
+structure TypedLayerComponentRectangle
+    (D : Transcription) {w h : Nat} (R : SiteRectangle w h)
+    (layer : Layer) where
+  componentRect : Fin w → Fin h → layer.Component
+  lookup : ∀ i : Fin w, ∀ j : Fin h,
+    D.componentAtSiteLayer (R i j) layer =
+      some (LayerComponent.ofLayer layer (componentRect i j))
+
+namespace TypedLayerComponentRectangle
+
+def toLayerComponentRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) :
+    LayerComponentRectangle D R layer where
+  componentRect := fun i j => LayerComponent.ofLayer layer (C.componentRect i j)
+  lookup := C.lookup
+
+@[simp]
+theorem toLayerComponentRectangle_componentRect
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    C.toLayerComponentRectangle.componentRect i j =
+      LayerComponent.ofLayer layer (C.componentRect i j) :=
+  rfl
+
+theorem component_layer
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    (LayerComponent.ofLayer layer (C.componentRect i j)).layer = layer := by
+  simp
+
+def blockGrid
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) :
+    Figure16.BlockGrid w h :=
+  C.toLayerComponentRectangle.blockGrid
+
+end TypedLayerComponentRectangle
+
+/--
 Boundary certificate for the Figure 16 block grid induced by a layer-component
 rectangle.
 
@@ -636,6 +711,11 @@ theorem expanded_vMatches_boundary
     certificate.blockGrid_compatible i j hj di
 
 end CompatibleLayerComponentRectangle
+
+abbrev CompatibleTypedLayerComponentRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : TypedLayerComponentRectangle D R layer) : Prop :=
+  CompatibleLayerComponentRectangle C.toLayerComponentRectangle
 
 /--
 All three Figure 16 layer-component rectangles over the same Figure 18 site
@@ -726,6 +806,56 @@ theorem expanded_vMatches_boundary
 
 end LayerStackRectangle
 
+/--
+Typed layer-stack rectangle.  This is equivalent to `LayerStackRectangle`, but
+its fields are closer to Figure 16 data entry: each layer uses its own component
+type before being embedded into `LayerComponent`.
+-/
+structure TypedLayerStackRectangle
+    (D : Transcription) {w h : Nat} (R : SiteRectangle w h) where
+  thin : TypedLayerComponentRectangle D R .thin
+  thick : TypedLayerComponentRectangle D R .thick
+  black : TypedLayerComponentRectangle D R .black
+  thinCompatible : CompatibleTypedLayerComponentRectangle thin
+  thickCompatible : CompatibleTypedLayerComponentRectangle thick
+  blackCompatible : CompatibleTypedLayerComponentRectangle black
+
+namespace TypedLayerStackRectangle
+
+def toLayerStackRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : TypedLayerStackRectangle D R) :
+    LayerStackRectangle D R where
+  thin := S.thin.toLayerComponentRectangle
+  thick := S.thick.toLayerComponentRectangle
+  black := S.black.toLayerComponentRectangle
+  thinCompatible := S.thinCompatible
+  thickCompatible := S.thickCompatible
+  blackCompatible := S.blackCompatible
+
+@[simp]
+theorem toLayerStackRectangle_thin
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : TypedLayerStackRectangle D R) :
+    S.toLayerStackRectangle.thin = S.thin.toLayerComponentRectangle :=
+  rfl
+
+@[simp]
+theorem toLayerStackRectangle_thick
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : TypedLayerStackRectangle D R) :
+    S.toLayerStackRectangle.thick = S.thick.toLayerComponentRectangle :=
+  rfl
+
+@[simp]
+theorem toLayerStackRectangle_black
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : TypedLayerStackRectangle D R) :
+    S.toLayerStackRectangle.black = S.black.toLayerComponentRectangle :=
+  rfl
+
+end TypedLayerStackRectangle
+
 /-- Site rectangle extracted from an indexed active-corner window. -/
 def siteRectangleOfIndexedActiveCornerWindow
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -808,6 +938,34 @@ structure Figure18IndexedActiveCornerWindowWithLayerStack
     (n : Nat) (hn : 0 < n) where
   window : Figure18IndexedActiveCornerWindow table x n hn
   layerStack : IndexedActiveCornerWindowLayerStack D window
+
+namespace Figure18IndexedActiveCornerWindowWithLayerStack
+
+def ofTyped
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (layerStack : TypedLayerStackRectangle D
+      (siteRectangleOfIndexedActiveCornerWindow window)) :
+    Figure18IndexedActiveCornerWindowWithLayerStack D table x n hn where
+  window := window
+  layerStack := layerStack.toLayerStackRectangle
+
+@[simp]
+theorem ofTyped_window
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (layerStack : TypedLayerStackRectangle D
+      (siteRectangleOfIndexedActiveCornerWindow window)) :
+    (ofTyped window layerStack).window = window :=
+  rfl
+
+end Figure18IndexedActiveCornerWindowWithLayerStack
 
 /--
 Layered strengthening of `HasFigure18IndexedActiveCornerWindows`.
@@ -899,6 +1057,34 @@ structure Figure18IndexedRoutedFixedCornerSquareWithLayerStack
     (n : Nat) (hn : 0 < n) where
   window : Figure18IndexedRoutedFixedCornerSquare table x n hn
   layerStack : IndexedRoutedFixedCornerSquareLayerStack D window
+
+namespace Figure18IndexedRoutedFixedCornerSquareWithLayerStack
+
+def ofTyped
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (layerStack : TypedLayerStackRectangle D
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window)) :
+    Figure18IndexedRoutedFixedCornerSquareWithLayerStack D table x n hn where
+  window := window
+  layerStack := layerStack.toLayerStackRectangle
+
+@[simp]
+theorem ofTyped_window
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (layerStack : TypedLayerStackRectangle D
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window)) :
+    (ofTyped window layerStack).window = window :=
+  rfl
+
+end Figure18IndexedRoutedFixedCornerSquareWithLayerStack
 
 /--
 Layered strengthening of `HasFigure18IndexedRoutedFixedCornerSquares`.
