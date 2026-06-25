@@ -637,6 +637,115 @@ theorem expanded_vMatches_boundary
 
 end CompatibleLayerComponentRectangle
 
+/-- Site rectangle extracted from an indexed active-corner window. -/
+def siteRectangleOfIndexedActiveCornerWindow
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn) :
+    SiteRectangle n n :=
+  fun i j => {
+    index := window.indexRect i j
+    quadrant := window.quadrantRect i j
+  }
+
+theorem siteRectangleOfIndexedActiveCornerWindow_index
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (i : Fin n) (j : Fin n) :
+    (siteRectangleOfIndexedActiveCornerWindow window i j).index =
+      window.indexRect i j :=
+  rfl
+
+theorem siteRectangleOfIndexedActiveCornerWindow_quadrant
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (i : Fin n) (j : Fin n) :
+    (siteRectangleOfIndexedActiveCornerWindow window i j).quadrant =
+      window.quadrantRect i j :=
+  rfl
+
+theorem siteRectangleOfIndexedActiveCornerWindow_tile
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (i : Fin n) (j : Fin n) :
+    (siteRectangleOfIndexedActiveCornerWindow window i j).tile =
+      window.baseRect i j :=
+  rfl
+
+abbrev IndexedActiveCornerWindowLayerComponents
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (layer : Layer) : Type :=
+  LayerComponentRectangle D
+    (siteRectangleOfIndexedActiveCornerWindow window) layer
+
+abbrev CompatibleIndexedActiveCornerWindowLayerComponents
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    {window : Figure18IndexedActiveCornerWindow table x n hn}
+    {layer : Layer}
+    (C : IndexedActiveCornerWindowLayerComponents D window layer) : Prop :=
+  CompatibleLayerComponentRectangle C
+
+/-- Site rectangle extracted from an indexed routed fixed-corner square. -/
+def siteRectangleOfIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    SiteRectangle n n :=
+  window.siteRect
+
+theorem siteRectangleOfIndexedRoutedFixedCornerSquare_eq
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn) :
+    siteRectangleOfIndexedRoutedFixedCornerSquare window = window.siteRect :=
+  rfl
+
+theorem siteRectangleOfIndexedRoutedFixedCornerSquare_tile
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (i : Fin n) (j : Fin n) :
+    (siteRectangleOfIndexedRoutedFixedCornerSquare window i j).tile =
+      window.baseRect i j :=
+  rfl
+
+abbrev IndexedRoutedFixedCornerSquareLayerComponents
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (layer : Layer) : Type :=
+  LayerComponentRectangle D
+    (siteRectangleOfIndexedRoutedFixedCornerSquare window) layer
+
+abbrev CompatibleIndexedRoutedFixedCornerSquareLayerComponents
+    (D : Transcription)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    {window : Figure18IndexedRoutedFixedCornerSquare table x n hn}
+    {layer : Layer}
+    (C : IndexedRoutedFixedCornerSquareLayerComponents D window layer) : Prop :=
+  CompatibleLayerComponentRectangle C
+
 end Figure13Layers
 end OllingerRobinson
 end LeanWang
