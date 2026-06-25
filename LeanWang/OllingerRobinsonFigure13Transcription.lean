@@ -3968,6 +3968,16 @@ structure Figure18ListedActiveSiteInstance where
   certificate : Figure18ListedActiveSiteCertificate activeSites cornerSite
 
 /--
+Concrete Figure 18 scaffold package generated from checked Nat-indexed
+active-site specs and a distinguished corner site.
+-/
+structure Figure18CheckedListedActiveSiteInstance where
+  activeSiteData : Figure18Site.CheckedNatSpecs
+  cornerSite : Figure18Site
+  certificate :
+    Figure18ListedActiveSiteCertificate activeSiteData.sites cornerSite
+
+/--
 Concrete Figure 18 scaffold package using the direct indexed free-square
 certificate.
 -/
@@ -4325,6 +4335,75 @@ theorem isScaffold (I : Figure18ListedActiveSiteInstance) :
   I.certificate.isScaffold
 
 end Figure18ListedActiveSiteInstance
+
+namespace Figure18CheckedListedActiveSiteInstance
+
+def activeSites (I : Figure18CheckedListedActiveSiteInstance) :
+    List Figure18Site :=
+  I.activeSiteData.sites
+
+def table (I : Figure18CheckedListedActiveSiteInstance) :
+    Figure18RoleTable.FlatRoleTable :=
+  Figure18RoleTable.FlatRoleTable.ofActiveSites I.activeSites I.cornerSite
+
+def finite (I : Figure18CheckedListedActiveSiteInstance) :
+    FiniteCheckedTranscription :=
+  I.table.toRoleTable.finiteCheckedTranscription
+
+def presentation (I : Figure18CheckedListedActiveSiteInstance) :
+    ScaffoldPresentation :=
+  I.table.toRoleTable.presentation
+
+def toListedActiveSiteInstance
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    Figure18ListedActiveSiteInstance where
+  activeSites := I.activeSites
+  cornerSite := I.cornerSite
+  certificate := I.certificate
+
+def toFlatActiveSiteInstance
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    Figure18FlatActiveSiteInstance :=
+  I.toListedActiveSiteInstance.toFlatActiveSiteInstance
+
+def toFlexibleInstance
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    Figure18FlexibleInstance :=
+  I.toListedActiveSiteInstance.toFlexibleInstance
+
+@[simp]
+theorem toListedActiveSiteInstance_activeSites
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    I.toListedActiveSiteInstance.activeSites = I.activeSites :=
+  rfl
+
+@[simp]
+theorem toListedActiveSiteInstance_cornerSite
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    I.toListedActiveSiteInstance.cornerSite = I.cornerSite :=
+  rfl
+
+@[simp]
+theorem toFlatActiveSiteInstance_table
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    I.toFlatActiveSiteInstance.table = I.table :=
+  rfl
+
+@[simp]
+theorem toFlexibleInstance_table
+    (I : Figure18CheckedListedActiveSiteInstance) :
+    I.toFlexibleInstance.table = I.table.toRoleTable :=
+  rfl
+
+theorem presentation_tiles (I : Figure18CheckedListedActiveSiteInstance) :
+    I.presentation.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  I.table.toRoleTable.presentation_tiles
+
+theorem isScaffold (I : Figure18CheckedListedActiveSiteInstance) :
+    IsScaffold I.presentation.toScaffold :=
+  I.certificate.isScaffold
+
+end Figure18CheckedListedActiveSiteInstance
 
 namespace Figure18FlexibleInstance
 
