@@ -949,6 +949,23 @@ theorem tileableBoxes_of_compatibleSquares
 
 end SiteRectangle
 
+/-- Decode a concrete Figure 18 scaffold tile into one of its transcribed sites. -/
+noncomputable def siteOfFigure18ScaffoldTile
+    (tile : TileIn figure18ScaffoldTiles) : Figure18Site :=
+  Classical.choose (exists_site_of_mem_figure18ScaffoldTiles tile.2)
+
+theorem siteOfFigure18ScaffoldTile_tile
+    (tile : TileIn figure18ScaffoldTiles) :
+    (siteOfFigure18ScaffoldTile tile).tile = tile.1 :=
+  (Classical.choose_spec
+    (exists_site_of_mem_figure18ScaffoldTiles tile.2)).2
+
+theorem siteOfFigure18ScaffoldTile_mem_all
+    (tile : TileIn figure18ScaffoldTiles) :
+    siteOfFigure18ScaffoldTile tile ∈ Figure18Site.all :=
+  (Classical.choose_spec
+    (exists_site_of_mem_figure18ScaffoldTiles tile.2)).1
+
 /--
 Site-level Robinson/Figure 16 scaffold tileability target.
 
@@ -972,6 +989,56 @@ theorem tileableBoxes_of_compatibleFigure18ScaffoldSquares
     (hsquares : HasCompatibleFigure18ScaffoldSquares) :
     ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r :=
   SiteRectangle.tileableBoxes_of_compatibleSquares hsquares
+
+/--
+A plane tiling of the concrete Figure 18 scaffold tiles supplies compatible
+site squares of every finite side length by decoding each tile in a finite
+window.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_tilesPlane
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    HasCompatibleFigure18ScaffoldSquares := by
+  rcases hplane with ⟨x, hx⟩
+  intro n
+  let R : SiteRectangle n n := fun i j =>
+    siteOfFigure18ScaffoldTile (x (Int.ofNat i.val, Int.ofNat j.val))
+  refine ⟨R, ?_, ?_⟩
+  · intro i j hi
+    apply Figure18Site.hCompatible_of_hMatches
+    have hleft := siteOfFigure18ScaffoldTile_tile
+      (x (Int.ofNat i.val, Int.ofNat j.val))
+    have hright := siteOfFigure18ScaffoldTile_tile
+      (x (Int.ofNat (i.val + 1), Int.ofNat j.val))
+    have hsucc : Int.ofNat (i.val + 1) = Int.ofNat i.val + 1 := by
+      norm_num
+    have hleft' :
+        (R i j).tile =
+          (x (Int.ofNat i.val, Int.ofNat j.val)).1 := by
+      simpa [R] using hleft
+    have hright' :
+        (R ⟨i.val + 1, hi⟩ j).tile =
+          (x (Int.ofNat i.val + 1, Int.ofNat j.val)).1 := by
+      simpa [R, hsucc] using hright
+    rw [hleft', hright']
+    exact hx.1 (Int.ofNat i.val, Int.ofNat j.val)
+  · intro i j hj
+    apply Figure18Site.vCompatible_of_vMatches
+    have hlower := siteOfFigure18ScaffoldTile_tile
+      (x (Int.ofNat i.val, Int.ofNat j.val))
+    have hupper := siteOfFigure18ScaffoldTile_tile
+      (x (Int.ofNat i.val, Int.ofNat (j.val + 1)))
+    have hsucc : Int.ofNat (j.val + 1) = Int.ofNat j.val + 1 := by
+      norm_num
+    have hlower' :
+        (R i j).tile =
+          (x (Int.ofNat i.val, Int.ofNat j.val)).1 := by
+      simpa [R] using hlower
+    have hupper' :
+        (R i ⟨j.val + 1, hj⟩).tile =
+          (x (Int.ofNat i.val, Int.ofNat j.val + 1)).1 := by
+      simpa [R, hsucc] using hupper
+    rw [hlower', hupper']
+    exact hx.2 (Int.ofNat i.val, Int.ofNat j.val)
 
 /--
 A rectangle of Figure 18 sites together with the component selected in one
