@@ -10255,12 +10255,11 @@ theorem
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  refine
-    encoded_domino_problem_undecidable_of_figure13_l2c1_signal_local_tower_layer_position_source
-      ?_ patches h
   exact
-    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
-      hrouting
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofL2C1FixedGeometryTowerRoutingFreeGridsLayerPatches
+        hrouting patches)
+      h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank Figure 18
@@ -10286,12 +10285,11 @@ theorem
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  refine
-    domino_problem_undecidable_of_figure13_l2c1_signal_local_tower_layer_position_source
-      ?_ patches h
   exact
-    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
-      hrouting
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofL2C1FixedGeometryTowerRoutingFreeGridsLayerPatches
+        hrouting patches)
+      h
 
 /--
 Encoded domino undecidability from the second audited L2-blank Figure 18
@@ -10317,12 +10315,11 @@ theorem
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  refine
-    encoded_domino_problem_undecidable_of_figure13_l2c2_signal_local_tower_layer_position_source
-      ?_ patches h
   exact
-    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
-      hrouting
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofL2C2FixedGeometryTowerRoutingFreeGridsLayerPatches
+        hrouting patches)
+      h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank Figure 18
@@ -10348,12 +10345,11 @@ theorem
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  refine
-    domino_problem_undecidable_of_figure13_l2c2_signal_local_tower_layer_position_source
-      ?_ patches h
   exact
-    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
-      hrouting
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofL2C2FixedGeometryTowerRoutingFreeGridsLayerPatches
+        hrouting patches)
+      h
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18

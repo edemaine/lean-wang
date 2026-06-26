@@ -6288,6 +6288,78 @@ def ofL2Component2BlankCandidateLayerPatches
   ofL2Component2BlankCandidatePatches levelCompatibleRoutedFreeGrids
     (activeCornerBoxPatches_of_layerBoxPatches patches)
 
+/--
+Compatible-level L2 component-1 entry point using fixed Robinson Section 7
+obstruction geometry with Figure 18 routing and finite layer patches.
+-/
+def ofL2C1FixedGeometryTowerRoutingLayerPatches
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFixedGeometryTowerRoutingLayerPatches
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    fixedGeometryRouting patches
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
+/--
+Compatible-level L2 component-2 entry point using fixed Robinson Section 7
+obstruction geometry with Figure 18 routing and finite layer patches.
+-/
+def ofL2C2FixedGeometryTowerRoutingLayerPatches
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFixedGeometryTowerRoutingLayerPatches
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    fixedGeometryRouting patches
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
 def ofL2C1SignalLocalStepFreeGrids
     (signalLocalCoordinateSteps :
       HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
@@ -7750,6 +7822,62 @@ def ofL2C2SignalLocalTowerFreeGridsLayerPatches
         NatSiteSpecSanity.cornerSite] using
         l2Component2BlankCandidatePairCompatibilityBool)
     patches
+
+/--
+Concrete L2 component-1 entry point using fixed Robinson Section 7 obstruction
+geometry with Figure 18 routing and finite layer patches.
+-/
+def ofL2C1FixedGeometryTowerRoutingFreeGridsLayerPatches
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofCompatibleLevelObligations
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    (NatSiteRobinsonCompatibleLevelObligations.ofL2C1FixedGeometryTowerRoutingLayerPatches
+      fixedGeometryRouting patches)
+
+/--
+Concrete L2 component-2 entry point using fixed Robinson Section 7 obstruction
+geometry with Figure 18 routing and finite layer patches.
+-/
+def ofL2C2FixedGeometryTowerRoutingFreeGridsLayerPatches
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofCompatibleLevelObligations
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    (NatSiteRobinsonCompatibleLevelObligations.ofL2C2FixedGeometryTowerRoutingLayerPatches
+      fixedGeometryRouting patches)
 
 def ofL2C2SignalLocalTowerFreeGridsIndexedBoxes
     (signalLocalTower :
