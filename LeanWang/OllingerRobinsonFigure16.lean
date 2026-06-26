@@ -42,6 +42,7 @@ inductive Thick where
   | e | f | g | h
   | i | j | k | l
   | m | n | o | p
+  | q | r | s | t
 deriving DecidableEq, Repr
 
 namespace Thick
@@ -50,7 +51,8 @@ def all : List Thick := [
   .a, .b, .c, .d,
   .e, .f, .g, .h,
   .i, .j, .k, .l,
-  .m, .n, .o, .p
+  .m, .n, .o, .p,
+  .q, .r, .s, .t
 ]
 
 end Thick
@@ -136,6 +138,10 @@ def L2m : Symbol := .thick .m
 def L2n : Symbol := .thick .n
 def L2o : Symbol := .thick .o
 def L2p : Symbol := .thick .p
+def L2q : Symbol := .thick .q
+def L2r : Symbol := .thick .r
+def L2s : Symbol := .thick .s
+def L2t : Symbol := .thick .t
 
 def R0 : Symbol := .line .r0
 def R1 : Symbol := .line .r1
@@ -159,6 +165,7 @@ def all : List Symbol := [
   L2e, L2f, L2g, L2h,
   L2i, L2j, L2k, L2l,
   L2m, L2n, L2o, L2p,
+  L2q, L2r, L2s, L2t,
   R0, R1, R2, R3,
   G0, G1, G2, G3,
   L3a, L3b, L3c, L3d, L3e
@@ -169,7 +176,7 @@ end Symbol
 namespace Thick
 
 /--
-The `L2e`-`L2p` components are sums of two distinct thick-line atoms.
+The `L2e`-`L2t` components are sums of two distinct thick-line atoms.
 
 The first four `L2` components are corner components rather than two-line sums,
 so they return `none`.
@@ -191,6 +198,10 @@ def lineSum? : Thick → Option ThickLineSum
   | .n => some <| ThickLineSum.mkDistinct .g2 .g1 (by decide)
   | .o => some <| ThickLineSum.mkDistinct .g2 .g3 (by decide)
   | .p => some <| ThickLineSum.mkDistinct .g0 .g3 (by decide)
+  | .q => some <| ThickLineSum.mkDistinct .g0 .r1 (by decide)
+  | .r => some <| ThickLineSum.mkDistinct .r2 .g1 (by decide)
+  | .s => some <| ThickLineSum.mkDistinct .g2 .r3 (by decide)
+  | .t => some <| ThickLineSum.mkDistinct .r0 .g3 (by decide)
 
 def hasLineSum (component : Thick) : Prop :=
   component.lineSum?.isSome
@@ -237,6 +248,10 @@ def tile : Symbol → WangTile
   | .thick .n => t 16 50 29 51
   | .thick .o => t 16 52 25 53
   | .thick .p => t 27 54 25 55
+  | .thick .q => t 27 64 32 65
+  | .thick .r => t 23 66 29 67
+  | .thick .s => t 16 68 18 69
+  | .thick .t => t 20 70 25 71
   | .line .r0 => t 17 20 3 2
   | .line .r1 => t 1 0 26 32
   | .line .r2 => t 28 23 3 2
@@ -575,6 +590,10 @@ def phiL2Component2 : Thick → Block
   | .n => .mkRows .G2 .blank .L2n .G1
   | .o => .mkRows .G2 .blank .L2o .G3
   | .p => .mkRows .G0 .blank .L2p .G3
+  | .q => .mkRows .G0 .blank .L2q .R1
+  | .r => .mkRows .R2 .blank .L2r .G1
+  | .s => .mkRows .G2 .blank .L2s .R3
+  | .t => .mkRows .R0 .blank .L2t .G3
 
 namespace Thick
 
@@ -603,7 +622,8 @@ theorem lineSumBlock?_eq_some_phiL2Component2
       phiL2Component2, Symbol.R0, Symbol.R1, Symbol.R2, Symbol.R3,
       Symbol.G0, Symbol.G1, Symbol.G2, Symbol.G3, Symbol.L2e, Symbol.L2f,
       Symbol.L2g, Symbol.L2h, Symbol.L2i, Symbol.L2j, Symbol.L2k,
-      Symbol.L2l, Symbol.L2m, Symbol.L2n, Symbol.L2o, Symbol.L2p] at h ⊢
+      Symbol.L2l, Symbol.L2m, Symbol.L2n, Symbol.L2o, Symbol.L2p,
+      Symbol.L2q, Symbol.L2r, Symbol.L2s, Symbol.L2t] at h ⊢
 
 end Thick
 
@@ -704,6 +724,22 @@ theorem phiL2Component2_o :
 
 theorem phiL2Component2_p :
     phiL2Component2 .p = .mkRows .G0 .blank .L2p .G3 :=
+  rfl
+
+theorem phiL2Component2_q :
+    phiL2Component2 .q = .mkRows .G0 .blank .L2q .R1 :=
+  rfl
+
+theorem phiL2Component2_r :
+    phiL2Component2 .r = .mkRows .R2 .blank .L2r .G1 :=
+  rfl
+
+theorem phiL2Component2_s :
+    phiL2Component2 .s = .mkRows .G2 .blank .L2s .R3 :=
+  rfl
+
+theorem phiL2Component2_t :
+    phiL2Component2 .t = .mkRows .R0 .blank .L2t .G3 :=
   rfl
 
 theorem phiL3_a :
@@ -846,7 +882,11 @@ def l2Component2Blocks : List NamedBlock := [
   ⟨"phi_L2_component2(L2m)", phiL2Component2 .m⟩,
   ⟨"phi_L2_component2(L2n)", phiL2Component2 .n⟩,
   ⟨"phi_L2_component2(L2o)", phiL2Component2 .o⟩,
-  ⟨"phi_L2_component2(L2p)", phiL2Component2 .p⟩
+  ⟨"phi_L2_component2(L2p)", phiL2Component2 .p⟩,
+  ⟨"phi_L2_component2(L2q)", phiL2Component2 .q⟩,
+  ⟨"phi_L2_component2(L2r)", phiL2Component2 .r⟩,
+  ⟨"phi_L2_component2(L2s)", phiL2Component2 .s⟩,
+  ⟨"phi_L2_component2(L2t)", phiL2Component2 .t⟩
 ]
 
 def l3Blocks : List NamedBlock := [
