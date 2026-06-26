@@ -1219,6 +1219,98 @@ def ofPlane {S : Scaffold} {r : Nat} {origin : Int × Int}
   active_hsucc := active_hsucc
   active_vsucc := active_vsucc
 
+/--
+Build a translated indexed box when active scaffold cells are isolated inside
+the translated box.
+
+This is tailored to the Robinson-board route: once the concrete Figure 18/L2
+data proves that no two selected active/corner sites can be adjacent in the
+ambient scaffold, all successor obligations for the payload index become
+vacuous.
+-/
+def ofNoAdjacentActive {S : Scaffold} {r : Nat} {origin : Int × Int}
+    (base : TranslatedBoxPattern S.tiles r origin)
+    (base_valid : ValidTranslatedBoxTiling S.tiles r origin base)
+    (no_active_hsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+          S.active (base p).1 = true →
+            S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+              False)
+    (no_active_vsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+          S.active (base p).1 = true →
+            S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+              False) :
+    TranslatedActiveCornerIndexedBox S r origin where
+  n := 1
+  hn := by decide
+  base := base
+  base_valid := base_valid
+  index := fun _ => (⟨0, by decide⟩, ⟨0, by decide⟩)
+  corner_index := by
+    intro p hactive hcorner
+    rfl
+  active_hsucc := by
+    intro p hp hpActive hqActive
+    exact False.elim (no_active_hsucc p hp hpActive hqActive)
+  active_vsucc := by
+    intro p hp hpActive hqActive
+    exact False.elim (no_active_vsucc p hp hpActive hqActive)
+
+theorem nonempty_of_noAdjacentActive {S : Scaffold} {r : Nat}
+    {origin : Int × Int}
+    {base : TranslatedBoxPattern S.tiles r origin}
+    (base_valid : ValidTranslatedBoxTiling S.tiles r origin base)
+    (no_active_hsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+          S.active (base p).1 = true →
+            S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+              False)
+    (no_active_vsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+          S.active (base p).1 = true →
+            S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+              False) :
+    Nonempty (TranslatedActiveCornerIndexedBox S r origin) :=
+  ⟨ofNoAdjacentActive base base_valid no_active_hsucc no_active_vsucc⟩
+
+/--
+Positive-radius translated indexed boxes follow from positive-radius translated
+boxes whose active cells are isolated.
+-/
+theorem positive_nonempty_of_noAdjacentActive
+    {S : Scaffold}
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern S.tiles r origin,
+            ValidTranslatedBoxTiling S.tiles r origin base ∧
+              (∀ p : TranslatedBox r origin,
+                ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+                  S.active (base p).1 = true →
+                    S.active
+                      (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+                      False) ∧
+              (∀ p : TranslatedBox r origin,
+                ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+                  S.active (base p).1 = true →
+                    S.active
+                      (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+                      False)) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox S r origin) := by
+  intro r hr
+  rcases hboxes r hr with
+    ⟨origin, base, base_valid, no_active_hsucc, no_active_vsucc⟩
+  exact ⟨origin,
+    nonempty_of_noAdjacentActive base_valid
+      no_active_hsucc no_active_vsucc⟩
+
 theorem east_mem_centered {r : Nat} {origin : Int × Int}
     (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2)) :
     InTranslatedBox r origin

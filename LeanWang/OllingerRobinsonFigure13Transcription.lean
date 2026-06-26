@@ -8111,6 +8111,33 @@ def HasPositiveTranslatedActiveCornerIndexedBoxInvariant
     ∃ origin : Int × Int,
       Nonempty (TranslatedActiveCornerIndexedBox D.scaffold r origin)
 
+/--
+Positive translated scaffold boxes whose active cells are isolated.
+
+This is a convenient Robinson-board realization target: build the finite
+scaffold patch at its natural translated coordinates, then prove there are no
+adjacent active-active cells in that patch.  The payload index can then be the
+constant `1 × 1` index.
+-/
+def HasPositiveTranslatedIsolatedActiveBoxInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  ∀ r : Nat, 0 < r →
+    ∃ origin : Int × Int,
+      ∃ base : TranslatedBoxPattern D.scaffold.tiles r origin,
+        ValidTranslatedBoxTiling D.scaffold.tiles r origin base ∧
+          (∀ p : TranslatedBox r origin,
+            ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+              D.scaffold.active (base p).1 = true →
+                D.scaffold.active
+                  (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+                  False) ∧
+          (∀ p : TranslatedBox r origin,
+            ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+              D.scaffold.active (base p).1 = true →
+                D.scaffold.active
+                  (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+                  False)
+
 theorem HasRealizationInvariant.ofLayerPatches
     {D : Figure18ScaffoldData}
     (hpatches : D.HasLayerPatchRealizationInvariant) :
@@ -8136,6 +8163,13 @@ theorem HasPositiveActiveCornerIndexedBoxInvariant.ofTranslated
     (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
     D.HasPositiveActiveCornerIndexedBoxInvariant :=
   TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+    hboxes
+
+theorem HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveTranslatedIsolatedActiveBoxInvariant) :
+    D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant :=
+  TranslatedActiveCornerIndexedBox.positive_nonempty_of_noAdjacentActive
     hboxes
 
 theorem HasActiveCornerIndexedBoxInvariant.ofPositiveTranslated
