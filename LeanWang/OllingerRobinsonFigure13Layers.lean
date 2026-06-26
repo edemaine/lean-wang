@@ -4184,6 +4184,30 @@ def HasIndexedRoutedFixedCornerSquareCheckedStacks
                     true
 
 /--
+Finite checked-stack target for Robinson's routed board/free-grid route.
+
+The geometric proof supplies a routed board/free-grid witness.  The finite
+Figure 13/Figure 16 transcription supplies the compatible layer stack over the
+same selected Figure 18 sites.  Forgetting the board terminology gives the
+ordinary indexed-routed checked-stack target.
+-/
+def HasRobinsonBoardRoutedFreeGridCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedRoutedFixedCornerSquare
+                grid.toIndexedRoutedFixedCornerSquare) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
+/--
 Finite checked-stack target for the adjacent product-witness route.
 
 This is closer to the Figure 18 geometric extraction than
@@ -4457,6 +4481,16 @@ theorem hasIndexedRoutedFixedCornerSquareCheckedStacks_of_adjacentProductWitness
   exact ⟨window.toIndexedRoutedFixedCornerSquare hx, stackData, hsite,
     hmatch, hcompatible⟩
 
+theorem hasIndexedRoutedFixedCornerSquareCheckedStacks_of_robinsonBoardRoutedFreeGrid
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasRobinsonBoardRoutedFreeGridCheckedStacks table) :
+    data.HasIndexedRoutedFixedCornerSquareCheckedStacks table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨grid, stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨grid.toIndexedRoutedFixedCornerSquare, stackData, hsite,
+    hmatch, hcompatible⟩
+
 theorem hasAdjacentProductWitnessCheckedStacks_of_decodedSite
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasDecodedSiteCheckedStacks table) :
@@ -4693,6 +4727,24 @@ def indexedRoutedCertificateOfCheckedStacks
       hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked
     realizes := realizes
   }
+
+/--
+Build the preferred indexed-routed layered certificate from Robinson
+board/free-grid witnesses carrying finite checked layer stacks.
+-/
+def indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasRobinsonBoardRoutedFreeGridCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfCheckedStacks
+    (hasIndexedRoutedFixedCornerSquareCheckedStacks_of_robinsonBoardRoutedFreeGrid
+      hchecked)
+    realizes
 
 /--
 Build the preferred indexed-routed layered certificate from adjacent
