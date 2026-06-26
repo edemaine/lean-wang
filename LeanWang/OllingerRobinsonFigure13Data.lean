@@ -6795,6 +6795,31 @@ def ofLevelSignalLocalTowerFreeGridsLayerPatches
     cornerIndex cornerQuadrant cornerIndex_valid signalLocalTower hcheck
     (activeCornerBoxPatches_of_layerBoxPatches patches)
 
+def ofLevelSignalLocalTowerFreeGridsIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelSignalLocalTowerFreeGridsLayerPatches
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid signalLocalTower hcheck
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
+
 def ofLevelSignalCoordinateStepLocallyCompatibleFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -7127,6 +7152,25 @@ def ofL2C1SignalLocalTowerFreeGridsLayerPatches
         l2Component1BlankCandidatePairCompatibilityBool)
     patches
 
+def ofL2C1SignalLocalTowerFreeGridsIndexedBoxes
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C1SignalLocalTowerFreeGridsLayerPatches signalLocalTower
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
+
 def ofL2Component1BlankCandidateLevelSignalCoordinateStepLocal
     (signalCoordinateSteps :
       HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable
@@ -7404,6 +7448,25 @@ def ofL2C2SignalLocalTowerFreeGridsLayerPatches
         NatSiteSpecSanity.cornerSite] using
         l2Component2BlankCandidatePairCompatibilityBool)
     patches
+
+def ofL2C2SignalLocalTowerFreeGridsIndexedBoxes
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C2SignalLocalTowerFreeGridsLayerPatches signalLocalTower
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
 
 def ofL2Component2BlankCandidateLevelSignalCoordinateStepLocal
     (signalCoordinateSteps :
