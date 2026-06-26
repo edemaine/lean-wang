@@ -5239,6 +5239,29 @@ def toCertificate
   ofGeometry geometry routing.siteRect routing.payloadRect routing.active
     routing.cornerSite routing.product routing.hmatch routing.vmatch
 
+/--
+Ordinary routing already contains the payload rectangle and product equations,
+so it can be re-exposed in pointwise product-witness form.
+-/
+def toProductWitnessRouting
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry) :
+    ProductWitnessRouting table x geometry where
+  siteRect := routing.siteRect
+  payloadWitness := fun i j => ⟨routing.payloadRect i j, routing.product i j⟩
+  active := routing.active
+  cornerSite := routing.cornerSite
+  hmatch := routing.hmatch
+  vmatch := routing.vmatch
+  siteCompatible := by
+    simpa [Figure18RobinsonBoardSignalCertificate.SiteCompatible,
+      Figure18RobinsonBoardSignalCertificate.ofGeometry] using
+      routing.siteCompatible
+
 @[simp]
 theorem toCertificate_geometry
     {table : Figure18RoleTable}
@@ -6209,6 +6232,17 @@ def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
       table geometryTower
 
 /--
+Routing over the canonical Robinson obstruction-geometry tower.
+
+This is equivalent to the canonical product-witness target, but often closer to
+the theorem-facing certificate shape.
+-/
+def HasFigure18RobinsonBoardCanonicalRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+    table canonicalRobinsonBoardSignalGeometryTower
+
+/--
 Product-witness routing over the canonical Robinson obstruction-geometry tower.
 
 After the pure Section 7 geometry has been fixed by
@@ -6219,6 +6253,32 @@ def HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
     (table : Figure18RoleTable) : Prop :=
   HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
     table canonicalRobinsonBoardSignalGeometryTower
+
+/--
+Routing over one fixed geometry tower supplies pointwise product witnesses over
+that same tower.
+-/
+theorem
+    hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_routing
+    {table : Figure18RoleTable}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+      table geometryTower := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨fun level => (routing level).toProductWitnessRouting⟩
+
+/-- Canonical routing supplies canonical product-witness routing. -/
+theorem
+    hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_routing
+    {table : Figure18RoleTable}
+    (hrouting : HasFigure18RobinsonBoardCanonicalRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table :=
+  hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_routing
+    hrouting
 
 /--
 Routing over the canonical Robinson tower supplies the older existential
@@ -6626,6 +6686,16 @@ def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting
       activeSites cornerSite).toRoleTable
 
 /--
+Routing over the canonical Robinson obstruction-geometry tower for a generated
+listed-active role table.
+-/
+def HasFigure18RobinsonBoardCanonicalRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardCanonicalRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+/--
 Product-witness routing over the canonical Robinson obstruction-geometry tower
 for a generated listed-active role table.
 -/
@@ -6654,6 +6724,15 @@ theorem hasFigure18RobinsonBoardFixedGeometryTowerRouting_of_productWitnessRouti
     HasFigure18RobinsonBoardFixedGeometryTowerRouting activeSites
       cornerSite :=
   hasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable_of_productWitnessRouting
+    hrouting
+
+theorem hasFigure18RobinsonBoardCanonicalProductWitnessRouting_of_routing
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalRouting activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_routing
     hrouting
 
 theorem hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting_of_canonical

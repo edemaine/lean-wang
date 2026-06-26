@@ -8248,6 +8248,56 @@ def ofL2C2CanonicalProductRoutingFreeGridsPositiveBoxes
       hboxes_pos)
 
 /--
+Concrete L2 component-1 entry point using canonical ordinary routing and
+positive-radius indexed boxes.
+-/
+def ofL2C1CanonicalRoutingFreeGridsPositiveBoxes
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C1CanonicalProductRoutingFreeGridsPositiveBoxes
+    (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_routing
+      canonicalRouting)
+    hboxes_pos
+
+/--
+Concrete L2 component-2 entry point using canonical ordinary routing and
+positive-radius indexed boxes.
+-/
+def ofL2C2CanonicalRoutingFreeGridsPositiveBoxes
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C2CanonicalProductRoutingFreeGridsPositiveBoxes
+    (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_routing
+      canonicalRouting)
+    hboxes_pos
+
+/--
 Concrete L2 component-1 entry point using product-witness fixed Robinson
 Section 7 obstruction geometry with Figure 18 routing and active-corner
 indexed boxes.
