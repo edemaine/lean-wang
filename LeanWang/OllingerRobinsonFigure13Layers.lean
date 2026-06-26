@@ -950,6 +950,30 @@ theorem tileableBoxes_of_compatibleSquares
 end SiteRectangle
 
 /--
+Site-level Robinson/Figure 16 scaffold tileability target.
+
+The remaining construction should produce compatible Figure 18 site squares of
+every side length.  The generic site-rectangle lemmas above then turn those
+squares into ordinary finite Wang rectangles over `figure18ScaffoldTiles`.
+-/
+def HasCompatibleFigure18ScaffoldSquares : Prop :=
+  ∀ n : Nat,
+    ∃ R : SiteRectangle n n,
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+        Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) ∧
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+        Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)
+
+/--
+Compatible Figure 18 site squares of every side length give the shared
+centered-box tileability target for the subdivided Figure 13 scaffold.
+-/
+theorem tileableBoxes_of_compatibleFigure18ScaffoldSquares
+    (hsquares : HasCompatibleFigure18ScaffoldSquares) :
+    ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r :=
+  SiteRectangle.tileableBoxes_of_compatibleSquares hsquares
+
+/--
 A rectangle of Figure 18 sites together with the component selected in one
 Figure 16 layer at every site.
 -/
