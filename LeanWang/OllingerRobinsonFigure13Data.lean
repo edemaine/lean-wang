@@ -1571,6 +1571,22 @@ def generatedStackPairFailures
   ((generatedStackBadHPairs sites).map fun pair => ("H", pair.1, pair.2)) ++
   ((generatedStackBadVPairs sites).map fun pair => ("V", pair.1, pair.2))
 
+theorem generatedStackBadHPairs_eq_nil_iff
+    {sites : List Figure18Site} :
+    generatedStackBadHPairs sites = [] ↔
+      ∀ left : Figure18Site, left ∈ sites →
+        ∀ right : Figure18Site, right ∈ sites →
+          generatedStackHCompatiblePairBool left right = true := by
+  simp [generatedStackBadHPairs]
+
+theorem generatedStackBadVPairs_eq_nil_iff
+    {sites : List Figure18Site} :
+    generatedStackBadVPairs sites = [] ↔
+      ∀ lower : Figure18Site, lower ∈ sites →
+        ∀ upper : Figure18Site, upper ∈ sites →
+          generatedStackVCompatiblePairBool lower upper = true := by
+  simp [generatedStackBadVPairs]
+
 theorem generatedStackSitePairCompatibilityBool_eq_true_iff
     {sites : List Figure18Site} :
     generatedStackSitePairCompatibilityBool sites = true ↔
@@ -1594,6 +1610,32 @@ theorem generatedStackSitePairCompatibilityBool_eq_true_iff
     rw [Bool.and_eq_true]
     exact hpairs left hleft right hright
 
+theorem generatedStackSitePairCompatibilityBool_eq_true_iff_failures_eq_nil
+    {sites : List Figure18Site} :
+    generatedStackSitePairCompatibilityBool sites = true ↔
+      generatedStackPairFailures sites = [] := by
+  rw [generatedStackSitePairCompatibilityBool_eq_true_iff]
+  change (∀ left : Figure18Site, left ∈ sites →
+        ∀ right : Figure18Site, right ∈ sites →
+          generatedStackHCompatiblePairBool left right = true ∧
+            generatedStackVCompatiblePairBool left right = true) ↔
+      (((generatedStackBadHPairs sites).map fun pair =>
+          ("H", pair.1, pair.2)) ++
+        ((generatedStackBadVPairs sites).map fun pair =>
+          ("V", pair.1, pair.2))) = []
+  rw [List.append_eq_nil_iff, List.map_eq_nil_iff, List.map_eq_nil_iff,
+    generatedStackBadHPairs_eq_nil_iff, generatedStackBadVPairs_eq_nil_iff]
+  constructor
+  · intro hpairs
+    constructor
+    · intro left hleft right hright
+      exact (hpairs left hleft right hright).1
+    · intro lower hlower upper hupper
+      exact (hpairs lower hlower upper hupper).2
+  · intro hpairs left hleft right hright
+    exact ⟨hpairs.1 left hleft right hright,
+      hpairs.2 left hleft right hright⟩
+
 def generatedStackAllowedSites
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : List Figure18Site :=
@@ -1611,6 +1653,15 @@ def generatedStackAllowedSitePairCompatibilityBool
     (cornerSite : Figure18Site) : Bool :=
   generatedStackSitePairCompatibilityBool
     (generatedStackAllowedSites activeSiteData cornerSite)
+
+theorem
+    generatedStackAllowedSitePairCompatibilityBool_eq_true_iff_failures_eq_nil
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site} :
+    generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+      true ↔
+      generatedStackAllowedSitePairFailures activeSiteData cornerSite = [] :=
+  generatedStackSitePairCompatibilityBool_eq_true_iff_failures_eq_nil
 
 theorem generatedStackSitePairCompatibilityBool_of_subset
     {sites sites' : List Figure18Site}
