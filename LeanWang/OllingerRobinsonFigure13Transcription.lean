@@ -3673,6 +3673,10 @@ namespace RobinsonSquare
 def forcedSide (level : Nat) : Nat :=
   2 ^ (level + 1) - 1
 
+/-- Side length of a red border at a routed-board level. -/
+def redBorderSide (level : Nat) : Nat :=
+  4 ^ level
+
 /-- Side length of the Figure 18 board at a routed-board level. -/
 def boardSide (level : Nat) : Nat :=
   4 ^ level - 1
@@ -3693,10 +3697,40 @@ def freeGridSide (level : Nat) : Nat :=
 @[simp] theorem forcedSide_three : forcedSide 3 = 15 := by
   decide
 
+@[simp] theorem redBorderSide_zero : redBorderSide 0 = 1 := by
+  decide
+
+@[simp] theorem redBorderSide_one : redBorderSide 1 = 4 := by
+  decide
+
+@[simp] theorem redBorderSide_two : redBorderSide 2 = 16 := by
+  decide
+
+@[simp] theorem redBorderSide_three : redBorderSide 3 = 64 := by
+  decide
+
 @[simp] theorem boardSide_zero : boardSide 0 = 0 := by
   decide
 
+@[simp] theorem boardSide_one : boardSide 1 = 3 := by
+  decide
+
+@[simp] theorem boardSide_two : boardSide 2 = 15 := by
+  decide
+
+@[simp] theorem boardSide_three : boardSide 3 = 63 := by
+  decide
+
 @[simp] theorem freeGridSide_zero : freeGridSide 0 = 2 := by
+  decide
+
+@[simp] theorem freeGridSide_one : freeGridSide 1 = 3 := by
+  decide
+
+@[simp] theorem freeGridSide_two : freeGridSide 2 = 5 := by
+  decide
+
+@[simp] theorem freeGridSide_three : freeGridSide 3 = 9 := by
   decide
 
 theorem one_le_two_pow (level : Nat) : 1 ≤ 2 ^ level := by
@@ -3728,6 +3762,54 @@ theorem self_le_freeGridSide (level : Nat) :
 theorem freeGridSide_pos (level : Nat) : 0 < freeGridSide level := by
   unfold freeGridSide
   exact Nat.succ_pos (2 ^ level)
+
+theorem redBorderSide_pos (level : Nat) : 0 < redBorderSide level := by
+  unfold redBorderSide
+  exact pow_pos (by decide : 0 < 4) level
+
+theorem boardSide_eq_redBorderSide_sub_one (level : Nat) :
+    boardSide level = redBorderSide level - 1 := by
+  rfl
+
+theorem redBorderSide_succ (level : Nat) :
+    redBorderSide (level + 1) = 4 * redBorderSide level := by
+  unfold redBorderSide
+  rw [pow_succ]
+  omega
+
+theorem boardSide_succ (level : Nat) :
+    boardSide (level + 1) = 4 * boardSide level + 3 := by
+  unfold boardSide
+  have hpos : 0 < 4 ^ level := pow_pos (by decide : 0 < 4) level
+  rw [pow_succ]
+  omega
+
+theorem freeGridSide_succ (level : Nat) :
+    freeGridSide (level + 1) = 2 * freeGridSide level - 1 := by
+  unfold freeGridSide
+  rw [pow_succ]
+  omega
+
+/--
+Robinson's Section 7 count recurrence for the number of free rows or columns
+on a board: the next board repeats the old free-line pattern twice, sharing the
+center line.
+-/
+theorem freeGridSide_succ_eq_double_sub_one (level : Nat) :
+    freeGridSide (level + 1) = freeGridSide level + freeGridSide level - 1 := by
+  rw [freeGridSide_succ]
+  omega
+
+theorem freeGridSide_le_boardSide_add_two (level : Nat) :
+    freeGridSide level ≤ boardSide level + 2 := by
+  unfold freeGridSide boardSide
+  induction level with
+  | zero =>
+      simp
+  | succ level ih =>
+      rw [pow_succ, pow_succ]
+      have hpos : 0 < 4 ^ level := pow_pos (by decide : 0 < 4) level
+      omega
 
 /--
 Any requested finite payload square fits in the free grid of some Robinson
