@@ -2484,6 +2484,50 @@ def HasAllowedRobinsonBoardRoutedFreeGrids
             grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
             true)
 
+/--
+Level-indexed version of `HasAllowedRobinsonBoardRoutedFreeGrids`.
+
+Robinson's board proof naturally produces a full free-grid at each board level.
+This predicate asks only those canonical level grids to have allowed and locally
+compatible Figure 18 sites.  Arbitrary requested finite windows are then handled
+by restricting the level grid.
+-/
+def HasAllowedRobinsonBoardLevelRoutedFreeGrids
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    (level : Nat)
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x
+      (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide_pos level)),
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i j =
+            cornerSite ∨
+          siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i j ∈
+            activeSiteData.sites) ∧
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.hCompatible
+            (siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i j)
+            (siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
+              true) ∧
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.vCompatible
+            (siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i j)
+            (siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
+              true)
+
 theorem hasAllowedRobinsonBoardRoutedFreeGrids_of_flatRoleTable
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -2554,6 +2598,78 @@ theorem sparseRawDataOfSites_hasCheckedStacksForRobinsonBoardRoutedFreeGrids_of_
       activeSiteData cornerSite hcheck R hsites hh hv with
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨stackData, hsite, hmatch, hcompatible⟩
+
+theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_level
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {table : Figure18RoleTable}
+    (hgrids : HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable table)
+    (hallowed :
+      HasAllowedRobinsonBoardLevelRoutedFreeGrids activeSiteData cornerSite
+        table) :
+    (sparseRawDataOfSites
+      activeSiteData cornerSite).HasRobinsonBoardRoutedFreeGridCheckedStacks
+      table := by
+  intro T seed x hx n hn
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hgrids x hx level with ⟨bigGrid⟩
+  let grid := bigGrid.restrict hn hcap
+  rcases hallowed level bigGrid with ⟨hsitesBig, hhBig, hvBig⟩
+  have hsites : ∀ i : Fin n, ∀ j : Fin n,
+      siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare i j =
+        cornerSite ∨
+      siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare i j ∈
+        activeSiteData.sites := by
+    intro i j
+    simpa [grid, Figure18RobinsonBoardRoutedFreeGrid.restrict,
+      Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
+      Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
+      siteRectangleOfIndexedRoutedFixedCornerSquare] using
+      hsitesBig (Fin.castLE hcap i) (Fin.castLE hcap j)
+  have hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible
+        (siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare i j)
+        (siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
+          true := by
+    intro i j hi
+    have hiBig : (Fin.castLE hcap i).val + 1 <
+        RobinsonSquare.freeGridSide level :=
+      Nat.lt_of_lt_of_le hi hcap
+    simpa [grid, Figure18RobinsonBoardRoutedFreeGrid.restrict,
+      Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
+      Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
+      siteRectangleOfIndexedRoutedFixedCornerSquare, Fin.castLE] using
+      hhBig (Fin.castLE hcap i) (Fin.castLE hcap j) hiBig
+  have hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible
+        (siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare i j)
+        (siteRectangleOfIndexedRoutedFixedCornerSquare
+          grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
+          true := by
+    intro i j hj
+    have hjBig : (Fin.castLE hcap j).val + 1 <
+        RobinsonSquare.freeGridSide level :=
+      Nat.lt_of_lt_of_le hj hcap
+    simpa [grid, Figure18RobinsonBoardRoutedFreeGrid.restrict,
+      Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
+      Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
+      siteRectangleOfIndexedRoutedFixedCornerSquare, Fin.castLE] using
+      hvBig (Fin.castLE hcap i) (Fin.castLE hcap j) hjBig
+  let window := grid.toIndexedRoutedFixedCornerSquare
+  let R := siteRectangleOfIndexedRoutedFixedCornerSquare window
+  rcases sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+      activeSiteData cornerSite hcheck R hsites hh hv with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨grid, stackData, hsite, hmatch, hcompatible⟩
 
 theorem hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
     (activeSiteData : Figure18Site.CheckedNatSpecs)
@@ -4791,6 +4907,40 @@ structure NatSiteRobinsonObligations
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
 
+/--
+Level-indexed Robinson-board/free-grid obligations.
+
+This is the preferred Section 7 surface: Robinson geometry supplies the full
+free grid at each board level, and finite checking is required only for those
+level grids.  Arbitrary finite payload squares are obtained by restricting a
+large enough level grid.
+-/
+structure NatSiteRobinsonLevelObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  levelRoutedFreeGrids :
+    HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+        true
+  levelAllowed :
+    HasAllowedRobinsonBoardLevelRoutedFreeGrids
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  realizes :
+    RealizesActiveCornerSquares
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
+
 namespace NatSiteRobinsonObligations
 
 def ofPairFailures
@@ -4899,6 +5049,44 @@ def ofL2Component2BlankCandidate
 
 end NatSiteRobinsonObligations
 
+namespace NatSiteRobinsonLevelObligations
+
+def ofPairFailures
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (levelAllowed :
+      HasAllowedRobinsonBoardLevelRoutedFreeGrids
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (pairFailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          []) :
+    NatSiteRobinsonLevelObligations activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid where
+  levelRoutedFreeGrids := levelRoutedFreeGrids
+  pairCompatibility :=
+    generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+      pairFailures
+  levelAllowed := levelAllowed
+  realizes := realizes
+
+end NatSiteRobinsonLevelObligations
+
 namespace NatSiteRobinsonScaffoldCertificate
 
 def ofFreeGrids
@@ -4998,6 +5186,44 @@ def ofLocallyCompatibleFreeGrids
       hcompatible)
     realizes
 
+def ofLevelAllowedFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hallowed :
+      HasAllowedRobinsonBoardLevelRoutedFreeGrids
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  robinsonStacks :=
+    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_level
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck hgrids hallowed
+  realizes := realizes
+
 def ofObligations
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5012,6 +5238,21 @@ def ofObligations
     cornerIndex cornerQuadrant cornerIndex_valid
     obligations.routedFreeGrids obligations.pairCompatibility
     obligations.localCompatibility obligations.realizes
+
+def ofLevelObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteRobinsonLevelObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelAllowedFreeGrids activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    obligations.levelRoutedFreeGrids obligations.pairCompatibility
+    obligations.levelAllowed obligations.realizes
 
 def ofPairFailures
     (activeSiteSpecs : List (Nat × Quadrant))
