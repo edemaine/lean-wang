@@ -1535,6 +1535,19 @@ theorem activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes
   rcases hboxes r with ⟨box⟩
   exact ⟨box.toCombinedBoxLayerPatch (hsquares box.n box.hn)⟩
 
+/--
+For the layered patch invariant, it is enough to construct indexed boxes at
+positive radii and know that the scaffold corner belongs to the scaffold
+tileset.  The radius-zero patch is then the singleton corner box.
+-/
+theorem activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
+    {S : Scaffold}
+    (hmem : S.corner ∈ S.tiles)
+    (hboxes_pos : ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox S r)) :
+    HasActiveCornerLayerBoxPatches S :=
+  activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes
+    (ActiveCornerIndexedBox.nonempty_all_of_pos_and_corner_mem hmem hboxes_pos)
+
 theorem activeCornerBoxPatches_of_layerBoxPatches
     {S : Scaffold} (hpatches : HasActiveCornerLayerBoxPatches S) :
     HasActiveCornerBoxPatches S := by

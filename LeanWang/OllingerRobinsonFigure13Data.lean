@@ -8180,6 +8180,74 @@ def ofL2C2CanonicalProductRoutingFreeGridsLayerPatches
     patches
 
 /--
+Concrete L2 component-1 entry point using canonical product witnesses and
+positive-radius indexed boxes.  The radius-zero box is supplied by the
+scaffold corner tile.
+-/
+def ofL2C1CanonicalProductRoutingFreeGridsPositiveBoxes
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C1CanonicalProductRoutingFreeGridsLayerPatches canonicalRouting
+    (activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
+      (by
+        simpa [LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation] using
+          Figure18RoleTable.scaffold_corner_mem
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+      hboxes_pos)
+
+/--
+Concrete L2 component-2 entry point using canonical product witnesses and
+positive-radius indexed boxes.  The radius-zero box is supplied by the
+scaffold corner tile.
+-/
+def ofL2C2CanonicalProductRoutingFreeGridsPositiveBoxes
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C2CanonicalProductRoutingFreeGridsLayerPatches canonicalRouting
+    (activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
+      (by
+        simpa [LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation] using
+          Figure18RoleTable.scaffold_corner_mem
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+      hboxes_pos)
+
+/--
 Concrete L2 component-1 entry point using product-witness fixed Robinson
 Section 7 obstruction geometry with Figure 18 routing and active-corner
 indexed boxes.
