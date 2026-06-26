@@ -93,9 +93,28 @@ theorem exists_substitutionRule (component : LayerComponent) :
     Figure16.SubstitutionRule.ofSource_mem component.ruleSource, rfl, ?_⟩
   rfl
 
+theorem exists_certifiedSubstitutionRule (component : LayerComponent) :
+    ∃ rule : Figure16.SubstitutionRule,
+      rule ∈ Figure16.certifiedSubstitutionTable.rules ∧
+        rule.source = component.ruleSource ∧ rule.block = component.block := by
+  rcases Figure16.certifiedSubstitutionTable.exists_rule_for_source
+      component.ruleSource with
+    ⟨rule, hmem, hsource⟩
+  refine ⟨rule, hmem, hsource, ?_⟩
+  rw [Figure16.certifiedSubstitutionTable.block_eq_source_block hmem,
+    hsource]
+  rfl
+
 theorem block_validRectangle_symbolTileSet (component : LayerComponent) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
   exact component.ruleSource.block_validRectangle_symbolTileSet
+
+theorem certifiedBlock_validRectangle_symbolTileSet
+    (component : LayerComponent) :
+    ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
+  simpa [block] using
+    Figure16.certifiedSubstitutionTable.source_block_validRectangle
+      component.ruleSource
 
 @[simp]
 theorem ofLayer_layer (layer : Layer) (component : layer.Component) :
@@ -286,6 +305,16 @@ theorem exists_substitutionRule_of_mem_ruleSources
     ⟨component, _hcomponent, rfl⟩
   simpa [LayerComponent.block] using component.exists_substitutionRule
 
+theorem exists_certifiedSubstitutionRule_of_mem_ruleSources
+    {components : Components} {source : Figure16.RuleSource}
+    (hsource : source ∈ components.ruleSources) :
+    ∃ rule : Figure16.SubstitutionRule,
+      rule ∈ Figure16.certifiedSubstitutionTable.rules ∧
+        rule.source = source ∧ rule.block = source.block := by
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  simpa [LayerComponent.block] using component.exists_certifiedSubstitutionRule
+
 theorem validRectangle_of_mem_ruleSources
     {components : Components} {source : Figure16.RuleSource}
     (hsource : source ∈ components.ruleSources) :
@@ -293,6 +322,14 @@ theorem validRectangle_of_mem_ruleSources
   rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
     ⟨component, _hcomponent, rfl⟩
   exact component.block_validRectangle_symbolTileSet
+
+theorem certifiedValidRectangle_of_mem_ruleSources
+    {components : Components} {source : Figure16.RuleSource}
+    (hsource : source ∈ components.ruleSources) :
+    ValidRectangle Figure16.Symbol.tileSet source.block.rectangle := by
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  exact component.certifiedBlock_validRectangle_symbolTileSet
 
 theorem mem_symbols_all
     {components : Components} {symbol : Figure16.Symbol}
@@ -425,6 +462,12 @@ theorem validRectangle_of_mem_ruleSourcesAt
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   Components.validRectangle_of_mem_ruleSources hsource
 
+theorem certifiedValidRectangle_of_mem_ruleSourcesAt
+    (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAt index) :
+    ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
+  Components.certifiedValidRectangle_of_mem_ruleSources hsource
+
 /--
 Layer components at a Figure 18 quarter-site.  The layer annotation belongs to
 the underlying raw Figure 13 tile, so this intentionally depends only on
@@ -512,12 +555,25 @@ theorem validRectangle_of_mem_ruleSourcesAtSite
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   D.validRectangle_of_mem_ruleSourcesAt site.index hsource
 
+theorem certifiedValidRectangle_of_mem_ruleSourcesAtSite
+    (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAtSite site) :
+    ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
+  D.certifiedValidRectangle_of_mem_ruleSourcesAt site.index hsource
+
 theorem componentAtSiteLayer_block_validRectangle
     {D : Transcription} {site : Figure18Site} {layer : Layer}
     {component : LayerComponent}
     (_hcomponent : D.componentAtSiteLayer site layer = some component) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle :=
   component.block_validRectangle_symbolTileSet
+
+theorem componentAtSiteLayer_certifiedBlock_validRectangle
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (_hcomponent : D.componentAtSiteLayer site layer = some component) :
+    ValidRectangle Figure16.Symbol.tileSet component.block.rectangle :=
+  component.certifiedBlock_validRectangle_symbolTileSet
 
 end Transcription
 
