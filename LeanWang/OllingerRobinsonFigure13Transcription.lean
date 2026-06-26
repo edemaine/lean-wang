@@ -5363,6 +5363,127 @@ theorem toRouting_product_apply
 
 end ProductWitnessRouting
 
+/--
+Product-witness routing where the payload edge matches are obtained by
+transmission along unobstructed board rows and columns.
+
+This is the form closest to Robinson's Section 7 description: obstruction
+signals identify the free lines, and the remaining local tile rules transport
+the simulated payload signals along those lines.  The constructor below turns
+these transmission facts into the simpler `ProductWitnessRouting` interface.
+-/
+structure CorridorProductWitnessRouting
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) : Type where
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  payloadWitness :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        { payload : WangTile //
+          WangTile.product (siteRect i j).tile payload =
+            (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)).1 }
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  htransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          (∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column
+              (geometry.freeRowCoord j)) →
+            WangTile.HMatches (payloadWitness i j).1
+              (payloadWitness ⟨i.val + 1, hi⟩ j).1
+  vtransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          (∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction
+              (geometry.freeColumnCoord i) row) →
+            WangTile.VMatches (payloadWitness i j).1
+              (payloadWitness i ⟨j.val + 1, hj⟩).1
+  siteCompatible :
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.hCompatible
+          (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.vCompatible
+          (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+
+namespace CorridorProductWitnessRouting
+
+/--
+Forget the explicit corridor-transmission hypotheses after using the
+obstruction geometry to prove that selected rows and columns are unobstructed.
+-/
+def toProductWitnessRouting
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : CorridorProductWitnessRouting table x geometry) :
+    ProductWitnessRouting table x geometry where
+  siteRect := routing.siteRect
+  payloadWitness := routing.payloadWitness
+  active := routing.active
+  cornerSite := routing.cornerSite
+  hmatch := by
+    intro i j hi
+    exact routing.htransmit i j hi
+      (fun column hcolumn =>
+        geometry.noHorizontalObstruction_of_freeRowCoord column hcolumn j)
+  vmatch := by
+    intro i j hj
+    exact routing.vtransmit i j hj
+      (fun row hrow =>
+        geometry.noVerticalObstruction_of_freeColumnCoord i row hrow)
+  siteCompatible := routing.siteCompatible
+
+@[simp]
+theorem toProductWitnessRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : CorridorProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toProductWitnessRouting.siteRect i j = routing.siteRect i j :=
+  rfl
+
+@[simp]
+theorem toProductWitnessRouting_payloadWitness_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : CorridorProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toProductWitnessRouting.payloadWitness i j =
+      routing.payloadWitness i j :=
+  rfl
+
+end CorridorProductWitnessRouting
+
 namespace Routing
 
 /-- Assemble the full signal certificate from geometry plus routing data. -/
@@ -6417,6 +6538,27 @@ def HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
             table x (geometryTower.geometries level))
 
 /--
+Robinson Section 7 routing over a fixed geometry tower, stated with explicit
+payload transmission along unobstructed board rows and columns.
+
+This is the next proof-facing target after the pure red-border geometry: local
+tile rules should show that no obstruction signal on a selected free line
+transports the relevant payload edge color across that board corridor.
+-/
+def HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable
+    (table : Figure18RoleTable)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          Figure18RobinsonBoardSignalCertificate.CorridorProductWitnessRouting
+            table x (geometryTower.geometries level))
+
+/--
 Robinson Section 7 proof target with a single geometry tower selected
 independently of the payload tiles and the combined tiling.
 -/
@@ -6434,6 +6576,16 @@ def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
     (table : Figure18RoleTable) : Prop :=
   ∃ geometryTower : RobinsonBoardSignalGeometryTower,
     HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+      table geometryTower
+
+/--
+Fixed-geometry variant whose payload routing is supplied by explicit corridor
+transmission facts.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerCorridorProductWitnessRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∃ geometryTower : RobinsonBoardSignalGeometryTower,
+    HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable
       table geometryTower
 
 /--
@@ -6458,6 +6610,63 @@ def HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
     (table : Figure18RoleTable) : Prop :=
   HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
     table canonicalRobinsonBoardSignalGeometryTower
+
+/--
+Robinson-style corridor transmission over the canonical obstruction-geometry
+tower.
+-/
+def HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable
+    table canonicalRobinsonBoardSignalGeometryTower
+
+/--
+Corridor-transmission routing over one fixed geometry tower supplies pointwise
+product-witness routing over the same tower.
+-/
+theorem
+    hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_corridor
+    {table : Figure18RoleTable}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+      table geometryTower := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨fun level => (routing level).toProductWitnessRouting⟩
+
+/--
+Canonical corridor-transmission routing supplies the existing canonical
+product-witness routing target.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table :=
+  hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_corridor
+    hrouting
+
+/--
+Fixed-geometry corridor-transmission routing supplies the existing
+fixed-geometry product-witness routing target.
+-/
+theorem
+    hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_corridor
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerCorridorProductWitnessRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+      table := by
+  rcases hrouting with ⟨geometryTower, hrouting⟩
+  exact ⟨geometryTower,
+    hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_corridor
+      hrouting⟩
 
 /--
 Routing over one fixed geometry tower supplies pointwise product witnesses over
@@ -6936,6 +7145,18 @@ def HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTower
     geometryTower
 
 /--
+Corridor-transmission product-witness routing over a fixed Robinson
+obstruction-geometry tower for a generated listed-active role table.
+-/
+def HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTower
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+    geometryTower
+
+/--
 Generated listed-active Figure 18 invariant with one geometry tower selected
 independently of the payload tiles and tiling.
 -/
@@ -6953,6 +7174,17 @@ that tower.
 def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting
     (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
   HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+/--
+Generated listed-active Figure 18 invariant with one geometry tower selected
+independently of the payload tiles and corridor-transmission routing supplied
+over that tower.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerCorridorProductWitnessRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardFixedGeometryTowerCorridorProductWitnessRoutingForTable
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
 
@@ -6975,6 +7207,50 @@ def HasFigure18RobinsonBoardCanonicalProductWitnessRouting
   HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
+
+/--
+Corridor-transmission routing over the canonical Robinson obstruction-geometry
+tower for a generated listed-active role table.
+-/
+def HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+theorem
+    hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTower_of_corridor
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTower
+        activeSites cornerSite geometryTower) :
+    HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTower
+      activeSites cornerSite geometryTower :=
+  hasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable_of_corridor
+    hrouting
+
+theorem
+    hasFigure18RobinsonBoardCanonicalProductWitnessRouting_of_corridor
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
+    hrouting
+
+theorem
+    hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting_of_corridor
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerCorridorProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_corridor
+    hrouting
 
 theorem hasFigure18RobinsonBoardRoutingForGeometryTower_of_productWitnessRouting
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
