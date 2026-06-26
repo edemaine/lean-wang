@@ -3820,6 +3820,93 @@ theorem exists_level_with_payload_capacity (n : Nat) :
     ∃ level : Nat, n ≤ freeGridSide level :=
   ⟨n, self_le_freeGridSide n⟩
 
+/-- Last index in the virtual free-line grid at a Robinson board level. -/
+def freeGridLast (level : Nat) : Fin (freeGridSide level) :=
+  ⟨freeGridSide level - 1, by
+    have hpos := freeGridSide_pos level
+    omega⟩
+
+/--
+Left copy of a level's free-line indices inside the next level's overlapping
+`F_{n+1} = 2F_n - 1` recurrence.
+-/
+def freeLineLeftEmbedding (level : Nat) :
+    Fin (freeGridSide level) → Fin (freeGridSide (level + 1)) :=
+  fun i =>
+    ⟨i.val, by
+      have hle : freeGridSide level ≤ freeGridSide (level + 1) := by
+        rw [freeGridSide_succ]
+        have hpos := freeGridSide_pos level
+        omega
+      exact Nat.lt_of_lt_of_le i.isLt hle⟩
+
+/--
+Right copy of a level's free-line indices inside the next level's overlapping
+`F_{n+1} = 2F_n - 1` recurrence.
+-/
+def freeLineRightEmbedding (level : Nat) :
+    Fin (freeGridSide level) → Fin (freeGridSide (level + 1)) :=
+  fun i =>
+    ⟨i.val + (freeGridSide level - 1), by
+      rw [freeGridSide_succ]
+      have hpos := freeGridSide_pos level
+      have hi := i.isLt
+      omega⟩
+
+@[simp]
+theorem freeGridLast_val (level : Nat) :
+    (freeGridLast level).val = freeGridSide level - 1 :=
+  rfl
+
+@[simp]
+theorem freeLineLeftEmbedding_val (level : Nat)
+    (i : Fin (freeGridSide level)) :
+    (freeLineLeftEmbedding level i).val = i.val :=
+  rfl
+
+@[simp]
+theorem freeLineRightEmbedding_val (level : Nat)
+    (i : Fin (freeGridSide level)) :
+    (freeLineRightEmbedding level i).val =
+      i.val + (freeGridSide level - 1) :=
+  rfl
+
+/--
+The two recursive copies share exactly the old last/free-center index: the
+right copy's first line is the left copy's last line.
+-/
+theorem freeLineEmbedding_overlap (level : Nat) :
+    freeLineLeftEmbedding level (freeGridLast level) =
+      freeLineRightEmbedding level ⟨0, freeGridSide_pos level⟩ := by
+  apply Fin.ext
+  simp [freeLineLeftEmbedding, freeLineRightEmbedding, freeGridLast]
+
+/--
+Every next-level virtual free-line index lies in the left copy, or in the
+right copy, of the previous level's free-line indices. The shared line belongs
+to both copies.
+-/
+theorem freeLineEmbedding_cover (level : Nat)
+    (i : Fin (freeGridSide (level + 1))) :
+    (∃ j : Fin (freeGridSide level), freeLineLeftEmbedding level j = i) ∨
+      ∃ j : Fin (freeGridSide level), freeLineRightEmbedding level j = i := by
+  by_cases hleft : i.val < freeGridSide level
+  · left
+    refine ⟨⟨i.val, hleft⟩, ?_⟩
+    apply Fin.ext
+    simp [freeLineLeftEmbedding]
+  · right
+    have hpos := freeGridSide_pos level
+    have hnext : freeGridSide (level + 1) = 2 * freeGridSide level - 1 :=
+      freeGridSide_succ level
+    have hlt : i.val - (freeGridSide level - 1) < freeGridSide level := by
+      have hi := i.isLt
+      omega
+    refine ⟨⟨i.val - (freeGridSide level - 1), hlt⟩, ?_⟩
+    apply Fin.ext
+    simp [freeLineRightEmbedding]
+    omega
+
 end RobinsonSquare
 
 /--
