@@ -559,6 +559,111 @@ theorem expanded_vMatches_boundary {w h : Nat} {G : BlockGrid w h}
   · simpa [expandedTile, expandedSymbol, Block.entry, Block.vBoundaryMatches] using
       hboundary.2
 
+/-- Block coordinate of a cell in the doubled expansion. -/
+def doubledBlockCoord {w : Nat} (i : Fin (2 * w)) : Fin w :=
+  ⟨i.val / 2, by
+    have hi : i.val < 2 * w := i.isLt
+    omega⟩
+
+/-- In-block offset of a cell in the doubled expansion. -/
+def doubledOffset {w : Nat} (i : Fin (2 * w)) : Fin 2 :=
+  ⟨i.val % 2, by omega⟩
+
+theorem doubledOffset_eq_zero_or_one {w : Nat} (i : Fin (2 * w)) :
+    (doubledOffset i).val = 0 ∨ (doubledOffset i).val = 1 := by
+  have hlt : (doubledOffset i).val < 2 := (doubledOffset i).isLt
+  omega
+
+theorem doubled_succ_of_offset_zero {w : Nat}
+    (i : Fin (2 * w)) (hi : i.val + 1 < 2 * w)
+    (hzero : (doubledOffset i).val = 0) :
+    doubledBlockCoord ⟨i.val + 1, hi⟩ = doubledBlockCoord i ∧
+      doubledOffset ⟨i.val + 1, hi⟩ = ⟨1, by decide⟩ := by
+  have hmod : i.val % 2 = 0 := by
+    simpa [doubledOffset] using hzero
+  have hdecomp : 2 * (i.val / 2) + i.val % 2 = i.val :=
+    Nat.div_add_mod i.val 2
+  have hi_eq : i.val = 2 * (i.val / 2) := by omega
+  constructor
+  · apply Fin.ext
+    simp [doubledBlockCoord]
+    omega
+  · apply Fin.ext
+    simp [doubledOffset]
+    omega
+
+theorem doubled_succ_of_offset_one {w : Nat}
+    (i : Fin (2 * w)) (hi : i.val + 1 < 2 * w)
+    (hone : (doubledOffset i).val = 1) :
+    ∃ hb : (doubledBlockCoord i).val + 1 < w,
+      doubledBlockCoord ⟨i.val + 1, hi⟩ =
+          ⟨(doubledBlockCoord i).val + 1, hb⟩ ∧
+        doubledOffset ⟨i.val + 1, hi⟩ = ⟨0, by decide⟩ := by
+  have hmod : i.val % 2 = 1 := by
+    simpa [doubledOffset] using hone
+  have hdecomp : 2 * (i.val / 2) + i.val % 2 = i.val :=
+    Nat.div_add_mod i.val 2
+  have hi_eq : i.val = 2 * (i.val / 2) + 1 := by omega
+  have hb : (doubledBlockCoord i).val + 1 < w := by
+    simp [doubledBlockCoord]
+    omega
+  refine ⟨hb, ?_, ?_⟩
+  · apply Fin.ext
+    simp [doubledBlockCoord]
+    omega
+  · apply Fin.ext
+    simp [doubledOffset]
+    omega
+
+/-- The `2w × 2h` rectangle obtained by expanding every Figure 16 block. -/
+def expandedRectangle {w h : Nat} (G : BlockGrid w h) :
+    Rectangle (2 * w) (2 * h) :=
+  fun i j =>
+    expandedTile G (doubledBlockCoord i) (doubledBlockCoord j)
+      (doubledOffset i) (doubledOffset j)
+
+/--
+A compatible grid of Figure 16 substitution blocks expands to a valid Wang
+rectangle over the finite component-symbol tileset.
+-/
+theorem expandedRectangle_valid {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) :
+    ValidRectangle Symbol.tileSet (expandedRectangle G) := by
+  constructor
+  · intro i j
+    exact expandedTile_mem_symbolTileSet G
+      (doubledBlockCoord i) (doubledBlockCoord j)
+      (doubledOffset i) (doubledOffset j)
+  constructor
+  · intro i j hi
+    rcases doubledOffset_eq_zero_or_one i with hzero | hone
+    · rcases doubled_succ_of_offset_zero i hi hzero with
+        ⟨hblock, hoff⟩
+      have hoff_i : doubledOffset i = ⟨0, by decide⟩ := Fin.ext hzero
+      simpa [expandedRectangle, hblock, hoff, hoff_i] using
+        expanded_hMatches_within hG (doubledBlockCoord i)
+          (doubledBlockCoord j) (doubledOffset j)
+    · rcases doubled_succ_of_offset_one i hi hone with
+        ⟨hb, hblock, hoff⟩
+      have hoff_i : doubledOffset i = ⟨1, by decide⟩ := Fin.ext hone
+      simpa [expandedRectangle, hblock, hoff, hoff_i] using
+        expanded_hMatches_boundary hG (doubledBlockCoord i)
+          (doubledBlockCoord j) hb (doubledOffset j)
+  · intro i j hj
+    rcases doubledOffset_eq_zero_or_one j with hzero | hone
+    · rcases doubled_succ_of_offset_zero j hj hzero with
+        ⟨hblock, hoff⟩
+      have hoff_j : doubledOffset j = ⟨0, by decide⟩ := Fin.ext hzero
+      simpa [expandedRectangle, hblock, hoff, hoff_j] using
+        expanded_vMatches_within hG (doubledBlockCoord i)
+          (doubledBlockCoord j) (doubledOffset i)
+    · rcases doubled_succ_of_offset_one j hj hone with
+        ⟨hb, hblock, hoff⟩
+      have hoff_j : doubledOffset j = ⟨1, by decide⟩ := Fin.ext hone
+      simpa [expandedRectangle, hblock, hoff, hoff_j] using
+        expanded_vMatches_boundary hG (doubledBlockCoord i)
+          (doubledBlockCoord j) hb (doubledOffset i)
+
 end BlockGrid
 
 /-- `phi_L1(*)`. -/
