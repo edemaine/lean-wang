@@ -1132,6 +1132,44 @@ theorem validTranslatedBoxTiling_of_validPlaneTiling
   · intro p hp
     exact hx.2 p.1
 
+/-- View a centered box pattern as a translated box pattern at origin `(0, 0)`. -/
+def translatedBoxPatternOfBox {T : TileSet} {r : Nat}
+    (x : BoxPattern T r) :
+    TranslatedBoxPattern T r (0, 0) :=
+  fun p => x ⟨p.1, by simpa [InTranslatedBox] using p.2⟩
+
+/-- A valid centered box is a valid translated box at origin `(0, 0)`. -/
+theorem validTranslatedBoxTiling_of_validBoxTiling
+    {T : TileSet} {r : Nat} {x : BoxPattern T r}
+    (hx : ValidBoxTiling T r x) :
+    ValidTranslatedBoxTiling T r (0, 0)
+      (translatedBoxPatternOfBox x) := by
+  constructor
+  · intro p hp
+    simpa [translatedBoxPatternOfBox] using
+      hx.1 ⟨p.1, by simpa [InTranslatedBox] using p.2⟩
+        (by simpa [InTranslatedBox] using hp)
+  · intro p hp
+    simpa [translatedBoxPatternOfBox] using
+      hx.2 ⟨p.1, by simpa [InTranslatedBox] using p.2⟩
+        (by simpa [InTranslatedBox] using hp)
+
+/--
+Positive-radius centered finite boxes supply the translated valid-box interface
+used by the Robinson-board scaffold route.
+-/
+theorem positiveTranslatedValidBoxes_of_tileableBoxes
+    {T : TileSet}
+    (hboxes : ∀ r : Nat, 0 < r → TileableBox T r) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern T r origin,
+          ValidTranslatedBoxTiling T r origin base := by
+  intro r hr
+  rcases hboxes r hr with ⟨base, base_valid⟩
+  exact ⟨(0, 0), translatedBoxPatternOfBox base,
+    validTranslatedBoxTiling_of_validBoxTiling base_valid⟩
+
 /-- Embed the centered box into its translate by `origin`. -/
 def translatedBoxPoint {r : Nat} (origin : Int × Int) (p : Box r) :
     TranslatedBox r origin :=
