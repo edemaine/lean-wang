@@ -615,6 +615,119 @@ def phiL3 : Black → Block
   | .d => .mkRows .L3d .L3a .L3d .L3c
   | .e => .mkRows .L3e .L3a .L3e .L3c
 
+/-!
+Named theorem form of the human Figure 16 transcription.  These facts are
+definitionally true, but keeping the displayed rows as theorem names makes the
+transcription easy to audit and reference from the Figure 13 layer decoder.
+-/
+namespace HumanTranscription
+
+theorem phiL1Star_row :
+    phiL1Star = .mkRows .L1d .L1b .L1a .L1c :=
+  rfl
+
+theorem phiL2Component1_a :
+    phiL2Component1 .a = .mkRows .G3 .L2b .blank .G2 :=
+  rfl
+
+theorem phiL2Component1_b :
+    phiL2Component1 .b = .mkRows .R3 .L2d .blank .R2 :=
+  rfl
+
+theorem phiL2Component1_c :
+    phiL2Component1 .c = .mkRows .R1 .L2c .blank .G0 :=
+  rfl
+
+theorem phiL2Component1_d :
+    phiL2Component1 .d = .mkRows .G1 .L2a .blank .R0 :=
+  rfl
+
+theorem phiL2Component2_a :
+    phiL2Component2 .a = .mkRows .G2 .blank .L2a .R3 :=
+  rfl
+
+theorem phiL2Component2_b :
+    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R3 :=
+  rfl
+
+theorem phiL2Component2_c :
+    phiL2Component2 .c = .mkRows .R2 .blank .L2c .G3 :=
+  rfl
+
+theorem phiL2Component2_d :
+    phiL2Component2 .d = .mkRows .G0 .blank .L2d .G1 :=
+  rfl
+
+theorem phiL2Component2_e :
+    phiL2Component2 .e = .mkRows .R0 .blank .L2e .R1 :=
+  rfl
+
+theorem phiL2Component2_f :
+    phiL2Component2 .f = .mkRows .R2 .blank .L2f .R1 :=
+  rfl
+
+theorem phiL2Component2_g :
+    phiL2Component2 .g = .mkRows .R2 .blank .L2g .R3 :=
+  rfl
+
+theorem phiL2Component2_h :
+    phiL2Component2 .h = .mkRows .R0 .blank .L2h .R3 :=
+  rfl
+
+theorem phiL2Component2_i :
+    phiL2Component2 .i = .mkRows .G0 .blank .L2i .R3 :=
+  rfl
+
+theorem phiL2Component2_j :
+    phiL2Component2 .j = .mkRows .R0 .blank .L2j .G1 :=
+  rfl
+
+theorem phiL2Component2_k :
+    phiL2Component2 .k = .mkRows .G2 .blank .L2k .R1 :=
+  rfl
+
+theorem phiL2Component2_l :
+    phiL2Component2 .l = .mkRows .R2 .blank .L2l .G3 :=
+  rfl
+
+theorem phiL2Component2_m :
+    phiL2Component2 .m = .mkRows .G0 .blank .L2m .G1 :=
+  rfl
+
+theorem phiL2Component2_n :
+    phiL2Component2 .n = .mkRows .G2 .blank .L2n .G1 :=
+  rfl
+
+theorem phiL2Component2_o :
+    phiL2Component2 .o = .mkRows .G2 .blank .L2o .G3 :=
+  rfl
+
+theorem phiL2Component2_p :
+    phiL2Component2 .p = .mkRows .G0 .blank .L2p .G3 :=
+  rfl
+
+theorem phiL3_a :
+    phiL3 .a = .mkRows .L3e .L3a .L3a .L3b :=
+  rfl
+
+theorem phiL3_b :
+    phiL3 .b = .mkRows .L3d .L3a .L3b .L3b :=
+  rfl
+
+theorem phiL3_c :
+    phiL3 .c = .mkRows .L3d .L3a .L3c .L3c :=
+  rfl
+
+theorem phiL3_d :
+    phiL3 .d = .mkRows .L3d .L3a .L3d .L3c :=
+  rfl
+
+theorem phiL3_e :
+    phiL3 .e = .mkRows .L3e .L3a .L3e .L3c :=
+  rfl
+
+end HumanTranscription
+
 /-- Domain of the finite Figure 16 substitution rule table. -/
 inductive RuleSource where
   | l1Star
