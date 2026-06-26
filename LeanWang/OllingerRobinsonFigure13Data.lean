@@ -2077,6 +2077,65 @@ def scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSitePairCompatibili
     realizes
 
 /--
+Concrete layered scaffold data from a flat Figure 18 role table.
+
+This is the entry point for a future paper-derived Figure 18 role
+transcription: the table determines the active sites and corner site, while the
+Figure 13 layer decomposition remains the audited data in this module.
+-/
+def scaffoldDataOfFlatRoleTable
+    (table : Figure18RoleTable.FlatRoleTable) :
+    LayeredFigure18ScaffoldData :=
+  scaffoldDataOfSites table.activeSiteData table.cornerSite
+
+@[simp]
+theorem scaffoldDataOfFlatRoleTable_activeSiteData
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (scaffoldDataOfFlatRoleTable table).activeSiteData =
+      table.activeSiteData :=
+  rfl
+
+@[simp]
+theorem scaffoldDataOfFlatRoleTable_activeSites
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (scaffoldDataOfFlatRoleTable table).activeSites =
+      table.activeSites := by
+  rw [LayeredFigure18ScaffoldData.activeSites_eq]
+  simp
+
+@[simp]
+theorem scaffoldDataOfFlatRoleTable_cornerSite
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (scaffoldDataOfFlatRoleTable table).cornerSite =
+      table.cornerSite :=
+  scaffoldDataOfSites_cornerSite table.activeSiteData table.cornerSite
+
+theorem scaffoldDataOfFlatRoleTable_tiles
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (scaffoldDataOfFlatRoleTable table).scaffold.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  scaffoldDataOfSites_tiles table.activeSiteData table.cornerSite
+
+def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
+    (table : Figure18RoleTable.FlatRoleTable)
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        table.activeSiteData.sites table.cornerSite)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfFlatRoleTable table).table.presentation.toScaffold) :
+    (scaffoldDataOfFlatRoleTable table).IndexedRoutedCertificate := by
+  exact
+    scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSitePairCompatibility
+      table.activeSiteData table.cornerSite
+      hwindows
+      hpair
+      realizes
+
+/--
 Plain Figure 18 scaffold data with the Figure 13 layer transcription fixed.
 
 This is the non-layered certificate target: proving its `Certificate` only

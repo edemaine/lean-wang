@@ -697,6 +697,14 @@ def sitesOfNatSpecs : List (Nat × Quadrant) → List Figure18Site
       | some site => site :: sitesOfNatSpecs specs
       | none => sitesOfNatSpecs specs
 
+/-- Encode a typed Figure 18 site as the raw Nat-indexed form used for data entry. -/
+def toNatSpec (site : Figure18Site) : Nat × Quadrant :=
+  (site.index.val, site.quadrant)
+
+/-- Encode typed Figure 18 sites as raw Nat-indexed specs. -/
+def natSpecsOfSites (sites : List Figure18Site) : List (Nat × Quadrant) :=
+  sites.map toNatSpec
+
 /-- Finite check that all raw Figure 18 site specs use valid Figure 13 indices. -/
 def natSpecsValidBool (specs : List (Nat × Quadrant)) : Bool :=
   specs.all fun spec => decide (spec.1 < 92)
@@ -773,6 +781,26 @@ theorem mem_sitesOfNatSpecs_iff_of_natSpecsValidBool
     rcases mem_sitesOfNatSpecs_of_mem hcheck hmem with ⟨hi, hsite⟩
     simpa using hsite
 
+theorem natSpecsValidBool_natSpecsOfSites (sites : List Figure18Site) :
+    natSpecsValidBool (natSpecsOfSites sites) = true := by
+  induction sites with
+  | nil =>
+      rfl
+  | cons site sites ih =>
+      rcases site with ⟨i, q⟩
+      simp [natSpecsOfSites, toNatSpec, natSpecsValidBool, i.isLt]
+
+theorem sitesOfNatSpecs_natSpecsOfSites (sites : List Figure18Site) :
+    sitesOfNatSpecs (natSpecsOfSites sites) = sites := by
+  induction sites with
+  | nil =>
+      rfl
+  | cons site sites ih =>
+      rcases site with ⟨i, q⟩
+      change sitesOfNatSpecs ((i.val, q) :: natSpecsOfSites sites) =
+        ({ index := i, quadrant := q } : Figure18Site) :: sites
+      simp [sitesOfNatSpecs, ofNat?, i.isLt, ih]
+
 /-- Checked raw data for a finite list of Figure 18 sites. -/
 structure CheckedNatSpecs where
   specs : List (Nat × Quadrant)
@@ -780,8 +808,22 @@ structure CheckedNatSpecs where
 
 namespace CheckedNatSpecs
 
+def ofSites (sites : List Figure18Site) : CheckedNatSpecs where
+  specs := natSpecsOfSites sites
+  valid := natSpecsValidBool_natSpecsOfSites sites
+
 def sites (data : CheckedNatSpecs) : List Figure18Site :=
   sitesOfNatSpecs data.specs
+
+@[simp]
+theorem ofSites_specs (sites : List Figure18Site) :
+    (ofSites sites).specs = natSpecsOfSites sites :=
+  rfl
+
+@[simp]
+theorem ofSites_sites (sites : List Figure18Site) :
+    (ofSites sites).sites = sites :=
+  sitesOfNatSpecs_natSpecsOfSites sites
 
 theorem sites_length (data : CheckedNatSpecs) :
     data.sites.length = data.specs.length :=
@@ -2283,6 +2325,10 @@ def cornerSite (table : FlatRoleTable) : Figure18Site where
 def activeSites (table : FlatRoleTable) : List Figure18Site :=
   activeFlatSites table.flat
 
+def activeSiteData (table : FlatRoleTable) :
+    Figure18Site.CheckedNatSpecs :=
+  Figure18Site.CheckedNatSpecs.ofSites table.activeSites
+
 def cornerSites (table : FlatRoleTable) : List Figure18Site :=
   cornerFlatSites table.flat
 
@@ -2371,6 +2417,11 @@ theorem corner_mem_activeSites (table : FlatRoleTable) :
     table.cornerSite ∈ table.activeSites :=
   corner_mem_activeFlatSites_ofFlatRoles table.flat table.length_eq
     table.cornerIndex table.cornerQuadrant table.uniqueCorner
+
+@[simp]
+theorem activeSiteData_sites (table : FlatRoleTable) :
+    table.activeSiteData.sites = table.activeSites :=
+  Figure18Site.CheckedNatSpecs.ofSites_sites table.activeSites
 
 theorem ofActiveSites_roleAtSite
     (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
