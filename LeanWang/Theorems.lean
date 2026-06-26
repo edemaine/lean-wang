@@ -53,17 +53,181 @@ def tileColors (t : WangTile) : List Nat :=
 def payloadPalette (T : TileSet) : List Nat :=
   0 :: T.flatMap tileColors
 
+/-- Parameters for payload tiles with fixed north color. -/
+structure PayloadNParams where
+  colors : List Nat
+  n : Nat
+
+namespace PayloadNParams
+
+def toTuple (p : PayloadNParams) : List Nat × Nat :=
+  (p.colors, p.n)
+
+def ofTuple (p : List Nat × Nat) : PayloadNParams where
+  colors := p.1
+  n := p.2
+
+def equivTuple : PayloadNParams ≃ List Nat × Nat where
+  toFun := toTuple
+  invFun := ofTuple
+  left_inv := by
+    intro p
+    cases p
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨colors, n⟩
+    rfl
+
+instance instPrimcodable : Primcodable PayloadNParams :=
+  Primcodable.ofEquiv (List Nat × Nat) equivTuple
+
+theorem toTuple_primrec : Primrec toTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv (e := equivTuple) : Primrec equivTuple)
+
+theorem ofTuple_primrec : Primrec ofTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv_symm (e := equivTuple) : Primrec equivTuple.symm)
+
+theorem colors_primrec : Primrec PayloadNParams.colors :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem n_primrec : Primrec PayloadNParams.n :=
+  Primrec.snd.comp toTuple_primrec
+
+end PayloadNParams
+
+/-- Parameters for payload tiles with fixed north and south colors. -/
+structure PayloadNSParams where
+  colors : List Nat
+  n : Nat
+  s : Nat
+
+namespace PayloadNSParams
+
+def toTuple (p : PayloadNSParams) : List Nat × Nat × Nat :=
+  (p.colors, p.n, p.s)
+
+def ofTuple (p : List Nat × Nat × Nat) : PayloadNSParams where
+  colors := p.1
+  n := p.2.1
+  s := p.2.2
+
+def equivTuple : PayloadNSParams ≃ List Nat × Nat × Nat where
+  toFun := toTuple
+  invFun := ofTuple
+  left_inv := by
+    intro p
+    cases p
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨colors, n, s⟩
+    rfl
+
+instance instPrimcodable : Primcodable PayloadNSParams :=
+  Primcodable.ofEquiv (List Nat × Nat × Nat) equivTuple
+
+theorem toTuple_primrec : Primrec toTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv (e := equivTuple) : Primrec equivTuple)
+
+theorem ofTuple_primrec : Primrec ofTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv_symm (e := equivTuple) : Primrec equivTuple.symm)
+
+theorem colors_primrec : Primrec PayloadNSParams.colors :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem n_primrec : Primrec PayloadNSParams.n :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem s_primrec : Primrec PayloadNSParams.s :=
+  Primrec.snd.comp (Primrec.snd.comp toTuple_primrec)
+
+end PayloadNSParams
+
+/-- Parameters for payload tiles with fixed north, south, and east colors. -/
+structure PayloadNSEParams where
+  colors : List Nat
+  n : Nat
+  s : Nat
+  e : Nat
+
+namespace PayloadNSEParams
+
+def toTuple (p : PayloadNSEParams) : List Nat × Nat × Nat × Nat :=
+  (p.colors, p.n, p.s, p.e)
+
+def ofTuple (p : List Nat × Nat × Nat × Nat) : PayloadNSEParams where
+  colors := p.1
+  n := p.2.1
+  s := p.2.2.1
+  e := p.2.2.2
+
+def equivTuple : PayloadNSEParams ≃ List Nat × Nat × Nat × Nat where
+  toFun := toTuple
+  invFun := ofTuple
+  left_inv := by
+    intro p
+    cases p
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨colors, n, s, e⟩
+    rfl
+
+instance instPrimcodable : Primcodable PayloadNSEParams :=
+  Primcodable.ofEquiv (List Nat × Nat × Nat × Nat) equivTuple
+
+theorem toTuple_primrec : Primrec toTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv (e := equivTuple) : Primrec equivTuple)
+
+theorem ofTuple_primrec : Primrec ofTuple := by
+  simpa [equivTuple] using
+    (Primrec.of_equiv_symm (e := equivTuple) : Primrec equivTuple.symm)
+
+theorem colors_primrec : Primrec PayloadNSEParams.colors :=
+  Primrec.fst.comp toTuple_primrec
+
+theorem n_primrec : Primrec PayloadNSEParams.n :=
+  Primrec.fst.comp (Primrec.snd.comp toTuple_primrec)
+
+theorem s_primrec : Primrec PayloadNSEParams.s :=
+  Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem e_primrec : Primrec PayloadNSEParams.e :=
+  Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+end PayloadNSEParams
+
+/-- Payload tiles with fixed north, south, and east colors and west in `colors`. -/
+def payloadsWithNSEParams (p : PayloadNSEParams) : TileSet :=
+  p.colors.map fun w => { n := p.n, s := p.s, e := p.e, w := w }
+
+/-- Payload tiles with fixed north and south colors and remaining colors in `colors`. -/
+def payloadsWithNSParams (p : PayloadNSParams) : TileSet :=
+  p.colors.flatMap fun e =>
+    payloadsWithNSEParams { colors := p.colors, n := p.n, s := p.s, e := e }
+
+/-- Payload tiles with fixed north color and remaining colors in `colors`. -/
+def payloadsWithNParams (p : PayloadNParams) : TileSet :=
+  p.colors.flatMap fun s =>
+    payloadsWithNSParams { colors := p.colors, n := p.n, s := s }
+
 /-- Payload tiles with fixed north, south, and east colors and west in `colors`. -/
 def payloadsWithNSE (colors : List Nat) (n s e : Nat) : TileSet :=
-  colors.map fun w => { n := n, s := s, e := e, w := w }
+  payloadsWithNSEParams { colors := colors, n := n, s := s, e := e }
 
 /-- Payload tiles with fixed north and south colors and remaining colors in `colors`. -/
 def payloadsWithNS (colors : List Nat) (n s : Nat) : TileSet :=
-  colors.flatMap fun e => payloadsWithNSE colors n s e
+  payloadsWithNSParams { colors := colors, n := n, s := s }
 
 /-- Payload tiles with fixed north color and remaining colors in `colors`. -/
 def payloadsWithN (colors : List Nat) (n : Nat) : TileSet :=
-  colors.flatMap fun s => payloadsWithNS colors n s
+  payloadsWithNParams { colors := colors, n := n }
 
 /--
 All payload tiles whose edge colors come from a finite color palette.
@@ -91,31 +255,73 @@ theorem payloadPalette_primrec : Primrec payloadPalette := by
     (Primrec.list_flatMap Primrec.id
       (Primrec₂.mk (tileColors_primrec.comp Primrec.snd)))
 
-theorem payloadsWithNSE_primrec :
-    Primrec (fun p : ((List Nat × Nat) × Nat) × Nat =>
-      payloadsWithNSE p.1.1.1 p.1.1.2 p.1.2 p.2) := by
-  -- Routine projection bookkeeping for the finite palette generator.
-  sorry
+theorem payloadsWithNSEParams_primrec : Primrec payloadsWithNSEParams := by
+  unfold payloadsWithNSEParams
+  refine Primrec.list_map PayloadNSEParams.colors_primrec ?_
+  have hn : Primrec₂ (fun (p : PayloadNSEParams) (_w : Nat) => p.n) :=
+    PayloadNSEParams.n_primrec.comp₂ Primrec₂.left
+  have hs : Primrec₂ (fun (p : PayloadNSEParams) (_w : Nat) => p.s) :=
+    PayloadNSEParams.s_primrec.comp₂ Primrec₂.left
+  have he : Primrec₂ (fun (p : PayloadNSEParams) (_w : Nat) => p.e) :=
+    PayloadNSEParams.e_primrec.comp₂ Primrec₂.left
+  have hw : Primrec₂ (fun (_p : PayloadNSEParams) (w : Nat) => w) :=
+    Primrec₂.right
+  have htuple : Primrec₂ (fun (p : PayloadNSEParams) (w : Nat) =>
+      (p.n, p.s, p.e, w)) :=
+    Primrec₂.pair.comp₂ hn (Primrec₂.pair.comp₂ hs (Primrec₂.pair.comp₂ he hw))
+  exact WangTile.ofTuple_primrec.comp₂ htuple
 
-theorem payloadsWithNS_primrec :
-    Primrec (fun p : (List Nat × Nat) × Nat => payloadsWithNS p.1.1 p.1.2 p.2) := by
-  unfold payloadsWithNS
-  refine Primrec.list_flatMap (Primrec.fst.comp Primrec.fst) ?_
-  apply Primrec₂.mk
-  exact payloadsWithNSE_primrec
+theorem payloadNSEParamsOfNS_primrec₂ :
+    Primrec₂ (fun (p : PayloadNSParams) (e : Nat) =>
+      ({ colors := p.colors, n := p.n, s := p.s, e := e } : PayloadNSEParams)) := by
+  have hcolors : Primrec₂ (fun (p : PayloadNSParams) (_e : Nat) => p.colors) :=
+    PayloadNSParams.colors_primrec.comp₂ Primrec₂.left
+  have hn : Primrec₂ (fun (p : PayloadNSParams) (_e : Nat) => p.n) :=
+    PayloadNSParams.n_primrec.comp₂ Primrec₂.left
+  have hs : Primrec₂ (fun (p : PayloadNSParams) (_e : Nat) => p.s) :=
+    PayloadNSParams.s_primrec.comp₂ Primrec₂.left
+  have he : Primrec₂ (fun (_p : PayloadNSParams) (e : Nat) => e) :=
+    Primrec₂.right
+  have htuple : Primrec₂ (fun (p : PayloadNSParams) (e : Nat) =>
+      (p.colors, p.n, p.s, e)) :=
+    Primrec₂.pair.comp₂ hcolors (Primrec₂.pair.comp₂ hn (Primrec₂.pair.comp₂ hs he))
+  exact PayloadNSEParams.ofTuple_primrec.comp₂ htuple
 
-theorem payloadsWithN_primrec :
-    Primrec (fun p : List Nat × Nat => payloadsWithN p.1 p.2) := by
-  unfold payloadsWithN
-  refine Primrec.list_flatMap Primrec.fst ?_
-  apply Primrec₂.mk
-  exact payloadsWithNS_primrec
+theorem payloadsWithNSParams_primrec : Primrec payloadsWithNSParams := by
+  unfold payloadsWithNSParams
+  refine Primrec.list_flatMap PayloadNSParams.colors_primrec ?_
+  exact payloadsWithNSEParams_primrec.comp₂ payloadNSEParamsOfNS_primrec₂
+
+theorem payloadNSParamsOfN_primrec₂ :
+    Primrec₂ (fun (p : PayloadNParams) (s : Nat) =>
+      ({ colors := p.colors, n := p.n, s := s } : PayloadNSParams)) := by
+  have hcolors : Primrec₂ (fun (p : PayloadNParams) (_s : Nat) => p.colors) :=
+    PayloadNParams.colors_primrec.comp₂ Primrec₂.left
+  have hn : Primrec₂ (fun (p : PayloadNParams) (_s : Nat) => p.n) :=
+    PayloadNParams.n_primrec.comp₂ Primrec₂.left
+  have hs : Primrec₂ (fun (_p : PayloadNParams) (s : Nat) => s) :=
+    Primrec₂.right
+  have htuple : Primrec₂ (fun (p : PayloadNParams) (s : Nat) =>
+      (p.colors, p.n, s)) :=
+    Primrec₂.pair.comp₂ hcolors (Primrec₂.pair.comp₂ hn hs)
+  exact PayloadNSParams.ofTuple_primrec.comp₂ htuple
+
+theorem payloadsWithNParams_primrec : Primrec payloadsWithNParams := by
+  unfold payloadsWithNParams
+  refine Primrec.list_flatMap PayloadNParams.colors_primrec ?_
+  exact payloadsWithNSParams_primrec.comp₂ payloadNSParamsOfN_primrec₂
+
+theorem payloadNParamsOfColors_primrec₂ :
+    Primrec₂ (fun (colors : List Nat) (n : Nat) =>
+      ({ colors := colors, n := n } : PayloadNParams)) := by
+  have htuple : Primrec₂ (fun (colors : List Nat) (n : Nat) => (colors, n)) :=
+    Primrec₂.pair
+  exact PayloadNParams.ofTuple_primrec.comp₂ htuple
 
 theorem completePayloadsFromColors_primrec : Primrec completePayloadsFromColors := by
   unfold completePayloadsFromColors
   refine Primrec.list_flatMap Primrec.id ?_
-  apply Primrec₂.mk
-  exact payloadsWithN_primrec
+  exact payloadsWithNParams_primrec.comp₂ payloadNParamsOfColors_primrec₂
 
 theorem completePayloads_primrec : Primrec completePayloads :=
   completePayloadsFromColors_primrec.comp payloadPalette_primrec
