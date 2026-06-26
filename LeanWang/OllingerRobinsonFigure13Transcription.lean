@@ -1586,6 +1586,19 @@ theorem combinedSite_product
   rw [table.combinedSite_tile tile]
   exact hproduct
 
+noncomputable def combinedPayload
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    WangTile :=
+  Classical.choose (table.combinedSite_product tile)
+
+theorem combinedPayload_product
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed)) :
+    WangTile.product (table.combinedSite tile).tile
+      (table.combinedPayload tile) = tile.1 :=
+  Classical.choose_spec (table.combinedSite_product tile)
+
 theorem combinedSite_eq_of_product_site
     (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
     (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed))
@@ -5480,6 +5493,132 @@ theorem toProductWitnessRouting_payloadWitness_apply
     (j : Fin (RobinsonSquare.freeGridSide level)) :
     routing.toProductWitnessRouting.payloadWitness i j =
       routing.payloadWitness i j :=
+  rfl
+
+/--
+Build corridor routing from selected combined-tiling sites.
+
+This removes the repetitive product-witness extraction from the concrete
+Robinson proof: once the geometric argument has selected the free crossings,
+shown that their decoded scaffold sites are active with the right corner, and
+proved corridor transmission/site-compatibility, the payload witnesses are read
+directly from the product decomposition of the combined tiling.
+-/
+noncomputable def ofCombinedSites
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (active :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          CellRole.isActive
+            (table.roleAtSite
+              (table.combinedSite
+                (x (geometry.freeColumnCoord i,
+                  geometry.freeRowCoord j)))) = true)
+    (cornerSite :
+      table.combinedSite
+        (x (geometry.freeColumnCoord
+          ⟨0, RobinsonSquare.freeGridSide_pos level⟩,
+          geometry.freeRowCoord
+            ⟨0, RobinsonSquare.freeGridSide_pos level⟩)) =
+        table.cornerSite)
+    (htransmit :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+            (∀ column : Int, geometry.isBoardColumn column →
+              ¬ geometry.hasHorizontalObstruction column
+                (geometry.freeRowCoord j)) →
+              WangTile.HMatches
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord j)))
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord ⟨i.val + 1, hi⟩,
+                    geometry.freeRowCoord j))))
+    (vtransmit :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+            (∀ row : Int, geometry.isBoardRow row →
+              ¬ geometry.hasVerticalObstruction
+                (geometry.freeColumnCoord i) row) →
+              WangTile.VMatches
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord j)))
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord ⟨j.val + 1, hj⟩))))
+    (siteCompatible :
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.hCompatible
+            (table.combinedSite
+              (x (geometry.freeColumnCoord i,
+                geometry.freeRowCoord j)))
+            (table.combinedSite
+              (x (geometry.freeColumnCoord ⟨i.val + 1, hi⟩,
+                geometry.freeRowCoord j))) = true) ∧
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.vCompatible
+            (table.combinedSite
+              (x (geometry.freeColumnCoord i,
+                geometry.freeRowCoord j)))
+            (table.combinedSite
+              (x (geometry.freeColumnCoord i,
+                geometry.freeRowCoord ⟨j.val + 1, hj⟩))) = true)) :
+    CorridorProductWitnessRouting table x geometry where
+  siteRect := fun i j =>
+    table.combinedSite
+      (x (geometry.freeColumnCoord i, geometry.freeRowCoord j))
+  payloadWitness := fun i j =>
+    ⟨table.combinedPayload
+      (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)),
+      table.combinedPayload_product
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j))⟩
+  active := active
+  cornerSite := cornerSite
+  htransmit := htransmit
+  vtransmit := vtransmit
+  siteCompatible := siteCompatible
+
+@[simp]
+theorem ofCombinedSites_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (active cornerSite htransmit vtransmit siteCompatible)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (ofCombinedSites (table := table) (x := x) (geometry := geometry)
+      active cornerSite htransmit vtransmit siteCompatible).siteRect i j =
+      table.combinedSite
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) :=
+  rfl
+
+@[simp]
+theorem ofCombinedSites_payloadWitness_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (active cornerSite htransmit vtransmit siteCompatible)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    ((ofCombinedSites (table := table) (x := x) (geometry := geometry)
+      active cornerSite htransmit vtransmit siteCompatible).payloadWitness i j).1 =
+      table.combinedPayload
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) :=
   rfl
 
 end CorridorProductWitnessRouting
