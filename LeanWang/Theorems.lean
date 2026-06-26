@@ -785,6 +785,173 @@ theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
   patch.toCombinedBoxPatch.tileableBox
 
 /--
+Inactive payload tile that absorbs the payload colors of any active neighboring
+box cells and uses color `0` on sides without an active neighbor.
+-/
+def inactivePayloadAround {r : Nat} (isActive : Box r → Bool)
+    (activePayload : Box r → WangTile) (p : Box r) : WangTile where
+  n :=
+    if hp : InBox r (p.1.1, p.1.2 + 1) then
+      let q : Box r := ⟨(p.1.1, p.1.2 + 1), hp⟩
+      if isActive q = true then (activePayload q).s else 0
+    else 0
+  s :=
+    if hp : InBox r (p.1.1, p.1.2 - 1) then
+      let q : Box r := ⟨(p.1.1, p.1.2 - 1), hp⟩
+      if isActive q = true then (activePayload q).n else 0
+    else 0
+  e :=
+    if hp : InBox r (p.1.1 + 1, p.1.2) then
+      let q : Box r := ⟨(p.1.1 + 1, p.1.2), hp⟩
+      if isActive q = true then (activePayload q).w else 0
+    else 0
+  w :=
+    if hp : InBox r (p.1.1 - 1, p.1.2) then
+      let q : Box r := ⟨(p.1.1 - 1, p.1.2), hp⟩
+      if isActive q = true then (activePayload q).e else 0
+    else 0
+
+def payloadWithInactiveAround {r : Nat} (isActive : Box r → Bool)
+    (activePayload : Box r → WangTile) (p : Box r) : WangTile :=
+  if isActive p = true then activePayload p
+  else inactivePayloadAround isActive activePayload p
+
+theorem inactivePayloadAround_mem_completePayloads {T : TileSet} {r : Nat}
+    {isActive : Box r → Bool} {activePayload : Box r → WangTile}
+    (hmem : ∀ p : Box r, isActive p = true → activePayload p ∈ T)
+    (p : Box r) :
+    inactivePayloadAround isActive activePayload p ∈ completePayloads T := by
+  refine mk_mem_completePayloads ?_ ?_ ?_ ?_
+  · split
+    · rename_i hp
+      by_cases hactive :
+          isActive ⟨(p.1.1, p.1.2 + 1), hp⟩ = true
+      · simp [hactive, mem_payloadPalette_s (hmem _ hactive)]
+      · simp [hactive, zero_mem_payloadPalette]
+    · simp [zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hactive :
+          isActive ⟨(p.1.1, p.1.2 - 1), hp⟩ = true
+      · simp [hactive, mem_payloadPalette_n (hmem _ hactive)]
+      · simp [hactive, zero_mem_payloadPalette]
+    · simp [zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hactive :
+          isActive ⟨(p.1.1 + 1, p.1.2), hp⟩ = true
+      · simp [hactive, mem_payloadPalette_w (hmem _ hactive)]
+      · simp [hactive, zero_mem_payloadPalette]
+    · simp [zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hactive :
+          isActive ⟨(p.1.1 - 1, p.1.2), hp⟩ = true
+      · simp [hactive, mem_payloadPalette_e (hmem _ hactive)]
+      · simp [hactive, zero_mem_payloadPalette]
+    · simp [zero_mem_payloadPalette]
+
+theorem payloadWithInactiveAround_hmatch {r : Nat}
+    {isActive : Box r → Bool} {activePayload : Box r → WangTile}
+    (hactive :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+        isActive p = true →
+          isActive ⟨(p.1.1 + 1, p.1.2), hp⟩ = true →
+            WangTile.HMatches (activePayload p)
+              (activePayload ⟨(p.1.1 + 1, p.1.2), hp⟩))
+    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2)) :
+    WangTile.HMatches
+      (payloadWithInactiveAround isActive activePayload p)
+      (payloadWithInactiveAround isActive activePayload
+        ⟨(p.1.1 + 1, p.1.2), hp⟩) := by
+  let q : Box r := ⟨(p.1.1 + 1, p.1.2), hp⟩
+  by_cases hpActive : isActive p = true
+  · by_cases hqActive : isActive q = true
+    · simpa [payloadWithInactiveAround, q, hpActive, hqActive] using
+        hactive p hp hpActive hqActive
+    · simp [WangTile.HMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, p.2]
+  · by_cases hqActive : isActive q = true
+    · simp [WangTile.HMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, hp]
+    · simp [WangTile.HMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, hp, p.2]
+
+theorem payloadWithInactiveAround_vmatch {r : Nat}
+    {isActive : Box r → Bool} {activePayload : Box r → WangTile}
+    (hactive :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+        isActive p = true →
+          isActive ⟨(p.1.1, p.1.2 + 1), hp⟩ = true →
+            WangTile.VMatches (activePayload p)
+              (activePayload ⟨(p.1.1, p.1.2 + 1), hp⟩))
+    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1)) :
+    WangTile.VMatches
+      (payloadWithInactiveAround isActive activePayload p)
+      (payloadWithInactiveAround isActive activePayload
+        ⟨(p.1.1, p.1.2 + 1), hp⟩) := by
+  let q : Box r := ⟨(p.1.1, p.1.2 + 1), hp⟩
+  by_cases hpActive : isActive p = true
+  · by_cases hqActive : isActive q = true
+    · simpa [payloadWithInactiveAround, q, hpActive, hqActive] using
+        hactive p hp hpActive hqActive
+    · simp [WangTile.VMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, p.2]
+  · by_cases hqActive : isActive q = true
+    · simp [WangTile.VMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, hp]
+    · simp [WangTile.VMatches, payloadWithInactiveAround,
+        inactivePayloadAround, q, hpActive, hqActive, hp, p.2]
+
+/--
+Assemble a layer patch from a base scaffold box and payloads prescribed only
+on active cells.  Inactive cells are filled automatically by the complete
+payload palette so that they absorb neighboring active payload colors.
+-/
+def ofActivePayloads {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat}
+    (base : BoxPattern S.tiles r)
+    (base_valid : ValidBoxTiling S.tiles r base)
+    (activePayload : Box r → WangTile)
+    (active_payload : ∀ p : Box r, S.active (base p).1 = true →
+      activePayload p ∈ T ∧ ((base p).1 = S.corner → activePayload p = seed))
+    (active_hmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+            WangTile.HMatches (activePayload p)
+              (activePayload ⟨(p.1.1 + 1, p.1.2), hp⟩))
+    (active_vmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+            WangTile.VMatches (activePayload p)
+              (activePayload ⟨(p.1.1, p.1.2 + 1), hp⟩)) :
+    CombinedBoxLayerPatch S T seed r where
+  base := base
+  payload :=
+    payloadWithInactiveAround (fun p => S.active (base p).1) activePayload
+  base_valid := base_valid
+  active_payload := by
+    intro p hactive
+    simpa [payloadWithInactiveAround, hactive] using active_payload p hactive
+  inactive_payload := by
+    intro p hinactive
+    have hmem :
+        ∀ q : Box r, S.active (base q).1 = true → activePayload q ∈ T := by
+      intro q hq
+      exact (active_payload q hq).1
+    rw [payloadWithInactiveAround, if_neg]
+    · exact inactivePayloadAround_mem_completePayloads hmem p
+    · simp [hinactive]
+  payload_hmatch := by
+    intro p hp
+    exact payloadWithInactiveAround_hmatch active_hmatch p hp
+  payload_vmatch := by
+    intro p hp
+    exact payloadWithInactiveAround_vmatch active_vmatch p hp
+
+/--
 Build a layer patch over a scaffold box that is entirely inactive.  Active-cell
 payload obligations are contradictory, and inactive payload membership is
 supplied by the complete payload box.
