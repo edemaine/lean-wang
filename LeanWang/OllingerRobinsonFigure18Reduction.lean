@@ -2520,6 +2520,144 @@ theorem
 
 /--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and generated position-coded source-route
+obligations.
+
+This is the direct Figure 18 scaffold surface for the paper's selected
+free-coordinate argument; it does not require adjacent selected coordinates.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  let I : OllingerRobinson.Figure18RoutedInstance := {
+    table := (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table
+    certificate := certificate
+  }
+  exact
+    encoded_domino_problem_undecidable_of_checked_flexible_transcription_position_source
+      I.toFlexibleInstance.checkedFlexibleTranscription
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and generated position-coded source-route
+obligations.
+
+This is the direct Figure 18 scaffold surface for the paper's selected
+free-coordinate argument; it does not require adjacent selected coordinates.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  let I : OllingerRobinson.Figure18RoutedInstance := {
+    table := (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table
+    certificate := certificate
+  }
+  exact
+    domino_problem_undecidable_of_checked_flexible_transcription_position_source
+      I.toFlexibleInstance.checkedFlexibleTranscription
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and the generated interior position-code rows.
+
+This is the direct Figure 18 scaffold surface for the paper's selected
+free-coordinate argument; it does not require adjacent selected coordinates.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  let I : OllingerRobinson.Figure18RoutedInstance := {
+    table := (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table
+    certificate := certificate
+  }
+  exact
+    encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+      I.toFlexibleInstance.checkedFlexibleTranscription
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and the generated interior position-code rows.
+
+This is the direct Figure 18 scaffold surface for the paper's selected
+free-coordinate argument; it does not require adjacent selected coordinates.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  let I : OllingerRobinson.Figure18RoutedInstance := {
+    table := (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table
+    certificate := certificate
+  }
+  exact
+    domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+      I.toFlexibleInstance.checkedFlexibleTranscription
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, checked
 indexed routed stack witnesses, realization, and generated position-coded
 source-route obligations.
