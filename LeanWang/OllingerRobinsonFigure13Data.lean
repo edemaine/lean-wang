@@ -7612,6 +7612,26 @@ theorem indexedRoutedInstance_isScaffold
 
 end NatSiteRobinsonScaffoldCertificate
 
+def HasNatSiteSignalLocalTower
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).table.presentation.toScaffold T seed) x →
+      Nonempty (Figure18RobinsonBoardSignalLocalTower
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table x)
+
 namespace NatSiteRobinsonTowerIndexedBoxObligations
 
 def toIndexedBoxScaffoldCertificate
@@ -7681,6 +7701,33 @@ def ofPositiveBoxes
             (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
               cornerIndex cornerQuadrant cornerIndex_valid).table)
       indexedBoxes_pos
+
+def ofSignalLocalTowerPositiveBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (indexedBoxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofPositiveBoxes
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+      signalLocalTower)
+    pairCompatibility
+    indexedBoxes_pos
 
 def ofL2C1PositiveBoxes
     (signalLocalTower :
