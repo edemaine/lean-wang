@@ -4187,6 +4187,31 @@ def toFlatActiveSiteFixedCornerSquare
       activeSites cornerSite site).2 (window.listedActive i j)
   cornerSite := window.corner
 
+/--
+Convert an explicit flat-table listed-active witness, using the table's own
+computed active-site list, into a flat-active witness for that same table.
+-/
+def toFlatActiveSiteFixedCornerSquareForTable
+    {table : Figure18RoleTable.FlatRoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      table.toRoleTable table.activeSites table.cornerSite x n hn) :
+    Figure18FlatActiveSiteFixedCornerSquare table x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  horizontalCoord_succ := window.horizontalCoord_succ
+  verticalCoord_succ := window.verticalCoord_succ
+  activeSites := by
+    intro i j
+    rcases window.listedActive i j with hcorner | hactive
+    · rw [hcorner]
+      exact table.corner_mem_activeSites
+    · exact hactive
+  cornerSite := window.corner
+
 end Figure18ListedActiveSiteFixedCornerSquare
 
 theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness

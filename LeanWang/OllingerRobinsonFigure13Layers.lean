@@ -1950,6 +1950,34 @@ theorem siteRectangleOfListedActiveSiteFixedCornerSquare_eq_indexedRouted
       siteRectangleOfListedActiveSiteFixedCornerSquare window :=
   rfl
 
+/-- Site rectangle decoded from an explicit flat-table listed active-site window. -/
+noncomputable def siteRectangleOfListedActiveSiteFixedCornerSquareForFlatTable
+    {table : Figure18RoleTable.FlatRoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      table.toRoleTable table.activeSites table.cornerSite x n hn) :
+    SiteRectangle n n :=
+  siteRectangleOfFlatActiveSiteFixedCornerSquare
+    window.toFlatActiveSiteFixedCornerSquareForTable
+
+theorem siteRectangleOfListedActiveSiteFixedCornerSquareForFlatTable_eq_indexedRouted
+    {table : Figure18RoleTable.FlatRoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      table.toRoleTable table.activeSites table.cornerSite x n hn)
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x) :
+    siteRectangleOfIndexedRoutedFixedCornerSquare
+        ((window.toFlatActiveSiteFixedCornerSquareForTable).toIndexedRoutedFixedCornerSquare hx) =
+      siteRectangleOfListedActiveSiteFixedCornerSquareForFlatTable window :=
+  rfl
+
 abbrev IndexedRoutedFixedCornerSquareLayerComponents
     (D : Transcription)
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -4343,6 +4371,59 @@ def HasListedActiveSiteCheckedStacks
                   (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
                     true
 
+/--
+Finite stack certificate for listed active-site windows against a specified
+flat role table.
+
+This avoids rebuilding the flat table from the active-site list, which is useful
+for generated tables whose computed active-site list is already the theorem
+surface.
+-/
+def HasCheckedStacksForListedActiveSiteWindowsForFlatTable
+    (data : CheckedSparseRawData)
+    (table : Figure18RoleTable.FlatRoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window :
+      Figure18ListedActiveSiteFixedCornerSquare table.toRoleTable
+        table.activeSites table.cornerSite x n hn)
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x),
+      ∃ (stackData : CheckedLayerStackRectangle n n),
+        ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            ((window.toFlatActiveSiteFixedCornerSquareForTable).toIndexedRoutedFixedCornerSquare
+              hx)) = true),
+          ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+            stackData.compatibleBool data.layerData
+              (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                true
+
+/-- Finite checked-stack target for explicit flat-table listed active windows. -/
+def HasListedActiveSiteCheckedStacksForFlatTable
+    (data : CheckedSparseRawData)
+    (table : Figure18RoleTable.FlatRoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x),
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window :
+          Figure18ListedActiveSiteFixedCornerSquare table.toRoleTable
+            table.activeSites table.cornerSite x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedRoutedFixedCornerSquare
+                ((window.toFlatActiveSiteFixedCornerSquareForTable).toIndexedRoutedFixedCornerSquare
+                  hx)) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
 theorem hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedActiveWindowCheckedStacks table) :
@@ -4419,6 +4500,18 @@ theorem hasFlatActiveSiteCheckedStacks_of_listedActiveSite
   exact ⟨window.toFlatActiveSiteFixedCornerSquare, stackData, hsite,
     hmatch, hcompatible⟩
 
+theorem hasFlatActiveSiteCheckedStacks_of_listedActiveSiteForFlatTable
+    {data : CheckedSparseRawData}
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hchecked :
+      data.HasListedActiveSiteCheckedStacksForFlatTable table) :
+    data.HasFlatActiveSiteCheckedStacks table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window.toFlatActiveSiteFixedCornerSquareForTable, stackData,
+    hsite, hmatch, hcompatible⟩
+
 theorem hasListedActiveSiteCheckedStacks_of_windows
     {data : CheckedSparseRawData}
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -4429,6 +4522,21 @@ theorem hasListedActiveSiteCheckedStacks_of_windows
       data.HasCheckedStacksForListedActiveSiteWindows
         activeSites cornerSite) :
     data.HasListedActiveSiteCheckedStacks activeSites cornerSite := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window⟩
+  rcases hstacks window hx with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
+
+theorem hasListedActiveSiteCheckedStacksForFlatTable_of_windows
+    {data : CheckedSparseRawData}
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+        table.toRoleTable table.activeSites table.cornerSite)
+    (hstacks :
+      data.HasCheckedStacksForListedActiveSiteWindowsForFlatTable table) :
+    data.HasListedActiveSiteCheckedStacksForFlatTable table := by
   intro T seed x hx n hn
   rcases hwindows x hx n hn with ⟨window⟩
   rcases hstacks window hx with
@@ -4489,6 +4597,62 @@ theorem hasCheckedStacksForListedActiveSiteWindows_of_rectangles
   refine ⟨stackData, ?_, hmatch, hcompatible⟩
   have hR :=
     siteRectangleOfListedActiveSiteFixedCornerSquare_eq_indexedRouted
+      window hx
+  simpa [hR] using hsite
+
+theorem hasCheckedStacksForListedActiveSiteWindowsForFlatTable_of_rectangles
+    {data : CheckedSparseRawData}
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hrectangles :
+      data.HasCheckedStacksForListedActiveSiteRectangles
+        table.activeSites table.cornerSite) :
+    data.HasCheckedStacksForListedActiveSiteWindowsForFlatTable table := by
+  intro T seed x n hn window hx
+  let R := siteRectangleOfListedActiveSiteFixedCornerSquareForFlatTable window
+  have hlisted : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = table.cornerSite ∨ R i j ∈ table.activeSites := by
+    intro i j
+    change table.toRoleTable.combinedSite
+        (x (window.horizontalCoord i, window.verticalCoord j)) =
+          table.cornerSite ∨
+      table.toRoleTable.combinedSite
+        (x (window.horizontalCoord i, window.verticalCoord j)) ∈
+          table.activeSites
+    exact window.listedActive i j
+  have hcorner : R ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite := by
+    change table.toRoleTable.combinedSite
+        (x (window.horizontalCoord ⟨0, hn⟩,
+          window.verticalCoord ⟨0, hn⟩)) = table.cornerSite
+    exact window.corner
+  have hhcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true := by
+    intro i j hi
+    change Figure18Site.hCompatible
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i, window.verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord ⟨i.val + 1, hi⟩,
+            window.verticalCoord j))) = true
+    exact table.toRoleTable.combinedSite_hCompatible_of_selectedCoords
+      hx window.horizontalCoord window.verticalCoord
+      window.horizontalCoord_succ i j hi
+  have hvcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true := by
+    intro i j hj
+    change Figure18Site.vCompatible
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i, window.verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i,
+            window.verticalCoord ⟨j.val + 1, hj⟩))) = true
+    exact table.toRoleTable.combinedSite_vCompatible_of_selectedCoords
+      hx window.horizontalCoord window.verticalCoord
+      window.verticalCoord_succ i j hj
+  rcases hrectangles R hlisted hcorner hhcompat hvcompat with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  refine ⟨stackData, ?_, hmatch, hcompatible⟩
+  have hR :=
+    siteRectangleOfListedActiveSiteFixedCornerSquareForFlatTable_eq_indexedRouted
       window hx
   simpa [hR] using hsite
 
