@@ -6005,6 +6005,177 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from Robinson routed board/free-grid geometry,
+local compatibility of the selected Figure 18 sites, finite generated stack
+compatibility, realization, and generated position-coded source-route
+obligations.
+
+For generated flat role tables, active-site membership of each selected crossing
+is already part of `Figure18RobinsonBoardRoutedFreeGrid.active`; the Robinson
+Section 7 obstruction-signal argument only has to prove the local horizontal and
+vertical compatibility recorded by `HasLocallyCompatibleRobinsonBoardRoutedFreeGrids`.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_locally_compatible_robinson_grids_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofLocallyCompatibleFreeGrids
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hgrids hcheck hcompatible realizes)
+      h
+
+/--
+Unencoded domino undecidability from Robinson routed board/free-grid geometry,
+local compatibility of the selected Figure 18 sites, finite generated stack
+compatibility, realization, and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_locally_compatible_robinson_grids_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      (NatSiteRobinsonScaffoldCertificate.ofLocallyCompatibleFreeGrids
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hgrids hcheck hcompatible realizes)
+      h
+
+/--
+Encoded domino undecidability from Robinson routed board/free-grid geometry,
+local compatibility of the selected Figure 18 sites, finite generated stack
+compatibility, realization, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_locally_compatible_robinson_grids_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      (NatSiteRobinsonScaffoldCertificate.ofLocallyCompatibleFreeGrids
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hgrids hcheck hcompatible realizes)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from Robinson routed board/free-grid geometry,
+local compatibility of the selected Figure 18 sites, finite generated stack
+compatibility, realization, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_locally_compatible_robinson_grids_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      (NatSiteRobinsonScaffoldCertificate.ofLocallyCompatibleFreeGrids
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hgrids hcheck hcompatible realizes)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, indexed
 active-corner windows, realization, and generated position-coded source-route

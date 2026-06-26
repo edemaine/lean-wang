@@ -3601,6 +3601,40 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRobinsonBoardRoutedFr
       hcheck hallowed)
     realizes
 
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfLocallyCompatibleRobinsonBoardRoutedFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRobinsonBoardRoutedFreeGrids
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hgrids hcheck
+    (hasAllowedRobinsonBoardRoutedFreeGrids_of_flatRoleTable
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcompatible)
+    realizes
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -4691,6 +4725,38 @@ def ofAllowedFreeGrids
       (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
       (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
       hcheck hallowed)
+    realizes
+
+def ofLocallyCompatibleFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofAllowedFreeGrids activeSiteSpecs activeSiteSpecs_valid cornerIndex
+    cornerQuadrant cornerIndex_valid hgrids hcheck
+    (hasAllowedRobinsonBoardRoutedFreeGrids_of_flatRoleTable
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcompatible)
     realizes
 
 def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
