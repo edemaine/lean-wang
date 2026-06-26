@@ -1420,6 +1420,21 @@ def figure18ScaffoldDataOfSitesCertificateOfWindows
     (figure18ScaffoldDataOfSites activeSiteData cornerSite)
     localFreeSquareWindows realizes
 
+def figure18ScaffoldDataOfSitesCertificateOfIndexedActiveWindows
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (indexedActiveWindows :
+      HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfSites
+          activeSiteData cornerSite).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfSites
+        activeSiteData cornerSite).HasRealizationInvariant) :
+    (figure18ScaffoldDataOfSites activeSiteData cornerSite).Certificate :=
+  Figure18ScaffoldData.Certificate.ofIndexedActiveWindows
+    (figure18ScaffoldDataOfSites activeSiteData cornerSite)
+    indexedActiveWindows realizes
+
 /-- Checked active-site data from raw Figure 18 site specs. -/
 def activeSiteDataOfSpecs
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -1648,6 +1663,26 @@ def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     localFreeSquareWindows realizes
+
+def figure18ScaffoldDataOfNatSitesCertificateOfIndexedActiveWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).Certificate :=
+  Figure18ScaffoldData.Certificate.ofIndexedActiveWindows
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    indexedActiveWindows realizes
 
 end ConcreteData
 end LayeredFigure18ScaffoldData

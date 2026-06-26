@@ -4354,6 +4354,13 @@ def HasLocalFreeSquareWindowInvariant (D : Figure18ScaffoldData) : Prop :=
   HasFigure18ListedActiveSiteFixedCornerSquareWindows
     D.activeSites D.cornerSite
 
+def HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    {D : Figure18ScaffoldData}
+    (hindexed : HasFigure18IndexedActiveCornerWindows D.table.toRoleTable) :
+    D.HasLocalFreeSquareWindowInvariant :=
+  hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_indexedActive
+    hindexed
+
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold
 
@@ -4381,6 +4388,16 @@ def Certificate.ofWindows
     (realizes : D.HasRealizationInvariant) :
     D.Certificate :=
   Certificate.ofWindowInvariant localFreeSquareWindows realizes
+
+def Certificate.ofIndexedActiveWindows
+    (D : Figure18ScaffoldData)
+    (indexedActiveWindows :
+      HasFigure18IndexedActiveCornerWindows D.table.toRoleTable)
+    (realizes : D.HasRealizationInvariant) :
+    D.Certificate :=
+  Certificate.ofWindows D
+    (HasLocalFreeSquareWindowInvariant.ofIndexedActive indexedActiveWindows)
+    realizes
 
 theorem activeSites_length (D : Figure18ScaffoldData) :
     D.activeSites.length = D.activeSiteData.specs.length :=
