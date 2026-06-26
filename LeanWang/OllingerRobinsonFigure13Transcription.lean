@@ -3660,16 +3660,14 @@ def HasFigure18ListedActiveSiteFixedCornerSquareWindows
           activeSites cornerSite x n hn)
 
 /--
-Robinson-board form of the Figure 18 window obligation.
+Adjacent-coordinate specialization of the Robinson-board free-grid obligation.
 
-Robinson's proof uses red borders to define boards and obstruction signals to
-single out the free rows and columns.  After those free rows and columns are
-projected to coordinates, the board behaves like a contiguous finite square.
-This structure is the corresponding Lean target: the geometric proof supplies
-the selected free-column and free-row coordinates, plus the decoded Figure 18
-role condition at every crossing and the lower-left corner condition.
+This is useful if a later geometric proof extracts a literal adjacent block of
+active Figure 18 sites.  Robinson's board argument more naturally gives routed
+coordinates, so `Figure18RobinsonBoardRoutedFreeGrid` below is the preferred
+target for the Section 7 proof.
 -/
-structure Figure18RobinsonBoardFreeGrid
+structure Figure18RobinsonBoardAdjacentFreeGrid
     (table : Figure18RoleTable)
     (activeSites : List Figure18Site) (cornerSite : Figure18Site)
     {T : TileSet} {seed : WangTile}
@@ -3691,7 +3689,7 @@ structure Figure18RobinsonBoardFreeGrid
       (x (freeColumnCoord ⟨0, hn⟩, freeRowCoord ⟨0, hn⟩)) =
       cornerSite
 
-namespace Figure18RobinsonBoardFreeGrid
+namespace Figure18RobinsonBoardAdjacentFreeGrid
 
 /--
 Forget the Robinson-board terminology once the free-grid coordinates have been
@@ -3705,7 +3703,7 @@ def toListedActiveSiteFixedCornerSquare
       (combineWithScaffold table.presentation.toScaffold T seed)}
     {n : Nat} {hn : 0 < n}
     (grid :
-      Figure18RobinsonBoardFreeGrid
+      Figure18RobinsonBoardAdjacentFreeGrid
         table activeSites cornerSite x n hn) :
     Figure18ListedActiveSiteFixedCornerSquare
       table activeSites cornerSite x n hn where
@@ -3716,17 +3714,13 @@ def toListedActiveSiteFixedCornerSquare
   listedActive := grid.freeCrossingRole
   corner := grid.lowerLeftCorner
 
-end Figure18RobinsonBoardFreeGrid
+end Figure18RobinsonBoardAdjacentFreeGrid
 
 /--
-Robinson-board/free-grid version of the concrete Figure 18 invariant.
-
-This is equivalent in strength to producing listed-active windows, but it
-matches the proof in Robinson's section on boards: red borders create boards,
-obstruction signals identify free rows and columns, and their crossings provide
-the active payload square.
+Adjacent-coordinate Robinson-board/free-grid version of the concrete Figure 18
+invariant.
 -/
-def HasFigure18RobinsonBoardFreeGrids
+def HasFigure18RobinsonBoardAdjacentFreeGrids
     (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
   ∀ {T : TileSet} {seed : WangTile}
     (x : Int × Int → TileIn (combineWithScaffold
@@ -3736,20 +3730,115 @@ def HasFigure18RobinsonBoardFreeGrids
       (Figure18RoleTable.FlatRoleTable.ofActiveSites
         activeSites cornerSite).toRoleTable.presentation.toScaffold T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n,
-        Nonempty (Figure18RobinsonBoardFreeGrid
+        Nonempty (Figure18RobinsonBoardAdjacentFreeGrid
           (Figure18RoleTable.FlatRoleTable.ofActiveSites
             activeSites cornerSite).toRoleTable
           activeSites cornerSite x n hn)
 
-theorem hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_robinsonBoardFreeGrids
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_robinsonBoardAdjacentFreeGrids
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hgrids :
-      HasFigure18RobinsonBoardFreeGrids activeSites cornerSite) :
+      HasFigure18RobinsonBoardAdjacentFreeGrids activeSites cornerSite) :
     HasFigure18ListedActiveSiteFixedCornerSquareWindows
       activeSites cornerSite := by
   intro T seed x hx n hn
   rcases hgrids x hx n hn with ⟨grid⟩
   exact ⟨grid.toListedActiveSiteFixedCornerSquare⟩
+
+/--
+Routed Robinson-board form of the Figure 18 forcing obligation.
+
+Robinson's proof uses red borders to define boards and obstruction signals to
+single out the free rows and columns.  Those free rows and columns are not
+usually adjacent in the ambient plane; the board instead transmits payload
+signals through the intervening scaffold cells.  This structure records the
+selected free crossings, their decoded Figure 18 sites, and the routed payload
+edge matches needed by `Figure18IndexedRoutedFixedCornerSquare`.
+-/
+structure Figure18RobinsonBoardRoutedFreeGrid
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) : Type where
+  freeColumnCoord : Fin n → Int
+  freeRowCoord : Fin n → Int
+  siteRect : Fin n → Fin n → Figure18Site
+  payloadRect : Rectangle n n
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite
+  product : ∀ i : Fin n, ∀ j : Fin n,
+    WangTile.product (siteRect i j).tile (payloadRect i j) =
+      (x (freeColumnCoord i, freeRowCoord j)).1
+  hmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    WangTile.HMatches (payloadRect i j) (payloadRect ⟨i.val + 1, hi⟩ j)
+  vmatch : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    WangTile.VMatches (payloadRect i j) (payloadRect i ⟨j.val + 1, hj⟩)
+
+namespace Figure18RobinsonBoardRoutedFreeGrid
+
+/-- Forget the board terminology after the routed free-grid data is selected. -/
+def toIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn :=
+  Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches hn
+    grid.freeColumnCoord
+    grid.freeRowCoord
+    grid.siteRect
+    grid.payloadRect
+    grid.active
+    grid.cornerSite
+    grid.product
+    grid.hmatch
+    grid.vmatch
+
+end Figure18RobinsonBoardRoutedFreeGrid
+
+/-- Robinson-board/free-grid invariant for a specified Figure 18 role table. -/
+def HasFigure18RobinsonBoardRoutedFreeGridsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18RobinsonBoardRoutedFreeGrid table x n hn)
+
+theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    {table : Figure18RoleTable}
+    (hgrids : HasFigure18RobinsonBoardRoutedFreeGridsForTable table) :
+    HasFigure18IndexedRoutedFixedCornerSquares table := by
+  intro T seed x hx n hn
+  rcases hgrids x hx n hn with ⟨grid⟩
+  exact ⟨grid.toIndexedRoutedFixedCornerSquare⟩
+
+/--
+Robinson-board/free-grid invariant for a generated listed-active Figure 18 role
+table.
+-/
+def HasFigure18RobinsonBoardRoutedFreeGrids
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardRoutedFreeGridsForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite) :
+    HasFigure18IndexedRoutedFixedCornerSquares
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    hgrids
 
 /--
 Structured listed-active window invariant for a specified Figure 18 role table.
@@ -4940,8 +5029,14 @@ def HasLocalFreeSquareWindowInvariant (D : Figure18ScaffoldData) : Prop :=
   HasFigure18ListedActiveSiteFixedCornerSquareWindows
     D.activeSites D.cornerSite
 
-def HasRobinsonBoardFreeGridInvariant (D : Figure18ScaffoldData) : Prop :=
-  HasFigure18RobinsonBoardFreeGrids D.activeSites D.cornerSite
+def HasRobinsonBoardAdjacentFreeGridInvariant (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardAdjacentFreeGrids D.activeSites D.cornerSite
+
+def HasRobinsonBoardRoutedFreeGridInvariant (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardRoutedFreeGrids D.activeSites D.cornerSite
+
+def HasIndexedRoutedForces (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18IndexedRoutedFixedCornerSquares D.table.toRoleTable
 
 def HasLocalFreeSquareWindowInvariant.ofIndexedActive
     {D : Figure18ScaffoldData}
@@ -4950,11 +5045,18 @@ def HasLocalFreeSquareWindowInvariant.ofIndexedActive
   hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_indexedActive
     hindexed
 
-def HasLocalFreeSquareWindowInvariant.ofRobinsonBoardFreeGrid
+def HasLocalFreeSquareWindowInvariant.ofRobinsonBoardAdjacentFreeGrid
     {D : Figure18ScaffoldData}
-    (hgrids : D.HasRobinsonBoardFreeGridInvariant) :
+    (hgrids : D.HasRobinsonBoardAdjacentFreeGridInvariant) :
     D.HasLocalFreeSquareWindowInvariant :=
-  hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_robinsonBoardFreeGrids
+  hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_robinsonBoardAdjacentFreeGrids
+    hgrids
+
+def HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
+    {D : Figure18ScaffoldData}
+    (hgrids : D.HasRobinsonBoardRoutedFreeGridInvariant) :
+    D.HasIndexedRoutedForces :=
+  hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
     hgrids
 
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
@@ -4967,6 +5069,38 @@ data has been transcribed.
 structure Certificate (D : Figure18ScaffoldData) : Prop where
   localFreeSquares : D.HasLocalFreeSquareInvariant
   realizes : D.HasRealizationInvariant
+
+/--
+Routed certificate for the Robinson board argument.  This is the preferred
+certificate shape for Section 7 of Robinson's paper: the board/free-row proof
+directly supplies routed payload squares rather than adjacent active windows.
+-/
+structure RoutedCertificate (D : Figure18ScaffoldData) : Prop where
+  indexedRoutedForces : D.HasIndexedRoutedForces
+  realizes : D.HasRealizationInvariant
+
+def RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant
+    (D : Figure18ScaffoldData)
+    (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.RoutedCertificate where
+  indexedRoutedForces :=
+    HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid boardFreeGrids
+  realizes := realizes
+
+def RoutedCertificate.toIndexedRoutedCertificate
+    {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
+    Figure18IndexedRoutedCertificate D.table.toRoleTable where
+  indexedRoutedForces := certificate.indexedRoutedForces
+  realizes := by
+    simpa [HasRealizationInvariant, scaffold, presentation, table]
+      using certificate.realizes
+
+theorem RoutedCertificate.isScaffold
+    {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
+    IsScaffold D.scaffold := by
+  simpa [scaffold, presentation, table] using
+    certificate.toIndexedRoutedCertificate.isScaffold
 
 def Certificate.ofWindowInvariant
     {D : Figure18ScaffoldData}
@@ -4985,13 +5119,13 @@ def Certificate.ofWindows
     D.Certificate :=
   Certificate.ofWindowInvariant localFreeSquareWindows realizes
 
-def Certificate.ofRobinsonBoardFreeGridInvariant
+def Certificate.ofRobinsonBoardAdjacentFreeGridInvariant
     (D : Figure18ScaffoldData)
-    (boardFreeGrids : D.HasRobinsonBoardFreeGridInvariant)
+    (boardFreeGrids : D.HasRobinsonBoardAdjacentFreeGridInvariant)
     (realizes : D.HasRealizationInvariant) :
     D.Certificate :=
   Certificate.ofWindowInvariant
-    (HasLocalFreeSquareWindowInvariant.ofRobinsonBoardFreeGrid
+    (HasLocalFreeSquareWindowInvariant.ofRobinsonBoardAdjacentFreeGrid
       (D := D)
       boardFreeGrids)
     realizes

@@ -492,14 +492,19 @@ Figure 18 geometry.  The proof should target a board/free-grid certificate:
 
 - red borders form nested boards of side `4^n - 1`;
 - obstruction signals mark exactly the non-free rows and columns of a board;
-- the unmarked free rows and columns can be enumerated as a contiguous
-  `2^n + 1`-by-`2^n + 1` grid after projection;
-- crossings of those free rows and columns are exactly the active Figure 18
-  sites, with the lower-left crossing the distinguished corner site.
+- the unmarked free rows and columns can be enumerated as a virtual
+  `2^n + 1`-by-`2^n + 1` grid;
+- crossings of those free rows and columns provide the payload cells, with the
+  lower-left crossing the distinguished corner site;
+- payload edge matches are routed through the intervening board cells, so the
+  proof should not require adjacent plane coordinates for consecutive virtual
+  rows or columns.
 
-In Lean, this is represented by the `Figure18RobinsonBoardFreeGrid` target,
-which converts to the existing listed-active Figure 18 window invariant used by
-the abstract scaffold reduction.
+In Lean, this is represented by the
+`Figure18RobinsonBoardRoutedFreeGrid` target, which converts to the existing
+indexed-routed Figure 18 witness and then to `ForcesFixedCornerSquares`.
+The older adjacent/listed-active window targets remain useful only if a local
+Figure 18 extraction really produces adjacent plane coordinates.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
