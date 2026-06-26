@@ -2227,6 +2227,12 @@ theorem optionRowFromSparseEntries_length {α : Type}
     (optionRowFromSparseEntries entries).length = 92 := by
   simp [optionRowFromSparseEntries]
 
+theorem optionRowFromSparseEntries_getElem?
+    {α : Type} (entries : List (Nat × α)) (index : Fin 92) :
+    (optionRowFromSparseEntries entries)[index.val]? =
+      some (optionFromSparseEntries entries index.val) := by
+  simp [optionRowFromSparseEntries, optionFromSparseEntries, index.isLt]
+
 /--
 Sparse entry form for the final Figure 13 layer transcription.
 
@@ -2283,6 +2289,24 @@ theorem thickIndices_nodup (rows : CheckedSparseSeparateLayerRows) :
 theorem blackIndices_nodup (rows : CheckedSparseSeparateLayerRows) :
     (rows.blackEntries.map Prod.fst).Nodup :=
   indices_nodup_of_sparseEntriesValidBool rows.blackEntries_valid
+
+theorem thins_getElem? (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    rows.thins[index.val]? =
+      some (optionFromSparseEntries rows.thinEntries index.val) :=
+  optionRowFromSparseEntries_getElem? rows.thinEntries index
+
+theorem thicks_getElem? (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    rows.thicks[index.val]? =
+      some (optionFromSparseEntries rows.thickEntries index.val) :=
+  optionRowFromSparseEntries_getElem? rows.thickEntries index
+
+theorem blacks_getElem? (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    rows.blacks[index.val]? =
+      some (optionFromSparseEntries rows.blackEntries index.val) :=
+  optionRowFromSparseEntries_getElem? rows.blackEntries index
 
 end CheckedSparseSeparateLayerRows
 
@@ -2363,6 +2387,39 @@ theorem blacks_getElem?_blackAt
     rows.blacks[index.val]? = some (rows.blackAt index) := by
   unfold blackAt
   exact List.getElem?_eq_getElem (by simp [rows.blacks_length, index.isLt])
+
+@[simp]
+theorem ofSparse_thinAt (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    (ofSparse rows).thinAt index =
+      optionFromSparseEntries rows.thinEntries index.val := by
+  have hget := rows.thins_getElem? index
+  have hthin := (ofSparse rows).thins_getElem?_thinAt index
+  change rows.thins[index.val]? = some ((ofSparse rows).thinAt index) at hthin
+  rw [hthin] at hget
+  exact Option.some.inj hget
+
+@[simp]
+theorem ofSparse_thickAt (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    (ofSparse rows).thickAt index =
+      optionFromSparseEntries rows.thickEntries index.val := by
+  have hget := rows.thicks_getElem? index
+  have hthick := (ofSparse rows).thicks_getElem?_thickAt index
+  change rows.thicks[index.val]? = some ((ofSparse rows).thickAt index) at hthick
+  rw [hthick] at hget
+  exact Option.some.inj hget
+
+@[simp]
+theorem ofSparse_blackAt (rows : CheckedSparseSeparateLayerRows)
+    (index : Fin 92) :
+    (ofSparse rows).blackAt index =
+      optionFromSparseEntries rows.blackEntries index.val := by
+  have hget := rows.blacks_getElem? index
+  have hblack := (ofSparse rows).blacks_getElem?_blackAt index
+  change rows.blacks[index.val]? = some ((ofSparse rows).blackAt index) at hblack
+  rw [hblack] at hget
+  exact Option.some.inj hget
 
 theorem layerRows_getElem?_components
     (rows : CheckedSeparateLayerRows) (index : Fin 92) :
