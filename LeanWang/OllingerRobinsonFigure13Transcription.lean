@@ -4728,6 +4728,41 @@ def HasFigure18RobinsonBoardLevelSignalCertificatesForTable
         Nonempty (Figure18RobinsonBoardSignalCertificate table x level)
 
 /--
+Level-indexed Robinson Section 7 signal invariant with the free-line
+recurrence between consecutive board levels.
+
+This records the part of Robinson's Section 7 argument that says the
+next-level free-row/free-column pattern is made from two translated copies of
+the previous level's pattern, overlapping at the central free line.
+-/
+def HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty
+          (Σ parent : Figure18RobinsonBoardSignalCertificate table x level,
+            Σ child : Figure18RobinsonBoardSignalCertificate table x (level + 1),
+              Figure18RobinsonBoardSignalCertificate.CoordinateStep
+                parent child)
+
+/--
+Forgetting the coordinate recurrence leaves the obstruction-signal certificate
+surface used by the existing scaffold reduction.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalCertificatesForTable_of_coordinateSteps
+    {table : Figure18RoleTable}
+    (hsteps :
+      HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable table) :
+    HasFigure18RobinsonBoardLevelSignalCertificatesForTable table := by
+  intro T seed x hx level
+  rcases hsteps x hx level with ⟨parent, child, step⟩
+  exact ⟨parent⟩
+
+/--
 Level-indexed Robinson-board/free-grid invariant.
 
 This matches the recursive board proof more directly than the public
