@@ -406,6 +406,25 @@ def RealizesActiveCornerSquares (S : Scaffold) : Prop :=
       TilesPlane (combineWithScaffold S T seed)
 
 /--
+Finite-box form of the backward scaffold construction.
+
+Robinson's Section 7 argument builds larger and larger finite board patches by
+placing the supplied fixed-corner payload squares into the free rows and
+columns.  Once every centered box of the combined scaffold tileset is tileable,
+the existing Wang compactness theorem produces a full plane tiling.
+-/
+def RealizesActiveCornerBoxes (S : Scaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      ∀ r : Nat, TileableBox (combineWithScaffold S T seed) r
+
+theorem realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+    {S : Scaffold} (hboxes : RealizesActiveCornerBoxes S) :
+    RealizesActiveCornerSquares S := by
+  intro T seed hsquares
+  exact tilesPlane_of_all_tileableBoxes (hboxes T seed hsquares)
+
+/--
 Forward half of the scaffold reduction, stated directly at the payload-square
 level.
 
@@ -486,6 +505,23 @@ theorem isScaffold_of_realizesActiveCornerSquares_of_forcesActiveCornerSquares
     (hforces : ForcesActiveCornerSquares S) :
     IsScaffold S := by
   exact isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    hrealizes (forcesFixedCornerSquares_of_forcesActiveCornerSquares hforces)
+
+theorem isScaffold_of_realizesActiveCornerBoxes_of_forcesFixedCornerSquares
+    {S : Scaffold}
+    (hrealizes : RealizesActiveCornerBoxes S)
+    (hforces : ForcesFixedCornerSquares S) :
+    IsScaffold S := by
+  exact isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes hrealizes)
+    hforces
+
+theorem isScaffold_of_realizesActiveCornerBoxes_of_forcesActiveCornerSquares
+    {S : Scaffold}
+    (hrealizes : RealizesActiveCornerBoxes S)
+    (hforces : ForcesActiveCornerSquares S) :
+    IsScaffold S := by
+  exact isScaffold_of_realizesActiveCornerBoxes_of_forcesFixedCornerSquares
     hrealizes (forcesFixedCornerSquares_of_forcesActiveCornerSquares hforces)
 
 /-- The empty scaffold example; useful only as a minimal data sanity check. -/

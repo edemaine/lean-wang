@@ -5489,6 +5489,41 @@ def ofLocalCompatibility
   pairCompatibility := hcheck
   realizes := realizes
 
+/--
+Version of `ofLocalCompatibility` whose backward scaffold input is the finite
+box realization supplied by Robinson's nested-board construction.
+-/
+def ofLocalCompatibilityBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (levelLocalCompatibility :
+      HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalCompatibility activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    levelRoutedFreeGrids levelLocalCompatibility
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
+    hcheck
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5515,6 +5550,39 @@ def ofLocalSignalCoordinateSteps
       signalLocalCoordinateSteps
   pairCompatibility := hcheck
   realizes := realizes
+
+/--
+Preferred Section 7 constructor with both local coordinate-step certificates
+and finite-box realization.  This is the proof target closest to Robinson's
+description: local obstruction signals give the level grids, while finite board
+patches give every centered box and compactness supplies the plane tiling.
+-/
+def ofLocalSignalCoordinateStepsBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalSignalCoordinateSteps activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    signalLocalCoordinateSteps
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
+    hcheck
 
 def ofPairFailures
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -5631,6 +5699,42 @@ def ofL2C1SignalLocalStepFreeGrids
         NatSiteSpecSanity.cornerSite] using
         l2Component1BlankCandidatePairCompatibilityBool)
 
+/--
+Concrete L2 component-1 entry point using Robinson finite-box realization
+instead of the already-compactified realization property.
+-/
+def ofL2C1SignalLocalStepFreeGridsBoxes
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofLocalSignalCoordinateStepsBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    signalLocalCoordinateSteps realizes
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
 def ofL2C2SignalLocalStepFreeGrids
     (signalLocalCoordinateSteps :
       HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
@@ -5652,6 +5756,42 @@ def ofL2C2SignalLocalStepFreeGrids
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   ofLocalSignalCoordinateSteps
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    signalLocalCoordinateSteps realizes
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+/--
+Concrete L2 component-2 entry point using Robinson finite-box realization
+instead of the already-compactified realization property.
+-/
+def ofL2C2SignalLocalStepFreeGridsBoxes
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofLocalSignalCoordinateStepsBoxes
     l2Component2BlankCandidateActiveSiteSpecs
     l2Component2BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.northeast
