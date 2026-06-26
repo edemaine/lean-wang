@@ -1102,6 +1102,12 @@ abbrev TranslatedBox (r : Nat) (origin : Int × Int) :=
 abbrev TranslatedBoxPattern (T : TileSet) (r : Nat) (origin : Int × Int) :=
   TranslatedBox r origin → TileIn T
 
+/-- Restrict a plane tiling to one translated finite box. -/
+def translatedBoxPatternOfPlane {T : TileSet} {r : Nat}
+    (origin : Int × Int) (x : Int × Int → TileIn T) :
+    TranslatedBoxPattern T r origin :=
+  fun p => x p.1
+
 /-- Validity of a finite translated box tiling. -/
 def ValidTranslatedBoxTiling
     (T : TileSet) (r : Nat) (origin : Int × Int)
@@ -1112,6 +1118,19 @@ def ValidTranslatedBoxTiling
     (∀ p : TranslatedBox r origin,
       ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
         WangTile.VMatches (x p).1 (x ⟨(p.1.1, p.1.2 + 1), hp⟩).1)
+
+/-- A translated finite box inherited from a valid plane tiling is valid. -/
+theorem validTranslatedBoxTiling_of_validPlaneTiling
+    {T : TileSet} {r : Nat} {origin : Int × Int}
+    {x : Int × Int → TileIn T}
+    (hx : ValidPlaneTiling T x) :
+    ValidTranslatedBoxTiling T r origin
+      (translatedBoxPatternOfPlane origin x) := by
+  constructor
+  · intro p hp
+    exact hx.1 p.1
+  · intro p hp
+    exact hx.2 p.1
 
 /-- Embed the centered box into its translate by `origin`. -/
 def translatedBoxPoint {r : Nat} (origin : Int × Int) (p : Box r) :
@@ -1156,6 +1175,49 @@ structure TranslatedActiveCornerIndexedBox
                 ((index p).1, ⟨(index p).2.val + 1, hj⟩)
 
 namespace TranslatedActiveCornerIndexedBox
+
+/--
+Build a translated indexed box by restricting a valid scaffold plane tiling.
+
+This is the form used by Robinson Section 7 board witnesses: the geometric
+argument supplies a global scaffold tiling or board patch, plus an index map on
+the free row/column product inside the selected translated box.
+-/
+def ofPlane {S : Scaffold} {r : Nat} {origin : Int × Int}
+    (n : Nat) (hn : 0 < n)
+    (x : Int × Int → TileIn S.tiles)
+    (hx : ValidPlaneTiling S.tiles x)
+    (index : TranslatedBox r origin → Fin n × Fin n)
+    (corner_index :
+      ∀ p : TranslatedBox r origin,
+        S.active (x p.1).1 = true →
+          (x p.1).1 = S.corner →
+            index p = (⟨0, hn⟩, ⟨0, hn⟩))
+    (active_hsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+          S.active (x p.1).1 = true →
+            S.active (x (p.1.1 + 1, p.1.2)).1 = true →
+              ∃ hi : (index p).1.val + 1 < n,
+                index ⟨(p.1.1 + 1, p.1.2), hp⟩ =
+                  (⟨(index p).1.val + 1, hi⟩, (index p).2))
+    (active_vsucc :
+      ∀ p : TranslatedBox r origin,
+        ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+          S.active (x p.1).1 = true →
+            S.active (x (p.1.1, p.1.2 + 1)).1 = true →
+              ∃ hj : (index p).2.val + 1 < n,
+                index ⟨(p.1.1, p.1.2 + 1), hp⟩ =
+                  ((index p).1, ⟨(index p).2.val + 1, hj⟩)) :
+    TranslatedActiveCornerIndexedBox S r origin where
+  n := n
+  hn := hn
+  base := translatedBoxPatternOfPlane origin x
+  base_valid := validTranslatedBoxTiling_of_validPlaneTiling hx
+  index := index
+  corner_index := corner_index
+  active_hsucc := active_hsucc
+  active_vsucc := active_vsucc
 
 theorem east_mem_centered {r : Nat} {origin : Int × Int}
     (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2)) :
