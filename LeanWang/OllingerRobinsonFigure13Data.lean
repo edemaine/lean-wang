@@ -2165,6 +2165,23 @@ structure FlatRoleTableObligations
   realizes :
     (figure18ScaffoldDataOfFlatRoleTable table).HasRealizationInvariant
 
+namespace FlatRoleTableObligations
+
+def ofCertificate
+    (table : Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true) :
+    FlatRoleTableObligations table where
+  listedWindows :=
+    hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
+      certificate.localFreeSquares
+  pairCompatibility := hpair
+  realizes := certificate.realizes
+
+end FlatRoleTableObligations
+
 def figure18ScaffoldDataOfFlatRoleTableCertificateOfObligations
     (table : Figure18RoleTable.FlatRoleTable)
     (obligations : FlatRoleTableObligations table) :

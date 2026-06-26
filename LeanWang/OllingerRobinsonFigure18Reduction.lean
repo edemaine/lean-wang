@@ -4096,6 +4096,102 @@ theorem
 
 /--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, finite
+generated-stack pair compatibility, and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_flat_table_cert_pair_position_source
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_flat_table_obligations_position_source
+      table
+      (FlatRoleTableObligations.ofCertificate table certificate hpair)
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, finite
+generated-stack pair compatibility, and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_flat_table_cert_pair_position_source
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_flat_table_obligations_position_source
+      table
+      (FlatRoleTableObligations.ofCertificate table certificate hpair)
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, finite
+generated-stack pair compatibility, and the generated interior position-code
+rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_flat_table_cert_pair_interiorRows
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
+      table
+      (FlatRoleTableObligations.ofCertificate table certificate hpair)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, finite
+generated-stack pair compatibility, and the generated interior position-code
+rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_flat_table_cert_pair_interiorRows
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
+      table
+      (FlatRoleTableObligations.ofCertificate table certificate hpair)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, a plain
 Figure 18 scaffold certificate, and generated position-coded source-route
 obligations.
