@@ -1516,6 +1516,81 @@ def thickBlockAtSite (site : Figure18Site) : Figure16.Block :=
 def blackBlockAtSite (site : Figure18Site) : Figure16.Block :=
   (LayerComponent.black (blackComponentAt site.index)).block
 
+/-- West/east coordinate of a Figure 18 quadrant inside a Figure 16 block. -/
+def quadrantColumn : Quadrant → Fin 2
+  | .southwest => ⟨0, by decide⟩
+  | .southeast => ⟨1, by decide⟩
+  | .northwest => ⟨0, by decide⟩
+  | .northeast => ⟨1, by decide⟩
+
+/-- South/north coordinate of a Figure 18 quadrant inside a Figure 16 block. -/
+def quadrantRow : Quadrant → Fin 2
+  | .southwest => ⟨0, by decide⟩
+  | .southeast => ⟨0, by decide⟩
+  | .northwest => ⟨1, by decide⟩
+  | .northeast => ⟨1, by decide⟩
+
+/-- Entry of a Figure 16 substitution block at a Figure 18 quadrant. -/
+def blockEntryAtQuadrant (block : Figure16.Block) (quadrant : Quadrant) :
+    Figure16.Symbol :=
+  block.entry (quadrantColumn quadrant) (quadrantRow quadrant)
+
+/-- The first L2 summand symbol, coming from the Figure 13 thin/L1 component. -/
+def l2Component1SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
+  blockEntryAtQuadrant (thinBlockAtSite site) site.quadrant
+
+/-- The second L2 summand symbol, coming from the Figure 13 thick/L2 component. -/
+def l2Component2SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
+  blockEntryAtQuadrant (thickBlockAtSite site) site.quadrant
+
+/-- The L3 symbol at a Figure 18 quadrant. -/
+def l3SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
+  blockEntryAtQuadrant (blackBlockAtSite site) site.quadrant
+
+def l2Component1BlankSiteBool (site : Figure18Site) : Bool :=
+  decide (l2Component1SymbolAtSite site = Figure16.Symbol.blank)
+
+def l2Component2BlankSiteBool (site : Figure18Site) : Bool :=
+  decide (l2Component2SymbolAtSite site = Figure16.Symbol.blank)
+
+/--
+Diagnostic predicate for a quarter-site blank in both L2 summands.
+
+This is not the final active-site predicate; the finite facts below show that
+the two Figure 16 L2 summands put their local blanks in opposite quadrants, so
+the free-square data cannot be recovered by a naive per-tile intersection of
+the two local blanks.
+-/
+def l2BothComponentsBlankSiteBool (site : Figure18Site) : Bool :=
+  l2Component1BlankSiteBool site && l2Component2BlankSiteBool site
+
+def natSpecsAtQuadrant (quadrant : Quadrant) : List (Nat × Quadrant) :=
+  (List.range 92).map fun index => (index, quadrant)
+
+def l2Component1BlankSiteSpecs : List (Nat × Quadrant) :=
+  Figure18Site.natSpecsOfSites <|
+    Figure18Site.all.filter l2Component1BlankSiteBool
+
+def l2Component2BlankSiteSpecs : List (Nat × Quadrant) :=
+  Figure18Site.natSpecsOfSites <|
+    Figure18Site.all.filter l2Component2BlankSiteBool
+
+def l2BothComponentsBlankSiteSpecs : List (Nat × Quadrant) :=
+  Figure18Site.natSpecsOfSites <|
+    Figure18Site.all.filter l2BothComponentsBlankSiteBool
+
+theorem l2Component1BlankSiteSpecs_eq :
+    l2Component1BlankSiteSpecs = natSpecsAtQuadrant Quadrant.southwest := by
+  decide
+
+theorem l2Component2BlankSiteSpecs_eq :
+    l2Component2BlankSiteSpecs = natSpecsAtQuadrant Quadrant.northeast := by
+  decide
+
+theorem l2BothComponentsBlankSiteSpecs_eq_nil :
+    l2BothComponentsBlankSiteSpecs = [] := by
+  decide
+
 def generatedStackHCompatiblePairBool
     (left right : Figure18Site) : Bool :=
   if Figure18Site.hCompatible left right then
