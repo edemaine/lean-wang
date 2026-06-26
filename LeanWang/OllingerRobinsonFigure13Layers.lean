@@ -2620,6 +2620,24 @@ theorem layerData_componentAtLayerAt_black
       some (LayerComponent.black black) := by
   simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hblack]
 
+theorem layerData_componentAtLayerAt_thin_none
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    (hthin : rows.thinAt index = none) :
+    rows.layerData.componentAtLayerAt index .thin = none := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hthin]
+
+theorem layerData_componentAtLayerAt_thick_none
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    (hthick : rows.thickAt index = none) :
+    rows.layerData.componentAtLayerAt index .thick = none := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hthick]
+
+theorem layerData_componentAtLayerAt_black_none
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    (hblack : rows.blackAt index = none) :
+    rows.layerData.componentAtLayerAt index .black = none := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hblack]
+
 theorem layerData_componentAtLayerAt
     {rows : CheckedSeparateLayerRows} {layer : Layer} {index : Fin 92}
     {component : layer.Component}
@@ -2658,6 +2676,24 @@ theorem layerData_componentAtSiteLayer_black
       some (LayerComponent.black black) :=
   rows.layerData_componentAtLayerAt_black hblack
 
+theorem layerData_componentAtSiteLayer_thin_none
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    (hthin : rows.thinAt site.index = none) :
+    rows.layerData.componentAtSiteLayer site .thin = none :=
+  rows.layerData_componentAtLayerAt_thin_none hthin
+
+theorem layerData_componentAtSiteLayer_thick_none
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    (hthick : rows.thickAt site.index = none) :
+    rows.layerData.componentAtSiteLayer site .thick = none :=
+  rows.layerData_componentAtLayerAt_thick_none hthick
+
+theorem layerData_componentAtSiteLayer_black_none
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    (hblack : rows.blackAt site.index = none) :
+    rows.layerData.componentAtSiteLayer site .black = none :=
+  rows.layerData_componentAtLayerAt_black_none hblack
+
 theorem layerData_componentAtSiteLayer
     {rows : CheckedSeparateLayerRows} {layer : Layer} {site : Figure18Site}
     {component : layer.Component}
@@ -2693,6 +2729,30 @@ theorem ofSparse_layerData_componentAtLayerAt_black
   (ofSparse rows).layerData_componentAtLayerAt_black
     (ofSparse_blackAt_of_mem rows hmem)
 
+theorem ofSparse_layerData_componentAtLayerAt_thin_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thinEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtLayerAt index .thin = none :=
+  (ofSparse rows).layerData_componentAtLayerAt_thin_none
+    (ofSparse_thinAt_eq_none_of_index_not_mem rows hnot)
+
+theorem ofSparse_layerData_componentAtLayerAt_thick_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thickEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtLayerAt index .thick = none :=
+  (ofSparse rows).layerData_componentAtLayerAt_thick_none
+    (ofSparse_thickAt_eq_none_of_index_not_mem rows hnot)
+
+theorem ofSparse_layerData_componentAtLayerAt_black_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.blackEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtLayerAt index .black = none :=
+  (ofSparse rows).layerData_componentAtLayerAt_black_none
+    (ofSparse_blackAt_eq_none_of_index_not_mem rows hnot)
+
 theorem ofSparse_layerData_componentAtSiteLayer_thin
     (rows : CheckedSparseSeparateLayerRows)
     {site : Figure18Site} {thin : Figure16.Thin}
@@ -2719,6 +2779,30 @@ theorem ofSparse_layerData_componentAtSiteLayer_black
       some (LayerComponent.black black) :=
   (ofSparse rows).layerData_componentAtSiteLayer_black
     (ofSparse_blackAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtSiteLayer_thin_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site}
+    (hnot : site.index.val ∉ rows.thinEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .thin = none :=
+  (ofSparse rows).layerData_componentAtSiteLayer_thin_none
+    (ofSparse_thinAt_eq_none_of_index_not_mem rows hnot)
+
+theorem ofSparse_layerData_componentAtSiteLayer_thick_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site}
+    (hnot : site.index.val ∉ rows.thickEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .thick = none :=
+  (ofSparse rows).layerData_componentAtSiteLayer_thick_none
+    (ofSparse_thickAt_eq_none_of_index_not_mem rows hnot)
+
+theorem ofSparse_layerData_componentAtSiteLayer_black_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site}
+    (hnot : site.index.val ∉ rows.blackEntries.map Prod.fst) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .black = none :=
+  (ofSparse rows).layerData_componentAtSiteLayer_black_none
+    (ofSparse_blackAt_eq_none_of_index_not_mem rows hnot)
 
 def toCheckedRawData
     (rows : CheckedSeparateLayerRows)
