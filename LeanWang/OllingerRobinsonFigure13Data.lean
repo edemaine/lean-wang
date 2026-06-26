@@ -3423,6 +3423,33 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridC
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
 
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hstacks :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasCheckedStacksForRobinsonBoardRoutedFreeGrids
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  CheckedSparseRawData.indexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    hgrids hstacks realizes
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -4449,6 +4476,37 @@ structure NatSiteRobinsonScaffoldCertificate where
         cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
 
 namespace NatSiteRobinsonScaffoldCertificate
+
+def ofFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hstacks :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasCheckedStacksForRobinsonBoardRoutedFreeGrids
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  robinsonStacks :=
+    CheckedSparseRawData.hasRobinsonBoardRoutedFreeGridCheckedStacks_of_freeGrids
+      hgrids hstacks
+  realizes := realizes
 
 def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
