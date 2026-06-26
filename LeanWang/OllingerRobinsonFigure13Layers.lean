@@ -2505,6 +2505,76 @@ theorem toCheckedRawData_layerRows
 
 end CheckedSeparateLayerRows
 
+/--
+Checked raw Figure 18 scaffold data whose Figure 13 layer transcription is
+entered sparsely.
+
+This is the intended data-entry shape for the final concrete scaffold: the
+layer rows name only occupied Figure 16 components, while the active sites and
+corner are the finite Figure 18 scaffold data.
+-/
+structure CheckedSparseRawData where
+  layerRows : CheckedSparseSeparateLayerRows
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+
+namespace CheckedSparseRawData
+
+def separateLayerRows (data : CheckedSparseRawData) :
+    CheckedSeparateLayerRows :=
+  CheckedSeparateLayerRows.ofSparse data.layerRows
+
+def toCheckedRawData (data : CheckedSparseRawData) : CheckedRawData :=
+  data.separateLayerRows.toCheckedRawData data.activeSiteSpecs
+    data.activeSiteSpecs_valid data.cornerIndex data.cornerQuadrant
+    data.cornerIndex_valid
+
+def layerData (data : CheckedSparseRawData) : Transcription :=
+  data.toCheckedRawData.layerData
+
+def activeSiteData (data : CheckedSparseRawData) :
+    Figure18Site.CheckedNatSpecs :=
+  data.toCheckedRawData.activeSiteData
+
+def cornerSite (data : CheckedSparseRawData) : Figure18Site :=
+  data.toCheckedRawData.cornerSite
+
+def toLayeredFigure18ScaffoldData (data : CheckedSparseRawData) :
+    LayeredFigure18ScaffoldData :=
+  data.toCheckedRawData.toLayeredFigure18ScaffoldData
+
+@[simp]
+theorem toCheckedRawData_layerRows (data : CheckedSparseRawData) :
+    data.toCheckedRawData.layerRows = data.separateLayerRows.layerRows :=
+  rfl
+
+@[simp]
+theorem toCheckedRawData_activeSiteSpecs (data : CheckedSparseRawData) :
+    data.toCheckedRawData.activeSiteSpecs = data.activeSiteSpecs :=
+  rfl
+
+@[simp]
+theorem toCheckedRawData_cornerIndex (data : CheckedSparseRawData) :
+    data.toCheckedRawData.cornerIndex = data.cornerIndex :=
+  rfl
+
+@[simp]
+theorem toCheckedRawData_cornerQuadrant (data : CheckedSparseRawData) :
+    data.toCheckedRawData.cornerQuadrant = data.cornerQuadrant :=
+  rfl
+
+@[simp]
+theorem toLayeredFigure18ScaffoldData_eq (data : CheckedSparseRawData) :
+    data.toLayeredFigure18ScaffoldData =
+      data.toCheckedRawData.toLayeredFigure18ScaffoldData :=
+  rfl
+
+end CheckedSparseRawData
+
 namespace CheckedSeparateLayerRows
 
 /--
@@ -2832,6 +2902,55 @@ theorem isScaffold_indexedRouted
   certificate.isScaffold
 
 end CheckedRawData
+
+namespace CheckedSparseRawData
+
+abbrev Certificate (data : CheckedSparseRawData) : Prop :=
+  data.toCheckedRawData.Certificate
+
+abbrev IndexedRoutedCertificate (data : CheckedSparseRawData) : Prop :=
+  data.toCheckedRawData.IndexedRoutedCertificate
+
+def toLayeredFigure18Instance
+    {data : CheckedSparseRawData} (certificate : data.Certificate) :
+    LayeredFigure18Instance :=
+  data.toCheckedRawData.toLayeredFigure18Instance certificate
+
+def toFigure18Instance
+    {data : CheckedSparseRawData} (certificate : data.Certificate) :
+    Figure18Instance :=
+  data.toCheckedRawData.toFigure18Instance certificate
+
+theorem isScaffold
+    {data : CheckedSparseRawData} (certificate : data.Certificate) :
+    IsScaffold data.toLayeredFigure18ScaffoldData.scaffold :=
+  data.toCheckedRawData.isScaffold certificate
+
+def toLayeredFigure18IndexedRoutedInstance
+    {data : CheckedSparseRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    LayeredFigure18IndexedRoutedInstance :=
+  data.toCheckedRawData.toLayeredFigure18IndexedRoutedInstance certificate
+
+def toFigure18IndexedRoutedInstance
+    {data : CheckedSparseRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    Figure18IndexedRoutedInstance :=
+  data.toCheckedRawData.toFigure18IndexedRoutedInstance certificate
+
+def toFigure18FlexibleInstance
+    {data : CheckedSparseRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    Figure18FlexibleInstance :=
+  data.toCheckedRawData.toFigure18FlexibleInstance certificate
+
+theorem isScaffold_indexedRouted
+    {data : CheckedSparseRawData}
+    (certificate : data.IndexedRoutedCertificate) :
+    IsScaffold data.toLayeredFigure18ScaffoldData.scaffold :=
+  data.toCheckedRawData.isScaffold_indexedRouted certificate
+
+end CheckedSparseRawData
 
 end LayeredFigure18ScaffoldData
 
