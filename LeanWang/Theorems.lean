@@ -334,6 +334,60 @@ theorem mem_completePayloads_of_mem {T : TileSet} {t : WangTile}
     (mem_payloadPalette_e ht)
     (mem_payloadPalette_w ht)
 
+/--
+Any valid rectangle over the instance tileset is also valid over the inactive
+payload palette.  The edge constraints are unchanged; only tile membership is
+weakened from `T` to `completePayloads T`.
+-/
+theorem validRectangle_completePayloads_of_validRectangle {T : TileSet}
+    {w h : Nat} {x : Rectangle w h}
+    (hx : ValidRectangle T x) : ValidRectangle (completePayloads T) x := by
+  constructor
+  · intro i j
+    exact mem_completePayloads_of_mem (hx.1 i j)
+  · exact hx.2
+
+theorem tileableRectangle_completePayloads_of_tileableRectangle {T : TileSet}
+    {w h : Nat} :
+    TileableRectangle T w h → TileableRectangle (completePayloads T) w h := by
+  rintro ⟨x, hx⟩
+  exact ⟨x, validRectangle_completePayloads_of_validRectangle hx⟩
+
+theorem tileableSquare_completePayloads_of_tileableSquare {T : TileSet}
+    {n : Nat} :
+    TileableSquare T n → TileableSquare (completePayloads T) n :=
+  tileableRectangle_completePayloads_of_tileableRectangle
+
+theorem tileableFixedCornerSquare_completePayloads_of_tileableFixedCornerSquare
+    {T : TileSet} {seed : WangTile} {n : Nat} :
+    TileableFixedCornerSquare T seed n →
+      TileableFixedCornerSquare (completePayloads T) seed n := by
+  rintro ⟨hn, x, hx, hseed⟩
+  exact ⟨hn, x, validRectangle_completePayloads_of_validRectangle hx, hseed⟩
+
+/--
+Box-pattern analogue of `validRectangle_completePayloads_of_validRectangle`.
+This is useful for finite scaffold patches, whose backward direction is stated
+on centered boxes rather than origin-based rectangles.
+-/
+theorem validBoxTiling_completePayloads_of_validBoxTiling {T : TileSet}
+    {r : Nat} {x : BoxPattern T r} :
+    ValidBoxTiling T r x →
+      ValidBoxTiling (completePayloads T) r
+        (fun p => ⟨(x p).1, mem_completePayloads_of_mem (x p).2⟩) := by
+  intro hx
+  constructor
+  · intro p hp
+    exact hx.1 p hp
+  · intro p hp
+    exact hx.2 p hp
+
+theorem tileableBox_completePayloads_of_tileableBox {T : TileSet} {r : Nat} :
+    TileableBox T r → TileableBox (completePayloads T) r := by
+  rintro ⟨x, hx⟩
+  exact ⟨fun p => ⟨(x p).1, mem_completePayloads_of_mem (x p).2⟩,
+    validBoxTiling_completePayloads_of_validBoxTiling hx⟩
+
 theorem monochromeTile_mem_completePayloads (T : TileSet) :
     monochromeTile ∈ completePayloads T := by
   change ({ n := 0, s := 0, e := 0, w := 0 } : WangTile) ∈ completePayloads T
@@ -729,6 +783,54 @@ theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
     {r : Nat} (patch : CombinedBoxLayerPatch S T seed r) :
     TileableBox (combineWithScaffold S T seed) r :=
   patch.toCombinedBoxPatch.tileableBox
+
+/--
+Build a layer patch over a scaffold box that is entirely inactive.  Active-cell
+payload obligations are contradictory, and inactive payload membership is
+supplied by the complete payload box.
+-/
+def ofInactivePayloadBox {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat}
+    (base : BoxPattern S.tiles r)
+    (base_valid : ValidBoxTiling S.tiles r base)
+    (base_inactive : ∀ p : Box r, S.active (base p).1 = false)
+    (payload : BoxPattern (completePayloads T) r)
+    (payload_valid : ValidBoxTiling (completePayloads T) r payload) :
+    CombinedBoxLayerPatch S T seed r where
+  base := base
+  payload := fun p => (payload p).1
+  base_valid := base_valid
+  active_payload := by
+    intro p hactive
+    have hcontra : False := by
+      simp [base_inactive p] at hactive
+    exact False.elim hcontra
+  inactive_payload := by
+    intro p _hinactive
+    exact (payload p).2
+  payload_hmatch := by
+    intro p hp
+    exact payload_valid.1 p hp
+  payload_vmatch := by
+    intro p hp
+    exact payload_valid.2 p hp
+
+/--
+Variant of `ofInactivePayloadBox` whose payload box is still stated over the
+instance tileset.  It is automatically lifted to the complete inactive payload
+palette.
+-/
+def ofInactiveBox {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat}
+    (base : BoxPattern S.tiles r)
+    (base_valid : ValidBoxTiling S.tiles r base)
+    (base_inactive : ∀ p : Box r, S.active (base p).1 = false)
+    (payload : BoxPattern T r)
+    (payload_valid : ValidBoxTiling T r payload) :
+    CombinedBoxLayerPatch S T seed r :=
+  ofInactivePayloadBox base base_valid base_inactive
+    (fun p => ⟨(payload p).1, mem_completePayloads_of_mem (payload p).2⟩)
+    (validBoxTiling_completePayloads_of_validBoxTiling payload_valid)
 
 end CombinedBoxLayerPatch
 
