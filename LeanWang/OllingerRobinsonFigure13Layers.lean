@@ -2221,6 +2221,12 @@ def blackAt (rows : CheckedSeparateLayerRows) (index : Fin 92) :
     Option Figure16.Black :=
   rows.blacks.get ⟨index.val, by simp [rows.blacks_length, index.isLt]⟩
 
+def componentAt (rows : CheckedSeparateLayerRows) :
+    (layer : Layer) → Fin 92 → Option layer.Component
+  | .thin, index => rows.thinAt index
+  | .thick, index => rows.thickAt index
+  | .black, index => rows.blackAt index
+
 def layerRows (rows : CheckedSeparateLayerRows) : List Components :=
   zipComponentRows rows.thins rows.thicks rows.blacks
 
@@ -2321,6 +2327,20 @@ theorem layerData_componentAtLayerAt_black
       some (LayerComponent.black black) := by
   simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hblack]
 
+theorem layerData_componentAtLayerAt
+    {rows : CheckedSeparateLayerRows} {layer : Layer} {index : Fin 92}
+    {component : layer.Component}
+    (hcomponent : rows.componentAt layer index = some component) :
+    rows.layerData.componentAtLayerAt index layer =
+      some (LayerComponent.ofLayer layer component) := by
+  cases layer with
+  | thin =>
+      exact rows.layerData_componentAtLayerAt_thin hcomponent
+  | thick =>
+      exact rows.layerData_componentAtLayerAt_thick hcomponent
+  | black =>
+      exact rows.layerData_componentAtLayerAt_black hcomponent
+
 theorem layerData_componentAtSiteLayer_thin
     {rows : CheckedSeparateLayerRows} {site : Figure18Site}
     {thin : Figure16.Thin}
@@ -2344,6 +2364,14 @@ theorem layerData_componentAtSiteLayer_black
     rows.layerData.componentAtSiteLayer site .black =
       some (LayerComponent.black black) :=
   rows.layerData_componentAtLayerAt_black hblack
+
+theorem layerData_componentAtSiteLayer
+    {rows : CheckedSeparateLayerRows} {layer : Layer} {site : Figure18Site}
+    {component : layer.Component}
+    (hcomponent : rows.componentAt layer site.index = some component) :
+    rows.layerData.componentAtSiteLayer site layer =
+      some (LayerComponent.ofLayer layer component) :=
+  rows.layerData_componentAtLayerAt hcomponent
 
 def toCheckedRawData
     (rows : CheckedSeparateLayerRows)
@@ -2373,6 +2401,69 @@ theorem toCheckedRawData_layerRows
       cornerIndex cornerQuadrant cornerIndex_valid).layerRows =
         rows.layerRows :=
   rfl
+
+end CheckedSeparateLayerRows
+
+namespace CheckedSeparateLayerRows
+
+/--
+Finite check that a component rectangle agrees with separately transcribed
+Figure 13 layer rows at the corresponding Figure 18 site indices.
+-/
+def componentRectangleMatchesBool
+    {w h : Nat} (rows : CheckedSeparateLayerRows) {layer : Layer}
+    (siteData : CheckedNatSiteRectangle w h)
+    (data : CheckedLayerComponentRectangle w h layer) : Bool :=
+  (List.finRange w).all fun i =>
+    (List.finRange h).all fun j =>
+      match layer with
+      | .thin =>
+          decide <| rows.thinAt (siteData.toSiteRectangle i j).index =
+            some (data.componentAt i j)
+      | .thick =>
+          decide <| rows.thickAt (siteData.toSiteRectangle i j).index =
+            some (data.componentAt i j)
+      | .black =>
+          decide <| rows.blackAt (siteData.toSiteRectangle i j).index =
+            some (data.componentAt i j)
+
+theorem componentAt_matchesSeparateRows_of_bool
+    {w h : Nat} {layer : Layer}
+    {rows : CheckedSeparateLayerRows}
+    {siteData : CheckedNatSiteRectangle w h}
+    {data : CheckedLayerComponentRectangle w h layer}
+    (hcheck : rows.componentRectangleMatchesBool siteData data = true) :
+    ∀ i : Fin w, ∀ j : Fin h,
+      rows.componentAt layer (siteData.toSiteRectangle i j).index =
+        some (data.componentAt i j) := by
+  intro i j
+  unfold componentRectangleMatchesBool at hcheck
+  have hiCheck := List.all_eq_true.1 hcheck i (List.mem_finRange i)
+  have hjCheck := List.all_eq_true.1 hiCheck j (List.mem_finRange j)
+  cases layer with
+  | thin =>
+      change rows.thinAt (siteData.toSiteRectangle i j).index =
+        some (data.componentAt i j)
+      exact of_decide_eq_true hjCheck
+  | thick =>
+      change rows.thickAt (siteData.toSiteRectangle i j).index =
+        some (data.componentAt i j)
+      exact of_decide_eq_true hjCheck
+  | black =>
+      change rows.blackAt (siteData.toSiteRectangle i j).index =
+        some (data.componentAt i j)
+      exact of_decide_eq_true hjCheck
+
+theorem lookupBool_layerData_of_matchesSeparateRowsBool
+    {w h : Nat} {layer : Layer}
+    {rows : CheckedSeparateLayerRows}
+    {siteData : CheckedNatSiteRectangle w h}
+    {data : CheckedLayerComponentRectangle w h layer}
+    (hcheck : rows.componentRectangleMatchesBool siteData data = true) :
+    data.lookupBool rows.layerData siteData = true :=
+  CheckedLayerComponentRectangle.lookupBool_of_lookup fun i j =>
+    rows.layerData_componentAtSiteLayer
+      (componentAt_matchesSeparateRows_of_bool hcheck i j)
 
 end CheckedSeparateLayerRows
 
