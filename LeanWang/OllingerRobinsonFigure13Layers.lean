@@ -2194,6 +2194,98 @@ theorem zipComponentRows_length_of_lengths
                   (ih (Nat.succ.inj hthin) (Nat.succ.inj hthick)
                     (Nat.succ.inj hblack))
 
+def sparseEntriesValidBool {α : Type} (entries : List (Nat × α)) : Bool :=
+  entries.all (fun entry => decide (entry.1 < 92)) &&
+    decide (entries.map Prod.fst).Nodup
+
+theorem all_indices_lt_of_sparseEntriesValidBool
+    {α : Type} {entries : List (Nat × α)}
+    (hvalid : sparseEntriesValidBool entries = true) :
+    ∀ entry ∈ entries, entry.1 < 92 := by
+  rw [sparseEntriesValidBool, Bool.and_eq_true] at hvalid
+  intro entry hentry
+  exact of_decide_eq_true (List.all_eq_true.1 hvalid.1 entry hentry)
+
+theorem indices_nodup_of_sparseEntriesValidBool
+    {α : Type} {entries : List (Nat × α)}
+    (hvalid : sparseEntriesValidBool entries = true) :
+    (entries.map Prod.fst).Nodup := by
+  rw [sparseEntriesValidBool, Bool.and_eq_true] at hvalid
+  exact of_decide_eq_true hvalid.2
+
+def optionFromSparseEntries {α : Type} (entries : List (Nat × α))
+    (index : Nat) : Option α :=
+  (entries.find? fun entry => entry.1 == index).map Prod.snd
+
+def optionRowFromSparseEntries {α : Type}
+    (entries : List (Nat × α)) : List (Option α) :=
+  (List.range 92).map (optionFromSparseEntries entries)
+
+@[simp]
+theorem optionRowFromSparseEntries_length {α : Type}
+    (entries : List (Nat × α)) :
+    (optionRowFromSparseEntries entries).length = 92 := by
+  simp [optionRowFromSparseEntries]
+
+/--
+Sparse entry form for the final Figure 13 layer transcription.
+
+Each list names only the raw Figure 13 tile indices carrying a component in
+that layer.  The finite checks rule out out-of-range and duplicate indices
+before expanding to the 92-entry option rows consumed by
+`CheckedSeparateLayerRows`.
+-/
+structure CheckedSparseSeparateLayerRows where
+  thinEntries : List (Nat × Figure16.Thin)
+  thinEntries_valid : sparseEntriesValidBool thinEntries = true
+  thickEntries : List (Nat × Figure16.Thick)
+  thickEntries_valid : sparseEntriesValidBool thickEntries = true
+  blackEntries : List (Nat × Figure16.Black)
+  blackEntries_valid : sparseEntriesValidBool blackEntries = true
+
+namespace CheckedSparseSeparateLayerRows
+
+def thins (rows : CheckedSparseSeparateLayerRows) :
+    List (Option Figure16.Thin) :=
+  optionRowFromSparseEntries rows.thinEntries
+
+def thicks (rows : CheckedSparseSeparateLayerRows) :
+    List (Option Figure16.Thick) :=
+  optionRowFromSparseEntries rows.thickEntries
+
+def blacks (rows : CheckedSparseSeparateLayerRows) :
+    List (Option Figure16.Black) :=
+  optionRowFromSparseEntries rows.blackEntries
+
+@[simp]
+theorem thins_length (rows : CheckedSparseSeparateLayerRows) :
+    rows.thins.length = 92 := by
+  simp [thins]
+
+@[simp]
+theorem thicks_length (rows : CheckedSparseSeparateLayerRows) :
+    rows.thicks.length = 92 := by
+  simp [thicks]
+
+@[simp]
+theorem blacks_length (rows : CheckedSparseSeparateLayerRows) :
+    rows.blacks.length = 92 := by
+  simp [blacks]
+
+theorem thinIndices_nodup (rows : CheckedSparseSeparateLayerRows) :
+    (rows.thinEntries.map Prod.fst).Nodup :=
+  indices_nodup_of_sparseEntriesValidBool rows.thinEntries_valid
+
+theorem thickIndices_nodup (rows : CheckedSparseSeparateLayerRows) :
+    (rows.thickEntries.map Prod.fst).Nodup :=
+  indices_nodup_of_sparseEntriesValidBool rows.thickEntries_valid
+
+theorem blackIndices_nodup (rows : CheckedSparseSeparateLayerRows) :
+    (rows.blackEntries.map Prod.fst).Nodup :=
+  indices_nodup_of_sparseEntriesValidBool rows.blackEntries_valid
+
+end CheckedSparseSeparateLayerRows
+
 /--
 Checked Figure 13 layer transcription entered as three separate 92-entry layer
 lists.  This is the Lean data-entry form closest to Figure 16: first transcribe
@@ -2208,6 +2300,15 @@ structure CheckedSeparateLayerRows where
   blacks_length : blacks.length = 92
 
 namespace CheckedSeparateLayerRows
+
+def ofSparse (rows : CheckedSparseSeparateLayerRows) :
+    CheckedSeparateLayerRows where
+  thins := rows.thins
+  thins_length := rows.thins_length
+  thicks := rows.thicks
+  thicks_length := rows.thicks_length
+  blacks := rows.blacks
+  blacks_length := rows.blacks_length
 
 def thinAt (rows : CheckedSeparateLayerRows) (index : Fin 92) :
     Option Figure16.Thin :=
