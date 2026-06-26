@@ -5131,6 +5131,31 @@ structure NatSiteRobinsonCanonicalPositiveBoxObligations
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)
 
+/--
+Canonical-routing scaffold target with positive-radius boxes allowed to live at
+radius-dependent translated origins.
+
+This matches the Robinson board construction more closely: Section 7 produces
+large boards at natural plane coordinates, and those boxes can be recentered
+only at the interface with the generic scaffold reduction.
+-/
+structure NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  canonicalRouting :
+    HasFigure18RobinsonBoardCanonicalRoutingForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  positiveTranslatedIndexedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
+
 namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
 
 def toScaffoldCertificate
@@ -8915,6 +8940,73 @@ def toL2C2TowerIndexedBoxObligations
         l2Component2BlankCandidatePairCompatibilityBool)
 
 end NatSiteRobinsonCanonicalPositiveBoxObligations
+
+namespace NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+
+def toCanonicalPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCanonicalPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  canonicalRouting := O.canonicalRouting
+  positiveIndexedBoxes :=
+    TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      O.positiveTranslatedIndexedBoxes
+
+def toTowerIndexedBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  O.toCanonicalPositiveBoxObligations.toTowerIndexedBoxObligations
+    pairCompatibility
+
+def toL2C1TowerIndexedBoxObligations
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toCanonicalPositiveBoxObligations.toL2C1TowerIndexedBoxObligations
+
+def toL2C2TowerIndexedBoxObligations
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toCanonicalPositiveBoxObligations.toL2C2TowerIndexedBoxObligations
+
+end NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
 

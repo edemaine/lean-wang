@@ -12701,6 +12701,170 @@ theorem
       O (positionSourceObligationsOfPositionCodeDecoderStep hstep hcorrect)
 
 /--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical routing and translated positive-radius indexed boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_canonical_obligations_position_source
+      O.toCanonicalPositiveBoxObligations h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical routing and translated positive-radius indexed boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_canonical_obligations_position_source
+      O.toCanonicalPositiveBoxObligations h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical routing and translated positive-radius indexed boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_canonical_obligations_position_source
+      O.toCanonicalPositiveBoxObligations h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical routing and translated positive-radius indexed boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_canonical_obligations_position_source
+      O.toCanonicalPositiveBoxObligations h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical routing, translated positive-radius indexed boxes, and the generated
+position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_canonical_obligations_decoderStep
+      O.toCanonicalPositiveBoxObligations hstep hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical routing, translated positive-radius indexed boxes, and the generated
+position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_canonical_obligations_decoderStep
+      O.toCanonicalPositiveBoxObligations hstep hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical routing, translated positive-radius indexed boxes, and the generated
+position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_canonical_obligations_decoderStep
+      O.toCanonicalPositiveBoxObligations hstep hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical routing, translated positive-radius indexed boxes, and the generated
+position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_canonical_obligations_decoderStep
+      O.toCanonicalPositiveBoxObligations hstep hcorrect
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate, with
 the indexed-box part stated only for positive radii.  The radius-zero box is
 supplied by the scaffold corner tile.

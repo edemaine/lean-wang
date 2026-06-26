@@ -1376,6 +1376,16 @@ theorem nonempty_centered_of_translated {S : Scaffold} {r : Nat}
   rcases hbox with ⟨box⟩
   exact ⟨box.toActiveCornerIndexedBox⟩
 
+theorem nonempty_centered_pos_of_translated_pos {S : Scaffold}
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox S r origin)) :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox S r) := by
+  intro r hr
+  rcases hboxes r hr with ⟨origin, hbox⟩
+  exact nonempty_centered_of_translated (origin := origin) hbox
+
 end TranslatedActiveCornerIndexedBox
 
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
