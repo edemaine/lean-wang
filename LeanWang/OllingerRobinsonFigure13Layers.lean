@@ -2243,6 +2243,31 @@ theorem optionFromSparseEntries_eq_some_of_mem
         unfold optionFromSparseEntries at htailLookup ⊢
         simp [hne, htailLookup]
 
+theorem optionFromSparseEntries_eq_none_of_index_not_mem
+    {α : Type} {entries : List (Nat × α)} {index : Nat}
+    (hnot : index ∉ entries.map Prod.fst) :
+    optionFromSparseEntries entries index = none := by
+  induction entries with
+  | nil =>
+      rfl
+  | cons head tail ih =>
+      rcases head with ⟨headIndex, headValue⟩
+      simp only [List.map_cons, List.mem_cons] at hnot
+      have hne : headIndex ≠ index := by
+        intro heq
+        exact hnot (Or.inl heq.symm)
+      have htail : index ∉ tail.map Prod.fst := by
+        intro hmem
+        exact hnot (Or.inr hmem)
+      unfold optionFromSparseEntries
+      simp only [Option.map_eq_none_iff, List.find?_eq_none, List.mem_cons,
+        beq_iff_eq, forall_eq_or_imp, Prod.forall]
+      constructor
+      · exact hne
+      · intro tailIndex tailValue htailMem heq
+        apply htail
+        exact List.mem_map.2 ⟨(tailIndex, tailValue), htailMem, heq⟩
+
 def optionRowFromSparseEntries {α : Type}
     (entries : List (Nat × α)) : List (Option α) :=
   (List.range 92).map (optionFromSparseEntries entries)
@@ -2351,6 +2376,24 @@ theorem blackEntry_lookup (rows : CheckedSparseSeparateLayerRows)
     (hmem : (index.val, black) ∈ rows.blackEntries) :
     optionFromSparseEntries rows.blackEntries index.val = some black :=
   optionFromSparseEntries_eq_some_of_mem rows.blackIndices_nodup hmem
+
+theorem thinEntry_lookup_none (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thinEntries.map Prod.fst) :
+    optionFromSparseEntries rows.thinEntries index.val = none :=
+  optionFromSparseEntries_eq_none_of_index_not_mem hnot
+
+theorem thickEntry_lookup_none (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thickEntries.map Prod.fst) :
+    optionFromSparseEntries rows.thickEntries index.val = none :=
+  optionFromSparseEntries_eq_none_of_index_not_mem hnot
+
+theorem blackEntry_lookup_none (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.blackEntries.map Prod.fst) :
+    optionFromSparseEntries rows.blackEntries index.val = none :=
+  optionFromSparseEntries_eq_none_of_index_not_mem hnot
 
 end CheckedSparseSeparateLayerRows
 
@@ -2488,6 +2531,30 @@ theorem ofSparse_blackAt_of_mem
     (ofSparse rows).blackAt index = some black := by
   rw [ofSparse_blackAt]
   exact rows.blackEntry_lookup hmem
+
+theorem ofSparse_thinAt_eq_none_of_index_not_mem
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thinEntries.map Prod.fst) :
+    (ofSparse rows).thinAt index = none := by
+  rw [ofSparse_thinAt]
+  exact rows.thinEntry_lookup_none hnot
+
+theorem ofSparse_thickAt_eq_none_of_index_not_mem
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.thickEntries.map Prod.fst) :
+    (ofSparse rows).thickAt index = none := by
+  rw [ofSparse_thickAt]
+  exact rows.thickEntry_lookup_none hnot
+
+theorem ofSparse_blackAt_eq_none_of_index_not_mem
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92}
+    (hnot : index.val ∉ rows.blackEntries.map Prod.fst) :
+    (ofSparse rows).blackAt index = none := by
+  rw [ofSparse_blackAt]
+  exact rows.blackEntry_lookup_none hnot
 
 theorem layerRows_getElem?_components
     (rows : CheckedSeparateLayerRows) (index : Fin 92) :
