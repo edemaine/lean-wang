@@ -2687,14 +2687,14 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨grid, stackData, hsite, hmatch, hcompatible⟩
 
-theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelSignalLocal
+theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
     (hcheck :
       generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
         true)
-    (hsignal :
-      HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable
+    (hgrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
         (Figure18RoleTable.FlatRoleTable.ofActiveSites
           activeSiteData.sites cornerSite).toRoleTable) :
     (sparseRawDataOfSites
@@ -2704,11 +2704,8 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
   intro T seed x hx n hn
   rcases RobinsonSquare.exists_level_with_payload_capacity n with
     ⟨level, hcap⟩
-  rcases hsignal x hx level with ⟨certificate, hsiteCompat⟩
-  let bigGrid := certificate.toRoutedFreeGrid
+  rcases hgrids x hx level with ⟨bigGrid, hbigSite⟩
   let grid := bigGrid.restrict hn hcap
-  have hbigSite : bigGrid.SiteCompatible :=
-    certificate.siteCompatible_toRoutedFreeGrid hsiteCompat
   have hgridSite : grid.SiteCompatible :=
     hbigSite.restrict hn hcap
   have hsites : ∀ i : Fin n, ∀ j : Fin n,
@@ -2725,7 +2722,7 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
             activeSiteData.sites cornerSite).toRoleTable.roleAtSite
               (siteRectangleOfIndexedRoutedFixedCornerSquare
                 grid.toIndexedRoutedFixedCornerSquare i j)) = true := by
-      simpa [grid, bigGrid, Figure18RobinsonBoardRoutedFreeGrid.restrict,
+      simpa [grid, Figure18RobinsonBoardRoutedFreeGrid.restrict,
         Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
         Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
         siteRectangleOfIndexedRoutedFixedCornerSquare] using
@@ -2765,6 +2762,25 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
       activeSiteData cornerSite hcheck R hsites hh hv with
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨grid, stackData, hsite, hmatch, hcompatible⟩
+
+theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelSignalLocal
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hsignal :
+      HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable) :
+    (sparseRawDataOfSites
+      activeSiteData cornerSite).HasRobinsonBoardRoutedFreeGridCheckedStacks
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable := by
+  exact sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
+    activeSiteData cornerSite hcheck
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localSignalCertificates
+      hsignal)
 
 theorem hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
     (activeSiteData : Figure18Site.CheckedNatSpecs)

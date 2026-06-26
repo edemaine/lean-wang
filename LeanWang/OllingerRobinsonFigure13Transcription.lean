@@ -5175,6 +5175,24 @@ def HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
           (RobinsonSquare.freeGridSide_pos level))
 
 /--
+Level-indexed Robinson-board/free-grid invariant retaining the finite local
+site compatibility needed by the generated Figure 18 stack checker.
+-/
+def HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty
+          { grid : Figure18RobinsonBoardRoutedFreeGrid table x
+              (RobinsonSquare.freeGridSide level)
+              (RobinsonSquare.freeGridSide_pos level) //
+            grid.SiteCompatible }
+
+/--
 Robinson's obstruction-signal board certificate is a direct refinement of the
 level-indexed routed free-grid certificate used downstream.
 -/
@@ -5185,6 +5203,43 @@ theorem hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_signalCertificat
   intro T seed x hx level
   rcases hsignal x hx level with ⟨certificate⟩
   exact ⟨certificate.toRoutedFreeGrid⟩
+
+/--
+Robinson's local obstruction-signal board certificate refines the compatible
+routed free-grid certificate used by the finite stack checker.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localSignalCertificates
+    {table : Figure18RoleTable}
+    (hsignal : HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table := by
+  intro T seed x hx level
+  rcases hsignal x hx level with ⟨certificate, hsite⟩
+  exact ⟨⟨certificate.toRoutedFreeGrid,
+    certificate.siteCompatible_toRoutedFreeGrid hsite⟩⟩
+
+/-- Forget local site compatibility from compatible level routed grids. -/
+theorem hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_compatible
+    {table : Figure18RoleTable}
+    (hgrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table) :
+    HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable table := by
+  intro T seed x hx level
+  rcases hgrids x hx level with ⟨grid, _hsite⟩
+  exact ⟨grid⟩
+
+/--
+Local coordinate-step certificates refine compatible level routed grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localCoordinateSteps
+    {table : Figure18RoleTable}
+    (hsteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localSignalCertificates
+    (hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
+      hsteps)
 
 /-- Robinson-board/free-grid invariant for a specified Figure 18 role table. -/
 def HasFigure18RobinsonBoardRoutedFreeGridsForTable
