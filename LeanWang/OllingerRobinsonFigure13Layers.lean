@@ -1051,6 +1051,23 @@ theorem compatibleFigure18ScaffoldSquares_of_tilesPlane
     exact hx.2 (Int.ofNat i.val, Int.ofNat j.val)
 
 /--
+The site-level scaffold-square target is equivalent to ordinary plane
+tileability of the concrete Figure 18 scaffold tiles.
+-/
+theorem compatibleFigure18ScaffoldSquares_iff_tilesPlane :
+    HasCompatibleFigure18ScaffoldSquares ↔ TilesPlane figure18ScaffoldTiles :=
+  ⟨tilesPlane_of_compatibleFigure18ScaffoldSquares,
+    compatibleFigure18ScaffoldSquares_of_tilesPlane⟩
+
+/--
+Ordinary plane tileability of the concrete Figure 18 scaffold tiles is
+equivalent to producing compatible Figure 18 site squares of every side length.
+-/
+theorem tilesPlane_iff_compatibleFigure18ScaffoldSquares :
+    TilesPlane figure18ScaffoldTiles ↔ HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_iff_tilesPlane.symm
+
+/--
 A rectangle of Figure 18 sites together with the component selected in one
 Figure 16 layer at every site.
 -/
