@@ -5866,6 +5866,21 @@ def ofLevelCompatibleFreeGrids
       hcheck levelCompatibleRoutedFreeGrids
   realizes := realizes
 
+def ofCompatibleLevelObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+        activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelCompatibleFreeGrids activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    obligations.levelCompatibleRoutedFreeGrids obligations.pairCompatibility
+    obligations.realizes
+
 def ofLevelSignalLocallyCompatibleFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5942,11 +5957,11 @@ def ofLevelSignalLocalCoordinateStepFreeGrids
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
     NatSiteRobinsonScaffoldCertificate :=
-  ofLevelCompatibleFreeGrids activeSiteSpecs activeSiteSpecs_valid
+  ofCompatibleLevelObligations activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid
-    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localCoordinateSteps
-      signalLocalCoordinateSteps)
-    hcheck realizes
+    (NatSiteRobinsonCompatibleLevelObligations.ofLocalSignalCoordinateSteps
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid signalLocalCoordinateSteps realizes hcheck)
 
 def ofLevelSignalCoordinateStepLocallyCompatibleFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -6007,21 +6022,6 @@ def ofLevelObligations
     cornerIndex cornerQuadrant cornerIndex_valid
     obligations.levelRoutedFreeGrids obligations.pairCompatibility
     obligations.levelAllowed obligations.realizes
-
-def ofCompatibleLevelObligations
-    (activeSiteSpecs : List (Nat × Quadrant))
-    (activeSiteSpecs_valid :
-      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
-    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
-    (cornerIndex_valid : decide (cornerIndex < 92) = true)
-    (obligations :
-      NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
-        activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
-    NatSiteRobinsonScaffoldCertificate :=
-  ofLevelCompatibleFreeGrids activeSiteSpecs activeSiteSpecs_valid
-    cornerIndex cornerQuadrant cornerIndex_valid
-    obligations.levelCompatibleRoutedFreeGrids obligations.pairCompatibility
-    obligations.realizes
 
 def ofPairFailures
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -6229,18 +6229,13 @@ def ofL2C1SignalLocalStepFreeGrids
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
     NatSiteRobinsonScaffoldCertificate :=
-  ofLevelSignalLocalCoordinateStepFreeGrids
+  ofCompatibleLevelObligations
     l2Component1BlankCandidateActiveSiteSpecs
     l2Component1BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.southwest
     l2Component1BlankCandidateSanity.cornerIndex_valid
-    signalLocalCoordinateSteps
-    (by
-      simpa [l2Component1BlankCandidateActiveSiteData,
-        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
-        NatSiteSpecSanity.cornerSite] using
-        l2Component1BlankCandidatePairCompatibilityBool)
-    realizes
+    (NatSiteRobinsonCompatibleLevelObligations.ofL2C1SignalLocalStepFreeGrids
+      signalLocalCoordinateSteps realizes)
 
 def ofL2Component1BlankCandidateLevelSignalCoordinateStepLocal
     (signalCoordinateSteps :
@@ -6454,18 +6449,13 @@ def ofL2C2SignalLocalStepFreeGrids
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
     NatSiteRobinsonScaffoldCertificate :=
-  ofLevelSignalLocalCoordinateStepFreeGrids
+  ofCompatibleLevelObligations
     l2Component2BlankCandidateActiveSiteSpecs
     l2Component2BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.northeast
     l2Component2BlankCandidateSanity.cornerIndex_valid
-    signalLocalCoordinateSteps
-    (by
-      simpa [l2Component2BlankCandidateActiveSiteData,
-        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
-        NatSiteSpecSanity.cornerSite] using
-        l2Component2BlankCandidatePairCompatibilityBool)
-    realizes
+    (NatSiteRobinsonCompatibleLevelObligations.ofL2C2SignalLocalStepFreeGrids
+      signalLocalCoordinateSteps realizes)
 
 def ofL2Component2BlankCandidateLevelSignalCoordinateStepLocal
     (signalCoordinateSteps :
