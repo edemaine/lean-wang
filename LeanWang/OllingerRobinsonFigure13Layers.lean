@@ -2335,6 +2335,62 @@ theorem indices_nodup_of_sparseEntriesValidBool
   rw [sparseEntriesValidBool, Bool.and_eq_true] at hvalid
   exact of_decide_eq_true hvalid.2
 
+/--
+Checked sparse entries for one Figure 16 layer.
+
+This is the chunk-friendly data-entry form used while transcribing Figure 13:
+small audited pieces can be validated independently, then concatenated with a
+fresh finite check for the combined index set.
+-/
+structure CheckedSparseEntries (α : Type) where
+  entries : List (Nat × α)
+  valid : sparseEntriesValidBool entries = true
+
+namespace CheckedSparseEntries
+
+def ofEntries {α : Type} (entries : List (Nat × α))
+    (valid : sparseEntriesValidBool entries = true) :
+    CheckedSparseEntries α where
+  entries := entries
+  valid := valid
+
+def empty (α : Type) : CheckedSparseEntries α where
+  entries := ([] : List (Nat × α))
+  valid := by simp [sparseEntriesValidBool]
+
+def append {α : Type} (left right : CheckedSparseEntries α)
+    (valid : sparseEntriesValidBool (left.entries ++ right.entries) = true) :
+    CheckedSparseEntries α where
+  entries := left.entries ++ right.entries
+  valid := valid
+
+@[simp]
+theorem ofEntries_entries {α : Type} (entries : List (Nat × α))
+    (valid : sparseEntriesValidBool entries = true) :
+    (ofEntries entries valid).entries = entries :=
+  rfl
+
+@[simp]
+theorem empty_entries {α : Type} :
+    (empty α).entries = [] :=
+  rfl
+
+@[simp]
+theorem append_entries {α : Type} (left right : CheckedSparseEntries α)
+    (valid : sparseEntriesValidBool (left.entries ++ right.entries) = true) :
+    (append left right valid).entries = left.entries ++ right.entries :=
+  rfl
+
+theorem all_indices_lt {α : Type} (entries : CheckedSparseEntries α) :
+    ∀ entry ∈ entries.entries, entry.1 < 92 :=
+  all_indices_lt_of_sparseEntriesValidBool entries.valid
+
+theorem indices_nodup {α : Type} (entries : CheckedSparseEntries α) :
+    (entries.entries.map Prod.fst).Nodup :=
+  indices_nodup_of_sparseEntriesValidBool entries.valid
+
+end CheckedSparseEntries
+
 def optionFromSparseEntries {α : Type} (entries : List (Nat × α))
     (index : Nat) : Option α :=
   (entries.find? fun entry => entry.1 == index).map Prod.snd
@@ -2423,6 +2479,45 @@ structure CheckedSparseSeparateLayerRows where
   blackEntries_valid : sparseEntriesValidBool blackEntries = true
 
 namespace CheckedSparseSeparateLayerRows
+
+def ofCheckedEntries
+    (thinEntries : CheckedSparseEntries Figure16.Thin)
+    (thickEntries : CheckedSparseEntries Figure16.Thick)
+    (blackEntries : CheckedSparseEntries Figure16.Black) :
+    CheckedSparseSeparateLayerRows where
+  thinEntries := thinEntries.entries
+  thinEntries_valid := thinEntries.valid
+  thickEntries := thickEntries.entries
+  thickEntries_valid := thickEntries.valid
+  blackEntries := blackEntries.entries
+  blackEntries_valid := blackEntries.valid
+
+@[simp]
+theorem ofCheckedEntries_thinEntries
+    (thinEntries : CheckedSparseEntries Figure16.Thin)
+    (thickEntries : CheckedSparseEntries Figure16.Thick)
+    (blackEntries : CheckedSparseEntries Figure16.Black) :
+    (ofCheckedEntries thinEntries thickEntries blackEntries).thinEntries =
+      thinEntries.entries :=
+  rfl
+
+@[simp]
+theorem ofCheckedEntries_thickEntries
+    (thinEntries : CheckedSparseEntries Figure16.Thin)
+    (thickEntries : CheckedSparseEntries Figure16.Thick)
+    (blackEntries : CheckedSparseEntries Figure16.Black) :
+    (ofCheckedEntries thinEntries thickEntries blackEntries).thickEntries =
+      thickEntries.entries :=
+  rfl
+
+@[simp]
+theorem ofCheckedEntries_blackEntries
+    (thinEntries : CheckedSparseEntries Figure16.Thin)
+    (thickEntries : CheckedSparseEntries Figure16.Thick)
+    (blackEntries : CheckedSparseEntries Figure16.Black) :
+    (ofCheckedEntries thinEntries thickEntries blackEntries).blackEntries =
+      blackEntries.entries :=
+  rfl
 
 def thins (rows : CheckedSparseSeparateLayerRows) :
     List (Option Figure16.Thin) :=

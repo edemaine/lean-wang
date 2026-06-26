@@ -46,13 +46,18 @@ theorem topRowThinEntries_indices :
     topRowThinEntries.map Prod.fst = [0, 1, 2, 3, 4, 5, 6, 7] := by
   rfl
 
-def topRowThinSparseRows : CheckedSparseSeparateLayerRows where
-  thinEntries := topRowThinEntries
-  thinEntries_valid := topRowThinEntries_valid
-  thickEntries := []
-  thickEntries_valid := by decide
-  blackEntries := []
-  blackEntries_valid := by decide
+def topRowThinCheckedEntries : CheckedSparseEntries Figure16.Thin :=
+  CheckedSparseEntries.ofEntries topRowThinEntries topRowThinEntries_valid
+
+theorem topRowThinCheckedEntries_entries :
+    topRowThinCheckedEntries.entries = topRowThinEntries :=
+  rfl
+
+def topRowThinSparseRows : CheckedSparseSeparateLayerRows :=
+  CheckedSparseSeparateLayerRows.ofCheckedEntries
+    topRowThinCheckedEntries
+    (CheckedSparseEntries.empty Figure16.Thick)
+    (CheckedSparseEntries.empty Figure16.Black)
 
 theorem topRowThinSparseRows_thinEntries :
     topRowThinSparseRows.thinEntries = topRowThinEntries :=
