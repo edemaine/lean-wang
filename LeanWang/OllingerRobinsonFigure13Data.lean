@@ -3961,6 +3961,88 @@ def toListedActiveIndexedRoutedCertificate
 
 end NatSiteObligations
 
+/--
+Concrete theorem-facing scaffold package for the Figure 13/Figure 18 Nat-site
+route.
+
+The fields split the remaining concrete work in the intended way: finite
+paper-derived active-site/corner data, the geometric scaffold certificate, and
+the generated finite stack-pair audit.
+-/
+structure NatSiteScaffoldCertificate where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  certificate :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).Certificate
+  pairFailures :
+    generatedStackAllowedSitePairFailures
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) = []
+
+namespace NatSiteScaffoldCertificate
+
+def activeSiteData (C : NatSiteScaffoldCertificate) :
+    Figure18Site.CheckedNatSpecs :=
+  activeSiteDataOfSpecs C.activeSiteSpecs C.activeSiteSpecs_valid
+
+def cornerSite (C : NatSiteScaffoldCertificate) : Figure18Site :=
+  cornerSiteOfNat C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def scaffoldData (C : NatSiteScaffoldCertificate) :
+    LayeredFigure18ScaffoldData :=
+  scaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def figure18ScaffoldData (C : NatSiteScaffoldCertificate) :
+    Figure18ScaffoldData :=
+  figure18ScaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def obligations (C : NatSiteScaffoldCertificate) :
+    NatSiteObligations C.activeSiteSpecs C.activeSiteSpecs_valid
+      C.cornerIndex C.cornerQuadrant C.cornerIndex_valid :=
+  NatSiteObligations.ofCertificateFailures
+    C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+    C.certificate C.pairFailures
+
+def indexedRoutedCertificate (C : NatSiteScaffoldCertificate) :
+    C.scaffoldData.IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTableCertificateFailures
+    C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+    C.certificate C.pairFailures
+
+def listedActiveIndexedRoutedCertificate (C : NatSiteScaffoldCertificate) :
+    C.scaffoldData.IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificateFailures
+    C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+    C.certificate C.pairFailures
+
+theorem pairCompatibility (C : NatSiteScaffoldCertificate) :
+    generatedStackAllowedSitePairCompatibilityBool
+      C.activeSiteData C.cornerSite = true :=
+  generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+    C.pairFailures
+
+theorem scaffoldData_tiles (C : NatSiteScaffoldCertificate) :
+    C.scaffoldData.scaffold.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  scaffoldDataOfNatSites_tiles C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+theorem figure18ScaffoldData_tiles (C : NatSiteScaffoldCertificate) :
+    C.figure18ScaffoldData.tiles = figure18ScaffoldTiles :=
+  figure18ScaffoldDataOfNatSites_tiles C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+end NatSiteScaffoldCertificate
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers

@@ -5375,6 +5375,84 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from a bundled concrete Figure 13/Figure 18
+Nat-site scaffold certificate and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_position_source
+    (C : NatSiteScaffoldCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+      C.activeSiteSpecs C.activeSiteSpecs_valid
+      C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+      C.indexedRoutedCertificate
+      h
+
+/--
+Unencoded domino undecidability from a bundled concrete Figure 13/Figure 18
+Nat-site scaffold certificate and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_position_source
+    (C : NatSiteScaffoldCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+      C.activeSiteSpecs C.activeSiteSpecs_valid
+      C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+      C.indexedRoutedCertificate
+      h
+
+/--
+Encoded domino undecidability from a bundled concrete Figure 13/Figure 18
+Nat-site scaffold certificate and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_interiorRows
+    (C : NatSiteScaffoldCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+      C.activeSiteSpecs C.activeSiteSpecs_valid
+      C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+      C.indexedRoutedCertificate
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a bundled concrete Figure 13/Figure 18
+Nat-site scaffold certificate and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_interiorRows
+    (C : NatSiteScaffoldCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+      C.activeSiteSpecs C.activeSiteSpecs_valid
+      C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+      C.indexedRoutedCertificate
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, indexed
 active-corner windows, realization, and generated position-coded source-route
