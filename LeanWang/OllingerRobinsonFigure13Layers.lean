@@ -77,6 +77,32 @@ def ruleSource : LayerComponent → Figure16.RuleSource
 def block (component : LayerComponent) : Figure16.Block :=
   component.ruleSource.block
 
+@[simp]
+theorem block_thin (component : Figure16.Thin) :
+    (LayerComponent.thin component).block =
+      Figure16.phiL2Component1 component :=
+  rfl
+
+@[simp]
+theorem block_thick (component : Figure16.Thick) :
+    (LayerComponent.thick component).block =
+      Figure16.phiL2Component2 component :=
+  rfl
+
+@[simp]
+theorem block_black (component : Figure16.Black) :
+    (LayerComponent.black component).block =
+      Figure16.phiL3 component :=
+  rfl
+
+@[simp]
+theorem block_ofLayer (layer : Layer) (component : layer.Component) :
+    (ofLayer layer component).block = (match layer with
+      | .thin => Figure16.phiL2Component1 component
+      | .thick => Figure16.phiL2Component2 component
+      | .black => Figure16.phiL3 component) := by
+  cases layer <;> rfl
+
 theorem symbol_mem_all (component : LayerComponent) :
     component.symbol ∈ Figure16.Symbol.all :=
   Figure16.Symbol.mem_all component.symbol
