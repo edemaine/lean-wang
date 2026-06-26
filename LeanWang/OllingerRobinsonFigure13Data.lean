@@ -1239,6 +1239,108 @@ theorem layerData_componentsAt_91 :
       Components.ofAll Figure16.Thin.a Figure16.Thick.g Figure16.Black.e := by
   decide
 
+def thinComponentAt (index : Fin 92) : Figure16.Thin :=
+  (thinEntries.get ⟨index.val, by simp [thinEntries_length, index.isLt]⟩).2
+
+def thickComponentAt (index : Fin 92) : Figure16.Thick :=
+  (thickEntries.get ⟨index.val, by simp [thickEntries_length, index.isLt]⟩).2
+
+def blackComponentAt (index : Fin 92) : Figure16.Black :=
+  (blackEntries.get ⟨index.val, by simp [blackEntries_length, index.isLt]⟩).2
+
+theorem sparseLayerRows_thinAt (index : Fin 92) :
+    sparseLayerRows.separateLayerRows.thinAt index =
+      some (thinComponentAt index) := by
+  decide +revert
+
+theorem sparseLayerRows_thickAt (index : Fin 92) :
+    sparseLayerRows.separateLayerRows.thickAt index =
+      some (thickComponentAt index) := by
+  decide +revert
+
+theorem sparseLayerRows_blackAt (index : Fin 92) :
+    sparseLayerRows.separateLayerRows.blackAt index =
+      some (blackComponentAt index) := by
+  decide +revert
+
+def checkedLayerStackRectangleOfSiteRectangle {w h : Nat}
+    (R : SiteRectangle w h) : CheckedLayerStackRectangle w h where
+  sites := R.toCheckedNatSiteRectangle
+  thin := CheckedLayerComponentRectangle.ofRect fun i j =>
+    thinComponentAt (R i j).index
+  thick := CheckedLayerComponentRectangle.ofRect fun i j =>
+    thickComponentAt (R i j).index
+  black := CheckedLayerComponentRectangle.ofRect fun i j =>
+    blackComponentAt (R i j).index
+
+theorem checkedLayerStackRectangleOfSiteRectangle_matchesSite {w h : Nat}
+    (R : SiteRectangle w h) :
+    (checkedLayerStackRectangleOfSiteRectangle R).sites.matchesSiteRectangleBool
+      R = true :=
+  R.toCheckedNatSiteRectangle_matchesSiteRectangleBool
+
+theorem checkedLayerStackRectangleOfSiteRectangle_site_index {w h : Nat}
+    (R : SiteRectangle w h) (i : Fin w) (j : Fin h) :
+    ((checkedLayerStackRectangleOfSiteRectangle R).sites.toSiteRectangle i j).index =
+      (R i j).index := by
+  apply Fin.ext
+  change (R.toCheckedNatSiteRectangle.specAt i j).1 = (R i j).index.val
+  rw [SiteRectangle.toCheckedNatSiteRectangle_specAt]
+
+theorem checkedLayerStackRectangleOfSiteRectangle_thin_componentAt
+    {w h : Nat} (R : SiteRectangle w h) (i : Fin w) (j : Fin h) :
+    (checkedLayerStackRectangleOfSiteRectangle R).thin.componentAt i j =
+      thinComponentAt (R i j).index :=
+  CheckedLayerComponentRectangle.ofRect_componentAt _ i j
+
+theorem checkedLayerStackRectangleOfSiteRectangle_thick_componentAt
+    {w h : Nat} (R : SiteRectangle w h) (i : Fin w) (j : Fin h) :
+    (checkedLayerStackRectangleOfSiteRectangle R).thick.componentAt i j =
+      thickComponentAt (R i j).index :=
+  CheckedLayerComponentRectangle.ofRect_componentAt _ i j
+
+theorem checkedLayerStackRectangleOfSiteRectangle_black_componentAt
+    {w h : Nat} (R : SiteRectangle w h) (i : Fin w) (j : Fin h) :
+    (checkedLayerStackRectangleOfSiteRectangle R).black.componentAt i j =
+      blackComponentAt (R i j).index :=
+  CheckedLayerComponentRectangle.ofRect_componentAt _ i j
+
+theorem sparseLayerRows_layerStackRectangleMatchesBool {w h : Nat}
+    (R : SiteRectangle w h) :
+    sparseLayerRows.layerStackRectangleMatchesBool
+      (checkedLayerStackRectangleOfSiteRectangle R) = true := by
+  unfold CheckedSparseSeparateLayerRows.layerStackRectangleMatchesBool
+  unfold CheckedSeparateLayerRows.layerStackRectangleMatchesBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · unfold CheckedSeparateLayerRows.componentRectangleMatchesBool
+    apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [checkedLayerStackRectangleOfSiteRectangle_site_index,
+      checkedLayerStackRectangleOfSiteRectangle_thin_componentAt]
+    exact sparseLayerRows_thinAt (R i j).index
+  · unfold CheckedSeparateLayerRows.componentRectangleMatchesBool
+    apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [checkedLayerStackRectangleOfSiteRectangle_site_index,
+      checkedLayerStackRectangleOfSiteRectangle_thick_componentAt]
+    exact sparseLayerRows_thickAt (R i j).index
+  · unfold CheckedSeparateLayerRows.componentRectangleMatchesBool
+    apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [checkedLayerStackRectangleOfSiteRectangle_site_index,
+      checkedLayerStackRectangleOfSiteRectangle_black_componentAt]
+    exact sparseLayerRows_blackAt (R i j).index
+
 /--
 Dense raw-data adapter for the concrete Figure 13 layer transcription.
 
@@ -1335,6 +1437,26 @@ theorem sparseRawDataOfSites_cornerSite
       cornerSite := by
   cases cornerSite
   rfl
+
+theorem sparseRawDataOfSites_layerStackRectangleMatchesBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) {w h : Nat} (R : SiteRectangle w h) :
+    (sparseRawDataOfSites activeSiteData cornerSite).layerStackRectangleMatchesBool
+      (checkedLayerStackRectangleOfSiteRectangle R) = true := by
+  simpa [sparseRawDataOfSites, CheckedSparseRawData.layerStackRectangleMatchesBool]
+    using sparseLayerRows_layerStackRectangleMatchesBool R
+
+theorem sparseRawDataOfSites_exists_checkedLayerStackRectangle
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) {w h : Nat} (R : SiteRectangle w h) :
+    ∃ (stackData : CheckedLayerStackRectangle w h),
+      stackData.sites.matchesSiteRectangleBool R = true ∧
+        (sparseRawDataOfSites activeSiteData cornerSite).layerStackRectangleMatchesBool
+          stackData = true := by
+  exact ⟨checkedLayerStackRectangleOfSiteRectangle R,
+    checkedLayerStackRectangleOfSiteRectangle_matchesSite R,
+    sparseRawDataOfSites_layerStackRectangleMatchesBool
+      activeSiteData cornerSite R⟩
 
 /--
 Concrete layered scaffold data with the Figure 13 layer transcription fixed and
