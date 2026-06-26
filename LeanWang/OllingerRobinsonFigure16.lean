@@ -198,9 +198,9 @@ def lineSum? : Thick → Option ThickLineSum
   | .n => some <| ThickLineSum.mkDistinct .g2 .g1 (by decide)
   | .o => some <| ThickLineSum.mkDistinct .g2 .g3 (by decide)
   | .p => some <| ThickLineSum.mkDistinct .g0 .g3 (by decide)
-  | .q => some <| ThickLineSum.mkDistinct .g0 .r1 (by decide)
+  | .q => some <| ThickLineSum.mkDistinct .g2 .r3 (by decide)
   | .r => some <| ThickLineSum.mkDistinct .r2 .g1 (by decide)
-  | .s => some <| ThickLineSum.mkDistinct .g2 .r3 (by decide)
+  | .s => some <| ThickLineSum.mkDistinct .g0 .r1 (by decide)
   | .t => some <| ThickLineSum.mkDistinct .r0 .g3 (by decide)
 
 def hasLineSum (component : Thick) : Prop :=
@@ -248,9 +248,9 @@ def tile : Symbol → WangTile
   | .thick .n => t 16 50 29 51
   | .thick .o => t 16 52 25 53
   | .thick .p => t 27 54 25 55
-  | .thick .q => t 27 64 32 65
+  | .thick .q => t 16 68 18 69
   | .thick .r => t 23 66 29 67
-  | .thick .s => t 16 68 18 69
+  | .thick .s => t 27 64 32 65
   | .thick .t => t 20 70 25 71
   | .line .r0 => t 17 20 3 2
   | .line .r1 => t 1 0 26 32
@@ -590,9 +590,9 @@ def phiL2Component2 : Thick → Block
   | .n => .mkRows .G2 .blank .L2n .G1
   | .o => .mkRows .G2 .blank .L2o .G3
   | .p => .mkRows .G0 .blank .L2p .G3
-  | .q => .mkRows .G0 .blank .L2q .R1
+  | .q => .mkRows .G2 .blank .L2q .R3
   | .r => .mkRows .R2 .blank .L2r .G1
-  | .s => .mkRows .G2 .blank .L2s .R3
+  | .s => .mkRows .G0 .blank .L2s .R1
   | .t => .mkRows .R0 .blank .L2t .G3
 
 namespace Thick
@@ -727,7 +727,7 @@ theorem phiL2Component2_p :
   rfl
 
 theorem phiL2Component2_q :
-    phiL2Component2 .q = .mkRows .G0 .blank .L2q .R1 :=
+    phiL2Component2 .q = .mkRows .G2 .blank .L2q .R3 :=
   rfl
 
 theorem phiL2Component2_r :
@@ -735,7 +735,7 @@ theorem phiL2Component2_r :
   rfl
 
 theorem phiL2Component2_s :
-    phiL2Component2 .s = .mkRows .G2 .blank .L2s .R3 :=
+    phiL2Component2 .s = .mkRows .G0 .blank .L2s .R1 :=
   rfl
 
 theorem phiL2Component2_t :

@@ -1,0 +1,95 @@
+phi_L1(*) =
+  L1d L1b
+  L1a L1c
+
+phi_L2 is the sum of two components:
+component 1:
+phi_L2(L1a) =
+  G3 L2b
+  - G2
+phi_L2(L1b) =
+  R3 L2d
+  - R2
+phi_L2(L1c) =
+  R1 L2c
+  - G0
+phi_L2(L1d) =
+  G1 L2a
+  - R0
+component 2:
+phi_L2(L2a) =
+  G2 -
+  L2a R3
+phi_L2(L2b) =
+  R0 -
+  L2b R3
+phi_L2(L2c) =
+  R2 -
+  L2c G3
+phi_L2(L2d) =
+  G0 -
+  L2d G1
+phi_L2(L2e) =
+  R0 -
+  L2e R1
+phi_L2(L2f) =
+  R2 -
+  L2f R1
+phi_L2(L2g) =
+  R2 -
+  L2g R3
+phi_L2(L2h) =
+  R0 -
+  L2h R3
+phi_L2(L2i) =
+  G0 -
+  L2i R3
+phi_L2(L2j) =
+  R0 -
+  L2j G1
+phi_L2(L2k) =
+  G2 -
+  L2k R1
+phi_L2(L2l) =
+  R2 -
+  L2l G3
+phi_L2(L2m) =
+  G0 -
+  L2m G1
+phi_L2(L2n) =
+  G2 -
+  L2n G1
+phi_L2(L2o) =
+  G2 -
+  L2o G3
+phi_L2(L2p) =
+  G0 -
+  L2p G3
+phi_L2(L2q) =
+  G2 -
+  L2q R3
+phi_L2(L2r) =
+  R2 -
+  L2r G1
+phi_L2(L2s) =
+  G0 -
+  L2s R1
+phi_L2(L2t) =
+  R0 -
+  L2t G3
+
+phi_L3(L3a) =
+  L3e L3a
+  L3a L3b
+phi_L3(L3b) =
+  L3d L3a
+  L3b L3b
+phi_L3(L3c) =
+  L3d L3a
+  L3c L3c
+phi_L3(L3d) =
+  L3d L3a
+  L3d L3c
+phi_L3(L3e) =
+  L3e L3a
+  L3e L3c
