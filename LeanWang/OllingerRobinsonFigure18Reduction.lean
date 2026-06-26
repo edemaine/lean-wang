@@ -25,6 +25,7 @@ namespace LeanWang
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
+open OllingerRobinson
 open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 /--
@@ -10229,6 +10230,130 @@ theorem
       (NatSiteRobinsonScaffoldCertificate.ofL2C2SignalLocalTowerFreeGridsLayerPatches
         htower patches)
       h
+
+/--
+Encoded domino undecidability from the first audited L2-blank Figure 18
+candidate, a fixed Robinson Section 7 obstruction-geometry tower with routing,
+finite scaffold/payload layer patches, and generated position-coded
+source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c1_fixed_geometry_routing_layer_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  refine
+    encoded_domino_problem_undecidable_of_figure13_l2c1_signal_local_tower_layer_position_source
+      ?_ patches h
+  exact
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      hrouting
+
+/--
+Unencoded domino undecidability from the first audited L2-blank Figure 18
+candidate, a fixed Robinson Section 7 obstruction-geometry tower with routing,
+finite scaffold/payload layer patches, and generated position-coded
+source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c1_fixed_geometry_routing_layer_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  refine
+    domino_problem_undecidable_of_figure13_l2c1_signal_local_tower_layer_position_source
+      ?_ patches h
+  exact
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      hrouting
+
+/--
+Encoded domino undecidability from the second audited L2-blank Figure 18
+candidate, a fixed Robinson Section 7 obstruction-geometry tower with routing,
+finite scaffold/payload layer patches, and generated position-coded
+source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c2_fixed_geometry_routing_layer_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  refine
+    encoded_domino_problem_undecidable_of_figure13_l2c2_signal_local_tower_layer_position_source
+      ?_ patches h
+  exact
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      hrouting
+
+/--
+Unencoded domino undecidability from the second audited L2-blank Figure 18
+candidate, a fixed Robinson Section 7 obstruction-geometry tower with routing,
+finite scaffold/payload layer patches, and generated position-coded
+source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c2_fixed_geometry_routing_layer_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  refine
+    domino_problem_undecidable_of_figure13_l2c2_signal_local_tower_layer_position_source
+      ?_ patches h
+  exact
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      hrouting
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
