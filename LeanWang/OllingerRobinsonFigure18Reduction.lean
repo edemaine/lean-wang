@@ -25,6 +25,7 @@ namespace LeanWang
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
+open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 /--
 Encoded domino undecidability from a concrete Figure 18 scaffold instance with
@@ -1267,6 +1268,120 @@ theorem
     domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
         activeSiteData cornerSite)
+      certificate hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, an
+indexed-routed layered geometric certificate, and generated position-coded
+source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid).IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid)
+      certificate h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, an
+indexed-routed layered geometric certificate, and generated position-coded
+source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid).IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid)
+      certificate h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, and the
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid).IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid)
+      certificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, and the
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid).IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
+      (sparseRawDataOfNatSites
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid)
       certificate hinterior hcorrect
 
 /--

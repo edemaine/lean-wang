@@ -1372,6 +1372,160 @@ theorem scaffoldDataOfSites_tiles
       TileSubdivision.subdivideTileSet fig13Tiles :=
   (scaffoldDataOfSites activeSiteData cornerSite).scaffold_tiles
 
+/-- Checked active-site data from raw Figure 18 site specs. -/
+def activeSiteDataOfSpecs
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true) :
+    Figure18Site.CheckedNatSpecs where
+  specs := activeSiteSpecs
+  valid := activeSiteSpecs_valid
+
+/-- Checked corner site from a raw Figure 13 tile index and quadrant. -/
+def cornerSiteOfNat
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    Figure18Site where
+  index := ⟨cornerIndex, of_decide_eq_true cornerIndex_valid⟩
+  quadrant := cornerQuadrant
+
+@[simp]
+theorem activeSiteDataOfSpecs_specs
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true) :
+    (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).specs =
+      activeSiteSpecs :=
+  rfl
+
+@[simp]
+theorem cornerSiteOfNat_index_val
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid).index.val =
+      cornerIndex :=
+  rfl
+
+@[simp]
+theorem cornerSiteOfNat_quadrant
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid).quadrant =
+      cornerQuadrant :=
+  rfl
+
+/--
+Concrete sparse raw data from raw active-site specs and a raw checked corner.
+
+This is the finite data-entry target for the scaffold transcription: the
+Figure 13 layer rows are fixed to `figures/fig13-human.tsv`; only the active
+Figure 18 sites and corner remain as paper-derived finite data.
+-/
+def sparseRawDataOfNatSites
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    CheckedSparseRawData where
+  layerRows := sparseLayerRows
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+
+theorem sparseRawDataOfNatSites_eq_sparseRawDataOfSites
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid =
+      sparseRawDataOfSites
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) :=
+  rfl
+
+theorem sparseRawDataOfNatSites_layerData
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).layerData = layerData := by
+  rw [sparseRawDataOfNatSites_eq_sparseRawDataOfSites]
+  exact sparseRawDataOfSites_layerData _ _
+
+theorem sparseRawDataOfNatSites_activeSiteSpecs
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).activeSiteSpecs =
+        activeSiteSpecs :=
+  rfl
+
+theorem sparseRawDataOfNatSites_cornerIndex
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).cornerIndex =
+        cornerIndex :=
+  rfl
+
+theorem sparseRawDataOfNatSites_cornerQuadrant
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).cornerQuadrant =
+        cornerQuadrant :=
+  rfl
+
+/-- Concrete layered scaffold data from raw active-site specs and corner. -/
+def scaffoldDataOfNatSites
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    LayeredFigure18ScaffoldData :=
+  (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid).toLayeredFigure18ScaffoldData
+
+theorem scaffoldDataOfNatSites_layerData
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).layerData = layerData :=
+  sparseRawDataOfNatSites_layerData activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+
+theorem scaffoldDataOfNatSites_tiles
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).scaffold.tiles =
+        TileSubdivision.subdivideTileSet fig13Tiles :=
+  (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid).scaffold_tiles
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
