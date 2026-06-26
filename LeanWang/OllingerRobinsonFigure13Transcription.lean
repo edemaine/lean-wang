@@ -4521,6 +4521,163 @@ theorem noObstruction_at_freeCrossing
   · exact geometry.noVerticalObstruction_of_freeColumnCoord
       i (geometry.freeRowCoord j) (geometry.freeRowCoord_board j)
 
+/-- Column-coordinate recurrence between consecutive Robinson board geometries. -/
+def ColumnCoordinateStep
+    {level : Nat}
+    (parent : RobinsonBoardSignalGeometry level)
+    (child : RobinsonBoardSignalGeometry (level + 1)) :
+    Type :=
+  RobinsonSquare.FreeLineCoordinateStep level
+    parent.freeColumnCoord child.freeColumnCoord
+
+/-- Row-coordinate recurrence between consecutive Robinson board geometries. -/
+def RowCoordinateStep
+    {level : Nat}
+    (parent : RobinsonBoardSignalGeometry level)
+    (child : RobinsonBoardSignalGeometry (level + 1)) :
+    Type :=
+  RobinsonSquare.FreeLineCoordinateStep level
+    parent.freeRowCoord child.freeRowCoord
+
+/--
+Both coordinate recurrences for the next-level Robinson board geometry.
+-/
+structure CoordinateStep
+    {level : Nat}
+    (parent : RobinsonBoardSignalGeometry level)
+    (child : RobinsonBoardSignalGeometry (level + 1)) :
+    Type where
+  columns : ColumnCoordinateStep parent child
+  rows : RowCoordinateStep parent child
+
+/-- Column-coordinate overlap forced by the free-line recurrence. -/
+theorem columnCoordinateStep_overlap
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : ColumnCoordinateStep parent child) :
+    parent.freeColumnCoord (RobinsonSquare.freeGridLast level) +
+        step.leftOffset =
+      parent.freeColumnCoord ⟨0, RobinsonSquare.freeGridSide_pos level⟩ +
+        step.rightOffset :=
+  RobinsonSquare.FreeLineCoordinateStep.overlap step
+
+/-- Row-coordinate overlap forced by the free-line recurrence. -/
+theorem rowCoordinateStep_overlap
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : RowCoordinateStep parent child) :
+    parent.freeRowCoord (RobinsonSquare.freeGridLast level) +
+        step.leftOffset =
+      parent.freeRowCoord ⟨0, RobinsonSquare.freeGridSide_pos level⟩ +
+        step.rightOffset :=
+  RobinsonSquare.FreeLineCoordinateStep.overlap step
+
+/-- Child column coordinate from its canonical previous-level preimage. -/
+theorem columnCoordinateStep_child_eq_preimage
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : ColumnCoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide (level + 1))) :
+    child.freeColumnCoord i =
+      match (RobinsonSquare.freeLinePreimage level i).side with
+      | .left =>
+          parent.freeColumnCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.leftOffset
+      | .right =>
+          parent.freeColumnCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.rightOffset :=
+  RobinsonSquare.FreeLineCoordinateStep.child_eq_preimage step i
+
+/-- Child row coordinate from its canonical previous-level preimage. -/
+theorem rowCoordinateStep_child_eq_preimage
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : RowCoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide (level + 1))) :
+    child.freeRowCoord i =
+      match (RobinsonSquare.freeLinePreimage level i).side with
+      | .left =>
+          parent.freeRowCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.leftOffset
+      | .right =>
+          parent.freeRowCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.rightOffset :=
+  RobinsonSquare.FreeLineCoordinateStep.child_eq_preimage step i
+
+namespace CoordinateStep
+
+/-- Column-coordinate overlap from a combined geometry coordinate step. -/
+theorem column_overlap
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : CoordinateStep parent child) :
+    parent.freeColumnCoord (RobinsonSquare.freeGridLast level) +
+        step.columns.leftOffset =
+      parent.freeColumnCoord ⟨0, RobinsonSquare.freeGridSide_pos level⟩ +
+        step.columns.rightOffset :=
+  columnCoordinateStep_overlap step.columns
+
+/-- Row-coordinate overlap from a combined geometry coordinate step. -/
+theorem row_overlap
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : CoordinateStep parent child) :
+    parent.freeRowCoord (RobinsonSquare.freeGridLast level) +
+        step.rows.leftOffset =
+      parent.freeRowCoord ⟨0, RobinsonSquare.freeGridSide_pos level⟩ +
+        step.rows.rightOffset :=
+  rowCoordinateStep_overlap step.rows
+
+/-- Child column coordinate from a combined geometry coordinate step. -/
+theorem column_child_eq_preimage
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide (level + 1))) :
+    child.freeColumnCoord i =
+      match (RobinsonSquare.freeLinePreimage level i).side with
+      | .left =>
+          parent.freeColumnCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.columns.leftOffset
+      | .right =>
+          parent.freeColumnCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.columns.rightOffset :=
+  columnCoordinateStep_child_eq_preimage step.columns i
+
+/-- Child row coordinate from a combined geometry coordinate step. -/
+theorem row_child_eq_preimage
+    {level : Nat}
+    {parent : RobinsonBoardSignalGeometry level}
+    {child : RobinsonBoardSignalGeometry (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide (level + 1))) :
+    child.freeRowCoord i =
+      match (RobinsonSquare.freeLinePreimage level i).side with
+      | .left =>
+          parent.freeRowCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.rows.leftOffset
+      | .right =>
+          parent.freeRowCoord
+            (RobinsonSquare.freeLinePreimage level i).index +
+            step.rows.rightOffset :=
+  rowCoordinateStep_child_eq_preimage step.rows i
+
+end CoordinateStep
+
 end RobinsonBoardSignalGeometry
 
 /--
@@ -4657,6 +4814,18 @@ theorem geometry_freeColumnCoord
   rfl
 
 @[simp]
+theorem geometry_freeColumnCoord_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level)) :
+    certificate.geometry.freeColumnCoord i = certificate.freeColumnCoord i :=
+  rfl
+
+@[simp]
 theorem geometry_freeRowCoord
     {table : Figure18RoleTable}
     {T : TileSet} {seed : WangTile}
@@ -4665,6 +4834,18 @@ theorem geometry_freeRowCoord
     {level : Nat}
     (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
     certificate.geometry.freeRowCoord = certificate.freeRowCoord :=
+  rfl
+
+@[simp]
+theorem geometry_freeRowCoord_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level)) :
+    certificate.geometry.freeRowCoord i = certificate.freeRowCoord i :=
   rfl
 
 /--
@@ -4981,6 +5162,27 @@ structure CoordinateStep
     Type where
   columns : ColumnCoordinateStep parent child
   rows : RowCoordinateStep parent child
+
+/--
+A coordinate recurrence proved at the obstruction-geometry level induces the
+same recurrence for full Figure 18 signal certificates.
+-/
+def CoordinateStep.ofGeometry
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step :
+      RobinsonBoardSignalGeometry.CoordinateStep
+        parent.geometry child.geometry) :
+    CoordinateStep parent child where
+  columns := by
+    exact step.columns
+  rows := by
+    exact step.rows
 
 /--
 Column-coordinate overlap forced by the two translated copies in Robinson's
