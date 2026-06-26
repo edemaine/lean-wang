@@ -1844,6 +1844,120 @@ theorem
 
 /--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, listed active-site
+stack witnesses, realization, and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_sites_listed_active_stacks_position_source
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (hchecked :
+      (sparseRawDataOfSites activeSiteData
+        cornerSite).HasListedActiveSiteCheckedStacks
+          activeSiteData.sites cornerSite)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_position_source
+      activeSiteData cornerSite
+      (scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteData cornerSite hchecked realizes)
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, listed active-site
+stack witnesses, realization, and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_sites_listed_active_stacks_position_source
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (hchecked :
+      (sparseRawDataOfSites activeSiteData
+        cornerSite).HasListedActiveSiteCheckedStacks
+          activeSiteData.sites cornerSite)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_position_source
+      activeSiteData cornerSite
+      (scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteData cornerSite hchecked realizes)
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, listed active-site
+stack witnesses, realization, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_sites_listed_active_stacks_interiorRows
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (hchecked :
+      (sparseRawDataOfSites activeSiteData
+        cornerSite).HasListedActiveSiteCheckedStacks
+          activeSiteData.sites cornerSite)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_interiorRows
+      activeSiteData cornerSite
+      (scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteData cornerSite hchecked realizes)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, listed active-site
+stack witnesses, realization, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_sites_listed_active_stacks_interiorRows
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (hchecked :
+      (sparseRawDataOfSites activeSiteData
+        cornerSite).HasListedActiveSiteCheckedStacks
+          activeSiteData.sites cornerSite)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_interiorRows
+      activeSiteData cornerSite
+      (scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteData cornerSite hchecked realizes)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, checked active Figure 18 sites, a typed corner site, a plain Figure 18
 scaffold certificate, and generated position-coded source-route obligations.
 -/
@@ -2884,6 +2998,154 @@ theorem
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid
       (scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatActiveSiteCheckedStacks
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hchecked realizes)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, listed
+active-site stack witnesses, realization, and generated position-coded
+source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_listed_active_stacks_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasListedActiveSiteCheckedStacks
+          (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+          (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hchecked realizes)
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, listed
+active-site stack witnesses, realization, and generated position-coded
+source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_listed_active_stacks_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasListedActiveSiteCheckedStacks
+          (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+          (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hchecked realizes)
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, listed
+active-site stack witnesses, realization, and the generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_listed_active_stacks_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasListedActiveSiteCheckedStacks
+          (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+          (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hchecked realizes)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, listed
+active-site stack witnesses, realization, and the generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_listed_active_stacks_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasListedActiveSiteCheckedStacks
+          (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+          (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_concrete_figure13_nat_sites_indexed_routed_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSiteCheckedStacks
         activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
         cornerIndex_valid hchecked realizes)
       hinterior hcorrect
