@@ -7648,6 +7648,40 @@ def toScaffoldCertificate
     NatSiteRobinsonScaffoldCertificate :=
   O.toIndexedBoxScaffoldCertificate.toScaffoldCertificate
 
+def ofPositiveBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (indexedBoxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  signalLocalTower := signalLocalTower
+  pairCompatibility := pairCompatibility
+  indexedBoxes :=
+    ActiveCornerIndexedBox.nonempty_all_of_pos_and_corner_mem
+      (by
+        simpa [LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation] using
+          Figure18RoleTable.scaffold_corner_mem
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).table)
+      indexedBoxes_pos
+
 def ofL2C1PositiveBoxes
     (signalLocalTower :
       HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
@@ -7667,25 +7701,14 @@ def ofL2C1PositiveBoxes
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
-      l2Component1BlankCandidateSanity.cornerIndex_valid where
-  signalLocalTower := signalLocalTower
-  pairCompatibility := by
-    simpa [l2Component1BlankCandidateActiveSiteData,
-      l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
-      NatSiteSpecSanity.cornerSite] using
-      l2Component1BlankCandidatePairCompatibilityBool
-  indexedBoxes :=
-    ActiveCornerIndexedBox.nonempty_all_of_pos_and_corner_mem
-      (by
-        simpa [LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation] using
-          Figure18RoleTable.scaffold_corner_mem
-            (scaffoldDataOfNatSites
-              l2Component1BlankCandidateActiveSiteSpecs
-              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-              0 Quadrant.southwest
-              l2Component1BlankCandidateSanity.cornerIndex_valid).table)
-      indexedBoxes_pos
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofPositiveBoxes signalLocalTower
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+    indexedBoxes_pos
 
 def ofL2C2PositiveBoxes
     (signalLocalTower :
@@ -7706,25 +7729,14 @@ def ofL2C2PositiveBoxes
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
-      l2Component2BlankCandidateSanity.cornerIndex_valid where
-  signalLocalTower := signalLocalTower
-  pairCompatibility := by
-    simpa [l2Component2BlankCandidateActiveSiteData,
-      l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
-      NatSiteSpecSanity.cornerSite] using
-      l2Component2BlankCandidatePairCompatibilityBool
-  indexedBoxes :=
-    ActiveCornerIndexedBox.nonempty_all_of_pos_and_corner_mem
-      (by
-        simpa [LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation] using
-          Figure18RoleTable.scaffold_corner_mem
-            (scaffoldDataOfNatSites
-              l2Component2BlankCandidateActiveSiteSpecs
-              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-              0 Quadrant.northeast
-              l2Component2BlankCandidateSanity.cornerIndex_valid).table)
-      indexedBoxes_pos
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofPositiveBoxes signalLocalTower
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+    indexedBoxes_pos
 
 def ofL2C1
     (signalLocalTower :
