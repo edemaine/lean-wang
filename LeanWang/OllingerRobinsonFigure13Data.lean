@@ -3090,6 +3090,72 @@ theorem cornerSite_not_mem_activeSiteData_sites
 end NatSiteSpecSanity
 
 /--
+Diagnostic active-site candidate from the first L2 summand's local blank
+quadrants, with the distinguished corner removed from the raw active list.
+
+This is not asserted to be the final Figure 18 active-site set. It is a named
+finite candidate so that the local data-entry and generated-stack audits can be
+run in Lean.
+-/
+def l2Component1BlankCandidateActiveSiteSpecs : List (Nat × Quadrant) :=
+  l2Component1BlankSiteSpecs.erase (cornerNatSpec 0 Quadrant.southwest)
+
+theorem l2Component1BlankCandidateSanityBool :
+    natSiteSpecSanityBool l2Component1BlankCandidateActiveSiteSpecs
+      0 Quadrant.southwest = true := by
+  decide
+
+def l2Component1BlankCandidateSanity :
+    NatSiteSpecSanity l2Component1BlankCandidateActiveSiteSpecs
+      0 Quadrant.southwest :=
+  natSiteSpecSanity_of_bool l2Component1BlankCandidateSanityBool
+
+def l2Component1BlankCandidateActiveSiteData :
+    Figure18Site.CheckedNatSpecs :=
+  l2Component1BlankCandidateSanity.activeSiteData
+
+def l2Component1BlankCandidateCornerSite : Figure18Site :=
+  l2Component1BlankCandidateSanity.cornerSite
+
+set_option maxRecDepth 20000 in
+theorem l2Component1BlankCandidatePairFailures :
+    generatedStackAllowedSitePairFailures
+      l2Component1BlankCandidateActiveSiteData
+      l2Component1BlankCandidateCornerSite = [] := by
+  decide
+
+/--
+Diagnostic active-site candidate from the second L2 summand's local blank
+quadrants, with the distinguished corner removed from the raw active list.
+-/
+def l2Component2BlankCandidateActiveSiteSpecs : List (Nat × Quadrant) :=
+  l2Component2BlankSiteSpecs.erase (cornerNatSpec 0 Quadrant.northeast)
+
+theorem l2Component2BlankCandidateSanityBool :
+    natSiteSpecSanityBool l2Component2BlankCandidateActiveSiteSpecs
+      0 Quadrant.northeast = true := by
+  decide
+
+def l2Component2BlankCandidateSanity :
+    NatSiteSpecSanity l2Component2BlankCandidateActiveSiteSpecs
+      0 Quadrant.northeast :=
+  natSiteSpecSanity_of_bool l2Component2BlankCandidateSanityBool
+
+def l2Component2BlankCandidateActiveSiteData :
+    Figure18Site.CheckedNatSpecs :=
+  l2Component2BlankCandidateSanity.activeSiteData
+
+def l2Component2BlankCandidateCornerSite : Figure18Site :=
+  l2Component2BlankCandidateSanity.cornerSite
+
+set_option maxRecDepth 20000 in
+theorem l2Component2BlankCandidatePairFailures :
+    generatedStackAllowedSitePairFailures
+      l2Component2BlankCandidateActiveSiteData
+      l2Component2BlankCandidateCornerSite = [] := by
+  decide
+
+/--
 Generated flat Figure 18 role table from raw Nat-indexed active sites.
 
 This names the `ofActiveSites` route used by the scaffold theorem surface, so
