@@ -4035,6 +4035,82 @@ theorem freeLinePreimage_side_right_of_not_lt (level : Nat)
     (freeLinePreimage level i).side = FreeLineSide.right := by
   simp [freeLinePreimage, hleft]
 
+/--
+Coordinate form of Robinson's free-line recurrence.
+
+The next-level free-line coordinates are obtained from two translated copies
+of the previous level's coordinates, overlapping at one line.  The actual
+translation offsets are left abstract here; the geometric red-board proof is
+responsible for supplying them.
+-/
+structure FreeLineCoordinateStep (level : Nat)
+    (parent : Fin (freeGridSide level) → Int)
+    (child : Fin (freeGridSide (level + 1)) → Int) : Type where
+  leftOffset : Int
+  rightOffset : Int
+  left :
+    ∀ i : Fin (freeGridSide level),
+      child (freeLineLeftEmbedding level i) = parent i + leftOffset
+  right :
+    ∀ i : Fin (freeGridSide level),
+      child (freeLineRightEmbedding level i) = parent i + rightOffset
+
+namespace FreeLineCoordinateStep
+
+/--
+The two offsets agree at the unique overlap line after accounting for the
+parent coordinates used by the two copies.
+-/
+theorem overlap
+    {level : Nat}
+    {parent : Fin (freeGridSide level) → Int}
+    {child : Fin (freeGridSide (level + 1)) → Int}
+    (step : FreeLineCoordinateStep level parent child) :
+    parent (freeGridLast level) + step.leftOffset =
+      parent ⟨0, freeGridSide_pos level⟩ + step.rightOffset := by
+  calc
+    parent (freeGridLast level) + step.leftOffset
+        = child (freeLineLeftEmbedding level (freeGridLast level)) := by
+          rw [step.left]
+    _ = child (freeLineRightEmbedding level ⟨0, freeGridSide_pos level⟩) := by
+          rw [freeLineEmbedding_overlap]
+    _ = parent ⟨0, freeGridSide_pos level⟩ + step.rightOffset := by
+          rw [step.right]
+
+/-- Coordinate value of a child free line from its canonical predecessor. -/
+theorem child_eq_preimage
+    {level : Nat}
+    {parent : Fin (freeGridSide level) → Int}
+    {child : Fin (freeGridSide (level + 1)) → Int}
+    (step : FreeLineCoordinateStep level parent child)
+    (i : Fin (freeGridSide (level + 1))) :
+    child i =
+      match (freeLinePreimage level i).side with
+      | .left =>
+          parent (freeLinePreimage level i).index + step.leftOffset
+      | .right =>
+          parent (freeLinePreimage level i).index + step.rightOffset := by
+  have hchild := FreeLinePreimage.child_eq (freeLinePreimage level i)
+  cases hside : (freeLinePreimage level i).side
+  · simp only [FreeLinePreimage.child, hside] at hchild
+    change child i =
+      parent (freeLinePreimage level i).index + step.leftOffset
+    calc
+      child i = child (freeLineLeftEmbedding level
+          (freeLinePreimage level i).index) := by rw [hchild]
+      _ = parent (freeLinePreimage level i).index + step.leftOffset :=
+          step.left (freeLinePreimage level i).index
+  · simp only [FreeLinePreimage.child, hside] at hchild
+    change child i =
+      parent (freeLinePreimage level i).index + step.rightOffset
+    calc
+      child i = child (freeLineRightEmbedding level
+          (freeLinePreimage level i).index) := by rw [hchild]
+      _ = parent (freeLinePreimage level i).index + step.rightOffset :=
+          step.right (freeLinePreimage level i).index
+
+end FreeLineCoordinateStep
+
 end RobinsonSquare
 
 /--
@@ -4395,6 +4471,55 @@ theorem noObstruction_at_freeCrossing
       (certificate.freeColumnCoord i) (certificate.freeColumnCoord_board i) j
   · exact certificate.noVerticalObstruction_of_freeColumnCoord
       i (certificate.freeRowCoord j) (certificate.freeRowCoord_board j)
+
+/--
+Column-coordinate recurrence between consecutive Robinson signal certificates.
+
+This is the coordinate-level form of Robinson's repeated free-column pattern;
+the proof of Section 7 should supply this for the certificates it constructs.
+-/
+def ColumnCoordinateStep
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (parent : Figure18RobinsonBoardSignalCertificate table x level)
+    (child : Figure18RobinsonBoardSignalCertificate table x (level + 1)) :
+    Type :=
+  RobinsonSquare.FreeLineCoordinateStep level
+    parent.freeColumnCoord child.freeColumnCoord
+
+/--
+Row-coordinate recurrence between consecutive Robinson signal certificates.
+-/
+def RowCoordinateStep
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (parent : Figure18RobinsonBoardSignalCertificate table x level)
+    (child : Figure18RobinsonBoardSignalCertificate table x (level + 1)) :
+    Type :=
+  RobinsonSquare.FreeLineCoordinateStep level
+    parent.freeRowCoord child.freeRowCoord
+
+/--
+Both coordinate recurrences needed for the next-level Robinson board to be
+assembled from two translated copies of the previous level's free grid.
+-/
+structure CoordinateStep
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (parent : Figure18RobinsonBoardSignalCertificate table x level)
+    (child : Figure18RobinsonBoardSignalCertificate table x (level + 1)) :
+    Type where
+  columns : ColumnCoordinateStep parent child
+  rows : RowCoordinateStep parent child
 
 /--
 Forget the Section 7 obstruction-signal bookkeeping after it has selected and
