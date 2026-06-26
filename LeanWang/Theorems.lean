@@ -188,6 +188,90 @@ theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
     TileableBox (combineWithScaffold S T seed) r :=
   ⟨patch.toBoxPattern, patch.validBoxTiling_toBoxPattern⟩
 
+/--
+If the cell immediately to the east is inactive, the current payload's east
+edge must match the monochrome inactive payload.
+-/
+theorem payload_e_eq_zero_of_east_inactive
+    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : CombinedBoxPatch S T seed r)
+    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2))
+    (hinactive :
+      S.active (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩) = false) :
+    (patch.payload p).e = 0 := by
+  have hpayload :
+      patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩ = monochromeTile :=
+    patch.inactive_payload ⟨(p.1.1 + 1, p.1.2), hp⟩ hinactive
+  have hmatch :=
+    (WangTile.HMatches_product_iff
+      (patch.base p) (patch.payload p)
+      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩)
+      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).1
+        (patch.hmatch p hp) |>.2
+  simpa [WangTile.HMatches, hpayload, monochromeTile] using hmatch
+
+/--
+If the current cell is inactive, the eastern neighbor's payload west edge must
+match the monochrome inactive payload.
+-/
+theorem east_payload_w_eq_zero_of_inactive
+    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : CombinedBoxPatch S T seed r)
+    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2))
+    (hinactive : S.active (patch.base p) = false) :
+    (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩).w = 0 := by
+  have hpayload : patch.payload p = monochromeTile :=
+    patch.inactive_payload p hinactive
+  have hmatch :=
+    (WangTile.HMatches_product_iff
+      (patch.base p) (patch.payload p)
+      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩)
+      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).1
+        (patch.hmatch p hp) |>.2
+  simpa [WangTile.HMatches, hpayload, monochromeTile] using hmatch.symm
+
+/--
+If the cell immediately to the north is inactive, the current payload's north
+edge must match the monochrome inactive payload.
+-/
+theorem payload_n_eq_zero_of_north_inactive
+    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : CombinedBoxPatch S T seed r)
+    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1))
+    (hinactive :
+      S.active (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩) = false) :
+    (patch.payload p).n = 0 := by
+  have hpayload :
+      patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩ = monochromeTile :=
+    patch.inactive_payload ⟨(p.1.1, p.1.2 + 1), hp⟩ hinactive
+  have hmatch :=
+    (WangTile.VMatches_product_iff
+      (patch.base p) (patch.payload p)
+      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩)
+      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).1
+        (patch.vmatch p hp) |>.2
+  simpa [WangTile.VMatches, hpayload, monochromeTile] using hmatch
+
+/--
+If the current cell is inactive, the northern neighbor's payload south edge
+must match the monochrome inactive payload.
+-/
+theorem north_payload_s_eq_zero_of_inactive
+    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : CombinedBoxPatch S T seed r)
+    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1))
+    (hinactive : S.active (patch.base p) = false) :
+    (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩).s = 0 := by
+  have hpayload : patch.payload p = monochromeTile :=
+    patch.inactive_payload p hinactive
+  have hmatch :=
+    (WangTile.VMatches_product_iff
+      (patch.base p) (patch.payload p)
+      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩)
+      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).1
+        (patch.vmatch p hp) |>.2
+  simpa [WangTile.VMatches, hpayload, monochromeTile] using hmatch.symm
+
 end CombinedBoxPatch
 
 /--
