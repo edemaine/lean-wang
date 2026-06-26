@@ -2801,6 +2801,32 @@ def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
       hpair
       realizes
 
+def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfCertificatePairCompatibility
+    (table : Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        table.activeSiteData table.cornerSite = true) :
+    (scaffoldDataOfFlatRoleTable table).IndexedRoutedCertificate :=
+  scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
+    table
+    (hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
+      certificate.localFreeSquares)
+    hpair
+    certificate.realizes
+
+def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfCertificateFailures
+    (table : Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = []) :
+    (scaffoldDataOfFlatRoleTable table).IndexedRoutedCertificate :=
+  scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfCertificatePairCompatibility
+    table certificate
+    (generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+      hfailures)
+
 def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfObligations
     (table : Figure18RoleTable.FlatRoleTable)
     (obligations : FlatRoleTableObligations table) :
@@ -3774,6 +3800,28 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
       certificate.localFreeSquares)
     hpair
     certificate.realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificateFailures
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          []) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid certificate
+    (generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+      hfailures)
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfObligations
     (activeSiteSpecs : List (Nat × Quadrant))
