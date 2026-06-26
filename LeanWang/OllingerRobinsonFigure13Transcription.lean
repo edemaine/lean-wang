@@ -4761,6 +4761,98 @@ theorem row_child_eq_preimage
             step.rows.rightOffset :=
   rowCoordinateStep_child_eq_preimage step.rows i
 
+/--
+The lower-left translated copy of a parent free-grid crossing inside the next
+Robinson level.
+-/
+theorem childCoord_left_left
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (child.freeColumnCoord (RobinsonSquare.freeLineLeftEmbedding level i),
+      child.freeRowCoord (RobinsonSquare.freeLineLeftEmbedding level j)) =
+    (parent.freeColumnCoord i + step.columns.leftOffset,
+      parent.freeRowCoord j + step.rows.leftOffset) := by
+  apply Prod.ext
+  · exact step.columns.left i
+  · exact step.rows.left j
+
+/--
+The upper-left translated copy of a parent free-grid crossing inside the next
+Robinson level.
+-/
+theorem childCoord_left_right
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (child.freeColumnCoord (RobinsonSquare.freeLineLeftEmbedding level i),
+      child.freeRowCoord (RobinsonSquare.freeLineRightEmbedding level j)) =
+    (parent.freeColumnCoord i + step.columns.leftOffset,
+      parent.freeRowCoord j + step.rows.rightOffset) := by
+  apply Prod.ext
+  · exact step.columns.left i
+  · exact step.rows.right j
+
+/--
+The lower-right translated copy of a parent free-grid crossing inside the next
+Robinson level.
+-/
+theorem childCoord_right_left
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (child.freeColumnCoord (RobinsonSquare.freeLineRightEmbedding level i),
+      child.freeRowCoord (RobinsonSquare.freeLineLeftEmbedding level j)) =
+    (parent.freeColumnCoord i + step.columns.rightOffset,
+      parent.freeRowCoord j + step.rows.leftOffset) := by
+  apply Prod.ext
+  · exact step.columns.right i
+  · exact step.rows.left j
+
+/--
+The upper-right translated copy of a parent free-grid crossing inside the next
+Robinson level.
+-/
+theorem childCoord_right_right
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (child.freeColumnCoord (RobinsonSquare.freeLineRightEmbedding level i),
+      child.freeRowCoord (RobinsonSquare.freeLineRightEmbedding level j)) =
+    (parent.freeColumnCoord i + step.columns.rightOffset,
+      parent.freeRowCoord j + step.rows.rightOffset) := by
+  apply Prod.ext
+  · exact step.columns.right i
+  · exact step.rows.right j
+
 end CoordinateStep
 
 /--
