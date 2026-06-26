@@ -606,6 +606,45 @@ end Transcription
 /-- A rectangle of Figure 18 quarter-sites. -/
 abbrev SiteRectangle (w h : Nat) := Fin w → Fin h → Figure18Site
 
+private theorem rowMajorFlatIndex_div_eq {w h : Nat} (i : Fin w) (j : Fin h) :
+    (i.val + w * j.val) / w = j.val := by
+  rw [Nat.add_mul_div_left]
+  · rw [Nat.div_eq_of_lt i.isLt]
+    simp
+  · exact Fin.pos_iff_nonempty.2 ⟨i⟩
+
+private theorem rowMajorFlatIndex_div_lt {w h : Nat} {k : Nat}
+    (hk : k < w * h) :
+    k / w < h := by
+  by_cases hw : w = 0
+  · simp [hw] at hk
+  · exact Nat.div_lt_of_lt_mul hk
+
+private theorem rowMajorFlatIndex_mod_lt {w h : Nat} {k : Nat}
+    (hk : k < w * h) :
+    k % w < w := by
+  by_cases hw : w = 0
+  · simp [hw] at hk
+  · exact Nat.mod_lt k (Nat.pos_of_ne_zero hw)
+
+private theorem rowMajorFlatIndex_lt {w h : Nat} (i : Fin w) (j : Fin h) :
+    i.val + w * j.val < w * h := by
+  have hrow : i.val + w * j.val < w + w * j.val :=
+    Nat.add_lt_add_right i.isLt (w * j.val)
+  have hrow' : w + w * j.val = w * (j.val + 1) := by
+    rw [Nat.mul_succ]
+    exact Nat.add_comm _ _
+  have hj : j.val + 1 ≤ h := Nat.succ_le_of_lt j.isLt
+  calc
+    i.val + w * j.val < w + w * j.val := hrow
+    _ = w * (j.val + 1) := hrow'
+    _ ≤ w * h := Nat.mul_le_mul_left w hj
+
+private theorem rowMajorFlatIndex_mod_eq {w h : Nat} (i : Fin w) (j : Fin h) :
+    (i.val + w * j.val) % w = i.val :=
+  (Nat.add_mul_mod_self_left i.val w j.val).trans
+    (Nat.mod_eq_of_lt i.isLt)
+
 /--
 Flat checked data for a rectangle of Figure 18 quarter-sites.
 
@@ -796,6 +835,73 @@ theorem rawTileRect_eq {w h : Nat} (R : SiteRectangle w h)
     R.rawTileRect i j = fig13Tile (R.indexRect i j) :=
   rfl
 
+def unflattenSite {w h : Nat} (R : SiteRectangle w h)
+    (k : Fin (w * h)) : Figure18Site :=
+  R ⟨k.val % w, rowMajorFlatIndex_mod_lt k.isLt⟩
+    ⟨k.val / w, rowMajorFlatIndex_div_lt k.isLt⟩
+
+def toNatSpecs {w h : Nat} (R : SiteRectangle w h) :
+    List (Nat × Quadrant) :=
+  List.ofFn fun k : Fin (w * h) =>
+    let site := R.unflattenSite k
+    (site.index.val, site.quadrant)
+
+theorem toNatSpecs_length {w h : Nat} (R : SiteRectangle w h) :
+    R.toNatSpecs.length = w * h := by
+  simp [toNatSpecs]
+
+theorem toNatSpecs_valid {w h : Nat} (R : SiteRectangle w h) :
+    R.toNatSpecs.all (fun spec => decide (spec.1 < 92)) = true := by
+  unfold toNatSpecs
+  rw [List.all_eq_true]
+  intro spec hspec
+  rw [List.mem_ofFn'] at hspec
+  rcases hspec with ⟨k, rfl⟩
+  exact decide_eq_true (R.unflattenSite k).index.isLt
+
+def toCheckedNatSiteRectangle {w h : Nat} (R : SiteRectangle w h) :
+    CheckedNatSiteRectangle w h where
+  specs := R.toNatSpecs
+  length_eq := R.toNatSpecs_length
+  valid := R.toNatSpecs_valid
+
+theorem toCheckedNatSiteRectangle_specAt {w h : Nat}
+    (R : SiteRectangle w h) (i : Fin w) (j : Fin h) :
+    R.toCheckedNatSiteRectangle.specAt i j =
+      ((R i j).index.val, (R i j).quadrant) := by
+  unfold CheckedNatSiteRectangle.specAt toCheckedNatSiteRectangle toNatSpecs
+  change (List.ofFn (fun k : Fin (w * h) =>
+    let site := R.unflattenSite k
+    (site.index.val, site.quadrant))).get _ = _
+  simp only [Lean.Elab.WF.paramLet, List.get_eq_getElem, List.getElem_ofFn,
+    CheckedNatSiteRectangle.flatIndex, unflattenSite, Prod.mk.injEq]
+  have hflat : i.val + w * j.val < w * h := rowMajorFlatIndex_lt i j
+  have hi' :
+      (⟨(i.val + w * j.val) % w, rowMajorFlatIndex_mod_lt hflat⟩ :
+        Fin w) = i := by
+    ext
+    exact rowMajorFlatIndex_mod_eq i j
+  have hj' :
+      (⟨(i.val + w * j.val) / w, rowMajorFlatIndex_div_lt hflat⟩ :
+        Fin h) = j := by
+    ext
+    exact rowMajorFlatIndex_div_eq i j
+  rw [hi', hj']
+  simp
+
+theorem toCheckedNatSiteRectangle_matchesSiteRectangleBool {w h : Nat}
+    (R : SiteRectangle w h) :
+    R.toCheckedNatSiteRectangle.matchesSiteRectangleBool R = true := by
+  unfold CheckedNatSiteRectangle.matchesSiteRectangleBool
+  apply List.all_eq_true.2
+  intro i _hi
+  apply List.all_eq_true.2
+  intro j _hj
+  apply decide_eq_true
+  apply Figure18Site.equivPair.injective
+  simp [Figure18Site.equivPair, Figure18Site.toPair,
+    CheckedNatSiteRectangle.toSiteRectangle, toCheckedNatSiteRectangle_specAt]
+
 end SiteRectangle
 
 /--
@@ -907,6 +1013,53 @@ def blockGrid
 end TypedLayerComponentRectangle
 
 namespace CheckedLayerComponentRectangle
+
+def unflattenComponent {w h : Nat} {layer : Layer}
+    (componentRect : Fin w → Fin h → layer.Component)
+    (k : Fin (w * h)) : layer.Component :=
+  componentRect ⟨k.val % w, rowMajorFlatIndex_mod_lt k.isLt⟩
+    ⟨k.val / w, rowMajorFlatIndex_div_lt k.isLt⟩
+
+def ofRect {w h : Nat} {layer : Layer}
+    (componentRect : Fin w → Fin h → layer.Component) :
+    CheckedLayerComponentRectangle w h layer where
+  specs := List.ofFn fun k : Fin (w * h) =>
+    unflattenComponent componentRect k
+  length_eq := by
+    simp
+
+theorem ofRect_componentAt {w h : Nat} {layer : Layer}
+    (componentRect : Fin w → Fin h → layer.Component)
+    (i : Fin w) (j : Fin h) :
+    (ofRect componentRect).componentAt i j = componentRect i j := by
+  unfold componentAt ofRect unflattenComponent
+  change (List.ofFn (fun k : Fin (w * h) =>
+    unflattenComponent componentRect k)).get _ = _
+  simp only [List.get_eq_getElem, List.getElem_ofFn, flatIndex,
+    unflattenComponent]
+  have hflat : i.val + w * j.val < w * h := rowMajorFlatIndex_lt i j
+  have hi' :
+      (⟨(i.val + w * j.val) % w, rowMajorFlatIndex_mod_lt hflat⟩ :
+        Fin w) = i := by
+    ext
+    exact rowMajorFlatIndex_mod_eq i j
+  have hj' :
+      (⟨(i.val + w * j.val) / w, rowMajorFlatIndex_div_lt hflat⟩ :
+        Fin h) = j := by
+    ext
+    exact rowMajorFlatIndex_div_eq i j
+  rw [hi', hj']
+
+theorem lookupBool_of_ofRect_lookup
+    {w h : Nat} {layer : Layer}
+    {D : Transcription} {siteData : CheckedNatSiteRectangle w h}
+    {componentRect : Fin w → Fin h → layer.Component}
+    (hlookup : ∀ i : Fin w, ∀ j : Fin h,
+      D.componentAtSiteLayer (siteData.toSiteRectangle i j) layer =
+        some (LayerComponent.ofLayer layer (componentRect i j))) :
+    (ofRect componentRect).lookupBool D siteData = true :=
+  lookupBool_of_lookup fun i j => by
+    simpa [ofRect_componentAt] using hlookup i j
 
 def toTypedLayerComponentRectangle
     {w h : Nat} {layer : Layer}
