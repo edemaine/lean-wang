@@ -4017,6 +4017,31 @@ def HasFlatDecodedSiteCheckedStacks
                   (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
                     true
 
+/--
+Finite checked-stack target for the flat active-site route.
+
+This is one of the closest current interfaces to the Figure 18 transcription:
+the witness only records adjacent selected coordinates, active decoded sites in
+the flat active-site list, the corner, and the checked Figure 16 layer stack.
+-/
+def HasFlatActiveSiteCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable.FlatRoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x),
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18FlatActiveSiteFixedCornerSquare table x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedRoutedFixedCornerSquare
+                (window.toIndexedRoutedFixedCornerSquare hx)) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
 theorem hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedActiveWindowCheckedStacks table) :
@@ -4068,6 +4093,16 @@ theorem hasDecodedSiteCheckedStacks_of_flatDecodedSite
   rcases hchecked x hx n hn with
     ⟨window, stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window.toDecodedSiteFixedCornerSquare, stackData, hsite,
+    hmatch, hcompatible⟩
+
+theorem hasFlatDecodedSiteCheckedStacks_of_flatActiveSite
+    {data : CheckedSparseRawData} {table : Figure18RoleTable.FlatRoleTable}
+    (hchecked : data.HasFlatActiveSiteCheckedStacks table) :
+    data.HasFlatDecodedSiteCheckedStacks table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window.toFlatDecodedSiteFixedCornerSquare hx, stackData, hsite,
     hmatch, hcompatible⟩
 
 /--
@@ -4158,6 +4193,23 @@ def indexedRoutedCertificateOfFlatDecodedSiteCheckedStacks
     data.IndexedRoutedCertificate :=
   data.indexedRoutedCertificateOfDecodedSiteCheckedStacks
     (hasDecodedSiteCheckedStacks_of_flatDecodedSite hchecked)
+    realizes
+
+/--
+Build the preferred indexed-routed layered certificate from flat active-site
+squares carrying finite checked layer stacks.
+-/
+def indexedRoutedCertificateOfFlatActiveSiteCheckedStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasFlatActiveSiteCheckedStacks
+        data.toLayeredFigure18ScaffoldData.flatTable)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfFlatDecodedSiteCheckedStacks
+    (hasFlatDecodedSiteCheckedStacks_of_flatActiveSite hchecked)
     realizes
 
 end CheckedSparseRawData
