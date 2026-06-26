@@ -2088,6 +2088,18 @@ structure CheckedRawData where
 
 namespace CheckedRawData
 
+def ofCheckedSites
+    (layerRows : List Components) (layerRows_length : layerRows.length = 92)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : CheckedRawData where
+  layerRows := layerRows
+  layerRows_length := layerRows_length
+  activeSiteSpecs := activeSiteData.specs
+  activeSiteSpecs_valid := activeSiteData.valid
+  cornerIndex := cornerSite.index.val
+  cornerQuadrant := cornerSite.quadrant
+  cornerIndex_valid := decide_eq_true cornerSite.index.isLt
+
 def layerData (data : CheckedRawData) : Transcription where
   rows := data.layerRows
   length_eq := data.layerRows_length
@@ -2153,6 +2165,34 @@ theorem cornerSite_index_val (data : CheckedRawData) :
 
 theorem cornerSite_quadrant (data : CheckedRawData) :
     data.cornerSite.quadrant = data.cornerQuadrant :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_layerRows
+    (layerRows : List Components) (layerRows_length : layerRows.length = 92)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows layerRows_length activeSiteData cornerSite).layerRows =
+      layerRows :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_activeSiteData
+    (layerRows : List Components) (layerRows_length : layerRows.length = 92)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows layerRows_length activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_cornerSite
+    (layerRows : List Components) (layerRows_length : layerRows.length = 92)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows layerRows_length activeSiteData cornerSite).cornerSite =
+      cornerSite := by
+  cases cornerSite
   rfl
 
 end CheckedRawData
@@ -2876,6 +2916,14 @@ def toCheckedRawData
   cornerQuadrant := cornerQuadrant
   cornerIndex_valid := cornerIndex_valid
 
+def toCheckedRawDataOfCheckedSites
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    CheckedRawData :=
+  CheckedRawData.ofCheckedSites rows.layerRows rows.layerRows_length
+    activeSiteData cornerSite
+
 @[simp]
 theorem toCheckedRawData_layerRows
     (rows : CheckedSeparateLayerRows)
@@ -2887,6 +2935,34 @@ theorem toCheckedRawData_layerRows
     (rows.toCheckedRawData activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid).layerRows =
         rows.layerRows :=
+  rfl
+
+@[simp]
+theorem toCheckedRawDataOfCheckedSites_layerRows
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rows.toCheckedRawDataOfCheckedSites activeSiteData cornerSite).layerRows =
+      rows.layerRows :=
+  rfl
+
+@[simp]
+theorem toCheckedRawDataOfCheckedSites_activeSiteData
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rows.toCheckedRawDataOfCheckedSites activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+@[simp]
+theorem toCheckedRawDataOfCheckedSites_cornerSite
+    (rows : CheckedSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rows.toCheckedRawDataOfCheckedSites activeSiteData cornerSite).cornerSite =
+      cornerSite := by
+  cases cornerSite
   rfl
 
 end CheckedSeparateLayerRows
@@ -2909,6 +2985,17 @@ structure CheckedSparseRawData where
   cornerIndex_valid : decide (cornerIndex < 92) = true
 
 namespace CheckedSparseRawData
+
+def ofCheckedSites
+    (layerRows : CheckedSparseSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : CheckedSparseRawData where
+  layerRows := layerRows
+  activeSiteSpecs := activeSiteData.specs
+  activeSiteSpecs_valid := activeSiteData.valid
+  cornerIndex := cornerSite.index.val
+  cornerQuadrant := cornerSite.quadrant
+  cornerIndex_valid := decide_eq_true cornerSite.index.isLt
 
 def separateLayerRows (data : CheckedSparseRawData) :
     CheckedSeparateLayerRows :=
@@ -2957,6 +3044,34 @@ theorem toCheckedRawData_cornerQuadrant (data : CheckedSparseRawData) :
 theorem toLayeredFigure18ScaffoldData_eq (data : CheckedSparseRawData) :
     data.toLayeredFigure18ScaffoldData =
       data.toCheckedRawData.toLayeredFigure18ScaffoldData :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_layerRows
+    (layerRows : CheckedSparseSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows activeSiteData cornerSite).layerRows =
+      layerRows :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_activeSiteData
+    (layerRows : CheckedSparseSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+@[simp]
+theorem ofCheckedSites_cornerSite
+    (layerRows : CheckedSparseSeparateLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (ofCheckedSites layerRows activeSiteData cornerSite).cornerSite =
+      cornerSite := by
+  cases cornerSite
   rfl
 
 end CheckedSparseRawData
