@@ -4741,6 +4741,78 @@ def ofPairFailures
   localCompatibility := localCompatibility
   realizes := realizes
 
+def ofL2Component1BlankCandidate
+    (routedFreeGrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (localCompatibility :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid where
+  routedFreeGrids := routedFreeGrids
+  pairCompatibility := by
+    simpa [l2Component1BlankCandidateActiveSiteData,
+      l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+      NatSiteSpecSanity.cornerSite] using
+      l2Component1BlankCandidatePairCompatibilityBool
+  localCompatibility := localCompatibility
+  realizes := realizes
+
+def ofL2Component2BlankCandidate
+    (routedFreeGrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (localCompatibility :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid where
+  routedFreeGrids := routedFreeGrids
+  pairCompatibility := by
+    simpa [l2Component2BlankCandidateActiveSiteData,
+      l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+      NatSiteSpecSanity.cornerSite] using
+      l2Component2BlankCandidatePairCompatibilityBool
+  localCompatibility := localCompatibility
+  realizes := realizes
+
 end NatSiteRobinsonObligations
 
 namespace NatSiteRobinsonScaffoldCertificate
@@ -4886,6 +4958,68 @@ def ofPairFailures
     (NatSiteRobinsonObligations.ofPairFailures activeSiteSpecs
       activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
       routedFreeGrids localCompatibility realizes pairFailures)
+
+def ofL2Component1BlankCandidate
+    (routedFreeGrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (localCompatibility :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofObligations
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    (NatSiteRobinsonObligations.ofL2Component1BlankCandidate
+      routedFreeGrids localCompatibility realizes)
+
+def ofL2Component2BlankCandidate
+    (routedFreeGrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (localCompatibility :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofObligations
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    (NatSiteRobinsonObligations.ofL2Component2BlankCandidate
+      routedFreeGrids localCompatibility realizes)
 
 def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
