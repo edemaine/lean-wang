@@ -6060,6 +6060,28 @@ def HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
             (geometryTower.geometries level))
 
 /--
+Product-witness Figure 18 routing over a fixed Robinson obstruction-geometry
+tower.
+
+This is a more constructive target for the payload-dependent half of the
+Section 7 proof: at each free crossing, exhibit a payload component of the
+combined tile, then convert those pointwise witnesses to the theorem-facing
+`Routing` package.
+-/
+def HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+    (table : Figure18RoleTable)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          Figure18RobinsonBoardSignalCertificate.ProductWitnessRouting
+            table x (geometryTower.geometries level))
+
+/--
 Robinson Section 7 proof target with a single geometry tower selected
 independently of the payload tiles and the combined tiling.
 -/
@@ -6068,6 +6090,49 @@ def HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
   ∃ geometryTower : RobinsonBoardSignalGeometryTower,
     HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
       table geometryTower
+
+/--
+Fixed-geometry variant whose payload-dependent routing is supplied in
+pointwise product-witness form.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∃ geometryTower : RobinsonBoardSignalGeometryTower,
+    HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+      table geometryTower
+
+/--
+Pointwise product-witness routing over one fixed geometry tower supplies the
+existing theorem-facing routing-over-geometry predicate.
+-/
+theorem
+    hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+    {table : Figure18RoleTable}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+      table geometryTower := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨fun level => (routing level).toRouting⟩
+
+/--
+Fixed geometry plus pointwise product-witness routing supplies the existing
+fixed-geometry routing predicate.
+-/
+theorem
+    hasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable_of_productWitnessRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable table := by
+  rcases hrouting with ⟨geometryTower, hrouting⟩
+  exact ⟨geometryTower,
+    hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+      hrouting⟩
 
 /--
 Routing over one fixed geometry tower supplies the earlier geometry-plus-routing
@@ -6396,6 +6461,18 @@ def HasFigure18RobinsonBoardRoutingForGeometryTower
     geometryTower
 
 /--
+Product-witness routing over a fixed Robinson obstruction-geometry tower for a
+generated listed-active role table.
+-/
+def HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTower
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTowerForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+    geometryTower
+
+/--
 Generated listed-active Figure 18 invariant with one geometry tower selected
 independently of the payload tiles and tiling.
 -/
@@ -6404,6 +6481,38 @@ def HasFigure18RobinsonBoardFixedGeometryTowerRouting
   HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
+
+/--
+Generated listed-active Figure 18 invariant with one geometry tower selected
+independently of the payload tiles and product-witness routing supplied over
+that tower.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+theorem hasFigure18RobinsonBoardRoutingForGeometryTower_of_productWitnessRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardProductWitnessRoutingForGeometryTower
+        activeSites cornerSite geometryTower) :
+    HasFigure18RobinsonBoardRoutingForGeometryTower activeSites cornerSite
+      geometryTower :=
+  hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+    hrouting
+
+theorem hasFigure18RobinsonBoardFixedGeometryTowerRouting_of_productWitnessRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardFixedGeometryTowerRouting activeSites
+      cornerSite :=
+  hasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable_of_productWitnessRouting
+    hrouting
 
 theorem hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
