@@ -3232,6 +3232,74 @@ def figure18ScaffoldDataOfNatSitesCertificateOfIndexedActiveWindows
       cornerIndex cornerQuadrant cornerIndex_valid)
     indexedActiveWindows realizes
 
+/--
+Bundled scaffold-side obligations for raw Nat-indexed Figure 18 site data.
+
+This is the theorem-facing package intended for the final concrete Figure 18
+instantiation: the listed-window geometric invariant, the finite generated
+Figure 13/Figure 16 stack compatibility check, and the active/corner
+realization invariant.
+-/
+structure NatSiteObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  listedWindows :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasLocalFreeSquareWindowInvariant
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+        true
+  realizes :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
+
+namespace NatSiteObligations
+
+def ofCertificate
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid where
+  listedWindows :=
+    hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
+      certificate.localFreeSquares
+  pairCompatibility := hpair
+  realizes := certificate.realizes
+
+end NatSiteObligations
+
+def figure18ScaffoldDataOfNatSitesCertificateOfObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).Certificate :=
+  Figure18ScaffoldData.Certificate.ofWindows
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    obligations.listedWindows obligations.realizes
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -3255,6 +3323,24 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
       certificate.localFreeSquares)
     hpair
     certificate.realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSitePairCompatibility
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    obligations.listedWindows
+    obligations.pairCompatibility
+    obligations.realizes
 
 end ConcreteData
 end LayeredFigure18ScaffoldData
