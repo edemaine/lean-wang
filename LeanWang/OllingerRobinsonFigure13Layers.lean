@@ -942,8 +942,8 @@ theorem tileableBoxes_of_compatibleSquares
           Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) ∧
         (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
           Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)) :
-    ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r := by
-  intro r _hr
+    ∀ r : Nat, TileableBox figure18ScaffoldTiles r := by
+  intro r
   rcases hsquares (boxSide r) with ⟨R, hh, hv⟩
   exact tileableBox_of_tileableSquare (R.tileableSquare_of_compatible hh hv)
 
@@ -987,8 +987,18 @@ centered-box tileability target for the subdivided Figure 13 scaffold.
 -/
 theorem tileableBoxes_of_compatibleFigure18ScaffoldSquares
     (hsquares : HasCompatibleFigure18ScaffoldSquares) :
-    ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r :=
+    ∀ r : Nat, TileableBox figure18ScaffoldTiles r :=
   SiteRectangle.tileableBoxes_of_compatibleSquares hsquares
+
+/--
+Compatible Figure 18 site squares of every side length compactly determine a
+plane tiling of the concrete subdivided Figure 13 scaffold tiles.
+-/
+theorem tilesPlane_of_compatibleFigure18ScaffoldSquares
+    (hsquares : HasCompatibleFigure18ScaffoldSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_of_all_tileableBoxes
+    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
 
 /--
 A plane tiling of the concrete Figure 18 scaffold tiles supplies compatible

@@ -4874,7 +4874,7 @@ theorem l2Component1PositiveTranslatedIsolatedBoxesOfCompatibleSquares
     Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
       l2Component1Figure18ScaffoldData :=
   l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTileableBoxes
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 theorem l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (hplane : TilesPlane figure18ScaffoldTiles) :
@@ -4939,7 +4939,7 @@ theorem l2Component2PositiveTranslatedIsolatedBoxesOfCompatibleSquares
     Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
       l2Component2Figure18ScaffoldData :=
   l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTileableBoxes
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 theorem l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (hplane : TilesPlane figure18ScaffoldTiles) :
@@ -9746,7 +9746,7 @@ def ofL2C1Figure18ScaffoldDataPositiveCompatibleSquares
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
   ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
     canonicalRouting
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 def ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
     (canonicalRouting :
@@ -9893,7 +9893,7 @@ def ofL2C2Figure18ScaffoldDataPositiveCompatibleSquares
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
     canonicalRouting
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 def ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
     (canonicalRouting :
@@ -10138,7 +10138,7 @@ def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveCompatibleSqu
         l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
   l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTileableBoxes
     canonicalRouting
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTilesPlane
     (canonicalRouting :
@@ -10273,7 +10273,7 @@ def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveCompatibleSqu
         l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
   l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTileableBoxes
     canonicalRouting
-    (tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares)
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
 
 def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTilesPlane
     (canonicalRouting :
