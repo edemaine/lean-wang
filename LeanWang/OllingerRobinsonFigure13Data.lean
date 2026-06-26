@@ -2782,6 +2782,25 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
     (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localSignalCertificates
       hsignal)
 
+theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelSignalLocalTower
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable) :
+    (sparseRawDataOfSites
+      activeSiteData cornerSite).HasRobinsonBoardRoutedFreeGridCheckedStacks
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable := by
+  exact sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
+    activeSiteData cornerSite hcheck
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      htower)
+
 theorem hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -7595,6 +7614,28 @@ end NatSiteRobinsonScaffoldCertificate
 
 namespace NatSiteRobinsonTowerIndexedBoxObligations
 
+def toIndexedBoxScaffoldCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonIndexedBoxScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  robinsonStacks :=
+    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelSignalLocalTower
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      O.pairCompatibility O.signalLocalTower
+  indexedBoxes := O.indexedBoxes
+
 def toScaffoldCertificate
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -7605,9 +7646,7 @@ def toScaffoldCertificate
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid) :
     NatSiteRobinsonScaffoldCertificate :=
-  NatSiteRobinsonScaffoldCertificate.ofLevelSignalLocalTowerFreeGridsIndexedBoxes
-    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-    cornerIndex_valid O.signalLocalTower O.pairCompatibility O.indexedBoxes
+  O.toIndexedBoxScaffoldCertificate.toScaffoldCertificate
 
 def ofL2C1
     (signalLocalTower :
