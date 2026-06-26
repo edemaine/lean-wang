@@ -3948,6 +3948,93 @@ theorem freeLineEmbedding_cover (level : Nat)
     simp [freeLineRightEmbedding]
     omega
 
+/-- Which recursive copy contains a next-level free-line index. -/
+inductive FreeLineSide where
+  | left
+  | right
+deriving DecidableEq, Repr
+
+/--
+Deterministic predecessor data for a next-level free-line index in Robinson's
+overlapping recurrence.
+
+The shared overlap line is assigned to the left copy; the symmetric overlap
+identity is still available from `freeLineEmbedding_overlap` and
+`freeLineEmbedding_eq_iff`.
+-/
+structure FreeLinePreimage (level : Nat)
+    (i : Fin (freeGridSide (level + 1))) where
+  side : FreeLineSide
+  index : Fin (freeGridSide level)
+  maps :
+    match side with
+    | .left => freeLineLeftEmbedding level index = i
+    | .right => freeLineRightEmbedding level index = i
+
+namespace FreeLinePreimage
+
+/-- Reapply a predecessor to recover the original next-level index. -/
+def child {level : Nat} {i : Fin (freeGridSide (level + 1))}
+    (p : FreeLinePreimage level i) : Fin (freeGridSide (level + 1)) :=
+  match p.side with
+  | .left => freeLineLeftEmbedding level p.index
+  | .right => freeLineRightEmbedding level p.index
+
+@[simp]
+theorem child_eq {level : Nat} {i : Fin (freeGridSide (level + 1))}
+    (p : FreeLinePreimage level i) : p.child = i := by
+  cases p with
+  | mk side index maps =>
+      cases side <;> exact maps
+
+end FreeLinePreimage
+
+/--
+Canonical predecessor for a next-level free-line index.  Indices in the
+left copy, including the overlap line, choose `.left`; the remaining indices
+choose `.right`.
+-/
+def freeLinePreimage (level : Nat)
+    (i : Fin (freeGridSide (level + 1))) :
+    FreeLinePreimage level i := by
+  by_cases hleft : i.val < freeGridSide level
+  · exact
+      { side := FreeLineSide.left
+        index := ⟨i.val, hleft⟩
+        maps := by
+          apply Fin.ext
+          simp [freeLineLeftEmbedding] }
+  · have hpos := freeGridSide_pos level
+    have hlt : i.val - (freeGridSide level - 1) < freeGridSide level := by
+      have hi : i.val < 2 * freeGridSide level - 1 := by
+        simpa [freeGridSide_succ] using i.isLt
+      omega
+    exact
+      { side := FreeLineSide.right
+        index := ⟨i.val - (freeGridSide level - 1), hlt⟩
+        maps := by
+          apply Fin.ext
+          simp [freeLineRightEmbedding]
+          omega }
+
+@[simp]
+theorem freeLinePreimage_child (level : Nat)
+    (i : Fin (freeGridSide (level + 1))) :
+    (freeLinePreimage level i).child = i :=
+  FreeLinePreimage.child_eq (freeLinePreimage level i)
+
+theorem freeLinePreimage_side_left_of_lt (level : Nat)
+    (i : Fin (freeGridSide (level + 1)))
+    (hleft : i.val < freeGridSide level) :
+    (freeLinePreimage level i).side = FreeLineSide.left := by
+  simp [freeLinePreimage, hleft]
+
+theorem freeLinePreimage_side_right_of_not_lt (level : Nat)
+    (i : Fin (freeGridSide (level + 1)))
+    (hleft : ¬ i.val < freeGridSide level) :
+    (freeLinePreimage level i).side = FreeLineSide.right := by
+  simp [freeLinePreimage, hleft]
+
 end RobinsonSquare
 
 /--
