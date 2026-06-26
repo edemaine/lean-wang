@@ -1239,6 +1239,139 @@ theorem layerData_componentsAt_91 :
       Components.ofAll Figure16.Thin.a Figure16.Thick.g Figure16.Black.e := by
   decide
 
+/--
+Dense raw-data adapter for the concrete Figure 13 layer transcription.
+
+The active Figure 18 sites and distinguished corner are still supplied
+separately; this definition fixes the 92-row layer table to the human-audited
+Figure 13 data above.
+-/
+def rawDataOfSites
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : CheckedRawData :=
+  CheckedRawData.ofCheckedSites componentRows componentRows_length
+    activeSiteData cornerSite
+
+theorem rawDataOfSites_layerData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rawDataOfSites activeSiteData cornerSite).layerData = layerData :=
+  rfl
+
+theorem rawDataOfSites_layerRows
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rawDataOfSites activeSiteData cornerSite).layerRows = componentRows :=
+  rfl
+
+theorem rawDataOfSites_activeSiteData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rawDataOfSites activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+theorem rawDataOfSites_cornerSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (rawDataOfSites activeSiteData cornerSite).cornerSite = cornerSite := by
+  cases cornerSite
+  rfl
+
+/--
+Sparse raw-data adapter for the concrete Figure 13 layer transcription.
+
+This is the preferred constructor for future scaffold data entry because it
+keeps the audited layer rows in the `CheckedSparseSeparateLayerRows` form used
+by the finite Figure 18 lookup checks.
+-/
+def sparseRawDataOfSites
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : CheckedSparseRawData :=
+  CheckedSparseRawData.ofCheckedSites sparseLayerRows activeSiteData cornerSite
+
+theorem sparseRawDataOfSites_separateLayerRows
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (sparseRawDataOfSites activeSiteData cornerSite).separateLayerRows =
+      separateLayerRows :=
+  rfl
+
+theorem sparseRawDataOfSites_layerData_rows
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (sparseRawDataOfSites activeSiteData cornerSite).layerData.rows =
+      componentRows := by
+  exact sparseLayerRows_layerData_rows
+
+private theorem transcription_eq_of_rows_eq
+    {D E : Transcription} (hrows : D.rows = E.rows) : D = E := by
+  cases D with
+  | mk rows length_eq =>
+      cases E with
+      | mk rows' length_eq' =>
+          simp only at hrows
+          subst rows'
+          rfl
+
+theorem sparseRawDataOfSites_layerData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (sparseRawDataOfSites activeSiteData cornerSite).layerData = layerData := by
+  exact transcription_eq_of_rows_eq
+    (sparseRawDataOfSites_layerData_rows activeSiteData cornerSite)
+
+theorem sparseRawDataOfSites_activeSiteData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (sparseRawDataOfSites activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+theorem sparseRawDataOfSites_cornerSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (sparseRawDataOfSites activeSiteData cornerSite).cornerSite =
+      cornerSite := by
+  cases cornerSite
+  rfl
+
+/--
+Concrete layered scaffold data with the Figure 13 layer transcription fixed and
+the finite Figure 18 active-site/corner data supplied as parameters.
+-/
+def scaffoldDataOfSites
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : LayeredFigure18ScaffoldData :=
+  (sparseRawDataOfSites activeSiteData cornerSite).toLayeredFigure18ScaffoldData
+
+theorem scaffoldDataOfSites_layerData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (scaffoldDataOfSites activeSiteData cornerSite).layerData = layerData :=
+  sparseRawDataOfSites_layerData activeSiteData cornerSite
+
+theorem scaffoldDataOfSites_activeSiteData
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (scaffoldDataOfSites activeSiteData cornerSite).activeSiteData =
+      activeSiteData :=
+  rfl
+
+theorem scaffoldDataOfSites_cornerSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (scaffoldDataOfSites activeSiteData cornerSite).cornerSite =
+      cornerSite :=
+  sparseRawDataOfSites_cornerSite activeSiteData cornerSite
+
+theorem scaffoldDataOfSites_tiles
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    (scaffoldDataOfSites activeSiteData cornerSite).scaffold.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  (scaffoldDataOfSites activeSiteData cornerSite).scaffold_tiles
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
