@@ -4853,6 +4853,61 @@ theorem childCoord_right_right
   · exact step.columns.right i
   · exact step.rows.right j
 
+/--
+Coordinate value of any child free-grid crossing, expressed through the
+canonical column and row preimages in the previous Robinson level.
+-/
+theorem childCoord_eq_preimage
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {parent : Figure18RobinsonBoardSignalCertificate table x level}
+    {child : Figure18RobinsonBoardSignalCertificate table x (level + 1)}
+    (step : CoordinateStep parent child)
+    (i : Fin (RobinsonSquare.freeGridSide (level + 1)))
+    (j : Fin (RobinsonSquare.freeGridSide (level + 1))) :
+    (child.freeColumnCoord i, child.freeRowCoord j) =
+      match (RobinsonSquare.freeLinePreimage level i).side,
+          (RobinsonSquare.freeLinePreimage level j).side with
+      | .left, .left =>
+          (parent.freeColumnCoord
+              (RobinsonSquare.freeLinePreimage level i).index +
+              step.columns.leftOffset,
+            parent.freeRowCoord
+              (RobinsonSquare.freeLinePreimage level j).index +
+              step.rows.leftOffset)
+      | .left, .right =>
+          (parent.freeColumnCoord
+              (RobinsonSquare.freeLinePreimage level i).index +
+              step.columns.leftOffset,
+            parent.freeRowCoord
+              (RobinsonSquare.freeLinePreimage level j).index +
+              step.rows.rightOffset)
+      | .right, .left =>
+          (parent.freeColumnCoord
+              (RobinsonSquare.freeLinePreimage level i).index +
+              step.columns.rightOffset,
+            parent.freeRowCoord
+              (RobinsonSquare.freeLinePreimage level j).index +
+              step.rows.leftOffset)
+      | .right, .right =>
+          (parent.freeColumnCoord
+              (RobinsonSquare.freeLinePreimage level i).index +
+              step.columns.rightOffset,
+            parent.freeRowCoord
+              (RobinsonSquare.freeLinePreimage level j).index +
+              step.rows.rightOffset) := by
+  cases hcol : (RobinsonSquare.freeLinePreimage level i).side <;>
+    cases hrow : (RobinsonSquare.freeLinePreimage level j).side
+  all_goals
+    apply Prod.ext
+    · have h := column_child_eq_preimage step i
+      simpa [hcol] using h
+    · have h := row_child_eq_preimage step j
+      simpa [hrow] using h
+
 end CoordinateStep
 
 /--
