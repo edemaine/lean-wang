@@ -7099,6 +7099,86 @@ theorem
       h
 
 /--
+Encoded domino undecidability from a coherent Robinson Section 7 local
+obstruction-signal tower, finite active-corner indexed boxes, finite generated
+stack compatibility, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_level_tower_indexedBoxes_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (htower :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      (NatSiteRobinsonScaffoldCertificate.ofLevelSignalLocalTowerFreeGridsIndexedBoxes
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid htower hcheck hboxes)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from a coherent Robinson Section 7 local
+obstruction-signal tower, finite active-corner indexed boxes, finite generated
+stack compatibility, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_level_tower_indexedBoxes_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (htower :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      (NatSiteRobinsonScaffoldCertificate.ofLevelSignalLocalTowerFreeGridsIndexedBoxes
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid htower hcheck hboxes)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the bundled Robinson Section 7 scaffold
 target: a coherent local obstruction-signal tower, finite active-corner indexed
 boxes, and the generated finite compatibility check.
@@ -7139,6 +7219,58 @@ theorem
   exact
     domino_problem_undecidable_of_figure13_robinson_certificate_position_source
       O.toScaffoldCertificate h
+
+/--
+Encoded domino undecidability from the bundled Robinson Section 7 scaffold
+target and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_towerBoxObligations_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the bundled Robinson Section 7 scaffold
+target and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_towerBoxObligations_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
 
 /--
 Encoded domino undecidability from a coherent Robinson Section 7 local
@@ -9994,6 +10126,102 @@ theorem
   exact
     domino_problem_undecidable_of_figure13_robinson_certificate_position_source
       O.toScaffoldCertificate h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation and the generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation and the generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation and the generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation and the generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+      O.toScaffoldCertificate hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
