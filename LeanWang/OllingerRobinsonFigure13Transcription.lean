@@ -6512,6 +6512,16 @@ def HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold
 
+def HasLayerPatchRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
+  HasActiveCornerLayerBoxPatches D.scaffold
+
+theorem HasRealizationInvariant.ofLayerPatches
+    {D : Figure18ScaffoldData}
+    (hpatches : D.HasLayerPatchRealizationInvariant) :
+    D.HasRealizationInvariant :=
+  realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+    (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches hpatches)
+
 /--
 The two geometric facts still needed after the finite Figure 18 active-site
 data has been transcribed.
@@ -6538,6 +6548,14 @@ def RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant
     HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid boardFreeGrids
   realizes := realizes
 
+def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
+    (D : Figure18ScaffoldData)
+    (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant D boardFreeGrids
+    (HasRealizationInvariant.ofLayerPatches patches)
+
 def RoutedCertificate.toIndexedRoutedCertificate
     {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
     Figure18IndexedRoutedCertificate D.table.toRoleTable where
@@ -6562,12 +6580,27 @@ def Certificate.ofWindowInvariant
       localFreeSquareWindows
   realizes := realizes
 
+def Certificate.ofWindowInvariantLayerPatches
+    {D : Figure18ScaffoldData}
+    (localFreeSquareWindows : D.HasLocalFreeSquareWindowInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.Certificate :=
+  Certificate.ofWindowInvariant localFreeSquareWindows
+    (HasRealizationInvariant.ofLayerPatches patches)
+
 def Certificate.ofWindows
     (D : Figure18ScaffoldData)
     (localFreeSquareWindows : D.HasLocalFreeSquareWindowInvariant)
     (realizes : D.HasRealizationInvariant) :
     D.Certificate :=
   Certificate.ofWindowInvariant localFreeSquareWindows realizes
+
+def Certificate.ofWindowsLayerPatches
+    (D : Figure18ScaffoldData)
+    (localFreeSquareWindows : D.HasLocalFreeSquareWindowInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.Certificate :=
+  Certificate.ofWindowInvariantLayerPatches localFreeSquareWindows patches
 
 def Certificate.ofRobinsonBoardAdjacentFreeGridInvariant
     (D : Figure18ScaffoldData)
