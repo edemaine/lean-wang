@@ -5309,6 +5309,58 @@ def toRouting
       Figure18RobinsonBoardSignalCertificate.ofGeometry] using
       routing.siteCompatible
 
+@[simp]
+theorem payloadRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.payloadRect i j = (routing.payloadWitness i j).1 :=
+  rfl
+
+@[simp]
+theorem toRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toRouting.siteRect i j = routing.siteRect i j :=
+  rfl
+
+@[simp]
+theorem toRouting_payloadRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toRouting.payloadRect i j = (routing.payloadWitness i j).1 :=
+  rfl
+
+@[simp]
+theorem toRouting_product_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toRouting.product i j = routing.product i j :=
+  rfl
+
 end ProductWitnessRouting
 
 namespace Routing
@@ -5324,6 +5376,32 @@ def toCertificate
     Figure18RobinsonBoardSignalCertificate table x level :=
   ofGeometry geometry routing.siteRect routing.payloadRect routing.active
     routing.cornerSite routing.product routing.hmatch routing.vmatch
+
+@[simp]
+theorem toCertificate_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toCertificate.siteRect i j = routing.siteRect i j :=
+  rfl
+
+@[simp]
+theorem toCertificate_payloadRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toCertificate.payloadRect i j = routing.payloadRect i j :=
+  rfl
 
 /--
 Ordinary routing already contains the payload rectangle and product equations,
@@ -5347,6 +5425,47 @@ def toProductWitnessRouting
     simpa [Figure18RobinsonBoardSignalCertificate.SiteCompatible,
       Figure18RobinsonBoardSignalCertificate.ofGeometry] using
       routing.siteCompatible
+
+@[simp]
+theorem toProductWitnessRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toProductWitnessRouting.siteRect i j = routing.siteRect i j :=
+  rfl
+
+@[simp]
+theorem toProductWitnessRouting_payloadWitness_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (routing.toProductWitnessRouting.payloadWitness i j).1 =
+      routing.payloadRect i j :=
+  rfl
+
+@[simp]
+theorem toProductWitnessRouting_payloadRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toProductWitnessRouting.payloadRect i j =
+      routing.payloadRect i j :=
+  rfl
 
 @[simp]
 theorem toCertificate_geometry
