@@ -3709,6 +3709,15 @@ noncomputable def toAdjacentCompatibleFixedCornerSquare
     window.hcompatible window.vcompatible window.active
     window.cornerSite window.productWitness
 
+noncomputable def toIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18AdjacentProductWitnessFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn :=
+  window.toAdjacentCompatibleFixedCornerSquare.toIndexedRoutedFixedCornerSquare hx
+
 theorem tileable
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
