@@ -5596,6 +5596,38 @@ def ofLevelLocallyCompatibleFreeGrids
       hcompatible)
     realizes
 
+def ofLevelCompatibleFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  robinsonStacks :=
+    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck levelCompatibleRoutedFreeGrids
+  realizes := realizes
+
 def ofLevelSignalLocallyCompatibleFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5645,18 +5677,12 @@ def ofLevelSignalLocalFreeGrids
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
-    NatSiteRobinsonScaffoldCertificate where
-  activeSiteSpecs := activeSiteSpecs
-  activeSiteSpecs_valid := activeSiteSpecs_valid
-  cornerIndex := cornerIndex
-  cornerQuadrant := cornerQuadrant
-  cornerIndex_valid := cornerIndex_valid
-  robinsonStacks :=
-    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelSignalLocal
-      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
-      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
-      hcheck signalLocalCertificates
-  realizes := realizes
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelCompatibleFreeGrids activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localSignalCertificates
+      signalLocalCertificates)
+    hcheck realizes
 
 def ofLevelSignalLocalCoordinateStepFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -5678,9 +5704,9 @@ def ofLevelSignalLocalCoordinateStepFreeGrids
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
     NatSiteRobinsonScaffoldCertificate :=
-  ofLevelSignalLocalFreeGrids activeSiteSpecs activeSiteSpecs_valid
+  ofLevelCompatibleFreeGrids activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid
-    (hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localCoordinateSteps
       signalLocalCoordinateSteps)
     hcheck realizes
 
