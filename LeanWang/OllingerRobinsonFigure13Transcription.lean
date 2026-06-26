@@ -3881,6 +3881,47 @@ theorem freeLineEmbedding_overlap (level : Nat) :
   apply Fin.ext
   simp [freeLineLeftEmbedding, freeLineRightEmbedding, freeGridLast]
 
+/-- The left copy of free-line indices is injective. -/
+theorem freeLineLeftEmbedding_injective (level : Nat) :
+    Function.Injective (freeLineLeftEmbedding level) := by
+  intro i j h
+  apply Fin.ext
+  simpa [freeLineLeftEmbedding] using congrArg Fin.val h
+
+/-- The right copy of free-line indices is injective. -/
+theorem freeLineRightEmbedding_injective (level : Nat) :
+    Function.Injective (freeLineRightEmbedding level) := by
+  intro i j h
+  apply Fin.ext
+  have hval := congrArg Fin.val h
+  simpa [freeLineRightEmbedding] using hval
+
+/--
+The overlap between the two recursive copies is unique: it is the old last
+index in the left copy and the old first index in the right copy.
+-/
+theorem freeLineEmbedding_eq_iff (level : Nat)
+    (i j : Fin (freeGridSide level)) :
+    freeLineLeftEmbedding level i = freeLineRightEmbedding level j ↔
+      i = freeGridLast level ∧ j = ⟨0, freeGridSide_pos level⟩ := by
+  constructor
+  · intro h
+    have hval := congrArg Fin.val h
+    have hpos := freeGridSide_pos level
+    have hi := i.isLt
+    have hj := j.isLt
+    constructor
+    · apply Fin.ext
+      simp [freeLineLeftEmbedding, freeLineRightEmbedding,
+        freeGridLast] at hval ⊢
+      omega
+    · apply Fin.ext
+      simp [freeLineLeftEmbedding, freeLineRightEmbedding] at hval
+      change j.val = 0
+      omega
+  · rintro ⟨rfl, rfl⟩
+    exact freeLineEmbedding_overlap level
+
 /--
 Every next-level virtual free-line index lies in the left copy, or in the
 right copy, of the previous level's free-line indices. The shared line belongs
