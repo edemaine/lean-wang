@@ -5011,6 +5011,113 @@ structure Routing
     (ofGeometry geometry siteRect payloadRect active cornerSite product
       hmatch vmatch).SiteCompatible
 
+/--
+Product-witness form of Figure 18 routing over one Robinson obstruction
+geometry.
+
+This is closer to the data extracted from a combined tiling: at each selected
+free crossing, identify the Figure 18 base site and exhibit some payload tile
+whose product is the combined tile there.  The assembled `payloadRect` is
+derived when converting to `Routing`.
+-/
+structure ProductWitnessRouting
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) : Type where
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  payloadWitness :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        { payload : WangTile //
+          WangTile.product (siteRect i j).tile payload =
+            (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)).1 }
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  hmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.HMatches (payloadWitness i j).1
+            (payloadWitness ⟨i.val + 1, hi⟩ j).1
+  vmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.VMatches (payloadWitness i j).1
+            (payloadWitness i ⟨j.val + 1, hj⟩).1
+  siteCompatible :
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.hCompatible
+          (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.vCompatible
+          (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+
+namespace ProductWitnessRouting
+
+/-- Payload rectangle assembled from pointwise product witnesses. -/
+def payloadRect
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry) :
+    Rectangle (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide level) :=
+  fun i j => (routing.payloadWitness i j).1
+
+theorem product
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    WangTile.product (routing.siteRect i j).tile
+        (routing.payloadRect i j) =
+      (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)).1 :=
+  (routing.payloadWitness i j).2
+
+/-- Convert product-witness routing into the theorem-facing routing package. -/
+def toRouting
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : ProductWitnessRouting table x geometry) :
+    Routing table x geometry where
+  siteRect := routing.siteRect
+  payloadRect := routing.payloadRect
+  active := routing.active
+  cornerSite := routing.cornerSite
+  product := routing.product
+  hmatch := routing.hmatch
+  vmatch := routing.vmatch
+  siteCompatible := by
+    simpa [Figure18RobinsonBoardSignalCertificate.SiteCompatible,
+      Figure18RobinsonBoardSignalCertificate.ofGeometry] using
+      routing.siteCompatible
+
+end ProductWitnessRouting
+
 namespace Routing
 
 /-- Assemble the full signal certificate from geometry plus routing data. -/
