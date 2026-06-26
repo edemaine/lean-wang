@@ -2940,6 +2940,80 @@ theorem cornerSiteOfNat_quadrant
       cornerQuadrant :=
   rfl
 
+/-- Raw Nat-indexed form of the distinguished Figure 18 corner site. -/
+def cornerNatSpec (cornerIndex : Nat) (cornerQuadrant : Quadrant) :
+    Nat × Quadrant :=
+  (cornerIndex, cornerQuadrant)
+
+/--
+Finite data sanity check for the final Figure 18 Nat-site transcription.
+
+This is intentionally separate from the scaffold obligations: it catches
+entry-level mistakes in the raw active-site list before proving any geometric
+or generated-stack facts.
+-/
+def natSiteSpecSanityBool
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant) : Bool :=
+  (((Figure18Site.natSpecsValidBool activeSiteSpecs &&
+    decide (cornerIndex < 92)) &&
+    decide activeSiteSpecs.Nodup) &&
+    decide (cornerNatSpec cornerIndex cornerQuadrant ∉ activeSiteSpecs))
+
+/-- Proposition-level form of `natSiteSpecSanityBool`. -/
+structure NatSiteSpecSanity
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant) : Prop where
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  activeSiteSpecs_nodup : activeSiteSpecs.Nodup
+  corner_not_active : cornerNatSpec cornerIndex cornerQuadrant ∉ activeSiteSpecs
+
+theorem natSiteSpecSanity_of_bool
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    (hcheck :
+      natSiteSpecSanityBool activeSiteSpecs cornerIndex cornerQuadrant =
+        true) :
+    NatSiteSpecSanity activeSiteSpecs cornerIndex cornerQuadrant := by
+  unfold natSiteSpecSanityBool at hcheck
+  rw [Bool.and_eq_true, Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  exact {
+    activeSiteSpecs_valid := hcheck.1.1.1
+    cornerIndex_valid := hcheck.1.1.2
+    activeSiteSpecs_nodup := of_decide_eq_true hcheck.1.2
+    corner_not_active := of_decide_eq_true hcheck.2
+  }
+
+namespace NatSiteSpecSanity
+
+def activeSiteData
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    (sanity : NatSiteSpecSanity activeSiteSpecs cornerIndex cornerQuadrant) :
+    Figure18Site.CheckedNatSpecs :=
+  activeSiteDataOfSpecs activeSiteSpecs sanity.activeSiteSpecs_valid
+
+def cornerSite
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    (sanity : NatSiteSpecSanity activeSiteSpecs cornerIndex cornerQuadrant) :
+    Figure18Site :=
+  cornerSiteOfNat cornerIndex cornerQuadrant sanity.cornerIndex_valid
+
+theorem cornerSite_not_mem_activeSiteData_sites
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    (sanity : NatSiteSpecSanity activeSiteSpecs cornerIndex cornerQuadrant) :
+    sanity.cornerSite ∉ sanity.activeSiteData.sites := by
+  intro hmem
+  have hspec := sanity.activeSiteData.mem_specs_of_mem_sites hmem
+  exact sanity.corner_not_active (by
+    simpa [activeSiteData, cornerSite, cornerNatSpec] using hspec)
+
+end NatSiteSpecSanity
+
 /--
 Generated flat Figure 18 role table from raw Nat-indexed active sites.
 
@@ -4064,6 +4138,18 @@ def ofObligations
   pairFailures :=
     generatedStackAllowedSitePairFailures_eq_nil_of_pairCompatibilityBool
       obligations.pairCompatibility
+
+def ofSaneObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (sanity :
+      NatSiteSpecSanity activeSiteSpecs cornerIndex cornerQuadrant)
+    (obligations :
+      NatSiteObligations activeSiteSpecs sanity.activeSiteSpecs_valid
+        cornerIndex cornerQuadrant sanity.cornerIndex_valid) :
+    NatSiteScaffoldCertificate :=
+  ofObligations activeSiteSpecs sanity.activeSiteSpecs_valid
+    cornerIndex cornerQuadrant sanity.cornerIndex_valid obligations
 
 def activeSiteData (C : NatSiteScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
