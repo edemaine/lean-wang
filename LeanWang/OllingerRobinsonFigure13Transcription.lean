@@ -6382,6 +6382,18 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTo
     (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
       hrouting)
 
+/--
+Canonical Robinson-board routing supplies the local Section 7 tower used by the
+finite stack checker.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+    {table : Figure18RoleTable}
+    (hrouting : HasFigure18RobinsonBoardCanonicalRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
+      canonicalRobinsonBoardSignalGeometryTower hrouting)
+
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
     {table : Figure18RoleTable}
@@ -6612,6 +6624,18 @@ theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_fixedGeometryTowerRou
     (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
       hrouting)
 
+/--
+Canonical Robinson-board routing supplies routed free grids of every requested
+finite size.
+-/
+theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalRouting
+    {table : Figure18RoleTable}
+    (hrouting : HasFigure18RobinsonBoardCanonicalRoutingForTable table) :
+    HasFigure18RobinsonBoardRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
+      canonicalRobinsonBoardSignalGeometryTower hrouting)
+
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     {table : Figure18RoleTable}
     (hgrids : HasFigure18RobinsonBoardRoutedFreeGridsForTable table) :
@@ -6771,6 +6795,24 @@ theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_fixedGeometryTowerRouting
   hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting
     (hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
       hrouting)
+
+theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonical
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalRouting activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+    hrouting
+
+theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalRouting activeSites cornerSite) :
+    HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalRouting
+    hrouting
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
