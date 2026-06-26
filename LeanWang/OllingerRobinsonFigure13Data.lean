@@ -4883,6 +4883,13 @@ theorem l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
   l2Component1PositiveTranslatedIsolatedBoxesOfCompatibleSquares
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
 
+theorem l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
 theorem l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
     (hboxes :
       ∀ r : Nat, 0 < r →
@@ -4947,6 +4954,13 @@ theorem l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
       l2Component2Figure18ScaffoldData :=
   l2Component2PositiveTranslatedIsolatedBoxesOfCompatibleSquares
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
+
+theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -9765,6 +9779,24 @@ def ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
   ofL2C1Figure18ScaffoldDataPositiveCompatibleSquares canonicalRouting
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
 
+def ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    canonicalRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
 def ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -9911,6 +9943,24 @@ def ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   ofL2C2Figure18ScaffoldDataPositiveCompatibleSquares canonicalRouting
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    canonicalRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 def toCanonicalPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
@@ -10159,6 +10209,25 @@ def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18Scaff
     canonicalRouting
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
 
+def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveFig13TilesPlane
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTilesPlane
+    canonicalRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
 def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -10293,6 +10362,25 @@ def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18Scaff
   l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveCompatibleSquares
     canonicalRouting
     (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
+
+def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveFig13TilesPlane
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveFigure18ScaffoldTilesPlane
+    canonicalRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
 

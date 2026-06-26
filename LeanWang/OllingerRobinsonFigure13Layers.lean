@@ -1051,6 +1051,16 @@ theorem compatibleFigure18ScaffoldSquares_of_tilesPlane
     exact hx.2 (Int.ofNat i.val, Int.ofNat j.val)
 
 /--
+A plane tiling by the raw Figure 13 tiles gives compatible Figure 18 scaffold
+site squares after subdividing each raw tile into its four quarter-sites.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_fig13TilesPlane
+    (hplane : TilesPlane fig13Tiles) :
+    HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_of_tilesPlane
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
+/--
 The site-level scaffold-square target is equivalent to ordinary plane
 tileability of the concrete Figure 18 scaffold tiles.
 -/
