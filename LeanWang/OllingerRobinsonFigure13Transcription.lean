@@ -4350,6 +4350,180 @@ theorem SiteCompatible.restrict
 end Figure18RobinsonBoardRoutedFreeGrid
 
 /--
+Robinson Section 7 board geometry at one red-board level.
+
+This is the obstruction-only part of the argument: the free rows and columns
+are enumerated, lie on the board, and are exactly the board rows/columns with no
+obstruction signal crossing them.  It deliberately does not mention Figure 18
+sites, payload tiles, or combined tilings.
+-/
+structure RobinsonBoardSignalGeometry (level : Nat) : Type where
+  freeColumnCoord :
+    Fin (RobinsonSquare.freeGridSide level) → Int
+  freeRowCoord :
+    Fin (RobinsonSquare.freeGridSide level) → Int
+  isBoardColumn : Int → Prop
+  isBoardRow : Int → Prop
+  isFreeColumn : Int → Prop
+  isFreeRow : Int → Prop
+  hasHorizontalObstruction : Int → Int → Prop
+  hasVerticalObstruction : Int → Int → Prop
+  freeRow_iff_noHorizontalObstruction :
+    ∀ y : Int, isBoardRow y →
+      (isFreeRow y ↔
+        ∀ x : Int, isBoardColumn x → ¬ hasHorizontalObstruction x y)
+  freeColumn_iff_noVerticalObstruction :
+    ∀ x : Int, isBoardColumn x →
+      (isFreeColumn x ↔
+        ∀ y : Int, isBoardRow y → ¬ hasVerticalObstruction x y)
+  freeColumnCoord_board :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      isBoardColumn (freeColumnCoord i)
+  freeRowCoord_board :
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      isBoardRow (freeRowCoord j)
+  freeColumnCoord_free :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      isFreeColumn (freeColumnCoord i)
+  freeRowCoord_free :
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      isFreeRow (freeRowCoord j)
+  freeColumnCoord_complete :
+    ∀ x : Int, isFreeColumn x →
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        freeColumnCoord i = x
+  freeRowCoord_complete :
+    ∀ y : Int, isFreeRow y →
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        freeRowCoord j = y
+  freeColumnCoord_injective :
+    Function.Injective freeColumnCoord
+  freeRowCoord_injective :
+    Function.Injective freeRowCoord
+
+namespace RobinsonBoardSignalGeometry
+
+/-- The free columns are exactly the columns enumerated by the geometry. -/
+theorem isFreeColumn_iff_exists_freeColumnCoord
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (column : Int) :
+    geometry.isFreeColumn column ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        geometry.freeColumnCoord i = column := by
+  constructor
+  · exact geometry.freeColumnCoord_complete column
+  · rintro ⟨i, rfl⟩
+    exact geometry.freeColumnCoord_free i
+
+/-- The free rows are exactly the rows enumerated by the geometry. -/
+theorem isFreeRow_iff_exists_freeRowCoord
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (row : Int) :
+    geometry.isFreeRow row ↔
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        geometry.freeRowCoord j = row := by
+  constructor
+  · exact geometry.freeRowCoord_complete row
+  · rintro ⟨j, rfl⟩
+    exact geometry.freeRowCoord_free j
+
+/-- A selected free row has no horizontal obstruction at any board column. -/
+theorem noHorizontalObstruction_of_freeRowCoord
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (column : Int) (hcolumn : geometry.isBoardColumn column)
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    ¬ geometry.hasHorizontalObstruction column
+      (geometry.freeRowCoord j) := by
+  have hrow := geometry.freeRow_iff_noHorizontalObstruction
+    (geometry.freeRowCoord j) (geometry.freeRowCoord_board j)
+  exact (hrow.1 (geometry.freeRowCoord_free j)) column hcolumn
+
+/-- A selected free column has no vertical obstruction at any board row. -/
+theorem noVerticalObstruction_of_freeColumnCoord
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (row : Int) (hrow : geometry.isBoardRow row) :
+    ¬ geometry.hasVerticalObstruction
+      (geometry.freeColumnCoord i) row := by
+  have hcolumn := geometry.freeColumn_iff_noVerticalObstruction
+    (geometry.freeColumnCoord i) (geometry.freeColumnCoord_board i)
+  exact (hcolumn.1 (geometry.freeColumnCoord_free i)) row hrow
+
+/-- A horizontal obstruction through a board row prevents that row from being free. -/
+theorem not_freeRow_of_horizontalObstruction
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column row : Int}
+    (hrow : geometry.isBoardRow row)
+    (hcolumn : geometry.isBoardColumn column)
+    (hobs : geometry.hasHorizontalObstruction column row) :
+    ¬ geometry.isFreeRow row := by
+  intro hfree
+  exact (geometry.freeRow_iff_noHorizontalObstruction row hrow).1 hfree
+    column hcolumn hobs
+
+/-- A vertical obstruction through a board column prevents that column from being free. -/
+theorem not_freeColumn_of_verticalObstruction
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column row : Int}
+    (hcolumn : geometry.isBoardColumn column)
+    (hrow : geometry.isBoardRow row)
+    (hobs : geometry.hasVerticalObstruction column row) :
+    ¬ geometry.isFreeColumn column := by
+  intro hfree
+  exact (geometry.freeColumn_iff_noVerticalObstruction column hcolumn).1
+    hfree row hrow hobs
+
+/-- Every non-free board row has a horizontal obstruction at some board column. -/
+theorem exists_horizontalObstruction_of_boardRow_not_free
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {row : Int}
+    (hrow : geometry.isBoardRow row)
+    (hnotFree : ¬ geometry.isFreeRow row) :
+    ∃ column : Int,
+      geometry.isBoardColumn column ∧
+        geometry.hasHorizontalObstruction column row := by
+  by_contra hnone
+  apply hnotFree
+  refine (geometry.freeRow_iff_noHorizontalObstruction row hrow).2 ?_
+  intro column hcolumn hobs
+  exact hnone ⟨column, hcolumn, hobs⟩
+
+/-- Every non-free board column has a vertical obstruction at some board row. -/
+theorem exists_verticalObstruction_of_boardColumn_not_free
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column : Int}
+    (hcolumn : geometry.isBoardColumn column)
+    (hnotFree : ¬ geometry.isFreeColumn column) :
+    ∃ row : Int,
+      geometry.isBoardRow row ∧
+        geometry.hasVerticalObstruction column row := by
+  by_contra hnone
+  apply hnotFree
+  refine (geometry.freeColumn_iff_noVerticalObstruction column hcolumn).2 ?_
+  intro row hrow hobs
+  exact hnone ⟨row, hrow, hobs⟩
+
+/--
+At a selected free-row/free-column crossing, neither obstruction signal is
+present.
+-/
+theorem noObstruction_at_freeCrossing
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (¬ geometry.hasHorizontalObstruction
+        (geometry.freeColumnCoord i) (geometry.freeRowCoord j)) ∧
+      ¬ geometry.hasVerticalObstruction
+        (geometry.freeColumnCoord i) (geometry.freeRowCoord j) := by
+  constructor
+  · exact geometry.noHorizontalObstruction_of_freeRowCoord
+      (geometry.freeColumnCoord i) (geometry.freeColumnCoord_board i) j
+  · exact geometry.noVerticalObstruction_of_freeColumnCoord
+      i (geometry.freeRowCoord j) (geometry.freeRowCoord_board j)
+
+end RobinsonBoardSignalGeometry
+
+/--
 Robinson Section 7 certificate for one red board level.
 
 The original argument identifies the free rows and columns by obstruction
@@ -4440,6 +4614,128 @@ structure Figure18RobinsonBoardSignalCertificate
             (payloadRect i ⟨j.val + 1, hj⟩)
 
 namespace Figure18RobinsonBoardSignalCertificate
+
+/-- Forget the Figure 18 payload-routing data and keep only board geometry. -/
+def geometry
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    RobinsonBoardSignalGeometry level where
+  freeColumnCoord := certificate.freeColumnCoord
+  freeRowCoord := certificate.freeRowCoord
+  isBoardColumn := certificate.isBoardColumn
+  isBoardRow := certificate.isBoardRow
+  isFreeColumn := certificate.isFreeColumn
+  isFreeRow := certificate.isFreeRow
+  hasHorizontalObstruction := certificate.hasHorizontalObstruction
+  hasVerticalObstruction := certificate.hasVerticalObstruction
+  freeRow_iff_noHorizontalObstruction :=
+    certificate.freeRow_iff_noHorizontalObstruction
+  freeColumn_iff_noVerticalObstruction :=
+    certificate.freeColumn_iff_noVerticalObstruction
+  freeColumnCoord_board := certificate.freeColumnCoord_board
+  freeRowCoord_board := certificate.freeRowCoord_board
+  freeColumnCoord_free := certificate.freeColumnCoord_free
+  freeRowCoord_free := certificate.freeRowCoord_free
+  freeColumnCoord_complete := certificate.freeColumnCoord_complete
+  freeRowCoord_complete := certificate.freeRowCoord_complete
+  freeColumnCoord_injective := certificate.freeColumnCoord_injective
+  freeRowCoord_injective := certificate.freeRowCoord_injective
+
+@[simp]
+theorem geometry_freeColumnCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    certificate.geometry.freeColumnCoord = certificate.freeColumnCoord :=
+  rfl
+
+@[simp]
+theorem geometry_freeRowCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    certificate.geometry.freeRowCoord = certificate.freeRowCoord :=
+  rfl
+
+/--
+Build a full signal certificate from board obstruction geometry and the routed
+Figure 18 payload data at the selected free crossings.
+-/
+def ofGeometry
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level)
+    (siteRect :
+      Fin (RobinsonSquare.freeGridSide level) →
+        Fin (RobinsonSquare.freeGridSide level) → Figure18Site)
+    (payloadRect :
+      Rectangle (RobinsonSquare.freeGridSide level)
+        (RobinsonSquare.freeGridSide level))
+    (active :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          CellRole.isActive (table.roleAtSite (siteRect i j)) = true)
+    (cornerSite :
+      siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+        ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite)
+    (product :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          WangTile.product (siteRect i j).tile (payloadRect i j) =
+            (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)).1)
+    (hmatch :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+            WangTile.HMatches (payloadRect i j)
+              (payloadRect ⟨i.val + 1, hi⟩ j))
+    (vmatch :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+            WangTile.VMatches (payloadRect i j)
+              (payloadRect i ⟨j.val + 1, hj⟩)) :
+    Figure18RobinsonBoardSignalCertificate table x level where
+  freeColumnCoord := geometry.freeColumnCoord
+  freeRowCoord := geometry.freeRowCoord
+  isBoardColumn := geometry.isBoardColumn
+  isBoardRow := geometry.isBoardRow
+  isFreeColumn := geometry.isFreeColumn
+  isFreeRow := geometry.isFreeRow
+  hasHorizontalObstruction := geometry.hasHorizontalObstruction
+  hasVerticalObstruction := geometry.hasVerticalObstruction
+  freeRow_iff_noHorizontalObstruction :=
+    geometry.freeRow_iff_noHorizontalObstruction
+  freeColumn_iff_noVerticalObstruction :=
+    geometry.freeColumn_iff_noVerticalObstruction
+  freeColumnCoord_board := geometry.freeColumnCoord_board
+  freeRowCoord_board := geometry.freeRowCoord_board
+  freeColumnCoord_free := geometry.freeColumnCoord_free
+  freeRowCoord_free := geometry.freeRowCoord_free
+  freeColumnCoord_complete := geometry.freeColumnCoord_complete
+  freeRowCoord_complete := geometry.freeRowCoord_complete
+  freeColumnCoord_injective := geometry.freeColumnCoord_injective
+  freeRowCoord_injective := geometry.freeRowCoord_injective
+  siteRect := siteRect
+  payloadRect := payloadRect
+  active := active
+  cornerSite := cornerSite
+  product := product
+  hmatch := hmatch
+  vmatch := vmatch
 
 /--
 The Figure 18 sites selected by a Robinson signal certificate are locally
