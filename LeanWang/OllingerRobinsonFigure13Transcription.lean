@@ -3659,6 +3659,66 @@ def HasFigure18ListedActiveSiteFixedCornerSquareWindows
             activeSites cornerSite).toRoleTable
           activeSites cornerSite x n hn)
 
+/--
+Structured listed-active window invariant for a specified Figure 18 role table.
+
+This version avoids rebuilding the role table from the active-site list.  It is
+useful while transporting concrete Figure 18 witnesses across generated active
+site lists.
+-/
+def HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+    (table : Figure18RoleTable)
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18ListedActiveSiteFixedCornerSquare
+          table activeSites cornerSite x n hn)
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable_of_windows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        activeSites cornerSite) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      activeSites cornerSite :=
+  hwindows
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable_mono_activeSites
+    {table : Figure18RoleTable}
+    {activeSites activeSites' : List Figure18Site}
+    {cornerSite : Figure18Site}
+    (hsubset :
+      ∀ site : Figure18Site, site ∈ activeSites → site ∈ activeSites')
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+        table activeSites cornerSite) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+      table activeSites' cornerSite := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window⟩
+  exact ⟨window.mono_activeSites hsubset⟩
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable_toGeneratedActiveSites
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        activeSites cornerSite) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).activeSites
+      cornerSite := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window⟩
+  exact ⟨window.toGeneratedActiveSites⟩
+
 theorem hasFigure18ListedActiveSiteFixedCornerSquares_of_windows
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hwindows :

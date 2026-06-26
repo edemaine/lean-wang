@@ -3439,6 +3439,27 @@ theorem flatRoleTable_pairCompatibility
   generatedStackAllowedSitePairCompatibilityBool_flatRoleTableOfNatSites
     obligations.pairCompatibility
 
+theorem flatRoleTable_listedWindowsForTable
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).toRoleTable
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).activeSites
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).cornerSite := by
+  rw [flatRoleTableOfNatSites_cornerSite]
+  exact
+    hasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable_toGeneratedActiveSites
+      obligations.listedWindows
+
 end NatSiteObligations
 
 def figure18ScaffoldDataOfNatSitesCertificateOfObligations
