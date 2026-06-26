@@ -4253,6 +4253,10 @@ def tiles (D : Figure18ScaffoldData) : TileSet :=
 def HasLocalFreeSquareInvariant (D : Figure18ScaffoldData) : Prop :=
   HasFigure18ListedActiveSiteFixedCornerSquares D.activeSites D.cornerSite
 
+def HasLocalFreeSquareWindowInvariant (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18ListedActiveSiteFixedCornerSquareWindows
+    D.activeSites D.cornerSite
+
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold
 
@@ -4263,6 +4267,23 @@ data has been transcribed.
 structure Certificate (D : Figure18ScaffoldData) : Prop where
   localFreeSquares : D.HasLocalFreeSquareInvariant
   realizes : D.HasRealizationInvariant
+
+def Certificate.ofWindowInvariant
+    {D : Figure18ScaffoldData}
+    (localFreeSquareWindows : D.HasLocalFreeSquareWindowInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.Certificate where
+  localFreeSquares :=
+    hasFigure18ListedActiveSiteFixedCornerSquares_of_windows
+      localFreeSquareWindows
+  realizes := realizes
+
+def Certificate.ofWindows
+    (D : Figure18ScaffoldData)
+    (localFreeSquareWindows : D.HasLocalFreeSquareWindowInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.Certificate :=
+  Certificate.ofWindowInvariant localFreeSquareWindows realizes
 
 theorem activeSites_length (D : Figure18ScaffoldData) :
     D.activeSites.length = D.activeSiteData.specs.length :=

@@ -1406,6 +1406,20 @@ theorem figure18ScaffoldDataOfSites_tiles
       figure18ScaffoldTiles :=
   (figure18ScaffoldDataOfSites activeSiteData cornerSite).tiles_eq
 
+def figure18ScaffoldDataOfSitesCertificateOfWindows
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (localFreeSquareWindows :
+      (figure18ScaffoldDataOfSites
+        activeSiteData cornerSite).HasLocalFreeSquareWindowInvariant)
+    (realizes :
+      (figure18ScaffoldDataOfSites
+        activeSiteData cornerSite).HasRealizationInvariant) :
+    (figure18ScaffoldDataOfSites activeSiteData cornerSite).Certificate :=
+  Figure18ScaffoldData.Certificate.ofWindows
+    (figure18ScaffoldDataOfSites activeSiteData cornerSite)
+    localFreeSquareWindows realizes
+
 /-- Checked active-site data from raw Figure 18 site specs. -/
 def activeSiteDataOfSpecs
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -1615,6 +1629,25 @@ theorem figure18ScaffoldDataOfNatSites_tiles
         figure18ScaffoldTiles :=
   (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid).tiles_eq
+
+def figure18ScaffoldDataOfNatSitesCertificateOfWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (localFreeSquareWindows :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasLocalFreeSquareWindowInvariant)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).Certificate :=
+  Figure18ScaffoldData.Certificate.ofWindows
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    localFreeSquareWindows realizes
 
 end ConcreteData
 end LayeredFigure18ScaffoldData
