@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinsonFigure13Layers
+import LeanWang.OllingerRobinsonFigure13Data
 import LeanWang.TM0FoldedTranscriptionReduction
 
 /-!
@@ -1175,6 +1175,98 @@ theorem domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_interi
     domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite)
+      certificate hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, an indexed-routed
+layered geometric certificate, and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_position_source
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (certificate :
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite).IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite)
+      certificate h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, checked active Figure 18 sites, a typed corner site, an indexed-routed
+layered geometric certificate, and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_position_source
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (certificate :
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite).IndexedRoutedCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite)
+      certificate h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_interiorRows
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (certificate :
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite).IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite)
+      certificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_concrete_figure13_sites_indexed_routed_interiorRows
+    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
+    (cornerSite : OllingerRobinson.Figure18Site)
+    (certificate :
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite).IndexedRoutedCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
+        activeSiteData cornerSite)
       certificate hinterior hcorrect
 
 /--
