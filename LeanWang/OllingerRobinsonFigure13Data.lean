@@ -4421,6 +4421,94 @@ theorem checkedListedActiveSiteInstance_isScaffold
 
 end NatSiteScaffoldCertificate
 
+/--
+Concrete theorem-facing scaffold package for Robinson's routed board/free-grid
+route.
+
+This is the clean scaffold-side target after switching to Robinson Section 7:
+finite Nat-indexed Figure 18 site data, checked Figure 13/Figure 16 layer
+stacks attached to each routed board free-grid witness, and the realization
+invariant.  It avoids the older listed-window plus pair-compatibility route.
+-/
+structure NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  robinsonStacks :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonBoardRoutedFreeGridCheckedStacks
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table
+  realizes :
+    RealizesActiveCornerSquares
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
+
+namespace NatSiteRobinsonScaffoldCertificate
+
+def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
+    Figure18Site.CheckedNatSpecs :=
+  activeSiteDataOfSpecs C.activeSiteSpecs C.activeSiteSpecs_valid
+
+def cornerSite (C : NatSiteRobinsonScaffoldCertificate) : Figure18Site :=
+  cornerSiteOfNat C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def scaffoldData (C : NatSiteRobinsonScaffoldCertificate) :
+    LayeredFigure18ScaffoldData :=
+  scaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def figure18ScaffoldData (C : NatSiteRobinsonScaffoldCertificate) :
+    Figure18ScaffoldData :=
+  figure18ScaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def indexedRoutedCertificate (C : NatSiteRobinsonScaffoldCertificate) :
+    C.scaffoldData.IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
+    C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+    C.robinsonStacks C.realizes
+
+def indexedRoutedInstance (C : NatSiteRobinsonScaffoldCertificate) :
+    Figure18IndexedRoutedInstance :=
+  C.indexedRoutedCertificate.toFigure18IndexedRoutedInstance
+
+def flexibleInstance (C : NatSiteRobinsonScaffoldCertificate) :
+    Figure18FlexibleInstance :=
+  C.indexedRoutedCertificate.toFigure18FlexibleInstance
+
+theorem scaffoldData_tiles (C : NatSiteRobinsonScaffoldCertificate) :
+    C.scaffoldData.scaffold.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  scaffoldDataOfNatSites_tiles C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+theorem figure18ScaffoldData_tiles (C : NatSiteRobinsonScaffoldCertificate) :
+    C.figure18ScaffoldData.tiles = figure18ScaffoldTiles :=
+  figure18ScaffoldDataOfNatSites_tiles C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+theorem indexedRoutedInstance_presentation_tiles
+    (C : NatSiteRobinsonScaffoldCertificate) :
+    C.indexedRoutedInstance.presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  C.indexedRoutedInstance.presentation_tiles
+
+theorem isScaffold (C : NatSiteRobinsonScaffoldCertificate) :
+    IsScaffold C.scaffoldData.scaffold :=
+  C.indexedRoutedCertificate.isScaffold
+
+theorem indexedRoutedInstance_isScaffold
+    (C : NatSiteRobinsonScaffoldCertificate) :
+    IsScaffold C.indexedRoutedInstance.presentation.toScaffold :=
+  C.indexedRoutedInstance.isScaffold
+
+end NatSiteRobinsonScaffoldCertificate
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
