@@ -3948,6 +3948,38 @@ end Figure18FlatActiveSiteFixedCornerSquare
 
 end FlatActiveSite
 
+namespace Figure18ListedActiveSiteFixedCornerSquare
+
+def toFlatActiveSiteFixedCornerSquare
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      activeSites cornerSite x n hn) :
+    Figure18FlatActiveSiteFixedCornerSquare
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites activeSites cornerSite)
+      x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  horizontalCoord_succ := window.horizontalCoord_succ
+  verticalCoord_succ := window.verticalCoord_succ
+  activeSites := by
+    intro i j
+    let site :=
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.combinedSite
+        (x (window.horizontalCoord i, window.verticalCoord j))
+    exact (Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_iff
+      activeSites cornerSite site).2 (window.listedActive i j)
+  cornerSite := window.corner
+
+end Figure18ListedActiveSiteFixedCornerSquare
+
 theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
     {table : Figure18RoleTable}
     (hproduct : HasFigure18AdjacentProductWitnessFixedCornerSquares table) :
