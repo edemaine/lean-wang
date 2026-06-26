@@ -3414,6 +3414,120 @@ def HasFigure18ListedActiveSiteFixedCornerSquares
               (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
             cornerSite
 
+/--
+Structured witness for one listed-active Figure 18 fixed-corner square.
+
+This packages the free-subsquare data that Figure 18 supplies: adjacent
+horizontal and vertical coordinates, every decoded quarter-site either equal to
+the distinguished corner or belonging to the listed active sites, and the
+lower-left decoded site equal to the corner.  The unstructured proposition
+`HasFigure18ListedActiveSiteFixedCornerSquares` is kept as the public certificate
+field; this structure is the Lean-friendly target for constructing one witness at
+a time from the free-subsquare geometry.
+-/
+structure Figure18ListedActiveSiteFixedCornerSquare
+    (table : Figure18RoleTable)
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) : Type where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+    horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1
+  verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1
+  listedActive : ∀ i : Fin n, ∀ j : Fin n,
+    table.combinedSite
+      (x (horizontalCoord i, verticalCoord j)) = cornerSite ∨
+    table.combinedSite
+      (x (horizontalCoord i, verticalCoord j)) ∈ activeSites
+  corner : table.combinedSite
+      (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+      cornerSite
+
+namespace Figure18ListedActiveSiteFixedCornerSquare
+
+theorem exists_witness
+    {table : Figure18RoleTable}
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window :
+      Figure18ListedActiveSiteFixedCornerSquare
+        table activeSites cornerSite x n hn) :
+    ∃ horizontalCoord : Fin n → Int, ∃ verticalCoord : Fin n → Int,
+      (∀ i : Fin n, ∀ hi : i.val + 1 < n,
+        horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1) ∧
+      (∀ j : Fin n, ∀ hj : j.val + 1 < n,
+        verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1) ∧
+      (∀ i : Fin n, ∀ j : Fin n,
+        table.combinedSite
+          (x (horizontalCoord i, verticalCoord j)) = cornerSite ∨
+        table.combinedSite
+          (x (horizontalCoord i, verticalCoord j)) ∈ activeSites) ∧
+      table.combinedSite
+          (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+        cornerSite :=
+  ⟨window.horizontalCoord, window.verticalCoord, window.horizontalCoord_succ,
+    window.verticalCoord_succ, window.listedActive, window.corner⟩
+
+end Figure18ListedActiveSiteFixedCornerSquare
+
+/--
+Structured form of `HasFigure18ListedActiveSiteFixedCornerSquares`.
+
+This is often the more convenient proof target: after selecting the Figure 18
+free-subsquare coordinates, construct one
+`Figure18ListedActiveSiteFixedCornerSquare` witness for each `n`.
+-/
+def HasFigure18ListedActiveSiteFixedCornerSquareWindows
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty (Figure18ListedActiveSiteFixedCornerSquare
+          (Figure18RoleTable.FlatRoleTable.ofActiveSites
+            activeSites cornerSite).toRoleTable
+          activeSites cornerSite x n hn)
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquares_of_windows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        activeSites cornerSite) :
+    HasFigure18ListedActiveSiteFixedCornerSquares activeSites cornerSite := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window⟩
+  exact window.exists_witness
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hlisted :
+      HasFigure18ListedActiveSiteFixedCornerSquares activeSites cornerSite) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindows
+      activeSites cornerSite := by
+  intro T seed x hx n hn
+  rcases hlisted x hx n hn with
+    ⟨horizontalCoord, verticalCoord, horizontalCoord_succ,
+      verticalCoord_succ, listedActive, corner⟩
+  exact ⟨{
+    horizontalCoord := horizontalCoord
+    verticalCoord := verticalCoord
+    horizontalCoord_succ := horizontalCoord_succ
+    verticalCoord_succ := verticalCoord_succ
+    listedActive := listedActive
+    corner := corner
+  }⟩
+
 theorem hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hlisted :
