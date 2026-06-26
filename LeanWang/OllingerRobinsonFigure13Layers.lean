@@ -1178,6 +1178,18 @@ theorem blockGrid_compatible
     Figure16.BlockGrid.Compatible C.blockGrid := by
   exact ⟨certificate.cell_compatible, certificate.hBoundary, certificate.vBoundary⟩
 
+/--
+Expanding the compatible Figure 16 block grid attached to a layer-component
+rectangle gives a valid rectangle over the component-symbol tileset.
+-/
+theorem expandedRectangle_valid
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C) :
+    ValidRectangle Figure16.Symbol.tileSet
+      (Figure16.BlockGrid.expandedRectangle C.blockGrid) :=
+  Figure16.BlockGrid.expandedRectangle_valid certificate.blockGrid_compatible
+
 theorem expandedTile_mem_symbolTileSet
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
     {C : LayerComponentRectangle D R layer}
@@ -1355,6 +1367,17 @@ theorem blockGrid_compatible
   · exact S.thinCompatible.blockGrid_compatible
   · exact S.thickCompatible.blockGrid_compatible
   · exact S.blackCompatible.blockGrid_compatible
+
+/--
+Each expanded Figure 16 layer in a compatible layer stack is a valid component
+rectangle.
+-/
+theorem expandedRectangle_valid
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer) :
+    ValidRectangle Figure16.Symbol.tileSet
+      (Figure16.BlockGrid.expandedRectangle (S.blockGrid layer)) := by
+  exact Figure16.BlockGrid.expandedRectangle_valid (S.blockGrid_compatible layer)
 
 theorem expandedTile_mem_symbolTileSet
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
