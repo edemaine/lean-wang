@@ -21,6 +21,7 @@ import LeanWang.OllingerRobinsonFigure16
 import LeanWang.OllingerRobinsonTranscription
 import LeanWang.OllingerRobinsonFigure13Transcription
 import LeanWang.OllingerRobinsonFigure13Layers
+import LeanWang.OllingerRobinsonFigure13Data
 import LeanWang.TM0FoldedReduction
 import LeanWang.TM0FoldedTranscriptionReduction
 import LeanWang.TM0FoldedPositionReduction
