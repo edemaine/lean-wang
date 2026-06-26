@@ -3659,6 +3659,87 @@ def HasFigure18ListedActiveSiteFixedCornerSquareWindows
             activeSites cornerSite).toRoleTable
           activeSites cornerSite x n hn)
 
+/-!
+Robinson square sizes used by the board/free-grid proof.
+
+The original recursive argument produces forced squares of side
+`1, 3, 7, 15, ...`.  The Figure 18 routed-board interface uses the coarser
+board scale `4^level - 1`; its free rows and columns give a virtual payload
+grid of side `2^level + 1`.
+-/
+namespace RobinsonSquare
+
+/-- Side length of Robinson's forced `level`-square: `1, 3, 7, ...`. -/
+def forcedSide (level : Nat) : Nat :=
+  2 ^ (level + 1) - 1
+
+/-- Side length of the Figure 18 board at a routed-board level. -/
+def boardSide (level : Nat) : Nat :=
+  4 ^ level - 1
+
+/-- Number of free rows/columns available in a routed board of this level. -/
+def freeGridSide (level : Nat) : Nat :=
+  2 ^ level + 1
+
+@[simp] theorem forcedSide_zero : forcedSide 0 = 1 := by
+  decide
+
+@[simp] theorem forcedSide_one : forcedSide 1 = 3 := by
+  decide
+
+@[simp] theorem forcedSide_two : forcedSide 2 = 7 := by
+  decide
+
+@[simp] theorem forcedSide_three : forcedSide 3 = 15 := by
+  decide
+
+@[simp] theorem boardSide_zero : boardSide 0 = 0 := by
+  decide
+
+@[simp] theorem freeGridSide_zero : freeGridSide 0 = 2 := by
+  decide
+
+theorem one_le_two_pow (level : Nat) : 1 ≤ 2 ^ level := by
+  induction level with
+  | zero =>
+      simp
+  | succ level ih =>
+      rw [pow_succ]
+      omega
+
+theorem le_two_pow (level : Nat) : level ≤ 2 ^ level := by
+  induction level with
+  | zero =>
+      simp
+  | succ level ih =>
+      have hone : 1 ≤ 2 ^ level := one_le_two_pow level
+      calc
+        level + 1 ≤ 2 ^ level + 1 := Nat.succ_le_succ ih
+        _ ≤ 2 ^ level + 2 ^ level := Nat.add_le_add_left hone (2 ^ level)
+        _ = 2 ^ (level + 1) := by
+          rw [pow_succ]
+          omega
+
+theorem self_le_freeGridSide (level : Nat) :
+    level ≤ freeGridSide level := by
+  unfold freeGridSide
+  exact Nat.le_trans (le_two_pow level) (Nat.le.intro rfl)
+
+theorem freeGridSide_pos (level : Nat) : 0 < freeGridSide level := by
+  unfold freeGridSide
+  exact Nat.succ_pos (2 ^ level)
+
+/--
+Any requested finite payload square fits in the free grid of some Robinson
+board level.  The concrete geometric proof may use a sharper level, but choosing
+`level = n` is enough for the abstract routed-grid obligation.
+-/
+theorem exists_level_with_payload_capacity (n : Nat) :
+    ∃ level : Nat, n ≤ freeGridSide level :=
+  ⟨n, self_le_freeGridSide n⟩
+
+end RobinsonSquare
+
 /--
 Adjacent-coordinate specialization of the Robinson-board free-grid obligation.
 
