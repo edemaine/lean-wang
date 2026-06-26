@@ -6599,6 +6599,20 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRoutin
     (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
       canonicalRobinsonBoardSignalGeometryTower hrouting)
 
+/--
+Canonical product-witness routing supplies the local Section 7 tower used by
+the finite stack checker.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalProductWitnessRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+    (hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+      hrouting)
+
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
     {table : Figure18RoleTable}
@@ -6841,6 +6855,20 @@ theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalRouting
     (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
       canonicalRobinsonBoardSignalGeometryTower hrouting)
 
+/--
+Canonical product-witness routing supplies routed free grids of every requested
+finite size.
+-/
+theorem
+    hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalProductWitnessRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table) :
+    HasFigure18RobinsonBoardRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalRouting
+    (hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+      hrouting)
+
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     {table : Figure18RoleTable}
     (hgrids : HasFigure18RobinsonBoardRoutedFreeGridsForTable table) :
@@ -6848,6 +6876,20 @@ theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGri
   intro T seed x hx n hn
   rcases hgrids x hx n hn with ⟨grid⟩
   exact ⟨grid.toIndexedRoutedFixedCornerSquare⟩
+
+/--
+Canonical product-witness routing directly supplies the indexed-routed
+fixed-corner-square forcing interface.
+-/
+theorem
+    hasFigure18IndexedRoutedFixedCornerSquaresForTable_of_canonicalProductWitnessRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table) :
+    HasFigure18IndexedRoutedFixedCornerSquares table :=
+  hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    (hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalProductWitnessRouting
+      hrouting)
 
 /--
 Robinson-board/free-grid invariant for a generated listed-active Figure 18 role
@@ -7011,12 +7053,33 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonical
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
     hrouting
 
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalProductWitness
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalProductWitnessRouting
+    hrouting
+
 theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalRouting
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hrouting :
       HasFigure18RobinsonBoardCanonicalRouting activeSites cornerSite) :
     HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
   hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalRouting
+    hrouting
+
+theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalProductWitnessRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_canonicalProductWitnessRouting
     hrouting
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
@@ -7028,6 +7091,18 @@ theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGri
         activeSites cornerSite).toRoleTable :=
   hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     hgrids
+
+theorem
+    hasFigure18IndexedRoutedFixedCornerSquares_of_canonicalProductWitnessRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+        activeSites cornerSite) :
+    HasFigure18IndexedRoutedFixedCornerSquares
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18IndexedRoutedFixedCornerSquaresForTable_of_canonicalProductWitnessRouting
+    hrouting
 
 /--
 Structured listed-active window invariant for a specified Figure 18 role table.
