@@ -5799,6 +5799,40 @@ def ofLocalSignalTower
     realizes hcheck
 
 /--
+Fixed-geometry-routing version of `ofLocalSignalTower`.
+
+This is the split Robinson Section 7 target: prove one payload-independent
+geometry tower, then prove Figure 18 routing over that tower for each combined
+tiling.
+-/
+def ofFixedGeometryTowerRouting
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalSignalTower activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      fixedGeometryRouting)
+    realizes hcheck
+
+/--
 Preferred Section 7 constructor with both local coordinate-step certificates
 and finite-box realization.  This is the proof target closest to Robinson's
 description: local obstruction signals give the level grids, while finite board
@@ -5856,6 +5890,34 @@ def ofLocalSignalTowerBoxes
   ofLocalSignalTower activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid
     signalLocalTower
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
+    hcheck
+
+/-- Fixed-geometry-routing version of `ofLocalSignalTowerBoxes`. -/
+def ofFixedGeometryTowerRoutingBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofFixedGeometryTowerRouting activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting
     (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
     hcheck
 
@@ -5920,6 +5982,34 @@ def ofLocalSignalTowerPatches
     (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
     hcheck
 
+/-- Fixed-geometry-routing version of `ofLocalSignalTowerPatches`. -/
+def ofFixedGeometryTowerRoutingPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofFixedGeometryTowerRoutingBoxes activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting
+    (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
+    hcheck
+
 /--
 Layer-patch version of the preferred Section 7 constructor.  This is the most
 structured backward target: Robinson supplies a valid scaffold/base box and a
@@ -5978,6 +6068,34 @@ def ofLocalSignalTowerLayerPatches
   ofLocalSignalTowerPatches activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid
     signalLocalTower
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
+    hcheck
+
+/-- Fixed-geometry-routing version of `ofLocalSignalTowerLayerPatches`. -/
+def ofFixedGeometryTowerRoutingLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofFixedGeometryTowerRoutingPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting
     (activeCornerBoxPatches_of_layerBoxPatches patches)
     hcheck
 
@@ -6772,6 +6890,35 @@ def ofLevelSignalLocalTowerFreeGrids
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid signalLocalTower realizes hcheck)
 
+/--
+Fixed-geometry-routing version of `ofLevelSignalLocalTowerFreeGrids`.
+-/
+def ofFixedGeometryTowerRoutingFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelSignalLocalTowerFreeGrids activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+      fixedGeometryRouting)
+    hcheck realizes
+
 def ofLevelSignalLocalTowerFreeGridsBoxes
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -6794,6 +6941,31 @@ def ofLevelSignalLocalTowerFreeGridsBoxes
     NatSiteRobinsonScaffoldCertificate :=
   ofLevelSignalLocalTowerFreeGrids activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid signalLocalTower hcheck
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
+
+/-- Fixed-geometry-routing version of `ofLevelSignalLocalTowerFreeGridsBoxes`. -/
+def ofFixedGeometryTowerRoutingFreeGridsBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (realizes :
+      RealizesActiveCornerBoxes
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofFixedGeometryTowerRoutingFreeGrids activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid fixedGeometryRouting hcheck
     (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
 
 def ofLevelSignalLocalTowerFreeGridsPatches
@@ -6820,6 +6992,32 @@ def ofLevelSignalLocalTowerFreeGridsPatches
     cornerIndex cornerQuadrant cornerIndex_valid signalLocalTower hcheck
     (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
 
+/-- Fixed-geometry-routing version of `ofLevelSignalLocalTowerFreeGridsPatches`. -/
+def ofFixedGeometryTowerRoutingFreeGridsPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofFixedGeometryTowerRoutingFreeGridsBoxes activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting hcheck
+    (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
+
 def ofLevelSignalLocalTowerFreeGridsLayerPatches
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -6842,6 +7040,35 @@ def ofLevelSignalLocalTowerFreeGridsLayerPatches
     NatSiteRobinsonScaffoldCertificate :=
   ofLevelSignalLocalTowerFreeGridsPatches activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid signalLocalTower hcheck
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
+
+/--
+Fixed-geometry-routing version of
+`ofLevelSignalLocalTowerFreeGridsLayerPatches`.
+-/
+def ofFixedGeometryTowerRoutingFreeGridsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofFixedGeometryTowerRoutingFreeGridsPatches activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting hcheck
     (activeCornerBoxPatches_of_layerBoxPatches patches)
 
 def ofLevelSignalLocalTowerFreeGridsIndexedBoxes
@@ -6867,6 +7094,32 @@ def ofLevelSignalLocalTowerFreeGridsIndexedBoxes
   ofLevelSignalLocalTowerFreeGridsLayerPatches
     activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
     cornerIndex_valid signalLocalTower hcheck
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
+
+/-- Fixed-geometry-routing version of `ofLevelSignalLocalTowerFreeGridsIndexedBoxes`. -/
+def ofFixedGeometryTowerRoutingFreeGridsIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofFixedGeometryTowerRoutingFreeGridsLayerPatches activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    fixedGeometryRouting hcheck
     (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
 
 def ofLevelSignalCoordinateStepLocallyCompatibleFreeGrids

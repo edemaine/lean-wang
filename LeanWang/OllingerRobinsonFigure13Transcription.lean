@@ -6005,6 +6005,19 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRo
   exact ⟨Figure18RobinsonBoardSignalLocalTower.ofGeometryTower
     geometryTower routing⟩
 
+/--
+The fixed-geometry routing target supplies the existing coherent local tower
+surface used downstream.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_fixedGeometryTowerRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
+      hrouting)
+
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
     {table : Figure18RoleTable}
@@ -6220,6 +6233,19 @@ theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_geometryTowerRouting
     HasFigure18RobinsonBoardRoutedFreeGridsForTable table :=
   hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_localTower
     (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
+      hrouting)
+
+/--
+Fixed-geometry routing supplies routed free grids of every requested finite
+size.
+-/
+theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_fixedGeometryTowerRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable table) :
+    HasFigure18RobinsonBoardRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
       hrouting)
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
