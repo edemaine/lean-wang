@@ -3896,6 +3896,113 @@ theorem toIndexedRoutedFixedCornerSquareWithLayerStack_window
       hmatch hcompatible).window = window :=
   rfl
 
+/--
+Finite checked-stack target for the direct indexed-active route.
+
+For every combined tiling and requested size, this records an indexed active
+corner window together with a checked layer-stack rectangle whose site
+rectangle is exactly the one extracted from the window.  The two boolean checks
+say that the stack is present in the sparse Figure 13 transcription and that
+its Figure 16 layer components are locally compatible.
+-/
+def HasIndexedActiveWindowCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18IndexedActiveCornerWindow table x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedActiveCornerWindow window) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
+/--
+Finite checked-stack target for the indexed-routed route.
+
+This is the same checked data shape as
+`HasIndexedActiveWindowCheckedStacks`, but the window is the stronger routed
+payload square used by the preferred Figure 18 certificate path.
+-/
+def HasIndexedRoutedFixedCornerSquareCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18IndexedRoutedFixedCornerSquare table x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedRoutedFixedCornerSquare window) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
+theorem hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveWindowCheckedStacks table) :
+    HasFigure18IndexedActiveCornerWindowsWithLayerStack data.layerData table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, stackData, hsite, hmatch, hcompatible⟩
+  exact
+    ⟨data.toIndexedActiveCornerWindowWithLayerStack
+      window stackData hsite hmatch hcompatible⟩
+
+theorem hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedRoutedFixedCornerSquareCheckedStacks table) :
+    HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack data.layerData
+      table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, stackData, hsite, hmatch, hcompatible⟩
+  exact
+    ⟨data.toIndexedRoutedFixedCornerSquareWithLayerStack
+      window stackData hsite hmatch hcompatible⟩
+
+/--
+Build the direct layered certificate from finite checked stack witnesses and
+the realization invariant.
+-/
+def certificateOfCheckedIndexedActiveStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasIndexedActiveWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.Certificate where
+  certificate := {
+    indexedRecognizable :=
+      hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks hchecked
+    realizes := realizes
+  }
+
+/--
+Build the preferred indexed-routed layered certificate from finite checked stack
+witnesses and the realization invariant.
+-/
+def indexedRoutedCertificateOfCheckedStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasIndexedRoutedFixedCornerSquareCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.IndexedRoutedCertificate where
+  certificate := {
+    indexedRoutedForces :=
+      hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked
+    realizes := realizes
+  }
+
 end CheckedSparseRawData
 
 end LayeredFigure18ScaffoldData
