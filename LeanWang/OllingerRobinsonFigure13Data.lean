@@ -2435,20 +2435,7 @@ def HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
     {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
     {n : Nat} {hn : 0 < n}
     (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn),
-      (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
-        Figure18Site.hCompatible
-          (siteRectangleOfIndexedRoutedFixedCornerSquare
-            grid.toIndexedRoutedFixedCornerSquare i j)
-          (siteRectangleOfIndexedRoutedFixedCornerSquare
-            grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
-            true) ∧
-      (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
-        Figure18Site.vCompatible
-          (siteRectangleOfIndexedRoutedFixedCornerSquare
-            grid.toIndexedRoutedFixedCornerSquare i j)
-          (siteRectangleOfIndexedRoutedFixedCornerSquare
-            grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
-            true)
+      grid.SiteCompatible
 
 /--
 Level-indexed local compatibility of Robinson's virtual neighboring sites.
@@ -2466,24 +2453,7 @@ def HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
     (grid : Figure18RobinsonBoardRoutedFreeGrid table x
       (RobinsonSquare.freeGridSide level)
       (RobinsonSquare.freeGridSide_pos level)),
-      (∀ i : Fin (RobinsonSquare.freeGridSide level),
-        ∀ j : Fin (RobinsonSquare.freeGridSide level),
-        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
-          Figure18Site.hCompatible
-            (siteRectangleOfIndexedRoutedFixedCornerSquare
-              grid.toIndexedRoutedFixedCornerSquare i j)
-            (siteRectangleOfIndexedRoutedFixedCornerSquare
-              grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
-              true) ∧
-      (∀ i : Fin (RobinsonSquare.freeGridSide level),
-        ∀ j : Fin (RobinsonSquare.freeGridSide level),
-        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
-          Figure18Site.vCompatible
-            (siteRectangleOfIndexedRoutedFixedCornerSquare
-              grid.toIndexedRoutedFixedCornerSquare i j)
-            (siteRectangleOfIndexedRoutedFixedCornerSquare
-              grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
-              true)
+      grid.SiteCompatible
 
 /--
 Robinson routed free-grid witnesses whose selected site rectangles are allowed
@@ -2757,7 +2727,10 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
   rcases hsignal x hx level with ⟨certificate, hsiteCompat⟩
   let bigGrid := certificate.toRoutedFreeGrid
   let grid := bigGrid.restrict hn hcap
-  rcases hsiteCompat with ⟨hhBig, hvBig⟩
+  have hbigSite : bigGrid.SiteCompatible :=
+    certificate.siteCompatible_toRoutedFreeGrid hsiteCompat
+  have hgridSite : grid.SiteCompatible :=
+    hbigSite.restrict hn hcap
   have hsites : ∀ i : Fin n, ∀ j : Fin n,
       siteRectangleOfIndexedRoutedFixedCornerSquare
           grid.toIndexedRoutedFixedCornerSquare i j =
@@ -2791,17 +2764,10 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
         (siteRectangleOfIndexedRoutedFixedCornerSquare
           grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
           true := by
-    intro i j hi
-    have hiBig : (Fin.castLE hcap i).val + 1 <
-        RobinsonSquare.freeGridSide level :=
-      Nat.lt_of_lt_of_le hi hcap
-    simpa [grid, bigGrid,
-      Figure18RobinsonBoardSignalCertificate.toRoutedFreeGrid,
-      Figure18RobinsonBoardRoutedFreeGrid.restrict,
+    simpa [Figure18RobinsonBoardRoutedFreeGrid.SiteCompatible,
       Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
       Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
-      siteRectangleOfIndexedRoutedFixedCornerSquare, Fin.castLE] using
-      hhBig (Fin.castLE hcap i) (Fin.castLE hcap j) hiBig
+      siteRectangleOfIndexedRoutedFixedCornerSquare] using hgridSite.1
   have hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
       Figure18Site.vCompatible
         (siteRectangleOfIndexedRoutedFixedCornerSquare
@@ -2809,17 +2775,10 @@ theorem sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_leve
         (siteRectangleOfIndexedRoutedFixedCornerSquare
           grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
           true := by
-    intro i j hj
-    have hjBig : (Fin.castLE hcap j).val + 1 <
-        RobinsonSquare.freeGridSide level :=
-      Nat.lt_of_lt_of_le hj hcap
-    simpa [grid, bigGrid,
-      Figure18RobinsonBoardSignalCertificate.toRoutedFreeGrid,
-      Figure18RobinsonBoardRoutedFreeGrid.restrict,
+    simpa [Figure18RobinsonBoardRoutedFreeGrid.SiteCompatible,
       Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
       Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
-      siteRectangleOfIndexedRoutedFixedCornerSquare, Fin.castLE] using
-      hvBig (Fin.castLE hcap i) (Fin.castLE hcap j) hjBig
+      siteRectangleOfIndexedRoutedFixedCornerSquare] using hgridSite.2
   let window := grid.toIndexedRoutedFixedCornerSquare
   let R := siteRectangleOfIndexedRoutedFixedCornerSquare window
   rcases sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
