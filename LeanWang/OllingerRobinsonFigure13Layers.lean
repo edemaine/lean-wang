@@ -1737,6 +1737,66 @@ theorem siteRectangleOfIndexedRoutedFixedCornerSquare_tile
       window.baseRect i j :=
   rfl
 
+/-- Site rectangle decoded directly from a flat active-site window. -/
+noncomputable def siteRectangleOfFlatActiveSiteFixedCornerSquare
+    {table : Figure18RoleTable.FlatRoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18FlatActiveSiteFixedCornerSquare table x n hn) :
+    SiteRectangle n n :=
+  fun i j =>
+    table.toRoleTable.combinedSite
+      (x (window.horizontalCoord i, window.verticalCoord j))
+
+theorem siteRectangleOfFlatActiveSiteFixedCornerSquare_eq_indexedRouted
+    {table : Figure18RoleTable.FlatRoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18FlatActiveSiteFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x) :
+    siteRectangleOfIndexedRoutedFixedCornerSquare
+        (window.toIndexedRoutedFixedCornerSquare hx) =
+      siteRectangleOfFlatActiveSiteFixedCornerSquare window :=
+  rfl
+
+/-- Site rectangle decoded directly from a listed active-site window. -/
+noncomputable def siteRectangleOfListedActiveSiteFixedCornerSquare
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      activeSites cornerSite x n hn) :
+    SiteRectangle n n :=
+  siteRectangleOfFlatActiveSiteFixedCornerSquare
+    window.toFlatActiveSiteFixedCornerSquare
+
+theorem siteRectangleOfListedActiveSiteFixedCornerSquare_eq_indexedRouted
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18ListedActiveSiteFixedCornerSquare
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      activeSites cornerSite x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold T seed) x) :
+    siteRectangleOfIndexedRoutedFixedCornerSquare
+        ((window.toFlatActiveSiteFixedCornerSquare).toIndexedRoutedFixedCornerSquare hx) =
+      siteRectangleOfListedActiveSiteFixedCornerSquare window :=
+  rfl
+
 abbrev IndexedRoutedFixedCornerSquareLayerComponents
     (D : Transcription)
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -4075,6 +4135,31 @@ def HasCheckedStacksForListedActiveSiteWindows
                 true
 
 /--
+Finite stack certificate stated only in terms of Figure 18 site rectangles.
+
+This is the most local finite-check target for the layer transcription: a
+rectangle whose sites are all listed active sites or the corner, whose
+lower-left site is the corner, and whose adjacent sites are compatible must
+have a matching compatible Figure 16 layer stack in the sparse transcription.
+-/
+def HasCheckedStacksForListedActiveSiteRectangles
+    (data : CheckedSparseRawData)
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  ∀ {n : Nat} {hn : 0 < n} (R : SiteRectangle n n),
+    (∀ i : Fin n, ∀ j : Fin n, R i j = cornerSite ∨ R i j ∈ activeSites) →
+    R ⟨0, hn⟩ ⟨0, hn⟩ = cornerSite →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) →
+      ∃ (stackData : CheckedLayerStackRectangle n n),
+        ∃ (_hsite : stackData.sites.matchesSiteRectangleBool R = true),
+          ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+            stackData.compatibleBool data.layerData
+              (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                true
+
+/--
 Finite checked-stack target for the listed active-site route.
 
 This is the closest checked-stack interface to a direct Figure 18
@@ -4196,6 +4281,63 @@ theorem hasListedActiveSiteCheckedStacks_of_windows
   rcases hstacks window hx with
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
+
+theorem hasCheckedStacksForListedActiveSiteWindows_of_rectangles
+    {data : CheckedSparseRawData}
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrectangles :
+      data.HasCheckedStacksForListedActiveSiteRectangles
+        activeSites cornerSite) :
+    data.HasCheckedStacksForListedActiveSiteWindows activeSites cornerSite := by
+  intro T seed x n hn window hx
+  let table := Figure18RoleTable.FlatRoleTable.ofActiveSites activeSites cornerSite
+  let R := siteRectangleOfListedActiveSiteFixedCornerSquare window
+  have hlisted : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSites := by
+    intro i j
+    change table.toRoleTable.combinedSite
+        (x (window.horizontalCoord i, window.verticalCoord j)) =
+          cornerSite ∨
+      table.toRoleTable.combinedSite
+        (x (window.horizontalCoord i, window.verticalCoord j)) ∈
+          activeSites
+    exact window.listedActive i j
+  have hcorner : R ⟨0, hn⟩ ⟨0, hn⟩ = cornerSite := by
+    change table.toRoleTable.combinedSite
+        (x (window.horizontalCoord ⟨0, hn⟩,
+          window.verticalCoord ⟨0, hn⟩)) = cornerSite
+    exact window.corner
+  have hhcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true := by
+    intro i j hi
+    change Figure18Site.hCompatible
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i, window.verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord ⟨i.val + 1, hi⟩,
+            window.verticalCoord j))) = true
+    exact table.toRoleTable.combinedSite_hCompatible_of_selectedCoords
+      hx window.horizontalCoord window.verticalCoord
+      window.horizontalCoord_succ i j hi
+  have hvcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true := by
+    intro i j hj
+    change Figure18Site.vCompatible
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i, window.verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (window.horizontalCoord i,
+            window.verticalCoord ⟨j.val + 1, hj⟩))) = true
+    exact table.toRoleTable.combinedSite_vCompatible_of_selectedCoords
+      hx window.horizontalCoord window.verticalCoord
+      window.verticalCoord_succ i j hj
+  rcases hrectangles R hlisted hcorner hhcompat hvcompat with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  refine ⟨stackData, ?_, hmatch, hcompatible⟩
+  have hR :=
+    siteRectangleOfListedActiveSiteFixedCornerSquare_eq_indexedRouted
+      window hx
+  simpa [hR] using hsite
 
 /--
 Build the direct layered certificate from finite checked stack witnesses and
