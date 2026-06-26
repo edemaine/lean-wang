@@ -5058,6 +5058,36 @@ structure NatSiteRobinsonIndexedBoxScaffoldCertificate where
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)
 
+/--
+Bundled Robinson Section 7 target using the local obstruction-signal tower and
+finite active-corner indexed boxes.
+
+This is the smallest current theorem-facing surface for the scaffold side:
+Robinson geometry should prove the coherent board-level signal tower and
+construct finite indexed boxes around every requested square; the remaining
+finite compatibility check is generated from the Figure 13/Figure 16
+transcription.
+-/
+structure NatSiteRobinsonTowerIndexedBoxObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  signalLocalTower :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+        true
+  indexedBoxes :
+    ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)
+
 namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
 
 def toScaffoldCertificate
@@ -7562,6 +7592,80 @@ theorem indexedRoutedInstance_isScaffold
   C.indexedRoutedInstance.isScaffold
 
 end NatSiteRobinsonScaffoldCertificate
+
+namespace NatSiteRobinsonTowerIndexedBoxObligations
+
+def toScaffoldCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonScaffoldCertificate :=
+  NatSiteRobinsonScaffoldCertificate.ofLevelSignalLocalTowerFreeGridsIndexedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.signalLocalTower O.pairCompatibility O.indexedBoxes
+
+def ofL2C1
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (indexedBoxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid where
+  signalLocalTower := signalLocalTower
+  pairCompatibility := by
+    simpa [l2Component1BlankCandidateActiveSiteData,
+      l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+      NatSiteSpecSanity.cornerSite] using
+      l2Component1BlankCandidatePairCompatibilityBool
+  indexedBoxes := indexedBoxes
+
+def ofL2C2
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (indexedBoxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid where
+  signalLocalTower := signalLocalTower
+  pairCompatibility := by
+    simpa [l2Component2BlankCandidateActiveSiteData,
+      l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+      NatSiteSpecSanity.cornerSite] using
+      l2Component2BlankCandidatePairCompatibilityBool
+  indexedBoxes := indexedBoxes
+
+end NatSiteRobinsonTowerIndexedBoxObligations
 
 namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
 

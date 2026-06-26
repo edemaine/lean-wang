@@ -7099,6 +7099,48 @@ theorem
       h
 
 /--
+Encoded domino undecidability from the bundled Robinson Section 7 scaffold
+target: a coherent local obstruction-signal tower, finite active-corner indexed
+boxes, and the generated finite compatibility check.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_towerBoxObligations_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
+
+/--
+Unencoded domino undecidability from the bundled Robinson Section 7 scaffold
+target: a coherent local obstruction-signal tower, finite active-corner indexed
+boxes, and the generated finite compatibility check.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_towerBoxObligations_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
+
+/--
 Encoded domino undecidability from a coherent Robinson Section 7 local
 obstruction-signal tower, finite generated stack compatibility, realization,
 and the generated interior position-code rows.
@@ -9884,6 +9926,74 @@ theorem
       (NatSiteRobinsonScaffoldCertificate.ofL2C2SignalLocalTowerFreeGridsIndexedBoxes
         htower hboxes)
       h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via the
+bundled Robinson Section 7 tower/indexed-box obligation.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_position_source
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_position_source
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_position_source
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+the bundled Robinson Section 7 tower/indexed-box obligation.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_position_source
+    (O : NatSiteRobinsonTowerIndexedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+      O.toScaffoldCertificate h
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
