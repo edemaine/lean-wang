@@ -2031,6 +2031,59 @@ def sparseRawDataOfSites_toIndexedRoutedFixedCornerSquareWithLayerStack
   exact data.toIndexedRoutedFixedCornerSquareWithLayerStack window stackData
     (checkedLayerStackRectangleOfSiteRectangle_matchesSite R) hmatch hcompatible
 
+/--
+Geometric routed-window target whose selected site rectangle is directly
+checkable against the concrete Figure 13/16 layer stack data.
+
+This is the scaffold-facing obligation we want from the Figure 18 proof: for
+each combined tiling and size, produce an indexed-routed fixed-corner square
+whose selected Figure 13 sites are all either the distinguished corner or
+listed active sites, and whose neighboring selected sites are locally
+compatible.
+-/
+def HasAllowedIndexedRoutedFixedCornerSquares
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18IndexedRoutedFixedCornerSquare table x n hn),
+          (∀ i : Fin n, ∀ j : Fin n,
+            siteRectangleOfIndexedRoutedFixedCornerSquare window i j =
+              cornerSite ∨
+            siteRectangleOfIndexedRoutedFixedCornerSquare window i j ∈
+              activeSiteData.sites) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+            Figure18Site.hCompatible
+              (siteRectangleOfIndexedRoutedFixedCornerSquare window i j)
+              (siteRectangleOfIndexedRoutedFixedCornerSquare window
+                ⟨i.val + 1, hi⟩ j) = true) ∧
+          (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+            Figure18Site.vCompatible
+              (siteRectangleOfIndexedRoutedFixedCornerSquare window i j)
+              (siteRectangleOfIndexedRoutedFixedCornerSquare window
+                i ⟨j.val + 1, hj⟩) = true)
+
+theorem sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {table : Figure18RoleTable}
+    (hallowed :
+      HasAllowedIndexedRoutedFixedCornerSquares activeSiteData cornerSite table) :
+    (sparseRawDataOfSites activeSiteData cornerSite).HasIndexedRoutedFixedCornerSquareCheckedStacks
+      table := by
+  intro T seed x hx n hn
+  rcases hallowed x hx n hn with ⟨window, hsites, hh, hv⟩
+  let R := siteRectangleOfIndexedRoutedFixedCornerSquare window
+  rcases sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+      activeSiteData cornerSite hcheck R hsites hh hv with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
+
 theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -2124,6 +2177,25 @@ def scaffoldDataOfSitesIndexedRoutedCertificateOfCheckedStacks
     (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate :=
   CheckedSparseRawData.indexedRoutedCertificateOfCheckedStacks
     (sparseRawDataOfSites activeSiteData cornerSite) hchecked realizes
+
+def scaffoldDataOfSitesIndexedRoutedCertificateOfAllowedRouted
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hallowed :
+      HasAllowedIndexedRoutedFixedCornerSquares activeSiteData cornerSite
+        (scaffoldDataOfSites activeSiteData cornerSite).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold) :
+    (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate :=
+  scaffoldDataOfSitesIndexedRoutedCertificateOfCheckedStacks
+    activeSiteData cornerSite
+    (sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
+      activeSiteData cornerSite hcheck hallowed)
+    realizes
 
 def scaffoldDataOfSitesIndexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
     (activeSiteData : Figure18Site.CheckedNatSpecs)
@@ -2658,6 +2730,38 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedStacks
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hallowed :
+      HasAllowedIndexedRoutedFixedCornerSquares
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedStacks
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    (sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck hallowed)
+    realizes
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
