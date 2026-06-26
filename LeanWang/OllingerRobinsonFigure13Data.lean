@@ -1543,6 +1543,29 @@ def generatedStackSitePairCompatibilityBool
       generatedStackHCompatiblePairBool left right &&
         generatedStackVCompatiblePairBool left right
 
+theorem generatedStackSitePairCompatibilityBool_eq_true_iff
+    {sites : List Figure18Site} :
+    generatedStackSitePairCompatibilityBool sites = true ↔
+      ∀ left : Figure18Site, left ∈ sites →
+        ∀ right : Figure18Site, right ∈ sites →
+          generatedStackHCompatiblePairBool left right = true ∧
+            generatedStackVCompatiblePairBool left right = true := by
+  constructor
+  · intro hcheck left hleft right hright
+    unfold generatedStackSitePairCompatibilityBool at hcheck
+    have hleftCheck := List.all_eq_true.1 hcheck left hleft
+    have hrightCheck := List.all_eq_true.1 hleftCheck right hright
+    rw [Bool.and_eq_true] at hrightCheck
+    exact hrightCheck
+  · intro hpairs
+    unfold generatedStackSitePairCompatibilityBool
+    apply List.all_eq_true.2
+    intro left hleft
+    apply List.all_eq_true.2
+    intro right hright
+    rw [Bool.and_eq_true]
+    exact hpairs left hleft right hright
+
 def generatedStackAllowedSites
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : List Figure18Site :=
@@ -1662,6 +1685,34 @@ theorem mem_generatedStackAllowedSites_of_listed
   rcases hsite with rfl | hsite
   · simp [generatedStackAllowedSites]
   · simp [generatedStackAllowedSites, hsite]
+
+theorem generatedStackAllowedSitePairCompatibilityBool_eq_true_iff
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site} :
+    generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+      true ↔
+      ∀ left : Figure18Site,
+        left = cornerSite ∨ left ∈ activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = cornerSite ∨ right ∈ activeSiteData.sites →
+          generatedStackHCompatiblePairBool left right = true ∧
+            generatedStackVCompatiblePairBool left right = true := by
+  constructor
+  · intro hcheck left hleft right hright
+    exact
+      generatedStackSitePairCompatibilityBool_eq_true_iff.1 hcheck
+        left (mem_generatedStackAllowedSites_of_listed hleft)
+        right (mem_generatedStackAllowedSites_of_listed hright)
+  · intro hpairs
+    apply generatedStackSitePairCompatibilityBool_eq_true_iff.2
+    intro left hleft right hright
+    have hleft' :
+        left = cornerSite ∨ left ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hleft
+    have hright' :
+        right = cornerSite ∨ right ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hright
+    exact hpairs left hleft' right hright'
 
 theorem generatedStackHBoundaries_of_allowedPairCompatibilityBool
     {activeSiteData : Figure18Site.CheckedNatSpecs}
