@@ -1169,6 +1169,126 @@ theorem certifiedSubstitutionTable_complete :
     certifiedSubstitutionTable.rules.map SubstitutionRule.source = RuleSource.all :=
   substitutionRuleSources_eq_all
 
+/--
+Bundled audit certificate for the human Figure 16 transcription.
+
+The row fields are the literal `2 × 2` blocks from the human transcription.
+The final fields expose the finite checks consumed downstream: the substitution
+rule table is complete and source-unique, and every listed block has matching
+internal Wang edges.
+-/
+structure HumanTranscriptionCertificate : Prop where
+  phiL1Star_row :
+    phiL1Star = .mkRows .L1d .L1b .L1a .L1c
+  phiL2Component1_a :
+    phiL2Component1 .a = .mkRows .G3 .L2b .blank .G2
+  phiL2Component1_b :
+    phiL2Component1 .b = .mkRows .R3 .L2d .blank .R2
+  phiL2Component1_c :
+    phiL2Component1 .c = .mkRows .R1 .L2c .blank .G0
+  phiL2Component1_d :
+    phiL2Component1 .d = .mkRows .G1 .L2a .blank .R0
+  phiL2Component2_a :
+    phiL2Component2 .a = .mkRows .G2 .blank .L2a .R3
+  phiL2Component2_b :
+    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R3
+  phiL2Component2_c :
+    phiL2Component2 .c = .mkRows .R2 .blank .L2c .G3
+  phiL2Component2_d :
+    phiL2Component2 .d = .mkRows .G0 .blank .L2d .G1
+  phiL2Component2_e :
+    phiL2Component2 .e = .mkRows .R0 .blank .L2e .R1
+  phiL2Component2_f :
+    phiL2Component2 .f = .mkRows .R2 .blank .L2f .R1
+  phiL2Component2_g :
+    phiL2Component2 .g = .mkRows .R2 .blank .L2g .R3
+  phiL2Component2_h :
+    phiL2Component2 .h = .mkRows .R0 .blank .L2h .R3
+  phiL2Component2_i :
+    phiL2Component2 .i = .mkRows .G0 .blank .L2i .R3
+  phiL2Component2_j :
+    phiL2Component2 .j = .mkRows .R0 .blank .L2j .G1
+  phiL2Component2_k :
+    phiL2Component2 .k = .mkRows .G2 .blank .L2k .R1
+  phiL2Component2_l :
+    phiL2Component2 .l = .mkRows .R2 .blank .L2l .G3
+  phiL2Component2_m :
+    phiL2Component2 .m = .mkRows .G0 .blank .L2m .G1
+  phiL2Component2_n :
+    phiL2Component2 .n = .mkRows .G2 .blank .L2n .G1
+  phiL2Component2_o :
+    phiL2Component2 .o = .mkRows .G2 .blank .L2o .G3
+  phiL2Component2_p :
+    phiL2Component2 .p = .mkRows .G0 .blank .L2p .G3
+  phiL2Component2_q :
+    phiL2Component2 .q = .mkRows .G2 .blank .L2q .R3
+  phiL2Component2_r :
+    phiL2Component2 .r = .mkRows .R2 .blank .L2r .G1
+  phiL2Component2_s :
+    phiL2Component2 .s = .mkRows .G0 .blank .L2s .R1
+  phiL2Component2_t :
+    phiL2Component2 .t = .mkRows .R0 .blank .L2t .G3
+  phiL3_a :
+    phiL3 .a = .mkRows .L3e .L3a .L3a .L3b
+  phiL3_b :
+    phiL3 .b = .mkRows .L3d .L3a .L3b .L3b
+  phiL3_c :
+    phiL3 .c = .mkRows .L3d .L3a .L3c .L3c
+  phiL3_d :
+    phiL3 .d = .mkRows .L3d .L3a .L3d .L3c
+  phiL3_e :
+    phiL3 .e = .mkRows .L3e .L3a .L3e .L3c
+  sourceTableComplete :
+    substitutionRuleSources = RuleSource.all
+  sourceTableNodup :
+    substitutionRuleSources.Nodup
+  allBlocksCompatible :
+    allSubstitutionBlocksCompatibleBool = true
+  certifiedTableRules :
+    certifiedSubstitutionTable.rules = substitutionRules
+  certifiedTableComplete :
+    certifiedSubstitutionTable.rules.map SubstitutionRule.source =
+      RuleSource.all
+
+/-- The checked Figure 16 transcription, including the corrected `L2d` row. -/
+theorem humanTranscriptionCertificate :
+    HumanTranscriptionCertificate where
+  phiL1Star_row := HumanTranscription.phiL1Star_row
+  phiL2Component1_a := HumanTranscription.phiL2Component1_a
+  phiL2Component1_b := HumanTranscription.phiL2Component1_b
+  phiL2Component1_c := HumanTranscription.phiL2Component1_c
+  phiL2Component1_d := HumanTranscription.phiL2Component1_d
+  phiL2Component2_a := HumanTranscription.phiL2Component2_a
+  phiL2Component2_b := HumanTranscription.phiL2Component2_b
+  phiL2Component2_c := HumanTranscription.phiL2Component2_c
+  phiL2Component2_d := HumanTranscription.phiL2Component2_d
+  phiL2Component2_e := HumanTranscription.phiL2Component2_e
+  phiL2Component2_f := HumanTranscription.phiL2Component2_f
+  phiL2Component2_g := HumanTranscription.phiL2Component2_g
+  phiL2Component2_h := HumanTranscription.phiL2Component2_h
+  phiL2Component2_i := HumanTranscription.phiL2Component2_i
+  phiL2Component2_j := HumanTranscription.phiL2Component2_j
+  phiL2Component2_k := HumanTranscription.phiL2Component2_k
+  phiL2Component2_l := HumanTranscription.phiL2Component2_l
+  phiL2Component2_m := HumanTranscription.phiL2Component2_m
+  phiL2Component2_n := HumanTranscription.phiL2Component2_n
+  phiL2Component2_o := HumanTranscription.phiL2Component2_o
+  phiL2Component2_p := HumanTranscription.phiL2Component2_p
+  phiL2Component2_q := HumanTranscription.phiL2Component2_q
+  phiL2Component2_r := HumanTranscription.phiL2Component2_r
+  phiL2Component2_s := HumanTranscription.phiL2Component2_s
+  phiL2Component2_t := HumanTranscription.phiL2Component2_t
+  phiL3_a := HumanTranscription.phiL3_a
+  phiL3_b := HumanTranscription.phiL3_b
+  phiL3_c := HumanTranscription.phiL3_c
+  phiL3_d := HumanTranscription.phiL3_d
+  phiL3_e := HumanTranscription.phiL3_e
+  sourceTableComplete := substitutionRuleSources_eq_all
+  sourceTableNodup := substitutionRuleSources_nodup
+  allBlocksCompatible := allSubstitutionBlocksCompatibleBool_eq_true
+  certifiedTableRules := certifiedSubstitutionTable_rules
+  certifiedTableComplete := certifiedSubstitutionTable_complete
+
 end Figure16
 end OllingerRobinson
 end LeanWang
