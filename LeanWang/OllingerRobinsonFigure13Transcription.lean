@@ -3880,7 +3880,62 @@ def toIndexedRoutedFixedCornerSquare
     grid.hmatch
     grid.vmatch
 
+/-- Restrict a routed free grid to its lower-left `n × n` subgrid. -/
+def restrict
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n m : Nat} {hm : 0 < m} (hn : 0 < n) (hcap : n ≤ m)
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x m hm) :
+    Figure18RobinsonBoardRoutedFreeGrid table x n hn where
+  freeColumnCoord := fun i => grid.freeColumnCoord (Fin.castLE hcap i)
+  freeRowCoord := fun j => grid.freeRowCoord (Fin.castLE hcap j)
+  siteRect := fun i j =>
+    grid.siteRect (Fin.castLE hcap i) (Fin.castLE hcap j)
+  payloadRect := fun i j =>
+    grid.payloadRect (Fin.castLE hcap i) (Fin.castLE hcap j)
+  active := by
+    intro i j
+    exact grid.active (Fin.castLE hcap i) (Fin.castLE hcap j)
+  cornerSite := by
+    simpa [Fin.castLE] using grid.cornerSite
+  product := by
+    intro i j
+    exact grid.product (Fin.castLE hcap i) (Fin.castLE hcap j)
+  hmatch := by
+    intro i j hi
+    have hiBig : (Fin.castLE hcap i).val + 1 < m :=
+      Nat.lt_of_lt_of_le hi hcap
+    simpa [Fin.castLE] using
+      grid.hmatch (Fin.castLE hcap i) (Fin.castLE hcap j) hiBig
+  vmatch := by
+    intro i j hj
+    have hjBig : (Fin.castLE hcap j).val + 1 < m :=
+      Nat.lt_of_lt_of_le hj hcap
+    simpa [Fin.castLE] using
+      grid.vmatch (Fin.castLE hcap i) (Fin.castLE hcap j) hjBig
+
 end Figure18RobinsonBoardRoutedFreeGrid
+
+/--
+Level-indexed Robinson-board/free-grid invariant.
+
+This matches the recursive board proof more directly than the public
+`HasFigure18RobinsonBoardRoutedFreeGridsForTable` surface: for every Robinson
+board level, produce the whole free grid of side `2^level + 1`.
+-/
+def HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty (Figure18RobinsonBoardRoutedFreeGrid table x
+          (RobinsonSquare.freeGridSide level)
+          (RobinsonSquare.freeGridSide_pos level))
 
 /-- Robinson-board/free-grid invariant for a specified Figure 18 role table. -/
 def HasFigure18RobinsonBoardRoutedFreeGridsForTable
@@ -3892,6 +3947,16 @@ def HasFigure18RobinsonBoardRoutedFreeGridsForTable
       table.presentation.toScaffold T seed) x →
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18RobinsonBoardRoutedFreeGrid table x n hn)
+
+theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_level
+    {table : Figure18RoleTable}
+    (hlevel : HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable table) :
+    HasFigure18RobinsonBoardRoutedFreeGridsForTable table := by
+  intro T seed x hx n hn
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hlevel x hx level with ⟨grid⟩
+  exact ⟨grid.restrict hn hcap⟩
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     {table : Figure18RoleTable}
