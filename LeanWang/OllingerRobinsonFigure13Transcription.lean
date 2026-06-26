@@ -5323,6 +5323,32 @@ theorem
     (hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
       hsteps)
 
+/--
+A coherent local Section 7 tower directly supplies compatible level routed
+free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localCoordinateSteps
+    (hasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable_of_localTower
+      htower)
+
+/--
+A coherent local Section 7 tower directly supplies level routed free grids.
+-/
+theorem hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_localTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_compatible
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      htower)
+
 /-- Robinson-board/free-grid invariant for a specified Figure 18 role table. -/
 def HasFigure18RobinsonBoardRoutedFreeGridsForTable
     (table : Figure18RoleTable) : Prop :=
@@ -5343,6 +5369,19 @@ theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_level
     ⟨level, hcap⟩
   rcases hlevel x hx level with ⟨grid⟩
   exact ⟨grid.restrict hn hcap⟩
+
+/--
+A coherent local Section 7 tower supplies routed free grids of every requested
+finite size.
+-/
+theorem hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_localTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RobinsonBoardRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_level
+    (hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_localTower
+      htower)
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     {table : Figure18RoleTable}
