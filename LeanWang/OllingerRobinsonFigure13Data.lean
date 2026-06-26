@@ -1567,6 +1567,43 @@ def l2BothComponentsBlankSiteBool (site : Figure18Site) : Bool :=
 def natSpecsAtQuadrant (quadrant : Quadrant) : List (Nat × Quadrant) :=
   (List.range 92).map fun index => (index, quadrant)
 
+theorem natSpecsAtQuadrant_length (quadrant : Quadrant) :
+    (natSpecsAtQuadrant quadrant).length = 92 := by
+  simp [natSpecsAtQuadrant]
+
+theorem natSpecsAtQuadrant_nodup (quadrant : Quadrant) :
+    (natSpecsAtQuadrant quadrant).Nodup := by
+  unfold natSpecsAtQuadrant
+  apply List.Nodup.map
+  · intro i j hij
+    exact congrArg Prod.fst hij
+  · decide
+
+theorem mem_natSpecsAtQuadrant_iff
+    {index : Nat} {q quadrant : Quadrant} :
+    (index, q) ∈ natSpecsAtQuadrant quadrant ↔
+      index < 92 ∧ q = quadrant := by
+  constructor
+  · intro hmem
+    rcases List.mem_map.1 hmem with ⟨index', hindex', hpair⟩
+    have hindex_lt : index' < 92 := by
+      simpa using List.mem_range.1 hindex'
+    cases hpair
+    exact ⟨hindex_lt, rfl⟩
+  · rintro ⟨hindex, rfl⟩
+    exact List.mem_map.2 ⟨index, List.mem_range.2 hindex, rfl⟩
+
+theorem natSpecsAtQuadrant_disjoint_of_ne
+    {quadrant₁ quadrant₂ : Quadrant}
+    (hne : quadrant₁ ≠ quadrant₂) :
+    (natSpecsAtQuadrant quadrant₁).Disjoint
+      (natSpecsAtQuadrant quadrant₂) := by
+  intro spec hleft hright
+  rcases spec with ⟨index, quadrant⟩
+  have hq₁ := (mem_natSpecsAtQuadrant_iff.mp hleft).2
+  have hq₂ := (mem_natSpecsAtQuadrant_iff.mp hright).2
+  exact hne (hq₁.symm.trans hq₂)
+
 def l2Component1BlankSiteSpecs : List (Nat × Quadrant) :=
   Figure18Site.natSpecsOfSites <|
     Figure18Site.all.filter l2Component1BlankSiteBool
@@ -1583,9 +1620,34 @@ theorem l2Component1BlankSiteSpecs_eq :
     l2Component1BlankSiteSpecs = natSpecsAtQuadrant Quadrant.southwest := by
   decide
 
+theorem l2Component1BlankSiteSpecs_length :
+    l2Component1BlankSiteSpecs.length = 92 := by
+  rw [l2Component1BlankSiteSpecs_eq]
+  exact natSpecsAtQuadrant_length Quadrant.southwest
+
+theorem l2Component1BlankSiteSpecs_nodup :
+    l2Component1BlankSiteSpecs.Nodup := by
+  rw [l2Component1BlankSiteSpecs_eq]
+  exact natSpecsAtQuadrant_nodup Quadrant.southwest
+
 theorem l2Component2BlankSiteSpecs_eq :
     l2Component2BlankSiteSpecs = natSpecsAtQuadrant Quadrant.northeast := by
   decide
+
+theorem l2Component2BlankSiteSpecs_length :
+    l2Component2BlankSiteSpecs.length = 92 := by
+  rw [l2Component2BlankSiteSpecs_eq]
+  exact natSpecsAtQuadrant_length Quadrant.northeast
+
+theorem l2Component2BlankSiteSpecs_nodup :
+    l2Component2BlankSiteSpecs.Nodup := by
+  rw [l2Component2BlankSiteSpecs_eq]
+  exact natSpecsAtQuadrant_nodup Quadrant.northeast
+
+theorem l2BlankSiteSpecs_disjoint :
+    l2Component1BlankSiteSpecs.Disjoint l2Component2BlankSiteSpecs := by
+  rw [l2Component1BlankSiteSpecs_eq, l2Component2BlankSiteSpecs_eq]
+  exact natSpecsAtQuadrant_disjoint_of_ne (by decide)
 
 theorem l2BothComponentsBlankSiteSpecs_eq_nil :
     l2BothComponentsBlankSiteSpecs = [] := by
@@ -3229,6 +3291,14 @@ run in Lean.
 def l2Component1BlankCandidateActiveSiteSpecs : List (Nat × Quadrant) :=
   l2Component1BlankSiteSpecs.erase (cornerNatSpec 0 Quadrant.southwest)
 
+theorem l2Component1BlankCandidateActiveSiteSpecs_length :
+    l2Component1BlankCandidateActiveSiteSpecs.length = 91 := by
+  decide
+
+theorem l2Component1BlankCandidateActiveSiteSpecs_nodup :
+    l2Component1BlankCandidateActiveSiteSpecs.Nodup := by
+  decide
+
 theorem l2Component1BlankCandidateSanityBool :
     natSiteSpecSanityBool l2Component1BlankCandidateActiveSiteSpecs
       0 Quadrant.southwest = true := by
@@ -3266,6 +3336,20 @@ quadrants, with the distinguished corner removed from the raw active list.
 -/
 def l2Component2BlankCandidateActiveSiteSpecs : List (Nat × Quadrant) :=
   l2Component2BlankSiteSpecs.erase (cornerNatSpec 0 Quadrant.northeast)
+
+theorem l2Component2BlankCandidateActiveSiteSpecs_length :
+    l2Component2BlankCandidateActiveSiteSpecs.length = 91 := by
+  decide
+
+theorem l2Component2BlankCandidateActiveSiteSpecs_nodup :
+    l2Component2BlankCandidateActiveSiteSpecs.Nodup := by
+  decide
+
+theorem l2BlankCandidateActiveSiteSpecs_disjoint :
+    l2Component1BlankCandidateActiveSiteSpecs.Disjoint
+      l2Component2BlankCandidateActiveSiteSpecs := by
+  rw [← List.inter_eq_nil_iff_disjoint]
+  decide
 
 theorem l2Component2BlankCandidateSanityBool :
     natSiteSpecSanityBool l2Component2BlankCandidateActiveSiteSpecs
