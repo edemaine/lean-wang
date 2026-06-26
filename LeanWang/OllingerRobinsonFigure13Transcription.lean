@@ -4233,6 +4233,25 @@ structure Figure18RobinsonBoardRoutedFreeGrid
 
 namespace Figure18RobinsonBoardRoutedFreeGrid
 
+/--
+Finite Figure 18 site compatibility of neighboring virtual payload cells in a
+routed Robinson free grid.
+-/
+def SiteCompatible
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn) :
+    Prop :=
+  (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    Figure18Site.hCompatible
+      (grid.siteRect i j) (grid.siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+  (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    Figure18Site.vCompatible
+      (grid.siteRect i j) (grid.siteRect i ⟨j.val + 1, hj⟩) = true)
+
 /-- Forget the board terminology after the routed free-grid data is selected. -/
 def toIndexedRoutedFixedCornerSquare
     {table : Figure18RoleTable}
@@ -4288,6 +4307,37 @@ def restrict
       Nat.lt_of_lt_of_le hj hcap
     simpa [Fin.castLE] using
       grid.vmatch (Fin.castLE hcap i) (Fin.castLE hcap j) hjBig
+
+/-- Local site compatibility is inherited by lower-left restrictions. -/
+theorem SiteCompatible.restrict
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n m : Nat} {hm : 0 < m}
+    {grid : Figure18RobinsonBoardRoutedFreeGrid table x m hm}
+    (hsite : grid.SiteCompatible) (hn : 0 < n) (hcap : n ≤ m) :
+    (grid.restrict hn hcap).SiteCompatible := by
+  rcases hsite with ⟨hh, hv⟩
+  constructor
+  · intro i j hi
+    have hiBig : (Fin.castLE hcap i).val + 1 < m :=
+      Nat.lt_of_lt_of_le hi hcap
+    change Figure18Site.hCompatible
+        (grid.siteRect (Fin.castLE hcap i) (Fin.castLE hcap j))
+        (grid.siteRect (Fin.castLE hcap ⟨i.val + 1, hi⟩)
+          (Fin.castLE hcap j)) = true
+    simpa [Fin.castLE] using
+      hh (Fin.castLE hcap i) (Fin.castLE hcap j) hiBig
+  · intro i j hj
+    have hjBig : (Fin.castLE hcap j).val + 1 < m :=
+      Nat.lt_of_lt_of_le hj hcap
+    change Figure18Site.vCompatible
+        (grid.siteRect (Fin.castLE hcap i) (Fin.castLE hcap j))
+        (grid.siteRect (Fin.castLE hcap i)
+          (Fin.castLE hcap ⟨j.val + 1, hj⟩)) = true
+    simpa [Fin.castLE] using
+      hv (Fin.castLE hcap i) (Fin.castLE hcap j) hjBig
 
 end Figure18RobinsonBoardRoutedFreeGrid
 
@@ -4736,6 +4786,20 @@ def toRoutedFreeGrid
   product := certificate.product
   hmatch := certificate.hmatch
   vmatch := certificate.vmatch
+
+/-- Local site compatibility transfers to the routed free-grid view. -/
+theorem siteCompatible_toRoutedFreeGrid
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    {certificate : Figure18RobinsonBoardSignalCertificate table x level}
+    (hsite : certificate.SiteCompatible) :
+    certificate.toRoutedFreeGrid.SiteCompatible := by
+  simpa [toRoutedFreeGrid,
+    SiteCompatible,
+    Figure18RobinsonBoardRoutedFreeGrid.SiteCompatible] using hsite
 
 end Figure18RobinsonBoardSignalCertificate
 
