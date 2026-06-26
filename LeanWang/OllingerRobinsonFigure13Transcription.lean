@@ -4752,6 +4752,86 @@ theorem canonical_freeRowCoord
     (canonical level).freeRowCoord j = j.val :=
   rfl
 
+@[simp]
+theorem canonical_isBoardColumn
+    (level : Nat) (column : Int) :
+    (canonical level).isBoardColumn column := by
+  trivial
+
+@[simp]
+theorem canonical_isBoardRow
+    (level : Nat) (row : Int) :
+    (canonical level).isBoardRow row := by
+  trivial
+
+theorem canonical_isFreeColumn_iff_exists
+    (level : Nat) (column : Int) :
+    (canonical level).isFreeColumn column ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level), (i.val : Int) = column := by
+  rfl
+
+theorem canonical_isFreeRow_iff_exists
+    (level : Nat) (row : Int) :
+    (canonical level).isFreeRow row ↔
+      ∃ j : Fin (RobinsonSquare.freeGridSide level), (j.val : Int) = row := by
+  rfl
+
+theorem canonical_hasHorizontalObstruction_iff_not_freeRow
+    (level : Nat) (column row : Int) :
+    (canonical level).hasHorizontalObstruction column row ↔
+      ¬ (canonical level).isFreeRow row := by
+  rfl
+
+theorem canonical_hasVerticalObstruction_iff_not_freeColumn
+    (level : Nat) (column row : Int) :
+    (canonical level).hasVerticalObstruction column row ↔
+      ¬ (canonical level).isFreeColumn column := by
+  rfl
+
+theorem canonical_noHorizontalObstruction_iff_freeRow
+    (level : Nat) (column row : Int) :
+    ¬ (canonical level).hasHorizontalObstruction column row ↔
+      (canonical level).isFreeRow row := by
+  rw [canonical_hasHorizontalObstruction_iff_not_freeRow]
+  exact not_not
+
+theorem canonical_noVerticalObstruction_iff_freeColumn
+    (level : Nat) (column row : Int) :
+    ¬ (canonical level).hasVerticalObstruction column row ↔
+      (canonical level).isFreeColumn column := by
+  rw [canonical_hasVerticalObstruction_iff_not_freeColumn]
+  exact not_not
+
+theorem canonical_freeColumn_bounds
+    {level : Nat} {column : Int}
+    (hfree : (canonical level).isFreeColumn column) :
+    0 ≤ column ∧ column < RobinsonSquare.freeGridSide level := by
+  rcases hfree with ⟨i, rfl⟩
+  constructor
+  · exact Int.natCast_nonneg i.val
+  · exact_mod_cast i.isLt
+
+theorem canonical_freeRow_bounds
+    {level : Nat} {row : Int}
+    (hfree : (canonical level).isFreeRow row) :
+    0 ≤ row ∧ row < RobinsonSquare.freeGridSide level := by
+  rcases hfree with ⟨j, rfl⟩
+  constructor
+  · exact Int.natCast_nonneg j.val
+  · exact_mod_cast j.isLt
+
+theorem canonical_noObstruction_at_freeCrossing
+    (level : Nat)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (¬ (canonical level).hasHorizontalObstruction
+        ((canonical level).freeColumnCoord i)
+        ((canonical level).freeRowCoord j)) ∧
+      ¬ (canonical level).hasVerticalObstruction
+        ((canonical level).freeColumnCoord i)
+        ((canonical level).freeRowCoord j) :=
+  (canonical level).noObstruction_at_freeCrossing i j
+
 /-- Coordinate recurrence for the canonical Robinson board geometries. -/
 def canonicalCoordinateStep (level : Nat) :
     CoordinateStep (canonical level) (canonical (level + 1)) where
