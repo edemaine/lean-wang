@@ -5736,6 +5736,42 @@ def ofL2Component1BlankCandidateLevelLocal
     (NatSiteRobinsonLevelObligations.ofL2Component1BlankCandidateLocal
       levelRoutedFreeGrids levelLocalCompatibility realizes)
 
+def ofL2Component1BlankCandidateLevelSignalLocal
+    (signalCertificates :
+      HasFigure18RobinsonBoardLevelSignalCertificatesForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (levelLocalCompatibility :
+      HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelSignalLocallyCompatibleFreeGrids
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    signalCertificates
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+    levelLocalCompatibility realizes
+
 def ofL2Component2BlankCandidate
     (routedFreeGrids :
       HasFigure18RobinsonBoardRoutedFreeGridsForTable
@@ -5830,6 +5866,42 @@ def ofL2Component2BlankCandidateLevelLocal
     l2Component2BlankCandidateSanity.cornerIndex_valid
     (NatSiteRobinsonLevelObligations.ofL2Component2BlankCandidateLocal
       levelRoutedFreeGrids levelLocalCompatibility realizes)
+
+def ofL2Component2BlankCandidateLevelSignalLocal
+    (signalCertificates :
+      HasFigure18RobinsonBoardLevelSignalCertificatesForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (levelLocalCompatibility :
+      HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofLevelSignalLocallyCompatibleFreeGrids
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    signalCertificates
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+    levelLocalCompatibility realizes
 
 def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
