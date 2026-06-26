@@ -2450,6 +2450,40 @@ theorem corner_mem_ofActiveSites_activeSites
   exact (mem_ofActiveSites_activeSites_iff
     activeSites cornerSite cornerSite).2 (Or.inl rfl)
 
+theorem roleOfActiveSites_ofActiveSites_activeSites
+    (activeSites : List Figure18Site) (cornerSite site : Figure18Site) :
+    roleOfActiveSites
+        (ofActiveSites activeSites cornerSite).activeSites cornerSite site =
+      roleOfActiveSites activeSites cornerSite site := by
+  by_cases hcorner : site = cornerSite
+  · subst hcorner
+    simp [roleOfActiveSites]
+  · by_cases hmem : site ∈ activeSites
+    · have hmem' :
+          site ∈ (ofActiveSites activeSites cornerSite).activeSites :=
+        (mem_ofActiveSites_activeSites_iff
+          activeSites cornerSite site).2 (Or.inr hmem)
+      simp [roleOfActiveSites, hcorner, hmem, hmem']
+    · have hmem' :
+          site ∉ (ofActiveSites activeSites cornerSite).activeSites := by
+        intro hsite
+        rcases (mem_ofActiveSites_activeSites_iff
+          activeSites cornerSite site).1 hsite with hsite | hsite
+        · exact hcorner hsite
+        · exact hmem hsite
+      simp [roleOfActiveSites, hcorner, hmem, hmem']
+
+theorem flatRolesOfActiveSites_ofActiveSites_activeSites
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    flatRolesOfActiveSites
+        (ofActiveSites activeSites cornerSite).activeSites cornerSite =
+      flatRolesOfActiveSites activeSites cornerSite := by
+  unfold flatRolesOfActiveSites
+  rw [List.ofFn_inj]
+  funext k
+  exact roleOfActiveSites_ofActiveSites_activeSites
+    activeSites cornerSite (Figure18Site.siteOfFlatIndex k)
+
 end FlatRoleTable
 
 /--
