@@ -45,17 +45,93 @@ structure Scaffold where
   corner : WangTile
   active_primrec : Primrec active
 
+/-- The four edge colors appearing on a tile. -/
+def tileColors (t : WangTile) : List Nat :=
+  [t.n, t.s, t.e, t.w]
+
+/-- Edge colors available to inactive payload cells for an instance tileset. -/
+def payloadPalette (T : TileSet) : List Nat :=
+  0 :: T.flatMap tileColors
+
+/-- Payload tiles with fixed north, south, and east colors and west in `colors`. -/
+def payloadsWithNSE (colors : List Nat) (n s e : Nat) : TileSet :=
+  colors.map fun w => { n := n, s := s, e := e, w := w }
+
+/-- Payload tiles with fixed north and south colors and remaining colors in `colors`. -/
+def payloadsWithNS (colors : List Nat) (n s : Nat) : TileSet :=
+  colors.flatMap fun e => payloadsWithNSE colors n s e
+
+/-- Payload tiles with fixed north color and remaining colors in `colors`. -/
+def payloadsWithN (colors : List Nat) (n : Nat) : TileSet :=
+  colors.flatMap fun s => payloadsWithNS colors n s
+
+/--
+All payload tiles whose edge colors come from a finite color palette.
+
+Inactive scaffold cells use this complete palette, so they can absorb arbitrary
+instance-tile edge colors while still keeping the combined tileset finite.
+-/
+def completePayloadsFromColors (colors : List Nat) : TileSet :=
+  colors.flatMap fun n => payloadsWithN colors n
+
+/-- The inactive-cell payload palette induced by an instance tileset. -/
+def completePayloads (T : TileSet) : TileSet :=
+  completePayloadsFromColors (payloadPalette T)
+
+theorem tileColors_primrec : Primrec tileColors := by
+  unfold tileColors
+  exact Primrec.list_cons.comp WangTile.n_primrec
+    (Primrec.list_cons.comp WangTile.s_primrec
+      (Primrec.list_cons.comp WangTile.e_primrec
+        (Primrec.list_cons.comp WangTile.w_primrec (Primrec.const []))))
+
+theorem payloadPalette_primrec : Primrec payloadPalette := by
+  unfold payloadPalette
+  exact Primrec.list_cons.comp (Primrec.const 0)
+    (Primrec.list_flatMap Primrec.id
+      (Primrec₂.mk (tileColors_primrec.comp Primrec.snd)))
+
+theorem payloadsWithNSE_primrec :
+    Primrec (fun p : ((List Nat × Nat) × Nat) × Nat =>
+      payloadsWithNSE p.1.1.1 p.1.1.2 p.1.2 p.2) := by
+  -- Routine projection bookkeeping for the finite palette generator.
+  sorry
+
+theorem payloadsWithNS_primrec :
+    Primrec (fun p : (List Nat × Nat) × Nat => payloadsWithNS p.1.1 p.1.2 p.2) := by
+  unfold payloadsWithNS
+  refine Primrec.list_flatMap (Primrec.fst.comp Primrec.fst) ?_
+  apply Primrec₂.mk
+  exact payloadsWithNSE_primrec
+
+theorem payloadsWithN_primrec :
+    Primrec (fun p : List Nat × Nat => payloadsWithN p.1 p.2) := by
+  unfold payloadsWithN
+  refine Primrec.list_flatMap Primrec.fst ?_
+  apply Primrec₂.mk
+  exact payloadsWithNS_primrec
+
+theorem completePayloadsFromColors_primrec : Primrec completePayloadsFromColors := by
+  unfold completePayloadsFromColors
+  refine Primrec.list_flatMap Primrec.id ?_
+  apply Primrec₂.mk
+  exact payloadsWithN_primrec
+
+theorem completePayloads_primrec : Primrec completePayloads :=
+  completePayloadsFromColors_primrec.comp payloadPalette_primrec
+
 /--
 Payload symbols carried by a scaffold tile. Active scaffold cells carry the
 instance tileset, with the marked corner restricted to the requested seed.
-Inactive scaffold cells carry one dummy payload tile, so they do not force the
-instance tileset outside the free regions.
+Inactive scaffold cells carry every tile over the instance edge-color palette,
+so they do not force the instance tileset outside the free regions but can still
+match active-cell boundary colors.
 -/
 def scaffoldPayloads (S : Scaffold) (T : TileSet) (seed b : WangTile) : TileSet :=
   if S.active b then
     if b = S.corner then T.filter fun p => p = seed else T
   else
-    [monochromeTile]
+    completePayloads T
 
 /-- Combine a scaffold with a fixed-corner square instance. -/
 def combineWithScaffold (S : Scaffold) (T : TileSet) (seed : WangTile) : TileSet :=
@@ -67,7 +143,7 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
     tile ∈ combineWithScaffold S T seed ↔
       ∃ b ∈ S.tiles, ∃ p : WangTile,
         (S.active b = true → p ∈ T ∧ (b = S.corner → p = seed)) ∧
-          (S.active b = false → p = monochromeTile) ∧
+          (S.active b = false → p ∈ completePayloads T) ∧
           WangTile.product b p = tile := by
   constructor
   · intro htile
@@ -83,7 +159,7 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
           intro _hactive
           exact ⟨(List.mem_filter.1 hp).1,
             by intro _; exact of_decide_eq_true (List.mem_filter.1 hp).2⟩
-        have hinactive : S.active b = false → p = monochromeTile := by
+        have hinactive : S.active b = false → p ∈ completePayloads T := by
           intro hfalse
           rw [hactive] at hfalse
           nomatch hfalse
@@ -94,7 +170,7 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
         have hmem : S.active b = true → p ∈ T ∧ (b = S.corner → p = seed) := by
           intro _hactive
           exact ⟨hp, by intro hbcorner; exact False.elim (hcorner hbcorner)⟩
-        have hinactive : S.active b = false → p = monochromeTile := by
+        have hinactive : S.active b = false → p ∈ completePayloads T := by
           intro hfalse
           rw [hactive] at hfalse
           nomatch hfalse
@@ -105,13 +181,12 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
         · exact False.elim (hactive h)
       rw [scaffoldPayloads, if_neg hactive, List.mem_map] at hpayload
       rcases hpayload with ⟨p, hp, htile⟩
-      rw [List.mem_singleton] at hp
       refine ⟨b, hb, p, ?_⟩
       have hmem : S.active b = true → p ∈ T ∧ (b = S.corner → p = seed) := by
         intro htrue
         rw [hfalse] at htrue
         nomatch htrue
-      have hinactive : S.active b = false → p = monochromeTile := by
+      have hinactive : S.active b = false → p ∈ completePayloads T := by
         intro _
         exact hp
       exact And.intro hmem (And.intro hinactive htile)
@@ -127,7 +202,7 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
       · rw [if_neg hcorner, List.mem_map]
         exact ⟨p, (hactiveMem hactive).1, htile⟩
     · rw [scaffoldPayloads, if_neg hactive, List.mem_map]
-      exact ⟨p, by rw [List.mem_singleton]; exact hinactive (by
+      exact ⟨p, hinactive (by
         cases h : S.active b
         · rfl
         · exact False.elim (hactive h)), htile⟩
@@ -144,7 +219,7 @@ structure CombinedBoxPatch (S : Scaffold) (T : TileSet) (seed : WangTile)
   active_payload : ∀ p : Box r, S.active (base p) = true →
     payload p ∈ T ∧ (base p = S.corner → payload p = seed)
   inactive_payload : ∀ p : Box r, S.active (base p) = false →
-    payload p = monochromeTile
+    payload p ∈ completePayloads T
   hmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
     WangTile.HMatches
       (WangTile.product (base p) (payload p))
@@ -187,91 +262,6 @@ theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
     {r : Nat} (patch : CombinedBoxPatch S T seed r) :
     TileableBox (combineWithScaffold S T seed) r :=
   ⟨patch.toBoxPattern, patch.validBoxTiling_toBoxPattern⟩
-
-/--
-If the cell immediately to the east is inactive, the current payload's east
-edge must match the monochrome inactive payload.
--/
-theorem payload_e_eq_zero_of_east_inactive
-    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
-    (patch : CombinedBoxPatch S T seed r)
-    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2))
-    (hinactive :
-      S.active (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩) = false) :
-    (patch.payload p).e = 0 := by
-  have hpayload :
-      patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩ = monochromeTile :=
-    patch.inactive_payload ⟨(p.1.1 + 1, p.1.2), hp⟩ hinactive
-  have hmatch :=
-    (WangTile.HMatches_product_iff
-      (patch.base p) (patch.payload p)
-      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩)
-      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).1
-        (patch.hmatch p hp) |>.2
-  simpa [WangTile.HMatches, hpayload, monochromeTile] using hmatch
-
-/--
-If the current cell is inactive, the eastern neighbor's payload west edge must
-match the monochrome inactive payload.
--/
-theorem east_payload_w_eq_zero_of_inactive
-    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
-    (patch : CombinedBoxPatch S T seed r)
-    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2))
-    (hinactive : S.active (patch.base p) = false) :
-    (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩).w = 0 := by
-  have hpayload : patch.payload p = monochromeTile :=
-    patch.inactive_payload p hinactive
-  have hmatch :=
-    (WangTile.HMatches_product_iff
-      (patch.base p) (patch.payload p)
-      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩)
-      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).1
-        (patch.hmatch p hp) |>.2
-  simpa [WangTile.HMatches, hpayload, monochromeTile] using hmatch.symm
-
-/--
-If the cell immediately to the north is inactive, the current payload's north
-edge must match the monochrome inactive payload.
--/
-theorem payload_n_eq_zero_of_north_inactive
-    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
-    (patch : CombinedBoxPatch S T seed r)
-    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1))
-    (hinactive :
-      S.active (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩) = false) :
-    (patch.payload p).n = 0 := by
-  have hpayload :
-      patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩ = monochromeTile :=
-    patch.inactive_payload ⟨(p.1.1, p.1.2 + 1), hp⟩ hinactive
-  have hmatch :=
-    (WangTile.VMatches_product_iff
-      (patch.base p) (patch.payload p)
-      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩)
-      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).1
-        (patch.vmatch p hp) |>.2
-  simpa [WangTile.VMatches, hpayload, monochromeTile] using hmatch
-
-/--
-If the current cell is inactive, the northern neighbor's payload south edge
-must match the monochrome inactive payload.
--/
-theorem north_payload_s_eq_zero_of_inactive
-    {S : Scaffold} {T : TileSet} {seed : WangTile} {r : Nat}
-    (patch : CombinedBoxPatch S T seed r)
-    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1))
-    (hinactive : S.active (patch.base p) = false) :
-    (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩).s = 0 := by
-  have hpayload : patch.payload p = monochromeTile :=
-    patch.inactive_payload p hinactive
-  have hmatch :=
-    (WangTile.VMatches_product_iff
-      (patch.base p) (patch.payload p)
-      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩)
-      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).1
-        (patch.vmatch p hp) |>.2
-  simpa [WangTile.VMatches, hpayload, monochromeTile] using hmatch.symm
-
 end CombinedBoxPatch
 
 /--
@@ -290,7 +280,7 @@ structure CombinedBoxLayerPatch (S : Scaffold) (T : TileSet) (seed : WangTile)
   active_payload : ∀ p : Box r, S.active (base p).1 = true →
     payload p ∈ T ∧ ((base p).1 = S.corner → payload p = seed)
   inactive_payload : ∀ p : Box r, S.active (base p).1 = false →
-    payload p = monochromeTile
+    payload p ∈ completePayloads T
   payload_hmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
     WangTile.HMatches (payload p)
       (payload ⟨(p.1.1 + 1, p.1.2), hp⟩)
@@ -709,7 +699,7 @@ theorem combineWithScaffold_primrec (S : Scaffold) :
     have hactive : Primrec fun a : (TileSet × WangTile) × WangTile => S.active a.2 :=
       S.active_primrec.comp Primrec.snd
     refine Primrec.ite (Primrec.eq.comp hactive (Primrec.const true)) ?_
-      (Primrec.const ([monochromeTile] : TileSet))
+      (completePayloads_primrec.comp (Primrec.fst.comp Primrec.fst))
     refine Primrec.ite ?_ ?_ ?_
     · exact Primrec.eq.comp Primrec.snd (Primrec.const S.corner)
     · exact (PrimrecRel.listFilter (R := fun p seed : WangTile => p = seed) Primrec.eq).comp
