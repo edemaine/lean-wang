@@ -3986,6 +3986,85 @@ structure NatSiteScaffoldCertificate where
 
 namespace NatSiteScaffoldCertificate
 
+def ofWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (localFreeSquareWindows :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasLocalFreeSquareWindowInvariant)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (pairFailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          []) :
+    NatSiteScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  certificate :=
+    figure18ScaffoldDataOfNatSitesCertificateOfWindows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid localFreeSquareWindows realizes
+  pairFailures := pairFailures
+
+def ofIndexedActiveWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (pairFailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          []) :
+    NatSiteScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  certificate :=
+    figure18ScaffoldDataOfNatSitesCertificateOfIndexedActiveWindows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+  pairFailures := pairFailures
+
+def ofObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    NatSiteScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  certificate := obligations.toCertificate
+  pairFailures :=
+    generatedStackAllowedSitePairFailures_eq_nil_of_pairCompatibilityBool
+      obligations.pairCompatibility
+
 def activeSiteData (C : NatSiteScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
   activeSiteDataOfSpecs C.activeSiteSpecs C.activeSiteSpecs_valid
