@@ -1879,15 +1879,39 @@ def HasGeneratedStackCompatibilityForListedActiveSiteRectangles
           (sparseRawDataOfSites_layerStackRectangleMatchesBool
             activeSiteData cornerSite R)) = true
 
-theorem hasGeneratedStackCompatibilityForListedActiveSiteRectangles_of_allowedPairCompatibilityBool
+/--
+Local compatibility target for generated Figure 13 layer stacks over arbitrary
+Figure 18 site rectangles.
+
+Only the selected sites and local horizontal/vertical compatibility matter for
+the Figure 16 layer stack check.  The lower-left corner condition used by
+listed-active windows is handled separately by those window structures.
+-/
+def HasGeneratedStackCompatibilityForAllowedSiteRectangles
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : Prop :=
+  ∀ {n : Nat} (R : SiteRectangle n n),
+    (∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites) →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) →
+      let stackData := checkedLayerStackRectangleOfSiteRectangle R
+      stackData.compatibleBool (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+          (sparseRawDataOfSites_layerStackRectangleMatchesBool
+            activeSiteData cornerSite R)) = true
+
+theorem hasGeneratedStackCompatibilityForAllowedSiteRectangles_of_allowedPairCompatibilityBool
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
     (hcheck :
       generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
         true) :
-    HasGeneratedStackCompatibilityForListedActiveSiteRectangles
+    HasGeneratedStackCompatibilityForAllowedSiteRectangles
       activeSiteData cornerSite := by
-  intro n hn R hsites _hcorner hh hv
+  intro n R hsites hh hv
   dsimp
   unfold CheckedLayerStackRectangle.compatibleBool
   rw [Bool.and_eq_true, Bool.and_eq_true]
@@ -1916,6 +1940,96 @@ theorem hasGeneratedStackCompatibilityForListedActiveSiteRectangles_of_allowedPa
         hcheck R hsites hh,
       generatedStackBlackVBoundaryBool_of_allowedPairCompatibilityBool
         hcheck R hsites hv⟩
+
+theorem hasGeneratedStackCompatibilityForListedActiveSiteRectangles_of_allowedPairCompatibilityBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true) :
+    HasGeneratedStackCompatibilityForListedActiveSiteRectangles
+      activeSiteData cornerSite := by
+  intro n _hn R hsites _hcorner hh hv
+  exact
+    hasGeneratedStackCompatibilityForAllowedSiteRectangles_of_allowedPairCompatibilityBool
+      activeSiteData cornerSite hcheck R hsites hh hv
+
+theorem sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    ∃ (stackData : CheckedLayerStackRectangle n n),
+      ∃ (_hsite : stackData.sites.matchesSiteRectangleBool R = true),
+        ∃ (hmatch :
+          (sparseRawDataOfSites activeSiteData cornerSite).layerStackRectangleMatchesBool
+            stackData = true),
+          stackData.compatibleBool
+            (sparseRawDataOfSites activeSiteData cornerSite).layerData
+            (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+              hmatch) = true := by
+  refine ⟨checkedLayerStackRectangleOfSiteRectangle R,
+    checkedLayerStackRectangleOfSiteRectangle_matchesSite R,
+    sparseRawDataOfSites_layerStackRectangleMatchesBool
+      activeSiteData cornerSite R,
+    ?_⟩
+  exact
+    hasGeneratedStackCompatibilityForAllowedSiteRectangles_of_allowedPairCompatibilityBool
+      activeSiteData cornerSite hcheck R hsites hh hv
+
+/--
+Attach the concrete Figure 13/16 layer stack to an indexed-routed Figure 18
+fixed-corner square, assuming its selected site rectangle uses only allowed
+sites and has locally compatible neighboring sites.
+-/
+def sparseRawDataOfSites_toIndexedRoutedFixedCornerSquareWithLayerStack
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      siteRectangleOfIndexedRoutedFixedCornerSquare window i j = cornerSite ∨
+        siteRectangleOfIndexedRoutedFixedCornerSquare window i j ∈
+          activeSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible
+        (siteRectangleOfIndexedRoutedFixedCornerSquare window i j)
+        (siteRectangleOfIndexedRoutedFixedCornerSquare window
+          ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible
+        (siteRectangleOfIndexedRoutedFixedCornerSquare window i j)
+        (siteRectangleOfIndexedRoutedFixedCornerSquare window
+          i ⟨j.val + 1, hj⟩) = true) :
+    Figure18IndexedRoutedFixedCornerSquareWithLayerStack
+      (sparseRawDataOfSites activeSiteData cornerSite).layerData table x n hn := by
+  let R := siteRectangleOfIndexedRoutedFixedCornerSquare window
+  let stackData := checkedLayerStackRectangleOfSiteRectangle R
+  let data := sparseRawDataOfSites activeSiteData cornerSite
+  have hmatch : data.layerStackRectangleMatchesBool stackData = true :=
+    sparseRawDataOfSites_layerStackRectangleMatchesBool activeSiteData cornerSite R
+  have hcompatible :
+      stackData.compatibleBool data.layerData
+        (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+          hmatch) = true :=
+    hasGeneratedStackCompatibilityForAllowedSiteRectangles_of_allowedPairCompatibilityBool
+      activeSiteData cornerSite hcheck R hsites hh hv
+  exact data.toIndexedRoutedFixedCornerSquareWithLayerStack window stackData
+    (checkedLayerStackRectangleOfSiteRectangle_matchesSite R) hmatch hcompatible
 
 theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
     (activeSiteData : Figure18Site.CheckedNatSpecs)
