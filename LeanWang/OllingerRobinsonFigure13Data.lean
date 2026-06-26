@@ -1543,6 +1543,34 @@ def generatedStackSitePairCompatibilityBool
       generatedStackHCompatiblePairBool left right &&
         generatedStackVCompatiblePairBool left right
 
+/-- Horizontal generated-stack compatibility failures among a finite site list. -/
+def generatedStackBadHPairs
+    (sites : List Figure18Site) : List (Figure18Site × Figure18Site) :=
+  sites.flatMap fun left =>
+    (sites.filter fun right =>
+      !generatedStackHCompatiblePairBool left right).map fun right =>
+        (left, right)
+
+/-- Vertical generated-stack compatibility failures among a finite site list. -/
+def generatedStackBadVPairs
+    (sites : List Figure18Site) : List (Figure18Site × Figure18Site) :=
+  sites.flatMap fun lower =>
+    (sites.filter fun upper =>
+      !generatedStackVCompatiblePairBool lower upper).map fun upper =>
+        (lower, upper)
+
+/--
+Diagnostic list for the finite generated-stack pair check.
+
+For a future concrete Figure 18 active-site transcription this can be evaluated
+to inspect exactly which active/corner site pairs violate the stack check.
+-/
+def generatedStackPairFailures
+    (sites : List Figure18Site) :
+    List (String × Figure18Site × Figure18Site) :=
+  ((generatedStackBadHPairs sites).map fun pair => ("H", pair.1, pair.2)) ++
+  ((generatedStackBadVPairs sites).map fun pair => ("V", pair.1, pair.2))
+
 theorem generatedStackSitePairCompatibilityBool_eq_true_iff
     {sites : List Figure18Site} :
     generatedStackSitePairCompatibilityBool sites = true ↔
@@ -1570,6 +1598,13 @@ def generatedStackAllowedSites
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : List Figure18Site :=
   cornerSite :: activeSiteData.sites
+
+def generatedStackAllowedSitePairFailures
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) :
+    List (String × Figure18Site × Figure18Site) :=
+  generatedStackPairFailures
+    (generatedStackAllowedSites activeSiteData cornerSite)
 
 def generatedStackAllowedSitePairCompatibilityBool
     (activeSiteData : Figure18Site.CheckedNatSpecs)
@@ -1645,6 +1680,13 @@ theorem Figure18RoleTable.smokeFlat_pairCompatibility :
     generatedStackAllowedSitePairCompatibilityBool
       Figure18RoleTable.smokeFlat.activeSiteData
       Figure18RoleTable.smokeFlat.cornerSite = true := by
+  decide
+
+set_option maxRecDepth 20000 in
+theorem Figure18RoleTable.smokeFlat_pairFailures :
+    generatedStackAllowedSitePairFailures
+      Figure18RoleTable.smokeFlat.activeSiteData
+      Figure18RoleTable.smokeFlat.cornerSite = [] := by
   decide
 
 theorem generatedStackHBoundaries_of_pairCompatibilityBool
