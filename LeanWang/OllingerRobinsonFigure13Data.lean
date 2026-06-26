@@ -1554,6 +1554,61 @@ def generatedStackAllowedSitePairCompatibilityBool
   generatedStackSitePairCompatibilityBool
     (generatedStackAllowedSites activeSiteData cornerSite)
 
+theorem generatedStackSitePairCompatibilityBool_of_subset
+    {sites sites' : List Figure18Site}
+    (hcheck : generatedStackSitePairCompatibilityBool sites = true)
+    (hsubset : ∀ site : Figure18Site, site ∈ sites' → site ∈ sites) :
+    generatedStackSitePairCompatibilityBool sites' = true := by
+  unfold generatedStackSitePairCompatibilityBool at hcheck ⊢
+  apply List.all_eq_true.2
+  intro left hleft
+  apply List.all_eq_true.2
+  intro right hright
+  exact List.all_eq_true.1
+    (List.all_eq_true.1 hcheck left (hsubset left hleft))
+    right (hsubset right hright)
+
+theorem generatedStackAllowedSitePairCompatibilityBool_of_sites_subset
+    {activeSiteData activeSiteData' : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hsubset :
+      ∀ site : Figure18Site,
+        site ∈ activeSiteData'.sites →
+          site = cornerSite ∨ site ∈ activeSiteData.sites) :
+    generatedStackAllowedSitePairCompatibilityBool activeSiteData' cornerSite =
+      true := by
+  apply generatedStackSitePairCompatibilityBool_of_subset hcheck
+  intro site hsite
+  have hsite' : site = cornerSite ∨ site ∈ activeSiteData'.sites := by
+    simpa [generatedStackAllowedSites] using hsite
+  rcases hsite' with rfl | hsite'
+  · simp [generatedStackAllowedSites]
+  · rcases hsubset site hsite' with rfl | hsite
+    · simp [generatedStackAllowedSites]
+    · simp [generatedStackAllowedSites, hsite]
+
+theorem generatedStackAllowedSitePairCompatibilityBool_ofActiveSites
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true) :
+    generatedStackAllowedSitePairCompatibilityBool
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).activeSiteData
+      cornerSite = true := by
+  apply generatedStackAllowedSitePairCompatibilityBool_of_sites_subset hcheck
+  intro site hsite
+  have hsite' :
+      site ∈ (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).activeSites := by
+    simpa using hsite
+  exact (Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_iff
+    activeSiteData.sites cornerSite site).1 hsite'
+
 set_option maxRecDepth 20000 in
 /--
 Finite regression for the flat Figure 18 role-table route.
