@@ -4043,6 +4043,38 @@ def HasFlatActiveSiteCheckedStacks
                     true
 
 /--
+Finite stack certificate for listed active-site windows.
+
+This deliberately does not assert that listed-active windows exist.  It is the
+finite Figure 13/Figure 16 checking side of the scaffold proof: whenever the
+geometric argument supplies a listed-active window, this data supplies a
+matching checked layer stack over the routed site rectangle derived from that
+window.
+-/
+def HasCheckedStacksForListedActiveSiteWindows
+    (data : CheckedSparseRawData)
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  let table := Figure18RoleTable.FlatRoleTable.ofActiveSites activeSites cornerSite
+  ∀ {T : TileSet} {seed : WangTile}
+    {x : Int × Int →
+      TileIn (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window :
+      Figure18ListedActiveSiteFixedCornerSquare table.toRoleTable
+        activeSites cornerSite x n hn)
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x),
+      ∃ (stackData : CheckedLayerStackRectangle n n),
+        ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            ((window.toFlatActiveSiteFixedCornerSquare).toIndexedRoutedFixedCornerSquare
+              hx)) = true),
+          ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+            stackData.compatibleBool data.layerData
+              (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                true
+
+/--
 Finite checked-stack target for the listed active-site route.
 
 This is the closest checked-stack interface to a direct Figure 18
@@ -4148,6 +4180,22 @@ theorem hasFlatActiveSiteCheckedStacks_of_listedActiveSite
     ⟨window, stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window.toFlatActiveSiteFixedCornerSquare, stackData, hsite,
     hmatch, hcompatible⟩
+
+theorem hasListedActiveSiteCheckedStacks_of_windows
+    {data : CheckedSparseRawData}
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        activeSites cornerSite)
+    (hstacks :
+      data.HasCheckedStacksForListedActiveSiteWindows
+        activeSites cornerSite) :
+    data.HasListedActiveSiteCheckedStacks activeSites cornerSite := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window⟩
+  rcases hstacks window hx with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
 
 /--
 Build the direct layered certificate from finite checked stack witnesses and
