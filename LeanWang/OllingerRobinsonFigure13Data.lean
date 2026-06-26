@@ -2793,6 +2793,30 @@ def figure18ScaffoldDataOfNatSitesCertificateOfIndexedActiveWindows
       cornerIndex cornerQuadrant cornerIndex_valid)
     indexedActiveWindows realizes
 
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSitePairCompatibility
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    (hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
+      certificate.localFreeSquares)
+    hpair
+    certificate.realizes
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
