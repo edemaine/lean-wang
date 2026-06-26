@@ -1090,6 +1090,121 @@ def ofInactiveBox {S : Scaffold} {T : TileSet} {seed : WangTile}
 
 end CombinedBoxLayerPatch
 
+/-- The translate of the centered integer box `[-r, r] × [-r, r]`. -/
+def InTranslatedBox (r : Nat) (origin p : Int × Int) : Prop :=
+  InBox r (p.1 - origin.1, p.2 - origin.2)
+
+/-- Coordinates in an arbitrary translate of a centered integer box. -/
+abbrev TranslatedBox (r : Nat) (origin : Int × Int) :=
+  { p : Int × Int // InTranslatedBox r origin p }
+
+/-- A finite assignment on an arbitrary translated box. -/
+abbrev TranslatedBoxPattern (T : TileSet) (r : Nat) (origin : Int × Int) :=
+  TranslatedBox r origin → TileIn T
+
+/-- Validity of a finite translated box tiling. -/
+def ValidTranslatedBoxTiling
+    (T : TileSet) (r : Nat) (origin : Int × Int)
+    (x : TranslatedBoxPattern T r origin) : Prop :=
+  (∀ p : TranslatedBox r origin,
+    ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+      WangTile.HMatches (x p).1 (x ⟨(p.1.1 + 1, p.1.2), hp⟩).1) ∧
+    (∀ p : TranslatedBox r origin,
+      ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+        WangTile.VMatches (x p).1 (x ⟨(p.1.1, p.1.2 + 1), hp⟩).1)
+
+/-- Embed the centered box into its translate by `origin`. -/
+def translatedBoxPoint {r : Nat} (origin : Int × Int) (p : Box r) :
+    TranslatedBox r origin :=
+  ⟨(origin.1 + p.1.1, origin.2 + p.1.2), by
+    simpa [InTranslatedBox, sub_eq_add_neg, add_assoc, add_left_comm, add_comm]
+      using p.2⟩
+
+/--
+Finite geometric witness for one arbitrary translate of a scaffold box.
+
+Robinson boards naturally live at board-dependent coordinates.  This form lets
+the construction stay in those coordinates and later recenter the witness for
+the generic scaffold reduction.
+-/
+structure TranslatedActiveCornerIndexedBox
+    (S : Scaffold) (r : Nat) (origin : Int × Int) where
+  n : Nat
+  hn : 0 < n
+  base : TranslatedBoxPattern S.tiles r origin
+  base_valid : ValidTranslatedBoxTiling S.tiles r origin base
+  index : TranslatedBox r origin → Fin n × Fin n
+  corner_index :
+    ∀ p : TranslatedBox r origin, S.active (base p).1 = true →
+      (base p).1 = S.corner →
+        index p = (⟨0, hn⟩, ⟨0, hn⟩)
+  active_hsucc :
+    ∀ p : TranslatedBox r origin,
+      ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+            ∃ hi : (index p).1.val + 1 < n,
+              index ⟨(p.1.1 + 1, p.1.2), hp⟩ =
+                (⟨(index p).1.val + 1, hi⟩, (index p).2)
+  active_vsucc :
+    ∀ p : TranslatedBox r origin,
+      ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+            ∃ hj : (index p).2.val + 1 < n,
+              index ⟨(p.1.1, p.1.2 + 1), hp⟩ =
+                ((index p).1, ⟨(index p).2.val + 1, hj⟩)
+
+namespace TranslatedActiveCornerIndexedBox
+
+theorem east_mem_centered {r : Nat} {origin : Int × Int}
+    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2)) :
+    InTranslatedBox r origin
+      ((translatedBoxPoint origin p).1.1 + 1,
+        (translatedBoxPoint origin p).1.2) := by
+  change InBox r
+    (((origin.1 + p.1.1) + 1) - origin.1, (origin.2 + p.1.2) - origin.2)
+  have hcoord :
+      (((origin.1 + p.1.1) + 1) - origin.1, (origin.2 + p.1.2) - origin.2) =
+        (p.1.1 + 1, p.1.2) := by
+    apply Prod.ext <;> omega
+  exact hcoord.symm ▸ hp
+
+theorem north_mem_centered {r : Nat} {origin : Int × Int}
+    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1)) :
+    InTranslatedBox r origin
+      ((translatedBoxPoint origin p).1.1,
+        (translatedBoxPoint origin p).1.2 + 1) := by
+  change InBox r
+    ((origin.1 + p.1.1) - origin.1, ((origin.2 + p.1.2) + 1) - origin.2)
+  have hcoord :
+      ((origin.1 + p.1.1) - origin.1, ((origin.2 + p.1.2) + 1) - origin.2) =
+        (p.1.1, p.1.2 + 1) := by
+    apply Prod.ext <;> omega
+  exact hcoord.symm ▸ hp
+
+theorem east_point_eq {r : Nat} {origin : Int × Int}
+    (p : Box r) (hp : InBox r (p.1.1 + 1, p.1.2)) :
+    (⟨((translatedBoxPoint origin p).1.1 + 1,
+        (translatedBoxPoint origin p).1.2),
+        east_mem_centered p hp⟩ : TranslatedBox r origin) =
+      translatedBoxPoint origin ⟨(p.1.1 + 1, p.1.2), hp⟩ := by
+  apply Subtype.ext
+  simp [translatedBoxPoint]
+  omega
+
+theorem north_point_eq {r : Nat} {origin : Int × Int}
+    (p : Box r) (hp : InBox r (p.1.1, p.1.2 + 1)) :
+    (⟨((translatedBoxPoint origin p).1.1,
+        (translatedBoxPoint origin p).1.2 + 1),
+        north_mem_centered p hp⟩ : TranslatedBox r origin) =
+      translatedBoxPoint origin ⟨(p.1.1, p.1.2 + 1), hp⟩ := by
+  apply Subtype.ext
+  simp [translatedBoxPoint]
+  omega
+
+end TranslatedActiveCornerIndexedBox
+
 /--
 Finite geometric witness for one centered box of a scaffold.
 
@@ -1211,6 +1326,57 @@ theorem nonempty_all_of_pos_and_corner_mem {S : Scaffold}
   | r + 1 => hpos (r + 1) (Nat.succ_pos r)
 
 end ActiveCornerIndexedBox
+
+namespace TranslatedActiveCornerIndexedBox
+
+/-- Recenter an arbitrary-origin indexed scaffold box at the origin. -/
+def toActiveCornerIndexedBox {S : Scaffold} {r : Nat} {origin : Int × Int}
+    (box : TranslatedActiveCornerIndexedBox S r origin) :
+    ActiveCornerIndexedBox S r where
+  n := box.n
+  hn := box.hn
+  base := fun p => box.base (translatedBoxPoint origin p)
+  base_valid := by
+    constructor
+    · intro p hp
+      have hq := east_point_eq (origin := origin) p hp
+      simpa [hq] using
+        box.base_valid.1 (translatedBoxPoint origin p)
+          (east_mem_centered (origin := origin) p hp)
+    · intro p hp
+      have hq := north_point_eq (origin := origin) p hp
+      simpa [hq] using
+        box.base_valid.2 (translatedBoxPoint origin p)
+          (north_mem_centered (origin := origin) p hp)
+  index := fun p => box.index (translatedBoxPoint origin p)
+  corner_index := by
+    intro p hactive hcorner
+    exact box.corner_index (translatedBoxPoint origin p) hactive hcorner
+  active_hsucc := by
+    intro p hp hpActive hqActive
+    have hq := east_point_eq (origin := origin) p hp
+    rcases box.active_hsucc (translatedBoxPoint origin p)
+        (east_mem_centered (origin := origin) p hp) hpActive
+        (by simpa [hq] using hqActive) with
+      ⟨hi, hindex⟩
+    exact ⟨hi, by simpa [hq] using hindex⟩
+  active_vsucc := by
+    intro p hp hpActive hqActive
+    have hq := north_point_eq (origin := origin) p hp
+    rcases box.active_vsucc (translatedBoxPoint origin p)
+        (north_mem_centered (origin := origin) p hp) hpActive
+        (by simpa [hq] using hqActive) with
+      ⟨hj, hindex⟩
+    exact ⟨hj, by simpa [hq] using hindex⟩
+
+theorem nonempty_centered_of_translated {S : Scaffold} {r : Nat}
+    {origin : Int × Int}
+    (hbox : Nonempty (TranslatedActiveCornerIndexedBox S r origin)) :
+    Nonempty (ActiveCornerIndexedBox S r) := by
+  rcases hbox with ⟨box⟩
+  exact ⟨box.toActiveCornerIndexedBox⟩
+
+end TranslatedActiveCornerIndexedBox
 
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
