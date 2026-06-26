@@ -2966,6 +2966,121 @@ theorem toIndexedRoutedFixedCornerSquareWithLayerStack_window
 
 end CheckedSeparateLayerRows
 
+namespace CheckedSparseSeparateLayerRows
+
+def separateLayerRows (rows : CheckedSparseSeparateLayerRows) :
+    CheckedSeparateLayerRows :=
+  CheckedSeparateLayerRows.ofSparse rows
+
+def layerData (rows : CheckedSparseSeparateLayerRows) : Transcription :=
+  rows.separateLayerRows.layerData
+
+def componentRectangleMatchesBool
+    {w h : Nat} (rows : CheckedSparseSeparateLayerRows) {layer : Layer}
+    (siteData : CheckedNatSiteRectangle w h)
+    (data : CheckedLayerComponentRectangle w h layer) : Bool :=
+  rows.separateLayerRows.componentRectangleMatchesBool siteData data
+
+def layerStackRectangleMatchesBool
+    {w h : Nat} (rows : CheckedSparseSeparateLayerRows)
+    (data : CheckedLayerStackRectangle w h) : Bool :=
+  rows.separateLayerRows.layerStackRectangleMatchesBool data
+
+theorem lookupBool_layerData_of_layerStackRectangleMatchesBool
+    {w h : Nat} {rows : CheckedSparseSeparateLayerRows}
+    {data : CheckedLayerStackRectangle w h}
+    (hcheck : rows.layerStackRectangleMatchesBool data = true) :
+    data.lookupBool rows.layerData = true :=
+  CheckedSeparateLayerRows.lookupBool_layerData_of_layerStackRectangleMatchesBool
+    (rows := rows.separateLayerRows) hcheck
+
+def toTypedLayerStackRectangleOfSparseRows {w h : Nat}
+    (rows : CheckedSparseSeparateLayerRows) (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    TypedLayerStackRectangle rows.layerData data.siteRectangle :=
+  rows.separateLayerRows.toTypedLayerStackRectangleOfSeparateRows data hmatch
+    hcompatible
+
+def toIndexedActiveCornerWindowWithLayerStack
+    (rows : CheckedSparseSeparateLayerRows)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedActiveCornerWindow window) = true)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    Figure18IndexedActiveCornerWindowWithLayerStack rows.layerData table x n hn :=
+  rows.separateLayerRows.toIndexedActiveCornerWindowWithLayerStack
+    window data hsite hmatch hcompatible
+
+@[simp]
+theorem toIndexedActiveCornerWindowWithLayerStack_window
+    (rows : CheckedSparseSeparateLayerRows)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindow table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedActiveCornerWindow window) = true)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    (rows.toIndexedActiveCornerWindowWithLayerStack window data hsite hmatch
+      hcompatible).window = window :=
+  rfl
+
+def toIndexedRoutedFixedCornerSquareWithLayerStack
+    (rows : CheckedSparseSeparateLayerRows)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window) = true)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    Figure18IndexedRoutedFixedCornerSquareWithLayerStack rows.layerData table x n hn :=
+  rows.separateLayerRows.toIndexedRoutedFixedCornerSquareWithLayerStack
+    window data hsite hmatch hcompatible
+
+@[simp]
+theorem toIndexedRoutedFixedCornerSquareWithLayerStack_window
+    (rows : CheckedSparseSeparateLayerRows)
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquare table x n hn)
+    (data : CheckedLayerStackRectangle n n)
+    (hsite : data.sites.matchesSiteRectangleBool
+      (siteRectangleOfIndexedRoutedFixedCornerSquare window) = true)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    (rows.toIndexedRoutedFixedCornerSquareWithLayerStack window data hsite hmatch
+      hcompatible).window = window :=
+  rfl
+
+end CheckedSparseSeparateLayerRows
+
 /-- Direct indexed-active layered geometric certificate for layered scaffold data. -/
 structure Certificate (D : LayeredFigure18ScaffoldData) : Prop where
   certificate : LayeredFigure18Certificate D.layerData D.table
