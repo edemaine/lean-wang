@@ -672,6 +672,21 @@ theorem lookup_of_lookupBool
   have hjCheck := List.all_eq_true.1 hiCheck j (List.mem_finRange j)
   exact of_decide_eq_true hjCheck
 
+theorem lookupBool_of_lookup
+    {w h : Nat} {layer : Layer}
+    {D : Transcription} {siteData : CheckedNatSiteRectangle w h}
+    {data : CheckedLayerComponentRectangle w h layer}
+    (hlookup : ∀ i : Fin w, ∀ j : Fin h,
+      D.componentAtSiteLayer (siteData.toSiteRectangle i j) layer =
+        some (LayerComponent.ofLayer layer (data.componentAt i j))) :
+    lookupBool D siteData data = true := by
+  unfold lookupBool
+  apply List.all_eq_true.2
+  intro i hi
+  apply List.all_eq_true.2
+  intro j hj
+  exact decide_eq_true (hlookup i j)
+
 end CheckedLayerComponentRectangle
 
 namespace SiteRectangle
@@ -1306,6 +1321,15 @@ theorem blackLookupBool_of_lookupBool {w h : Nat}
     data.blackLookupBool D = true := by
   rw [lookupBool, Bool.and_eq_true] at hcheck
   exact hcheck.2
+
+theorem lookupBool_of_layer_lookups {w h : Nat}
+    {D : Transcription} {data : CheckedLayerStackRectangle w h}
+    (hthin : data.thinLookupBool D = true)
+    (hthick : data.thickLookupBool D = true)
+    (hblack : data.blackLookupBool D = true) :
+    data.lookupBool D = true := by
+  rw [lookupBool, hthin, hthick, hblack]
+  rfl
 
 def thinRectangle {w h : Nat}
     (D : Transcription) (data : CheckedLayerStackRectangle w h)
@@ -2272,6 +2296,54 @@ theorem layerData_componentsAt_black
     (rows.layerData.componentsAt index).black = rows.blackAt index := by
   rw [rows.layerData_componentsAt]
   rfl
+
+theorem layerData_componentAtLayerAt_thin
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    {thin : Figure16.Thin}
+    (hthin : rows.thinAt index = some thin) :
+    rows.layerData.componentAtLayerAt index .thin =
+      some (LayerComponent.thin thin) := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hthin]
+
+theorem layerData_componentAtLayerAt_thick
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    {thick : Figure16.Thick}
+    (hthick : rows.thickAt index = some thick) :
+    rows.layerData.componentAtLayerAt index .thick =
+      some (LayerComponent.thick thick) := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hthick]
+
+theorem layerData_componentAtLayerAt_black
+    {rows : CheckedSeparateLayerRows} {index : Fin 92}
+    {black : Figure16.Black}
+    (hblack : rows.blackAt index = some black) :
+    rows.layerData.componentAtLayerAt index .black =
+      some (LayerComponent.black black) := by
+  simp [Transcription.componentAtLayerAt, Components.componentAtLayer, hblack]
+
+theorem layerData_componentAtSiteLayer_thin
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    {thin : Figure16.Thin}
+    (hthin : rows.thinAt site.index = some thin) :
+    rows.layerData.componentAtSiteLayer site .thin =
+      some (LayerComponent.thin thin) :=
+  rows.layerData_componentAtLayerAt_thin hthin
+
+theorem layerData_componentAtSiteLayer_thick
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    {thick : Figure16.Thick}
+    (hthick : rows.thickAt site.index = some thick) :
+    rows.layerData.componentAtSiteLayer site .thick =
+      some (LayerComponent.thick thick) :=
+  rows.layerData_componentAtLayerAt_thick hthick
+
+theorem layerData_componentAtSiteLayer_black
+    {rows : CheckedSeparateLayerRows} {site : Figure18Site}
+    {black : Figure16.Black}
+    (hblack : rows.blackAt site.index = some black) :
+    rows.layerData.componentAtSiteLayer site .black =
+      some (LayerComponent.black black) :=
+  rows.layerData_componentAtLayerAt_black hblack
 
 def toCheckedRawData
     (rows : CheckedSeparateLayerRows)
