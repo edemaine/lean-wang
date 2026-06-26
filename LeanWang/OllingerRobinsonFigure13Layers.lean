@@ -2465,6 +2465,64 @@ theorem lookupBool_layerData_of_matchesSeparateRowsBool
     rows.layerData_componentAtSiteLayer
       (componentAt_matchesSeparateRows_of_bool hcheck i j)
 
+def layerStackRectangleMatchesBool
+    {w h : Nat} (rows : CheckedSeparateLayerRows)
+    (data : CheckedLayerStackRectangle w h) : Bool :=
+  (rows.componentRectangleMatchesBool data.sites data.thin &&
+    rows.componentRectangleMatchesBool data.sites data.thick) &&
+      rows.componentRectangleMatchesBool data.sites data.black
+
+theorem thinComponentRectangleMatchesBool_of_layerStack
+    {w h : Nat} {rows : CheckedSeparateLayerRows}
+    {data : CheckedLayerStackRectangle w h}
+    (hcheck : rows.layerStackRectangleMatchesBool data = true) :
+    rows.componentRectangleMatchesBool data.sites data.thin = true := by
+  rw [layerStackRectangleMatchesBool, Bool.and_eq_true,
+    Bool.and_eq_true] at hcheck
+  exact hcheck.1.1
+
+theorem thickComponentRectangleMatchesBool_of_layerStack
+    {w h : Nat} {rows : CheckedSeparateLayerRows}
+    {data : CheckedLayerStackRectangle w h}
+    (hcheck : rows.layerStackRectangleMatchesBool data = true) :
+    rows.componentRectangleMatchesBool data.sites data.thick = true := by
+  rw [layerStackRectangleMatchesBool, Bool.and_eq_true,
+    Bool.and_eq_true] at hcheck
+  exact hcheck.1.2
+
+theorem blackComponentRectangleMatchesBool_of_layerStack
+    {w h : Nat} {rows : CheckedSeparateLayerRows}
+    {data : CheckedLayerStackRectangle w h}
+    (hcheck : rows.layerStackRectangleMatchesBool data = true) :
+    rows.componentRectangleMatchesBool data.sites data.black = true := by
+  rw [layerStackRectangleMatchesBool, Bool.and_eq_true] at hcheck
+  exact hcheck.2
+
+theorem lookupBool_layerData_of_layerStackRectangleMatchesBool
+    {w h : Nat} {rows : CheckedSeparateLayerRows}
+    {data : CheckedLayerStackRectangle w h}
+    (hcheck : rows.layerStackRectangleMatchesBool data = true) :
+    data.lookupBool rows.layerData = true :=
+  CheckedLayerStackRectangle.lookupBool_of_layer_lookups
+    (lookupBool_layerData_of_matchesSeparateRowsBool
+      (thinComponentRectangleMatchesBool_of_layerStack hcheck))
+    (lookupBool_layerData_of_matchesSeparateRowsBool
+      (thickComponentRectangleMatchesBool_of_layerStack hcheck))
+    (lookupBool_layerData_of_matchesSeparateRowsBool
+      (blackComponentRectangleMatchesBool_of_layerStack hcheck))
+
+def toTypedLayerStackRectangleOfSeparateRows {w h : Nat}
+    (rows : CheckedSeparateLayerRows) (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true) :
+    TypedLayerStackRectangle rows.layerData data.siteRectangle :=
+  data.toTypedLayerStackRectangleOfChecks rows.layerData
+    (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch)
+    hcompatible
+
 end CheckedSeparateLayerRows
 
 /-- Direct indexed-active layered geometric certificate for layered scaffold data. -/
