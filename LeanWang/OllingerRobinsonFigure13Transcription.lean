@@ -1420,6 +1420,14 @@ theorem presentation_mem_site
     site.tile ∈ table.presentation.tiles :=
   table.presentation_mem_fig13QuarterTile site.index site.quadrant
 
+theorem presentation_sanity (table : Figure18RoleTable) :
+    table.presentation.Sanity := by
+  simpa [presentation] using table.finiteCheckedTranscription.sanityProp
+
+theorem scaffold_corner_mem (table : Figure18RoleTable) :
+    table.presentation.toScaffold.corner ∈ table.presentation.toScaffold.tiles :=
+  ScaffoldPresentation.toScaffold_corner_mem_of_sanity table.presentation_sanity
+
 theorem exists_fig13QuarterTile_of_mem_presentation
     (table : Figure18RoleTable) {tile : WangTile}
     (htile : tile ∈ table.presentation.tiles) :

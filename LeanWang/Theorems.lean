@@ -1199,6 +1199,17 @@ theorem nonempty_zero_of_corner_mem {S : Scaffold}
     Nonempty (ActiveCornerIndexedBox S 0) :=
   ⟨singletonCorner hmem⟩
 
+/--
+To build indexed boxes at every radius, it is enough to build them at positive
+radii and know that the scaffold corner tile is part of the scaffold tileset.
+-/
+theorem nonempty_all_of_pos_and_corner_mem {S : Scaffold}
+    (hmem : S.corner ∈ S.tiles)
+    (hpos : ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox S r)) :
+    ∀ r : Nat, Nonempty (ActiveCornerIndexedBox S r)
+  | 0 => nonempty_zero_of_corner_mem hmem
+  | r + 1 => hpos (r + 1) (Nat.succ_pos r)
+
 end ActiveCornerIndexedBox
 
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
