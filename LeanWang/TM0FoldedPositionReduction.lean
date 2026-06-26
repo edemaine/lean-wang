@@ -45,6 +45,42 @@ def positionSourceObligationsOfLabelIndexFromWithPositionCodeCorrect
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 /--
+Primitive recursiveness of the generated position-code accumulator step gives
+the full generated-position source obligations once the semantic folded proof
+is imported.
+-/
+def positionSourceObligationsOfPositionCodeDecoderStepCorrect
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2)) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeDecoderStep hstep
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the generated one-row position-code decoder gives
+the full generated-position source obligations once the semantic folded proof
+is imported.
+-/
+def positionSourceObligationsOfPositionCodeOneRowsCorrect
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeOneRows hvarRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the generated bounded-interior position-code rows
+gives the full generated-position source obligations once the semantic folded
+proof is imported.
+-/
+def positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+    (hbounded : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeBoundedInteriorRows hbounded
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
 Primitive recursiveness of the generated interior position-code rows gives the
 full generated-position source obligations once the semantic folded proof is
 imported.
@@ -67,6 +103,82 @@ theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionC
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
+/--
+Encoded domino undecidability from a scaffold and the generated position-code
+accumulator step, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_decoderStepCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+/--
+Unencoded domino undecidability from a scaffold and the generated position-code
+accumulator step, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_decoderStepCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+/--
+Encoded domino undecidability from a scaffold and the generated one-row
+position-code decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_oneRowsCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hvarRows)
+
+/--
+Unencoded domino undecidability from a scaffold and the generated one-row
+position-code decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_oneRowsCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hvarRows)
+
+/--
+Encoded domino undecidability from a scaffold and the generated
+bounded-interior position-code rows, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_boundedRowsCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hbounded : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+/--
+Unencoded domino undecidability from a scaffold and the generated
+bounded-interior position-code rows, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_boundedRowsCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hbounded : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
 
 /--
 Unencoded domino undecidability from a scaffold and the generated interior
