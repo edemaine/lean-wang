@@ -952,6 +952,95 @@ def ofActivePayloads {S : Scaffold} {T : TileSet} {seed : WangTile}
     exact payloadWithInactiveAround_vmatch active_vmatch p hp
 
 /--
+Version of `ofActivePayloads` where active box cells read their payloads from a
+single fixed-corner square.  The geometric proof only has to provide the index
+map from active scaffold cells into that square and prove the induced active
+adjacencies.
+-/
+def ofActivePayloadRectangle {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r n : Nat} (hn : 0 < n)
+    (base : BoxPattern S.tiles r)
+    (base_valid : ValidBoxTiling S.tiles r base)
+    (payloadRect : Rectangle n n)
+    (payload_valid : ValidRectangle T payloadRect)
+    (payload_seed : payloadRect ⟨0, hn⟩ ⟨0, hn⟩ = seed)
+    (index : Box r → Fin n × Fin n)
+    (corner_index :
+      ∀ p : Box r, S.active (base p).1 = true →
+        (base p).1 = S.corner →
+          index p = (⟨0, hn⟩, ⟨0, hn⟩))
+    (active_hmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+            WangTile.HMatches
+              (payloadRect (index p).1 (index p).2)
+              (payloadRect
+                (index ⟨(p.1.1 + 1, p.1.2), hp⟩).1
+                (index ⟨(p.1.1 + 1, p.1.2), hp⟩).2))
+    (active_vmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+            WangTile.VMatches
+              (payloadRect (index p).1 (index p).2)
+              (payloadRect
+                (index ⟨(p.1.1, p.1.2 + 1), hp⟩).1
+                (index ⟨(p.1.1, p.1.2 + 1), hp⟩).2)) :
+    CombinedBoxLayerPatch S T seed r :=
+  ofActivePayloads base base_valid
+    (fun p => payloadRect (index p).1 (index p).2)
+    (by
+      intro p hactive
+      constructor
+      · exact payload_valid.1 (index p).1 (index p).2
+      · intro hcorner
+        rw [corner_index p hactive hcorner]
+        exact payload_seed)
+    active_hmatch
+    active_vmatch
+
+/--
+`TileableFixedCornerSquare` wrapper around `ofActivePayloadRectangle`.
+-/
+def ofActivePayloadFixedCornerSquare
+    {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r n : Nat}
+    (base : BoxPattern S.tiles r)
+    (base_valid : ValidBoxTiling S.tiles r base)
+    (square : TileableFixedCornerSquare T seed n)
+    (index : Box r → Fin n × Fin n)
+    (corner_index :
+      ∀ p : Box r, S.active (base p).1 = true →
+        (base p).1 = S.corner →
+          index p =
+            (⟨0, square.choose⟩, ⟨0, square.choose⟩))
+    (active_hmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+            WangTile.HMatches
+              (square.choose_spec.choose (index p).1 (index p).2)
+              (square.choose_spec.choose
+                (index ⟨(p.1.1 + 1, p.1.2), hp⟩).1
+                (index ⟨(p.1.1 + 1, p.1.2), hp⟩).2))
+    (active_vmatch :
+      ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+        S.active (base p).1 = true →
+          S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+            WangTile.VMatches
+              (square.choose_spec.choose (index p).1 (index p).2)
+              (square.choose_spec.choose
+                (index ⟨(p.1.1, p.1.2 + 1), hp⟩).1
+                (index ⟨(p.1.1, p.1.2 + 1), hp⟩).2)) :
+    CombinedBoxLayerPatch S T seed r :=
+  ofActivePayloadRectangle square.choose base base_valid
+    square.choose_spec.choose
+    square.choose_spec.choose_spec.1
+    square.choose_spec.choose_spec.2
+    index corner_index active_hmatch active_vmatch
+
+/--
 Build a layer patch over a scaffold box that is entirely inactive.  Active-cell
 payload obligations are contradictory, and inactive payload membership is
 supplied by the complete payload box.
