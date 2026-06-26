@@ -6466,6 +6466,64 @@ def ofL2C2FixedGeometryProductRoutingLayerPatches
         NatSiteSpecSanity.cornerSite] using
         l2Component2BlankCandidatePairCompatibilityBool)
 
+/--
+Compatible-level L2 component-1 entry point using product witnesses over the
+canonical Robinson Section 7 obstruction geometry and finite layer patches.
+-/
+def ofL2C1CanonicalProductRoutingLayerPatches
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1FixedGeometryProductRoutingLayerPatches
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      canonicalRouting)
+    patches
+
+/--
+Compatible-level L2 component-2 entry point using product witnesses over the
+canonical Robinson Section 7 obstruction geometry and finite layer patches.
+-/
+def ofL2C2CanonicalProductRoutingLayerPatches
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2FixedGeometryProductRoutingLayerPatches
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      canonicalRouting)
+    patches
+
 def ofL2C1SignalLocalStepFreeGrids
     (signalLocalCoordinateSteps :
       HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
@@ -8070,6 +8128,56 @@ def ofL2C2FixedGeometryProductRoutingFreeGridsLayerPatches
     l2Component2BlankCandidateSanity.cornerIndex_valid
     (NatSiteRobinsonCompatibleLevelObligations.ofL2C2FixedGeometryProductRoutingLayerPatches
       fixedGeometryRouting patches)
+
+/--
+Concrete L2 component-1 entry point using product witnesses over the canonical
+Robinson Section 7 obstruction geometry and finite layer patches.
+-/
+def ofL2C1CanonicalProductRoutingFreeGridsLayerPatches
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C1FixedGeometryProductRoutingFreeGridsLayerPatches
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      canonicalRouting)
+    patches
+
+/--
+Concrete L2 component-2 entry point using product witnesses over the canonical
+Robinson Section 7 obstruction geometry and finite layer patches.
+-/
+def ofL2C2CanonicalProductRoutingFreeGridsLayerPatches
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C2FixedGeometryProductRoutingFreeGridsLayerPatches
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      canonicalRouting)
+    patches
 
 /--
 Concrete L2 component-1 entry point using product-witness fixed Robinson
