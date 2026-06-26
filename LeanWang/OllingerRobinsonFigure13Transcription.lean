@@ -4819,6 +4819,54 @@ theorem hasFigure18RobinsonBoardLevelSignalCertificatesForTable_of_coordinateSte
   exact ⟨parent⟩
 
 /--
+Level-indexed Robinson Section 7 signal invariant with both finite local site
+compatibility and the free-line recurrence between consecutive board levels.
+
+This is the preferred proof target for the concrete scaffold: the local site
+checks feed the finite layer-stack verifier, while the coordinate step records
+Robinson's recurrence for the free rows and columns.
+-/
+def HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty
+          (Σ parent :
+              { certificate :
+                  Figure18RobinsonBoardSignalCertificate table x level //
+                certificate.SiteCompatible },
+            Σ child :
+              { certificate :
+                  Figure18RobinsonBoardSignalCertificate table x (level + 1) //
+                certificate.SiteCompatible },
+              Figure18RobinsonBoardSignalCertificate.CoordinateStep
+                parent.1 child.1)
+
+/-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
+theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
+    {table : Figure18RoleTable}
+    (hsteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable table := by
+  intro T seed x hx level
+  rcases hsteps x hx level with ⟨parent, child, step⟩
+  exact ⟨parent⟩
+
+/-- Forget the local site checks from the combined Section 7 signal target. -/
+theorem hasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable_of_localCoordinateSteps
+    {table : Figure18RoleTable}
+    (hsteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable table) :
+    HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable table := by
+  intro T seed x hx level
+  rcases hsteps x hx level with ⟨parent, child, step⟩
+  exact ⟨parent.1, child.1, step⟩
+
+/--
 Level-indexed Robinson-board/free-grid invariant.
 
 This matches the recursive board proof more directly than the public
