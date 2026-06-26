@@ -3968,6 +3968,30 @@ def HasAdjacentProductWitnessCheckedStacks
                   (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
                     true
 
+/--
+Finite checked-stack target for the decoded-site route.
+
+This is closer to the paper's Figure 18 geometry than the product-witness
+target: product payload witnesses are derived from the selected decoded sites
+and membership in the combined tileset.
+-/
+def HasDecodedSiteCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x),
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18DecodedSiteFixedCornerSquare table x n hn),
+          ∃ (stackData : CheckedLayerStackRectangle n n),
+            ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+              (siteRectangleOfIndexedRoutedFixedCornerSquare
+                (window.toIndexedRoutedFixedCornerSquare hx)) = true),
+              ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                stackData.compatibleBool data.layerData
+                  (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                    true
+
 theorem hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedActiveWindowCheckedStacks table) :
@@ -4000,6 +4024,16 @@ theorem hasIndexedRoutedFixedCornerSquareCheckedStacks_of_adjacentProductWitness
     ⟨window, stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window.toIndexedRoutedFixedCornerSquare hx, stackData, hsite,
     hmatch, hcompatible⟩
+
+theorem hasAdjacentProductWitnessCheckedStacks_of_decodedSite
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasDecodedSiteCheckedStacks table) :
+    data.HasAdjacentProductWitnessCheckedStacks table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window.toAdjacentProductWitnessFixedCornerSquare, stackData,
+    hsite, hmatch, hcompatible⟩
 
 /--
 Build the direct layered certificate from finite checked stack witnesses and
@@ -4055,6 +4089,23 @@ def indexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
   data.indexedRoutedCertificateOfCheckedStacks
     (hasIndexedRoutedFixedCornerSquareCheckedStacks_of_adjacentProductWitness
       hchecked)
+    realizes
+
+/--
+Build the preferred indexed-routed layered certificate from decoded-site
+squares carrying finite checked layer stacks.
+-/
+def indexedRoutedCertificateOfDecodedSiteCheckedStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasDecodedSiteCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
+    (hasAdjacentProductWitnessCheckedStacks_of_decodedSite hchecked)
     realizes
 
 end CheckedSparseRawData

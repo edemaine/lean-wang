@@ -3729,6 +3729,70 @@ theorem tileable
 
 end Figure18AdjacentProductWitnessFixedCornerSquare
 
+/--
+Structured decoded-site selected-coordinate square.
+
+This packages one witness for `HasFigure18DecodedSiteFixedCornerSquares`: the
+selected coordinates are adjacent in the ambient tiling, the decoded scaffold
+sites are locally compatible and active, and the lower-left selected site is
+the distinguished corner.
+-/
+structure Figure18DecodedSiteFixedCornerSquare
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+    horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1
+  verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1
+  hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    Figure18Site.hCompatible
+      (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+      (table.combinedSite
+        (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) =
+      true
+  vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    Figure18Site.vCompatible
+      (table.combinedSite (x (horizontalCoord i, verticalCoord j)))
+      (table.combinedSite
+        (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) =
+      true
+  active : ∀ i : Fin n, ∀ j : Fin n,
+    CellRole.isActive
+      (table.roleAtSite
+        (table.combinedSite (x (horizontalCoord i, verticalCoord j)))) =
+      true
+  cornerSite :
+    table.combinedSite
+        (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+      table.cornerSite
+
+namespace Figure18DecodedSiteFixedCornerSquare
+
+noncomputable def toAdjacentProductWitnessFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18DecodedSiteFixedCornerSquare table x n hn) :
+    Figure18AdjacentProductWitnessFixedCornerSquare table x n hn :=
+  Figure18AdjacentProductWitnessFixedCornerSquare.ofCombinedSites hn
+    window.horizontalCoord window.verticalCoord
+    window.horizontalCoord_succ window.verticalCoord_succ
+    window.hcompatible window.vcompatible window.active window.cornerSite
+
+noncomputable def toIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18DecodedSiteFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x) :
+    Figure18IndexedRoutedFixedCornerSquare table x n hn :=
+  window.toAdjacentProductWitnessFixedCornerSquare.toIndexedRoutedFixedCornerSquare hx
+
+end Figure18DecodedSiteFixedCornerSquare
+
 theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
     {table : Figure18RoleTable}
     (hproduct : HasFigure18AdjacentProductWitnessFixedCornerSquares table) :
