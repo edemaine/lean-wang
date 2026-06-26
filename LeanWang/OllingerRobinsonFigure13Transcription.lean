@@ -4678,6 +4678,102 @@ theorem row_child_eq_preimage
 
 end CoordinateStep
 
+/--
+Canonical obstruction-only Robinson board geometry at one level.
+
+This realizes the abstract Section 7 free-line recurrence without choosing any
+payload routing: every integer coordinate is part of the board, the selected
+free rows/columns are the enumerated coordinates `0, ..., freeGridSide - 1`,
+and an obstruction signal is present exactly on non-free lines.
+-/
+def canonical (level : Nat) : RobinsonBoardSignalGeometry level where
+  freeColumnCoord := fun i => i.val
+  freeRowCoord := fun j => j.val
+  isBoardColumn := fun _ => True
+  isBoardRow := fun _ => True
+  isFreeColumn := fun x =>
+    ∃ i : Fin (RobinsonSquare.freeGridSide level), (i.val : Int) = x
+  isFreeRow := fun y =>
+    ∃ j : Fin (RobinsonSquare.freeGridSide level), (j.val : Int) = y
+  hasHorizontalObstruction := fun _ y =>
+    ¬ ∃ j : Fin (RobinsonSquare.freeGridSide level), (j.val : Int) = y
+  hasVerticalObstruction := fun x _ =>
+    ¬ ∃ i : Fin (RobinsonSquare.freeGridSide level), (i.val : Int) = x
+  freeRow_iff_noHorizontalObstruction := by
+    intro y _hrow
+    constructor
+    · intro hfree x _hcolumn hobs
+      exact hobs hfree
+    · intro hclear
+      by_contra hnotFree
+      exact hclear 0 True.intro hnotFree
+  freeColumn_iff_noVerticalObstruction := by
+    intro x _hcolumn
+    constructor
+    · intro hfree y _hrow hobs
+      exact hobs hfree
+    · intro hclear
+      by_contra hnotFree
+      exact hclear 0 True.intro hnotFree
+  freeColumnCoord_board := fun _ => True.intro
+  freeRowCoord_board := fun _ => True.intro
+  freeColumnCoord_free := fun i => ⟨i, rfl⟩
+  freeRowCoord_free := fun j => ⟨j, rfl⟩
+  freeColumnCoord_complete := by
+    intro x hfree
+    exact hfree
+  freeRowCoord_complete := by
+    intro y hfree
+    exact hfree
+  freeColumnCoord_injective := by
+    intro i j h
+    apply Fin.ext
+    exact Int.ofNat.inj h
+  freeRowCoord_injective := by
+    intro i j h
+    apply Fin.ext
+    exact Int.ofNat.inj h
+
+@[simp]
+theorem canonical_freeColumnCoord
+    (level : Nat) (i : Fin (RobinsonSquare.freeGridSide level)) :
+    (canonical level).freeColumnCoord i = i.val :=
+  rfl
+
+@[simp]
+theorem canonical_freeRowCoord
+    (level : Nat) (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (canonical level).freeRowCoord j = j.val :=
+  rfl
+
+/-- Coordinate recurrence for the canonical Robinson board geometries. -/
+def canonicalCoordinateStep (level : Nat) :
+    CoordinateStep (canonical level) (canonical (level + 1)) where
+  columns := {
+    leftOffset := 0
+    rightOffset := RobinsonSquare.freeGridSide level - 1
+    left := by
+      intro i
+      norm_num [canonical, RobinsonSquare.freeLineLeftEmbedding_val]
+    right := by
+      intro i
+      simp [canonical, RobinsonSquare.freeLineRightEmbedding_val]
+      have hpos := RobinsonSquare.freeGridSide_pos level
+      omega
+  }
+  rows := {
+    leftOffset := 0
+    rightOffset := RobinsonSquare.freeGridSide level - 1
+    left := by
+      intro i
+      norm_num [canonical, RobinsonSquare.freeLineLeftEmbedding_val]
+    right := by
+      intro i
+      simp [canonical, RobinsonSquare.freeLineRightEmbedding_val]
+      have hpos := RobinsonSquare.freeGridSide_pos level
+      omega
+  }
+
 end RobinsonBoardSignalGeometry
 
 /--
@@ -4695,6 +4791,17 @@ structure RobinsonBoardSignalGeometryTower : Type where
 /-- Existence of the pure Robinson Section 7 obstruction-geometry tower. -/
 def HasRobinsonBoardSignalGeometryTower : Prop :=
   Nonempty RobinsonBoardSignalGeometryTower
+
+/-- The canonical obstruction geometry at every level, with Robinson's recurrence. -/
+def canonicalRobinsonBoardSignalGeometryTower :
+    RobinsonBoardSignalGeometryTower where
+  geometries := RobinsonBoardSignalGeometry.canonical
+  steps := RobinsonBoardSignalGeometry.canonicalCoordinateStep
+
+/-- The pure obstruction-geometry part of Robinson Section 7 is inhabited. -/
+theorem hasRobinsonBoardSignalGeometryTower :
+    HasRobinsonBoardSignalGeometryTower :=
+  ⟨canonicalRobinsonBoardSignalGeometryTower⟩
 
 /--
 Robinson Section 7 certificate for one red board level.
