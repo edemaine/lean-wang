@@ -2090,6 +2090,77 @@ theorem noGeneratedStackAllowedSiteVPairsBool_eq_true_iff
       simpa [generatedStackAllowedSites] using hupper
     exact hpairs lower hlower' upper hupper'
 
+/--
+If a generated flat role table has no horizontally adjacent active/corner site
+pairs, then no locally compatible Robinson free grid of side at least two can
+use only that generated active/corner set.
+
+This records the key diagnostic from Robinson's Section 7 board route: virtual
+payload neighbors are routed through board cells and should not be forced to be
+adjacent Figure 18 sites.
+-/
+theorem false_of_noAllowedSiteHPairs_of_flatRoleTable_robinsonBoardSiteCompatible
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hno :
+      noGeneratedStackAllowedSiteHPairsBool activeSiteData cornerSite = true)
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable.presentation.toScaffold
+        T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid :
+      Figure18RobinsonBoardRoutedFreeGrid
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable x n hn)
+    (hsite : grid.SiteCompatible)
+    (hsize : 1 < n) : False := by
+  let i0 : Fin n := ⟨0, hn⟩
+  let i1 : Fin n := ⟨1, hsize⟩
+  let j0 : Fin n := ⟨0, hn⟩
+  have hi : i0.val + 1 < n := by
+    simpa [i0] using hsize
+  have hcompatTrue :
+      Figure18Site.hCompatible (grid.siteRect i0 j0)
+        (grid.siteRect i1 j0) = true := by
+    simpa [i0, i1, j0] using hsite.1 i0 j0 hi
+  have hleft :
+      grid.siteRect i0 j0 = cornerSite ∨
+        grid.siteRect i0 j0 ∈ activeSiteData.sites := by
+    have hactiveRole :
+        CellRole.isActive
+          ((Figure18RoleTable.FlatRoleTable.ofActiveSites
+            activeSiteData.sites cornerSite).toRoleTable.roleAtSite
+              (grid.siteRect i0 j0)) = true := by
+      exact grid.active i0 j0
+    exact (Figure18RoleTable.isActive_roleOfActiveSites_iff
+      activeSiteData.sites cornerSite (grid.siteRect i0 j0)).1
+      (by
+        simpa [Figure18RoleTable.FlatRoleTable.ofActiveSites_roleAtSite]
+          using hactiveRole)
+  have hright :
+      grid.siteRect i1 j0 = cornerSite ∨
+        grid.siteRect i1 j0 ∈ activeSiteData.sites := by
+    have hactiveRole :
+        CellRole.isActive
+          ((Figure18RoleTable.FlatRoleTable.ofActiveSites
+            activeSiteData.sites cornerSite).toRoleTable.roleAtSite
+              (grid.siteRect i1 j0)) = true := by
+      exact grid.active i1 j0
+    exact (Figure18RoleTable.isActive_roleOfActiveSites_iff
+      activeSiteData.sites cornerSite (grid.siteRect i1 j0)).1
+      (by
+        simpa [Figure18RoleTable.FlatRoleTable.ofActiveSites_roleAtSite]
+          using hactiveRole)
+  have hcompatFalse :
+      Figure18Site.hCompatible (grid.siteRect i0 j0)
+        (grid.siteRect i1 j0) = false :=
+    noGeneratedStackAllowedSiteHPairsBool_eq_true_iff.1 hno
+      (grid.siteRect i0 j0) hleft (grid.siteRect i1 j0) hright
+  rw [hcompatFalse] at hcompatTrue
+  simp at hcompatTrue
+
 theorem generatedStackHBoundaries_of_allowedPairCompatibilityBool
     {activeSiteData : Figure18Site.CheckedNatSpecs}
     {cornerSite left right : Figure18Site}
@@ -3740,6 +3811,25 @@ theorem l2Component1BlankCandidate_vCompatible_allowed_eq_false
     l2Component1BlankCandidateNoVCompatibleAllowedSitesBool
     lower hlower upper hupper
 
+theorem l2Component1BlankCandidate_no_flatRoleTable_robinsonBoardSiteCompatible
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        l2Component1BlankCandidateActiveSiteData.sites
+        l2Component1BlankCandidateCornerSite).toRoleTable.presentation.toScaffold
+        T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid :
+      Figure18RobinsonBoardRoutedFreeGrid
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          l2Component1BlankCandidateActiveSiteData.sites
+          l2Component1BlankCandidateCornerSite).toRoleTable x n hn)
+    (hsite : grid.SiteCompatible)
+    (hsize : 1 < n) : False :=
+  false_of_noAllowedSiteHPairs_of_flatRoleTable_robinsonBoardSiteCompatible
+    l2Component1BlankCandidateNoHCompatibleAllowedSitesBool
+    grid hsite hsize
+
 /--
 Diagnostic active-site candidate from the second L2 summand's local blank
 quadrants, with the distinguished corner removed from the raw active list.
@@ -3829,6 +3919,25 @@ theorem l2Component2BlankCandidate_vCompatible_allowed_eq_false
   noGeneratedStackAllowedSiteVPairsBool_eq_true_iff.1
     l2Component2BlankCandidateNoVCompatibleAllowedSitesBool
     lower hlower upper hupper
+
+theorem l2Component2BlankCandidate_no_flatRoleTable_robinsonBoardSiteCompatible
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        l2Component2BlankCandidateActiveSiteData.sites
+        l2Component2BlankCandidateCornerSite).toRoleTable.presentation.toScaffold
+        T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid :
+      Figure18RobinsonBoardRoutedFreeGrid
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          l2Component2BlankCandidateActiveSiteData.sites
+          l2Component2BlankCandidateCornerSite).toRoleTable x n hn)
+    (hsite : grid.SiteCompatible)
+    (hsize : 1 < n) : False :=
+  false_of_noAllowedSiteHPairs_of_flatRoleTable_robinsonBoardSiteCompatible
+    l2Component2BlankCandidateNoHCompatibleAllowedSitesBool
+    grid hsite hsize
 
 /--
 Generated flat Figure 18 role table from raw Nat-indexed active sites.
