@@ -5524,6 +5524,78 @@ def ofLocalCompatibilityBoxes
     (realizesActiveCornerSquares_of_realizesActiveCornerBoxes realizes)
     hcheck
 
+/--
+Patch-witness version of `ofLocalCompatibility`.  This exposes the compatible
+level-grid route through the finite patches produced by the Robinson board
+construction, before compactifying them to a plane realization.
+-/
+def ofLocalCompatibilityPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (levelLocalCompatibility :
+      HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalCompatibilityBoxes activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    levelRoutedFreeGrids levelLocalCompatibility
+    (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
+    hcheck
+
+/--
+Layer-patch version of `ofLocalCompatibility`.  This is the structured target
+for the compatible-level route: a scaffold/base box plus a compatible payload
+labelling is enough to discharge the backward scaffold realization.
+-/
+def ofLocalCompatibilityLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (levelLocalCompatibility :
+      HasLocallyCompatibleRobinsonBoardLevelRoutedFreeGrids
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalCompatibilityPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    levelRoutedFreeGrids levelLocalCompatibility
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
+    hcheck
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5705,6 +5777,59 @@ def ofL2Component1BlankCandidate
       l2Component1BlankCandidatePairCompatibilityBool
   realizes := realizes
 
+/--
+Compatible-level L2 component-1 entry point using Robinson finite box patches.
+-/
+def ofL2Component1BlankCandidatePatches
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2Component1BlankCandidate levelCompatibleRoutedFreeGrids
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+      (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches))
+
+/--
+Compatible-level L2 component-1 entry point using Robinson finite layer patches.
+-/
+def ofL2Component1BlankCandidateLayerPatches
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2Component1BlankCandidatePatches levelCompatibleRoutedFreeGrids
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
+
 def ofL2Component2BlankCandidate
     (levelCompatibleRoutedFreeGrids :
       HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
@@ -5732,6 +5857,59 @@ def ofL2Component2BlankCandidate
       NatSiteSpecSanity.cornerSite] using
       l2Component2BlankCandidatePairCompatibilityBool
   realizes := realizes
+
+/--
+Compatible-level L2 component-2 entry point using Robinson finite box patches.
+-/
+def ofL2Component2BlankCandidatePatches
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2Component2BlankCandidate levelCompatibleRoutedFreeGrids
+    (realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+      (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches))
+
+/--
+Compatible-level L2 component-2 entry point using Robinson finite layer patches.
+-/
+def ofL2Component2BlankCandidateLayerPatches
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2Component2BlankCandidatePatches levelCompatibleRoutedFreeGrids
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
 
 def ofL2C1SignalLocalStepFreeGrids
     (signalLocalCoordinateSteps :

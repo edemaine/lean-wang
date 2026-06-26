@@ -9797,6 +9797,138 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and generated position-coded source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c1_compatible_layer_patches_position_source
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component1BlankCandidateLayerPatches
+        hgrids patches)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and generated position-coded source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c1_compatible_level_layer_patches_position_source
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component1BlankCandidateLayerPatches
+        hgrids patches)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and generated position-coded source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c2_compatible_layer_patches_position_source
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2BlankCandidateLayerPatches
+        hgrids patches)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and generated position-coded source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c2_compatible_level_layer_patches_position_source
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2BlankCandidateLayerPatches
+        hgrids patches)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank Figure 18
 candidate, compatible Robinson level grids, realization, and the generated
 interior position-code rows.
 -/
@@ -9949,6 +10081,162 @@ theorem
       l2Component2BlankCandidateSanity.cornerIndex_valid
       (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2BlankCandidate
         hgrids realizes)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c1_compatible_level_layer_patches_interiorRows
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component1BlankCandidateLayerPatches
+        hgrids patches)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c1_compatible_level_layer_patches_interiorRows
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component1BlankCandidateLayerPatches
+        hgrids patches)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_l2c2_compatible_level_layer_patches_interiorRows
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2BlankCandidateLayerPatches
+        hgrids patches)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank Figure 18
+candidate, compatible Robinson level grids, finite scaffold/payload layer
+patches, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_l2c2_compatible_level_layer_patches_interiorRows
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2BlankCandidateLayerPatches
+        hgrids patches)
       hinterior hcorrect
 
 /--
