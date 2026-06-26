@@ -2116,6 +2116,35 @@ theorem scaffoldDataOfFlatRoleTable_tiles
       TileSubdivision.subdivideTileSet fig13Tiles :=
   scaffoldDataOfSites_tiles table.activeSiteData table.cornerSite
 
+/-- Plain Figure 18 scaffold data from a flat Figure 18 role table. -/
+def figure18ScaffoldDataOfFlatRoleTable
+    (table : Figure18RoleTable.FlatRoleTable) :
+    Figure18ScaffoldData where
+  activeSiteData := table.activeSiteData
+  cornerSite := table.cornerSite
+
+@[simp]
+theorem figure18ScaffoldDataOfFlatRoleTable_activeSiteData
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (figure18ScaffoldDataOfFlatRoleTable table).activeSiteData =
+      table.activeSiteData :=
+  rfl
+
+@[simp]
+theorem figure18ScaffoldDataOfFlatRoleTable_activeSites
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (figure18ScaffoldDataOfFlatRoleTable table).activeSites =
+      table.activeSites := by
+  rw [Figure18ScaffoldData.activeSites]
+  simp
+
+@[simp]
+theorem figure18ScaffoldDataOfFlatRoleTable_cornerSite
+    (table : Figure18RoleTable.FlatRoleTable) :
+    (figure18ScaffoldDataOfFlatRoleTable table).cornerSite =
+      table.cornerSite :=
+  rfl
+
 /--
 Remaining obligations for a concrete flat Figure 18 role table.
 
@@ -2128,14 +2157,22 @@ active/corner squares by the scaffold.
 structure FlatRoleTableObligations
     (table : Figure18RoleTable.FlatRoleTable) : Prop where
   listedWindows :
-    HasFigure18ListedActiveSiteFixedCornerSquareWindows
-      table.activeSiteData.sites table.cornerSite
+    (figure18ScaffoldDataOfFlatRoleTable
+      table).HasLocalFreeSquareWindowInvariant
   pairCompatibility :
     generatedStackAllowedSitePairCompatibilityBool
       table.activeSiteData table.cornerSite = true
   realizes :
-    RealizesActiveCornerSquares
-      (scaffoldDataOfFlatRoleTable table).table.presentation.toScaffold
+    (figure18ScaffoldDataOfFlatRoleTable table).HasRealizationInvariant
+
+def figure18ScaffoldDataOfFlatRoleTableCertificateOfObligations
+    (table : Figure18RoleTable.FlatRoleTable)
+    (obligations : FlatRoleTableObligations table) :
+    (figure18ScaffoldDataOfFlatRoleTable table).Certificate :=
+  Figure18ScaffoldData.Certificate.ofWindows
+    (figure18ScaffoldDataOfFlatRoleTable table)
+    obligations.listedWindows
+    obligations.realizes
 
 def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
     (table : Figure18RoleTable.FlatRoleTable)
