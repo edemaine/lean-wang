@@ -4662,6 +4662,104 @@ theorem
 
 /--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, no finite
+generated-stack pair failures, and generated position-coded source-route
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_flat_table_cert_failures_position_source
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = [])
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_flat_table_obligations_position_source
+      table
+      (FlatRoleTableObligations.ofCertificateFailures
+        table certificate hfailures)
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, no finite
+generated-stack pair failures, and generated position-coded source-route
+obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_flat_table_cert_failures_position_source
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = [])
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_flat_table_obligations_position_source
+      table
+      (FlatRoleTableObligations.ofCertificateFailures
+        table certificate hfailures)
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, no finite
+generated-stack pair failures, and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_flat_table_cert_failures_interiorRows
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = [])
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
+      table
+      (FlatRoleTableObligations.ofCertificateFailures
+        table certificate hfailures)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, a flat Figure 18 role table, a plain scaffold certificate, no finite
+generated-stack pair failures, and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_flat_table_cert_failures_interiorRows
+    (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = [])
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
+      table
+      (FlatRoleTableObligations.ofCertificateFailures
+        table certificate hfailures)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, a plain
 Figure 18 scaffold certificate, and generated position-coded source-route
 obligations.
@@ -5134,6 +5232,146 @@ theorem
       (scaffoldDataOfNatSitesIndexedRoutedCertificateOfCertificatePairCompatibility
         activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
         cornerIndex_valid certificate hpair)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a plain
+Figure 18 scaffold certificate, no finite generated-stack pair failures, and
+generated position-coded source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_cert_failures_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          [])
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_flat_table_obligations_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteObligations.ofCertificateFailures
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid certificate hfailures)
+      h
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a plain
+Figure 18 scaffold certificate, no finite generated-stack pair failures, and
+generated position-coded source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_cert_failures_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          [])
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_flat_table_obligations_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteObligations.ofCertificateFailures
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid certificate hfailures)
+      h
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a plain
+Figure 18 scaffold certificate, no finite generated-stack pair failures, and
+the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_cert_failures_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          [])
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_flat_table_obligations_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteObligations.ofCertificateFailures
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid certificate hfailures)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a plain
+Figure 18 scaffold certificate, no finite generated-stack pair failures, and
+the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_cert_failures_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          [])
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_flat_table_obligations_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteObligations.ofCertificateFailures
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid certificate hfailures)
       hinterior hcorrect
 
 /--
