@@ -7421,6 +7421,154 @@ theorem domino_problem_undecidable_of_figure13_tower_pos_boxes_interiorRows
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from canonical Robinson-board routing, finite
+generated stack compatibility, and positive-radius indexed boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_canonical_routing_pos_boxes_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_towerBoxObligations_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteRobinsonTowerIndexedBoxObligations.ofCanonicalRoutingPositiveBoxes
+        hrouting hcheck hboxes_pos)
+      h
+
+/--
+Unencoded domino undecidability from canonical Robinson-board routing, finite
+generated stack compatibility, and positive-radius indexed boxes.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_canonical_routing_pos_boxes_position_source
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_towerBoxObligations_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteRobinsonTowerIndexedBoxObligations.ofCanonicalRoutingPositiveBoxes
+        hrouting hcheck hboxes_pos)
+      h
+
+/--
+Encoded domino undecidability from canonical Robinson-board routing,
+positive-radius indexed boxes, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_canonical_routing_pos_boxes_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_towerBoxObligations_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteRobinsonTowerIndexedBoxObligations.ofCanonicalRoutingPositiveBoxes
+        hrouting hcheck hboxes_pos)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from canonical Robinson-board routing,
+positive-radius indexed boxes, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_canonical_routing_pos_boxes_interiorRows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_towerBoxObligations_interiorRows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid
+      (NatSiteRobinsonTowerIndexedBoxObligations.ofCanonicalRoutingPositiveBoxes
+        hrouting hcheck hboxes_pos)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the field-based Robinson Section 7 local
 signal tower, finite generated stack compatibility, and positive-radius
 indexed boxes.
