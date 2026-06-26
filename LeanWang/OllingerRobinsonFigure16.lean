@@ -920,6 +920,8 @@ structure CertifiedSubstitutionTable where
   rules : List SubstitutionRule
   complete : rules.map SubstitutionRule.source = RuleSource.all
   nodupSources : (rules.map SubstitutionRule.source).Nodup
+  correct : ∀ {rule : SubstitutionRule}, rule ∈ rules →
+    rule.block = rule.source.block
   valid : ∀ {rule : SubstitutionRule}, rule ∈ rules →
     ValidRectangle Symbol.tileSet rule.block.rectangle
 
@@ -937,6 +939,59 @@ theorem source_nodup_on_rules
     (table.rules.map SubstitutionRule.source).Nodup :=
   table.nodupSources
 
+theorem block_eq_source_block
+    (table : CertifiedSubstitutionTable) {rule : SubstitutionRule}
+    (hmem : rule ∈ table.rules) :
+    rule.block = rule.source.block :=
+  table.correct hmem
+
+theorem exists_rule_for_source
+    (table : CertifiedSubstitutionTable) (source : RuleSource) :
+    ∃ rule : SubstitutionRule, rule ∈ table.rules ∧ rule.source = source := by
+  have hsource : source ∈ table.rules.map SubstitutionRule.source := by
+    rw [table.complete]
+    exact RuleSource.mem_all source
+  rcases List.mem_map.1 hsource with ⟨rule, hmem, hsource⟩
+  exact ⟨rule, hmem, hsource⟩
+
+theorem eq_of_mem_same_source
+    (table : CertifiedSubstitutionTable) {rule other : SubstitutionRule}
+    (hrule : rule ∈ table.rules) (hother : other ∈ table.rules)
+    (hsource : rule.source = other.source) :
+    rule = other :=
+  List.inj_on_of_nodup_map table.nodupSources hrule hother hsource
+
+theorem eq_of_mem_source
+    (table : CertifiedSubstitutionTable) {rule : SubstitutionRule}
+    (hmem : rule ∈ table.rules) {source : RuleSource}
+    (hsource : rule.source = source) :
+    rule = (table.exists_rule_for_source source).choose := by
+  have hchosen := (table.exists_rule_for_source source).choose_spec
+  exact table.eq_of_mem_same_source hmem hchosen.1
+    (hsource.trans hchosen.2.symm)
+
+theorem exists_unique_rule_for_source
+    (table : CertifiedSubstitutionTable) (source : RuleSource) :
+    ∃! rule : SubstitutionRule, rule ∈ table.rules ∧ rule.source = source := by
+  rcases table.exists_rule_for_source source with ⟨rule, hmem, hsource⟩
+  refine ⟨rule, ⟨hmem, hsource⟩, ?_⟩
+  intro other hother
+  exact table.eq_of_mem_same_source hother.1 hmem (hother.2.trans hsource.symm)
+
+theorem block_eq_source_block_of_source
+    (table : CertifiedSubstitutionTable) {rule : SubstitutionRule}
+    (hmem : rule ∈ table.rules) {source : RuleSource}
+    (hsource : rule.source = source) :
+    rule.block = source.block := by
+  rw [table.block_eq_source_block hmem, hsource]
+
+theorem source_block_validRectangle
+    (table : CertifiedSubstitutionTable) (source : RuleSource) :
+    ValidRectangle Symbol.tileSet source.block.rectangle := by
+  rcases table.exists_rule_for_source source with ⟨rule, hmem, hsource⟩
+  simpa [table.block_eq_source_block_of_source hmem hsource] using
+    table.valid hmem
+
 end CertifiedSubstitutionTable
 
 /-- Figure 16 substitution rules with their finite certification. -/
@@ -944,6 +999,9 @@ def certifiedSubstitutionTable : CertifiedSubstitutionTable where
   rules := substitutionRules
   complete := substitutionRuleSources_eq_all
   nodupSources := substitutionRuleSources_nodup
+  correct := by
+    intro rule hmem
+    exact SubstitutionRule.block_eq_source_block hmem
   valid := by
     intro rule hmem
     exact SubstitutionRule.block_validRectangle_symbolTileSet hmem
