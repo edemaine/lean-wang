@@ -3685,6 +3685,21 @@ def toTypedLayerStackRectangleOfSeparateRows {w h : Nat}
     (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch)
     hcompatible
 
+theorem expandedRectangle_valid_of_checks {w h : Nat}
+    (rows : CheckedSeparateLayerRows) (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    ValidRectangle Figure16.Symbol.tileSet
+      (Figure16.BlockGrid.expandedRectangle
+        ((rows.toTypedLayerStackRectangleOfSeparateRows data hmatch
+            hcompatible).toLayerStackRectangle.blockGrid layer)) := by
+  let S := rows.toTypedLayerStackRectangleOfSeparateRows data hmatch hcompatible
+  exact S.toLayerStackRectangle.expandedRectangle_valid layer
+
 def toIndexedActiveCornerWindowWithLayerStack
     (rows : CheckedSeparateLayerRows)
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -3816,6 +3831,22 @@ def toTypedLayerStackRectangleOfSparseRows {w h : Nat}
     TypedLayerStackRectangle rows.layerData data.siteRectangle :=
   rows.separateLayerRows.toTypedLayerStackRectangleOfSeparateRows data hmatch
     hcompatible
+
+theorem expandedRectangle_valid_of_checks {w h : Nat}
+    (rows : CheckedSparseSeparateLayerRows)
+    (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    ValidRectangle Figure16.Symbol.tileSet
+      (Figure16.BlockGrid.expandedRectangle
+        ((rows.toTypedLayerStackRectangleOfSparseRows data hmatch
+            hcompatible).toLayerStackRectangle.blockGrid layer)) := by
+  let S := rows.toTypedLayerStackRectangleOfSparseRows data hmatch hcompatible
+  exact S.toLayerStackRectangle.expandedRectangle_valid layer
 
 def toIndexedActiveCornerWindowWithLayerStack
     (rows : CheckedSparseSeparateLayerRows)
@@ -4085,6 +4116,22 @@ def toTypedLayerStackRectangleOfSparseRawData {w h : Nat}
     TypedLayerStackRectangle data.layerData stackData.siteRectangle :=
   data.layerRows.toTypedLayerStackRectangleOfSparseRows stackData hmatch
     hcompatible
+
+theorem expandedRectangle_valid_of_checks {w h : Nat}
+    (data : CheckedSparseRawData) (stackData : CheckedLayerStackRectangle w h)
+    (hmatch : data.layerStackRectangleMatchesBool stackData = true)
+    (hcompatible :
+      stackData.compatibleBool data.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    ValidRectangle Figure16.Symbol.tileSet
+      (Figure16.BlockGrid.expandedRectangle
+        ((data.toTypedLayerStackRectangleOfSparseRawData stackData hmatch
+            hcompatible).toLayerStackRectangle.blockGrid layer)) := by
+  let S := data.toTypedLayerStackRectangleOfSparseRawData stackData hmatch
+    hcompatible
+  exact S.toLayerStackRectangle.expandedRectangle_valid layer
 
 def toIndexedActiveCornerWindowWithLayerStack
     (data : CheckedSparseRawData)
