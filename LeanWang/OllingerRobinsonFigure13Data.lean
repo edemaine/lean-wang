@@ -4082,6 +4082,14 @@ def figure18ScaffoldData (C : NatSiteScaffoldCertificate) :
   figure18ScaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
     C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
 
+def checkedListedActiveSiteInstance (C : NatSiteScaffoldCertificate) :
+    Figure18CheckedListedActiveSiteInstance :=
+  C.figure18ScaffoldData.toCheckedListedActiveSiteInstance C.certificate
+
+def flexibleInstance (C : NatSiteScaffoldCertificate) :
+    Figure18FlexibleInstance :=
+  C.checkedListedActiveSiteInstance.toFlexibleInstance
+
 def obligations (C : NatSiteScaffoldCertificate) :
     NatSiteObligations C.activeSiteSpecs C.activeSiteSpecs_valid
       C.cornerIndex C.cornerQuadrant C.cornerIndex_valid :=
@@ -4119,6 +4127,33 @@ theorem figure18ScaffoldData_tiles (C : NatSiteScaffoldCertificate) :
     C.figure18ScaffoldData.tiles = figure18ScaffoldTiles :=
   figure18ScaffoldDataOfNatSites_tiles C.activeSiteSpecs C.activeSiteSpecs_valid
     C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+@[simp]
+theorem checkedListedActiveSiteInstance_activeSiteData
+    (C : NatSiteScaffoldCertificate) :
+    C.checkedListedActiveSiteInstance.activeSiteData = C.activeSiteData :=
+  rfl
+
+@[simp]
+theorem checkedListedActiveSiteInstance_cornerSite
+    (C : NatSiteScaffoldCertificate) :
+    C.checkedListedActiveSiteInstance.cornerSite = C.cornerSite :=
+  rfl
+
+theorem checkedListedActiveSiteInstance_presentation_tiles
+    (C : NatSiteScaffoldCertificate) :
+    C.checkedListedActiveSiteInstance.presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  C.checkedListedActiveSiteInstance.presentation_tiles
+
+theorem isScaffold (C : NatSiteScaffoldCertificate) :
+    IsScaffold C.figure18ScaffoldData.scaffold :=
+  C.certificate.isScaffold
+
+theorem checkedListedActiveSiteInstance_isScaffold
+    (C : NatSiteScaffoldCertificate) :
+    IsScaffold C.checkedListedActiveSiteInstance.presentation.toScaffold :=
+  C.checkedListedActiveSiteInstance.isScaffold
 
 end NatSiteScaffoldCertificate
 
