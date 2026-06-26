@@ -190,6 +190,63 @@ theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
 
 end CombinedBoxPatch
 
+/--
+Layered form of a finite combined box patch.
+
+This is closer to how the Robinson proof constructs finite patches: first give
+a valid scaffold/base box, then give payload labels satisfying the active-cell
+membership restrictions and payload edge matches.  Product edge matches are
+derived mechanically from the base and payload matches.
+-/
+structure CombinedBoxLayerPatch (S : Scaffold) (T : TileSet) (seed : WangTile)
+    (r : Nat) where
+  base : BoxPattern S.tiles r
+  payload : Box r → WangTile
+  base_valid : ValidBoxTiling S.tiles r base
+  active_payload : ∀ p : Box r, S.active (base p).1 = true →
+    payload p ∈ T ∧ ((base p).1 = S.corner → payload p = seed)
+  inactive_payload : ∀ p : Box r, S.active (base p).1 = false →
+    payload p = monochromeTile
+  payload_hmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+    WangTile.HMatches (payload p)
+      (payload ⟨(p.1.1 + 1, p.1.2), hp⟩)
+  payload_vmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+    WangTile.VMatches (payload p)
+      (payload ⟨(p.1.1, p.1.2 + 1), hp⟩)
+
+namespace CombinedBoxLayerPatch
+
+/-- Forget the separated base/payload proof into the product-patch form. -/
+def toCombinedBoxPatch {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (patch : CombinedBoxLayerPatch S T seed r) :
+    CombinedBoxPatch S T seed r where
+  base := fun p => (patch.base p).1
+  payload := patch.payload
+  base_mem := fun p => (patch.base p).2
+  active_payload := patch.active_payload
+  inactive_payload := patch.inactive_payload
+  hmatch := by
+    intro p hp
+    exact (WangTile.HMatches_product_iff
+      (patch.base p).1 (patch.payload p)
+      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩).1
+      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).2
+        ⟨patch.base_valid.1 p hp, patch.payload_hmatch p hp⟩
+  vmatch := by
+    intro p hp
+    exact (WangTile.VMatches_product_iff
+      (patch.base p).1 (patch.payload p)
+      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩).1
+      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).2
+        ⟨patch.base_valid.2 p hp, patch.payload_vmatch p hp⟩
+
+theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (patch : CombinedBoxLayerPatch S T seed r) :
+    TileableBox (combineWithScaffold S T seed) r :=
+  patch.toCombinedBoxPatch.tileableBox
+
+end CombinedBoxLayerPatch
+
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
     (hactive : S.active S.corner = true)
@@ -488,12 +545,37 @@ def HasActiveCornerBoxPatches (S : Scaffold) : Prop :=
     (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
       ∀ r : Nat, Nonempty (CombinedBoxPatch S T seed r)
 
+/--
+Layered patch-witness form of `RealizesActiveCornerBoxes`.
+
+This is the intended finite target for the Robinson board construction: build a
+valid finite scaffold box and a compatible payload labelling over it, then let
+the generic product construction assemble the combined box patch.
+-/
+def HasActiveCornerLayerBoxPatches (S : Scaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      ∀ r : Nat, Nonempty (CombinedBoxLayerPatch S T seed r)
+
+theorem activeCornerBoxPatches_of_layerBoxPatches
+    {S : Scaffold} (hpatches : HasActiveCornerLayerBoxPatches S) :
+    HasActiveCornerBoxPatches S := by
+  intro T seed hsquares r
+  rcases hpatches T seed hsquares r with ⟨patch⟩
+  exact ⟨patch.toCombinedBoxPatch⟩
+
 theorem realizesActiveCornerBoxes_of_activeCornerBoxPatches
     {S : Scaffold} (hpatches : HasActiveCornerBoxPatches S) :
     RealizesActiveCornerBoxes S := by
   intro T seed hsquares r
   rcases hpatches T seed hsquares r with ⟨patch⟩
   exact patch.tileableBox
+
+theorem realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches
+    {S : Scaffold} (hpatches : HasActiveCornerLayerBoxPatches S) :
+    RealizesActiveCornerBoxes S :=
+  realizesActiveCornerBoxes_of_activeCornerBoxPatches
+    (activeCornerBoxPatches_of_layerBoxPatches hpatches)
 
 theorem realizesActiveCornerSquares_of_realizesActiveCornerBoxes
     {S : Scaffold} (hboxes : RealizesActiveCornerBoxes S) :

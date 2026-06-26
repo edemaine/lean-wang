@@ -5617,6 +5617,39 @@ def ofLocalSignalCoordinateStepsPatches
     (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches)
     hcheck
 
+/--
+Layer-patch version of the preferred Section 7 constructor.  This is the most
+structured backward target: Robinson supplies a valid scaffold/base box and a
+payload labelling over it; the generic layer-patch conversion assembles the
+combined finite boxes needed for compactness.
+-/
+def ofLocalSignalCoordinateStepsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLocalSignalCoordinateStepsPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    signalLocalCoordinateSteps
+    (activeCornerBoxPatches_of_layerBoxPatches patches)
+    hcheck
+
 def ofPairFailures
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -5803,6 +5836,41 @@ def ofL2C1SignalLocalStepFreeGridsPatches
         NatSiteSpecSanity.cornerSite] using
         l2Component1BlankCandidatePairCompatibilityBool)
 
+/--
+Concrete L2 component-1 entry point using Robinson finite layer patches.
+-/
+def ofL2C1SignalLocalStepFreeGridsLayerPatches
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofLocalSignalCoordinateStepsLayerPatches
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    signalLocalCoordinateSteps patches
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
 def ofL2C2SignalLocalStepFreeGrids
     (signalLocalCoordinateSteps :
       HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
@@ -5895,6 +5963,41 @@ def ofL2C2SignalLocalStepFreeGridsPatches
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   ofLocalSignalCoordinateStepsPatches
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    signalLocalCoordinateSteps patches
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+/--
+Concrete L2 component-2 entry point using Robinson finite layer patches.
+-/
+def ofL2C2SignalLocalStepFreeGridsLayerPatches
+    (signalLocalCoordinateSteps :
+      HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofLocalSignalCoordinateStepsLayerPatches
     l2Component2BlankCandidateActiveSiteSpecs
     l2Component2BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.northeast
