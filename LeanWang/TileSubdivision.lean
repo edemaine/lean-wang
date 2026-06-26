@@ -275,6 +275,14 @@ theorem subdivideTileSet_cons (t : WangTile) (T : TileSet) :
     subdivideTileSet (t :: T) = subdivideTile t ++ subdivideTileSet T :=
   rfl
 
+theorem subdivideTileAt_mem_subdivideTileSet {T : TileSet} {t : WangTile}
+    (ht : t ∈ T) (q : Quadrant) :
+    subdivideTileAt t q ∈ subdivideTileSet T := by
+  rw [subdivideTileSet, List.mem_flatMap]
+  refine ⟨t, ht, ?_⟩
+  rw [subdivideTile]
+  exact List.mem_map.2 ⟨q, Quadrant.mem_all q, rfl⟩
+
 theorem hMatches_southwest_southeast (t : WangTile) :
     WangTile.HMatches
       (subdivideTileAt t .southwest) (subdivideTileAt t .southeast) :=
@@ -408,6 +416,152 @@ theorem subdivideTileSet_nodup_of_nodup {T : TileSet}
       rw [List.nodup_cons] at hT
       exact List.Nodup.append (subdivideTile_nodup t) (ih hT.2)
         (subdivideTile_disjoint_subdivideTileSet_of_not_mem hT.1)
+
+private def intParityBit (z : Int) : Bool :=
+  z % 2 = 1
+
+private def pointQuadrant (p : Int × Int) : Quadrant :=
+  Quadrant.ofBits (intParityBit p.1, intParityBit p.2)
+
+private def macroPoint (p : Int × Int) : Int × Int :=
+  (p.1 / 2, p.2 / 2)
+
+private theorem intParityBit_eq_false_of_emod_eq_zero {z : Int}
+    (h : z % 2 = 0) :
+    intParityBit z = false := by
+  simp [intParityBit, h]
+
+private theorem intParityBit_eq_true_of_emod_eq_one {z : Int}
+    (h : z % 2 = 1) :
+    intParityBit z = true := by
+  simp [intParityBit, h]
+
+private theorem intParityBit_succ_eq_true_of_emod_eq_zero {z : Int}
+    (h : z % 2 = 0) :
+    intParityBit (z + 1) = true := by
+  have hsucc : (z + 1) % 2 = 1 := by
+    omega
+  exact intParityBit_eq_true_of_emod_eq_one hsucc
+
+private theorem intParityBit_succ_eq_false_of_emod_eq_one {z : Int}
+    (h : z % 2 = 1) :
+    intParityBit (z + 1) = false := by
+  have hsucc : (z + 1) % 2 = 0 := by
+    omega
+  exact intParityBit_eq_false_of_emod_eq_zero hsucc
+
+private theorem succ_div_two_of_emod_eq_zero {z : Int}
+    (h : z % 2 = 0) :
+    (z + 1) / 2 = z / 2 := by
+  omega
+
+private theorem succ_div_two_of_emod_eq_one {z : Int}
+    (h : z % 2 = 1) :
+    (z + 1) / 2 = z / 2 + 1 := by
+  omega
+
+private def subdividedPlaneTiling {T : TileSet}
+    (x : Int × Int → TileIn T) :
+    Int × Int → TileIn (subdivideTileSet T) := fun p =>
+  let tile := x (macroPoint p)
+  ⟨subdivideTileAt tile.1 (pointQuadrant p),
+    subdivideTileAt_mem_subdivideTileSet tile.2 (pointQuadrant p)⟩
+
+theorem validPlaneTiling_subdivideTileSet_of_validPlaneTiling {T : TileSet}
+    {x : Int × Int → TileIn T}
+    (hx : ValidPlaneTiling T x) :
+    ValidPlaneTiling (subdivideTileSet T) (subdividedPlaneTiling x) := by
+  constructor
+  · intro p
+    rcases Int.emod_two_eq_zero_or_one p.1 with hx0 | hx1
+    · have hdiv : (p.1 + 1) / 2 = p.1 / 2 :=
+        succ_div_two_of_emod_eq_zero hx0
+      have hbit : intParityBit p.1 = false :=
+        intParityBit_eq_false_of_emod_eq_zero hx0
+      have hbit' : intParityBit (p.1 + 1) = true :=
+        intParityBit_succ_eq_true_of_emod_eq_zero hx0
+      rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
+      · have hybit : intParityBit p.2 = false :=
+          intParityBit_eq_false_of_emod_eq_zero hy0
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hybit, Quadrant.ofBits] using
+          hMatches_southwest_southeast ((x (p.1 / 2, p.2 / 2)).1)
+      · have hybit : intParityBit p.2 = true :=
+          intParityBit_eq_true_of_emod_eq_one hy1
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hybit, Quadrant.ofBits] using
+          hMatches_northwest_northeast ((x (p.1 / 2, p.2 / 2)).1)
+    · have hdiv : (p.1 + 1) / 2 = p.1 / 2 + 1 :=
+        succ_div_two_of_emod_eq_one hx1
+      have hbit : intParityBit p.1 = true :=
+        intParityBit_eq_true_of_emod_eq_one hx1
+      have hbit' : intParityBit (p.1 + 1) = false :=
+        intParityBit_succ_eq_false_of_emod_eq_one hx1
+      rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
+      · have hybit : intParityBit p.2 = false :=
+          intParityBit_eq_false_of_emod_eq_zero hy0
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hybit, Quadrant.ofBits] using
+          hMatches_southeast_southwest_of_hMatches
+            (left := (x (p.1 / 2, p.2 / 2)).1)
+            (right := (x (p.1 / 2 + 1, p.2 / 2)).1)
+            (hx.1 (p.1 / 2, p.2 / 2))
+      · have hybit : intParityBit p.2 = true :=
+          intParityBit_eq_true_of_emod_eq_one hy1
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hybit, Quadrant.ofBits] using
+          hMatches_northeast_northwest_of_hMatches
+            (left := (x (p.1 / 2, p.2 / 2)).1)
+            (right := (x (p.1 / 2 + 1, p.2 / 2)).1)
+            (hx.1 (p.1 / 2, p.2 / 2))
+  · intro p
+    rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
+    · have hdiv : (p.2 + 1) / 2 = p.2 / 2 :=
+        succ_div_two_of_emod_eq_zero hy0
+      have hbit : intParityBit p.2 = false :=
+        intParityBit_eq_false_of_emod_eq_zero hy0
+      have hbit' : intParityBit (p.2 + 1) = true :=
+        intParityBit_succ_eq_true_of_emod_eq_zero hy0
+      rcases Int.emod_two_eq_zero_or_one p.1 with hx0 | hx1
+      · have hxbit : intParityBit p.1 = false :=
+          intParityBit_eq_false_of_emod_eq_zero hx0
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hxbit, Quadrant.ofBits] using
+          vMatches_southwest_northwest ((x (p.1 / 2, p.2 / 2)).1)
+      · have hxbit : intParityBit p.1 = true :=
+          intParityBit_eq_true_of_emod_eq_one hx1
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hxbit, Quadrant.ofBits] using
+          vMatches_southeast_northeast ((x (p.1 / 2, p.2 / 2)).1)
+    · have hdiv : (p.2 + 1) / 2 = p.2 / 2 + 1 :=
+        succ_div_two_of_emod_eq_one hy1
+      have hbit : intParityBit p.2 = true :=
+        intParityBit_eq_true_of_emod_eq_one hy1
+      have hbit' : intParityBit (p.2 + 1) = false :=
+        intParityBit_succ_eq_false_of_emod_eq_one hy1
+      rcases Int.emod_two_eq_zero_or_one p.1 with hx0 | hx1
+      · have hxbit : intParityBit p.1 = false :=
+          intParityBit_eq_false_of_emod_eq_zero hx0
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hxbit, Quadrant.ofBits] using
+          vMatches_northwest_southwest_of_vMatches
+            (lower := (x (p.1 / 2, p.2 / 2)).1)
+            (upper := (x (p.1 / 2, p.2 / 2 + 1)).1)
+            (hx.2 (p.1 / 2, p.2 / 2))
+      · have hxbit : intParityBit p.1 = true :=
+          intParityBit_eq_true_of_emod_eq_one hx1
+        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+          hbit', hxbit, Quadrant.ofBits] using
+          vMatches_northeast_southeast_of_vMatches
+            (lower := (x (p.1 / 2, p.2 / 2)).1)
+            (upper := (x (p.1 / 2, p.2 / 2 + 1)).1)
+            (hx.2 (p.1 / 2, p.2 / 2))
+
+theorem tilesPlane_subdivideTileSet_of_tilesPlane {T : TileSet} :
+    TilesPlane T → TilesPlane (subdivideTileSet T) := by
+  rintro ⟨x, hx⟩
+  exact ⟨subdividedPlaneTiling x,
+    validPlaneTiling_subdivideTileSet_of_validPlaneTiling hx⟩
 
 end TileSubdivision
 

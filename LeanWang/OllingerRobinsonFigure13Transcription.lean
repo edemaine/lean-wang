@@ -2609,6 +2609,12 @@ def figure18ScaffoldTiles : TileSet :=
 theorem figure18ScaffoldTiles_nodup : figure18ScaffoldTiles.Nodup := by
   exact TileSubdivision.subdivideTileSet_nodup_of_nodup fig13Tiles_nodup
 
+theorem tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles :
+    TilesPlane fig13Tiles → TilesPlane figure18ScaffoldTiles := by
+  simpa [figure18ScaffoldTiles] using
+    (TileSubdivision.tilesPlane_subdivideTileSet_of_tilesPlane
+      (T := fig13Tiles))
+
 theorem mem_figure18ScaffoldTiles_iff {tile : WangTile} :
     tile ∈ figure18ScaffoldTiles ↔
       tile ∈ Figure18Site.all.map Figure18Site.tile := by
