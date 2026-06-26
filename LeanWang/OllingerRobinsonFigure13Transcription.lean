@@ -3793,6 +3793,87 @@ noncomputable def toIndexedRoutedFixedCornerSquare
 
 end Figure18DecodedSiteFixedCornerSquare
 
+section FlatDecodedSite
+
+set_option maxRecDepth 10000
+
+/--
+Structured flat-table decoded-site selected-coordinate square.
+
+This packages one witness for `HasFigure18FlatDecodedSiteFixedCornerSquares`.
+The active-cell condition is stated as membership in the flat table's active
+site list; conversion to the role-table decoded-site form discharges the role
+lookup.
+-/
+structure Figure18FlatDecodedSiteFixedCornerSquare
+    (table : Figure18RoleTable.FlatRoleTable) {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed))
+    (n : Nat) (hn : 0 < n) where
+  horizontalCoord : Fin n → Int
+  verticalCoord : Fin n → Int
+  horizontalCoord_succ : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+    horizontalCoord ⟨i.val + 1, hi⟩ = horizontalCoord i + 1
+  verticalCoord_succ : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    verticalCoord ⟨j.val + 1, hj⟩ = verticalCoord j + 1
+  hcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+    Figure18Site.hCompatible
+      (table.toRoleTable.combinedSite
+        (x (horizontalCoord i, verticalCoord j)))
+      (table.toRoleTable.combinedSite
+        (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) =
+      true
+  vcompatible : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+    Figure18Site.vCompatible
+      (table.toRoleTable.combinedSite
+        (x (horizontalCoord i, verticalCoord j)))
+      (table.toRoleTable.combinedSite
+        (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) =
+      true
+  activeSites : ∀ i : Fin n, ∀ j : Fin n,
+    table.toRoleTable.combinedSite
+      (x (horizontalCoord i, verticalCoord j)) ∈ table.activeSites
+  cornerSite :
+    table.toRoleTable.combinedSite
+        (x (horizontalCoord ⟨0, hn⟩, verticalCoord ⟨0, hn⟩)) =
+      table.cornerSite
+
+namespace Figure18FlatDecodedSiteFixedCornerSquare
+
+def toDecodedSiteFixedCornerSquare
+    {table : Figure18RoleTable.FlatRoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18FlatDecodedSiteFixedCornerSquare table x n hn) :
+    Figure18DecodedSiteFixedCornerSquare table.toRoleTable x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  horizontalCoord_succ := window.horizontalCoord_succ
+  verticalCoord_succ := window.verticalCoord_succ
+  hcompatible := window.hcompatible
+  vcompatible := window.vcompatible
+  active := by
+    intro i j
+    exact table.isActive_toRoleTable_of_mem_activeSites (window.activeSites i j)
+  cornerSite := by
+    simpa using window.cornerSite
+
+noncomputable def toIndexedRoutedFixedCornerSquare
+    {table : Figure18RoleTable.FlatRoleTable} {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18FlatDecodedSiteFixedCornerSquare table x n hn)
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.toRoleTable.presentation.toScaffold T seed) x) :
+    Figure18IndexedRoutedFixedCornerSquare table.toRoleTable x n hn :=
+  window.toDecodedSiteFixedCornerSquare.toIndexedRoutedFixedCornerSquare hx
+
+end Figure18FlatDecodedSiteFixedCornerSquare
+
+end FlatDecodedSite
+
 theorem hasFigure18AdjacentCompatibleFixedCornerSquares_of_productWitness
     {table : Figure18RoleTable}
     (hproduct : HasFigure18AdjacentProductWitnessFixedCornerSquares table) :
