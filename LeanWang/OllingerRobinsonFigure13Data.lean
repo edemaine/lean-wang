@@ -1458,6 +1458,124 @@ theorem sparseRawDataOfSites_exists_checkedLayerStackRectangle
     sparseRawDataOfSites_layerStackRectangleMatchesBool
       activeSiteData cornerSite R⟩
 
+def thinBlockAtSite (site : Figure18Site) : Figure16.Block :=
+  (LayerComponent.thin (thinComponentAt site.index)).block
+
+def thickBlockAtSite (site : Figure18Site) : Figure16.Block :=
+  (LayerComponent.thick (thickComponentAt site.index)).block
+
+def blackBlockAtSite (site : Figure18Site) : Figure16.Block :=
+  (LayerComponent.black (blackComponentAt site.index)).block
+
+def generatedStackHCompatiblePairBool
+    (left right : Figure18Site) : Bool :=
+  if Figure18Site.hCompatible left right then
+    decide <|
+      (thinBlockAtSite left).hBoundaryMatches (thinBlockAtSite right) ∧
+      (thickBlockAtSite left).hBoundaryMatches (thickBlockAtSite right) ∧
+      (blackBlockAtSite left).hBoundaryMatches (blackBlockAtSite right)
+  else
+    true
+
+def generatedStackVCompatiblePairBool
+    (lower upper : Figure18Site) : Bool :=
+  if Figure18Site.vCompatible lower upper then
+    decide <|
+      (thinBlockAtSite lower).vBoundaryMatches (thinBlockAtSite upper) ∧
+      (thickBlockAtSite lower).vBoundaryMatches (thickBlockAtSite upper) ∧
+      (blackBlockAtSite lower).vBoundaryMatches (blackBlockAtSite upper)
+  else
+    true
+
+def generatedStackSitePairCompatibilityBool
+    (sites : List Figure18Site) : Bool :=
+  sites.all fun left =>
+    sites.all fun right =>
+      generatedStackHCompatiblePairBool left right &&
+        generatedStackVCompatiblePairBool left right
+
+def generatedStackAllowedSites
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : List Figure18Site :=
+  cornerSite :: activeSiteData.sites
+
+def generatedStackAllowedSitePairCompatibilityBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : Bool :=
+  generatedStackSitePairCompatibilityBool
+    (generatedStackAllowedSites activeSiteData cornerSite)
+
+theorem generatedStackHBoundaries_of_pairCompatibilityBool
+    {sites : List Figure18Site} {left right : Figure18Site}
+    (hcheck : generatedStackSitePairCompatibilityBool sites = true)
+    (hleft : left ∈ sites) (hright : right ∈ sites)
+    (hh : Figure18Site.hCompatible left right = true) :
+    (thinBlockAtSite left).hBoundaryMatches (thinBlockAtSite right) ∧
+      (thickBlockAtSite left).hBoundaryMatches (thickBlockAtSite right) ∧
+      (blackBlockAtSite left).hBoundaryMatches (blackBlockAtSite right) := by
+  unfold generatedStackSitePairCompatibilityBool at hcheck
+  have hleftCheck := List.all_eq_true.1 hcheck left hleft
+  have hrightCheck := List.all_eq_true.1 hleftCheck right hright
+  rw [Bool.and_eq_true] at hrightCheck
+  unfold generatedStackHCompatiblePairBool at hrightCheck
+  simpa [hh] using hrightCheck.1
+
+theorem generatedStackVBoundaries_of_pairCompatibilityBool
+    {sites : List Figure18Site} {lower upper : Figure18Site}
+    (hcheck : generatedStackSitePairCompatibilityBool sites = true)
+    (hlower : lower ∈ sites) (hupper : upper ∈ sites)
+    (hv : Figure18Site.vCompatible lower upper = true) :
+    (thinBlockAtSite lower).vBoundaryMatches (thinBlockAtSite upper) ∧
+      (thickBlockAtSite lower).vBoundaryMatches (thickBlockAtSite upper) ∧
+      (blackBlockAtSite lower).vBoundaryMatches (blackBlockAtSite upper) := by
+  unfold generatedStackSitePairCompatibilityBool at hcheck
+  have hlowerCheck := List.all_eq_true.1 hcheck lower hlower
+  have hupperCheck := List.all_eq_true.1 hlowerCheck upper hupper
+  rw [Bool.and_eq_true] at hupperCheck
+  unfold generatedStackVCompatiblePairBool at hupperCheck
+  simpa [hv] using hupperCheck.2
+
+theorem mem_generatedStackAllowedSites_of_listed
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite site : Figure18Site}
+    (hsite : site = cornerSite ∨ site ∈ activeSiteData.sites) :
+    site ∈ generatedStackAllowedSites activeSiteData cornerSite := by
+  rcases hsite with rfl | hsite
+  · simp [generatedStackAllowedSites]
+  · simp [generatedStackAllowedSites, hsite]
+
+theorem generatedStackHBoundaries_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite left right : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hleft : left = cornerSite ∨ left ∈ activeSiteData.sites)
+    (hright : right = cornerSite ∨ right ∈ activeSiteData.sites)
+    (hh : Figure18Site.hCompatible left right = true) :
+    (thinBlockAtSite left).hBoundaryMatches (thinBlockAtSite right) ∧
+      (thickBlockAtSite left).hBoundaryMatches (thickBlockAtSite right) ∧
+      (blackBlockAtSite left).hBoundaryMatches (blackBlockAtSite right) :=
+  generatedStackHBoundaries_of_pairCompatibilityBool hcheck
+    (mem_generatedStackAllowedSites_of_listed hleft)
+    (mem_generatedStackAllowedSites_of_listed hright) hh
+
+theorem generatedStackVBoundaries_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite lower upper : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hlower : lower = cornerSite ∨ lower ∈ activeSiteData.sites)
+    (hupper : upper = cornerSite ∨ upper ∈ activeSiteData.sites)
+    (hv : Figure18Site.vCompatible lower upper = true) :
+    (thinBlockAtSite lower).vBoundaryMatches (thinBlockAtSite upper) ∧
+      (thickBlockAtSite lower).vBoundaryMatches (thickBlockAtSite upper) ∧
+      (blackBlockAtSite lower).vBoundaryMatches (blackBlockAtSite upper) :=
+  generatedStackVBoundaries_of_pairCompatibilityBool hcheck
+    (mem_generatedStackAllowedSites_of_listed hlower)
+    (mem_generatedStackAllowedSites_of_listed hupper) hv
+
 def HasGeneratedStackCompatibilityForListedActiveSiteRectangles
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : Prop :=
