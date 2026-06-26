@@ -4692,6 +4692,10 @@ structure RobinsonBoardSignalGeometryTower : Type where
     RobinsonBoardSignalGeometry.CoordinateStep
       (geometries level) (geometries (level + 1))
 
+/-- Existence of the pure Robinson Section 7 obstruction-geometry tower. -/
+def HasRobinsonBoardSignalGeometryTower : Prop :=
+  Nonempty RobinsonBoardSignalGeometryTower
+
 /--
 Robinson Section 7 certificate for one red board level.
 
@@ -5930,6 +5934,63 @@ def HasFigure18RobinsonBoardGeometryTowerRoutingForTable
               (geometryTower.geometries level))
 
 /--
+Figure 18 routing over a fixed Robinson obstruction-geometry tower.
+
+This is the payload-dependent half of the Section 7 proof once the pure
+board/free-line geometry has been chosen.
+-/
+def HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+    (table : Figure18RoleTable)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          Figure18RobinsonBoardSignalCertificate.Routing table x
+            (geometryTower.geometries level))
+
+/--
+Robinson Section 7 proof target with a single geometry tower selected
+independently of the payload tiles and the combined tiling.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∃ geometryTower : RobinsonBoardSignalGeometryTower,
+    HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+      table geometryTower
+
+/--
+Routing over one fixed geometry tower supplies the earlier geometry-plus-routing
+target.
+-/
+theorem hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
+    {table : Figure18RoleTable}
+    (geometryTower : RobinsonBoardSignalGeometryTower)
+    (hrouting :
+      HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardGeometryTowerRoutingForTable table := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨⟨geometryTower, routing⟩⟩
+
+/--
+A fixed geometry tower with routing data is a direct refinement of the
+geometry-plus-routing target.
+-/
+theorem hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable table) :
+    HasFigure18RobinsonBoardGeometryTowerRoutingForTable table := by
+  rcases hrouting with ⟨geometryTower, hrouting⟩
+  exact hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_routingForGeometryTower
+    geometryTower hrouting
+
+/--
 The geometry-plus-routing target supplies the existing coherent local tower
 surface used downstream.
 -/
@@ -6189,6 +6250,37 @@ def HasFigure18RobinsonBoardGeometryTowerRouting
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
 
+/--
+Figure 18 routing over a fixed Robinson obstruction-geometry tower for a
+generated listed-active role table.
+-/
+def HasFigure18RobinsonBoardRoutingForGeometryTower
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  HasFigure18RobinsonBoardRoutingForGeometryTowerForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+    geometryTower
+
+/--
+Generated listed-active Figure 18 invariant with one geometry tower selected
+independently of the payload tiles and tiling.
+-/
+def HasFigure18RobinsonBoardFixedGeometryTowerRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+theorem hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRouting activeSites
+        cornerSite) :
+    HasFigure18RobinsonBoardGeometryTowerRouting activeSites cornerSite :=
+  hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
+    hrouting
+
 theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hrouting :
@@ -6196,6 +6288,16 @@ theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting
     HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
   hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_geometryTowerRouting
     hrouting
+
+theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_fixedGeometryTowerRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRouting activeSites
+        cornerSite) :
+    HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
+  hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
+      hrouting)
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -7406,6 +7508,11 @@ def HasRobinsonBoardGeometryTowerRoutingInvariant
     (D : Figure18ScaffoldData) : Prop :=
   HasFigure18RobinsonBoardGeometryTowerRouting D.activeSites D.cornerSite
 
+def HasRobinsonBoardFixedGeometryTowerRoutingInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardFixedGeometryTowerRouting
+    D.activeSites D.cornerSite
+
 def HasIndexedRoutedForces (D : Figure18ScaffoldData) : Prop :=
   HasFigure18IndexedRoutedFixedCornerSquares D.table.toRoleTable
 
@@ -7436,12 +7543,34 @@ def HasRobinsonBoardRoutedFreeGridInvariant.ofGeometryTowerRouting
     D.HasRobinsonBoardRoutedFreeGridInvariant :=
   hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting hrouting
 
+def HasRobinsonBoardGeometryTowerRoutingInvariant.ofFixedGeometryTowerRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant) :
+    D.HasRobinsonBoardGeometryTowerRoutingInvariant :=
+  hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
+    hrouting
+
+def HasRobinsonBoardRoutedFreeGridInvariant.ofFixedGeometryTowerRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant) :
+    D.HasRobinsonBoardRoutedFreeGridInvariant :=
+  hasFigure18RobinsonBoardRoutedFreeGrids_of_fixedGeometryTowerRouting
+    hrouting
+
 def HasIndexedRoutedForces.ofRobinsonBoardGeometryTowerRouting
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonBoardGeometryTowerRoutingInvariant) :
     D.HasIndexedRoutedForces :=
   HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
     (HasRobinsonBoardRoutedFreeGridInvariant.ofGeometryTowerRouting hrouting)
+
+def HasIndexedRoutedForces.ofRobinsonBoardFixedGeometryTowerRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant) :
+    D.HasIndexedRoutedForces :=
+  HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
+    (HasRobinsonBoardRoutedFreeGridInvariant.ofFixedGeometryTowerRouting
+      hrouting)
 
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold
@@ -7501,6 +7630,17 @@ def RoutedCertificate.ofRobinsonBoardGeometryTowerRoutingInvariant
       geometryRouting)
     realizes
 
+def RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingInvariant
+    (D : Figure18ScaffoldData)
+    (fixedGeometryRouting :
+      D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant D
+    (HasRobinsonBoardRoutedFreeGridInvariant.ofFixedGeometryTowerRouting
+      fixedGeometryRouting)
+    realizes
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
@@ -7516,6 +7656,16 @@ def RoutedCertificate.ofRobinsonBoardGeometryTowerRoutingLayerPatches
     D.RoutedCertificate :=
   RoutedCertificate.ofRobinsonBoardGeometryTowerRoutingInvariant D
     geometryRouting
+    (HasRealizationInvariant.ofLayerPatches patches)
+
+def RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingLayerPatches
+    (D : Figure18ScaffoldData)
+    (fixedGeometryRouting :
+      D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingInvariant D
+    fixedGeometryRouting
     (HasRealizationInvariant.ofLayerPatches patches)
 
 def RoutedCertificate.toIndexedRoutedCertificate
