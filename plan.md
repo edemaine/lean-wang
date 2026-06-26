@@ -487,6 +487,20 @@ This is the formal core of Theorem 10 in the paper.
 
 Instantiate the abstract scaffold theorem using the Ollinger/Robinson tileset from the paper.
 
+Robinson's original Section 7 argument is the clean route for the remaining
+Figure 18 geometry.  The proof should target a board/free-grid certificate:
+
+- red borders form nested boards of side `4^n - 1`;
+- obstruction signals mark exactly the non-free rows and columns of a board;
+- the unmarked free rows and columns can be enumerated as a contiguous
+  `2^n + 1`-by-`2^n + 1` grid after projection;
+- crossings of those free rows and columns are exactly the active Figure 18
+  sites, with the lower-left crossing the distinguished corner site.
+
+In Lean, this is represented by the `Figure18RobinsonBoardFreeGrid` target,
+which converts to the existing listed-active Figure 18 window invariant used by
+the abstract scaffold reduction.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,
