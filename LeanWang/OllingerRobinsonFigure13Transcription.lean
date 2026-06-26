@@ -4021,16 +4021,44 @@ structure Figure18RobinsonBoardSignalCertificate
     Fin (RobinsonSquare.freeGridSide level) → Int
   freeRowCoord :
     Fin (RobinsonSquare.freeGridSide level) → Int
+  isBoardColumn : Int → Prop
+  isBoardRow : Int → Prop
+  isFreeColumn : Int → Prop
+  isFreeRow : Int → Prop
   hasHorizontalObstruction : Int → Int → Prop
   hasVerticalObstruction : Int → Int → Prop
   freeRow_iff_noHorizontalObstruction :
-    ∀ i : Fin (RobinsonSquare.freeGridSide level),
-      ∀ j : Fin (RobinsonSquare.freeGridSide level),
-        ¬ hasHorizontalObstruction (freeColumnCoord i) (freeRowCoord j)
+    ∀ y : Int, isBoardRow y →
+      (isFreeRow y ↔
+        ∀ x : Int, isBoardColumn x → ¬ hasHorizontalObstruction x y)
   freeColumn_iff_noVerticalObstruction :
+    ∀ x : Int, isBoardColumn x →
+      (isFreeColumn x ↔
+        ∀ y : Int, isBoardRow y → ¬ hasVerticalObstruction x y)
+  freeColumnCoord_board :
     ∀ i : Fin (RobinsonSquare.freeGridSide level),
-      ∀ j : Fin (RobinsonSquare.freeGridSide level),
-        ¬ hasVerticalObstruction (freeColumnCoord i) (freeRowCoord j)
+      isBoardColumn (freeColumnCoord i)
+  freeRowCoord_board :
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      isBoardRow (freeRowCoord j)
+  freeColumnCoord_free :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      isFreeColumn (freeColumnCoord i)
+  freeRowCoord_free :
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      isFreeRow (freeRowCoord j)
+  freeColumnCoord_complete :
+    ∀ x : Int, isFreeColumn x →
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        freeColumnCoord i = x
+  freeRowCoord_complete :
+    ∀ y : Int, isFreeRow y →
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        freeRowCoord j = y
+  freeColumnCoord_injective :
+    Function.Injective freeColumnCoord
+  freeRowCoord_injective :
+    Function.Injective freeRowCoord
   siteRect :
     Fin (RobinsonSquare.freeGridSide level) →
       Fin (RobinsonSquare.freeGridSide level) → Figure18Site
