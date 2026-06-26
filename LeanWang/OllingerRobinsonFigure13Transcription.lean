@@ -1536,6 +1536,17 @@ theorem combinedSite_product
   rw [table.combinedSite_tile tile]
   exact hproduct
 
+theorem combinedSite_eq_of_product_site
+    (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
+    (tile : TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (site : Figure18Site) (payload : WangTile)
+    (hproduct : WangTile.product site.tile payload = tile.1) :
+    table.combinedSite tile = site := by
+  rcases table.combinedSite_product tile with
+    ⟨combinedPayload, hcombined⟩
+  apply Figure18Site.tile_injective
+  exact (product_eq_iff.1 (hcombined.trans hproduct.symm)).1
+
 theorem combinedSite_hCompatible_of_validPlaneTiling
     (table : Figure18RoleTable) {T : TileSet} {seed : WangTile}
     {x : Int × Int →
@@ -3527,6 +3538,92 @@ theorem hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_exists
     listedActive := listedActive
     corner := corner
   }⟩
+
+theorem hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_indexedActive
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hindexed :
+      HasFigure18IndexedActiveCornerWindows
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSites cornerSite).toRoleTable) :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindows
+      activeSites cornerSite := by
+  intro T seed x hx n hn
+  let flatTable :=
+    Figure18RoleTable.FlatRoleTable.ofActiveSites activeSites cornerSite
+  let table := flatTable.toRoleTable
+  rcases hindexed x hx n hn with ⟨window⟩
+  refine ⟨{
+    horizontalCoord := fun i => window.origin.1 + Int.ofNat i.val
+    verticalCoord := fun j => window.origin.2 + Int.ofNat j.val
+    horizontalCoord_succ := ?_
+    verticalCoord_succ := ?_
+    listedActive := ?_
+    corner := ?_
+  }⟩
+  · intro i hi
+    change window.origin.1 + Int.ofNat (i.val + 1) =
+      window.origin.1 + Int.ofNat i.val + 1
+    norm_num
+    exact (add_assoc window.origin.1 (Int.ofNat i.val) (1 : Int)).symm
+  · intro j hj
+    change window.origin.2 + Int.ofNat (j.val + 1) =
+      window.origin.2 + Int.ofNat j.val + 1
+    norm_num
+    exact (add_assoc window.origin.2 (Int.ofNat j.val) (1 : Int)).symm
+  · intro i j
+    let site : Figure18Site := {
+      index := window.indexRect i j
+      quadrant := window.quadrantRect i j
+    }
+    have hsite :
+        table.combinedSite
+          (x (window.origin.1 + Int.ofNat i.val,
+            window.origin.2 + Int.ofNat j.val)) = site := by
+      rcases window.product i j with ⟨payload, hproduct⟩
+      exact table.combinedSite_eq_of_product_site
+        (x (window.origin.1 + Int.ofNat i.val,
+          window.origin.2 + Int.ofNat j.val))
+        site payload hproduct
+    rw [hsite]
+    have hactiveRole :
+        CellRole.isActive (table.roleAtSite site) = true := by
+      simpa [table, site, Figure18RoleTable.roleAtSite] using
+        window.active i j
+    have hrole :
+        Figure18RoleTable.roleOfActiveSites activeSites cornerSite site =
+          table.roleAtSite site := by
+      exact (Figure18RoleTable.FlatRoleTable.ofActiveSites_roleAtSite
+        activeSites cornerSite site).symm
+    exact (Figure18RoleTable.isActive_roleOfActiveSites_iff
+      activeSites cornerSite site).1 (by simpa [hrole] using hactiveRole)
+  · let site : Figure18Site := {
+      index := window.indexRect ⟨0, hn⟩ ⟨0, hn⟩
+      quadrant := window.quadrantRect ⟨0, hn⟩ ⟨0, hn⟩
+    }
+    have hsite :
+        table.combinedSite
+          (x (window.origin.1 + Int.ofNat (⟨0, hn⟩ : Fin n).val,
+            window.origin.2 + Int.ofNat (⟨0, hn⟩ : Fin n).val)) =
+            site := by
+      rcases window.product ⟨0, hn⟩ ⟨0, hn⟩ with
+        ⟨payload, hproduct⟩
+      exact table.combinedSite_eq_of_product_site
+        (x (window.origin.1 + Int.ofNat (⟨0, hn⟩ : Fin n).val,
+          window.origin.2 + Int.ofNat (⟨0, hn⟩ : Fin n).val))
+        site payload hproduct
+    have hcornerRole : table.roleAtSite site = CellRole.corner := by
+      simpa [table, site, Figure18RoleTable.roleAtSite] using
+        window.corner
+    have hrole :
+        Figure18RoleTable.roleOfActiveSites activeSites cornerSite site =
+          table.roleAtSite site := by
+      exact (Figure18RoleTable.FlatRoleTable.ofActiveSites_roleAtSite
+        activeSites cornerSite site).symm
+    have hcorner : site = cornerSite :=
+      (Figure18RoleTable.roleOfActiveSites_eq_corner_iff
+        activeSites cornerSite site).1
+        (by simpa [hrole] using hcornerRole)
+    exact hsite.trans hcorner
 
 theorem hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
