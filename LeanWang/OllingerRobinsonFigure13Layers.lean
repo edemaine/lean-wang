@@ -2599,6 +2599,60 @@ theorem layerData_componentAtSiteLayer
       some (LayerComponent.ofLayer layer component) :=
   rows.layerData_componentAtLayerAt hcomponent
 
+theorem ofSparse_layerData_componentAtLayerAt_thin
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92} {thin : Figure16.Thin}
+    (hmem : (index.val, thin) ∈ rows.thinEntries) :
+    (ofSparse rows).layerData.componentAtLayerAt index .thin =
+      some (LayerComponent.thin thin) :=
+  (ofSparse rows).layerData_componentAtLayerAt_thin
+    (ofSparse_thinAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtLayerAt_thick
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92} {thick : Figure16.Thick}
+    (hmem : (index.val, thick) ∈ rows.thickEntries) :
+    (ofSparse rows).layerData.componentAtLayerAt index .thick =
+      some (LayerComponent.thick thick) :=
+  (ofSparse rows).layerData_componentAtLayerAt_thick
+    (ofSparse_thickAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtLayerAt_black
+    (rows : CheckedSparseSeparateLayerRows)
+    {index : Fin 92} {black : Figure16.Black}
+    (hmem : (index.val, black) ∈ rows.blackEntries) :
+    (ofSparse rows).layerData.componentAtLayerAt index .black =
+      some (LayerComponent.black black) :=
+  (ofSparse rows).layerData_componentAtLayerAt_black
+    (ofSparse_blackAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtSiteLayer_thin
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site} {thin : Figure16.Thin}
+    (hmem : (site.index.val, thin) ∈ rows.thinEntries) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .thin =
+      some (LayerComponent.thin thin) :=
+  (ofSparse rows).layerData_componentAtSiteLayer_thin
+    (ofSparse_thinAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtSiteLayer_thick
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site} {thick : Figure16.Thick}
+    (hmem : (site.index.val, thick) ∈ rows.thickEntries) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .thick =
+      some (LayerComponent.thick thick) :=
+  (ofSparse rows).layerData_componentAtSiteLayer_thick
+    (ofSparse_thickAt_of_mem rows hmem)
+
+theorem ofSparse_layerData_componentAtSiteLayer_black
+    (rows : CheckedSparseSeparateLayerRows)
+    {site : Figure18Site} {black : Figure16.Black}
+    (hmem : (site.index.val, black) ∈ rows.blackEntries) :
+    (ofSparse rows).layerData.componentAtSiteLayer site .black =
+      some (LayerComponent.black black) :=
+  (ofSparse rows).layerData_componentAtSiteLayer_black
+    (ofSparse_blackAt_of_mem rows hmem)
+
 def toCheckedRawData
     (rows : CheckedSeparateLayerRows)
     (activeSiteSpecs : List (Nat × Quadrant))
