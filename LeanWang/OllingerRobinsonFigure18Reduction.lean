@@ -10737,6 +10737,262 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated
+position-coded source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_product_boxes_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_l2c1_product_indexedBoxes_position_source
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated
+position-coded source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_product_boxes_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_l2c1_product_indexedBoxes_position_source
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes h
+
+/--
+Encoded domino undecidability from the second audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated
+position-coded source-route obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_product_boxes_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_l2c2_product_indexedBoxes_position_source
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated
+position-coded source-route obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_product_boxes_position_source
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_l2c2_product_indexedBoxes_position_source
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes h
+
+/--
+Encoded domino undecidability from the first audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_product_boxes_interiorRows
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_l2c1_product_indexedBoxes_interiorRows
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_product_boxes_interiorRows
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_l2c1_product_indexedBoxes_interiorRows
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_product_boxes_interiorRows
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_l2c2_product_indexedBoxes_interiorRows
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank Figure 18
+candidate, product-witness routing over the canonical Robinson Section 7
+obstruction-geometry tower, active-corner indexed boxes, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_product_boxes_interiorRows
+    (hrouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_l2c2_product_indexedBoxes_interiorRows
+    (hasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable_of_canonical
+      hrouting)
+    hboxes hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank Figure 18
 candidate, a coherent Robinson Section 7 local obstruction-signal tower,
 finite active-corner indexed boxes, and generated position-coded source-route
 obligations.
