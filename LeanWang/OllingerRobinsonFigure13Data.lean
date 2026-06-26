@@ -2740,6 +2740,79 @@ theorem cornerSiteOfNat_quadrant
   rfl
 
 /--
+Generated flat Figure 18 role table from raw Nat-indexed active sites.
+
+This names the `ofActiveSites` route used by the scaffold theorem surface, so
+the finite Figure 18 transcription can be stated in terms of Nat-indexed paper
+data without re-spelling the generated flat-table construction.
+-/
+def flatRoleTableOfNatSites
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    Figure18RoleTable.FlatRoleTable :=
+  Figure18RoleTable.FlatRoleTable.ofActiveSites
+    (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+    (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+
+@[simp]
+theorem flatRoleTableOfNatSites_cornerSite
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).cornerSite =
+        cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid :=
+  rfl
+
+theorem mem_flatRoleTableOfNatSites_activeSites_iff
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (site : Figure18Site) :
+    site ∈ (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).activeSites ↔
+      site =
+        cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid ∨
+      site ∈
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites := by
+  exact Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_iff
+    (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+    (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+    site
+
+theorem generatedStackAllowedSitePairCompatibilityBool_flatRoleTableOfNatSites
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    generatedStackAllowedSitePairCompatibilityBool
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).activeSiteData
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).cornerSite = true := by
+  rw [flatRoleTableOfNatSites_cornerSite]
+  simpa [flatRoleTableOfNatSites] using
+    generatedStackAllowedSitePairCompatibilityBool_ofActiveSites
+      (activeSiteData :=
+        activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSite :=
+        cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hpair
+
+/--
 Concrete sparse raw data from raw active-site specs and a raw checked corner.
 
 This is the finite data-entry target for the scaffold transcription: the
@@ -3248,6 +3321,18 @@ theorem figure18ScaffoldDataOfNatSites_tiles
   (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid).tiles_eq
 
+theorem figure18ScaffoldDataOfNatSites_table
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table =
+        flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid := by
+  rfl
+
 def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -3336,6 +3421,23 @@ def ofCertificate
       certificate.localFreeSquares
   pairCompatibility := hpair
   realizes := certificate.realizes
+
+theorem flatRoleTable_pairCompatibility
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    generatedStackAllowedSitePairCompatibilityBool
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).activeSiteData
+      (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).cornerSite = true :=
+  generatedStackAllowedSitePairCompatibilityBool_flatRoleTableOfNatSites
+    obligations.pairCompatibility
 
 end NatSiteObligations
 
