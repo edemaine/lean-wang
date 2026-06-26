@@ -2359,6 +2359,100 @@ def HasAllowedIndexedRoutedFixedCornerSquares
               (siteRectangleOfIndexedRoutedFixedCornerSquare window
                 i ⟨j.val + 1, hj⟩) = true)
 
+/--
+Local compatibility of the virtual neighboring sites selected by Robinson's
+routed board/free-grid geometry.
+
+This is a geometric condition only: it does not assert that the selected sites
+belong to the active-site list.  For generated flat role tables, that membership
+follows from the `active` field of `Figure18RobinsonBoardRoutedFreeGrid`.
+-/
+def HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn),
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+        Figure18Site.hCompatible
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j)
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
+            true) ∧
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+        Figure18Site.vCompatible
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j)
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
+            true)
+
+/--
+Robinson routed free-grid witnesses whose selected site rectangles are allowed
+by the active/corner data and locally compatible for the generated layer-stack
+checker.
+-/
+def HasAllowedRobinsonBoardRoutedFreeGrids
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn),
+      (∀ i : Fin n, ∀ j : Fin n,
+        siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j =
+          cornerSite ∨
+        siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j ∈
+          activeSiteData.sites) ∧
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+        Figure18Site.hCompatible
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j)
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare ⟨i.val + 1, hi⟩ j) =
+            true) ∧
+      (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+        Figure18Site.vCompatible
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i j)
+          (siteRectangleOfIndexedRoutedFixedCornerSquare
+            grid.toIndexedRoutedFixedCornerSquare i ⟨j.val + 1, hj⟩) =
+            true)
+
+theorem hasAllowedRobinsonBoardRoutedFreeGrids_of_flatRoleTable
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcompatible :
+      HasLocallyCompatibleRobinsonBoardRoutedFreeGrids
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable) :
+    HasAllowedRobinsonBoardRoutedFreeGrids activeSiteData cornerSite
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable := by
+  intro T seed x n hn grid
+  rcases hcompatible grid with ⟨hh, hv⟩
+  refine ⟨?_, hh, hv⟩
+  intro i j
+  have hactiveRole :
+      CellRole.isActive
+        ((Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable.roleAtSite
+            (siteRectangleOfIndexedRoutedFixedCornerSquare
+              grid.toIndexedRoutedFixedCornerSquare i j)) = true := by
+    simpa [Figure18RobinsonBoardRoutedFreeGrid.toIndexedRoutedFixedCornerSquare,
+      Figure18IndexedRoutedFixedCornerSquare.ofSiteMatches,
+      siteRectangleOfIndexedRoutedFixedCornerSquare] using grid.active i j
+  exact (Figure18RoleTable.isActive_roleOfActiveSites_iff
+    activeSiteData.sites cornerSite
+    (siteRectangleOfIndexedRoutedFixedCornerSquare
+      grid.toIndexedRoutedFixedCornerSquare i j)).1
+    (by
+      simpa [Figure18RoleTable.FlatRoleTable.ofActiveSites_roleAtSite]
+        using hactiveRole)
+
 theorem sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -2377,6 +2471,27 @@ theorem sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
       activeSiteData cornerSite hcheck R hsites hh hv with
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
+
+theorem sparseRawDataOfSites_hasCheckedStacksForRobinsonBoardRoutedFreeGrids_of_allowed
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {table : Figure18RoleTable}
+    (hallowed :
+      HasAllowedRobinsonBoardRoutedFreeGrids activeSiteData cornerSite table) :
+    (sparseRawDataOfSites
+      activeSiteData cornerSite).HasCheckedStacksForRobinsonBoardRoutedFreeGrids
+      table := by
+  intro T seed x n hn grid
+  rcases hallowed grid with ⟨hsites, hh, hv⟩
+  let window := grid.toIndexedRoutedFixedCornerSquare
+  let R := siteRectangleOfIndexedRoutedFixedCornerSquare window
+  rcases sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+      activeSiteData cornerSite hcheck R hsites hh hv with
+    ⟨stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨stackData, hsite, hmatch, hcompatible⟩
 
 theorem hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
     (activeSiteData : Figure18Site.CheckedNatSpecs)
@@ -3450,6 +3565,42 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
       cornerIndex cornerQuadrant cornerIndex_valid)
     hgrids hstacks realizes
 
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRobinsonBoardRoutedFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hallowed :
+      HasAllowedRobinsonBoardRoutedFreeGrids
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hgrids
+    (sparseRawDataOfSites_hasCheckedStacksForRobinsonBoardRoutedFreeGrids_of_allowed
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck hallowed)
+    realizes
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -4507,6 +4658,40 @@ def ofFreeGrids
     CheckedSparseRawData.hasRobinsonBoardRoutedFreeGridCheckedStacks_of_freeGrids
       hgrids hstacks
   realizes := realizes
+
+def ofAllowedFreeGrids
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hallowed :
+      HasAllowedRobinsonBoardRoutedFreeGrids
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofFreeGrids activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hgrids
+    (sparseRawDataOfSites_hasCheckedStacksForRobinsonBoardRoutedFreeGrids_of_allowed
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck hallowed)
+    realizes
 
 def activeSiteData (C : NatSiteRobinsonScaffoldCertificate) :
     Figure18Site.CheckedNatSpecs :=
