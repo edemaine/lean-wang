@@ -12988,6 +12988,110 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson-board corridor transmission and a raw Figure 13 plane tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_fig13_tiles_plane_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2Component1Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13TilesPlane
+        canonicalCorridorRouting hplane)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson-board corridor transmission and a raw Figure 13 plane tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_corridor_fig13_tiles_plane_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2Component1Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13TilesPlane
+        canonicalCorridorRouting hplane)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson-board corridor transmission and a raw Figure 13 plane tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_fig13_tiles_plane_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2Component2Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13TilesPlane
+        canonicalCorridorRouting hplane)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson-board corridor transmission and a raw Figure 13 plane tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_corridor_fig13_tiles_plane_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2Component2Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13TilesPlane
+        canonicalCorridorRouting hplane)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 canonical routing, translated positive-radius indexed boxes, and the generated
 position-code accumulator step.
 -/
