@@ -2410,6 +2410,18 @@ def blacks (rows : CheckedSparseSeparateLayerRows) :
     List (Option Figure16.Black) :=
   optionRowFromSparseEntries rows.blackEntries
 
+def entriesAt (rows : CheckedSparseSeparateLayerRows) :
+    (layer : Layer) → List (Nat × layer.Component)
+  | .thin => rows.thinEntries
+  | .thick => rows.thickEntries
+  | .black => rows.blackEntries
+
+def optionRowsAt (rows : CheckedSparseSeparateLayerRows) :
+    (layer : Layer) → List (Option layer.Component)
+  | .thin => rows.thins
+  | .thick => rows.thicks
+  | .black => rows.blacks
+
 @[simp]
 theorem thins_length (rows : CheckedSparseSeparateLayerRows) :
     rows.thins.length = 92 := by
@@ -2473,6 +2485,19 @@ theorem blackEntry_lookup (rows : CheckedSparseSeparateLayerRows)
     optionFromSparseEntries rows.blackEntries index.val = some black :=
   optionFromSparseEntries_eq_some_of_mem rows.blackIndices_nodup hmem
 
+theorem entry_lookup (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92} {component : layer.Component}
+    (hmem : (index.val, component) ∈ rows.entriesAt layer) :
+    optionFromSparseEntries (rows.entriesAt layer) index.val =
+      some component := by
+  cases layer with
+  | thin =>
+      exact rows.thinEntry_lookup hmem
+  | thick =>
+      exact rows.thickEntry_lookup hmem
+  | black =>
+      exact rows.blackEntry_lookup hmem
+
 theorem thinEntry_lookup_none (rows : CheckedSparseSeparateLayerRows)
     {index : Fin 92}
     (hnot : index.val ∉ rows.thinEntries.map Prod.fst) :
@@ -2490,6 +2515,18 @@ theorem blackEntry_lookup_none (rows : CheckedSparseSeparateLayerRows)
     (hnot : index.val ∉ rows.blackEntries.map Prod.fst) :
     optionFromSparseEntries rows.blackEntries index.val = none :=
   optionFromSparseEntries_eq_none_of_index_not_mem hnot
+
+theorem entry_lookup_none (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92}
+    (hnot : index.val ∉ (rows.entriesAt layer).map Prod.fst) :
+    optionFromSparseEntries (rows.entriesAt layer) index.val = none := by
+  cases layer with
+  | thin =>
+      exact rows.thinEntry_lookup_none hnot
+  | thick =>
+      exact rows.thickEntry_lookup_none hnot
+  | black =>
+      exact rows.blackEntry_lookup_none hnot
 
 end CheckedSparseSeparateLayerRows
 
@@ -2604,6 +2641,19 @@ theorem ofSparse_blackAt (rows : CheckedSparseSeparateLayerRows)
   rw [hblack] at hget
   exact Option.some.inj hget
 
+@[simp]
+theorem ofSparse_componentAt (rows : CheckedSparseSeparateLayerRows)
+    (layer : Layer) (index : Fin 92) :
+    (ofSparse rows).componentAt layer index =
+      optionFromSparseEntries (rows.entriesAt layer) index.val := by
+  cases layer with
+  | thin =>
+      exact ofSparse_thinAt rows index
+  | thick =>
+      exact ofSparse_thickAt rows index
+  | black =>
+      exact ofSparse_blackAt rows index
+
 theorem ofSparse_thinAt_of_mem
     (rows : CheckedSparseSeparateLayerRows)
     {index : Fin 92} {thin : Figure16.Thin}
@@ -2628,6 +2678,14 @@ theorem ofSparse_blackAt_of_mem
   rw [ofSparse_blackAt]
   exact rows.blackEntry_lookup hmem
 
+theorem ofSparse_componentAt_of_mem
+    (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92} {component : layer.Component}
+    (hmem : (index.val, component) ∈ rows.entriesAt layer) :
+    (ofSparse rows).componentAt layer index = some component := by
+  rw [ofSparse_componentAt]
+  exact rows.entry_lookup hmem
+
 theorem ofSparse_thinAt_eq_none_of_index_not_mem
     (rows : CheckedSparseSeparateLayerRows)
     {index : Fin 92}
@@ -2651,6 +2709,14 @@ theorem ofSparse_blackAt_eq_none_of_index_not_mem
     (ofSparse rows).blackAt index = none := by
   rw [ofSparse_blackAt]
   exact rows.blackEntry_lookup_none hnot
+
+theorem ofSparse_componentAt_eq_none_of_index_not_mem
+    (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92}
+    (hnot : index.val ∉ (rows.entriesAt layer).map Prod.fst) :
+    (ofSparse rows).componentAt layer index = none := by
+  rw [ofSparse_componentAt]
+  exact rows.entry_lookup_none hnot
 
 theorem layerRows_getElem?_components
     (rows : CheckedSeparateLayerRows) (index : Fin 92) :
@@ -2748,6 +2814,18 @@ theorem layerData_componentAtLayerAt
   | black =>
       exact rows.layerData_componentAtLayerAt_black hcomponent
 
+theorem layerData_componentAtLayerAt_none
+    {rows : CheckedSeparateLayerRows} {layer : Layer} {index : Fin 92}
+    (hcomponent : rows.componentAt layer index = none) :
+    rows.layerData.componentAtLayerAt index layer = none := by
+  cases layer with
+  | thin =>
+      exact rows.layerData_componentAtLayerAt_thin_none hcomponent
+  | thick =>
+      exact rows.layerData_componentAtLayerAt_thick_none hcomponent
+  | black =>
+      exact rows.layerData_componentAtLayerAt_black_none hcomponent
+
 theorem layerData_componentAtSiteLayer_thin
     {rows : CheckedSeparateLayerRows} {site : Figure18Site}
     {thin : Figure16.Thin}
@@ -2825,6 +2903,15 @@ theorem ofSparse_layerData_componentAtLayerAt_black
   (ofSparse rows).layerData_componentAtLayerAt_black
     (ofSparse_blackAt_of_mem rows hmem)
 
+theorem ofSparse_layerData_componentAtLayerAt
+    (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92} {component : layer.Component}
+    (hmem : (index.val, component) ∈ rows.entriesAt layer) :
+    (ofSparse rows).layerData.componentAtLayerAt index layer =
+      some (LayerComponent.ofLayer layer component) :=
+  (ofSparse rows).layerData_componentAtLayerAt
+    (ofSparse_componentAt_of_mem rows hmem)
+
 theorem ofSparse_layerData_componentAtLayerAt_thin_none
     (rows : CheckedSparseSeparateLayerRows)
     {index : Fin 92}
@@ -2848,6 +2935,14 @@ theorem ofSparse_layerData_componentAtLayerAt_black_none
     (ofSparse rows).layerData.componentAtLayerAt index .black = none :=
   (ofSparse rows).layerData_componentAtLayerAt_black_none
     (ofSparse_blackAt_eq_none_of_index_not_mem rows hnot)
+
+theorem ofSparse_layerData_componentAtLayerAt_none
+    (rows : CheckedSparseSeparateLayerRows)
+    {layer : Layer} {index : Fin 92}
+    (hnot : index.val ∉ (rows.entriesAt layer).map Prod.fst) :
+    (ofSparse rows).layerData.componentAtLayerAt index layer = none :=
+  (ofSparse rows).layerData_componentAtLayerAt_none
+    (ofSparse_componentAt_eq_none_of_index_not_mem rows hnot)
 
 theorem ofSparse_layerData_componentAtSiteLayer_thin
     (rows : CheckedSparseSeparateLayerRows)
