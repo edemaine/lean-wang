@@ -343,6 +343,110 @@ theorem monochromeTile_mem_completePayloads (T : TileSet) :
     (zero_mem_payloadPalette T)
     (zero_mem_payloadPalette T)
 
+/-- Inactive payload tile whose west edge absorbs a specified palette color. -/
+def inactivePayloadWithWest (c : Nat) : WangTile where
+  n := 0
+  s := 0
+  e := 0
+  w := c
+
+/-- Inactive payload tile whose east edge absorbs a specified palette color. -/
+def inactivePayloadWithEast (c : Nat) : WangTile where
+  n := 0
+  s := 0
+  e := c
+  w := 0
+
+/-- Inactive payload tile whose south edge absorbs a specified palette color. -/
+def inactivePayloadWithSouth (c : Nat) : WangTile where
+  n := 0
+  s := c
+  e := 0
+  w := 0
+
+/-- Inactive payload tile whose north edge absorbs a specified palette color. -/
+def inactivePayloadWithNorth (c : Nat) : WangTile where
+  n := c
+  s := 0
+  e := 0
+  w := 0
+
+theorem inactivePayloadWithWest_mem_completePayloads {T : TileSet} {c : Nat}
+    (hc : c ∈ payloadPalette T) :
+    inactivePayloadWithWest c ∈ completePayloads T := by
+  change ({ n := 0, s := 0, e := 0, w := c } : WangTile) ∈ completePayloads T
+  exact mk_mem_completePayloads
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    hc
+
+theorem inactivePayloadWithEast_mem_completePayloads {T : TileSet} {c : Nat}
+    (hc : c ∈ payloadPalette T) :
+    inactivePayloadWithEast c ∈ completePayloads T := by
+  change ({ n := 0, s := 0, e := c, w := 0 } : WangTile) ∈ completePayloads T
+  exact mk_mem_completePayloads
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    hc
+    (zero_mem_payloadPalette T)
+
+theorem inactivePayloadWithSouth_mem_completePayloads {T : TileSet} {c : Nat}
+    (hc : c ∈ payloadPalette T) :
+    inactivePayloadWithSouth c ∈ completePayloads T := by
+  change ({ n := 0, s := c, e := 0, w := 0 } : WangTile) ∈ completePayloads T
+  exact mk_mem_completePayloads
+    (zero_mem_payloadPalette T)
+    hc
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+
+theorem inactivePayloadWithNorth_mem_completePayloads {T : TileSet} {c : Nat}
+    (hc : c ∈ payloadPalette T) :
+    inactivePayloadWithNorth c ∈ completePayloads T := by
+  change ({ n := c, s := 0, e := 0, w := 0 } : WangTile) ∈ completePayloads T
+  exact mk_mem_completePayloads
+    hc
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+
+theorem hMatches_inactivePayloadWithWest (t : WangTile) :
+    WangTile.HMatches t (inactivePayloadWithWest t.e) := by
+  rfl
+
+theorem hMatches_inactivePayloadWithEast (t : WangTile) :
+    WangTile.HMatches (inactivePayloadWithEast t.w) t := by
+  rfl
+
+theorem vMatches_inactivePayloadWithSouth (t : WangTile) :
+    WangTile.VMatches t (inactivePayloadWithSouth t.n) := by
+  rfl
+
+theorem vMatches_inactivePayloadWithNorth (t : WangTile) :
+    WangTile.VMatches (inactivePayloadWithNorth t.s) t := by
+  rfl
+
+theorem inactivePayloadWithWest_mem_completePayloads_of_mem
+    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    inactivePayloadWithWest t.e ∈ completePayloads T :=
+  inactivePayloadWithWest_mem_completePayloads (mem_payloadPalette_e ht)
+
+theorem inactivePayloadWithEast_mem_completePayloads_of_mem
+    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    inactivePayloadWithEast t.w ∈ completePayloads T :=
+  inactivePayloadWithEast_mem_completePayloads (mem_payloadPalette_w ht)
+
+theorem inactivePayloadWithSouth_mem_completePayloads_of_mem
+    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    inactivePayloadWithSouth t.n ∈ completePayloads T :=
+  inactivePayloadWithSouth_mem_completePayloads (mem_payloadPalette_n ht)
+
+theorem inactivePayloadWithNorth_mem_completePayloads_of_mem
+    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    inactivePayloadWithNorth t.s ∈ completePayloads T :=
+  inactivePayloadWithNorth_mem_completePayloads (mem_payloadPalette_s ht)
+
 theorem tileColors_primrec : Primrec tileColors := by
   unfold tileColors
   exact Primrec.list_cons.comp WangTile.n_primrec
