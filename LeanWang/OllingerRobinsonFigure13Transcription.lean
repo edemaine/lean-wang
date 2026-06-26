@@ -4001,6 +4001,113 @@ def restrict
 end Figure18RobinsonBoardRoutedFreeGrid
 
 /--
+Robinson Section 7 certificate for one red board level.
+
+The original argument identifies the free rows and columns by obstruction
+signals: a row is free exactly when no horizontal obstruction signal crosses it,
+and a column is free exactly when no vertical obstruction signal crosses it.
+At crossings of selected free rows and columns, payload signals are routed
+through the intervening board cells.  This structure keeps those obstruction
+facts visible for the geometric proof while still carrying the routed payload
+data expected by `Figure18RobinsonBoardRoutedFreeGrid`.
+-/
+structure Figure18RobinsonBoardSignalCertificate
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    (level : Nat) : Type where
+  freeColumnCoord :
+    Fin (RobinsonSquare.freeGridSide level) → Int
+  freeRowCoord :
+    Fin (RobinsonSquare.freeGridSide level) → Int
+  hasHorizontalObstruction : Int → Int → Prop
+  hasVerticalObstruction : Int → Int → Prop
+  freeRow_iff_noHorizontalObstruction :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ¬ hasHorizontalObstruction (freeColumnCoord i) (freeRowCoord j)
+  freeColumn_iff_noVerticalObstruction :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ¬ hasVerticalObstruction (freeColumnCoord i) (freeRowCoord j)
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  payloadRect :
+    Rectangle (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide level)
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  product :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        WangTile.product (siteRect i j).tile (payloadRect i j) =
+          (x (freeColumnCoord i, freeRowCoord j)).1
+  hmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.HMatches (payloadRect i j)
+            (payloadRect ⟨i.val + 1, hi⟩ j)
+  vmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.VMatches (payloadRect i j)
+            (payloadRect i ⟨j.val + 1, hj⟩)
+
+namespace Figure18RobinsonBoardSignalCertificate
+
+/--
+Forget the Section 7 obstruction-signal bookkeeping after it has selected and
+routed the free grid.
+-/
+def toRoutedFreeGrid
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    Figure18RobinsonBoardRoutedFreeGrid table x
+      (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide_pos level) where
+  freeColumnCoord := certificate.freeColumnCoord
+  freeRowCoord := certificate.freeRowCoord
+  siteRect := certificate.siteRect
+  payloadRect := certificate.payloadRect
+  active := certificate.active
+  cornerSite := certificate.cornerSite
+  product := certificate.product
+  hmatch := certificate.hmatch
+  vmatch := certificate.vmatch
+
+end Figure18RobinsonBoardSignalCertificate
+
+/--
+Level-indexed Robinson Section 7 signal invariant.
+
+This is the intended geometric proof target from Robinson's original argument.
+It is stronger than the public routed-grid invariant because it also records
+the obstruction signals used to recognize the free rows and columns.
+-/
+def HasFigure18RobinsonBoardLevelSignalCertificatesForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty (Figure18RobinsonBoardSignalCertificate table x level)
+
+/--
 Level-indexed Robinson-board/free-grid invariant.
 
 This matches the recursive board proof more directly than the public
@@ -4018,6 +4125,18 @@ def HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable
         Nonempty (Figure18RobinsonBoardRoutedFreeGrid table x
           (RobinsonSquare.freeGridSide level)
           (RobinsonSquare.freeGridSide_pos level))
+
+/--
+Robinson's obstruction-signal board certificate is a direct refinement of the
+level-indexed routed free-grid certificate used downstream.
+-/
+theorem hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_signalCertificates
+    {table : Figure18RoleTable}
+    (hsignal : HasFigure18RobinsonBoardLevelSignalCertificatesForTable table) :
+    HasFigure18RobinsonBoardLevelRoutedFreeGridsForTable table := by
+  intro T seed x hx level
+  rcases hsignal x hx level with ⟨certificate⟩
+  exact ⟨certificate.toRoutedFreeGrid⟩
 
 /-- Robinson-board/free-grid invariant for a specified Figure 18 role table. -/
 def HasFigure18RobinsonBoardRoutedFreeGridsForTable
