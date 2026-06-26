@@ -8172,6 +8172,136 @@ theorem HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBox
   TranslatedActiveCornerIndexedBox.positive_nonempty_of_noAdjacentActive
     hboxes
 
+/--
+An active scaffold tile in a Figure 18 scaffold decodes to one of the generated
+active sites, with the distinguished corner included as an allowed active site.
+-/
+theorem exists_allowedSite_of_active_tile
+    (D : Figure18ScaffoldData)
+    (tile : TileIn D.scaffold.tiles)
+    (hactive : D.scaffold.active tile.1 = true) :
+    ∃ site : Figure18Site,
+      tile.1 = site.tile ∧
+        (site = D.cornerSite ∨ site ∈ D.activeSiteData.sites) := by
+  let table := D.table.toRoleTable
+  have htile : tile.1 ∈ table.presentation.tiles := by
+    simpa [table, scaffold, presentation] using tile.2
+  let site := table.siteOfPresentationTile tile.1 htile
+  refine ⟨site, (table.siteOfPresentationTile_tile htile).symm, ?_⟩
+  have hactiveRole :
+      CellRole.isActive (table.roleAtSite site) = true := by
+    have hactivePresentation :
+        CellRole.isActive (table.presentation.role tile.1) = true := by
+      simpa [table, scaffold, presentation] using hactive
+    rw [table.presentation_active_siteOfPresentationTile htile]
+      at hactivePresentation
+    exact hactivePresentation
+  have hmem : site ∈ D.table.activeSites := by
+    exact (D.table.mem_activeSites_iff site).2
+      ⟨table.siteOfPresentationTile_mem_all htile, hactiveRole⟩
+  simpa [table, Figure18ScaffoldData.table,
+    Figure18ScaffoldData.activeSites] using
+    (Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_iff
+      D.activeSites D.cornerSite site).1 hmem
+
+/--
+If the generated active/corner site set has no horizontally compatible pairs,
+then no valid translated box over the corresponding scaffold has adjacent
+active cells in the east direction.
+-/
+theorem no_active_hsucc_of_noAllowedSiteHPairs
+    (D : Figure18ScaffoldData)
+    (hno : ∀ left : Figure18Site,
+      left = D.cornerSite ∨ left ∈ D.activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = D.cornerSite ∨ right ∈ D.activeSiteData.sites →
+            Figure18Site.hCompatible left right = false)
+    {r : Nat} {origin : Int × Int}
+    {base : TranslatedBoxPattern D.scaffold.tiles r origin}
+    (base_valid : ValidTranslatedBoxTiling D.scaffold.tiles r origin base) :
+    ∀ p : TranslatedBox r origin,
+      ∀ hp : InTranslatedBox r origin (p.1.1 + 1, p.1.2),
+        D.scaffold.active (base p).1 = true →
+          D.scaffold.active
+            (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+            False := by
+  intro p hp hpActive hqActive
+  let q : TranslatedBox r origin := ⟨(p.1.1 + 1, p.1.2), hp⟩
+  rcases D.exists_allowedSite_of_active_tile (base p) hpActive with
+    ⟨left, hleftTile, hleftAllowed⟩
+  rcases D.exists_allowedSite_of_active_tile (base q) hqActive with
+    ⟨right, hrightTile, hrightAllowed⟩
+  have hcompatTrue : Figure18Site.hCompatible left right = true := by
+    apply Figure18Site.hCompatible_of_hMatches
+    simpa [q, hleftTile, hrightTile] using base_valid.1 p hp
+  have hcompatFalse : Figure18Site.hCompatible left right = false :=
+    hno left hleftAllowed right hrightAllowed
+  rw [hcompatFalse] at hcompatTrue
+  simp at hcompatTrue
+
+/--
+If the generated active/corner site set has no vertically compatible pairs,
+then no valid translated box over the corresponding scaffold has adjacent
+active cells in the north direction.
+-/
+theorem no_active_vsucc_of_noAllowedSiteVPairs
+    (D : Figure18ScaffoldData)
+    (hno : ∀ lower : Figure18Site,
+      lower = D.cornerSite ∨ lower ∈ D.activeSiteData.sites →
+        ∀ upper : Figure18Site,
+          upper = D.cornerSite ∨ upper ∈ D.activeSiteData.sites →
+            Figure18Site.vCompatible lower upper = false)
+    {r : Nat} {origin : Int × Int}
+    {base : TranslatedBoxPattern D.scaffold.tiles r origin}
+    (base_valid : ValidTranslatedBoxTiling D.scaffold.tiles r origin base) :
+    ∀ p : TranslatedBox r origin,
+      ∀ hp : InTranslatedBox r origin (p.1.1, p.1.2 + 1),
+        D.scaffold.active (base p).1 = true →
+          D.scaffold.active
+            (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+            False := by
+  intro p hp hpActive hqActive
+  let q : TranslatedBox r origin := ⟨(p.1.1, p.1.2 + 1), hp⟩
+  rcases D.exists_allowedSite_of_active_tile (base p) hpActive with
+    ⟨lower, hlowerTile, hlowerAllowed⟩
+  rcases D.exists_allowedSite_of_active_tile (base q) hqActive with
+    ⟨upper, hupperTile, hupperAllowed⟩
+  have hcompatTrue : Figure18Site.vCompatible lower upper = true := by
+    apply Figure18Site.vCompatible_of_vMatches
+    simpa [q, hlowerTile, hupperTile] using base_valid.2 p hp
+  have hcompatFalse : Figure18Site.vCompatible lower upper = false :=
+    hno lower hlowerAllowed upper hupperAllowed
+  rw [hcompatFalse] at hcompatTrue
+  simp at hcompatTrue
+
+/--
+Positive translated valid boxes become isolated-active boxes when the generated
+active/corner site set has no locally compatible active/corner neighbors.
+-/
+theorem HasPositiveTranslatedIsolatedActiveBoxInvariant.ofValidTranslatedBoxes
+    {D : Figure18ScaffoldData}
+    (hnoH : ∀ left : Figure18Site,
+      left = D.cornerSite ∨ left ∈ D.activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = D.cornerSite ∨ right ∈ D.activeSiteData.sites →
+            Figure18Site.hCompatible left right = false)
+    (hnoV : ∀ lower : Figure18Site,
+      lower = D.cornerSite ∨ lower ∈ D.activeSiteData.sites →
+        ∀ upper : Figure18Site,
+          upper = D.cornerSite ∨ upper ∈ D.activeSiteData.sites →
+            Figure18Site.vCompatible lower upper = false)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern D.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling D.scaffold.tiles r origin base) :
+    D.HasPositiveTranslatedIsolatedActiveBoxInvariant := by
+  intro r hr
+  rcases hboxes r hr with ⟨origin, base, base_valid⟩
+  exact ⟨origin, base, base_valid,
+    D.no_active_hsucc_of_noAllowedSiteHPairs hnoH base_valid,
+    D.no_active_vsucc_of_noAllowedSiteVPairs hnoV base_valid⟩
+
 theorem HasActiveCornerIndexedBoxInvariant.ofPositiveTranslated
     {D : Figure18ScaffoldData}
     (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :

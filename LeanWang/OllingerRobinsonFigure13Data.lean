@@ -4780,6 +4780,92 @@ theorem figure18ScaffoldDataOfNatSites_table
           cornerIndex cornerQuadrant cornerIndex_valid := by
   rfl
 
+def l2Component1Figure18ScaffoldData : Figure18ScaffoldData :=
+  figure18ScaffoldDataOfNatSites
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+
+def l2Component2Figure18ScaffoldData : Figure18ScaffoldData :=
+  figure18ScaffoldDataOfNatSites
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+
+theorem l2Component1Figure18ScaffoldDataNoHCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteHPairsBool
+      l2Component1Figure18ScaffoldData.activeSiteData
+      l2Component1Figure18ScaffoldData.cornerSite = true := by
+  decide
+
+theorem l2Component1Figure18ScaffoldDataNoVCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteVPairsBool
+      l2Component1Figure18ScaffoldData.activeSiteData
+      l2Component1Figure18ScaffoldData.cornerSite = true := by
+  decide
+
+theorem l2Component2Figure18ScaffoldDataNoHCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteHPairsBool
+      l2Component2Figure18ScaffoldData.activeSiteData
+      l2Component2Figure18ScaffoldData.cornerSite = true := by
+  decide
+
+theorem l2Component2Figure18ScaffoldDataNoVCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteVPairsBool
+      l2Component2Figure18ScaffoldData.activeSiteData
+      l2Component2Figure18ScaffoldData.cornerSite = true := by
+  decide
+
+theorem l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData := by
+  apply
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant.ofValidTranslatedBoxes
+  · intro left hleft right hright
+    exact
+      (noGeneratedStackAllowedSiteHPairsBool_eq_true_iff.1
+        l2Component1Figure18ScaffoldDataNoHCompatibleAllowedSitesBool)
+        left hleft right hright
+  · intro lower hlower upper hupper
+    exact
+      (noGeneratedStackAllowedSiteVPairsBool_eq_true_iff.1
+        l2Component1Figure18ScaffoldDataNoVCompatibleAllowedSitesBool)
+        lower hlower upper hupper
+  · exact hboxes
+
+theorem l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData := by
+  apply
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant.ofValidTranslatedBoxes
+  · intro left hleft right hright
+    exact
+      (noGeneratedStackAllowedSiteHPairsBool_eq_true_iff.1
+        l2Component2Figure18ScaffoldDataNoHCompatibleAllowedSitesBool)
+        left hleft right hright
+  · intro lower hlower upper hupper
+    exact
+      (noGeneratedStackAllowedSiteVPairsBool_eq_true_iff.1
+        l2Component2Figure18ScaffoldDataNoVCompatibleAllowedSitesBool)
+        lower hlower upper hupper
+  · exact hboxes
+
 def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
