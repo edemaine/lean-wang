@@ -1078,19 +1078,6 @@ theorem domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interior
   domino_problem_undecidable_of_checked_raw_indexed_routed_interiorRows
     data.toCheckedRawData certificate hinterior hcorrect
 
-private abbrev ORCheckedSparseSeparateLayerRows :=
-  OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseSeparateLayerRows
-
-private abbrev ORCheckedSparseRawData :=
-  OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData
-
-private abbrev checkedSparseRawDataOfSites
-    (layerRows : ORCheckedSparseSeparateLayerRows)
-    (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
-    (cornerSite : OllingerRobinson.Figure18Site) : ORCheckedSparseRawData :=
-  OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData.ofCheckedSites
-    layerRows activeSiteData cornerSite
-
 /--
 Encoded domino undecidability from the preferred concrete sparse layered data
 entry shape: sparse Figure 13 layer rows, checked active Figure 18 sites, a
@@ -1099,17 +1086,19 @@ generated position-coded source-route obligations.
 -/
 theorem
     encoded_domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_position_source
-    (layerRows : ORCheckedSparseSeparateLayerRows)
+    (layerRows :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseLayerRows)
     (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
-      (checkedSparseRawDataOfSites
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
     encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
-      (checkedSparseRawDataOfSites layerRows activeSiteData cornerSite)
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
+        layerRows activeSiteData cornerSite)
       certificate h
 
 /--
@@ -1120,17 +1109,19 @@ generated position-coded source-route obligations.
 -/
 theorem
     domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_position_source
-    (layerRows : ORCheckedSparseSeparateLayerRows)
+    (layerRows :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseLayerRows)
     (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
-      (checkedSparseRawDataOfSites
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
     domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_position_source
-      (checkedSparseRawDataOfSites layerRows activeSiteData cornerSite)
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
+        layerRows activeSiteData cornerSite)
       certificate h
 
 /--
@@ -1139,11 +1130,12 @@ entry shape and the generated interior position-code rows.
 -/
 theorem
     encoded_domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_interiorRows
-    (layerRows : ORCheckedSparseSeparateLayerRows)
+    (layerRows :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseLayerRows)
     (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
-      (checkedSparseRawDataOfSites
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
@@ -1155,7 +1147,8 @@ theorem
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
     encoded_domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
-      (checkedSparseRawDataOfSites layerRows activeSiteData cornerSite)
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
+        layerRows activeSiteData cornerSite)
       certificate hinterior hcorrect
 
 /--
@@ -1163,11 +1156,12 @@ Unencoded domino undecidability from the preferred concrete sparse layered data
 entry shape and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_interiorRows
-    (layerRows : ORCheckedSparseSeparateLayerRows)
+    (layerRows :
+      OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseLayerRows)
     (activeSiteData : OllingerRobinson.Figure18Site.CheckedNatSpecs)
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
-      (checkedSparseRawDataOfSites
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
@@ -1179,7 +1173,8 @@ theorem domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_interi
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
     domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interiorRows
-      (checkedSparseRawDataOfSites layerRows activeSiteData cornerSite)
+      (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
+        layerRows activeSiteData cornerSite)
       certificate hinterior hcorrect
 
 /--

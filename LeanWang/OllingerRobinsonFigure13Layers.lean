@@ -3076,6 +3076,16 @@ theorem ofCheckedSites_cornerSite
 
 end CheckedSparseRawData
 
+abbrev CheckedSparseLayerRows := CheckedSparseSeparateLayerRows
+
+abbrev CheckedSparseScaffoldData := CheckedSparseRawData
+
+def checkedSparseScaffoldDataOfSites
+    (layerRows : CheckedSparseLayerRows)
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : CheckedSparseScaffoldData :=
+  CheckedSparseRawData.ofCheckedSites layerRows activeSiteData cornerSite
+
 namespace CheckedSeparateLayerRows
 
 /--
