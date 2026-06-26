@@ -4383,6 +4383,35 @@ structure Figure18RobinsonBoardSignalCertificate
 
 namespace Figure18RobinsonBoardSignalCertificate
 
+/--
+The Figure 18 sites selected by a Robinson signal certificate are locally
+compatible as virtual neighbors in the payload grid.
+
+This is the finite site-level condition needed by the generated layer-stack
+checker.  It is deliberately separate from `hmatch` and `vmatch`, which record
+payload-edge matches in the routed Wang square.
+-/
+def SiteCompatible
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    Prop :=
+  (∀ i : Fin (RobinsonSquare.freeGridSide level),
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+    ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+      Figure18Site.hCompatible
+        (certificate.siteRect i j)
+        (certificate.siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+  (∀ i : Fin (RobinsonSquare.freeGridSide level),
+    ∀ j : Fin (RobinsonSquare.freeGridSide level),
+    ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+      Figure18Site.vCompatible
+        (certificate.siteRect i j)
+        (certificate.siteRect i ⟨j.val + 1, hj⟩) = true)
+
 /-- The selected free columns are exactly the columns enumerated by the certificate. -/
 theorem isFreeColumn_iff_exists_freeColumnCoord
     {table : Figure18RoleTable}
@@ -4726,6 +4755,33 @@ def HasFigure18RobinsonBoardLevelSignalCertificatesForTable
       table.presentation.toScaffold T seed) x →
       ∀ level : Nat,
         Nonempty (Figure18RobinsonBoardSignalCertificate table x level)
+
+/--
+Level-indexed Robinson Section 7 signal invariant with finite local site
+compatibility for the selected virtual free-grid neighbors.
+-/
+def HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ level : Nat,
+        Nonempty
+          { certificate :
+              Figure18RobinsonBoardSignalCertificate table x level //
+            certificate.SiteCompatible }
+
+/-- Forget the finite local site checks from a local signal certificate. -/
+theorem hasFigure18RobinsonBoardLevelSignalCertificatesForTable_of_local
+    {table : Figure18RoleTable}
+    (hlocal :
+      HasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable table) :
+    HasFigure18RobinsonBoardLevelSignalCertificatesForTable table := by
+  intro T seed x hx level
+  rcases hlocal x hx level with ⟨certificate, _hsite⟩
+  exact ⟨certificate⟩
 
 /--
 Level-indexed Robinson Section 7 signal invariant with the free-line
