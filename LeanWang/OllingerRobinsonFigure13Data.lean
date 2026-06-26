@@ -8071,6 +8071,54 @@ def ofL2C2FixedGeometryProductRoutingFreeGridsLayerPatches
     (NatSiteRobinsonCompatibleLevelObligations.ofL2C2FixedGeometryProductRoutingLayerPatches
       fixedGeometryRouting patches)
 
+/--
+Concrete L2 component-1 entry point using product-witness fixed Robinson
+Section 7 obstruction geometry with Figure 18 routing and active-corner
+indexed boxes.
+-/
+def ofL2C1FixedGeometryProductRoutingFreeGridsIndexedBoxes
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C1FixedGeometryProductRoutingFreeGridsLayerPatches fixedGeometryRouting
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
+
+/--
+Concrete L2 component-2 entry point using product-witness fixed Robinson
+Section 7 obstruction geometry with Figure 18 routing and active-corner
+indexed boxes.
+-/
+def ofL2C2FixedGeometryProductRoutingFreeGridsIndexedBoxes
+    (fixedGeometryRouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    NatSiteRobinsonScaffoldCertificate :=
+  ofL2C2FixedGeometryProductRoutingFreeGridsLayerPatches fixedGeometryRouting
+    (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes)
+
 def ofL2C2SignalLocalTowerFreeGridsIndexedBoxes
     (signalLocalTower :
       HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
