@@ -8513,6 +8513,61 @@ theorem tiles_eq (D : Figure18ScaffoldData) :
     D.tiles = figure18ScaffoldTiles :=
   D.presentation_tiles
 
+/--
+The remaining Robinson-board tileability target is independent of the chosen
+active/corner sites: every `Figure18ScaffoldData` presentation uses the same
+subdivided Figure 13 scaffold tiles.
+-/
+theorem positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+    (D : Figure18ScaffoldData)
+    (hboxes : ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern D.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling D.scaffold.tiles r origin base :=
+  positiveTranslatedValidBoxes_of_tileableBoxes
+    (fun r hr => by
+      simpa [D.scaffold_tiles] using hboxes r hr)
+
+/--
+Shared route from Robinson-board tileability of the concrete Figure 18
+scaffold tiles to the isolated-active-box invariant for a particular active
+site choice.
+-/
+theorem HasPositiveTranslatedIsolatedActiveBoxInvariant.ofFigure18ScaffoldTileableBoxes
+    {D : Figure18ScaffoldData}
+    (hnoH : ∀ left : Figure18Site,
+      left = D.cornerSite ∨ left ∈ D.activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = D.cornerSite ∨ right ∈ D.activeSiteData.sites →
+            Figure18Site.hCompatible left right = false)
+    (hnoV : ∀ lower : Figure18Site,
+      lower = D.cornerSite ∨ lower ∈ D.activeSiteData.sites →
+        ∀ upper : Figure18Site,
+          upper = D.cornerSite ∨ upper ∈ D.activeSiteData.sites →
+            Figure18Site.vCompatible lower upper = false)
+    (hboxes : ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r) :
+    D.HasPositiveTranslatedIsolatedActiveBoxInvariant :=
+  HasPositiveTranslatedIsolatedActiveBoxInvariant.ofValidTranslatedBoxes hnoH hnoV
+    (positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes D hboxes)
+
+theorem isolatedActiveBoxes_ofFigure18ScaffoldTileableBoxes
+    {D : Figure18ScaffoldData}
+    (hnoH : ∀ left : Figure18Site,
+      left = D.cornerSite ∨ left ∈ D.activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = D.cornerSite ∨ right ∈ D.activeSiteData.sites →
+            Figure18Site.hCompatible left right = false)
+    (hnoV : ∀ lower : Figure18Site,
+      lower = D.cornerSite ∨ lower ∈ D.activeSiteData.sites →
+        ∀ upper : Figure18Site,
+          upper = D.cornerSite ∨ upper ∈ D.activeSiteData.sites →
+            Figure18Site.vCompatible lower upper = false)
+    (hboxes : ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r) :
+    D.HasPositiveTranslatedIsolatedActiveBoxInvariant :=
+  HasPositiveTranslatedIsolatedActiveBoxInvariant.ofFigure18ScaffoldTileableBoxes
+    hnoH hnoV hboxes
+
 theorem corner_mem_table_activeSites (D : Figure18ScaffoldData) :
     D.cornerSite ∈ D.table.activeSites :=
   Figure18RoleTable.FlatRoleTable.corner_mem_ofActiveSites_activeSites
