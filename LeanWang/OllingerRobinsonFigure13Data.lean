@@ -1663,6 +1663,26 @@ theorem
       generatedStackAllowedSitePairFailures activeSiteData cornerSite = [] :=
   generatedStackSitePairCompatibilityBool_eq_true_iff_failures_eq_nil
 
+theorem generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hfailures :
+      generatedStackAllowedSitePairFailures activeSiteData cornerSite = []) :
+    generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+      true :=
+  generatedStackAllowedSitePairCompatibilityBool_eq_true_iff_failures_eq_nil.2
+    hfailures
+
+theorem generatedStackAllowedSitePairFailures_eq_nil_of_pairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true) :
+    generatedStackAllowedSitePairFailures activeSiteData cornerSite = [] :=
+  generatedStackAllowedSitePairCompatibilityBool_eq_true_iff_failures_eq_nil.1
+    hpair
+
 theorem generatedStackSitePairCompatibilityBool_of_subset
     {sites sites' : List Figure18Site}
     (hcheck : generatedStackSitePairCompatibilityBool sites = true)
@@ -2740,6 +2760,17 @@ def ofCertificate
   pairCompatibility := hpair
   realizes := certificate.realizes
 
+def ofCertificateFailures
+    (table : Figure18RoleTable.FlatRoleTable)
+    (certificate : (figure18ScaffoldDataOfFlatRoleTable table).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        table.activeSiteData table.cornerSite = []) :
+    FlatRoleTableObligations table :=
+  ofCertificate table certificate
+    (generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+      hfailures)
+
 end FlatRoleTableObligations
 
 def figure18ScaffoldDataOfFlatRoleTableCertificateOfObligations
@@ -3642,6 +3673,27 @@ def ofCertificate
       certificate.localFreeSquares
   pairCompatibility := hpair
   realizes := certificate.realizes
+
+def ofCertificateFailures
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
+    (hfailures :
+      generatedStackAllowedSitePairFailures
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          []) :
+    NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofCertificate activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid certificate
+    (generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
+      hfailures)
 
 theorem flatRoleTable_pairCompatibility
     {activeSiteSpecs : List (Nat × Quadrant)}
