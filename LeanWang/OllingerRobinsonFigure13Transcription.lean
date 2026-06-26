@@ -3580,6 +3580,61 @@ theorem exists_witness
   ⟨window.horizontalCoord, window.verticalCoord, window.horizontalCoord_succ,
     window.verticalCoord_succ, window.listedActive, window.corner⟩
 
+/-- Enlarge the listed active-site set for a fixed decoded-window witness. -/
+def mono_activeSites
+    {table : Figure18RoleTable}
+    {activeSites activeSites' : List Figure18Site}
+    {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (hsubset :
+      ∀ site : Figure18Site, site ∈ activeSites → site ∈ activeSites')
+    (window :
+      Figure18ListedActiveSiteFixedCornerSquare
+        table activeSites cornerSite x n hn) :
+    Figure18ListedActiveSiteFixedCornerSquare
+      table activeSites' cornerSite x n hn where
+  horizontalCoord := window.horizontalCoord
+  verticalCoord := window.verticalCoord
+  horizontalCoord_succ := window.horizontalCoord_succ
+  verticalCoord_succ := window.verticalCoord_succ
+  listedActive := by
+    intro i j
+    rcases window.listedActive i j with hcorner | hactive
+    · exact Or.inl hcorner
+    · exact Or.inr (hsubset _ hactive)
+  corner := window.corner
+
+/--
+View a listed-active witness against the generated flat table's computed active
+site list.
+-/
+def toGeneratedActiveSites
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSites cornerSite).toRoleTable.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window :
+      Figure18ListedActiveSiteFixedCornerSquare
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSites cornerSite).toRoleTable
+        activeSites cornerSite x n hn) :
+    Figure18ListedActiveSiteFixedCornerSquare
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).activeSites
+      cornerSite x n hn :=
+  window.mono_activeSites (by
+    intro site hsite
+    exact Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_of_mem
+      hsite)
+
 end Figure18ListedActiveSiteFixedCornerSquare
 
 /--
