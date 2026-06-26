@@ -4092,6 +4092,95 @@ structure Figure18RobinsonBoardSignalCertificate
 
 namespace Figure18RobinsonBoardSignalCertificate
 
+/-- The selected free columns are exactly the columns enumerated by the certificate. -/
+theorem isFreeColumn_iff_exists_freeColumnCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column : Int) :
+    certificate.isFreeColumn column ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        certificate.freeColumnCoord i = column := by
+  constructor
+  · exact certificate.freeColumnCoord_complete column
+  · rintro ⟨i, rfl⟩
+    exact certificate.freeColumnCoord_free i
+
+/-- The selected free rows are exactly the rows enumerated by the certificate. -/
+theorem isFreeRow_iff_exists_freeRowCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (row : Int) :
+    certificate.isFreeRow row ↔
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        certificate.freeRowCoord j = row := by
+  constructor
+  · exact certificate.freeRowCoord_complete row
+  · rintro ⟨j, rfl⟩
+    exact certificate.freeRowCoord_free j
+
+/-- A selected free row has no horizontal obstruction at any board column. -/
+theorem noHorizontalObstruction_of_freeRowCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column : Int) (hcolumn : certificate.isBoardColumn column)
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    ¬ certificate.hasHorizontalObstruction column
+      (certificate.freeRowCoord j) := by
+  have hrow := certificate.freeRow_iff_noHorizontalObstruction
+    (certificate.freeRowCoord j) (certificate.freeRowCoord_board j)
+  exact (hrow.1 (certificate.freeRowCoord_free j)) column hcolumn
+
+/-- A selected free column has no vertical obstruction at any board row. -/
+theorem noVerticalObstruction_of_freeColumnCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (row : Int) (hrow : certificate.isBoardRow row) :
+    ¬ certificate.hasVerticalObstruction
+      (certificate.freeColumnCoord i) row := by
+  have hcolumn := certificate.freeColumn_iff_noVerticalObstruction
+    (certificate.freeColumnCoord i) (certificate.freeColumnCoord_board i)
+  exact (hcolumn.1 (certificate.freeColumnCoord_free i)) row hrow
+
+/--
+At a selected free-row/free-column crossing, neither obstruction signal is
+present.
+-/
+theorem noObstruction_at_freeCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (¬ certificate.hasHorizontalObstruction
+        (certificate.freeColumnCoord i) (certificate.freeRowCoord j)) ∧
+      ¬ certificate.hasVerticalObstruction
+        (certificate.freeColumnCoord i) (certificate.freeRowCoord j) := by
+  constructor
+  · exact certificate.noHorizontalObstruction_of_freeRowCoord
+      (certificate.freeColumnCoord i) (certificate.freeColumnCoord_board i) j
+  · exact certificate.noVerticalObstruction_of_freeColumnCoord
+      i (certificate.freeRowCoord j) (certificate.freeRowCoord_board j)
+
 /--
 Forget the Section 7 obstruction-signal bookkeeping after it has selected and
 routed the free grid.
