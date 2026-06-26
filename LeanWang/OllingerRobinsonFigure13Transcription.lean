@@ -8006,6 +8006,11 @@ def scaffold (D : Figure18ScaffoldData) : Scaffold :=
 def tiles (D : Figure18ScaffoldData) : TileSet :=
   D.presentation.tiles
 
+theorem scaffold_corner_mem (D : Figure18ScaffoldData) :
+    D.scaffold.corner ∈ D.scaffold.tiles := by
+  simpa [scaffold, presentation, table] using
+    D.table.toRoleTable.scaffold_corner_mem
+
 def HasLocalFreeSquareInvariant (D : Figure18ScaffoldData) : Prop :=
   HasFigure18ListedActiveSiteFixedCornerSquares D.activeSites D.cornerSite
 
@@ -8096,6 +8101,16 @@ def HasLayerPatchRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
 def HasActiveCornerIndexedBoxInvariant (D : Figure18ScaffoldData) : Prop :=
   ∀ r : Nat, Nonempty (ActiveCornerIndexedBox D.scaffold r)
 
+def HasPositiveActiveCornerIndexedBoxInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox D.scaffold r)
+
+def HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  ∀ r : Nat, 0 < r →
+    ∃ origin : Int × Int,
+      Nonempty (TranslatedActiveCornerIndexedBox D.scaffold r origin)
+
 theorem HasRealizationInvariant.ofLayerPatches
     {D : Figure18ScaffoldData}
     (hpatches : D.HasLayerPatchRealizationInvariant) :
@@ -8108,6 +8123,41 @@ theorem HasLayerPatchRealizationInvariant.ofActiveCornerIndexedBoxes
     (hboxes : D.HasActiveCornerIndexedBoxInvariant) :
     D.HasLayerPatchRealizationInvariant :=
   activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes
+
+theorem HasActiveCornerIndexedBoxInvariant.ofPositive
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveActiveCornerIndexedBoxInvariant) :
+    D.HasActiveCornerIndexedBoxInvariant :=
+  ActiveCornerIndexedBox.nonempty_all_of_pos_and_corner_mem
+    D.scaffold_corner_mem hboxes
+
+theorem HasPositiveActiveCornerIndexedBoxInvariant.ofTranslated
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.HasPositiveActiveCornerIndexedBoxInvariant :=
+  TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+    hboxes
+
+theorem HasActiveCornerIndexedBoxInvariant.ofPositiveTranslated
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.HasActiveCornerIndexedBoxInvariant :=
+  HasActiveCornerIndexedBoxInvariant.ofPositive
+    (HasPositiveActiveCornerIndexedBoxInvariant.ofTranslated hboxes)
+
+theorem HasLayerPatchRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.HasLayerPatchRealizationInvariant :=
+  HasLayerPatchRealizationInvariant.ofActiveCornerIndexedBoxes
+    (HasActiveCornerIndexedBoxInvariant.ofPositiveTranslated hboxes)
+
+theorem HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.HasRealizationInvariant :=
+  HasRealizationInvariant.ofLayerPatches
+    (HasLayerPatchRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes hboxes)
 
 /--
 The two geometric facts still needed after the finite Figure 18 active-site
@@ -8182,6 +8232,33 @@ def RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingLayerPatches
   RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingInvariant D
     fixedGeometryRouting
     (HasRealizationInvariant.ofLayerPatches patches)
+
+def RoutedCertificate.ofRobinsonBoardRoutedFreeGridPositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant D boardFreeGrids
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
+
+def RoutedCertificate.ofRobinsonBoardGeometryTowerRoutingPositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (geometryRouting : D.HasRobinsonBoardGeometryTowerRoutingInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardGeometryTowerRoutingInvariant D
+    geometryRouting
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
+
+def RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingPositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (fixedGeometryRouting :
+      D.HasRobinsonBoardFixedGeometryTowerRoutingInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardFixedGeometryTowerRoutingInvariant D
+    fixedGeometryRouting
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
 
 def RoutedCertificate.toIndexedRoutedCertificate
     {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
