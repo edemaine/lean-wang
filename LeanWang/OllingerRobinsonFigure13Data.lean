@@ -2084,6 +2084,78 @@ theorem sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
     ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
 
+theorem hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hflat :
+      HasFigure18FlatActiveSiteFixedCornerSquares
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite)) :
+    HasAllowedIndexedRoutedFixedCornerSquares activeSiteData cornerSite
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable := by
+  intro T seed x hx n hn
+  rcases hflat x hx n hn with
+    ⟨horizontalCoord, verticalCoord, horizontalCoord_succ,
+      verticalCoord_succ, activeSites, corner⟩
+  let table := Figure18RoleTable.FlatRoleTable.ofActiveSites
+    activeSiteData.sites cornerSite
+  let window : Figure18FlatActiveSiteFixedCornerSquare table x n hn := {
+    horizontalCoord := horizontalCoord
+    verticalCoord := verticalCoord
+    horizontalCoord_succ := horizontalCoord_succ
+    verticalCoord_succ := verticalCoord_succ
+    activeSites := activeSites
+    cornerSite := corner
+  }
+  refine ⟨window.toIndexedRoutedFixedCornerSquare hx, ?_, ?_, ?_⟩
+  · intro i j
+    change
+      table.toRoleTable.combinedSite
+          (x (horizontalCoord i, verticalCoord j)) =
+        cornerSite ∨
+      table.toRoleTable.combinedSite
+          (x (horizontalCoord i, verticalCoord j)) ∈
+        activeSiteData.sites
+    exact (Figure18RoleTable.FlatRoleTable.mem_ofActiveSites_activeSites_iff
+      activeSiteData.sites cornerSite
+      (table.toRoleTable.combinedSite
+        (x (horizontalCoord i, verticalCoord j)))).1
+      (activeSites i j)
+  · intro i j hi
+    change
+      Figure18Site.hCompatible
+        (table.toRoleTable.combinedSite
+          (x (horizontalCoord i, verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (horizontalCoord ⟨i.val + 1, hi⟩, verticalCoord j))) =
+        true
+    exact table.toRoleTable.combinedSite_hCompatible_of_selectedCoords
+      hx horizontalCoord verticalCoord horizontalCoord_succ i j hi
+  · intro i j hj
+    change
+      Figure18Site.vCompatible
+        (table.toRoleTable.combinedSite
+          (x (horizontalCoord i, verticalCoord j)))
+        (table.toRoleTable.combinedSite
+          (x (horizontalCoord i, verticalCoord ⟨j.val + 1, hj⟩))) =
+        true
+    exact table.toRoleTable.combinedSite_vCompatible_of_selectedCoords
+      hx horizontalCoord verticalCoord verticalCoord_succ i j hj
+
+theorem hasAllowedIndexedRoutedFixedCornerSquares_of_listedActiveSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hlisted :
+      HasFigure18ListedActiveSiteFixedCornerSquares
+        activeSiteData.sites cornerSite) :
+    HasAllowedIndexedRoutedFixedCornerSquares activeSiteData cornerSite
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSiteData.sites cornerSite).toRoleTable :=
+  hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
+    activeSiteData cornerSite
+    (hasFigure18FlatActiveSiteFixedCornerSquares_of_listedActiveSite hlisted)
+
 theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -2195,6 +2267,45 @@ def scaffoldDataOfSitesIndexedRoutedCertificateOfAllowedRouted
     activeSiteData cornerSite
     (sparseRawDataOfSites_hasIndexedRoutedCheckedStacks_of_allowedRouted
       activeSiteData cornerSite hcheck hallowed)
+    realizes
+
+def scaffoldDataOfSitesIndexedRoutedCertificateOfFlatActiveSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hflat :
+      HasFigure18FlatActiveSiteFixedCornerSquares
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold) :
+    (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate :=
+  scaffoldDataOfSitesIndexedRoutedCertificateOfAllowedRouted
+    activeSiteData cornerSite hcheck
+    (hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
+      activeSiteData cornerSite hflat)
+    realizes
+
+def scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSite
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hlisted :
+      HasFigure18ListedActiveSiteFixedCornerSquares
+        activeSiteData.sites cornerSite)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold) :
+    (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate :=
+  scaffoldDataOfSitesIndexedRoutedCertificateOfAllowedRouted
+    activeSiteData cornerSite hcheck
+    (hasAllowedIndexedRoutedFixedCornerSquares_of_listedActiveSite
+      activeSiteData cornerSite hlisted)
     realizes
 
 def scaffoldDataOfSitesIndexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
@@ -2761,6 +2872,67 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
       (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
       (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
       hcheck hallowed)
+    realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatActiveSite
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hflat :
+      HasFigure18FlatActiveSiteFixedCornerSquares
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+          (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hcheck
+    (hasAllowedIndexedRoutedFixedCornerSquares_of_flatActiveSite
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hflat)
+    realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSite
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (hlisted :
+      HasFigure18ListedActiveSiteFixedCornerSquares
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid).sites
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid))
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRouted
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hcheck
+    (hasAllowedIndexedRoutedFixedCornerSquares_of_listedActiveSite
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hlisted)
     realizes
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAdjacentProductWitnessCheckedStacks
