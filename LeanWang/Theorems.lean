@@ -132,6 +132,64 @@ theorem mem_combineWithScaffold_iff {S : Scaffold} {T : TileSet}
         · rfl
         · exact False.elim (hactive h)), htile⟩
 
+/--
+A finite centered-box patch over the scaffold/product tileset, stated in the
+base/payload language used by the Robinson board construction.
+-/
+structure CombinedBoxPatch (S : Scaffold) (T : TileSet) (seed : WangTile)
+    (r : Nat) where
+  base : Box r → WangTile
+  payload : Box r → WangTile
+  base_mem : ∀ p : Box r, base p ∈ S.tiles
+  active_payload : ∀ p : Box r, S.active (base p) = true →
+    payload p ∈ T ∧ (base p = S.corner → payload p = seed)
+  inactive_payload : ∀ p : Box r, S.active (base p) = false →
+    payload p = monochromeTile
+  hmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+    WangTile.HMatches
+      (WangTile.product (base p) (payload p))
+      (WangTile.product (base ⟨(p.1.1 + 1, p.1.2), hp⟩)
+        (payload ⟨(p.1.1 + 1, p.1.2), hp⟩))
+  vmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+    WangTile.VMatches
+      (WangTile.product (base p) (payload p))
+      (WangTile.product (base ⟨(p.1.1, p.1.2 + 1), hp⟩)
+        (payload ⟨(p.1.1, p.1.2 + 1), hp⟩))
+
+namespace CombinedBoxPatch
+
+theorem product_mem {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (patch : CombinedBoxPatch S T seed r) (p : Box r) :
+    WangTile.product (patch.base p) (patch.payload p) ∈
+      combineWithScaffold S T seed := by
+  rw [mem_combineWithScaffold_iff]
+  exact ⟨patch.base p, patch.base_mem p, patch.payload p,
+    patch.active_payload p, patch.inactive_payload p, rfl⟩
+
+/-- View a combined box patch as an ordinary finite box pattern. -/
+def toBoxPattern {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (patch : CombinedBoxPatch S T seed r) :
+    BoxPattern (combineWithScaffold S T seed) r :=
+  fun p =>
+    ⟨WangTile.product (patch.base p) (patch.payload p),
+      patch.product_mem p⟩
+
+theorem validBoxTiling_toBoxPattern {S : Scaffold} {T : TileSet}
+    {seed : WangTile} {r : Nat} (patch : CombinedBoxPatch S T seed r) :
+    ValidBoxTiling (combineWithScaffold S T seed) r patch.toBoxPattern := by
+  constructor
+  · intro p hp
+    exact patch.hmatch p hp
+  · intro p hp
+    exact patch.vmatch p hp
+
+theorem tileableBox {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (patch : CombinedBoxPatch S T seed r) :
+    TileableBox (combineWithScaffold S T seed) r :=
+  ⟨patch.toBoxPattern, patch.validBoxTiling_toBoxPattern⟩
+
+end CombinedBoxPatch
+
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
     (hactive : S.active S.corner = true)
@@ -417,6 +475,25 @@ def RealizesActiveCornerBoxes (S : Scaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
     (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
       ∀ r : Nat, TileableBox (combineWithScaffold S T seed) r
+
+/--
+Patch-witness form of `RealizesActiveCornerBoxes`.
+
+This is the concrete target for the backward Robinson construction: given
+arbitrarily large fixed-corner payload squares, build a base/payload patch over
+each requested centered box of the combined scaffold tileset.
+-/
+def HasActiveCornerBoxPatches (S : Scaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      ∀ r : Nat, Nonempty (CombinedBoxPatch S T seed r)
+
+theorem realizesActiveCornerBoxes_of_activeCornerBoxPatches
+    {S : Scaffold} (hpatches : HasActiveCornerBoxPatches S) :
+    RealizesActiveCornerBoxes S := by
+  intro T seed hsquares r
+  rcases hpatches T seed hsquares r with ⟨patch⟩
+  exact patch.tileableBox
 
 theorem realizesActiveCornerSquares_of_realizesActiveCornerBoxes
     {S : Scaffold} (hboxes : RealizesActiveCornerBoxes S) :
