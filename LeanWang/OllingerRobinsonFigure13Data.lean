@@ -2116,6 +2116,27 @@ theorem scaffoldDataOfFlatRoleTable_tiles
       TileSubdivision.subdivideTileSet fig13Tiles :=
   scaffoldDataOfSites_tiles table.activeSiteData table.cornerSite
 
+/--
+Remaining obligations for a concrete flat Figure 18 role table.
+
+After the paper's Figure 18 role transcription is entered as a
+`FlatRoleTable`, these are the three scaffold-specific facts still needed by
+the Wang-tiling reduction: the geometric listed-window invariant, the finite
+Figure 13/Figure 16 generated-stack compatibility check, and realization of
+active/corner squares by the scaffold.
+-/
+structure FlatRoleTableObligations
+    (table : Figure18RoleTable.FlatRoleTable) : Prop where
+  listedWindows :
+    HasFigure18ListedActiveSiteFixedCornerSquareWindows
+      table.activeSiteData.sites table.cornerSite
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      table.activeSiteData table.cornerSite = true
+  realizes :
+    RealizesActiveCornerSquares
+      (scaffoldDataOfFlatRoleTable table).table.presentation.toScaffold
+
 def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
     (table : Figure18RoleTable.FlatRoleTable)
     (hwindows :
@@ -2134,6 +2155,14 @@ def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
       hwindows
       hpair
       realizes
+
+def scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfObligations
+    (table : Figure18RoleTable.FlatRoleTable)
+    (obligations : FlatRoleTableObligations table) :
+    (scaffoldDataOfFlatRoleTable table).IndexedRoutedCertificate :=
+  scaffoldDataOfFlatRoleTableIndexedRoutedCertificateOfListedPairCompatibility
+    table obligations.listedWindows obligations.pairCompatibility
+    obligations.realizes
 
 /--
 Plain Figure 18 scaffold data with the Figure 13 layer transcription fixed.
