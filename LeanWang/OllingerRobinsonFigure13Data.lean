@@ -1458,6 +1458,55 @@ theorem sparseRawDataOfSites_exists_checkedLayerStackRectangle
     sparseRawDataOfSites_layerStackRectangleMatchesBool
       activeSiteData cornerSite R⟩
 
+/--
+Bundled audit certificate for the human Figure 13 layer transcription.
+
+The first fields say that each sparse layer transcription is a complete
+`0..91` indexed table.  The row fields connect those sparse tables to the
+dense `componentRows` table, and the final fields expose the stack-rectangle
+lookup facts consumed by the scaffold checking layer.
+-/
+structure Figure13LayerTranscriptionCertificate : Prop where
+  thinValid : sparseEntriesValidBool thinEntries = true
+  thickValid : sparseEntriesValidBool thickEntries = true
+  blackValid : sparseEntriesValidBool blackEntries = true
+  thinCoversIndices : thinEntries.map Prod.fst = List.range 92
+  thickCoversIndices : thickEntries.map Prod.fst = List.range 92
+  blackCoversIndices : blackEntries.map Prod.fst = List.range 92
+  componentRowsLength : componentRows.length = 92
+  separateRowsLayerData : separateLayerRows.layerData.rows = componentRows
+  sparseRowsLayerData : sparseLayerRows.layerData.rows = componentRows
+  sparseLayerData : sparseLayerRows.layerData = layerData
+  sparseRowsMatchStackRectangles :
+    ∀ {w h : Nat} (R : SiteRectangle w h),
+      sparseLayerRows.layerStackRectangleMatchesBool
+        (checkedLayerStackRectangleOfSiteRectangle R) = true
+  sparseRawDataMatchStackRectangles :
+    ∀ (activeSiteData : Figure18Site.CheckedNatSpecs)
+      (cornerSite : Figure18Site) {w h : Nat} (R : SiteRectangle w h),
+      (sparseRawDataOfSites activeSiteData cornerSite).layerStackRectangleMatchesBool
+        (checkedLayerStackRectangleOfSiteRectangle R) = true
+
+/--
+The concrete Figure 13 layer transcription satisfies the finite audit
+certificate derived from `figures/fig13-human.tsv`.
+-/
+theorem figure13LayerTranscriptionCertificate :
+    Figure13LayerTranscriptionCertificate where
+  thinValid := thinEntries_valid
+  thickValid := thickEntries_valid
+  blackValid := blackEntries_valid
+  thinCoversIndices := thinEntries_indices
+  thickCoversIndices := thickEntries_indices
+  blackCoversIndices := blackEntries_indices
+  componentRowsLength := componentRows_length
+  separateRowsLayerData := separateLayerRows_layerData_rows
+  sparseRowsLayerData := sparseLayerRows_layerData_rows
+  sparseLayerData := transcription_eq_of_rows_eq sparseLayerRows_layerData_rows
+  sparseRowsMatchStackRectangles := sparseLayerRows_layerStackRectangleMatchesBool
+  sparseRawDataMatchStackRectangles :=
+    sparseRawDataOfSites_layerStackRectangleMatchesBool
+
 def thinBlockAtSite (site : Figure18Site) : Figure16.Block :=
   (LayerComponent.thin (thinComponentAt site.index)).block
 
