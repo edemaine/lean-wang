@@ -2484,6 +2484,15 @@ theorem flatRolesOfActiveSites_ofActiveSites_activeSites
   exact roleOfActiveSites_ofActiveSites_activeSites
     activeSites cornerSite (Figure18Site.siteOfFlatIndex k)
 
+theorem ofActiveSites_activeSites_roleAtSite
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    (ofActiveSites
+        (ofActiveSites activeSites cornerSite).activeSites cornerSite).toRoleTable.roleAtSite =
+      (ofActiveSites activeSites cornerSite).toRoleTable.roleAtSite := by
+  funext site
+  rw [ofActiveSites_roleAtSite, ofActiveSites_roleAtSite,
+    roleOfActiveSites_ofActiveSites_activeSites]
+
 end FlatRoleTable
 
 /--
