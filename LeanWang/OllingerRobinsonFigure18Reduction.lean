@@ -5681,6 +5681,66 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the bundled Robinson certificate whose
+backward scaffold construction is stated as active-indexed finite boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_indexed_box_certificate_position_source
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+    C.toScaffoldCertificate h
+
+/--
+Unencoded domino undecidability from the bundled Robinson certificate whose
+backward scaffold construction is stated as active-indexed finite boxes.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_indexed_box_certificate_position_source
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_robinson_certificate_position_source
+    C.toScaffoldCertificate h
+
+/--
+Encoded domino undecidability from an active-indexed-box Robinson certificate
+and the generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_indexed_box_certificate_interiorRows
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+    C.toScaffoldCertificate hinterior hcorrect
+
+/--
+Unencoded domino undecidability from an active-indexed-box Robinson certificate
+and the generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_indexed_box_certificate_interiorRows
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
+    C.toScaffoldCertificate hinterior hcorrect
+
+/--
 Encoded domino undecidability from separated Robinson routed board/free-grid
 geometry, finite checked layer-stack attachment, realization, and generated
 position-coded source-route obligations.

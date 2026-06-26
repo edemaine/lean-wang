@@ -3794,6 +3794,31 @@ theorem scaffoldDataOfNatSites_tiles
   (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
     cornerIndex cornerQuadrant cornerIndex_valid).scaffold_tiles
 
+/--
+Realization of a Nat-site Figure 18 scaffold follows from finite active-indexed
+box witnesses.  This is the backward half of the scaffold argument in the
+current theorem-facing form.
+-/
+def scaffoldDataOfNatSitesRealizesOfActiveCornerIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    RealizesActiveCornerSquares
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold := by
+  change RealizesActiveCornerSquares
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).scaffold
+  exact realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+    (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches
+      (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes))
+
 def scaffoldDataOfNatSitesCertificateOfCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -3862,6 +3887,31 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridC
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasRobinsonBoardRoutedFreeGridCheckedStacks
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hboxes :
+      ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid hchecked
+    (scaffoldDataOfNatSitesRealizesOfActiveCornerIndexedBoxes
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid hboxes)
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -4984,6 +5034,47 @@ structure NatSiteRobinsonScaffoldCertificate where
     RealizesActiveCornerSquares
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
+
+/--
+The same Robinson scaffold package, but with the backward scaffold construction
+stated as active-indexed finite boxes instead of the already-forgotten
+realization theorem.
+-/
+structure NatSiteRobinsonIndexedBoxScaffoldCertificate where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  robinsonStacks :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonBoardRoutedFreeGridCheckedStacks
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table
+  indexedBoxes :
+    ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)
+
+namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
+
+def toScaffoldCertificate
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs := C.activeSiteSpecs
+  activeSiteSpecs_valid := C.activeSiteSpecs_valid
+  cornerIndex := C.cornerIndex
+  cornerQuadrant := C.cornerQuadrant
+  cornerIndex_valid := C.cornerIndex_valid
+  robinsonStacks := C.robinsonStacks
+  realizes :=
+    scaffoldDataOfNatSitesRealizesOfActiveCornerIndexedBoxes
+      C.activeSiteSpecs C.activeSiteSpecs_valid C.cornerIndex
+      C.cornerQuadrant C.cornerIndex_valid C.indexedBoxes
+
+end NatSiteRobinsonIndexedBoxScaffoldCertificate
 
 /--
 Bundled Robinson-board/free-grid obligations for raw Nat-indexed Figure 18 site
@@ -7075,6 +7166,52 @@ theorem indexedRoutedInstance_isScaffold
   C.indexedRoutedInstance.isScaffold
 
 end NatSiteRobinsonScaffoldCertificate
+
+namespace NatSiteRobinsonIndexedBoxScaffoldCertificate
+
+def scaffoldData (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    LayeredFigure18ScaffoldData :=
+  C.toScaffoldCertificate.scaffoldData
+
+def figure18ScaffoldData (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    Figure18ScaffoldData :=
+  C.toScaffoldCertificate.figure18ScaffoldData
+
+def indexedRoutedCertificate
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    C.scaffoldData.IndexedRoutedCertificate :=
+  C.toScaffoldCertificate.indexedRoutedCertificate
+
+def indexedRoutedInstance
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    Figure18IndexedRoutedInstance :=
+  C.toScaffoldCertificate.indexedRoutedInstance
+
+def flexibleInstance (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    Figure18FlexibleInstance :=
+  C.toScaffoldCertificate.flexibleInstance
+
+theorem scaffoldData_tiles
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    C.scaffoldData.scaffold.tiles = TileSubdivision.subdivideTileSet fig13Tiles :=
+  C.toScaffoldCertificate.scaffoldData_tiles
+
+theorem indexedRoutedInstance_presentation_tiles
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    C.indexedRoutedInstance.presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  C.toScaffoldCertificate.indexedRoutedInstance_presentation_tiles
+
+theorem isScaffold (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    IsScaffold C.scaffoldData.scaffold :=
+  C.toScaffoldCertificate.isScaffold
+
+theorem indexedRoutedInstance_isScaffold
+    (C : NatSiteRobinsonIndexedBoxScaffoldCertificate) :
+    IsScaffold C.indexedRoutedInstance.presentation.toScaffold :=
+  C.toScaffoldCertificate.indexedRoutedInstance_isScaffold
+
+end NatSiteRobinsonIndexedBoxScaffoldCertificate
 
 end ConcreteData
 end LayeredFigure18ScaffoldData
