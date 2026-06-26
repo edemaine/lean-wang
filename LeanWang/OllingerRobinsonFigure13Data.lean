@@ -1576,6 +1576,228 @@ theorem generatedStackVBoundaries_of_allowedPairCompatibilityBool
     (mem_generatedStackAllowedSites_of_listed hlower)
     (mem_generatedStackAllowedSites_of_listed hupper) hv
 
+set_option linter.flexible false in
+theorem generatedStackThinHBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) :
+    CompatibleLayerComponentRectangle.hBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).thinRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.thinLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.hBoundaryBool
+  apply List.all_eq_true.2
+  intro i _hi_mem
+  by_cases hi : i.val + 1 < n
+  · simp [hi]
+    intro j
+    have hb := generatedStackHBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites ⟨i.val + 1, hi⟩ j) (hh i j hi)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.thinRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_thin_componentAt,
+      thinBlockAtSite] at hb ⊢
+    exact hb.1
+  · simp [hi]
+
+set_option linter.flexible false in
+theorem generatedStackThickHBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) :
+    CompatibleLayerComponentRectangle.hBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).thickRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.thickLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.hBoundaryBool
+  apply List.all_eq_true.2
+  intro i _hi_mem
+  by_cases hi : i.val + 1 < n
+  · simp [hi]
+    intro j
+    have hb := generatedStackHBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites ⟨i.val + 1, hi⟩ j) (hh i j hi)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.thickRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_thick_componentAt,
+      thickBlockAtSite] at hb ⊢
+    exact hb.2.1
+  · simp [hi]
+
+set_option linter.flexible false in
+theorem generatedStackBlackHBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) :
+    CompatibleLayerComponentRectangle.hBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).blackRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.blackLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.hBoundaryBool
+  apply List.all_eq_true.2
+  intro i _hi_mem
+  by_cases hi : i.val + 1 < n
+  · simp [hi]
+    intro j
+    have hb := generatedStackHBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites ⟨i.val + 1, hi⟩ j) (hh i j hi)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.blackRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_black_componentAt,
+      blackBlockAtSite] at hb ⊢
+    exact hb.2.2
+  · simp [hi]
+
+set_option linter.flexible false in
+theorem generatedStackThinVBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    CompatibleLayerComponentRectangle.vBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).thinRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.thinLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.vBoundaryBool
+  apply List.all_eq_true.2
+  intro j _hj_mem
+  by_cases hj : j.val + 1 < n
+  · simp [hj]
+    intro i
+    have hb := generatedStackVBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites i ⟨j.val + 1, hj⟩) (hv i j hj)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.thinRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_thin_componentAt,
+      thinBlockAtSite] at hb ⊢
+    exact hb.1
+  · simp [hj]
+
+set_option linter.flexible false in
+theorem generatedStackThickVBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    CompatibleLayerComponentRectangle.vBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).thickRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.thickLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.vBoundaryBool
+  apply List.all_eq_true.2
+  intro j _hj_mem
+  by_cases hj : j.val + 1 < n
+  · simp [hj]
+    intro i
+    have hb := generatedStackVBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites i ⟨j.val + 1, hj⟩) (hv i j hj)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.thickRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_thick_componentAt,
+      thickBlockAtSite] at hb ⊢
+    exact hb.2.1
+  · simp [hj]
+
+set_option linter.flexible false in
+theorem generatedStackBlackVBoundaryBool_of_allowedPairCompatibilityBool
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site}
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    CompatibleLayerComponentRectangle.vBoundaryBool
+      ((checkedLayerStackRectangleOfSiteRectangle R).blackRectangle
+        (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedLayerStackRectangle.blackLookupBool_of_lookupBool
+          (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+            (sparseRawDataOfSites_layerStackRectangleMatchesBool
+              activeSiteData cornerSite R)))).toLayerComponentRectangle =
+        true := by
+  unfold CompatibleLayerComponentRectangle.vBoundaryBool
+  apply List.all_eq_true.2
+  intro j _hj_mem
+  by_cases hj : j.val + 1 < n
+  · simp [hj]
+    intro i
+    have hb := generatedStackVBoundaries_of_allowedPairCompatibilityBool
+      hcheck (hsites i j) (hsites i ⟨j.val + 1, hj⟩) (hv i j hj)
+    dsimp [TypedLayerComponentRectangle.toLayerComponentRectangle,
+      LayerComponentRectangle.blockGrid]
+    simp [CheckedLayerStackRectangle.blackRectangle,
+      CheckedLayerComponentRectangle.toTypedLayerComponentRectangle_componentRect,
+      checkedLayerStackRectangleOfSiteRectangle_black_componentAt,
+      blackBlockAtSite] at hb ⊢
+    exact hb.2.2
+  · simp [hj]
+
 def HasGeneratedStackCompatibilityForListedActiveSiteRectangles
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : Prop :=
@@ -1593,6 +1815,44 @@ def HasGeneratedStackCompatibilityForListedActiveSiteRectangles
           (sparseRawDataOfSites_layerStackRectangleMatchesBool
             activeSiteData cornerSite R)) = true
 
+theorem hasGeneratedStackCompatibilityForListedActiveSiteRectangles_of_allowedPairCompatibilityBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true) :
+    HasGeneratedStackCompatibilityForListedActiveSiteRectangles
+      activeSiteData cornerSite := by
+  intro n hn R hsites _hcorner hh hv
+  dsimp
+  unfold CheckedLayerStackRectangle.compatibleBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · unfold TypedLayerComponentRectangle.compatibleBool
+    unfold CompatibleLayerComponentRectangle.compatibleBool
+    rw [Bool.and_eq_true]
+    exact ⟨
+      generatedStackThinHBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hh,
+      generatedStackThinVBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hv⟩
+  · unfold TypedLayerComponentRectangle.compatibleBool
+    unfold CompatibleLayerComponentRectangle.compatibleBool
+    rw [Bool.and_eq_true]
+    exact ⟨
+      generatedStackThickHBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hh,
+      generatedStackThickVBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hv⟩
+  · unfold TypedLayerComponentRectangle.compatibleBool
+    unfold CompatibleLayerComponentRectangle.compatibleBool
+    rw [Bool.and_eq_true]
+    exact ⟨
+      generatedStackBlackHBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hh,
+      generatedStackBlackVBoundaryBool_of_allowedPairCompatibilityBool
+        hcheck R hsites hv⟩
+
 theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
@@ -1608,6 +1868,20 @@ theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_ge
       activeSiteData cornerSite R,
     ?_⟩
   exact hcompat R hsites hcorner hh hv
+
+theorem
+    sparseRawDataOfSites_hasCheckedStacks_of_allowedPairCompatibilityBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true) :
+    (sparseRawDataOfSites activeSiteData cornerSite).HasCheckedStacksForListedActiveSiteRectangles
+        activeSiteData.sites cornerSite :=
+  sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
+    activeSiteData cornerSite
+    (hasGeneratedStackCompatibilityForListedActiveSiteRectangles_of_allowedPairCompatibilityBool
+      activeSiteData cornerSite hcheck)
 
 /--
 Concrete layered scaffold data with the Figure 13 layer transcription fixed and
@@ -1781,6 +2055,25 @@ def scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteRectangles
     activeSiteData cornerSite hwindows
     (CheckedSparseRawData.hasCheckedStacksForListedActiveSiteWindows_of_rectangles
       hrectangles)
+    realizes
+
+def scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSitePairCompatibility
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindows
+        activeSiteData.sites cornerSite)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold) :
+    (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate :=
+  scaffoldDataOfSitesIndexedRoutedCertificateOfListedActiveSiteRectangles
+    activeSiteData cornerSite hwindows
+    (sparseRawDataOfSites_hasCheckedStacks_of_allowedPairCompatibilityBool
+      activeSiteData cornerSite hpair)
     realizes
 
 /--
