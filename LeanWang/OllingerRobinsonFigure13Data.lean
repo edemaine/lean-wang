@@ -1680,6 +1680,26 @@ def generatedStackSitePairCompatibilityBool
       generatedStackHCompatiblePairBool left right &&
         generatedStackVCompatiblePairBool left right
 
+/--
+Finite check that no two listed sites are horizontally adjacent in the Figure 18
+site graph.
+-/
+def noSiteHCompatiblePairsBool
+    (sites : List Figure18Site) : Bool :=
+  sites.all fun left =>
+    sites.all fun right =>
+      !Figure18Site.hCompatible left right
+
+/--
+Finite check that no two listed sites are vertically adjacent in the Figure 18
+site graph.
+-/
+def noSiteVCompatiblePairsBool
+    (sites : List Figure18Site) : Bool :=
+  sites.all fun lower =>
+    sites.all fun upper =>
+      !Figure18Site.vCompatible lower upper
+
 /-- Horizontal generated-stack compatibility failures among a finite site list. -/
 def generatedStackBadHPairs
     (sites : List Figure18Site) : List (Figure18Site × Figure18Site) :=
@@ -1747,6 +1767,48 @@ theorem generatedStackSitePairCompatibilityBool_eq_true_iff
     rw [Bool.and_eq_true]
     exact hpairs left hleft right hright
 
+theorem noSiteHCompatiblePairsBool_eq_true_iff
+    {sites : List Figure18Site} :
+    noSiteHCompatiblePairsBool sites = true ↔
+      ∀ left : Figure18Site, left ∈ sites →
+        ∀ right : Figure18Site, right ∈ sites →
+          Figure18Site.hCompatible left right = false := by
+  constructor
+  · intro hcheck left hleft right hright
+    unfold noSiteHCompatiblePairsBool at hcheck
+    have hleftCheck := List.all_eq_true.1 hcheck left hleft
+    have hrightCheck := List.all_eq_true.1 hleftCheck right hright
+    cases hcompat : Figure18Site.hCompatible left right <;>
+      simp [hcompat] at hrightCheck ⊢
+  · intro hpairs
+    unfold noSiteHCompatiblePairsBool
+    apply List.all_eq_true.2
+    intro left hleft
+    apply List.all_eq_true.2
+    intro right hright
+    simp [hpairs left hleft right hright]
+
+theorem noSiteVCompatiblePairsBool_eq_true_iff
+    {sites : List Figure18Site} :
+    noSiteVCompatiblePairsBool sites = true ↔
+      ∀ lower : Figure18Site, lower ∈ sites →
+        ∀ upper : Figure18Site, upper ∈ sites →
+          Figure18Site.vCompatible lower upper = false := by
+  constructor
+  · intro hcheck lower hlower upper hupper
+    unfold noSiteVCompatiblePairsBool at hcheck
+    have hlowerCheck := List.all_eq_true.1 hcheck lower hlower
+    have hupperCheck := List.all_eq_true.1 hlowerCheck upper hupper
+    cases vcompat : Figure18Site.vCompatible lower upper <;>
+      simp [vcompat] at hupperCheck ⊢
+  · intro hpairs
+    unfold noSiteVCompatiblePairsBool
+    apply List.all_eq_true.2
+    intro lower hlower
+    apply List.all_eq_true.2
+    intro upper hupper
+    simp [hpairs lower hlower upper hupper]
+
 theorem generatedStackSitePairCompatibilityBool_eq_true_iff_failures_eq_nil
     {sites : List Figure18Site} :
     generatedStackSitePairCompatibilityBool sites = true ↔
@@ -1789,6 +1851,18 @@ def generatedStackAllowedSitePairCompatibilityBool
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) : Bool :=
   generatedStackSitePairCompatibilityBool
+    (generatedStackAllowedSites activeSiteData cornerSite)
+
+def noGeneratedStackAllowedSiteHPairsBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : Bool :=
+  noSiteHCompatiblePairsBool
+    (generatedStackAllowedSites activeSiteData cornerSite)
+
+def noGeneratedStackAllowedSiteVPairsBool
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : Bool :=
+  noSiteVCompatiblePairsBool
     (generatedStackAllowedSites activeSiteData cornerSite)
 
 theorem
@@ -1963,6 +2037,58 @@ theorem generatedStackAllowedSitePairCompatibilityBool_eq_true_iff
         right = cornerSite ∨ right ∈ activeSiteData.sites := by
       simpa [generatedStackAllowedSites] using hright
     exact hpairs left hleft' right hright'
+
+theorem noGeneratedStackAllowedSiteHPairsBool_eq_true_iff
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site} :
+    noGeneratedStackAllowedSiteHPairsBool activeSiteData cornerSite = true ↔
+      ∀ left : Figure18Site,
+        left = cornerSite ∨ left ∈ activeSiteData.sites →
+        ∀ right : Figure18Site,
+          right = cornerSite ∨ right ∈ activeSiteData.sites →
+          Figure18Site.hCompatible left right = false := by
+  constructor
+  · intro hcheck left hleft right hright
+    exact
+      noSiteHCompatiblePairsBool_eq_true_iff.1 hcheck
+        left (mem_generatedStackAllowedSites_of_listed hleft)
+        right (mem_generatedStackAllowedSites_of_listed hright)
+  · intro hpairs
+    apply noSiteHCompatiblePairsBool_eq_true_iff.2
+    intro left hleft right hright
+    have hleft' :
+        left = cornerSite ∨ left ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hleft
+    have hright' :
+        right = cornerSite ∨ right ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hright
+    exact hpairs left hleft' right hright'
+
+theorem noGeneratedStackAllowedSiteVPairsBool_eq_true_iff
+    {activeSiteData : Figure18Site.CheckedNatSpecs}
+    {cornerSite : Figure18Site} :
+    noGeneratedStackAllowedSiteVPairsBool activeSiteData cornerSite = true ↔
+      ∀ lower : Figure18Site,
+        lower = cornerSite ∨ lower ∈ activeSiteData.sites →
+        ∀ upper : Figure18Site,
+          upper = cornerSite ∨ upper ∈ activeSiteData.sites →
+          Figure18Site.vCompatible lower upper = false := by
+  constructor
+  · intro hcheck lower hlower upper hupper
+    exact
+      noSiteVCompatiblePairsBool_eq_true_iff.1 hcheck
+        lower (mem_generatedStackAllowedSites_of_listed hlower)
+        upper (mem_generatedStackAllowedSites_of_listed hupper)
+  · intro hpairs
+    apply noSiteVCompatiblePairsBool_eq_true_iff.2
+    intro lower hlower upper hupper
+    have hlower' :
+        lower = cornerSite ∨ lower ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hlower
+    have hupper' :
+        upper = cornerSite ∨ upper ∈ activeSiteData.sites := by
+      simpa [generatedStackAllowedSites] using hupper
+    exact hpairs lower hlower' upper hupper'
 
 theorem generatedStackHBoundaries_of_allowedPairCompatibilityBool
     {activeSiteData : Figure18Site.CheckedNatSpecs}
@@ -3576,6 +3702,44 @@ theorem l2Component1BlankCandidatePairCompatibilityBool :
   generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
     l2Component1BlankCandidatePairFailures
 
+theorem l2Component1BlankCandidateNoHCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteHPairsBool
+      l2Component1BlankCandidateActiveSiteData
+      l2Component1BlankCandidateCornerSite = true := by
+  decide
+
+theorem l2Component1BlankCandidateNoVCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteVPairsBool
+      l2Component1BlankCandidateActiveSiteData
+      l2Component1BlankCandidateCornerSite = true := by
+  decide
+
+theorem l2Component1BlankCandidate_hCompatible_allowed_eq_false
+    {left right : Figure18Site}
+    (hleft :
+      left = l2Component1BlankCandidateCornerSite ∨
+        left ∈ l2Component1BlankCandidateActiveSiteData.sites)
+    (hright :
+      right = l2Component1BlankCandidateCornerSite ∨
+        right ∈ l2Component1BlankCandidateActiveSiteData.sites) :
+    Figure18Site.hCompatible left right = false :=
+  noGeneratedStackAllowedSiteHPairsBool_eq_true_iff.1
+    l2Component1BlankCandidateNoHCompatibleAllowedSitesBool
+    left hleft right hright
+
+theorem l2Component1BlankCandidate_vCompatible_allowed_eq_false
+    {lower upper : Figure18Site}
+    (hlower :
+      lower = l2Component1BlankCandidateCornerSite ∨
+        lower ∈ l2Component1BlankCandidateActiveSiteData.sites)
+    (hupper :
+      upper = l2Component1BlankCandidateCornerSite ∨
+        upper ∈ l2Component1BlankCandidateActiveSiteData.sites) :
+    Figure18Site.vCompatible lower upper = false :=
+  noGeneratedStackAllowedSiteVPairsBool_eq_true_iff.1
+    l2Component1BlankCandidateNoVCompatibleAllowedSitesBool
+    lower hlower upper hupper
+
 /--
 Diagnostic active-site candidate from the second L2 summand's local blank
 quadrants, with the distinguished corner removed from the raw active list.
@@ -3627,6 +3791,44 @@ theorem l2Component2BlankCandidatePairCompatibilityBool :
       l2Component2BlankCandidateCornerSite = true :=
   generatedStackAllowedSitePairCompatibilityBool_of_failures_eq_nil
     l2Component2BlankCandidatePairFailures
+
+theorem l2Component2BlankCandidateNoHCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteHPairsBool
+      l2Component2BlankCandidateActiveSiteData
+      l2Component2BlankCandidateCornerSite = true := by
+  decide
+
+theorem l2Component2BlankCandidateNoVCompatibleAllowedSitesBool :
+    noGeneratedStackAllowedSiteVPairsBool
+      l2Component2BlankCandidateActiveSiteData
+      l2Component2BlankCandidateCornerSite = true := by
+  decide
+
+theorem l2Component2BlankCandidate_hCompatible_allowed_eq_false
+    {left right : Figure18Site}
+    (hleft :
+      left = l2Component2BlankCandidateCornerSite ∨
+        left ∈ l2Component2BlankCandidateActiveSiteData.sites)
+    (hright :
+      right = l2Component2BlankCandidateCornerSite ∨
+        right ∈ l2Component2BlankCandidateActiveSiteData.sites) :
+    Figure18Site.hCompatible left right = false :=
+  noGeneratedStackAllowedSiteHPairsBool_eq_true_iff.1
+    l2Component2BlankCandidateNoHCompatibleAllowedSitesBool
+    left hleft right hright
+
+theorem l2Component2BlankCandidate_vCompatible_allowed_eq_false
+    {lower upper : Figure18Site}
+    (hlower :
+      lower = l2Component2BlankCandidateCornerSite ∨
+        lower ∈ l2Component2BlankCandidateActiveSiteData.sites)
+    (hupper :
+      upper = l2Component2BlankCandidateCornerSite ∨
+        upper ∈ l2Component2BlankCandidateActiveSiteData.sites) :
+    Figure18Site.vCompatible lower upper = false :=
+  noGeneratedStackAllowedSiteVPairsBool_eq_true_iff.1
+    l2Component2BlankCandidateNoVCompatibleAllowedSitesBool
+    lower hlower upper hupper
 
 /--
 Generated flat Figure 18 role table from raw Nat-indexed active sites.
