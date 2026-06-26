@@ -6515,12 +6515,21 @@ def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
 def HasLayerPatchRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   HasActiveCornerLayerBoxPatches D.scaffold
 
+def HasActiveCornerIndexedBoxInvariant (D : Figure18ScaffoldData) : Prop :=
+  ∀ r : Nat, Nonempty (ActiveCornerIndexedBox D.scaffold r)
+
 theorem HasRealizationInvariant.ofLayerPatches
     {D : Figure18ScaffoldData}
     (hpatches : D.HasLayerPatchRealizationInvariant) :
     D.HasRealizationInvariant :=
   realizesActiveCornerSquares_of_realizesActiveCornerBoxes
     (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches hpatches)
+
+theorem HasLayerPatchRealizationInvariant.ofActiveCornerIndexedBoxes
+    {D : Figure18ScaffoldData}
+    (hboxes : D.HasActiveCornerIndexedBoxInvariant) :
+    D.HasLayerPatchRealizationInvariant :=
+  activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes
 
 /--
 The two geometric facts still needed after the finite Figure 18 active-site

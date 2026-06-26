@@ -1090,6 +1090,69 @@ def ofInactiveBox {S : Scaffold} {T : TileSet} {seed : WangTile}
 
 end CombinedBoxLayerPatch
 
+/--
+Finite geometric witness for one centered box of a scaffold.
+
+The witness gives a valid scaffold box together with an index map from active
+cells into a nonempty fixed-corner square.  Adjacent active cells must map to
+adjacent payload-square cells in the corresponding direction, so payload edge
+matches are inherited from the supplied fixed-corner square.
+-/
+structure ActiveCornerIndexedBox (S : Scaffold) (r : Nat) where
+  n : Nat
+  hn : 0 < n
+  base : BoxPattern S.tiles r
+  base_valid : ValidBoxTiling S.tiles r base
+  index : Box r → Fin n × Fin n
+  corner_index :
+    ∀ p : Box r, S.active (base p).1 = true →
+      (base p).1 = S.corner →
+        index p = (⟨0, hn⟩, ⟨0, hn⟩)
+  active_hsucc :
+    ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+      S.active (base p).1 = true →
+        S.active (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1 = true →
+          ∃ hi : (index p).1.val + 1 < n,
+            index ⟨(p.1.1 + 1, p.1.2), hp⟩ =
+              (⟨(index p).1.val + 1, hi⟩, (index p).2)
+  active_vsucc :
+    ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+      S.active (base p).1 = true →
+        S.active (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1 = true →
+          ∃ hj : (index p).2.val + 1 < n,
+            index ⟨(p.1.1, p.1.2 + 1), hp⟩ =
+              ((index p).1, ⟨(index p).2.val + 1, hj⟩)
+
+namespace ActiveCornerIndexedBox
+
+/--
+Fill the indexed active cells of a finite scaffold box from a fixed-corner
+payload square, then use the automatic inactive-payload absorber around them.
+-/
+def toCombinedBoxLayerPatch {S : Scaffold} {T : TileSet} {seed : WangTile}
+    {r : Nat} (box : ActiveCornerIndexedBox S r)
+    (square : TileableFixedCornerSquare T seed box.n) :
+    CombinedBoxLayerPatch S T seed r :=
+  CombinedBoxLayerPatch.ofActivePayloadFixedCornerSquare
+    box.base box.base_valid square box.index
+    box.corner_index
+    (by
+      intro p hp hpActive hqActive
+      rcases box.active_hsucc p hp hpActive hqActive with ⟨hi, hindex⟩
+      have hmatch :=
+        square.choose_spec.choose_spec.1.2.1
+          (box.index p).1 (box.index p).2 hi
+      simpa [hindex] using hmatch)
+    (by
+      intro p hp hpActive hqActive
+      rcases box.active_vsucc p hp hpActive hqActive with ⟨hj, hindex⟩
+      have hmatch :=
+        square.choose_spec.choose_spec.1.2.2
+          (box.index p).1 (box.index p).2 hj
+      simpa [hindex] using hmatch)
+
+end ActiveCornerIndexedBox
+
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
     {T : TileSet} {seed payload : WangTile}
     (hactive : S.active S.corner = true)
@@ -1399,6 +1462,19 @@ def HasActiveCornerLayerBoxPatches (S : Scaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
     (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
       ∀ r : Nat, Nonempty (CombinedBoxLayerPatch S T seed r)
+
+/--
+Turn a purely scaffold-geometric indexed-box construction into the layered
+patch realization invariant by filling active cells from the available
+fixed-corner payload square.
+-/
+theorem activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes
+    {S : Scaffold}
+    (hboxes : ∀ r : Nat, Nonempty (ActiveCornerIndexedBox S r)) :
+    HasActiveCornerLayerBoxPatches S := by
+  intro T seed hsquares r
+  rcases hboxes r with ⟨box⟩
+  exact ⟨box.toCombinedBoxLayerPatch (hsquares box.n box.hn)⟩
 
 theorem activeCornerBoxPatches_of_layerBoxPatches
     {S : Scaffold} (hpatches : HasActiveCornerLayerBoxPatches S) :
