@@ -9987,6 +9987,46 @@ def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     canonicalRouting
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
+def ofPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedBoxes canonicalRouting
+    translatedBoxes
+
+def ofPositiveTranslatedIsolatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalRouting :
+      HasFigure18RobinsonBoardCanonicalRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes canonicalRouting
+    isolatedBoxes
+
 def toCanonicalPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -10054,6 +10094,24 @@ end NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
 
+def canonicalRoutingOfCombinedSiteRouting
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    HasFigure18RobinsonBoardCanonicalRoutingForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+    (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
+      (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_combinedSites
+        canonicalCombinedSiteRouting))
+
 def toCanonicalTranslatedPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -10067,11 +10125,407 @@ def toCanonicalTranslatedPositiveBoxObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid where
   canonicalRouting :=
-    hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
-      (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
-        (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_combinedSites
-          O.canonicalCombinedSiteRouting))
+    canonicalRoutingOfCombinedSiteRouting O.canonicalCombinedSiteRouting
   positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def ofCanonicalTranslatedPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (O : NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  canonicalCombinedSiteRouting := canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def ofFigure18ScaffoldDataPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofCanonicalTranslatedPositiveBoxObligations canonicalCombinedSiteRouting
+    (NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations.ofPositiveTranslatedBoxes
+        (canonicalRoutingOfCombinedSiteRouting canonicalCombinedSiteRouting)
+        translatedBoxes)
+
+def ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofCanonicalTranslatedPositiveBoxObligations canonicalCombinedSiteRouting
+    (NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations.ofPositiveTranslatedIsolatedBoxes
+        (canonicalRoutingOfCombinedSiteRouting canonicalCombinedSiteRouting)
+        isolatedBoxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveTranslatedBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedBoxes canonicalCombinedSiteRouting
+    translatedBoxes
+
+def ofL2C1Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting isolatedBoxes
+
+def ofL2C1Figure18ScaffoldDataPositiveTranslatedValidBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (validBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes validBoxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveTileableBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (tileableBoxes :
+      ∀ r : Nat, 0 < r →
+        TileableBox l2Component1Figure18ScaffoldData.scaffold.tiles r) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveTranslatedValidBoxes
+    canonicalCombinedSiteRouting
+    (positiveTranslatedValidBoxes_of_tileableBoxes tileableBoxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (tileableBoxes :
+      ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTileableBoxes
+          tileableBoxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveCompatibleSquares
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hsquares : HasCompatibleFigure18ScaffoldSquares) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
+    canonicalCombinedSiteRouting
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
+
+def ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveCompatibleSquares
+    canonicalCombinedSiteRouting
+    (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
+
+def ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    canonicalCombinedSiteRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
+def ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedBoxes canonicalCombinedSiteRouting
+    translatedBoxes
+
+def ofL2C2Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting isolatedBoxes
+
+def ofL2C2Figure18ScaffoldDataPositiveTranslatedValidBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (validBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes validBoxes)
+
+def ofL2C2Figure18ScaffoldDataPositiveTileableBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (tileableBoxes :
+      ∀ r : Nat, 0 < r →
+        TileableBox l2Component2Figure18ScaffoldData.scaffold.tiles r) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveTranslatedValidBoxes
+    canonicalCombinedSiteRouting
+    (positiveTranslatedValidBoxes_of_tileableBoxes tileableBoxes)
+
+def ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (tileableBoxes :
+      ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalCombinedSiteRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTileableBoxes
+          tileableBoxes)
+
+def ofL2C2Figure18ScaffoldDataPositiveCompatibleSquares
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hsquares : HasCompatibleFigure18ScaffoldSquares) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTileableBoxes
+    canonicalCombinedSiteRouting
+    (fun r _hr => tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r)
+
+def ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveCompatibleSquares
+    canonicalCombinedSiteRouting
+    (compatibleFigure18ScaffoldSquares_of_tilesPlane hplane)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
+    canonicalCombinedSiteRouting
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 def toCanonicalPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
