@@ -3632,7 +3632,29 @@ def toCertificate
     activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
     cornerIndex_valid obligations
 
+/-- Convert bundled Nat-site obligations through the generated flat-table route. -/
 def toIndexedRoutedCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTableObligations
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid obligations
+
+/--
+Convert bundled Nat-site obligations through the original listed-active route.
+
+The default `toIndexedRoutedCertificate` uses the generated flat-table active
+site list, which is closer to the final Figure 18 theorem surface.
+-/
+def toListedActiveIndexedRoutedCertificate
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
       Figure18Site.natSpecsValidBool activeSiteSpecs = true}
