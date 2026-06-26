@@ -1505,6 +1505,21 @@ def generatedStackAllowedSitePairCompatibilityBool
   generatedStackSitePairCompatibilityBool
     (generatedStackAllowedSites activeSiteData cornerSite)
 
+set_option maxRecDepth 20000 in
+/--
+Finite regression for the flat Figure 18 role-table route.
+
+The smoke table is intentionally not the paper's scaffold.  This theorem only
+checks that the generated Figure 13/Figure 16 stack-compatibility checker runs
+through the same `FlatRoleTable.activeSiteData`/`cornerSite` interface that a
+future Figure 18 transcription will use.
+-/
+theorem Figure18RoleTable.smokeFlat_pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      Figure18RoleTable.smokeFlat.activeSiteData
+      Figure18RoleTable.smokeFlat.cornerSite = true := by
+  decide
+
 theorem generatedStackHBoundaries_of_pairCompatibilityBool
     {sites : List Figure18Site} {left right : Figure18Site}
     (hcheck : generatedStackSitePairCompatibilityBool sites = true)
