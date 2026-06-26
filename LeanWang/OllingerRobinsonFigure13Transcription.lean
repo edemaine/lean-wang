@@ -4681,6 +4681,18 @@ end CoordinateStep
 end RobinsonBoardSignalGeometry
 
 /--
+Coherent Robinson Section 7 obstruction geometry across all red-board levels.
+
+This is the pure geometry target: one obstruction/free-line geometry per level,
+plus the repeated free-line coordinate recurrence between consecutive levels.
+-/
+structure RobinsonBoardSignalGeometryTower : Type where
+  geometries : (level : Nat) → RobinsonBoardSignalGeometry level
+  steps : ∀ level : Nat,
+    RobinsonBoardSignalGeometry.CoordinateStep
+      (geometries level) (geometries (level + 1))
+
+/--
 Robinson Section 7 certificate for one red board level.
 
 The original argument identifies the free rows and columns by obstruction
@@ -4946,6 +4958,91 @@ def SiteCompatible
       Figure18Site.vCompatible
         (certificate.siteRect i j)
         (certificate.siteRect i ⟨j.val + 1, hj⟩) = true)
+
+/--
+Figure 18 payload-routing data over one Robinson obstruction geometry.
+
+The geometry fields say where the free rows and columns are; this routing data
+adds the decoded Figure 18 site at each free crossing, the payload tile read
+there, payload edge matches, and the finite local site-compatibility proof.
+-/
+structure Routing
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) : Type where
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  payloadRect :
+    Rectangle (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide level)
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  product :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        WangTile.product (siteRect i j).tile (payloadRect i j) =
+          (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)).1
+  hmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.HMatches (payloadRect i j)
+            (payloadRect ⟨i.val + 1, hi⟩ j)
+  vmatch :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.VMatches (payloadRect i j)
+            (payloadRect i ⟨j.val + 1, hj⟩)
+  siteCompatible :
+    (ofGeometry geometry siteRect payloadRect active cornerSite product
+      hmatch vmatch).SiteCompatible
+
+namespace Routing
+
+/-- Assemble the full signal certificate from geometry plus routing data. -/
+def toCertificate
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry) :
+    Figure18RobinsonBoardSignalCertificate table x level :=
+  ofGeometry geometry routing.siteRect routing.payloadRect routing.active
+    routing.cornerSite routing.product routing.hmatch routing.vmatch
+
+@[simp]
+theorem toCertificate_geometry
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry) :
+    routing.toCertificate.geometry = geometry := by
+  rfl
+
+theorem toCertificate_siteCompatible
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : Routing table x geometry) :
+    routing.toCertificate.SiteCompatible :=
+  routing.siteCompatible
+
+end Routing
 
 /-- The selected free columns are exactly the columns enumerated by the certificate. -/
 theorem isFreeColumn_iff_exists_freeColumnCoord
@@ -5728,6 +5825,28 @@ def toSubtypeTower
           (certificates level).1 (certificates (level + 1)).1) :=
   ⟨fun level => ⟨tower.certificates level, tower.siteCompatible level⟩,
     tower.steps⟩
+
+/--
+Build the proof-facing local tower from a pure obstruction-geometry tower and
+Figure 18 routing data at each level.
+-/
+def ofGeometryTower
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    (geometryTower : RobinsonBoardSignalGeometryTower)
+    (routing :
+      ∀ level : Nat,
+        Figure18RobinsonBoardSignalCertificate.Routing table x
+          (geometryTower.geometries level)) :
+    Figure18RobinsonBoardSignalLocalTower table x where
+  certificates := fun level => (routing level).toCertificate
+  siteCompatible := fun level =>
+    (routing level).toCertificate_siteCompatible
+  steps := fun level =>
+    Figure18RobinsonBoardSignalCertificate.CoordinateStep.ofGeometry
+      (geometryTower.steps level)
 
 /-- Recover the field-based local tower from the subtype tower. -/
 def ofSubtypeTower
