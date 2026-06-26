@@ -1151,6 +1151,54 @@ def toCombinedBoxLayerPatch {S : Scaffold} {T : TileSet} {seed : WangTile}
           (box.index p).1 (box.index p).2 hj
       simpa [hindex] using hmatch)
 
+/-- The radius-zero indexed box whose only scaffold cell is the corner tile. -/
+def singletonCorner {S : Scaffold} (hmem : S.corner ∈ S.tiles) :
+    ActiveCornerIndexedBox S 0 where
+  n := 1
+  hn := by decide
+  base := fun _ => ⟨S.corner, hmem⟩
+  base_valid := by
+    constructor
+    · intro p hp
+      exfalso
+      have hp0 := p.2
+      unfold InBox at hp hp0
+      have hge : (0 : Int) ≤ (p : Int × Int).1 := by simpa using hp0.1
+      have hle : (p : Int × Int).1 + 1 ≤ 0 := by simpa using hp.2.1
+      linarith
+    · intro p hp
+      exfalso
+      have hp0 := p.2
+      unfold InBox at hp hp0
+      have hge : (0 : Int) ≤ (p : Int × Int).2 := by simpa using hp0.2.2.1
+      have hle : (p : Int × Int).2 + 1 ≤ 0 := by simpa using hp.2.2.2
+      linarith
+  index := fun _ => (⟨0, by decide⟩, ⟨0, by decide⟩)
+  corner_index := by
+    intro p hactive hcorner
+    rfl
+  active_hsucc := by
+    intro p hp hpActive hqActive
+    exfalso
+    have hp0 := p.2
+    unfold InBox at hp hp0
+    have hge : (0 : Int) ≤ (p : Int × Int).1 := by simpa using hp0.1
+    have hle : (p : Int × Int).1 + 1 ≤ 0 := by simpa using hp.2.1
+    linarith
+  active_vsucc := by
+    intro p hp hpActive hqActive
+    exfalso
+    have hp0 := p.2
+    unfold InBox at hp hp0
+    have hge : (0 : Int) ≤ (p : Int × Int).2 := by simpa using hp0.2.2.1
+    have hle : (p : Int × Int).2 + 1 ≤ 0 := by simpa using hp.2.2.2
+    linarith
+
+theorem nonempty_zero_of_corner_mem {S : Scaffold}
+    (hmem : S.corner ∈ S.tiles) :
+    Nonempty (ActiveCornerIndexedBox S 0) :=
+  ⟨singletonCorner hmem⟩
+
 end ActiveCornerIndexedBox
 
 theorem payload_mem_of_product_corner_mem_combineWithScaffold {S : Scaffold}
