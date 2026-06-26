@@ -242,6 +242,107 @@ def completePayloadsFromColors (colors : List Nat) : TileSet :=
 def completePayloads (T : TileSet) : TileSet :=
   completePayloadsFromColors (payloadPalette T)
 
+theorem mem_tileColors_n (t : WangTile) : t.n ∈ tileColors t := by
+  simp [tileColors]
+
+theorem mem_tileColors_s (t : WangTile) : t.s ∈ tileColors t := by
+  simp [tileColors]
+
+theorem mem_tileColors_e (t : WangTile) : t.e ∈ tileColors t := by
+  simp [tileColors]
+
+theorem mem_tileColors_w (t : WangTile) : t.w ∈ tileColors t := by
+  simp [tileColors]
+
+theorem zero_mem_payloadPalette (T : TileSet) : 0 ∈ payloadPalette T := by
+  simp [payloadPalette]
+
+theorem mem_payloadPalette_of_mem_tileColors {T : TileSet} {t : WangTile}
+    {c : Nat} (ht : t ∈ T) (hc : c ∈ tileColors t) :
+    c ∈ payloadPalette T := by
+  unfold payloadPalette
+  simp only [List.mem_cons, List.mem_flatMap]
+  exact Or.inr ⟨t, ht, hc⟩
+
+theorem mem_payloadPalette_n {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    t.n ∈ payloadPalette T :=
+  mem_payloadPalette_of_mem_tileColors ht (mem_tileColors_n t)
+
+theorem mem_payloadPalette_s {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    t.s ∈ payloadPalette T :=
+  mem_payloadPalette_of_mem_tileColors ht (mem_tileColors_s t)
+
+theorem mem_payloadPalette_e {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    t.e ∈ payloadPalette T :=
+  mem_payloadPalette_of_mem_tileColors ht (mem_tileColors_e t)
+
+theorem mem_payloadPalette_w {T : TileSet} {t : WangTile} (ht : t ∈ T) :
+    t.w ∈ payloadPalette T :=
+  mem_payloadPalette_of_mem_tileColors ht (mem_tileColors_w t)
+
+theorem mk_mem_payloadsWithNSEParams {p : PayloadNSEParams} {w : Nat}
+    (hw : w ∈ p.colors) :
+    ({ n := p.n, s := p.s, e := p.e, w := w } : WangTile) ∈
+      payloadsWithNSEParams p := by
+  unfold payloadsWithNSEParams
+  exact List.mem_map.2 ⟨w, hw, rfl⟩
+
+theorem mk_mem_payloadsWithNSParams {p : PayloadNSParams} {e w : Nat}
+    (he : e ∈ p.colors) (hw : w ∈ p.colors) :
+    ({ n := p.n, s := p.s, e := e, w := w } : WangTile) ∈
+      payloadsWithNSParams p := by
+  unfold payloadsWithNSParams
+  rw [List.mem_flatMap]
+  exact ⟨e, he, mk_mem_payloadsWithNSEParams (p :=
+    { colors := p.colors, n := p.n, s := p.s, e := e }) hw⟩
+
+theorem mk_mem_payloadsWithNParams {p : PayloadNParams} {s e w : Nat}
+    (hs : s ∈ p.colors) (he : e ∈ p.colors) (hw : w ∈ p.colors) :
+    ({ n := p.n, s := s, e := e, w := w } : WangTile) ∈
+      payloadsWithNParams p := by
+  unfold payloadsWithNParams
+  rw [List.mem_flatMap]
+  exact ⟨s, hs, mk_mem_payloadsWithNSParams (p :=
+    { colors := p.colors, n := p.n, s := s }) he hw⟩
+
+theorem mk_mem_completePayloadsFromColors {colors : List Nat}
+    {n s e w : Nat}
+    (hn : n ∈ colors) (hs : s ∈ colors)
+    (he : e ∈ colors) (hw : w ∈ colors) :
+    ({ n := n, s := s, e := e, w := w } : WangTile) ∈
+      completePayloadsFromColors colors := by
+  unfold completePayloadsFromColors
+  rw [List.mem_flatMap]
+  exact ⟨n, hn, mk_mem_payloadsWithNParams
+    (p := { colors := colors, n := n }) hs he hw⟩
+
+theorem mk_mem_completePayloads {T : TileSet}
+    {n s e w : Nat}
+    (hn : n ∈ payloadPalette T) (hs : s ∈ payloadPalette T)
+    (he : e ∈ payloadPalette T) (hw : w ∈ payloadPalette T) :
+    ({ n := n, s := s, e := e, w := w } : WangTile) ∈
+      completePayloads T := by
+  unfold completePayloads
+  exact mk_mem_completePayloadsFromColors hn hs he hw
+
+theorem mem_completePayloads_of_mem {T : TileSet} {t : WangTile}
+    (ht : t ∈ T) : t ∈ completePayloads T := by
+  cases t
+  exact mk_mem_completePayloads
+    (mem_payloadPalette_n ht)
+    (mem_payloadPalette_s ht)
+    (mem_payloadPalette_e ht)
+    (mem_payloadPalette_w ht)
+
+theorem monochromeTile_mem_completePayloads (T : TileSet) :
+    monochromeTile ∈ completePayloads T := by
+  change ({ n := 0, s := 0, e := 0, w := 0 } : WangTile) ∈ completePayloads T
+  exact mk_mem_completePayloads
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+    (zero_mem_payloadPalette T)
+
 theorem tileColors_primrec : Primrec tileColors := by
   unfold tileColors
   exact Primrec.list_cons.comp WangTile.n_primrec
