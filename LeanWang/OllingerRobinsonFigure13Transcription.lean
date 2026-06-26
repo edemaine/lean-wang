@@ -5187,6 +5187,109 @@ def HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
             Figure18RobinsonBoardSignalCertificate.CoordinateStep
               (certificates level).1 (certificates (level + 1)).1)
 
+/--
+Cleaner witness shape for Robinson's coherent Section 7 local tower.
+
+The existing theorem-facing `HasFigure18RobinsonBoardLevelSignalLocalTowerForTable`
+uses a dependent sigma of subtype-valued certificates.  This structure exposes
+the same data as ordinary fields: one board signal certificate per level, a
+local Figure 18 compatibility proof for each level, and the free-line coordinate
+recurrence between consecutive levels.
+-/
+structure Figure18RobinsonBoardSignalLocalTower
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)) :
+    Type where
+  certificates :
+    (level : Nat) → Figure18RobinsonBoardSignalCertificate table x level
+  siteCompatible :
+    ∀ level : Nat, (certificates level).SiteCompatible
+  steps :
+    ∀ level : Nat,
+      Figure18RobinsonBoardSignalCertificate.CoordinateStep
+        (certificates level) (certificates (level + 1))
+
+namespace Figure18RobinsonBoardSignalLocalTower
+
+/-- Convert the field-based local tower into the subtype tower used downstream. -/
+def toSubtypeTower
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    (tower : Figure18RobinsonBoardSignalLocalTower table x) :
+    (Σ certificates :
+        (level : Nat) →
+          { certificate :
+              Figure18RobinsonBoardSignalCertificate table x level //
+            certificate.SiteCompatible },
+      ∀ level : Nat,
+        Figure18RobinsonBoardSignalCertificate.CoordinateStep
+          (certificates level).1 (certificates (level + 1)).1) :=
+  ⟨fun level => ⟨tower.certificates level, tower.siteCompatible level⟩,
+    tower.steps⟩
+
+/-- Recover the field-based local tower from the subtype tower. -/
+def ofSubtypeTower
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    (tower :
+      (Σ certificates :
+          (level : Nat) →
+            { certificate :
+                Figure18RobinsonBoardSignalCertificate table x level //
+              certificate.SiteCompatible },
+        ∀ level : Nat,
+          Figure18RobinsonBoardSignalCertificate.CoordinateStep
+            (certificates level).1 (certificates (level + 1)).1)) :
+    Figure18RobinsonBoardSignalLocalTower table x where
+  certificates := fun level => (tower.1 level).1
+  siteCompatible := fun level => (tower.1 level).2
+  steps := tower.2
+
+end Figure18RobinsonBoardSignalLocalTower
+
+/--
+Field-based local towers are exactly the existing theorem-facing local tower
+surface.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower
+    {table : Figure18RoleTable} :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table ↔
+      ∀ {T : TileSet} {seed : WangTile}
+        (x : Int × Int → TileIn (combineWithScaffold
+          table.presentation.toScaffold T seed)),
+        ValidPlaneTiling (combineWithScaffold
+          table.presentation.toScaffold T seed) x →
+          Nonempty (Figure18RobinsonBoardSignalLocalTower table x) := by
+  constructor
+  · intro htower T seed x hx
+    rcases htower x hx with ⟨tower⟩
+    exact ⟨Figure18RobinsonBoardSignalLocalTower.ofSubtypeTower tower⟩
+  · intro htower T seed x hx
+    rcases htower x hx with ⟨tower⟩
+    exact ⟨tower.toSubtypeTower⟩
+
+/--
+Constructor for the existing local-tower obligation from the cleaner
+field-based Robinson Section 7 witness.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+    {table : Figure18RoleTable}
+    (htower :
+      ∀ {T : TileSet} {seed : WangTile}
+        (x : Int × Int → TileIn (combineWithScaffold
+          table.presentation.toScaffold T seed)),
+        ValidPlaneTiling (combineWithScaffold
+          table.presentation.toScaffold T seed) x →
+          Nonempty (Figure18RobinsonBoardSignalLocalTower table x)) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.2 htower
+
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
     {table : Figure18RoleTable}
