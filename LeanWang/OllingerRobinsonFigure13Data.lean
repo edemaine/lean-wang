@@ -10143,6 +10143,33 @@ def natSiteFigure18RoutedCertificateOfCanonicalCorridorRoutingPositiveTranslated
       canonicalCorridorRouting)
     translatedBoxes
 
+/--
+Direct routed Figure 18 certificate from Robinson's canonical decoded
+combined-site corridor routing and positive-radius translated active-corner
+boxes.
+-/
+def natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalCorridorRoutingPositiveTranslatedBoxes
+    (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_combinedSites
+      canonicalCombinedSiteRouting)
+    translatedBoxes
+
 def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -10377,6 +10404,32 @@ def l2Component1Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13
         simpa [l2Component1Figure18ScaffoldData] using
           l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
 
+/--
+L2 component-1 routed Figure 18 certificate from canonical decoded combined-site
+corridor routing and a raw Figure 13 plane tiling.
+-/
+def l2Component1Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveFig13TilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
+    canonicalCombinedSiteRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
 def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -10606,6 +10659,32 @@ def l2Component2Figure18RoutedCertificateOfCanonicalCorridorRoutingPositiveFig13
         l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
   natSiteFigure18RoutedCertificateOfCanonicalCorridorRoutingPositiveTranslatedBoxes
     canonicalCorridorRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
+/--
+L2 component-2 routed Figure 18 certificate from canonical decoded combined-site
+corridor routing and a raw Figure 13 plane tiling.
+-/
+def l2Component2Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveFig13TilesPlane
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
+    canonicalCombinedSiteRouting
     (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
       (by
         simpa [l2Component2Figure18ScaffoldData] using
