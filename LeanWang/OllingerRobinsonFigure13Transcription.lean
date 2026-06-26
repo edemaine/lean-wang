@@ -4528,6 +4528,84 @@ theorem noVerticalObstruction_of_freeColumnCoord
     (certificate.freeColumnCoord i) (certificate.freeColumnCoord_board i)
   exact (hcolumn.1 (certificate.freeColumnCoord_free i)) row hrow
 
+/-- A horizontal obstruction through a board row prevents that row from being free. -/
+theorem not_freeRow_of_horizontalObstruction
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hrow : certificate.isBoardRow row)
+    (hcolumn : certificate.isBoardColumn column)
+    (hobs : certificate.hasHorizontalObstruction column row) :
+    ¬ certificate.isFreeRow row := by
+  intro hfree
+  exact (certificate.freeRow_iff_noHorizontalObstruction row hrow).1 hfree
+    column hcolumn hobs
+
+/-- A vertical obstruction through a board column prevents that column from being free. -/
+theorem not_freeColumn_of_verticalObstruction
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hrow : certificate.isBoardRow row)
+    (hobs : certificate.hasVerticalObstruction column row) :
+    ¬ certificate.isFreeColumn column := by
+  intro hfree
+  exact (certificate.freeColumn_iff_noVerticalObstruction column hcolumn).1
+    hfree row hrow hobs
+
+/--
+Every non-free board row has a horizontal obstruction at some board column.
+-/
+theorem exists_horizontalObstruction_of_boardRow_not_free
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {row : Int}
+    (hrow : certificate.isBoardRow row)
+    (hnotFree : ¬ certificate.isFreeRow row) :
+    ∃ column : Int,
+      certificate.isBoardColumn column ∧
+        certificate.hasHorizontalObstruction column row := by
+  by_contra hnone
+  apply hnotFree
+  refine (certificate.freeRow_iff_noHorizontalObstruction row hrow).2 ?_
+  intro column hcolumn hobs
+  exact hnone ⟨column, hcolumn, hobs⟩
+
+/--
+Every non-free board column has a vertical obstruction at some board row.
+-/
+theorem exists_verticalObstruction_of_boardColumn_not_free
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hnotFree : ¬ certificate.isFreeColumn column) :
+    ∃ row : Int,
+      certificate.isBoardRow row ∧
+        certificate.hasVerticalObstruction column row := by
+  by_contra hnone
+  apply hnotFree
+  refine (certificate.freeColumn_iff_noVerticalObstruction column hcolumn).2 ?_
+  intro row hrow hobs
+  exact hnone ⟨row, hrow, hobs⟩
+
 /--
 At a selected free-row/free-column crossing, neither obstruction signal is
 present.
