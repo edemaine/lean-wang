@@ -902,6 +902,51 @@ theorem toCheckedNatSiteRectangle_matchesSiteRectangleBool {w h : Nat}
   simp [Figure18Site.equivPair, Figure18Site.toPair,
     CheckedNatSiteRectangle.toSiteRectangle, toCheckedNatSiteRectangle_specAt]
 
+/--
+A Figure 18 site rectangle with compatible adjacent sites is a valid rectangle
+over the concrete subdivided Figure 13 scaffold tiles.
+-/
+theorem validTileRect {w h : Nat} (R : SiteRectangle w h)
+    (hh : ∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    ValidRectangle figure18ScaffoldTiles R.tileRect := by
+  constructor
+  · intro i j
+    exact mem_figure18ScaffoldTiles_of_site (R i j)
+  constructor
+  · intro i j hi
+    exact Figure18Site.hMatches_of_hCompatible (hh i j hi)
+  · intro i j hj
+    exact Figure18Site.vMatches_of_vCompatible (hv i j hj)
+
+/-- A compatible square of Figure 18 sites gives an ordinary scaffold square. -/
+theorem tileableSquare_of_compatible {n : Nat} (R : SiteRectangle n n)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    TileableSquare figure18ScaffoldTiles n :=
+  ⟨R.tileRect, R.validTileRect hh hv⟩
+
+/--
+If the Robinson-board geometry supplies compatible Figure 18 site squares of
+every side length, then the shared Figure 18 scaffold tiles tile every centered
+box.
+-/
+theorem tileableBoxes_of_compatibleSquares
+    (hsquares : ∀ n : Nat,
+      ∃ R : SiteRectangle n n,
+        (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+          Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) ∧
+        (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+          Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)) :
+    ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r := by
+  intro r _hr
+  rcases hsquares (boxSide r) with ⟨R, hh, hv⟩
+  exact tileableBox_of_tileableSquare (R.tileableSquare_of_compatible hh hv)
+
 end SiteRectangle
 
 /--
