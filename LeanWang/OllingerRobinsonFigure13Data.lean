@@ -1458,6 +1458,39 @@ theorem sparseRawDataOfSites_exists_checkedLayerStackRectangle
     sparseRawDataOfSites_layerStackRectangleMatchesBool
       activeSiteData cornerSite R⟩
 
+def HasGeneratedStackCompatibilityForListedActiveSiteRectangles
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site) : Prop :=
+  ∀ {n : Nat} {hn : 0 < n} (R : SiteRectangle n n),
+    (∀ i : Fin n, ∀ j : Fin n,
+      R i j = cornerSite ∨ R i j ∈ activeSiteData.sites) →
+    R ⟨0, hn⟩ ⟨0, hn⟩ = cornerSite →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) →
+    (∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) →
+      let stackData := checkedLayerStackRectangleOfSiteRectangle R
+      stackData.compatibleBool (sparseRawDataOfSites activeSiteData cornerSite).layerData
+        (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+          (sparseRawDataOfSites_layerStackRectangleMatchesBool
+            activeSiteData cornerSite R)) = true
+
+theorem sparseRawDataOfSites_hasCheckedStacksForListedActiveSiteRectangles_of_generatedCompatibility
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hcompat :
+      HasGeneratedStackCompatibilityForListedActiveSiteRectangles
+        activeSiteData cornerSite) :
+    (sparseRawDataOfSites activeSiteData cornerSite).HasCheckedStacksForListedActiveSiteRectangles
+        activeSiteData.sites cornerSite := by
+  intro n hn R hsites hcorner hh hv
+  refine ⟨checkedLayerStackRectangleOfSiteRectangle R,
+    checkedLayerStackRectangleOfSiteRectangle_matchesSite R,
+    sparseRawDataOfSites_layerStackRectangleMatchesBool
+      activeSiteData cornerSite R,
+    ?_⟩
+  exact hcompat R hsites hcorner hh hv
+
 /--
 Concrete layered scaffold data with the Figure 13 layer transcription fixed and
 the finite Figure 18 active-site/corner data supplied as parameters.
