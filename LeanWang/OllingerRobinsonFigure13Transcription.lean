@@ -5135,6 +5135,50 @@ def HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable
               Figure18RobinsonBoardSignalCertificate.CoordinateStep
                 parent.1 child.1)
 
+/--
+Coherent level tower for Robinson Section 7 signal certificates.
+
+Robinson's nested-board proof constructs one board certificate at every level
+and a coordinate recurrence between consecutive levels.  This tower form is
+closer to that construction than `HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable`,
+which only asks for an independent parent/child pair at each level.
+-/
+def HasFigure18RobinsonBoardLevelSignalTowerForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (Σ certificates :
+            (level : Nat) →
+              Figure18RobinsonBoardSignalCertificate table x level,
+          ∀ level : Nat,
+            Figure18RobinsonBoardSignalCertificate.CoordinateStep
+              (certificates level) (certificates (level + 1)))
+
+/--
+Coherent level tower with the finite local Figure 18 compatibility checks
+needed by the layer-stack verifier.
+-/
+def HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (Σ certificates :
+            (level : Nat) →
+              { certificate :
+                  Figure18RobinsonBoardSignalCertificate table x level //
+                certificate.SiteCompatible },
+          ∀ level : Nat,
+            Figure18RobinsonBoardSignalCertificate.CoordinateStep
+              (certificates level).1 (certificates (level + 1)).1)
+
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
     {table : Figure18RoleTable}
@@ -5154,6 +5198,44 @@ theorem hasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable_of_localCoord
   intro T seed x hx level
   rcases hsteps x hx level with ⟨parent, child, step⟩
   exact ⟨parent.1, child.1, step⟩
+
+/--
+A coherent Section 7 tower supplies the older independent coordinate-step
+surface by taking the consecutive levels from the same tower.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable_of_tower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalTowerForTable table) :
+    HasFigure18RobinsonBoardLevelSignalCoordinateStepsForTable table := by
+  intro T seed x hx level
+  rcases htower x hx with ⟨certificates, steps⟩
+  exact ⟨certificates level, certificates (level + 1), steps level⟩
+
+/--
+A coherent local Section 7 tower supplies the existing local coordinate-step
+surface by taking consecutive levels from the same tower.
+-/
+theorem hasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable_of_localTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalCoordinateStepsForTable table := by
+  intro T seed x hx level
+  rcases htower x hx with ⟨certificates, steps⟩
+  exact ⟨certificates level, certificates (level + 1), steps level⟩
+
+/-- Forget local site compatibility from a coherent local Section 7 tower. -/
+theorem hasFigure18RobinsonBoardLevelSignalTowerForTable_of_localTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RobinsonBoardLevelSignalTowerForTable table := by
+  intro T seed x hx
+  rcases htower x hx with ⟨certificates, steps⟩
+  refine ⟨⟨fun level => (certificates level).1, ?_⟩⟩
+  intro level
+  exact steps level
 
 /--
 Level-indexed Robinson-board/free-grid invariant.
