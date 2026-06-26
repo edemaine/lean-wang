@@ -3265,6 +3265,83 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfListedActiveSitePairCompatib
       hpair)
     realizes
 
+theorem sparseRawDataOfNatSites_hasCheckedStacksForFlatRoleTable
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasCheckedStacksForListedActiveSiteWindowsForFlatTable
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid) := by
+  apply CheckedSparseRawData.hasCheckedStacksForListedActiveSiteWindowsForFlatTable_of_rectangles
+  intro n hn R hsites hcorner hh hv
+  let table :=
+    flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid
+  let stackData := checkedLayerStackRectangleOfSiteRectangle R
+  refine ⟨stackData, checkedLayerStackRectangleOfSiteRectangle_matchesSite R,
+    ?_, ?_⟩
+  · simpa [sparseRawDataOfNatSites_eq_sparseRawDataOfSites] using
+      sparseRawDataOfSites_layerStackRectangleMatchesBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+        R
+  · have hpair' :
+        generatedStackAllowedSitePairCompatibilityBool
+          table.activeSiteData table.cornerSite = true := by
+      exact generatedStackAllowedSitePairCompatibilityBool_flatRoleTableOfNatSites
+        hpair
+    have hsites' : ∀ i : Fin n, ∀ j : Fin n,
+        R i j = table.cornerSite ∨ R i j ∈ table.activeSiteData.sites := by
+      intro i j
+      simpa [table] using hsites i j
+    have hcompat :=
+      hasGeneratedStackCompatibilityForAllowedSiteRectangles_of_allowedPairCompatibilityBool
+        table.activeSiteData table.cornerSite hpair' R hsites' hh hv
+    simpa [table, sparseRawDataOfNatSites_layerData,
+      sparseRawDataOfSites_layerData] using hcompat
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTablePairCompatibility
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hwindows :
+      HasFigure18ListedActiveSiteFixedCornerSquareWindowsForTable
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).toRoleTable
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).activeSites
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).cornerSite)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate := by
+  apply CheckedSparseRawData.indexedRoutedCertificateOfListedActiveSiteCheckedStacksForFlatTable
+  · exact CheckedSparseRawData.hasListedActiveSiteCheckedStacksForFlatTable_of_windows
+      hwindows
+      (sparseRawDataOfNatSites_hasCheckedStacksForFlatRoleTable
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hpair)
+  · exact realizes
+
 /-- Plain Figure 18 scaffold data from raw active-site specs and corner. -/
 def figure18ScaffoldDataOfNatSites
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -3517,6 +3594,24 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfObligations
     activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
     cornerIndex_valid
     obligations.listedWindows
+    obligations.pairCompatibility
+    obligations.realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTableObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (obligations :
+      NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTablePairCompatibility
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    obligations.flatRoleTable_listedWindowsForTable
     obligations.pairCompatibility
     obligations.realizes
 

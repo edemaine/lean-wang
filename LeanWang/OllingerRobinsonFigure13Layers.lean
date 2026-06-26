@@ -4777,6 +4777,19 @@ def indexedRoutedCertificateOfListedActiveSiteCheckedStacks
     (hasFlatActiveSiteCheckedStacks_of_listedActiveSite hchecked)
     realizes
 
+def indexedRoutedCertificateOfListedActiveSiteCheckedStacksForFlatTable
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasListedActiveSiteCheckedStacksForFlatTable
+        data.toLayeredFigure18ScaffoldData.flatTable)
+    (realizes :
+      RealizesActiveCornerSquares
+        data.toLayeredFigure18ScaffoldData.table.presentation.toScaffold) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfFlatActiveSiteCheckedStacks
+    (hasFlatActiveSiteCheckedStacks_of_listedActiveSiteForFlatTable hchecked)
+    realizes
+
 end CheckedSparseRawData
 
 end LayeredFigure18ScaffoldData
