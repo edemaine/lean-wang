@@ -10732,6 +10732,55 @@ def natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTransl
       canonicalCombinedSiteRouting)
     translatedBoxes
 
+/--
+Direct routed Figure 18 certificate from Robinson Section 7 combined-site
+corridor routing, where the board geometry tower may be selected from the
+given tiling, and positive-radius translated active-corner boxes.
+
+This is the proof-facing version closest to Robinson's paper: first extract
+red boards/free corridors from the tiling, then route the decoded payload
+through those corridors.
+-/
+def natSiteFigure18RoutedCertificateOfGeomCombinedPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (geometryCombinedSiteRouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table where
+  routedForces :=
+    hasFigure18RoutedFixedCornerSquares_of_indexed
+      (hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
+        (hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_geometryTowerRouting
+          (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_geometryTowerCombinedSites
+            geometryCombinedSiteRouting)))
+  realizes := by
+    have hrealizes :
+        Figure18ScaffoldData.HasRealizationInvariant
+          (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid) :=
+      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+        translatedBoxes
+    simpa [Figure18ScaffoldData.HasRealizationInvariant,
+      figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+      LayeredFigure18ScaffoldData.scaffold,
+      LayeredFigure18ScaffoldData.presentation,
+      LayeredFigure18ScaffoldData.table,
+      LayeredFigure18ScaffoldData.flatTable,
+      Figure18ScaffoldData.scaffold,
+      Figure18ScaffoldData.presentation,
+      Figure18ScaffoldData.table] using hrealizes
+
 def l2Component1Figure18RoutedCertificateOfCanonicalRoutingPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -10992,6 +11041,33 @@ def l2Component1Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveF
         simpa [l2Component1Figure18ScaffoldData] using
           l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
 
+/--
+L2 component-1 routed Figure 18 certificate from tiling-dependent
+Robinson-board geometry plus decoded combined-site corridor routing and a raw
+Figure 13 plane tiling.
+-/
+def l2Component1Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+    (geometryCombinedSiteRouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfGeomCombinedPositiveTranslatedBoxes
+    geometryCombinedSiteRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
 def l2Component2Figure18RoutedCertificateOfCanonicalRoutingPositiveTranslatedBoxes
     (canonicalRouting :
       HasFigure18RobinsonBoardCanonicalRoutingForTable
@@ -11247,6 +11323,33 @@ def l2Component2Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveF
         l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
   natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
     canonicalCombinedSiteRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
+/--
+L2 component-2 routed Figure 18 certificate from tiling-dependent
+Robinson-board geometry plus decoded combined-site corridor routing and a raw
+Figure 13 plane tiling.
+-/
+def l2Component2Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+    (geometryCombinedSiteRouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfGeomCombinedPositiveTranslatedBoxes
+    geometryCombinedSiteRouting
     (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
       (by
         simpa [l2Component2Figure18ScaffoldData] using
