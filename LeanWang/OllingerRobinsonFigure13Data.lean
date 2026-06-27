@@ -5782,6 +5782,37 @@ structure NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
             cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
 
 /--
+Origin-zero active/corner window target with generated finite compatibility and
+positive translated boxes.
+
+This is the scaffold-facing target for the current Figure 13/Figure 16 route:
+the geometry proof supplies canonical origin-zero active/corner windows, the
+finite transcription supplies generated pair compatibility, and the backward
+construction supplies translated active-corner boxes.
+-/
+structure NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  originZeroWindows :
+    HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+        true
+  positiveTranslatedIndexedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
+
+/--
 Tiling-dependent geometry-tower decoded combined-site corridor-routing
 scaffold target, with positive-radius boxes allowed to live at
 radius-dependent translated origins.
@@ -11735,6 +11766,171 @@ def toFigure18RoutedCertificate
     O.canonicalFreeSiteRectRouting O.positiveTranslatedIndexedBoxes
 
 end NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+
+namespace NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+
+def toCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  canonicalFreeSiteRectRouting :=
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_activeCorner
+      (hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+        O.originZeroWindows)
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def toFigure18ScaffoldDataRoutedCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).RoutedCertificate :=
+  figure18ScaffoldDataOfNatSitesRoutedCertificateOfOriginZeroPairCompatibility
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.originZeroWindows O.pairCompatibility
+    (by
+      intro r hr
+      simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table] using
+        O.positiveTranslatedIndexedBoxes r hr)
+
+def toFigure18RoutedCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  O.toCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+    |>.toFigure18RoutedCertificate
+
+def ofFigure18ScaffoldDataPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  originZeroWindows := originZeroWindows
+  pairCompatibility := pairCompatibility
+  positiveTranslatedIndexedBoxes := by
+    intro r hr
+    simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+      LayeredFigure18ScaffoldData.scaffold,
+      LayeredFigure18ScaffoldData.presentation,
+      LayeredFigure18ScaffoldData.table,
+      LayeredFigure18ScaffoldData.flatTable,
+      Figure18ScaffoldData.scaffold,
+      Figure18ScaffoldData.presentation,
+      Figure18ScaffoldData.table] using translatedBoxes r hr
+
+def ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedBoxes originZeroWindows
+    pairCompatibility
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      isolatedBoxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+end NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
 
