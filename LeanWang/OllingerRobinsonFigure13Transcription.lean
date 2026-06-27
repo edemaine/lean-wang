@@ -5792,6 +5792,94 @@ noncomputable def ofSiteRect
         vcompat i j hj
 
 /--
+Decoded combined-site corridor routing with the site rectangle named
+explicitly.
+
+This is the proof target intended for the local scaffold extraction: choose the
+Figure 18 site at every free crossing, prove that it agrees with the decoded
+combined tile there, and state the active/corner/compatibility facts directly
+on that named rectangle.
+-/
+structure SiteRectRouting
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) : Type where
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  site_eq :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        table.combinedSite
+          (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) =
+        siteRect i j
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  htransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          (∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column
+              (geometry.freeRowCoord j)) →
+            WangTile.HMatches
+              (table.combinedPayload
+                (x (geometry.freeColumnCoord i,
+                  geometry.freeRowCoord j)))
+              (table.combinedPayload
+                (x (geometry.freeColumnCoord ⟨i.val + 1, hi⟩,
+                  geometry.freeRowCoord j)))
+  vtransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          (∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction
+              (geometry.freeColumnCoord i) row) →
+            WangTile.VMatches
+              (table.combinedPayload
+                (x (geometry.freeColumnCoord i,
+                  geometry.freeRowCoord j)))
+              (table.combinedPayload
+                (x (geometry.freeColumnCoord i,
+                  geometry.freeRowCoord ⟨j.val + 1, hj⟩)))
+  siteCompatible :
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.hCompatible
+          (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.vCompatible
+          (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+
+namespace SiteRectRouting
+
+/-- Forget the named site rectangle after using it to build combined routing. -/
+noncomputable def toCombinedSiteCorridorRouting
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : SiteRectRouting table x geometry) :
+    CombinedSiteCorridorRouting table x geometry :=
+  ofSiteRect routing.siteRect routing.site_eq routing.active routing.cornerSite
+    routing.htransmit routing.vtransmit routing.siteCompatible
+
+end SiteRectRouting
+
+/--
 Extract product witnesses from the combined tiling after the geometric proof has
 selected and checked the combined sites.
 -/
@@ -5875,6 +5963,36 @@ theorem ofSiteRect_toCorridorProductWitnessRouting_payloadWitness_apply
       table.combinedPayload
         (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) :=
   rfl
+
+@[simp]
+theorem SiteRectRouting.toCombinedSiteCorridorRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (routing.toCombinedSiteCorridorRouting.toCorridorProductWitnessRouting).siteRect
+      i j = routing.siteRect i j :=
+  routing.site_eq i j
+
+@[simp]
+theorem SiteRectRouting.toCombinedSiteCorridorRouting_payloadWitness_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    ((routing.toCombinedSiteCorridorRouting.toCorridorProductWitnessRouting).payloadWitness
+      i j).1 =
+      table.combinedPayload
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) := by
+  simp [SiteRectRouting.toCombinedSiteCorridorRouting]
 
 end CombinedSiteCorridorRouting
 
@@ -6997,6 +7115,27 @@ def HasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTowerForTable
             table x (geometryTower.geometries level))
 
 /--
+Site-rectangle form of combined-site corridor routing over a fixed geometry
+tower.
+
+This keeps the selected Figure 18 site rectangle visible in the proof
+obligation, so the local scaffold argument can prove recognizability and
+compatibility against named sites before forgetting that extra data.
+-/
+def HasFigure18RobinsonBoardSiteRectCombinedSiteCorridorRoutingForGeometryTowerForTable
+    (table : Figure18RoleTable)
+    (geometryTower : RobinsonBoardSignalGeometryTower) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          Figure18RobinsonBoardSignalCertificate.CombinedSiteCorridorRouting.SiteRectRouting
+            table x (geometryTower.geometries level))
+
+/--
 Robinson Section 7 proof target with a single geometry tower selected
 independently of the payload tiles and the combined tiling.
 -/
@@ -7093,6 +7232,24 @@ theorem
   intro T seed x hx
   rcases hrouting x hx with ⟨routing⟩
   exact ⟨fun level => (routing level).toCorridorProductWitnessRouting⟩
+
+/--
+Named site-rectangle routing supplies the decoded combined-site corridor target
+over the same geometry tower.
+-/
+theorem
+    hasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTowerForTable_of_siteRect
+    {table : Figure18RoleTable}
+    {geometryTower : RobinsonBoardSignalGeometryTower}
+    (hrouting :
+      HasFigure18RobinsonBoardSiteRectCombinedSiteCorridorRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTowerForTable
+      table geometryTower := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨fun level =>
+    (routing level).toCombinedSiteCorridorRouting⟩
 
 /--
 Combined-site corridor routing with a tiling-dependent geometry tower supplies
