@@ -5954,6 +5954,115 @@ noncomputable def toCombinedSiteCorridorRouting
 end SiteRectRouting
 
 /--
+Canonical-site-rectangle routing at one Robinson board level.
+
+This is the local proof shape for the canonical Section 7 geometry: the free
+crossings are already the selected canonical rows and columns, so the payload
+transmission fields do not ask the caller to restate the obstruction-signal
+premises.  Those premises are reintroduced automatically when converting to the
+general `SiteRectRouting` interface.
+-/
+structure CanonicalSiteRectRouting
+    (table : Figure18RoleTable)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed))
+    (level : Nat) : Type where
+  siteRect :
+    Fin (RobinsonSquare.freeGridSide level) →
+      Fin (RobinsonSquare.freeGridSide level) → Figure18Site
+  site_eq :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        table.combinedSite
+          (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+            (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)) =
+        siteRect i j
+  active :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        CellRole.isActive (table.roleAtSite (siteRect i j)) = true
+  cornerSite :
+    siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite
+  htransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.HMatches
+            (table.combinedPayload
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+            (table.combinedPayload
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+                ⟨i.val + 1, hi⟩,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+  vtransmit :
+    ∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          WangTile.VMatches
+            (table.combinedPayload
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+            (table.combinedPayload
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+                  ⟨j.val + 1, hj⟩)))
+  siteCompatible :
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.hCompatible
+          (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+    (∀ i : Fin (RobinsonSquare.freeGridSide level),
+      ∀ j : Fin (RobinsonSquare.freeGridSide level),
+      ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+        Figure18Site.vCompatible
+          (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
+
+namespace CanonicalSiteRectRouting
+
+/--
+Canonical site-rectangle routing supplies the general site-rectangle routing
+interface over Robinson's canonical obstruction geometry.
+-/
+noncomputable def toSiteRectRouting
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (routing : CanonicalSiteRectRouting table x level) :
+    SiteRectRouting table x (RobinsonBoardSignalGeometry.canonical level) where
+  siteRect := routing.siteRect
+  site_eq := routing.site_eq
+  active := routing.active
+  cornerSite := routing.cornerSite
+  htransmit := by
+    intro i j hi _hclear
+    exact routing.htransmit i j hi
+  vtransmit := by
+    intro i j hj _hclear
+    exact routing.vtransmit i j hj
+  siteCompatible := routing.siteCompatible
+
+@[simp]
+theorem toSiteRectRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (routing : CanonicalSiteRectRouting table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    routing.toSiteRectRouting.siteRect i j = routing.siteRect i j :=
+  rfl
+
+end CanonicalSiteRectRouting
+
+/--
 Extract product witnesses from the combined tiling after the geometric proof has
 selected and checked the combined sites.
 -/
@@ -7309,6 +7418,32 @@ def HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
   HasFigure18RobinsonBoardSiteRectCombinedSiteCorridorRoutingForGeometryTowerForTable
     table canonicalRobinsonBoardSignalGeometryTower
 
+section CanonicalFreeSiteRectRouting
+
+open Figure18RobinsonBoardSignalCertificate.CombinedSiteCorridorRouting
+
+/--
+Canonical site-rectangle routing with obstruction premises already discharged.
+
+This is the proof-facing variant for the canonical Robinson tower: at each
+level the local extraction supplies a named site rectangle and direct payload
+transmission across the canonical free crossings.  It converts to
+`HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable`
+by reintroducing the general obstruction-premise fields automatically.
+-/
+def HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          CanonicalSiteRectRouting table x level)
+
+end CanonicalFreeSiteRectRouting
+
 /--
 Combined-site corridor routing over one fixed geometry tower supplies
 product-witness corridor routing over the same tower.
@@ -7375,6 +7510,22 @@ theorem
       table :=
   hasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTowerForTable_of_siteRect
     hrouting
+
+/--
+Canonical free-crossing site-rectangle routing supplies the existing canonical
+site-rectangle corridor-routing target.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+      table := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨fun level =>
+    (routing level).toSiteRectRouting⟩
 
 /--
 Combined-site corridor routing with a tiling-dependent geometry tower supplies
