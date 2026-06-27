@@ -14142,16 +14142,7 @@ def l2c2Fig13Obligations
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     canonicalCombinedSiteRouting hplane
 
-private theorem canonicalCombined_of_siteRect
-    {table : Figure18RoleTable}
-    (routing :
-      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
-        table) :
-    OllingerRobinson.HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
-      table :=
-  OllingerRobinson.hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
-    routing
-
+open NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations in
 def l2c1SiteRectFig13Obligations
     (canonicalSiteRectRouting :
       OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
@@ -14165,13 +14156,11 @@ def l2c1SiteRectFig13Obligations
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
-      l2Component1BlankCandidateSanity.cornerIndex_valid where
-  canonicalSiteRectCombinedSiteRouting := canonicalSiteRectRouting
-  positiveTranslatedIndexedBoxes :=
-    (l2c1Fig13Obligations
-      (canonicalCombined_of_siteRect canonicalSiteRectRouting)
-      hplane).positiveTranslatedIndexedBoxes
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane canonicalSiteRectRouting
+    hplane
 
+open NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations in
 def l2c2SiteRectFig13Obligations
     (canonicalSiteRectRouting :
       OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
@@ -14185,12 +14174,9 @@ def l2c2SiteRectFig13Obligations
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
-      l2Component2BlankCandidateSanity.cornerIndex_valid where
-  canonicalSiteRectCombinedSiteRouting := canonicalSiteRectRouting
-  positiveTranslatedIndexedBoxes :=
-    (l2c2Fig13Obligations
-      (canonicalCombined_of_siteRect canonicalSiteRectRouting)
-      hplane).positiveTranslatedIndexedBoxes
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane canonicalSiteRectRouting
+    hplane
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
