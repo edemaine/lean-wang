@@ -14010,6 +14010,102 @@ theorem
     domino_problem_undecidable_l2c2_canonical_translated_obligations_decoderStep
       O.toCanonicalTranslatedPositiveBoxObligations hstep hcorrect
 
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical named-site-rectangle routing, translated positive-radius indexed
+boxes, and the generated position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_site_rect_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_combined_site_translated_obligations_decoderStep
+      O.toCanonicalCombinedSiteTranslatedPositiveBoxObligations hstep hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical named-site-rectangle routing, translated positive-radius indexed
+boxes, and the generated position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c1_site_rect_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_combined_site_translated_obligations_decoderStep
+      O.toCanonicalCombinedSiteTranslatedPositiveBoxObligations hstep hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical named-site-rectangle routing, translated positive-radius indexed
+boxes, and the generated position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_site_rect_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_combined_site_translated_obligations_decoderStep
+      O.toCanonicalCombinedSiteTranslatedPositiveBoxObligations hstep hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical named-site-rectangle routing, translated positive-radius indexed
+boxes, and the generated position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c2_site_rect_translated_obligations_decoderStep
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_combined_site_translated_obligations_decoderStep
+      O.toCanonicalCombinedSiteTranslatedPositiveBoxObligations hstep hcorrect
+
 open NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations in
 def l2c1Fig13Obligations
     (canonicalCombinedSiteRouting :
@@ -14045,6 +14141,56 @@ def l2c2Fig13Obligations
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     canonicalCombinedSiteRouting hplane
+
+private theorem canonicalCombined_of_siteRect
+    {table : Figure18RoleTable}
+    (routing :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        table) :
+    OllingerRobinson.HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+      table :=
+  OllingerRobinson.hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
+    routing
+
+def l2c1SiteRectFig13Obligations
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid where
+  canonicalSiteRectCombinedSiteRouting := canonicalSiteRectRouting
+  positiveTranslatedIndexedBoxes :=
+    (l2c1Fig13Obligations
+      (canonicalCombined_of_siteRect canonicalSiteRectRouting)
+      hplane).positiveTranslatedIndexedBoxes
+
+def l2c2SiteRectFig13Obligations
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid where
+  canonicalSiteRectCombinedSiteRouting := canonicalSiteRectRouting
+  positiveTranslatedIndexedBoxes :=
+    (l2c2Fig13Obligations
+      (canonicalCombined_of_siteRect canonicalSiteRectRouting)
+      hplane).positiveTranslatedIndexedBoxes
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -14156,6 +14302,118 @@ theorem
   exact
     domino_problem_undecidable_l2c2_combined_site_translated_obligations_decoderStep
       (l2c2Fig13Obligations canonicalCombinedSiteRouting hplane)
+      hstep hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical named-site-rectangle routing, a raw Figure 13 plane tiling, and the
+generated position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_site_rect_fig13_tiles_plane_decoderStep
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_site_rect_translated_obligations_decoderStep
+      (l2c1SiteRectFig13Obligations canonicalSiteRectRouting hplane)
+      hstep hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical named-site-rectangle routing, a raw Figure 13 plane tiling, and the
+generated position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c1_site_rect_fig13_tiles_plane_decoderStep
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_site_rect_translated_obligations_decoderStep
+      (l2c1SiteRectFig13Obligations canonicalSiteRectRouting hplane)
+      hstep hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical named-site-rectangle routing, a raw Figure 13 plane tiling, and the
+generated position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_site_rect_fig13_tiles_plane_decoderStep
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_site_rect_translated_obligations_decoderStep
+      (l2c2SiteRectFig13Obligations canonicalSiteRectRouting hplane)
+      hstep hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical named-site-rectangle routing, a raw Figure 13 plane tiling, and the
+generated position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c2_site_rect_fig13_tiles_plane_decoderStep
+    (canonicalSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_site_rect_translated_obligations_decoderStep
+      (l2c2SiteRectFig13Obligations canonicalSiteRectRouting hplane)
       hstep hcorrect
 
 /--
