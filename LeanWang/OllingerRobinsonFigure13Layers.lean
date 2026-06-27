@@ -2086,6 +2086,20 @@ theorem ofChecked_window
     (ofChecked window data hsite hlookup hcompatible).window = window :=
   rfl
 
+/--
+The Figure 16 layer stack carried by an indexed active-corner window expands to
+a tileable doubled square in each layer.
+-/
+theorem tileableExpandedSquare
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedActiveCornerWindowWithLayerStack D table x n hn)
+    (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  window.layerStack.tileableExpandedSquare layer
+
 end Figure18IndexedActiveCornerWindowWithLayerStack
 
 /--
@@ -2110,6 +2124,21 @@ theorem hasFigure18IndexedActiveCornerWindows_of_layerStack
   intro T seed x hx n hn
   rcases hwindow x hx n hn with ⟨window⟩
   exact ⟨window.window⟩
+
+/--
+Any layered indexed-active recognizability witness produces a doubled Figure 16
+symbol square in each layer.
+-/
+theorem tileableExpandedSquares_of_indexedActiveLayerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindowsWithLayerStack D table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (n : Nat) (hn : 0 < n) (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) := by
+  rcases hwindow x hx n hn with ⟨window⟩
+  exact window.tileableExpandedSquare layer
 
 /-- Site rectangle extracted from an indexed routed fixed-corner square. -/
 def siteRectangleOfIndexedRoutedFixedCornerSquare
@@ -2329,6 +2358,20 @@ theorem ofChecked_window
     (ofChecked window data hsite hlookup hcompatible).window = window :=
   rfl
 
+/--
+The Figure 16 layer stack carried by an indexed routed fixed-corner square
+expands to a tileable doubled square in each layer.
+-/
+theorem tileableExpandedSquare
+    {D : Transcription} {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (window : Figure18IndexedRoutedFixedCornerSquareWithLayerStack D table x n hn)
+    (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  window.layerStack.tileableExpandedSquare layer
+
 end Figure18IndexedRoutedFixedCornerSquareWithLayerStack
 
 /--
@@ -2354,6 +2397,21 @@ theorem hasFigure18IndexedRoutedFixedCornerSquares_of_layerStack
   intro T seed x hx n hn
   rcases hrouted x hx n hn with ⟨window⟩
   exact ⟨window.window⟩
+
+/--
+Any layered indexed-routed forcing witness produces a doubled Figure 16 symbol
+square in each layer.
+-/
+theorem tileableExpandedSquares_of_indexedRoutedLayerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hrouted : HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack D table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (n : Nat) (hn : 0 < n) (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) := by
+  rcases hrouted x hx n hn with ⟨window⟩
+  exact window.tileableExpandedSquare layer
 
 /--
 Layered certificate for the direct indexed-active Figure 18 route.
@@ -3925,6 +3983,31 @@ theorem expandedRectangle_valid_of_checks {w h : Nat}
   let S := rows.toTypedLayerStackRectangleOfSeparateRows data hmatch hcompatible
   exact S.toLayerStackRectangle.expandedRectangle_valid layer
 
+/-- Checked separate layer rows expand to tileable doubled rectangles. -/
+theorem tileableExpandedRectangle_of_checks {w h : Nat}
+    (rows : CheckedSeparateLayerRows) (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableRectangle Figure16.Symbol.tileSet (2 * w) (2 * h) := by
+  let S := rows.toTypedLayerStackRectangleOfSeparateRows data hmatch hcompatible
+  exact S.toLayerStackRectangle.tileableExpandedRectangle layer
+
+/-- Square specialization of `tileableExpandedRectangle_of_checks`. -/
+theorem tileableExpandedSquare_of_checks {n : Nat}
+    (rows : CheckedSeparateLayerRows) (data : CheckedLayerStackRectangle n n)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  rows.tileableExpandedRectangle_of_checks data hmatch hcompatible layer
+
 def toIndexedActiveCornerWindowWithLayerStack
     (rows : CheckedSeparateLayerRows)
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -4072,6 +4155,33 @@ theorem expandedRectangle_valid_of_checks {w h : Nat}
             hcompatible).toLayerStackRectangle.blockGrid layer)) := by
   let S := rows.toTypedLayerStackRectangleOfSparseRows data hmatch hcompatible
   exact S.toLayerStackRectangle.expandedRectangle_valid layer
+
+/-- Checked sparse separate layer rows expand to tileable doubled rectangles. -/
+theorem tileableExpandedRectangle_of_checks {w h : Nat}
+    (rows : CheckedSparseSeparateLayerRows)
+    (data : CheckedLayerStackRectangle w h)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableRectangle Figure16.Symbol.tileSet (2 * w) (2 * h) := by
+  let S := rows.toTypedLayerStackRectangleOfSparseRows data hmatch hcompatible
+  exact S.toLayerStackRectangle.tileableExpandedRectangle layer
+
+/-- Square specialization of `tileableExpandedRectangle_of_checks`. -/
+theorem tileableExpandedSquare_of_checks {n : Nat}
+    (rows : CheckedSparseSeparateLayerRows)
+    (data : CheckedLayerStackRectangle n n)
+    (hmatch : rows.layerStackRectangleMatchesBool data = true)
+    (hcompatible :
+      data.compatibleBool rows.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  rows.tileableExpandedRectangle_of_checks data hmatch hcompatible layer
 
 def toIndexedActiveCornerWindowWithLayerStack
     (rows : CheckedSparseSeparateLayerRows)
@@ -4357,6 +4467,32 @@ theorem expandedRectangle_valid_of_checks {w h : Nat}
   let S := data.toTypedLayerStackRectangleOfSparseRawData stackData hmatch
     hcompatible
   exact S.toLayerStackRectangle.expandedRectangle_valid layer
+
+/-- Checked sparse raw data expands to tileable doubled rectangles. -/
+theorem tileableExpandedRectangle_of_checks {w h : Nat}
+    (data : CheckedSparseRawData) (stackData : CheckedLayerStackRectangle w h)
+    (hmatch : data.layerStackRectangleMatchesBool stackData = true)
+    (hcompatible :
+      stackData.compatibleBool data.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableRectangle Figure16.Symbol.tileSet (2 * w) (2 * h) := by
+  let S := data.toTypedLayerStackRectangleOfSparseRawData stackData hmatch
+    hcompatible
+  exact S.toLayerStackRectangle.tileableExpandedRectangle layer
+
+/-- Square specialization of `tileableExpandedRectangle_of_checks`. -/
+theorem tileableExpandedSquare_of_checks {n : Nat}
+    (data : CheckedSparseRawData) (stackData : CheckedLayerStackRectangle n n)
+    (hmatch : data.layerStackRectangleMatchesBool stackData = true)
+    (hcompatible :
+      stackData.compatibleBool data.layerData
+        (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+          true)
+    (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  data.tileableExpandedRectangle_of_checks stackData hmatch hcompatible layer
 
 def toIndexedActiveCornerWindowWithLayerStack
     (data : CheckedSparseRawData)
