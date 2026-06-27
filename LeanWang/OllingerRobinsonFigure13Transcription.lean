@@ -7528,6 +7528,72 @@ theorem
     (routing level).toSiteRectRouting⟩
 
 /--
+Canonical free-site-rectangle routing supplies canonical decoded combined-site
+corridor routing.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+      table :=
+  hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      hrouting)
+
+/--
+Canonical free-site-rectangle routing supplies canonical corridor-transmission
+routing.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_freeSiteRect
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+      table :=
+  hasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTowerForTable_of_combinedSites
+    (hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      hrouting)
+
+/--
+Canonical free-site-rectangle routing supplies canonical product-witness
+routing.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_freeSiteRect
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table := by
+  intro T seed x hx
+  rcases
+    hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_freeSiteRect
+      hrouting x hx with
+    ⟨routing⟩
+  exact ⟨fun level => (routing level).toProductWitnessRouting⟩
+
+/--
+Canonical free-site-rectangle routing supplies canonical Robinson-board routing.
+
+This is the direct Section 7 bridge: once the proof has identified the canonical
+free crossings and shown that they transmit payload colors like a contiguous
+square, the older signal-tower route can be recovered automatically.
+-/
+theorem hasFigure18RobinsonBoardCanonicalRoutingForTable_of_freeSiteRect
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardCanonicalRoutingForTable table := by
+  intro T seed x hx
+  rcases
+    hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_freeSiteRect
+      hrouting x hx with
+    ⟨routing⟩
+  exact ⟨fun level => (routing level).toRouting⟩
+
+/--
 Combined-site corridor routing with a tiling-dependent geometry tower supplies
 the existing geometry-plus-routing target.
 -/
@@ -7825,6 +7891,20 @@ theorem
     HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
     (hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
+      hrouting)
+
+/--
+Canonical free-site-rectangle routing supplies the local Section 7 tower used by
+the finite stack checker.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+    (hasFigure18RobinsonBoardCanonicalRoutingForTable_of_freeSiteRect
       hrouting)
 
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
@@ -8375,9 +8455,28 @@ theorem hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
         activeSites cornerSite) :
     HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRouting
       activeSites cornerSite :=
-  hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_siteRect
-    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteRouting_of_freeSiteRect
-      hrouting)
+  hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+    hrouting
+
+theorem hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_freeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_freeSiteRect
+    hrouting
+
+theorem hasFigure18RobinsonBoardCanonicalProductWitnessRouting_of_freeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_freeSiteRect
+    hrouting
 
 theorem
     hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_combinedSites
@@ -8573,6 +8672,18 @@ theorem
       (Figure18RoleTable.FlatRoleTable.ofActiveSites
         activeSites cornerSite).toRoleTable :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalProductWitnessRouting
+    hrouting
+
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
     hrouting
 
 theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalRouting
