@@ -14358,6 +14358,42 @@ def l2c2OriginZeroFig13BundledObligations
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     originZeroWindows hplane
 
+open NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations in
+def l2c1IndexedActiveFig13BundledObligations
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    indexedActiveWindows hplane
+
+open NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations in
+def l2c2IndexedActiveFig13BundledObligations
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    indexedActiveWindows hplane
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 canonical named-site-rectangle routing and a raw Figure 13 plane tiling.
@@ -14616,6 +14652,94 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+translation-invariant indexed active/corner windows, generated Figure 13/Figure
+16 compatibility, and translated active-box obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_indexed_active_translated_obligations_position_source
+    (O : NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+translation-invariant indexed active/corner windows, generated Figure 13/Figure
+16 compatibility, and translated active-box obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_indexed_active_translated_obligations_position_source
+    (O : NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+translation-invariant indexed active/corner windows, generated Figure 13/Figure
+16 compatibility, and translated active-box obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_indexed_active_translated_obligations_position_source
+    (O : NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+translation-invariant indexed active/corner windows, generated Figure 13/Figure
+16 compatibility, and translated active-box obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_indexed_active_translated_obligations_position_source
+    (O : NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 origin-zero active/corner windows and a raw Figure 13 plane tiling.
 -/
 theorem
@@ -14693,6 +14817,90 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
       (l2c2OriginZeroFig13BundledObligations originZeroWindows hplane) h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+translation-invariant indexed active/corner windows and a raw Figure 13 plane
+tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_indexed_active_fig13_tiles_plane_position_source
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_indexed_active_translated_obligations_position_source
+      (l2c1IndexedActiveFig13BundledObligations indexedActiveWindows hplane) h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+translation-invariant indexed active/corner windows and a raw Figure 13 plane
+tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c1_indexed_active_fig13_tiles_plane_position_source
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_indexed_active_translated_obligations_position_source
+      (l2c1IndexedActiveFig13BundledObligations indexedActiveWindows hplane) h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+translation-invariant indexed active/corner windows and a raw Figure 13 plane
+tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_indexed_active_fig13_tiles_plane_position_source
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_indexed_active_translated_obligations_position_source
+      (l2c2IndexedActiveFig13BundledObligations indexedActiveWindows hplane) h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+translation-invariant indexed active/corner windows and a raw Figure 13 plane
+tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c2_indexed_active_fig13_tiles_plane_position_source
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
+          (cornerSiteOfNat 0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_indexed_active_translated_obligations_position_source
+      (l2c2IndexedActiveFig13BundledObligations indexedActiveWindows hplane) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
