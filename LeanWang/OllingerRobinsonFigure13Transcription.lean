@@ -6985,6 +6985,55 @@ theorem
   exact (routing level).toCorridorProductWitnessRouting.toProductWitnessRouting.toRouting
 
 /--
+Combined-site corridor routing over one fixed geometry tower supplies the
+tiling-dependent geometry-combined routing target by choosing that tower.
+-/
+theorem
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_routingForGeometryTower
+    {table : Figure18RoleTable}
+    (geometryTower : RobinsonBoardSignalGeometryTower)
+    (hrouting :
+      HasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTowerForTable
+        table geometryTower) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+      table := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  exact ⟨⟨geometryTower, routing⟩⟩
+
+/--
+Fixed-geometry combined-site corridor routing supplies the tiling-dependent
+geometry-combined routing target.
+-/
+theorem
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_fixed
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+      table := by
+  rcases hrouting with ⟨geometryTower, hrouting⟩
+  exact
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_routingForGeometryTower
+      geometryTower hrouting
+
+/--
+Canonical combined-site corridor routing supplies the tiling-dependent
+geometry-combined routing target by choosing the canonical Robinson tower.
+-/
+theorem
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_canonical
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+      table :=
+  hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_routingForGeometryTower
+    canonicalRobinsonBoardSignalGeometryTower hrouting
+
+/--
 Canonical combined-site corridor routing supplies the existing canonical
 corridor-routing target.
 -/
@@ -7773,6 +7822,38 @@ theorem hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRoutin
         cornerSite) :
     HasFigure18RobinsonBoardGeometryTowerRouting activeSites cornerSite :=
   hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
+    hrouting
+
+theorem
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRouting_of_routingForGeometryTower
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (geometryTower : RobinsonBoardSignalGeometryTower)
+    (hrouting :
+      HasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTower
+        activeSites cornerSite geometryTower) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_routingForGeometryTower
+    geometryTower hrouting
+
+theorem hasFigure18RobinsonBoardGeometryTowerCombinedSiteRouting_of_fixed
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerCombinedSiteCorridorRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_fixed
+    hrouting
+
+theorem hasFigure18RobinsonBoardGeometryTowerCombinedSiteRouting_of_canonical
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_canonical
     hrouting
 
 theorem hasFigure18RobinsonBoardGeometryTowerRouting_of_geometryTowerCombinedSiteRouting

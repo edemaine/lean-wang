@@ -10850,6 +10850,23 @@ def ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
       isolatedBoxes)
 
+def ofCanonicalCombinedSiteTranslatedPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  geomCombinedSiteRouting :=
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_canonical
+      O.canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
 def toFigure18RoutedCertificate
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
