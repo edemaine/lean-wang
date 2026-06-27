@@ -5675,6 +5675,31 @@ structure NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
             cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
 
 /--
+Canonical named-site-rectangle routing target with positive-radius translated
+boxes.
+
+This is the more concrete finite scaffold target: the local Figure 13/Figure 16
+proof can select an explicit Figure 18 site rectangle at each free-grid level,
+then forget it when using the existing combined-site routing pipeline.
+-/
+structure NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  canonicalSiteRectCombinedSiteRouting :
+    HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table
+  positiveTranslatedIndexedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
+
+/--
 Tiling-dependent geometry-tower decoded combined-site corridor-routing
 scaffold target, with positive-radius boxes allowed to live at
 radius-dependent translated origins.
@@ -10759,6 +10784,32 @@ def natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTransl
     translatedBoxes
 
 /--
+Direct routed Figure 18 certificate from Robinson's canonical named
+site-rectangle routing and positive-radius translated active-corner boxes.
+-/
+def natSiteFigure18RoutedCertificateOfCanonicalSiteRectRoutingPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
+    (hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
+      canonicalSiteRectRouting)
+    translatedBoxes
+
+/--
 Direct routed Figure 18 certificate from Robinson Section 7 combined-site
 corridor routing, where the board geometry tower may be selected from the
 given tiling, and positive-radius translated active-corner boxes.
@@ -10806,6 +10857,60 @@ def natSiteFigure18RoutedCertificateOfGeomCombinedPositiveTranslatedBoxes
       Figure18ScaffoldData.scaffold,
       Figure18ScaffoldData.presentation,
       Figure18ScaffoldData.table] using hrealizes
+
+namespace NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+
+def toCanonicalCombinedSiteTranslatedPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  canonicalCombinedSiteRouting :=
+    hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
+      O.canonicalSiteRectCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def toGeomCombinedTranslatedPositiveBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  geomCombinedSiteRouting :=
+    hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_canonical
+      (hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
+        O.canonicalSiteRectCombinedSiteRouting)
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def toFigure18RoutedCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalSiteRectRoutingPositiveTranslatedBoxes
+    O.canonicalSiteRectCombinedSiteRouting O.positiveTranslatedIndexedBoxes
+
+end NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
 
