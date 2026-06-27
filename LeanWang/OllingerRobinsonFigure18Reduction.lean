@@ -2586,6 +2586,66 @@ theorem
 /--
 Encoded domino undecidability from the concrete human-audited Figure 13 layer
 table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and the generated position-code accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid certificate
+      (positionSourceObligationsOfPositionCodeDecoderStep hstep hcorrect)
+
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
+free-coordinate certificate, and the generated position-code accumulator step.
+-/
+theorem
+    domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (certificate :
+      OllingerRobinson.Figure18RoutedCertificate
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid certificate
+      (positionSourceObligationsOfPositionCodeDecoderStep hstep hcorrect)
+
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, a raw checked corner, a routed
 free-coordinate certificate, and the generated interior position-code rows.
 
 This is the direct Figure 18 scaffold surface for the paper's selected
@@ -13377,6 +13437,142 @@ theorem
       (l2Component2Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
         geometryCombinedSiteRouting hplane)
       h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson board geometry, decoded combined-site corridor
+routing, a raw Figure 13 plane tiling, and the generated position-code
+accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_combined_fig13_decoderStep
+    (geometryCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2Component1Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+        geometryCombinedSiteRouting hplane)
+      hstep hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson board geometry, decoded combined-site corridor
+routing, a raw Figure 13 plane tiling, and the generated position-code
+accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_fig13_decoderStep
+    (geometryCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2Component1Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+        geometryCombinedSiteRouting hplane)
+      hstep hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson board geometry, decoded combined-site corridor
+routing, a raw Figure 13 plane tiling, and the generated position-code
+accumulator step.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_combined_fig13_decoderStep
+    (geometryCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2Component2Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+        geometryCombinedSiteRouting hplane)
+      hstep hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson board geometry, decoded combined-site corridor
+routing, a raw Figure 13 plane tiling, and the generated position-code
+accumulator step.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_fig13_decoderStep
+    (geometryCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_decoderStep
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2Component2Figure18RoutedCertificateOfGeomCombinedPositiveFig13TilesPlane
+        geometryCombinedSiteRouting hplane)
+      hstep hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
