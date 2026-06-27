@@ -8300,6 +8300,20 @@ def HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRouting
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
 
+/--
+Canonical free-site-rectangle routing over Robinson's obstruction-geometry
+tower for a generated listed-active role table.
+
+This is the direct Section 7 target: obstruction arguments have already
+identified the selected free crossings, so horizontal and vertical transmission
+facts are stated without repeating clear-row and clear-column premises.
+-/
+def HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
 theorem
     hasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTower_of_combinedSites
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -8343,6 +8357,27 @@ theorem hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_siteRect
       activeSites cornerSite :=
   hasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable_of_siteRect
     hrouting
+
+theorem hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteRouting_of_freeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+    hrouting
+
+theorem hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_siteRect
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteRouting_of_freeSiteRect
+      hrouting)
 
 theorem
     hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_combinedSites
@@ -8575,6 +8610,16 @@ theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalCombinedSiteRouting
     HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
   hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalCorridorRouting
     (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_combinedSites
+      hrouting)
+
+theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalFreeSiteRectRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardRoutedFreeGrids activeSites cornerSite :=
+  hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalCombinedSiteRouting
+    (hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
       hrouting)
 
 theorem hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGrids
@@ -9874,6 +9919,11 @@ def HasRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant
   HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRouting
     D.activeSites D.cornerSite
 
+def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+    D.activeSites D.cornerSite
+
 def HasIndexedRoutedForces (D : Figure18ScaffoldData) : Prop :=
   HasFigure18IndexedRoutedFixedCornerSquares D.table.toRoleTable
 
@@ -9990,6 +10040,27 @@ def HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalSiteRectCombinedSiteRouti
   HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalCombinedSiteRouting
     (hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_siteRect hrouting)
 
+def HasRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteRouting_of_freeSiteRect
+    hrouting
+
+def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
+    hrouting
+
+def HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardRoutedFreeGridInvariant :=
+  hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalFreeSiteRectRouting
+    hrouting
+
 def HasIndexedRoutedForces.ofRobinsonBoardGeometryTowerRouting
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonBoardGeometryTowerRoutingInvariant) :
@@ -10061,6 +10132,14 @@ def HasIndexedRoutedForces.ofRobinsonBoardCanonicalSiteRectCombinedSiteRouting
     D.HasIndexedRoutedForces :=
   HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
     (HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalSiteRectCombinedSiteRouting
+      hrouting)
+
+def HasIndexedRoutedForces.ofRobinsonBoardCanonicalFreeSiteRectRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasIndexedRoutedForces :=
+  HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
+    (HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
       hrouting)
 
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
@@ -10416,6 +10495,17 @@ def RoutedCertificate.ofRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvaria
       canonicalRouting)
     realizes
 
+def RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
+    (D : Figure18ScaffoldData)
+    (canonicalRouting :
+      D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardRoutedFreeGridInvariant D
+    (HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
+      canonicalRouting)
+    realizes
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
@@ -10488,6 +10578,16 @@ def RoutedCertificate.ofRobinsonBoardCanonicalSiteRectCombinedSiteRoutingLayerPa
     (patches : D.HasLayerPatchRealizationInvariant) :
     D.RoutedCertificate :=
   RoutedCertificate.ofRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant D
+    canonicalRouting
+    (HasRealizationInvariant.ofLayerPatches patches)
+
+def RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingLayerPatches
+    (D : Figure18ScaffoldData)
+    (canonicalRouting :
+      D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant D
     canonicalRouting
     (HasRealizationInvariant.ofLayerPatches patches)
 
@@ -10585,6 +10685,16 @@ def RoutedCertificate.ofCanonicalSiteRectCombinedPositiveTranslatedBoxes
     (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
     D.RoutedCertificate :=
   RoutedCertificate.ofRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant D
+    canonicalRouting
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
+
+def RoutedCertificate.ofCanonicalFreeSiteRectPositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (canonicalRouting :
+      D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant D
     canonicalRouting
     (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
 
