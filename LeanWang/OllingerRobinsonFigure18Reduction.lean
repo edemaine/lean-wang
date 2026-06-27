@@ -14286,6 +14286,42 @@ def l2c2FreeSiteRectFig13Obligations
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlaneFreeSiteRect
     canonicalFreeSiteRectRouting hplane
 
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c1FreeSiteRectFig13BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    canonicalFreeSiteRectRouting hplane
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c2FreeSiteRectFig13BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    canonicalFreeSiteRectRouting hplane
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 canonical named-site-rectangle routing and a raw Figure 13 plane tiling.
@@ -14365,6 +14401,94 @@ theorem
   exact
     domino_problem_undecidable_l2c2_site_rect_translated_obligations_position_source
       (l2c2SiteRectFig13Obligations canonicalSiteRectRouting hplane) h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+bundled canonical free-site-rectangle routing and translated active-box
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+bundled canonical free-site-rectangle routing and translated active-box
+obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_free_site_rect_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+bundled canonical free-site-rectangle routing and translated active-box
+obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+bundled canonical free-site-rectangle routing and translated active-box
+obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toFigure18RoutedCertificate h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
