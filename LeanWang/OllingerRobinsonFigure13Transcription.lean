@@ -5704,6 +5704,94 @@ structure CombinedSiteCorridorRouting
 namespace CombinedSiteCorridorRouting
 
 /--
+Build combined-site corridor routing from an explicit selected site rectangle.
+
+This is the proof-facing constructor for the geometric extraction: first name
+the Figure 18 site seen at each free crossing, prove that it agrees with the
+decoded combined tile there, and then state active/corner/local-compatibility
+facts against that cleaner rectangle.
+-/
+noncomputable def ofSiteRect
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (siteRect :
+      Fin (RobinsonSquare.freeGridSide level) →
+        Fin (RobinsonSquare.freeGridSide level) → Figure18Site)
+    (site_eq :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          table.combinedSite
+            (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) =
+          siteRect i j)
+    (active :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          CellRole.isActive (table.roleAtSite (siteRect i j)) = true)
+    (cornerSite :
+      siteRect ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+        ⟨0, RobinsonSquare.freeGridSide_pos level⟩ = table.cornerSite)
+    (htransmit :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+            (∀ column : Int, geometry.isBoardColumn column →
+              ¬ geometry.hasHorizontalObstruction column
+                (geometry.freeRowCoord j)) →
+              WangTile.HMatches
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord j)))
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord ⟨i.val + 1, hi⟩,
+                    geometry.freeRowCoord j))))
+    (vtransmit :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+            (∀ row : Int, geometry.isBoardRow row →
+              ¬ geometry.hasVerticalObstruction
+                (geometry.freeColumnCoord i) row) →
+              WangTile.VMatches
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord j)))
+                (table.combinedPayload
+                  (x (geometry.freeColumnCoord i,
+                    geometry.freeRowCoord ⟨j.val + 1, hj⟩))))
+    (siteCompatible :
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hi : i.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.hCompatible
+            (siteRect i j) (siteRect ⟨i.val + 1, hi⟩ j) = true) ∧
+      (∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+        ∀ hj : j.val + 1 < RobinsonSquare.freeGridSide level,
+          Figure18Site.vCompatible
+            (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)) :
+    CombinedSiteCorridorRouting table x geometry where
+  active := by
+    intro i j
+    simpa [site_eq i j] using active i j
+  cornerSite := by
+    simpa [site_eq ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩] using cornerSite
+  htransmit := htransmit
+  vtransmit := vtransmit
+  siteCompatible := by
+    rcases siteCompatible with ⟨hcompat, vcompat⟩
+    constructor
+    · intro i j hi
+      simpa [site_eq i j, site_eq ⟨i.val + 1, hi⟩ j] using
+        hcompat i j hi
+    · intro i j hj
+      simpa [site_eq i j, site_eq i ⟨j.val + 1, hj⟩] using
+        vcompat i j hj
+
+/--
 Extract product witnesses from the combined tiling after the geometric proof has
 selected and checked the combined sites.
 -/
@@ -5745,6 +5833,45 @@ theorem toCorridorProductWitnessRouting_payloadWitness_apply
     (i : Fin (RobinsonSquare.freeGridSide level))
     (j : Fin (RobinsonSquare.freeGridSide level)) :
     (routing.toCorridorProductWitnessRouting.payloadWitness i j).1 =
+      table.combinedPayload
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) :=
+  rfl
+
+@[simp]
+theorem ofSiteRect_toCorridorProductWitnessRouting_siteRect_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (siteRect :
+      Fin (RobinsonSquare.freeGridSide level) →
+        Fin (RobinsonSquare.freeGridSide level) → Figure18Site)
+    (site_eq active cornerSite htransmit vtransmit siteCompatible)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    ((ofSiteRect (table := table) (x := x) (geometry := geometry)
+      siteRect site_eq active cornerSite htransmit vtransmit
+      siteCompatible).toCorridorProductWitnessRouting).siteRect i j =
+      siteRect i j := by
+  simp [toCorridorProductWitnessRouting_siteRect_apply, site_eq i j]
+
+@[simp]
+theorem ofSiteRect_toCorridorProductWitnessRouting_payloadWitness_apply
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (siteRect :
+      Fin (RobinsonSquare.freeGridSide level) →
+        Fin (RobinsonSquare.freeGridSide level) → Figure18Site)
+    (site_eq active cornerSite htransmit vtransmit siteCompatible)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (((ofSiteRect (table := table) (x := x) (geometry := geometry)
+      siteRect site_eq active cornerSite htransmit vtransmit
+      siteCompatible).toCorridorProductWitnessRouting).payloadWitness i j).1 =
       table.combinedPayload
         (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) :=
   rfl
