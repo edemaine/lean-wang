@@ -2117,6 +2117,25 @@ def HasFigure18IndexedActiveCornerWindowsWithLayerStack
       ∀ n : Nat, ∀ hn : 0 < n,
         Nonempty (Figure18IndexedActiveCornerWindowWithLayerStack D table x n hn)
 
+/--
+Layered strengthening of the origin-zero indexed active/corner route.
+
+This is the finite-data target aligned with Robinson's canonical board
+coordinates: the selected active/corner square is already positioned at
+`(0, 0)`, and the Figure 13/Figure 16 layer stack is attached to the same
+site rectangle.
+-/
+def HasFigure18IndexedActiveCornerOriginZeroWindowsWithLayerStack
+    (D : Transcription) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty
+          { window : Figure18IndexedActiveCornerWindowWithLayerStack
+              D table x n hn //
+              window.window.origin = (0, 0) }
+
 theorem hasFigure18IndexedActiveCornerWindows_of_layerStack
     {D : Transcription} {table : Figure18RoleTable}
     (hwindow : HasFigure18IndexedActiveCornerWindowsWithLayerStack D table) :
@@ -2124,6 +2143,15 @@ theorem hasFigure18IndexedActiveCornerWindows_of_layerStack
   intro T seed x hx n hn
   rcases hwindow x hx n hn with ⟨window⟩
   exact ⟨window.window⟩
+
+theorem hasFigure18IndexedActiveCornerOriginZeroWindows_of_layerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hwindow :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsWithLayerStack D table) :
+    HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table := by
+  intro T seed x hx n hn
+  rcases hwindow x hx n hn with ⟨window, horigin⟩
+  exact ⟨⟨window.window, horigin⟩⟩
 
 /--
 Any layered indexed-active recognizability witness produces a doubled Figure 16
@@ -4593,6 +4621,29 @@ def HasIndexedActiveWindowCheckedStacks
                     true
 
 /--
+Finite checked-stack target for the canonical origin-zero indexed-active route.
+
+This is the same finite Figure 13/Figure 16 checking payload as
+`HasIndexedActiveWindowCheckedStacks`, but it preserves the extra fact that the
+selected window is the canonical origin-zero square.
+-/
+def HasIndexedActiveOriginZeroWindowCheckedStacks
+    (data : CheckedSparseRawData) (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        ∃ (window : Figure18IndexedActiveCornerWindow table x n hn),
+          window.origin = (0, 0) ∧
+            ∃ (stackData : CheckedLayerStackRectangle n n),
+              ∃ (_hsite : stackData.sites.matchesSiteRectangleBool
+                (siteRectangleOfIndexedActiveCornerWindow window) = true),
+                ∃ (hmatch : data.layerStackRectangleMatchesBool stackData = true),
+                  stackData.compatibleBool data.layerData
+                    (lookupBool_layerData_of_layerStackRectangleMatchesBool hmatch) =
+                      true
+
+/--
 Finite checked-stack target for the indexed-routed route.
 
 This is the same checked data shape as
@@ -4913,6 +4964,36 @@ theorem hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks
     ⟨data.toIndexedActiveCornerWindowWithLayerStack
       window stackData hsite hmatch hcompatible⟩
 
+theorem hasIndexedActiveCornerOriginZeroWindowsWithLayerStack_of_checkedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveOriginZeroWindowCheckedStacks table) :
+    HasFigure18IndexedActiveCornerOriginZeroWindowsWithLayerStack
+      data.layerData table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, horigin, stackData, hsite, hmatch, hcompatible⟩
+  exact
+    ⟨⟨data.toIndexedActiveCornerWindowWithLayerStack
+      window stackData hsite hmatch hcompatible,
+      by simpa using horigin⟩⟩
+
+theorem hasIndexedActiveWindowCheckedStacks_of_originZero
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveOriginZeroWindowCheckedStacks table) :
+    data.HasIndexedActiveWindowCheckedStacks table := by
+  intro T seed x hx n hn
+  rcases hchecked x hx n hn with
+    ⟨window, _horigin, stackData, hsite, hmatch, hcompatible⟩
+  exact ⟨window, stackData, hsite, hmatch, hcompatible⟩
+
+theorem hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveOriginZeroWindowCheckedStacks table) :
+    HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table :=
+  hasFigure18IndexedActiveCornerOriginZeroWindows_of_layerStack
+    (hasIndexedActiveCornerOriginZeroWindowsWithLayerStack_of_checkedStacks
+      hchecked)
+
 theorem hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedRoutedFixedCornerSquareCheckedStacks table) :
@@ -5191,6 +5272,29 @@ def indexedRoutedCertificateOfCheckedStacks
       hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked
     realizes := realizes
   }
+
+/--
+Build the Robinson routed scaffold certificate from canonical origin-zero
+active/corner windows carrying finite checked layer stacks.
+-/
+def routedCertificateOfOriginZeroCheckedStacks
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasIndexedActiveOriginZeroWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (boxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        data.toLayeredFigure18ScaffoldData.scaffoldData) :
+    data.toLayeredFigure18ScaffoldData.scaffoldData.RoutedCertificate :=
+  open Figure18ScaffoldData in
+  Figure18ScaffoldData.RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
+    data.toLayeredFigure18ScaffoldData.scaffoldData
+    (HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
+      (HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
+        (hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks
+          hchecked)))
+    (Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      boxes)
 
 /--
 Build the preferred indexed-routed layered certificate from Robinson
