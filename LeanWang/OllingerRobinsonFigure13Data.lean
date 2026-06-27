@@ -10810,6 +10810,36 @@ def natSiteFigure18RoutedCertificateOfCanonicalSiteRectRoutingPositiveTranslated
     translatedBoxes
 
 /--
+Direct routed Figure 18 certificate from Robinson's canonical free-site-
+rectangle routing and positive-radius translated active-corner boxes.
+
+This is the proof-facing form for the Section 7 obstruction argument: the
+clear-row and clear-column premises have already been discharged by the
+canonical free-line geometry.
+-/
+def natSiteFigure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalSiteRectRoutingPositiveTranslatedBoxes
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      canonicalFreeSiteRectRouting)
+    translatedBoxes
+
+/--
 Direct routed Figure 18 certificate from Robinson Section 7 combined-site
 corridor routing, where the board geometry tower may be selected from the
 given tiling, and positive-radius translated active-corner boxes.
@@ -11903,6 +11933,32 @@ def l2Component1Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveF
           l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
 
 /--
+L2 component-1 routed Figure 18 certificate from canonical free-site-rectangle
+routing and a raw Figure 13 plane tiling.
+-/
+def l2Component1Figure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveFig13TilesPlane
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
+    canonicalFreeSiteRectRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
+/--
 L2 component-1 routed Figure 18 certificate from tiling-dependent
 Robinson-board geometry plus decoded combined-site corridor routing and a raw
 Figure 13 plane tiling.
@@ -12184,6 +12240,32 @@ def l2Component2Figure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveF
         l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
   natSiteFigure18RoutedCertificateOfCanonicalCombinedSiteRoutingPositiveTranslatedBoxes
     canonicalCombinedSiteRouting
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane))
+
+/--
+L2 component-2 routed Figure 18 certificate from canonical free-site-rectangle
+routing and a raw Figure 13 plane tiling.
+-/
+def l2Component2Figure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveFig13TilesPlane
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
+    canonicalFreeSiteRectRouting
     (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
       (by
         simpa [l2Component2Figure18ScaffoldData] using
