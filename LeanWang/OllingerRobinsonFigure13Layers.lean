@@ -1379,6 +1379,25 @@ theorem expandedRectangle_valid
       (Figure16.BlockGrid.expandedRectangle C.blockGrid) :=
   Figure16.BlockGrid.expandedRectangle_valid certificate.blockGrid_compatible
 
+/--
+Expanding a compatible layer-component rectangle gives a tileable doubled
+rectangle over the Figure 16 component-symbol tileset.
+-/
+theorem tileableExpandedRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C) :
+    TileableRectangle Figure16.Symbol.tileSet (2 * w) (2 * h) :=
+  Figure16.BlockGrid.tileableExpandedRectangle certificate.blockGrid_compatible
+
+/-- Square specialization of `tileableExpandedRectangle`. -/
+theorem tileableExpandedSquare
+    {D : Transcription} {n : Nat} {R : SiteRectangle n n} {layer : Layer}
+    {C : LayerComponentRectangle D R layer}
+    (certificate : CompatibleLayerComponentRectangle C) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  certificate.tileableExpandedRectangle
+
 theorem expandedTile_mem_symbolTileSet
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
     {C : LayerComponentRectangle D R layer}
@@ -1567,6 +1586,23 @@ theorem expandedRectangle_valid
     ValidRectangle Figure16.Symbol.tileSet
       (Figure16.BlockGrid.expandedRectangle (S.blockGrid layer)) := by
   exact Figure16.BlockGrid.expandedRectangle_valid (S.blockGrid_compatible layer)
+
+/--
+Each expanded Figure 16 layer in a compatible layer stack tiles the doubled
+rectangle over the component-symbol tileset.
+-/
+theorem tileableExpandedRectangle
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h}
+    (S : LayerStackRectangle D R) (layer : Layer) :
+    TileableRectangle Figure16.Symbol.tileSet (2 * w) (2 * h) :=
+  Figure16.BlockGrid.tileableExpandedRectangle (S.blockGrid_compatible layer)
+
+/-- Square specialization of `tileableExpandedRectangle`. -/
+theorem tileableExpandedSquare
+    {D : Transcription} {n : Nat} {R : SiteRectangle n n}
+    (S : LayerStackRectangle D R) (layer : Layer) :
+    TileableSquare Figure16.Symbol.tileSet (2 * n) :=
+  S.tileableExpandedRectangle layer
 
 theorem expandedTile_mem_symbolTileSet
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h}

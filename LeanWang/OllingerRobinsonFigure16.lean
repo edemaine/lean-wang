@@ -664,6 +664,21 @@ theorem expandedRectangle_valid {w h : Nat} {G : BlockGrid w h}
         expanded_vMatches_boundary hG (doubledBlockCoord i)
           (doubledBlockCoord j) hb (doubledOffset i)
 
+/--
+A compatible grid of Figure 16 substitution blocks gives a tileable doubled
+rectangle over the component-symbol tileset.
+-/
+theorem tileableExpandedRectangle {w h : Nat} {G : BlockGrid w h}
+    (hG : Compatible G) :
+    TileableRectangle Symbol.tileSet (2 * w) (2 * h) :=
+  ⟨expandedRectangle G, expandedRectangle_valid hG⟩
+
+/-- Square specialization of `tileableExpandedRectangle`. -/
+theorem tileableExpandedSquare {n : Nat} {G : BlockGrid n n}
+    (hG : Compatible G) :
+    TileableSquare Symbol.tileSet (2 * n) :=
+  tileableExpandedRectangle hG
+
 end BlockGrid
 
 /-- `phi_L1(*)`. -/
