@@ -250,6 +250,22 @@ theorem tilesPlane_iff_all_tileableBoxes (T : TileSet) :
   · exact tilesPlane_of_all_tileableBoxes
 
 /--
+Compactness from a cofinal family of finite square tilings.
+
+This is convenient for substitution arguments, which naturally produce
+tileable squares at selected large side lengths rather than at every exact side
+length.  Cropping supplies the missing smaller exact squares.
+-/
+theorem tilesPlane_of_cofinal_tileableSquares {T : TileSet}
+    (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare T m) :
+    TilesPlane T := by
+  apply tilesPlane_of_all_tileableBoxes
+  apply all_tileableBoxes_of_all_tileableSquares
+  intro n
+  rcases hsquares n with ⟨m, hnm, hm⟩
+  exact tileableSquare_crop hnm hm
+
+/--
 Square compactness for plane tilings, derived by translating centered boxes to
 ordinary finite squares and applying centered-box compactness.
 -/

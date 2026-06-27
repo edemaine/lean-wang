@@ -519,6 +519,31 @@ theorem validRectangleBool_eq_true (T : TileSet) {w h : Nat} (x : Rectangle w h)
     validRectangleBool T x = true ↔ ValidRectangle T x := by
   simp [validRectangleBool]
 
+/-- Restrict a finite rectangle to its southwest `w × h` subrectangle. -/
+def Rectangle.crop {W H : Nat} (x : Rectangle W H)
+    {w h : Nat} (hw : w ≤ W) (hh : h ≤ H) :
+    Rectangle w h :=
+  fun i j => x ⟨i.val, Nat.lt_of_lt_of_le i.isLt hw⟩
+    ⟨j.val, Nat.lt_of_lt_of_le j.isLt hh⟩
+
+theorem validRectangle_crop {T : TileSet}
+    {W H w h : Nat} {x : Rectangle W H}
+    (hx : ValidRectangle T x) (hw : w ≤ W) (hh : h ≤ H) :
+    ValidRectangle T (Rectangle.crop x hw hh) := by
+  constructor
+  · intro i j
+    exact hx.1 ⟨i.val, Nat.lt_of_lt_of_le i.isLt hw⟩
+      ⟨j.val, Nat.lt_of_lt_of_le j.isLt hh⟩
+  constructor
+  · intro i j hi
+    exact hx.2.1 ⟨i.val, Nat.lt_of_lt_of_le i.isLt hw⟩
+      ⟨j.val, Nat.lt_of_lt_of_le j.isLt hh⟩
+      (Nat.lt_of_lt_of_le hi hw)
+  · intro i j hj
+    exact hx.2.2 ⟨i.val, Nat.lt_of_lt_of_le i.isLt hw⟩
+      ⟨j.val, Nat.lt_of_lt_of_le j.isLt hh⟩
+      (Nat.lt_of_lt_of_le hj hh)
+
 theorem validRectangle_product_of_validRectangle {base payload : TileSet}
     {w h : Nat} {baseRect payloadRect : Rectangle w h}
     (hbase : ValidRectangle base baseRect)
@@ -627,6 +652,16 @@ def TileableRectangle (T : TileSet) (w h : Nat) : Prop :=
 /-- A tileset tiles a finite `n × n` square. -/
 def TileableSquare (T : TileSet) (n : Nat) : Prop :=
   TileableRectangle T n n
+
+theorem tileableRectangle_crop {T : TileSet}
+    {W H w h : Nat} (hw : w ≤ W) (hh : h ≤ H) :
+    TileableRectangle T W H → TileableRectangle T w h := by
+  rintro ⟨x, hx⟩
+  exact ⟨Rectangle.crop x hw hh, validRectangle_crop hx hw hh⟩
+
+theorem tileableSquare_crop {T : TileSet} {m n : Nat}
+    (h : m ≤ n) : TileableSquare T n → TileableSquare T m :=
+  tileableRectangle_crop h h
 
 theorem tileableRectangle_product_of_tileableRectangle {base payload : TileSet}
     {w h : Nat} :

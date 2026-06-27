@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonFigure13Transcription
 import LeanWang.OllingerRobinsonFigure16
+import LeanWang.Compactness
 
 /-!
 Layer decomposition interface for the Figure 13 tiles.
@@ -1059,6 +1060,21 @@ theorem compatibleFigure18ScaffoldSquares_of_fig13TilesPlane
     HasCompatibleFigure18ScaffoldSquares :=
   compatibleFigure18ScaffoldSquares_of_tilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
+/--
+A cofinal family of finite square tilings by the concrete Figure 18 scaffold
+tiles supplies compatible Figure 18 site squares of every finite side length.
+
+This is the finite-box form expected from the Figure 16 substitution: it is
+enough to build arbitrarily large substituted squares, because compactness and
+cropping provide the exact sizes used by the scaffold proof.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_cofinal_tileableSquares
+    (hsquares :
+      ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare figure18ScaffoldTiles m) :
+    HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_of_tilesPlane
+    (tilesPlane_of_cofinal_tileableSquares hsquares)
 
 /--
 The site-level scaffold-square target is equivalent to ordinary plane
