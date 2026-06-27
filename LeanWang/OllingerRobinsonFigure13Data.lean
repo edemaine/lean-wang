@@ -10889,6 +10889,28 @@ def ofFigure18ScaffoldDataPositiveTranslatedBoxes
       Figure18ScaffoldData.presentation,
       Figure18ScaffoldData.table] using translatedBoxes r hr
 
+def ofFigure18ScaffoldDataPositiveTranslatedBoxesFreeSiteRect
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedBoxes
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      canonicalFreeSiteRectRouting)
+    translatedBoxes
+
 def ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -11078,6 +11100,25 @@ def ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
     canonicalSiteRectRouting
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
+def ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlaneFreeSiteRect
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveFig13TilesPlane
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      canonicalFreeSiteRectRouting)
+    hplane
+
 def ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
     (canonicalSiteRectRouting :
       HasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable
@@ -11245,6 +11286,25 @@ def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
   ofL2C2Figure18ScaffoldDataPositiveFigure18ScaffoldTilesPlane
     canonicalSiteRectRouting
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlaneFreeSiteRect
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonCanonicalSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
+    (hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteCorridorRoutingForTable_of_freeSiteRect
+      canonicalFreeSiteRectRouting)
+    hplane
 
 def toCanonicalCombinedSiteTranslatedPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
