@@ -5236,6 +5236,99 @@ theorem hasCheckedStacksForListedActiveSiteWindowsForFlatTable_of_rectangles
   simpa [hR] using hsite
 
 /--
+Attach finite checked layer-stack data to canonical origin-zero indexed
+active/corner windows.
+
+The local rectangle checker is independent of the coordinates used to select
+the rectangle.  This bridge verifies that an origin-zero indexed window
+supplies a listed-active compatible site rectangle, then preserves the
+origin-zero witness for the canonical routing path.
+-/
+theorem hasIndexedActiveOriginZeroWindowCheckedStacks_of_originZeroWindowsForFlatTable
+    {data : CheckedSparseRawData}
+    {table : Figure18RoleTable.FlatRoleTable}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table.toRoleTable)
+    (hrectangles :
+      data.HasCheckedStacksForListedActiveSiteRectangles
+        table.activeSites table.cornerSite) :
+    data.HasIndexedActiveOriginZeroWindowCheckedStacks table.toRoleTable := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window, horigin⟩
+  let R := siteRectangleOfIndexedActiveCornerWindow window
+  have hsite : ∀ i : Fin n, ∀ j : Fin n,
+      table.toRoleTable.combinedSite
+        (x (window.origin.1 + Int.ofNat i.val,
+          window.origin.2 + Int.ofNat j.val)) = R i j := by
+    intro i j
+    rcases window.product i j with ⟨payload, hproduct⟩
+    exact table.toRoleTable.combinedSite_eq_of_product_site
+      (x (window.origin.1 + Int.ofNat i.val,
+        window.origin.2 + Int.ofNat j.val))
+      (R i j) payload
+      (by
+        simpa [R, siteRectangleOfIndexedActiveCornerWindow,
+          Figure18Site.tile] using hproduct)
+  have hlisted : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = table.cornerSite ∨ R i j ∈ table.activeSites := by
+    intro i j
+    right
+    exact (table.mem_activeSites_iff (R i j)).2
+      ⟨Figure18Site.mem_all (R i j), by
+        simpa [R, siteRectangleOfIndexedActiveCornerWindow,
+          Figure18RoleTable.roleAtSite] using window.active i j⟩
+  have hcorner : R ⟨0, hn⟩ ⟨0, hn⟩ = table.cornerSite := by
+    have hcornerRole :
+        table.toRoleTable.roleAtSite (R ⟨0, hn⟩ ⟨0, hn⟩) =
+          CellRole.corner := by
+      simpa [R, siteRectangleOfIndexedActiveCornerWindow,
+        Figure18RoleTable.roleAtSite] using window.corner
+    simpa using
+      (table.toRoleTable.roleAtSite_corner_iff
+        (R ⟨0, hn⟩ ⟨0, hn⟩)).1 hcornerRole
+  have hhorizontalSucc : ∀ i : Fin n, ∀ hi : i.val + 1 < n,
+      window.origin.1 + Int.ofNat (⟨i.val + 1, hi⟩ : Fin n).val =
+        window.origin.1 + Int.ofNat i.val + 1 := by
+    intro i hi
+    change window.origin.1 + Int.ofNat (i.val + 1) =
+      window.origin.1 + Int.ofNat i.val + 1
+    norm_num
+    exact (add_assoc window.origin.1 (Int.ofNat i.val) (1 : Int)).symm
+  have hverticalSucc : ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      window.origin.2 + Int.ofNat (⟨j.val + 1, hj⟩ : Fin n).val =
+        window.origin.2 + Int.ofNat j.val + 1 := by
+    intro j hj
+    change window.origin.2 + Int.ofNat (j.val + 1) =
+      window.origin.2 + Int.ofNat j.val + 1
+    norm_num
+    exact (add_assoc window.origin.2 (Int.ofNat j.val) (1 : Int)).symm
+  have hhcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) =
+        true := by
+    intro i j hi
+    have hcompat :=
+      table.toRoleTable.combinedSite_hCompatible_of_selectedCoords hx
+        (fun i : Fin n => window.origin.1 + Int.ofNat i.val)
+        (fun j : Fin n => window.origin.2 + Int.ofNat j.val)
+        hhorizontalSucc i j hi
+    rw [hsite i j, hsite ⟨i.val + 1, hi⟩ j] at hcompat
+    exact hcompat
+  have hvcompat : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) =
+        true := by
+    intro i j hj
+    have hcompat :=
+      table.toRoleTable.combinedSite_vCompatible_of_selectedCoords hx
+        (fun i : Fin n => window.origin.1 + Int.ofNat i.val)
+        (fun j : Fin n => window.origin.2 + Int.ofNat j.val)
+        hverticalSucc i j hj
+    rw [hsite i j, hsite i ⟨j.val + 1, hj⟩] at hcompat
+    exact hcompat
+  rcases hrectangles R hlisted hcorner hhcompat hvcompat with
+    ⟨stackData, hsiteMatch, hmatch, hcompatible⟩
+  exact ⟨window, horigin, stackData, hsiteMatch, hmatch, hcompatible⟩
+
+/--
 Build the direct layered certificate from finite checked stack witnesses and
 the realization invariant.
 -/
