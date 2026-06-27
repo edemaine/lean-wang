@@ -4833,6 +4833,80 @@ theorem canonical_freeRow_bounds
   · exact Int.natCast_nonneg j.val
   · exact_mod_cast j.isLt
 
+/-- In the canonical geometry, free columns are exactly the in-range columns. -/
+theorem canonical_isFreeColumn_iff_bounds
+    (level : Nat) (column : Int) :
+    (canonical level).isFreeColumn column ↔
+      0 ≤ column ∧ column < RobinsonSquare.freeGridSide level := by
+  constructor
+  · exact canonical_freeColumn_bounds
+  · intro hbounds
+    refine ⟨⟨column.toNat, ?_⟩, ?_⟩
+    · have hcast : (column.toNat : Int) = column :=
+        Int.toNat_of_nonneg hbounds.1
+      omega
+    · exact Int.toNat_of_nonneg hbounds.1
+
+/-- In the canonical geometry, free rows are exactly the in-range rows. -/
+theorem canonical_isFreeRow_iff_bounds
+    (level : Nat) (row : Int) :
+    (canonical level).isFreeRow row ↔
+      0 ≤ row ∧ row < RobinsonSquare.freeGridSide level := by
+  constructor
+  · exact canonical_freeRow_bounds
+  · intro hbounds
+    refine ⟨⟨row.toNat, ?_⟩, ?_⟩
+    · have hcast : (row.toNat : Int) = row :=
+        Int.toNat_of_nonneg hbounds.1
+      omega
+    · exact Int.toNat_of_nonneg hbounds.1
+
+/--
+In the canonical geometry, a horizontal obstruction is present exactly on rows
+outside the enumerated free-row range.
+-/
+theorem canonical_hasHorizontalObstruction_iff_row_out_of_bounds
+    (level : Nat) (column row : Int) :
+    (canonical level).hasHorizontalObstruction column row ↔
+      row < 0 ∨ (RobinsonSquare.freeGridSide level : Int) ≤ row := by
+  rw [canonical_hasHorizontalObstruction_iff_not_freeRow,
+    canonical_isFreeRow_iff_bounds]
+  omega
+
+/--
+In the canonical geometry, a vertical obstruction is present exactly on columns
+outside the enumerated free-column range.
+-/
+theorem canonical_hasVerticalObstruction_iff_column_out_of_bounds
+    (level : Nat) (column row : Int) :
+    (canonical level).hasVerticalObstruction column row ↔
+      column < 0 ∨ (RobinsonSquare.freeGridSide level : Int) ≤ column := by
+  rw [canonical_hasVerticalObstruction_iff_not_freeColumn,
+    canonical_isFreeColumn_iff_bounds]
+  omega
+
+/--
+No horizontal obstruction in the canonical geometry is the same as being on an
+enumerated free row.
+-/
+theorem canonical_noHorizontalObstruction_iff_row_bounds
+    (level : Nat) (column row : Int) :
+    ¬ (canonical level).hasHorizontalObstruction column row ↔
+      0 ≤ row ∧ row < RobinsonSquare.freeGridSide level := by
+  rw [canonical_noHorizontalObstruction_iff_freeRow,
+    canonical_isFreeRow_iff_bounds]
+
+/--
+No vertical obstruction in the canonical geometry is the same as being on an
+enumerated free column.
+-/
+theorem canonical_noVerticalObstruction_iff_column_bounds
+    (level : Nat) (column row : Int) :
+    ¬ (canonical level).hasVerticalObstruction column row ↔
+      0 ≤ column ∧ column < RobinsonSquare.freeGridSide level := by
+  rw [canonical_noVerticalObstruction_iff_freeColumn,
+    canonical_isFreeColumn_iff_bounds]
+
 theorem canonical_noObstruction_at_freeCrossing
     (level : Nat)
     (i : Fin (RobinsonSquare.freeGridSide level))
