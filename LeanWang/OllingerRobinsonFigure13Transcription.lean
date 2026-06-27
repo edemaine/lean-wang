@@ -4765,6 +4765,20 @@ theorem canonical_freeRowCoord
     (canonical level).freeRowCoord j = j.val :=
   rfl
 
+theorem canonical_freeColumnCoord_succ
+    (level : Nat) (i : Fin (RobinsonSquare.freeGridSide level))
+    (hi : i.val + 1 < RobinsonSquare.freeGridSide level) :
+    (canonical level).freeColumnCoord ⟨i.val + 1, hi⟩ =
+      (canonical level).freeColumnCoord i + 1 := by
+  norm_num [canonical]
+
+theorem canonical_freeRowCoord_succ
+    (level : Nat) (j : Fin (RobinsonSquare.freeGridSide level))
+    (hj : j.val + 1 < RobinsonSquare.freeGridSide level) :
+    (canonical level).freeRowCoord ⟨j.val + 1, hj⟩ =
+      (canonical level).freeRowCoord j + 1 := by
+  norm_num [canonical]
+
 @[simp]
 theorem canonical_isBoardColumn
     (level : Nat) (column : Int) :
@@ -6022,6 +6036,116 @@ structure CanonicalSiteRectRouting
           (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
 
 namespace CanonicalSiteRectRouting
+
+/--
+Build canonical site-rectangle routing from the two genuinely geometric facts:
+every canonical free crossing decodes to an active site, and the lower-left
+crossing decodes to the corner site.
+
+For the canonical obstruction geometry, adjacent free crossings are adjacent
+plane cells.  Therefore local Figure 18 compatibility and payload transmission
+are consequences of `ValidPlaneTiling`.
+-/
+noncomputable def ofActiveCorner
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (hx : ValidPlaneTiling
+      (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (active :
+      ∀ i : Fin (RobinsonSquare.freeGridSide level),
+        ∀ j : Fin (RobinsonSquare.freeGridSide level),
+          CellRole.isActive
+            (table.roleAtSite
+              (table.combinedSite
+                (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+                  (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))) =
+            true)
+    (cornerSite :
+      table.combinedSite
+          (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+              ⟨0, RobinsonSquare.freeGridSide_pos level⟩,
+            (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+              ⟨0, RobinsonSquare.freeGridSide_pos level⟩)) =
+        table.cornerSite) :
+    CanonicalSiteRectRouting table x level where
+  siteRect := fun i j =>
+    table.combinedSite
+      (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+        (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j))
+  site_eq := by
+    intro i j
+    rfl
+  active := active
+  cornerSite := cornerSite
+  htransmit := by
+    intro i j hi
+    have hcompat :
+        Figure18Site.hCompatible
+          (table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+          (table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+              ⟨i.val + 1, hi⟩,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j))) =
+          true := by
+      exact table.combinedSite_hCompatible_of_selectedCoords hx
+        (RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+        (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+        (RobinsonBoardSignalGeometry.canonical_freeColumnCoord_succ level)
+        i j hi
+    exact Figure18IndexedRoutedFixedCornerSquare.payload_hMatches_of_validPlaneTiling
+      hx hcompat
+      (table.combinedPayload_product
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+      (table.combinedPayload_product
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+          ⟨i.val + 1, hi⟩,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+  vtransmit := by
+    intro i j hj
+    have vcompat :
+        Figure18Site.vCompatible
+          (table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+          (table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+                ⟨j.val + 1, hj⟩))) =
+          true := by
+      exact table.combinedSite_vCompatible_of_selectedCoords hx
+        (RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+        (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+        (RobinsonBoardSignalGeometry.canonical_freeRowCoord_succ level)
+        i j hj
+    exact Figure18IndexedRoutedFixedCornerSquare.payload_vMatches_of_validPlaneTiling
+      hx vcompat
+      (table.combinedPayload_product
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))
+      (table.combinedPayload_product
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+            ⟨j.val + 1, hj⟩)))
+  siteCompatible := by
+    constructor
+    · intro i j hi
+      exact table.combinedSite_hCompatible_of_selectedCoords hx
+        (RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+        (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+        (RobinsonBoardSignalGeometry.canonical_freeColumnCoord_succ level)
+        i j hi
+    · intro i j hj
+      exact table.combinedSite_vCompatible_of_selectedCoords hx
+        (RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+        (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+        (RobinsonBoardSignalGeometry.canonical_freeRowCoord_succ level)
+        i j hj
 
 /--
 Canonical site-rectangle routing supplies the general site-rectangle routing
@@ -7442,6 +7566,56 @@ def HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
         (∀ level : Nat,
           CanonicalSiteRectRouting table x level)
 
+/--
+The irreducible active/corner part of canonical free-site-rectangle routing.
+
+For canonical free crossings, the payload transmission and local site
+compatibility fields are forced by `ValidPlaneTiling`; the geometric scaffold
+proof only has to show that those crossings decode to active Figure 18 sites
+and that the lower-left crossing is the distinguished corner site.
+-/
+def HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      Nonempty
+        (∀ level : Nat,
+          (∀ i : Fin (RobinsonSquare.freeGridSide level),
+            ∀ j : Fin (RobinsonSquare.freeGridSide level),
+              CellRole.isActive
+                (table.roleAtSite
+                  (table.combinedSite
+                    (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+                      (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)))) =
+                true) ∧
+          table.combinedSite
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord
+                  ⟨0, RobinsonSquare.freeGridSide_pos level⟩,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord
+                  ⟨0, RobinsonSquare.freeGridSide_pos level⟩)) =
+            table.cornerSite)
+
+/--
+Canonical active/corner recognition at free crossings supplies full canonical
+free-site-rectangle routing; validity of the combined tiling supplies the
+transmission and compatibility fields.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_activeCorner
+    {table : Figure18RoleTable}
+    (hactiveCorner :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+        table) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table := by
+  intro T seed x hx
+  rcases hactiveCorner x hx with ⟨activeCorner⟩
+  exact ⟨fun level =>
+    CanonicalSiteRectRouting.ofActiveCorner hx
+      (activeCorner level).1 (activeCorner level).2⟩
+
 end CanonicalFreeSiteRectRouting
 
 /--
@@ -8393,6 +8567,26 @@ def HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
   HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
+
+/--
+Active/corner recognition at canonical free crossings for a generated
+listed-active role table.
+-/
+def HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) : Prop :=
+  HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+theorem hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hactiveCorner :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_activeCorner
+    hactiveCorner
 
 theorem
     hasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTower_of_combinedSites
@@ -10044,6 +10238,11 @@ def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
   HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
     D.activeSites D.cornerSite
 
+def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
+    D.activeSites D.cornerSite
+
 def HasRobinsonBoardLevelSignalLocalTowerInvariant
     (D : Figure18ScaffoldData) : Prop :=
   HasFigure18RobinsonBoardLevelSignalLocalTowerForTable D.table.toRoleTable
@@ -10170,6 +10369,14 @@ def HasRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant.ofFreeSiteRect
     D.HasRobinsonBoardCanonicalSiteRectCombinedSiteRoutingInvariant :=
   hasFigure18RobinsonBoardCanonicalSiteRectCombinedSiteRouting_of_freeSiteRect
     hrouting
+
+def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
+    {D : Figure18ScaffoldData}
+    (hactiveCorner :
+      D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant) :
+    D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
+    hactiveCorner
 
 def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
     {D : Figure18ScaffoldData}
