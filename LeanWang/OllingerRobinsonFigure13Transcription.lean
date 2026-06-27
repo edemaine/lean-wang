@@ -7599,6 +7599,107 @@ def HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
             table.cornerSite)
 
 /--
+Origin-zero indexed active/corner windows.
+
+The usual active-corner window interface lets the selected square appear at any
+origin.  Canonical free-site routing needs the same local recognition at the
+canonical free coordinates `0, ..., n - 1`, so this stricter target fixes the
+origin to `(0, 0)`.
+-/
+def HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, ∀ hn : 0 < n,
+        Nonempty
+          { window : Figure18IndexedActiveCornerWindow table x n hn //
+              window.origin = (0, 0) }
+
+def HasFigure18IndexedActiveCornerOriginZeroWindows
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    Prop :=
+  HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+/--
+Origin-zero indexed active/corner windows recognize the canonical free
+crossings.  The window's pointwise product witnesses identify each combined
+base tile with the indexed Figure 18 site at the same canonical coordinate.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+    {table : Figure18RoleTable}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+      table := by
+  intro T seed x hx
+  refine ⟨fun level => ?_⟩
+  rcases hwindows x hx (RobinsonSquare.freeGridSide level)
+      (RobinsonSquare.freeGridSide_pos level) with
+    ⟨window, horigin⟩
+  constructor
+  · intro i j
+    let site : Figure18Site := {
+      index := window.indexRect i j
+      quadrant := window.quadrantRect i j
+    }
+    have hsite :
+        table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j)) =
+          site := by
+      rcases window.product i j with ⟨payload, hproduct⟩
+      exact table.combinedSite_eq_of_product_site
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j))
+        site payload
+        (by
+          simpa [site, Figure18Site.tile, horigin,
+            RobinsonBoardSignalGeometry.canonical] using hproduct)
+    rw [hsite]
+    simpa [site, Figure18RoleTable.roleAtSite] using window.active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let site : Figure18Site := {
+      index := window.indexRect i0 j0
+      quadrant := window.quadrantRect i0 j0
+    }
+    have hsite :
+        table.combinedSite
+            (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i0,
+              (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j0)) =
+          site := by
+      rcases window.product i0 j0 with ⟨payload, hproduct⟩
+      exact table.combinedSite_eq_of_product_site
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i0,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j0))
+        site payload
+        (by
+          simpa [site, Figure18Site.tile, i0, j0, horigin,
+            RobinsonBoardSignalGeometry.canonical] using hproduct)
+    have hcornerRole :
+        table.roleAtSite
+            (table.combinedSite
+              (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i0,
+                (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j0))) =
+          CellRole.corner := by
+      rw [hsite]
+      simpa [site, i0, j0, Figure18RoleTable.roleAtSite] using
+        window.corner
+    exact (table.roleAtSite_corner_iff
+      (table.combinedSite
+        (x ((RobinsonBoardSignalGeometry.canonical level).freeColumnCoord i0,
+          (RobinsonBoardSignalGeometry.canonical level).freeRowCoord j0)))).1
+      hcornerRole
+
+/--
 Canonical active/corner recognition at free crossings supplies full canonical
 free-site-rectangle routing; validity of the combined tiling supplies the
 transmission and compatibility fields.
@@ -8577,6 +8678,16 @@ def HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
   HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
     (Figure18RoleTable.FlatRoleTable.ofActiveSites
       activeSites cornerSite).toRoleTable
+
+theorem hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner_of_originZeroWindows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindows
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+    hwindows
 
 theorem hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -10243,6 +10354,10 @@ def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
   HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
     D.activeSites D.cornerSite
 
+def HasIndexedActiveCornerOriginZeroWindowInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18IndexedActiveCornerOriginZeroWindowsForTable D.table.toRoleTable
+
 def HasRobinsonBoardLevelSignalLocalTowerInvariant
     (D : Figure18ScaffoldData) : Prop :=
   HasFigure18RobinsonBoardLevelSignalLocalTowerForTable D.table.toRoleTable
@@ -10377,6 +10492,13 @@ def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
     D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant :=
   hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
     hactiveCorner
+
+def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+    hwindows
 
 def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
     {D : Figure18ScaffoldData}
