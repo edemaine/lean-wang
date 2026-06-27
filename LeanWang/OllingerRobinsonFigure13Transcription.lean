@@ -8478,6 +8478,15 @@ theorem hasFigure18RobinsonBoardCanonicalProductWitnessRouting_of_freeSiteRect
   hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_freeSiteRect
     hrouting
 
+theorem hasFigure18RobinsonBoardCanonicalRouting_of_freeSiteRect
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalRouting activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalRoutingForTable_of_freeSiteRect
+    hrouting
+
 theorem
     hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_combinedSites
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -10035,6 +10044,10 @@ def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
   HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
     D.activeSites D.cornerSite
 
+def HasRobinsonBoardLevelSignalLocalTowerInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasFigure18RobinsonBoardLevelSignalLocalTowerForTable D.table.toRoleTable
+
 def HasIndexedRoutedForces (D : Figure18ScaffoldData) : Prop :=
   HasFigure18IndexedRoutedFixedCornerSquares D.table.toRoleTable
 
@@ -10165,11 +10178,38 @@ def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
   hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
     hrouting
 
+def HasRobinsonBoardCanonicalCorridorRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardCanonicalCorridorRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRouting_of_freeSiteRect
+    hrouting
+
+def HasRobinsonBoardCanonicalProductWitnessRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardCanonicalProductWitnessRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalProductWitnessRouting_of_freeSiteRect
+    hrouting
+
+def HasRobinsonBoardCanonicalRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardCanonicalRoutingInvariant :=
+  hasFigure18RobinsonBoardCanonicalRouting_of_freeSiteRect hrouting
+
 def HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
     D.HasRobinsonBoardRoutedFreeGridInvariant :=
   hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalFreeSiteRectRouting
+    hrouting
+
+def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofCanonicalFreeSiteRectRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRect
     hrouting
 
 def HasIndexedRoutedForces.ofRobinsonBoardGeometryTowerRouting
