@@ -5079,6 +5079,70 @@ theorem hasRobinsonBoardRoutedFreeGridCheckedStacks_of_freeGrids
   rcases hstacks grid with ⟨stackData, hsite, hmatch, hcompatible⟩
   exact ⟨grid, stackData, hsite, hmatch, hcompatible⟩
 
+/--
+Checked indexed-active stacks compactly produce a plane tiling by the Figure 16
+component-symbol tileset in each layer.
+-/
+theorem tilesPlane_symbolTileSet_of_indexedActiveCheckedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveWindowCheckedStacks table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_indexedActiveLayerStack
+    (hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks hchecked)
+    x hx layer
+
+/--
+Origin-zero checked indexed-active stacks have the same Figure 16 compactness
+consequence after forgetting the origin marker.
+-/
+theorem tilesPlane_symbolTileSet_of_indexedActiveOriginZeroCheckedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedActiveOriginZeroWindowCheckedStacks table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_indexedActiveCheckedStacks
+    (hasIndexedActiveWindowCheckedStacks_of_originZero hchecked) x hx layer
+
+/--
+Checked indexed-routed stacks compactly produce a plane tiling by the Figure 16
+component-symbol tileset in each layer.
+-/
+theorem tilesPlane_symbolTileSet_of_indexedRoutedCheckedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasIndexedRoutedFixedCornerSquareCheckedStacks table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_indexedRoutedLayerStack
+    (hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked)
+    x hx layer
+
+/--
+Robinson board/free-grid checked stacks expose the same Figure 16 compactness
+consequence after forgetting the board terminology.
+-/
+theorem tilesPlane_symbolTileSet_of_robinsonBoardRoutedFreeGridCheckedStacks
+    {data : CheckedSparseRawData} {table : Figure18RoleTable}
+    (hchecked : data.HasRobinsonBoardRoutedFreeGridCheckedStacks table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_indexedRoutedCheckedStacks
+    (hasIndexedRoutedFixedCornerSquareCheckedStacks_of_robinsonBoardRoutedFreeGrid
+      hchecked)
+    x hx layer
+
 theorem hasAdjacentProductWitnessCheckedStacks_of_decodedSite
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasDecodedSiteCheckedStacks table) :
