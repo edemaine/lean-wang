@@ -16081,6 +16081,90 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_raw_boundary_fig16_position_source
+      section7Routing hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_free_site_rect_raw_boundary_fig16_position_source
+      section7Routing hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_raw_boundary_fig16_position_source
+      section7Routing hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_free_site_rect_raw_boundary_fig16_position_source
+      section7Routing hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 Robinson Section 7 obstruction routing, canonical checked Figure 16
 macro-squares, and generated interior position-code rows.
 -/
@@ -16188,6 +16272,118 @@ theorem
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
     domino_problem_undecidable_l2c2_section7_canonical_checked_fig16_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, canonical raw-boundary Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, canonical raw-boundary Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, canonical raw-boundary Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, canonical raw-boundary Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_position_source
       section7Routing hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
 
