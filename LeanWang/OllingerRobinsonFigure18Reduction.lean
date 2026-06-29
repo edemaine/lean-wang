@@ -15578,6 +15578,29 @@ abbrev Figure13TileableBoxes : Prop :=
 abbrev Figure13CofinalTileableSquares : Prop :=
   ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
 
+/-- Finite checked Figure 16-recognized Robinson board macro-square hypothesis. -/
+abbrev Figure13CheckedRecognizedMacroSquares : Prop :=
+  HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+
+/--
+Canonical finite checked Figure 16-recognized Robinson board macro-square
+hypothesis.
+-/
+abbrev Figure13CanonicalCheckedRecognizedMacroSquares : Prop :=
+  HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+
+theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
+    (hlevel : Figure13CheckedRecognizedMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 Robinson Section 7 obstruction routing and a raw Figure 13 plane tiling.
