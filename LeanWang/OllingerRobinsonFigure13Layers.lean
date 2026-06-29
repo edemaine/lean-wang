@@ -825,6 +825,18 @@ def tileRect {w h : Nat} (R : SiteRectangle w h) : Rectangle w h :=
 def rawTileRect {w h : Nat} (R : SiteRectangle w h) : Rectangle w h :=
   fun i j => (R i j).rawTile
 
+def RawBoundaryCompatible {w h : Nat} (R : SiteRectangle w h) : Prop :=
+  (∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+    WangTile.HMatches
+      (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .southeast)
+      (TileSubdivision.subdivideTileAt
+        (R.rawTileRect ⟨i.val + 1, hi⟩ j) .southwest)) ∧
+    (∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      WangTile.VMatches
+        (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .northwest)
+        (TileSubdivision.subdivideTileAt
+          (R.rawTileRect i ⟨j.val + 1, hj⟩) .southwest))
+
 theorem tileRect_eq {w h : Nat} (R : SiteRectangle w h)
     (i : Fin w) (j : Fin h) :
     R.tileRect i j =
@@ -977,6 +989,16 @@ theorem tileableRawSquare_of_subdivideTileAt_boundaries {n : Nat}
     TileableSquare fig13Tiles n :=
   ⟨R.rawTileRect, R.validRawTileRect_of_subdivideTileAt_boundaries hh hv⟩
 
+theorem validRawTileRect_of_rawBoundaryCompatible {w h : Nat}
+    (R : SiteRectangle w h) (hcompat : R.RawBoundaryCompatible) :
+    ValidRectangle fig13Tiles R.rawTileRect :=
+  R.validRawTileRect_of_subdivideTileAt_boundaries hcompat.1 hcompat.2
+
+theorem tileableRawSquare_of_rawBoundaryCompatible {n : Nat}
+    (R : SiteRectangle n n) (hcompat : R.RawBoundaryCompatible) :
+    TileableSquare fig13Tiles n :=
+  ⟨R.rawTileRect, R.validRawTileRect_of_rawBoundaryCompatible hcompat⟩
+
 /--
 If the Robinson-board geometry supplies compatible Figure 18 site squares of
 every side length, then the shared Figure 18 scaffold tiles tile every centered
@@ -1029,6 +1051,19 @@ def HasCompatibleFigure18ScaffoldSquares : Prop :=
         Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)
 
 /--
+Cofinal aligned macro-squares of Figure 18 sites.
+
+This is the finite raw-Figure-13 target for Robinson's board argument: after
+the board/free-line geometry chooses a square of quarter-sites, those
+quarter-sites must be aligned so that adjacent macro-cells expose the east and
+north boundary quarters of raw Figure 13 tiles.
+-/
+def HasAlignedFigure13MacroSquares : Prop :=
+  ∀ n : Nat,
+    ∃ m : Nat, n ≤ m ∧
+      ∃ R : SiteRectangle m m, R.RawBoundaryCompatible
+
+/--
 Finite centered boxes of raw Figure 13 tiles compactly determine a plane tiling.
 
 This is the raw Figure 13 form of the Konig-style compactness argument used by
@@ -1048,6 +1083,27 @@ theorem tilesPlane_fig13Tiles_of_cofinal_tileableSquares
     (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
     TilesPlane fig13Tiles :=
   tilesPlane_of_cofinal_tileableSquares hsquares
+
+/--
+Aligned macro-squares of Figure 18 sites supply cofinal raw Figure 13 square
+tilings.
+-/
+theorem cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares
+    (hsquares : HasAlignedFigure13MacroSquares) :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m := by
+  intro n
+  rcases hsquares n with ⟨m, hnm, R, hcompat⟩
+  exact ⟨m, hnm, R.tileableRawSquare_of_rawBoundaryCompatible hcompat⟩
+
+/--
+Aligned macro-squares of Figure 18 sites compactly determine a raw Figure 13
+plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (hsquares : HasAlignedFigure13MacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+    (cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares hsquares)
 
 /--
 Doubled raw Figure 13 square tilings of every positive source side are already
