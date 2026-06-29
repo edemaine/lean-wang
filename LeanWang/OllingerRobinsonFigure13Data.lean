@@ -3493,6 +3493,1041 @@ theorem l3
 end Figure16ExpandedSourceSiteBlock
 
 /--
+Canonical compatible source-site expansion: keep the raw Figure 13 tile index
+and select the quadrant requested by the Figure 16 block offset.
+-/
+def canonicalExpandedSourceSite
+    (source : Figure18Site) (di dj : Fin 2) : Figure18Site where
+  index := source.index
+  quadrant := quadrantOfOffset di dj
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_0
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨0, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨0, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_1
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨1, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨1, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_2
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨2, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨2, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_3
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨3, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨3, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_4
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨4, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨4, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_5
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨5, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨5, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_6
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨6, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨6, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_7
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨7, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨7, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_8
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨8, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨8, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_9
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨9, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨9, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_10
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨10, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨10, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_11
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨11, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨11, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_12
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨12, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨12, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_13
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨13, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨13, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_14
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨14, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨14, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_15
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨15, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨15, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_16
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨16, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨16, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_17
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨17, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨17, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_18
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨18, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨18, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_19
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨19, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨19, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_20
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨20, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨20, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_21
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨21, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨21, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_22
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨22, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨22, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_23
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨23, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨23, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_24
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨24, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨24, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_25
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨25, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨25, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_26
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨26, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨26, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_27
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨27, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨27, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_28
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨28, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨28, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_29
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨29, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨29, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_30
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨30, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨30, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_31
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨31, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨31, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_32
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨32, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨32, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_33
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨33, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨33, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_34
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨34, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨34, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_35
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨35, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨35, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_36
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨36, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨36, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_37
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨37, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨37, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_38
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨38, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨38, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_39
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨39, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨39, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_40
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨40, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨40, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_41
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨41, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨41, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_42
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨42, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨42, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_43
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨43, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨43, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_44
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨44, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨44, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_45
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨45, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨45, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_46
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨46, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨46, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_47
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨47, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨47, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_48
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨48, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨48, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_49
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨49, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨49, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_50
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨50, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨50, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_51
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨51, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨51, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_52
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨52, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨52, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_53
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨53, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨53, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_54
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨54, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨54, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_55
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨55, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨55, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_56
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨56, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨56, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_57
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨57, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨57, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_58
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨58, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨58, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_59
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨59, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨59, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_60
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨60, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨60, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_61
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨61, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨61, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_62
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨62, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨62, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_63
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨63, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨63, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_64
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨64, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨64, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_65
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨65, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨65, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_66
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨66, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨66, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_67
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨67, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨67, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_68
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨68, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨68, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_69
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨69, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨69, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_70
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨70, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨70, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_71
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨71, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨71, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_72
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨72, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨72, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_73
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨73, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨73, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_74
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨74, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨74, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_75
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨75, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨75, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_76
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨76, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨76, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_77
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨77, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨77, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_78
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨78, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨78, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_79
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨79, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨79, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_80
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨80, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨80, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_81
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨81, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨81, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_82
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨82, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨82, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_83
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨83, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨83, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_84
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨84, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨84, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_85
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨85, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨85, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_86
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨86, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨86, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_87
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨87, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨87, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_88
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨88, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨88, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_89
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨89, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨89, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_90
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨90, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨90, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+private theorem canonicalExpandedSourceSiteBlock_matchesBool_index_91
+    (quadrant : Quadrant) :
+    Figure16ExpandedSourceSiteBlock.matchesBool
+      ({ index := ⟨91, by decide⟩, quadrant := quadrant } : Figure18Site)
+      (canonicalExpandedSourceSite
+        ({ index := ⟨91, by decide⟩, quadrant := quadrant } : Figure18Site)) = true := by
+  cases quadrant <;> decide +revert
+
+theorem canonicalExpandedSourceSiteBlock_matchesBool
+    (source : Figure18Site) :
+    Figure16ExpandedSourceSiteBlock.matchesBool source
+      (canonicalExpandedSourceSite source) = true := by
+  rcases source with ⟨index, quadrant⟩
+  rcases index with ⟨n, hn⟩
+  by_cases h0 : n = 0
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_0 quadrant
+  by_cases h1 : n = 1
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_1 quadrant
+  by_cases h2 : n = 2
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_2 quadrant
+  by_cases h3 : n = 3
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_3 quadrant
+  by_cases h4 : n = 4
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_4 quadrant
+  by_cases h5 : n = 5
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_5 quadrant
+  by_cases h6 : n = 6
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_6 quadrant
+  by_cases h7 : n = 7
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_7 quadrant
+  by_cases h8 : n = 8
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_8 quadrant
+  by_cases h9 : n = 9
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_9 quadrant
+  by_cases h10 : n = 10
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_10 quadrant
+  by_cases h11 : n = 11
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_11 quadrant
+  by_cases h12 : n = 12
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_12 quadrant
+  by_cases h13 : n = 13
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_13 quadrant
+  by_cases h14 : n = 14
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_14 quadrant
+  by_cases h15 : n = 15
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_15 quadrant
+  by_cases h16 : n = 16
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_16 quadrant
+  by_cases h17 : n = 17
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_17 quadrant
+  by_cases h18 : n = 18
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_18 quadrant
+  by_cases h19 : n = 19
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_19 quadrant
+  by_cases h20 : n = 20
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_20 quadrant
+  by_cases h21 : n = 21
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_21 quadrant
+  by_cases h22 : n = 22
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_22 quadrant
+  by_cases h23 : n = 23
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_23 quadrant
+  by_cases h24 : n = 24
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_24 quadrant
+  by_cases h25 : n = 25
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_25 quadrant
+  by_cases h26 : n = 26
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_26 quadrant
+  by_cases h27 : n = 27
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_27 quadrant
+  by_cases h28 : n = 28
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_28 quadrant
+  by_cases h29 : n = 29
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_29 quadrant
+  by_cases h30 : n = 30
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_30 quadrant
+  by_cases h31 : n = 31
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_31 quadrant
+  by_cases h32 : n = 32
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_32 quadrant
+  by_cases h33 : n = 33
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_33 quadrant
+  by_cases h34 : n = 34
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_34 quadrant
+  by_cases h35 : n = 35
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_35 quadrant
+  by_cases h36 : n = 36
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_36 quadrant
+  by_cases h37 : n = 37
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_37 quadrant
+  by_cases h38 : n = 38
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_38 quadrant
+  by_cases h39 : n = 39
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_39 quadrant
+  by_cases h40 : n = 40
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_40 quadrant
+  by_cases h41 : n = 41
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_41 quadrant
+  by_cases h42 : n = 42
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_42 quadrant
+  by_cases h43 : n = 43
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_43 quadrant
+  by_cases h44 : n = 44
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_44 quadrant
+  by_cases h45 : n = 45
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_45 quadrant
+  by_cases h46 : n = 46
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_46 quadrant
+  by_cases h47 : n = 47
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_47 quadrant
+  by_cases h48 : n = 48
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_48 quadrant
+  by_cases h49 : n = 49
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_49 quadrant
+  by_cases h50 : n = 50
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_50 quadrant
+  by_cases h51 : n = 51
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_51 quadrant
+  by_cases h52 : n = 52
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_52 quadrant
+  by_cases h53 : n = 53
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_53 quadrant
+  by_cases h54 : n = 54
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_54 quadrant
+  by_cases h55 : n = 55
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_55 quadrant
+  by_cases h56 : n = 56
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_56 quadrant
+  by_cases h57 : n = 57
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_57 quadrant
+  by_cases h58 : n = 58
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_58 quadrant
+  by_cases h59 : n = 59
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_59 quadrant
+  by_cases h60 : n = 60
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_60 quadrant
+  by_cases h61 : n = 61
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_61 quadrant
+  by_cases h62 : n = 62
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_62 quadrant
+  by_cases h63 : n = 63
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_63 quadrant
+  by_cases h64 : n = 64
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_64 quadrant
+  by_cases h65 : n = 65
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_65 quadrant
+  by_cases h66 : n = 66
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_66 quadrant
+  by_cases h67 : n = 67
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_67 quadrant
+  by_cases h68 : n = 68
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_68 quadrant
+  by_cases h69 : n = 69
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_69 quadrant
+  by_cases h70 : n = 70
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_70 quadrant
+  by_cases h71 : n = 71
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_71 quadrant
+  by_cases h72 : n = 72
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_72 quadrant
+  by_cases h73 : n = 73
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_73 quadrant
+  by_cases h74 : n = 74
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_74 quadrant
+  by_cases h75 : n = 75
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_75 quadrant
+  by_cases h76 : n = 76
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_76 quadrant
+  by_cases h77 : n = 77
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_77 quadrant
+  by_cases h78 : n = 78
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_78 quadrant
+  by_cases h79 : n = 79
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_79 quadrant
+  by_cases h80 : n = 80
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_80 quadrant
+  by_cases h81 : n = 81
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_81 quadrant
+  by_cases h82 : n = 82
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_82 quadrant
+  by_cases h83 : n = 83
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_83 quadrant
+  by_cases h84 : n = 84
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_84 quadrant
+  by_cases h85 : n = 85
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_85 quadrant
+  by_cases h86 : n = 86
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_86 quadrant
+  by_cases h87 : n = 87
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_87 quadrant
+  by_cases h88 : n = 88
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_88 quadrant
+  by_cases h89 : n = 89
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_89 quadrant
+  by_cases h90 : n = 90
+  · subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_90 quadrant
+  · have h91 : n = 91 := by omega
+    subst n
+    exact canonicalExpandedSourceSiteBlock_matchesBool_index_91 quadrant
+
+theorem canonicalExpandedSourceSiteBlock
+    (source : Figure18Site) :
+    Figure16ExpandedSourceSiteBlock source
+      (canonicalExpandedSourceSite source) :=
+  Figure16ExpandedSourceSiteBlock.of_matchesBool
+    (canonicalExpandedSourceSiteBlock_matchesBool source)
+
+/--
 The doubled Figure 18 site rectangle obtained by applying the Figure 16
 substitution lookup to every source site.
 -/
