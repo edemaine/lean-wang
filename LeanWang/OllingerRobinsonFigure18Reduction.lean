@@ -15603,6 +15603,25 @@ hypothesis for the corrected Figure 18 site-compatible target.
 abbrev Figure18CanonicalCheckedRecognizedCompatibleMacroSquares : Prop :=
   HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
 
+/--
+Canonical Figure 16 macro-square hypothesis using only checked source layer
+stacks and raw Figure 13 boundary compatibility.
+-/
+abbrev Figure18CanonicalRawBoundaryMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : OllingerRobinson.Figure13Layers.SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ _hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        source.RawBoundaryCompatible
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible hlevel
+
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
     TilesPlane fig13Tiles :=
@@ -15882,6 +15901,98 @@ theorem
     domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
       (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
         canonicalFreeSiteRectRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical free-site-rectangle routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_raw_boundary_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
+      canonicalFreeSiteRectRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical free-site-rectangle routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_free_site_rect_raw_boundary_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
+      canonicalFreeSiteRectRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical free-site-rectangle routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_raw_boundary_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_compatible_fig16_position_source
+      canonicalFreeSiteRectRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical free-site-rectangle routing and canonical raw-boundary Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_free_site_rect_raw_boundary_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_free_site_rect_compatible_fig16_position_source
+      canonicalFreeSiteRectRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
       h
 
 /--
