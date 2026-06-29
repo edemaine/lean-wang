@@ -3530,6 +3530,42 @@ theorem matchesBool_of
 
 end Figure16ExpandedSiteRectangle
 
+theorem figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_expanded
+    {w h : Nat} (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true) :
+    Figure16ExpandedSiteRectangle.matchesBool
+      (checkedLayerStackOfSiteRectangle R hcompatible)
+      (expandedSiteRectangleOfSiteRectangle R) = true := by
+  unfold Figure16ExpandedSiteRectangle.matchesBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [expandedSiteRectangleOfSiteRectangle_l2Component1,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_thin_blockGrid]
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [expandedSiteRectangleOfSiteRectangle_l2Component2,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_thick_blockGrid]
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [expandedSiteRectangleOfSiteRectangle_l3,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_black_blockGrid]
+
 /--
 Figure 16-recognized macro-squares at every Robinson board/free-grid level.
 
@@ -3586,7 +3622,7 @@ def HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :
           (2 * RobinsonSquare.freeGridSide level)
           (2 * RobinsonSquare.freeGridSide level),
           Figure16ExpandedSiteRectangle.matchesBool
-            (layerStackRectangleOfSiteRectangle source hcompatible) target =
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
               true ∧
             target.rawBoundaryCompatibleBool = true
 
@@ -3605,8 +3641,9 @@ theorem checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
     HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares := by
   intro level
   rcases hlevel level with ⟨source, hcompatible, target, hrecognized, hraw⟩
-  exact ⟨source, layerStackRectangleOfSiteRectangle source hcompatible, target,
-    hrecognized, hraw⟩
+  exact ⟨(checkedLayerStackRectangleOfSiteRectangle source).siteRectangle,
+    checkedLayerStackOfSiteRectangle source hcompatible, target,
+      hrecognized, hraw⟩
 
 theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_canonicalChecked
     (hlevel :
