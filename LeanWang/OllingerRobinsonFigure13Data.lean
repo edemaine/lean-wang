@@ -5135,6 +5135,13 @@ theorem l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
   l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
     (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
 
+theorem l2Component1PositiveTranslatedIsolatedBoxesOfRobinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares hlevel)
+
 theorem l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
     (hboxes :
       ∀ r : Nat, 0 < r →
@@ -5220,6 +5227,13 @@ theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
       l2Component2Figure18ScaffoldData :=
   l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
     (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
+
+theorem l2Component2PositiveTranslatedIsolatedBoxesOfRobinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares hlevel)
 
 /--
 Direct origin-zero routed certificate for the first audited L2-blank candidate.
@@ -12080,6 +12094,48 @@ def ofL2C2Figure18ScaffoldDataPositiveFig13CofinalSquares
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
           hsquares)
+
+def ofL2C1Figure18ScaffoldDataPositiveRobinsonBoardLevelAlignedMacroSquares
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfRobinsonBoardLevelAlignedMacroSquares
+          hlevel)
+
+def ofL2C2Figure18ScaffoldDataPositiveRobinsonBoardLevelAlignedMacroSquares
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfRobinsonBoardLevelAlignedMacroSquares
+          hlevel)
 
 def toCanonicalSiteRectTranslatedPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}

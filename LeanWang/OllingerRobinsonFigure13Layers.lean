@@ -1064,6 +1064,20 @@ def HasAlignedFigure13MacroSquares : Prop :=
       ∃ R : SiteRectangle m m, R.RawBoundaryCompatible
 
 /--
+Level-indexed aligned macro-squares at Robinson board/free-grid sizes.
+
+This is closer to Section 7 of Robinson's paper than
+`HasAlignedFigure13MacroSquares`: the construction should produce a raw-aligned
+macro-square at each board level, whose side is the number of free rows and
+columns in that board.
+-/
+def HasFigure13RobinsonBoardLevelAlignedMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ R : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      R.RawBoundaryCompatible
+
+/--
 Finite centered boxes of raw Figure 13 tiles compactly determine a plane tiling.
 
 This is the raw Figure 13 form of the Konig-style compactness argument used by
@@ -1096,6 +1110,29 @@ theorem cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares
   exact ⟨m, hnm, R.tileableRawSquare_of_rawBoundaryCompatible hcompat⟩
 
 /--
+Level-indexed Robinson-board aligned macro-squares supply the cofinal aligned
+macro-square target.
+-/
+theorem alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    HasAlignedFigure13MacroSquares := by
+  intro n
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hlevel level with ⟨R, hcompat⟩
+  exact ⟨RobinsonSquare.freeGridSide level, hcap, R, hcompat⟩
+
+/--
+Level-indexed Robinson-board aligned macro-squares supply cofinal raw Figure 13
+square tilings.
+-/
+theorem cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m :=
+  cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
+
+/--
 Aligned macro-squares of Figure 18 sites compactly determine a raw Figure 13
 plane tiling.
 -/
@@ -1104,6 +1141,16 @@ theorem tilesPlane_fig13Tiles_of_alignedMacroSquares
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_cofinal_tileableSquares
     (cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares hsquares)
+
+/--
+Level-indexed Robinson-board aligned macro-squares compactly determine a raw
+Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
 
 /--
 Doubled raw Figure 13 square tilings of every positive source side are already
