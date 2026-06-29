@@ -15570,6 +15570,14 @@ abbrev LayeredSection7ObstructionRoutingInvariant
     Prop :=
   D.HasRobinsonSection7ObstructionRoutingInvariant
 
+/-- Finite-box form of the raw Figure 13 scaffold hypothesis. -/
+abbrev Figure13TileableBoxes : Prop :=
+  ∀ r : Nat, TileableBox fig13Tiles r
+
+/-- Cofinal-square form of the raw Figure 13 scaffold hypothesis. -/
+abbrev Figure13CofinalTileableSquares : Prop :=
+  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 Robinson Section 7 obstruction routing and a raw Figure 13 plane tiling.
@@ -15649,6 +15657,186 @@ theorem
   exact
     domino_problem_undecidable_l2c2_free_site_rect_fig13_tiles_plane_position_source
       section7Routing hplane h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and finite raw Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and finite raw Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and finite raw Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and finite raw Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and cofinal raw Figure 13 squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+        hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and cofinal raw Figure 13 squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+        hsquares)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and cofinal raw Figure 13 squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+        hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and cofinal raw Figure 13 squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (OllingerRobinson.Figure13Layers.tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+        hsquares)
+      h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -15760,6 +15948,230 @@ theorem
   exact
     domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
       section7Routing hplane
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, finite raw Figure 13 boxes, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_position_source
+      section7Routing hboxes
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, finite raw Figure 13 boxes, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_fig13_tileable_boxes_position_source
+      section7Routing hboxes
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, finite raw Figure 13 boxes, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_position_source
+      section7Routing hboxes
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, finite raw Figure 13 boxes, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hboxes : Figure13TileableBoxes)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_fig13_tileable_boxes_position_source
+      section7Routing hboxes
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, cofinal raw Figure 13 squares, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_position_source
+      section7Routing hsquares
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, cofinal raw Figure 13 squares, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_fig13_cofinal_squares_position_source
+      section7Routing hsquares
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, cofinal raw Figure 13 squares, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_position_source
+      section7Routing hsquares
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, cofinal raw Figure 13 squares, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_fig13_cofinal_squares_position_source
+      section7Routing hsquares
       (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
 
 /--
