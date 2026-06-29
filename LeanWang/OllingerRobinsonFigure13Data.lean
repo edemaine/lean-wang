@@ -1712,6 +1712,45 @@ theorem siteOfSymbols?_eq_some_l3
   exact (siteMatchesSymbolsBool_eq_true (List.find?_some hsite)).2.2.2
 
 /--
+Lookup for one Figure 18 site in the doubled Figure 16 expansion of a source
+Figure 18 site.
+-/
+def expandedSourceSite?
+    (source : Figure18Site) (di dj : Fin 2) : Option Figure18Site :=
+  siteOfSymbols?
+    ((thinBlockAtSite source).entry di dj)
+    ((thickBlockAtSite source).entry di dj)
+    ((blackBlockAtSite source).entry di dj)
+    (quadrantOfOffset di dj)
+
+theorem expandedSourceSite?_eq_some_quadrant
+    {source target : Figure18Site} {di dj : Fin 2}
+    (hsite : expandedSourceSite? source di dj = some target) :
+    target.quadrant = quadrantOfOffset di dj := by
+  exact siteOfSymbols?_eq_some_quadrant hsite
+
+theorem expandedSourceSite?_eq_some_l2Component1
+    {source target : Figure18Site} {di dj : Fin 2}
+    (hsite : expandedSourceSite? source di dj = some target) :
+    l2Component1SymbolAtSite target =
+      (thinBlockAtSite source).entry di dj := by
+  exact siteOfSymbols?_eq_some_l2Component1 hsite
+
+theorem expandedSourceSite?_eq_some_l2Component2
+    {source target : Figure18Site} {di dj : Fin 2}
+    (hsite : expandedSourceSite? source di dj = some target) :
+    l2Component2SymbolAtSite target =
+      (thickBlockAtSite source).entry di dj := by
+  exact siteOfSymbols?_eq_some_l2Component2 hsite
+
+theorem expandedSourceSite?_eq_some_l3
+    {source target : Figure18Site} {di dj : Fin 2}
+    (hsite : expandedSourceSite? source di dj = some target) :
+    l3SymbolAtSite target =
+      (blackBlockAtSite source).entry di dj := by
+  exact siteOfSymbols?_eq_some_l3 hsite
+
+/--
 A doubled Figure 13 site rectangle recognized by a Figure 16 substitution
 expansion.
 
