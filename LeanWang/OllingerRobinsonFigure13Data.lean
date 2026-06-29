@@ -5166,6 +5166,40 @@ def l2Component2Figure18ScaffoldDataRoutedCertificateOfOriginZeroFig13TilesPlane
       l2Component2BlankCandidateSanity.cornerIndex_valid
       originZeroWindows l2Component2BlankCandidatePairCompatibilityBool boxes
 
+/--
+Public routed Figure 18 certificate from the direct origin-zero Section 7 route
+for the first audited L2-blank candidate.
+-/
+def l2Component1Figure18RoutedCertificateOfOriginZeroFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate l2Component1Figure18ScaffoldData.table.toRoleTable :=
+  (l2Component1Figure18ScaffoldDataRoutedCertificateOfOriginZeroFig13TilesPlane
+    originZeroWindows hplane).toRoutedCertificate
+
+/--
+Public routed Figure 18 certificate from the direct origin-zero Section 7 route
+for the second audited L2-blank candidate.
+-/
+def l2Component2Figure18RoutedCertificateOfOriginZeroFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    Figure18RoutedCertificate l2Component2Figure18ScaffoldData.table.toRoleTable :=
+  (l2Component2Figure18ScaffoldDataRoutedCertificateOfOriginZeroFig13TilesPlane
+    originZeroWindows hplane).toRoutedCertificate
+
 def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
