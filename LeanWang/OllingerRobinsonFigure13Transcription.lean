@@ -10349,6 +10349,19 @@ def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
   HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
     D.activeSites D.cornerSite
 
+/--
+Robinson Section 7 obstruction-routing target for the concrete Figure 18
+scaffold data.
+
+This is the proof surface suggested by Robinson's board argument: red borders
+produce boards, obstruction signals identify exactly the free rows and columns,
+and those free-line crossings carry the payload square.  In the current
+formalization this is represented by canonical free-site-rectangle routing.
+-/
+def HasRobinsonSection7ObstructionRoutingInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
+
 def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
     (D : Figure18ScaffoldData) : Prop :=
   HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
@@ -10493,12 +10506,28 @@ def HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
   hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
     hactiveCorner
 
+def HasRobinsonSection7ObstructionRoutingInvariant.ofActiveCorner
+    {D : Figure18ScaffoldData}
+    (hactiveCorner :
+      D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant) :
+    D.HasRobinsonSection7ObstructionRoutingInvariant :=
+  HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
+    hactiveCorner
+
 def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
     {D : Figure18ScaffoldData}
     (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
     D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
   hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
     hwindows
+
+def HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasRobinsonSection7ObstructionRoutingInvariant :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofActiveCorner
+    (HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
+      hwindows)
 
 def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
     {D : Figure18ScaffoldData}
@@ -10539,6 +10568,20 @@ def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofCanonicalFreeSiteRectRoutin
     (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
     D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRect
+    hrouting
+
+def HasRobinsonBoardRoutedFreeGridInvariant.ofSection7ObstructionRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonSection7ObstructionRoutingInvariant) :
+    D.HasRobinsonBoardRoutedFreeGridInvariant :=
+  HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
+    hrouting
+
+def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonSection7ObstructionRoutingInvariant) :
+    D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
+  HasRobinsonBoardLevelSignalLocalTowerInvariant.ofCanonicalFreeSiteRectRouting
     hrouting
 
 def HasIndexedRoutedForces.ofRobinsonBoardGeometryTowerRouting
@@ -10621,6 +10664,13 @@ def HasIndexedRoutedForces.ofRobinsonBoardCanonicalFreeSiteRectRouting
   HasIndexedRoutedForces.ofRobinsonBoardRoutedFreeGrid
     (HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
       hrouting)
+
+def HasIndexedRoutedForces.ofRobinsonSection7ObstructionRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonSection7ObstructionRoutingInvariant) :
+    D.HasIndexedRoutedForces :=
+  HasIndexedRoutedForces.ofRobinsonBoardCanonicalFreeSiteRectRouting
+    hrouting
 
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold
@@ -10986,6 +11036,14 @@ def RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
       canonicalRouting)
     realizes
 
+def RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant
+    (D : Figure18ScaffoldData)
+    (section7Routing : D.HasRobinsonSection7ObstructionRoutingInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant D
+    section7Routing realizes
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
@@ -11176,6 +11234,15 @@ def RoutedCertificate.ofCanonicalFreeSiteRectPositiveTranslatedBoxes
     D.RoutedCertificate :=
   RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant D
     canonicalRouting
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
+
+def RoutedCertificate.ofRobinsonSection7PositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (section7Routing : D.HasRobinsonSection7ObstructionRoutingInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant D
+    section7Routing
     (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
 
 def RoutedCertificate.toIndexedRoutedCertificate
