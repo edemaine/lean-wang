@@ -1547,6 +1547,90 @@ def l2Component2SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
 def l3SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
   blockEntryAtQuadrant (blackBlockAtSite site) site.quadrant
 
+/--
+A doubled Figure 13 site rectangle recognized by a Figure 16 substitution
+expansion.
+
+The source rectangle carries the three compatible Figure 16 layer grids.  The
+target rectangle is twice as large in each direction.  Its decoded symbols must
+agree with the expanded thin/L1 substitution in the first L2 summand, the
+expanded thick/L2 substitution in the second L2 summand, and the expanded black
+substitution in L3.
+-/
+structure Figure16ExpandedSiteRectangle
+    {w h : Nat} (source : SiteRectangle w h)
+    (stack : LayerStackRectangle layerData source)
+    (target : SiteRectangle (2 * w) (2 * h)) : Prop where
+  l2Component1 :
+    ∀ i : Fin (2 * w), ∀ j : Fin (2 * h),
+      l2Component1SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .thin)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j)
+  l2Component2 :
+    ∀ i : Fin (2 * w), ∀ j : Fin (2 * h),
+      l2Component2SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .thick)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j)
+  l3 :
+    ∀ i : Fin (2 * w), ∀ j : Fin (2 * h),
+      l3SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .black)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j)
+
+/--
+Figure 16-recognized macro-squares at every Robinson board/free-grid level.
+
+This is the finite scaffold-instantiation target immediately before raw
+Figure 13 compactness: construct the source layer stack, recognize the doubled
+site rectangle obtained from applying the substitutions, and prove that the
+recognized target has the raw Figure 13 macro-boundary matches.
+-/
+def HasFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ stack : LayerStackRectangle layerData source,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle source stack target ∧
+            target.RawBoundaryCompatible
+
+/--
+Figure 16-recognized Robinson board macro-squares supply the cofinal aligned
+raw Figure 13 macro-square target.
+-/
+theorem alignedMacroSquares_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel : HasFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    HasAlignedFigure13MacroSquares := by
+  intro n
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hlevel level with ⟨source, stack, target, _hrecognized, hraw⟩
+  refine ⟨2 * RobinsonSquare.freeGridSide level, ?_, target, hraw⟩
+  exact hcap.trans
+    (Nat.le_mul_of_pos_left _ (by decide : 0 < 2))
+
+/--
+Figure 16-recognized Robinson board macro-squares compactly determine a raw
+Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel : HasFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+      hlevel)
+
 def l2Component1BlankSiteBool (site : Figure18Site) : Bool :=
   decide (l2Component1SymbolAtSite site = Figure16.Symbol.blank)
 
