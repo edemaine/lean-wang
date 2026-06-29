@@ -5071,6 +5071,43 @@ def HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool : Prop :=
             true,
         source.rawBoundaryCompatibleBool = true
 
+/--
+One level of the Robinson Section 7 source/free-grid certificate.
+
+The board/free-line argument should eventually construct these certificates:
+the selected source rectangle is the virtual grid of free row/column crossings,
+`stackCompatible` is the checked Figure 16 layer-stack local compatibility
+fact, and `rawBoundary` is the raw Figure 13 edge matching along adjacent
+source cells.
+-/
+structure CanonicalFigure16SourceRawBoundaryLevelCertificate
+    (level : Nat) where
+  source : SiteRectangle
+    (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level)
+  stackCompatible :
+    (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+      layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+        true
+  rawBoundary : source.rawBoundaryCompatibleBool = true
+
+/--
+Level-certificate form of the finite checked source raw-boundary target.
+
+This is the intended proof obligation for the remaining Robinson board
+construction: produce one finite source/free-grid certificate at every board
+level.
+-/
+def HasCanonicalFigure16SourceRawBoundaryLevelCertificates : Prop :=
+  ∀ level : Nat,
+    Nonempty (CanonicalFigure16SourceRawBoundaryLevelCertificate level)
+
+theorem canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool := by
+  intro level
+  rcases hlevel level with ⟨cert⟩
+  exact ⟨cert.source, cert.stackCompatible, cert.rawBoundary⟩
+
 theorem canonicalCheckedFigure16SourceRawBoundary_of_bool
     (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
     HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares := by
@@ -5078,6 +5115,12 @@ theorem canonicalCheckedFigure16SourceRawBoundary_of_bool
   rcases hlevel level with ⟨source, hcompatible, hraw⟩
   exact ⟨source, hcompatible,
     SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+
+theorem canonicalCheckedFigure16SourceRawBoundary_of_levelCertificates
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares :=
+  canonicalCheckedFigure16SourceRawBoundary_of_bool
+    (canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates hlevel)
 
 theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
     (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :

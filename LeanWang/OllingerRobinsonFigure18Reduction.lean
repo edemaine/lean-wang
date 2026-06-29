@@ -15614,10 +15614,29 @@ abbrev Figure18CanonicalRawBoundaryMacroSquares : Prop :=
 abbrev Figure18CanonicalRawBoundaryMacroSquaresBool : Prop :=
   HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool
 
+/--
+Level-certificate form of `Figure18CanonicalRawBoundaryMacroSquaresBool`.
+
+This is the clean Robinson Section 7 obligation: one source/free-grid
+certificate for each board level.
+-/
+abbrev Figure18CanonicalRawBoundaryLevelCertificates : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryLevelCertificates
+
 theorem canonicalRawBoundaryMacroSquares_of_bool
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
     Figure18CanonicalRawBoundaryMacroSquares :=
   canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel
+
+theorem canonicalRawBoundaryMacroSquaresBool_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryMacroSquaresBool :=
+  canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryMacroSquares_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalCheckedFigure16SourceRawBoundary_of_levelCertificates hlevel
 
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
