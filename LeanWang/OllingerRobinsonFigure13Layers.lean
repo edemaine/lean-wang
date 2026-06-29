@@ -983,6 +983,46 @@ def HasCompatibleFigure18ScaffoldSquares : Prop :=
         Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)
 
 /--
+Finite centered boxes of raw Figure 13 tiles compactly determine a plane tiling.
+
+This is the raw Figure 13 form of the Konig-style compactness argument used by
+Robinson: after the board construction supplies arbitrarily large finite
+patches, compactness turns them into an infinite tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_tileableBoxes
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_of_all_tileableBoxes hboxes
+
+/--
+Cofinal finite square tilings of the raw Figure 13 tiles determine a plane
+tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+    (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_of_cofinal_tileableSquares hsquares
+
+/--
+Doubled raw Figure 13 square tilings of every positive source side are already
+cofinal, so they determine a plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_positive_doubled_tileableSquares
+    (hsquares : ∀ n : Nat, 0 < n → TileableSquare fig13Tiles (2 * n)) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_of_all_positive_doubled_tileableSquares hsquares
+
+/-- Raw Figure 13 plane tileability is equivalent to all centered finite boxes. -/
+theorem tilesPlane_fig13Tiles_iff_tileableBoxes :
+    TilesPlane fig13Tiles ↔ ∀ r : Nat, TileableBox fig13Tiles r :=
+  tilesPlane_iff_all_tileableBoxes fig13Tiles
+
+/-- Raw Figure 13 plane tileability is equivalent to all finite squares. -/
+theorem tilesPlane_fig13Tiles_iff_tileableSquares :
+    TilesPlane fig13Tiles ↔ ∀ n : Nat, TileableSquare fig13Tiles n :=
+  tilesPlane_iff_all_tileableSquares fig13Tiles
+
+/--
 Compatible Figure 18 site squares of every side length give the shared
 centered-box tileability target for the subdivided Figure 13 scaffold.
 -/
