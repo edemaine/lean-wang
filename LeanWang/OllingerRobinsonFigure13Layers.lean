@@ -5052,6 +5052,16 @@ theorem hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks
     (hasIndexedActiveCornerOriginZeroWindowsWithLayerStack_of_checkedStacks
       hchecked)
 
+/-- Origin-zero checked layer stacks supply Robinson Section 7 obstruction routing. -/
+theorem hasRobinsonSection7ObstructionRoutingInvariant_of_originZeroCheckedStacks
+    {data : CheckedSparseRawData}
+    (hchecked :
+      data.HasIndexedActiveOriginZeroWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table) :
+    data.toLayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant :=
+  LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    (hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked)
+
 theorem hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedRoutedFixedCornerSquareCheckedStacks table) :
@@ -5502,12 +5512,10 @@ def routedCertificateOfOriginZeroCheckedStacks
         data.toLayeredFigure18ScaffoldData.scaffoldData) :
     data.toLayeredFigure18ScaffoldData.scaffoldData.RoutedCertificate :=
   open Figure18ScaffoldData in
-  Figure18ScaffoldData.RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant
+  Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant
     data.toLayeredFigure18ScaffoldData.scaffoldData
-    (HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
-      (HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
-        (hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks
-          hchecked)))
+    (hasRobinsonSection7ObstructionRoutingInvariant_of_originZeroCheckedStacks
+      hchecked)
     (Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
       boxes)
 
