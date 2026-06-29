@@ -4726,6 +4726,39 @@ theorem sparseRawDataOfNatSites_hasCheckedStacksForFlatRoleTable
     activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
     cornerIndex_valid hpair
 
+/--
+Origin-zero active/corner windows plus the generated finite Figure 13/Figure 16
+pair-compatibility check attach compatible checked layer stacks to the selected
+origin-zero rectangles.
+-/
+theorem sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).toRoleTable)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasIndexedActiveOriginZeroWindowCheckedStacks
+        (flatRoleTableOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).toRoleTable := by
+  open CheckedSparseRawData in
+  exact
+    hasIndexedActiveOriginZeroWindowCheckedStacks_of_originZeroWindowsForFlatTable
+      hwindows
+      (sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
+        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+        cornerIndex_valid hpair)
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfFlatRoleTablePairCompatibility
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -4884,11 +4917,9 @@ def figure18ScaffoldDataOfNatSitesRoutedCertificateOfOriginZeroPairCompatibility
   exact CheckedSparseRawData.routedCertificateOfOriginZeroCheckedStacks
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
-    (hasIndexedActiveOriginZeroWindowCheckedStacks_of_originZeroWindowsForFlatTable
-      hwindows
-      (sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
-        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-        cornerIndex_valid hpair))
+    (sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid hwindows hpair)
     (by
       simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites] using
         boxes)
