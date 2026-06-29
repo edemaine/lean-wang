@@ -14358,15 +14358,33 @@ def l2c2OriginZeroFig13BundledObligations
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     originZeroWindows hplane
 
+/--
+The Figure 18 role table whose indexed-active windows are needed for the first
+audited L2-blank candidate.
+-/
+def l2Component1IndexedActiveRoleTable : OllingerRobinson.Figure18RoleTable :=
+  (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+    (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
+    (cornerSiteOfNat 0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable
+
+/--
+The Figure 18 role table whose indexed-active windows are needed for the second
+audited L2-blank candidate.
+-/
+def l2Component2IndexedActiveRoleTable : OllingerRobinson.Figure18RoleTable :=
+  (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
+    (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
+    (cornerSiteOfNat 0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable
+
 open NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations in
 def l2c1IndexedActiveFig13BundledObligations
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
-            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.southwest
-            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component1IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles) :
     NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
       l2Component1BlankCandidateActiveSiteSpecs
@@ -14380,11 +14398,7 @@ open NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations in
 def l2c2IndexedActiveFig13BundledObligations
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
-            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.northeast
-            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component2IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles) :
     NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
       l2Component2BlankCandidateActiveSiteSpecs
@@ -14827,11 +14841,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_indexed_active_fig13_tiles_plane_position_source
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
-            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.southwest
-            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component1IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
@@ -14848,11 +14858,7 @@ theorem
     domino_problem_undecidable_l2c1_indexed_active_fig13_tiles_plane_position_source
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component1BlankCandidateActiveSiteSpecs
-            l2Component1BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.southwest
-            l2Component1BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component1IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
@@ -14869,11 +14875,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_indexed_active_fig13_tiles_plane_position_source
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
-            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.northeast
-            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component2IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
@@ -14890,11 +14892,7 @@ theorem
     domino_problem_undecidable_l2c2_indexed_active_fig13_tiles_plane_position_source
     (indexedActiveWindows :
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
-        (OllingerRobinson.Figure18RoleTable.FlatRoleTable.ofActiveSites
-          (activeSiteDataOfSpecs l2Component2BlankCandidateActiveSiteSpecs
-            l2Component2BlankCandidateSanity.activeSiteSpecs_valid).sites
-          (cornerSiteOfNat 0 Quadrant.northeast
-            l2Component2BlankCandidateSanity.cornerIndex_valid)).toRoleTable)
+        l2Component2IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
