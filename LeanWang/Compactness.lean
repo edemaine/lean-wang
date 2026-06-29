@@ -266,6 +266,24 @@ theorem tilesPlane_of_cofinal_tileableSquares {T : TileSet}
   exact tileableSquare_crop hnm hm
 
 /--
+Compactness from tileable doubled squares of every positive source size.
+
+This is the shape produced by 2-by-2 substitution blocks: proving
+`TileableSquare T (2 * n)` for every positive `n` is already cofinal among all
+finite square side lengths.
+-/
+theorem tilesPlane_of_all_positive_doubled_tileableSquares {T : TileSet}
+    (hsquares : ∀ n : Nat, 0 < n → TileableSquare T (2 * n)) :
+    TilesPlane T := by
+  apply tilesPlane_of_cofinal_tileableSquares
+  intro n
+  let m := max 1 n
+  refine ⟨2 * m, ?_, hsquares m ?_⟩
+  · exact (Nat.le_max_right 1 n).trans
+      (Nat.le_mul_of_pos_left m (by decide : 0 < 2))
+  · exact Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_max_left 1 n)
+
+/--
 Square compactness for plane tilings, derived by translating centered boxes to
 ordinary finite squares and applying centered-box compactness.
 -/

@@ -2168,6 +2168,22 @@ theorem tileableExpandedSquares_of_indexedActiveLayerStack
   rcases hwindow x hx n hn with ⟨window⟩
   exact window.tileableExpandedSquare layer
 
+/--
+Compactness consequence of layered indexed-active windows: the Figure 16
+component-symbol tileset tiles the plane in each layer.
+-/
+theorem tilesPlane_symbolTileSet_of_indexedActiveLayerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hwindow : HasFigure18IndexedActiveCornerWindowsWithLayerStack D table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet := by
+  apply tilesPlane_of_all_positive_doubled_tileableSquares
+  intro n hn
+  exact tileableExpandedSquares_of_indexedActiveLayerStack hwindow x hx n hn layer
+
 /-- Site rectangle extracted from an indexed routed fixed-corner square. -/
 def siteRectangleOfIndexedRoutedFixedCornerSquare
     {table : Figure18RoleTable} {T : TileSet} {seed : WangTile}
@@ -2440,6 +2456,22 @@ theorem tileableExpandedSquares_of_indexedRoutedLayerStack
     TileableSquare Figure16.Symbol.tileSet (2 * n) := by
   rcases hrouted x hx n hn with ⟨window⟩
   exact window.tileableExpandedSquare layer
+
+/--
+Compactness consequence of layered indexed-routed witnesses: the Figure 16
+component-symbol tileset tiles the plane in each layer.
+-/
+theorem tilesPlane_symbolTileSet_of_indexedRoutedLayerStack
+    {D : Transcription} {table : Figure18RoleTable}
+    (hrouted : HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack D table)
+    {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold table.presentation.toScaffold T seed))
+    (hx : ValidPlaneTiling (combineWithScaffold table.presentation.toScaffold T seed) x)
+    (layer : Layer) :
+    TilesPlane Figure16.Symbol.tileSet := by
+  apply tilesPlane_of_all_positive_doubled_tileableSquares
+  intro n hn
+  exact tileableExpandedSquares_of_indexedRoutedLayerStack hrouted x hx n hn layer
 
 /--
 Layered certificate for the direct indexed-active Figure 18 route.
