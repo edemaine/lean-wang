@@ -1640,6 +1640,77 @@ def l2Component2SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
 def l3SymbolAtSite (site : Figure18Site) : Figure16.Symbol :=
   blockEntryAtQuadrant (blackBlockAtSite site) site.quadrant
 
+/-- Figure 18 quadrant selected by a west/east and south/north offset. -/
+def quadrantOfOffset (di dj : Fin 2) : Quadrant :=
+  if dj.val = 0 then
+    if di.val = 0 then Quadrant.southwest else Quadrant.southeast
+  else
+    if di.val = 0 then Quadrant.northwest else Quadrant.northeast
+
+/--
+Whether a Figure 18 site exposes a requested Figure 16 symbol triple in the
+requested quadrant.
+-/
+def siteMatchesSymbolsBool
+    (l2c1 l2c2 l3 : Figure16.Symbol) (quadrant : Quadrant)
+    (site : Figure18Site) : Bool :=
+  decide (site.quadrant = quadrant) &&
+    decide (l2Component1SymbolAtSite site = l2c1) &&
+    decide (l2Component2SymbolAtSite site = l2c2) &&
+    decide (l3SymbolAtSite site = l3)
+
+/--
+First audited Figure 18 site exposing a requested Figure 16 symbol triple in a
+requested quadrant, if one exists.
+-/
+def siteOfSymbols?
+    (l2c1 l2c2 l3 : Figure16.Symbol) (quadrant : Quadrant) :
+    Option Figure18Site :=
+  Figure18Site.all.find? (siteMatchesSymbolsBool l2c1 l2c2 l3 quadrant)
+
+theorem siteMatchesSymbolsBool_eq_true
+    {l2c1 l2c2 l3 : Figure16.Symbol} {quadrant : Quadrant}
+    {site : Figure18Site}
+    (hmatch : siteMatchesSymbolsBool l2c1 l2c2 l3 quadrant site = true) :
+    site.quadrant = quadrant ∧
+      l2Component1SymbolAtSite site = l2c1 ∧
+      l2Component2SymbolAtSite site = l2c2 ∧
+      l3SymbolAtSite site = l3 := by
+  unfold siteMatchesSymbolsBool at hmatch
+  rw [Bool.and_eq_true, Bool.and_eq_true, Bool.and_eq_true] at hmatch
+  exact ⟨of_decide_eq_true hmatch.1.1.1,
+    of_decide_eq_true hmatch.1.1.2,
+    of_decide_eq_true hmatch.1.2,
+    of_decide_eq_true hmatch.2⟩
+
+theorem siteOfSymbols?_eq_some_quadrant
+    {l2c1 l2c2 l3 : Figure16.Symbol} {quadrant : Quadrant}
+    {site : Figure18Site}
+    (hsite : siteOfSymbols? l2c1 l2c2 l3 quadrant = some site) :
+    site.quadrant = quadrant := by
+  exact (siteMatchesSymbolsBool_eq_true (List.find?_some hsite)).1
+
+theorem siteOfSymbols?_eq_some_l2Component1
+    {l2c1 l2c2 l3 : Figure16.Symbol} {quadrant : Quadrant}
+    {site : Figure18Site}
+    (hsite : siteOfSymbols? l2c1 l2c2 l3 quadrant = some site) :
+    l2Component1SymbolAtSite site = l2c1 := by
+  exact (siteMatchesSymbolsBool_eq_true (List.find?_some hsite)).2.1
+
+theorem siteOfSymbols?_eq_some_l2Component2
+    {l2c1 l2c2 l3 : Figure16.Symbol} {quadrant : Quadrant}
+    {site : Figure18Site}
+    (hsite : siteOfSymbols? l2c1 l2c2 l3 quadrant = some site) :
+    l2Component2SymbolAtSite site = l2c2 := by
+  exact (siteMatchesSymbolsBool_eq_true (List.find?_some hsite)).2.2.1
+
+theorem siteOfSymbols?_eq_some_l3
+    {l2c1 l2c2 l3 : Figure16.Symbol} {quadrant : Quadrant}
+    {site : Figure18Site}
+    (hsite : siteOfSymbols? l2c1 l2c2 l3 quadrant = some site) :
+    l3SymbolAtSite site = l3 := by
+  exact (siteMatchesSymbolsBool_eq_true (List.find?_some hsite)).2.2.2
+
 /--
 A doubled Figure 13 site rectangle recognized by a Figure 16 substitution
 expansion.
