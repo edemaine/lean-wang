@@ -3368,6 +3368,131 @@ theorem expandedSourceSite_l3
     (expandedSourceSite?_eq_some source di dj)
 
 /--
+A jointly checked `2 × 2` Figure 18 site block realizing the Figure 16
+substitution of one source site.
+
+The independent `expandedSourceSite` decoder above proves that each requested
+symbol triple exists, but it chooses each quadrant separately.  This block-level
+target is the compatibility-aware form needed for the scaffold proof: the four
+chosen sites must both expose the requested Figure 16 symbols and glue along
+their internal Figure 18 edges.
+-/
+structure Figure16ExpandedSourceSiteBlock
+    (source : Figure18Site)
+    (target : Fin 2 → Fin 2 → Figure18Site) : Prop where
+  siteMatch : ∀ di : Fin 2, ∀ dj : Fin 2,
+    siteMatchesSymbolsBool
+      ((thinBlockAtSite source).entry di dj)
+      ((thickBlockAtSite source).entry di dj)
+      ((blackBlockAtSite source).entry di dj)
+      (quadrantOfOffset di dj)
+      (target di dj) = true
+  hWithin : ∀ dj : Fin 2,
+    Figure18Site.hCompatible
+      (target ⟨0, by decide⟩ dj)
+      (target ⟨1, by decide⟩ dj) = true
+  vWithin : ∀ di : Fin 2,
+    Figure18Site.vCompatible
+      (target di ⟨0, by decide⟩)
+      (target di ⟨1, by decide⟩) = true
+
+namespace Figure16ExpandedSourceSiteBlock
+
+/-- Finite checker for a joint `2 × 2` source-site expansion block. -/
+def matchesBool
+    (source : Figure18Site)
+    (target : Fin 2 → Fin 2 → Figure18Site) : Bool :=
+  ((List.finRange 2).all fun di =>
+    (List.finRange 2).all fun dj =>
+      siteMatchesSymbolsBool
+        ((thinBlockAtSite source).entry di dj)
+        ((thickBlockAtSite source).entry di dj)
+        ((blackBlockAtSite source).entry di dj)
+        (quadrantOfOffset di dj)
+        (target di dj)) &&
+  ((List.finRange 2).all fun dj =>
+    Figure18Site.hCompatible
+      (target ⟨0, by decide⟩ dj)
+      (target ⟨1, by decide⟩ dj)) &&
+  ((List.finRange 2).all fun di =>
+    Figure18Site.vCompatible
+      (target di ⟨0, by decide⟩)
+      (target di ⟨1, by decide⟩))
+
+theorem of_matchesBool
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hcheck : matchesBool source target = true) :
+    Figure16ExpandedSourceSiteBlock source target := by
+  unfold matchesBool at hcheck
+  rw [Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  refine ⟨?_, ?_, ?_⟩
+  · intro di dj
+    have hdi := List.all_eq_true.1 hcheck.1.1 di (List.mem_finRange di)
+    exact List.all_eq_true.1 hdi dj (List.mem_finRange dj)
+  · intro dj
+    exact List.all_eq_true.1 hcheck.1.2 dj (List.mem_finRange dj)
+  · intro di
+    exact List.all_eq_true.1 hcheck.2 di (List.mem_finRange di)
+
+theorem matchesBool_of
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hexpanded : Figure16ExpandedSourceSiteBlock source target) :
+    matchesBool source target = true := by
+  unfold matchesBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · apply List.all_eq_true.2
+    intro di _hdi
+    apply List.all_eq_true.2
+    intro dj _hdj
+    exact hexpanded.siteMatch di dj
+  · apply List.all_eq_true.2
+    intro dj _hdj
+    exact hexpanded.hWithin dj
+  · apply List.all_eq_true.2
+    intro di _hdi
+    exact hexpanded.vWithin di
+
+theorem quadrant
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hexpanded : Figure16ExpandedSourceSiteBlock source target)
+    (di dj : Fin 2) :
+    (target di dj).quadrant = quadrantOfOffset di dj :=
+  (siteMatchesSymbolsBool_eq_true (hexpanded.siteMatch di dj)).1
+
+theorem l2Component1
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hexpanded : Figure16ExpandedSourceSiteBlock source target)
+    (di dj : Fin 2) :
+    l2Component1SymbolAtSite (target di dj) =
+      (thinBlockAtSite source).entry di dj :=
+  (siteMatchesSymbolsBool_eq_true (hexpanded.siteMatch di dj)).2.1
+
+theorem l2Component2
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hexpanded : Figure16ExpandedSourceSiteBlock source target)
+    (di dj : Fin 2) :
+    l2Component2SymbolAtSite (target di dj) =
+      (thickBlockAtSite source).entry di dj :=
+  (siteMatchesSymbolsBool_eq_true (hexpanded.siteMatch di dj)).2.2.1
+
+theorem l3
+    {source : Figure18Site}
+    {target : Fin 2 → Fin 2 → Figure18Site}
+    (hexpanded : Figure16ExpandedSourceSiteBlock source target)
+    (di dj : Fin 2) :
+    l3SymbolAtSite (target di dj) =
+      (blackBlockAtSite source).entry di dj :=
+  (siteMatchesSymbolsBool_eq_true (hexpanded.siteMatch di dj)).2.2.2
+
+end Figure16ExpandedSourceSiteBlock
+
+/--
 The doubled Figure 18 site rectangle obtained by applying the Figure 16
 substitution lookup to every source site.
 -/
