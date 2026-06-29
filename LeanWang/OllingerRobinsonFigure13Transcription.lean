@@ -7717,6 +7717,21 @@ theorem
     CanonicalSiteRectRouting.ofActiveCorner hx
       (activeCorner level).1 (activeCorner level).2⟩
 
+/--
+Origin-zero indexed active/corner windows supply full canonical free-site
+rectangle routing.  This is the table-level bridge from local recognizability
+at the canonical free coordinates to Robinson Section 7 transmission routing.
+-/
+theorem
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    {table : Figure18RoleTable}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_activeCorner
+    (hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+      hwindows)
+
 end CanonicalFreeSiteRectRouting
 
 /--
@@ -8181,6 +8196,20 @@ theorem
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
     (hasFigure18RobinsonBoardCanonicalRoutingForTable_of_freeSiteRect
       hrouting)
+
+/--
+Origin-zero indexed active/corner windows supply the local Section 7 tower used
+by the finite stack checker.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_originZeroWindows
+    {table : Figure18RoleTable}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
+    (hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+      hwindows)
 
 /-- Forget the coordinate recurrence from the combined Section 7 signal target. -/
 theorem hasFigure18RobinsonBoardLevelSignalLocalCertificatesForTable_of_localCoordinateSteps
@@ -8699,6 +8728,16 @@ theorem hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_activeCorner
   hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_activeCorner
     hactiveCorner
 
+theorem hasFigure18RobinsonBoardCanonicalFreeSiteRectRouting_of_originZeroWindows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindows
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+      activeSites cornerSite :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    hwindows
+
 theorem
     hasFigure18RobinsonBoardCorridorProductWitnessRoutingForGeometryTower_of_combinedSites
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -8999,6 +9038,18 @@ theorem
         activeSites cornerSite).toRoleTable :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
     hrouting
+
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTower_of_originZeroWindows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindows
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_originZeroWindows
+    hwindows
 
 theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_canonicalRouting
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
@@ -10569,6 +10620,13 @@ def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofCanonicalFreeSiteRectRoutin
     D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRect
     hrouting
+
+def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_originZeroWindows
+    hwindows
 
 def HasRobinsonBoardRoutedFreeGridInvariant.ofSection7ObstructionRouting
     {D : Figure18ScaffoldData}
