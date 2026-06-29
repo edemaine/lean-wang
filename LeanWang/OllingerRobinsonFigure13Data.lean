@@ -12033,8 +12033,7 @@ def toFigure18RoutedCertificate
     Figure18RoutedCertificate
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).table :=
-  O.toCanonicalFreeSiteRectTranslatedPositiveBoxObligations
-    |>.toFigure18RoutedCertificate
+  O.toFigure18ScaffoldDataRoutedCertificate.toRoutedCertificate
 
 def toTowerIndexedBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}

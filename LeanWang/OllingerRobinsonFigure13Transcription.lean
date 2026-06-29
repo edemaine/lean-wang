@@ -11311,6 +11311,16 @@ def RoutedCertificate.toIndexedRoutedCertificate
     simpa [HasRealizationInvariant, scaffold, presentation, table]
       using certificate.realizes
 
+def RoutedCertificate.toRoutedCertificate
+    {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
+    Figure18RoutedCertificate D.table.toRoleTable :=
+  certificate.toIndexedRoutedCertificate.toRoutedCertificate
+
+def RoutedCertificate.toFlexibleCertificate
+    {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
+    Figure18FlexibleCertificate D.table.toRoleTable :=
+  certificate.toIndexedRoutedCertificate.toFlexibleCertificate
+
 theorem RoutedCertificate.isScaffold
     {D : Figure18ScaffoldData} (certificate : D.RoutedCertificate) :
     IsScaffold D.scaffold := by
