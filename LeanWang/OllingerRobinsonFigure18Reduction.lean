@@ -15664,6 +15664,42 @@ def l2c2FreeSiteRectCanonicalCheckedFig16BundledObligations
   ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedFigure16MacroSquares
     canonicalFreeSiteRectRouting hlevel
 
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 canonical free-site-rectangle routing and canonical checked Figure 16
@@ -15753,6 +15789,98 @@ theorem
   exact
     domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
       (l2c2FreeSiteRectCanonicalCheckedFig16BundledObligations
+        canonicalFreeSiteRectRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical free-site-rectangle routing and the corrected compatible Figure 16
+macro-square target.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_translated_obligations_position_source
+      (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+        canonicalFreeSiteRectRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical free-site-rectangle routing and the corrected compatible Figure 16
+macro-square target.
+-/
+theorem
+    domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_free_site_rect_translated_obligations_position_source
+      (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+        canonicalFreeSiteRectRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical free-site-rectangle routing and the corrected compatible Figure 16
+macro-square target.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_compatible_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
+      (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+        canonicalFreeSiteRectRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical free-site-rectangle routing and the corrected compatible Figure 16
+macro-square target.
+-/
+theorem
+    domino_problem_undecidable_l2c2_free_site_rect_compatible_fig16_position_source
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_free_site_rect_translated_obligations_position_source
+      (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
         canonicalFreeSiteRectRouting hlevel)
       h
 
