@@ -3691,6 +3691,70 @@ theorem figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_expanded
       Figure16.BlockGrid.expandedSymbol,
       checkedLayerStackOfSiteRectangle_black_blockGrid]
 
+/-- Figure 18 site-neighbor compatibility for a site rectangle. -/
+def Figure18SiteCompatibleRectangle {w h : Nat}
+    (R : SiteRectangle w h) : Prop :=
+  (∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+    Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true) ∧
+  (∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+    Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true)
+
+/-- Finite checker for Figure 18 site-neighbor compatibility. -/
+def figure18SiteCompatibleRectangleBool {w h : Nat}
+    (R : SiteRectangle w h) : Bool :=
+  ((List.finRange w).all fun i =>
+    if hi : i.val + 1 < w then
+      (List.finRange h).all fun j =>
+        Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j)
+    else
+      true) &&
+  ((List.finRange h).all fun j =>
+    if hj : j.val + 1 < h then
+      (List.finRange w).all fun i =>
+        Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩)
+    else
+      true)
+
+set_option linter.flexible false in
+theorem figure18SiteCompatibleRectangle_of_bool
+    {w h : Nat} {R : SiteRectangle w h}
+    (hcheck : figure18SiteCompatibleRectangleBool R = true) :
+    Figure18SiteCompatibleRectangle R := by
+  unfold figure18SiteCompatibleRectangleBool at hcheck
+  rw [Bool.and_eq_true] at hcheck
+  constructor
+  · intro i j hi
+    have hiCheck := List.all_eq_true.1 hcheck.1 i (List.mem_finRange i)
+    simp [hi] at hiCheck
+    exact hiCheck j
+  · intro i j hj
+    have hjCheck := List.all_eq_true.1 hcheck.2 j (List.mem_finRange j)
+    simp [hj] at hjCheck
+    exact hjCheck i
+
+set_option linter.flexible false in
+theorem figure18SiteCompatibleRectangleBool_of
+    {w h : Nat} {R : SiteRectangle w h}
+    (hcompatible : Figure18SiteCompatibleRectangle R) :
+    figure18SiteCompatibleRectangleBool R = true := by
+  unfold figure18SiteCompatibleRectangleBool
+  rw [Bool.and_eq_true]
+  constructor
+  · apply List.all_eq_true.2
+    intro i _hiMem
+    by_cases hi : i.val + 1 < w
+    · simp [hi]
+      intro j
+      exact hcompatible.1 i j hi
+    · simp [hi]
+  · apply List.all_eq_true.2
+    intro j _hjMem
+    by_cases hj : j.val + 1 < h
+    · simp [hj]
+      intro i
+      exact hcompatible.2 i j hj
+    · simp [hj]
+
 /--
 Figure 16-recognized macro-squares at every Robinson board/free-grid level.
 
@@ -3824,6 +3888,128 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoard
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
     (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
+      hlevel)
+
+/--
+Figure 16-recognized macro-squares whose targets are compatible Figure 18
+site rectangles.
+
+This is the compatibility-aware form of the Figure 16 scaffold target.  It does
+not claim that the doubled target is already aligned as raw Figure 13 macro
+tiles; it only requires the actual Figure 18 quarter-site adjacency needed for
+tiling `figure18ScaffoldTiles`.
+-/
+def HasFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ stack : LayerStackRectangle layerData source,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle source stack target ∧
+            Figure18SiteCompatibleRectangle target
+
+/--
+Finite-check version of the Figure 16-recognized compatible Figure 18
+macro-square target.
+-/
+def HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares :
+    Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ stack : LayerStackRectangle layerData source,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool stack target = true ∧
+            figure18SiteCompatibleRectangleBool target = true
+
+/--
+Canonical finite-check version of the compatible Figure 18 macro-square target.
+-/
+def HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares :
+    Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
+              true ∧
+            figure18SiteCompatibleRectangleBool target = true
+
+theorem figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_checked
+    (hlevel :
+      HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    HasFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, stack, target, hrecognized, hcompatible⟩
+  exact ⟨source, stack, target,
+    Figure16ExpandedSiteRectangle.of_matchesBool hrecognized,
+    figure18SiteCompatibleRectangle_of_bool hcompatible⟩
+
+theorem checkedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_canonical
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, hcompatible, target, hrecognized, htarget⟩
+  exact ⟨(checkedLayerStackRectangleOfSiteRectangle source).siteRectangle,
+    checkedLayerStackOfSiteRectangle source hcompatible, target,
+    hrecognized, htarget⟩
+
+theorem figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_canonicalChecked
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    HasFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares :=
+  figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_checked
+    (checkedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_canonical
+      hlevel)
+
+theorem cofinal_tileableSquares_figure18ScaffoldTiles_of_figure16RecognizedCompatible
+    (hlevel : HasFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧
+      TileableSquare figure18ScaffoldTiles m := by
+  intro n
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hlevel level with ⟨_source, _stack, target, _hrecognized,
+    hcompatible⟩
+  refine ⟨2 * RobinsonSquare.freeGridSide level, ?_, ?_⟩
+  · exact hcap.trans
+      (Nat.le_mul_of_pos_left _ (by decide : 0 < 2))
+  · exact SiteRectangle.tileableSquare_of_compatible target
+      hcompatible.1 hcompatible.2
+
+theorem tilesPlane_figure18ScaffoldTiles_of_figure16RecognizedCompatible
+    (hlevel : HasFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_of_cofinal_tileableSquares
+    (cofinal_tileableSquares_figure18ScaffoldTiles_of_figure16RecognizedCompatible
+      hlevel)
+
+theorem tilesPlane_figure18ScaffoldTiles_of_checkedFigure16RecognizedCompatible
+    (hlevel :
+      HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_figure16RecognizedCompatible
+    (figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_checked
+      hlevel)
+
+theorem tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_checkedFigure16RecognizedCompatible
+    (checkedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_canonical
       hlevel)
 
 def l2Component1BlankSiteBool (site : Figure18Site) : Bool :=

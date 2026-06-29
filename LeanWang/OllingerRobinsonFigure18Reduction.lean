@@ -15589,6 +15589,20 @@ hypothesis.
 abbrev Figure13CanonicalCheckedRecognizedMacroSquares : Prop :=
   HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
 
+/--
+Finite checked Figure 16-recognized Robinson board macro-square hypothesis for
+the corrected Figure 18 site-compatible target.
+-/
+abbrev Figure18CheckedRecognizedCompatibleMacroSquares : Prop :=
+  HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
+
+/--
+Canonical finite checked Figure 16-recognized Robinson board macro-square
+hypothesis for the corrected Figure 18 site-compatible target.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleMacroSquares : Prop :=
+  HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
+
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
     TilesPlane fig13Tiles :=
@@ -15599,6 +15613,19 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
     (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
+    (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_checkedFigure16RecognizedCompatible
+    hlevel
+
+theorem
+    tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
     hlevel
 
 open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
