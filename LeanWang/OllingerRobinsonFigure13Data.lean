@@ -5106,6 +5106,66 @@ theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
   l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
+/--
+Direct origin-zero routed certificate for the first audited L2-blank candidate.
+
+The finite Figure 13/Figure 16 pair-compatibility check is discharged by the
+candidate data; the raw Figure 13 plane tiling supplies the positive translated
+active boxes used for realization.
+-/
+def l2Component1Figure18ScaffoldDataRoutedCertificateOfOriginZeroFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    l2Component1Figure18ScaffoldData.RoutedCertificate := by
+  have boxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+  simpa [l2Component1Figure18ScaffoldData] using
+    figure18ScaffoldDataOfNatSitesRoutedCertificateOfOriginZeroPairCompatibility
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      originZeroWindows l2Component1BlankCandidatePairCompatibilityBool boxes
+
+/--
+Direct origin-zero routed certificate for the second audited L2-blank candidate.
+
+The finite Figure 13/Figure 16 pair-compatibility check is discharged by the
+candidate data; the raw Figure 13 plane tiling supplies the positive translated
+active boxes used for realization.
+-/
+def l2Component2Figure18ScaffoldDataRoutedCertificateOfOriginZeroFig13TilesPlane
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    l2Component2Figure18ScaffoldData.RoutedCertificate := by
+  have boxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+  simpa [l2Component2Figure18ScaffoldData] using
+    figure18ScaffoldDataOfNatSitesRoutedCertificateOfOriginZeroPairCompatibility
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      originZeroWindows l2Component2BlankCandidatePairCompatibilityBool boxes
+
 def figure18ScaffoldDataOfNatSitesCertificateOfWindows
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
