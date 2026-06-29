@@ -766,6 +766,16 @@ def layerData : Transcription where
 theorem layerData_rows : layerData.rows = componentRows :=
   rfl
 
+private theorem transcription_eq_of_rows_eq
+    {D E : Transcription} (hrows : D.rows = E.rows) : D = E := by
+  cases D with
+  | mk rows length_eq =>
+      cases E with
+      | mk rows' length_eq' =>
+          simp only at hrows
+          subst rows'
+          rfl
+
 theorem separateLayerRows_layerData_rows :
     separateLayerRows.layerData.rows = componentRows := by
   decide
@@ -773,6 +783,10 @@ theorem separateLayerRows_layerData_rows :
 theorem sparseLayerRows_layerData_rows :
     sparseLayerRows.layerData.rows = componentRows := by
   decide
+
+theorem sparseLayerRows_layerData :
+    sparseLayerRows.layerData = layerData :=
+  transcription_eq_of_rows_eq sparseLayerRows_layerData_rows
 
 /-- The concrete transcription keeps the raw Figure 13 tile at each index. -/
 theorem layerData_layeredTileAt_rawTile (index : Fin 92) :
@@ -1406,16 +1420,6 @@ theorem sparseRawDataOfSites_layerData_rows
       componentRows := by
   exact sparseLayerRows_layerData_rows
 
-private theorem transcription_eq_of_rows_eq
-    {D E : Transcription} (hrows : D.rows = E.rows) : D = E := by
-  cases D with
-  | mk rows length_eq =>
-      cases E with
-      | mk rows' length_eq' =>
-          simp only at hrows
-          subst rows'
-          rfl
-
 theorem sparseRawDataOfSites_layerData
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site) :
@@ -1515,6 +1519,95 @@ def thickBlockAtSite (site : Figure18Site) : Figure16.Block :=
 
 def blackBlockAtSite (site : Figure18Site) : Figure16.Block :=
   (LayerComponent.black (blackComponentAt site.index)).block
+
+theorem checkedLayerStackRectangleOfSiteRectangle_lookupBool {w h : Nat}
+    (R : SiteRectangle w h) :
+    (checkedLayerStackRectangleOfSiteRectangle R).lookupBool layerData = true := by
+  have hlookup :=
+    CheckedSparseSeparateLayerRows.lookupBool_layerData_of_layerStackRectangleMatchesBool
+      (rows := sparseLayerRows)
+      (sparseLayerRows_layerStackRectangleMatchesBool R)
+  simpa [sparseLayerRows_layerData] using hlookup
+
+/--
+Canonical compatible Figure 16 layer stack attached to a concrete Figure 13
+site rectangle.
+
+The rectangle supplies the layer components via the audited Figure 13 rows.
+The explicit compatibility proof is the finite Figure 16 neighbor check for
+the induced block grids.
+-/
+def checkedLayerStackOfSiteRectangle {w h : Nat}
+    (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true) :
+    LayerStackRectangle layerData
+      (checkedLayerStackRectangleOfSiteRectangle R).siteRectangle :=
+  ((checkedLayerStackRectangleOfSiteRectangle R).toTypedLayerStackRectangleOfChecks
+    layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool R)
+    hcompatible).toLayerStackRectangle
+
+def layerStackRectangleOfSiteRectangle {w h : Nat}
+    (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true) :
+    LayerStackRectangle layerData R := by
+  let data := checkedLayerStackRectangleOfSiteRectangle R
+  have hsite : data.siteRectangle = R :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (checkedLayerStackRectangleOfSiteRectangle_matchesSite R)
+  rw [← hsite]
+  exact checkedLayerStackOfSiteRectangle R hcompatible
+
+theorem checkedLayerStackOfSiteRectangle_thin_blockGrid {w h : Nat}
+    (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true)
+    (i : Fin w) (j : Fin h) :
+    (checkedLayerStackOfSiteRectangle R hcompatible).blockGrid .thin i j =
+      thinBlockAtSite (R i j) := by
+  simp [checkedLayerStackOfSiteRectangle,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangleOfChecks,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangle,
+    TypedLayerStackRectangle.toLayerStackRectangle, LayerStackRectangle.blockGrid,
+    TypedLayerComponentRectangle.toLayerComponentRectangle,
+    LayerComponentRectangle.blockGrid, CheckedLayerStackRectangle.thinRectangle,
+    checkedLayerStackRectangleOfSiteRectangle_thin_componentAt, thinBlockAtSite]
+
+theorem checkedLayerStackOfSiteRectangle_thick_blockGrid {w h : Nat}
+    (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true)
+    (i : Fin w) (j : Fin h) :
+    (checkedLayerStackOfSiteRectangle R hcompatible).blockGrid .thick i j =
+      thickBlockAtSite (R i j) := by
+  simp [checkedLayerStackOfSiteRectangle,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangleOfChecks,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangle,
+    TypedLayerStackRectangle.toLayerStackRectangle, LayerStackRectangle.blockGrid,
+    TypedLayerComponentRectangle.toLayerComponentRectangle,
+    LayerComponentRectangle.blockGrid, CheckedLayerStackRectangle.thickRectangle,
+    checkedLayerStackRectangleOfSiteRectangle_thick_componentAt, thickBlockAtSite]
+
+theorem checkedLayerStackOfSiteRectangle_black_blockGrid {w h : Nat}
+    (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true)
+    (i : Fin w) (j : Fin h) :
+    (checkedLayerStackOfSiteRectangle R hcompatible).blockGrid .black i j =
+      blackBlockAtSite (R i j) := by
+  simp [checkedLayerStackOfSiteRectangle,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangleOfChecks,
+    CheckedLayerStackRectangle.toTypedLayerStackRectangle,
+    TypedLayerStackRectangle.toLayerStackRectangle, LayerStackRectangle.blockGrid,
+    TypedLayerComponentRectangle.toLayerComponentRectangle,
+    LayerComponentRectangle.blockGrid, CheckedLayerStackRectangle.blackRectangle,
+    checkedLayerStackRectangleOfSiteRectangle_black_componentAt, blackBlockAtSite]
 
 /-- West/east coordinate of a Figure 18 quadrant inside a Figure 16 block. -/
 def quadrantColumn : Quadrant → Fin 2
