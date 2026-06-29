@@ -5058,6 +5058,40 @@ def HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares : Prop :=
             true,
         source.RawBoundaryCompatible
 
+/--
+Finite-check version of `HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares`.
+-/
+def HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ _hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        source.rawBoundaryCompatibleBool = true
+
+theorem canonicalCheckedFigure16SourceRawBoundary_of_bool
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, hcompatible, hraw⟩
+  exact ⟨source, hcompatible,
+    SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+
+theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, _hcompatible, hraw⟩
+  exact ⟨source, hraw⟩
+
+theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundaryBool
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
+    (canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel)
+
 theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
     (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
     HasFigure16RecognizedRobinsonBoardLevelMacroSquares := by

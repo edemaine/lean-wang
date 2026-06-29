@@ -15610,10 +15610,25 @@ stacks and raw Figure 13 boundary compatibility.
 abbrev Figure18CanonicalRawBoundaryMacroSquares : Prop :=
   HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares
 
+/-- Finite-check form of `Figure18CanonicalRawBoundaryMacroSquares`. -/
+abbrev Figure18CanonicalRawBoundaryMacroSquaresBool : Prop :=
+  HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool
+
+theorem canonicalRawBoundaryMacroSquares_of_bool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel
+
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
   canonicalCheckedFigure16RecognizedCompatible_of_sourceRawBoundary hlevel
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundaryBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
 
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
@@ -15631,6 +15646,12 @@ theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
 
 theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
     (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
