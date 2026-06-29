@@ -3325,6 +3325,92 @@ theorem expandedSourceSite?_isSome
     exact expandedSourceSite?_isSome_index_91 quadrant di dj
 
 /--
+The Figure 18 site selected for one cell of the doubled Figure 16 expansion of
+a source Figure 18 site.
+-/
+def expandedSourceSite
+    (source : Figure18Site) (di dj : Fin 2) : Figure18Site :=
+  (expandedSourceSite? source di dj).get
+    (expandedSourceSite?_isSome source di dj)
+
+theorem expandedSourceSite?_eq_some
+    (source : Figure18Site) (di dj : Fin 2) :
+    expandedSourceSite? source di dj =
+      some (expandedSourceSite source di dj) := by
+  exact (Option.some_get (expandedSourceSite?_isSome source di dj)).symm
+
+theorem expandedSourceSite_quadrant
+    (source : Figure18Site) (di dj : Fin 2) :
+    (expandedSourceSite source di dj).quadrant =
+      quadrantOfOffset di dj :=
+  expandedSourceSite?_eq_some_quadrant
+    (expandedSourceSite?_eq_some source di dj)
+
+theorem expandedSourceSite_l2Component1
+    (source : Figure18Site) (di dj : Fin 2) :
+    l2Component1SymbolAtSite (expandedSourceSite source di dj) =
+      (thinBlockAtSite source).entry di dj :=
+  expandedSourceSite?_eq_some_l2Component1
+    (expandedSourceSite?_eq_some source di dj)
+
+theorem expandedSourceSite_l2Component2
+    (source : Figure18Site) (di dj : Fin 2) :
+    l2Component2SymbolAtSite (expandedSourceSite source di dj) =
+      (thickBlockAtSite source).entry di dj :=
+  expandedSourceSite?_eq_some_l2Component2
+    (expandedSourceSite?_eq_some source di dj)
+
+theorem expandedSourceSite_l3
+    (source : Figure18Site) (di dj : Fin 2) :
+    l3SymbolAtSite (expandedSourceSite source di dj) =
+      (blackBlockAtSite source).entry di dj :=
+  expandedSourceSite?_eq_some_l3
+    (expandedSourceSite?_eq_some source di dj)
+
+/--
+The doubled Figure 18 site rectangle obtained by applying the Figure 16
+substitution lookup to every source site.
+-/
+def expandedSiteRectangleOfSiteRectangle {w h : Nat}
+    (R : SiteRectangle w h) : SiteRectangle (2 * w) (2 * h) :=
+  fun i j =>
+    expandedSourceSite
+      (R (Figure16.BlockGrid.doubledBlockCoord i)
+        (Figure16.BlockGrid.doubledBlockCoord j))
+      (Figure16.BlockGrid.doubledOffset i)
+      (Figure16.BlockGrid.doubledOffset j)
+
+theorem expandedSiteRectangleOfSiteRectangle_l2Component1 {w h : Nat}
+    (R : SiteRectangle w h) (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l2Component1SymbolAtSite (expandedSiteRectangleOfSiteRectangle R i j) =
+      (thinBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  expandedSourceSite_l2Component1 _ _ _
+
+theorem expandedSiteRectangleOfSiteRectangle_l2Component2 {w h : Nat}
+    (R : SiteRectangle w h) (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l2Component2SymbolAtSite (expandedSiteRectangleOfSiteRectangle R i j) =
+      (thickBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  expandedSourceSite_l2Component2 _ _ _
+
+theorem expandedSiteRectangleOfSiteRectangle_l3 {w h : Nat}
+    (R : SiteRectangle w h) (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l3SymbolAtSite (expandedSiteRectangleOfSiteRectangle R i j) =
+      (blackBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  expandedSourceSite_l3 _ _ _
+
+/--
 A doubled Figure 13 site rectangle recognized by a Figure 16 substitution
 expansion.
 
