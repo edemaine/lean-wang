@@ -1794,6 +1794,32 @@ def HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :=
           Figure16ExpandedSiteRectangle.matchesBool stack target = true ∧
             target.rawBoundaryCompatibleBool = true
 
+/--
+Canonical finite-check version of the Figure 16-recognized Robinson board
+macro-square target.
+
+Unlike `HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares`, this
+target does not quantify over an arbitrary layer stack.  The stack is the
+audited concrete Figure 13 layer stack attached to `source`; the first boolean
+field is exactly the finite Figure 16 neighbor-compatibility check needed to
+build that stack.
+-/
+def HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (layerStackRectangleOfSiteRectangle source hcompatible) target =
+              true ∧
+            target.rawBoundaryCompatibleBool = true
+
 theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
     (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
     HasFigure16RecognizedRobinsonBoardLevelMacroSquares := by
@@ -1802,6 +1828,23 @@ theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
   exact ⟨source, stack, target,
     Figure16ExpandedSiteRectangle.of_matchesBool hrecognized,
     SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+
+theorem checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, hcompatible, target, hrecognized, hraw⟩
+  exact ⟨source, layerStackRectangleOfSiteRectangle source hcompatible, target,
+    hrecognized, hraw⟩
+
+theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_canonicalChecked
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    HasFigure16RecognizedRobinsonBoardLevelMacroSquares :=
+  figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
+    (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
+      hlevel)
 
 /--
 Figure 16-recognized Robinson board macro-squares supply the cofinal aligned
@@ -1838,6 +1881,18 @@ theorem tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacr
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
     (figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked hlevel)
+
+/--
+Canonical finite-checked Figure 16-recognized Robinson board macro-squares
+compactly determine a raw Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
+      hlevel)
 
 def l2Component1BlankSiteBool (site : Figure18Site) : Bool :=
   decide (l2Component1SymbolAtSite site = Figure16.Symbol.blank)
