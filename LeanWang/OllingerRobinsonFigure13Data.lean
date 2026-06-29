@@ -4528,6 +4528,70 @@ theorem canonicalExpandedSourceSiteBlock
     (canonicalExpandedSourceSiteBlock_matchesBool source)
 
 /--
+The doubled Figure 18 site rectangle obtained by the canonical compatible
+source-site expansion.
+-/
+def canonicalExpandedSiteRectangleOfSiteRectangle {w h : Nat}
+    (R : SiteRectangle w h) : SiteRectangle (2 * w) (2 * h) :=
+  fun i j =>
+    canonicalExpandedSourceSite
+      (R (Figure16.BlockGrid.doubledBlockCoord i)
+        (Figure16.BlockGrid.doubledBlockCoord j))
+      (Figure16.BlockGrid.doubledOffset i)
+      (Figure16.BlockGrid.doubledOffset j)
+
+theorem canonicalExpandedSiteRectangleOfSiteRectangle_l2Component1
+    {w h : Nat} (R : SiteRectangle w h)
+    (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l2Component1SymbolAtSite
+        (canonicalExpandedSiteRectangleOfSiteRectangle R i j) =
+      (thinBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  Figure16ExpandedSourceSiteBlock.l2Component1
+    (canonicalExpandedSourceSiteBlock
+      (R (Figure16.BlockGrid.doubledBlockCoord i)
+        (Figure16.BlockGrid.doubledBlockCoord j)))
+    (Figure16.BlockGrid.doubledOffset i)
+    (Figure16.BlockGrid.doubledOffset j)
+
+theorem canonicalExpandedSiteRectangleOfSiteRectangle_l2Component2
+    {w h : Nat} (R : SiteRectangle w h)
+    (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l2Component2SymbolAtSite
+        (canonicalExpandedSiteRectangleOfSiteRectangle R i j) =
+      (thickBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  Figure16ExpandedSourceSiteBlock.l2Component2
+    (canonicalExpandedSourceSiteBlock
+      (R (Figure16.BlockGrid.doubledBlockCoord i)
+        (Figure16.BlockGrid.doubledBlockCoord j)))
+    (Figure16.BlockGrid.doubledOffset i)
+    (Figure16.BlockGrid.doubledOffset j)
+
+theorem canonicalExpandedSiteRectangleOfSiteRectangle_l3
+    {w h : Nat} (R : SiteRectangle w h)
+    (i : Fin (2 * w)) (j : Fin (2 * h)) :
+    l3SymbolAtSite
+        (canonicalExpandedSiteRectangleOfSiteRectangle R i j) =
+      (blackBlockAtSite
+        (R (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j))).entry
+        (Figure16.BlockGrid.doubledOffset i)
+        (Figure16.BlockGrid.doubledOffset j) :=
+  Figure16ExpandedSourceSiteBlock.l3
+    (canonicalExpandedSourceSiteBlock
+      (R (Figure16.BlockGrid.doubledBlockCoord i)
+        (Figure16.BlockGrid.doubledBlockCoord j)))
+    (Figure16.BlockGrid.doubledOffset i)
+    (Figure16.BlockGrid.doubledOffset j)
+
+/--
 The doubled Figure 18 site rectangle obtained by applying the Figure 16
 substitution lookup to every source site.
 -/
@@ -4723,6 +4787,42 @@ theorem figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_expanded
     intro j _hj
     apply decide_eq_true
     rw [expandedSiteRectangleOfSiteRectangle_l3,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_black_blockGrid]
+
+theorem figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_canonicalExpanded
+    {w h : Nat} (R : SiteRectangle w h)
+    (hcompatible :
+      (checkedLayerStackRectangleOfSiteRectangle R).compatibleBool layerData
+        (checkedLayerStackRectangleOfSiteRectangle_lookupBool R) = true) :
+    Figure16ExpandedSiteRectangle.matchesBool
+      (checkedLayerStackOfSiteRectangle R hcompatible)
+      (canonicalExpandedSiteRectangleOfSiteRectangle R) = true := by
+  unfold Figure16ExpandedSiteRectangle.matchesBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [canonicalExpandedSiteRectangleOfSiteRectangle_l2Component1,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_thin_blockGrid]
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [canonicalExpandedSiteRectangleOfSiteRectangle_l2Component2,
+      Figure16.BlockGrid.expandedSymbol,
+      checkedLayerStackOfSiteRectangle_thick_blockGrid]
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    apply decide_eq_true
+    rw [canonicalExpandedSiteRectangleOfSiteRectangle_l3,
       Figure16.BlockGrid.expandedSymbol,
       checkedLayerStackOfSiteRectangle_black_blockGrid]
 
