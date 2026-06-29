@@ -5101,12 +5101,87 @@ def HasCanonicalFigure16SourceRawBoundaryLevelCertificates : Prop :=
   ∀ level : Nat,
     Nonempty (CanonicalFigure16SourceRawBoundaryLevelCertificate level)
 
+/--
+Explicit finite-check form of the source/free-grid certificate target.
+
+This avoids nested dependent existentials when proving the remaining Robinson
+board construction: for each level, choose the source rectangle and prove the
+two boolean checks needed to build a level certificate.
+-/
+def HasCanonicalFigure16SourceRawBoundaryLevelChecks : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+        layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+          true ∧
+        source.rawBoundaryCompatibleBool = true
+
+theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
+    HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
+  intro level
+  rcases hlevel level with ⟨cert⟩
+  exact ⟨cert.source, cert.stackCompatible, cert.rawBoundary⟩
+
+theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
+    HasCanonicalFigure16SourceRawBoundaryLevelCertificates := by
+  intro level
+  rcases hlevel level with ⟨source, hstack, hraw⟩
+  exact ⟨{
+    source := source
+    stackCompatible := hstack
+    rawBoundary := hraw
+  }⟩
+
+theorem canonicalFigure16SourceRawBoundaryLevelChecks_iff_levelCertificates :
+    HasCanonicalFigure16SourceRawBoundaryLevelChecks ↔
+      HasCanonicalFigure16SourceRawBoundaryLevelCertificates :=
+  ⟨canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks,
+    canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates⟩
+
 theorem canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool := by
   intro level
   rcases hlevel level with ⟨cert⟩
   exact ⟨cert.source, cert.stackCompatible, cert.rawBoundary⟩
+
+theorem canonicalCheckedFigure16SourceRawBoundaryBool_of_levelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool :=
+  canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates
+    (canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks hlevel)
+
+theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_bool
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
+    HasCanonicalFigure16SourceRawBoundaryLevelCertificates := by
+  intro level
+  rcases hlevel level with ⟨source, hstack, hraw⟩
+  exact ⟨{
+    source := source
+    stackCompatible := hstack
+    rawBoundary := hraw
+  }⟩
+
+theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_bool
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
+    HasCanonicalFigure16SourceRawBoundaryLevelChecks :=
+  canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
+    (canonicalFigure16SourceRawBoundaryLevelCertificates_of_bool hlevel)
+
+theorem canonicalCheckedFigure16SourceRawBoundaryBool_iff_levelCertificates :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool ↔
+      HasCanonicalFigure16SourceRawBoundaryLevelCertificates :=
+  ⟨canonicalFigure16SourceRawBoundaryLevelCertificates_of_bool,
+    canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates⟩
+
+theorem canonicalCheckedFigure16SourceRawBoundaryBool_iff_levelChecks :
+    HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool ↔
+      HasCanonicalFigure16SourceRawBoundaryLevelChecks :=
+  ⟨canonicalFigure16SourceRawBoundaryLevelChecks_of_bool,
+    canonicalCheckedFigure16SourceRawBoundaryBool_of_levelChecks⟩
 
 theorem canonicalCheckedFigure16SourceRawBoundary_of_bool
     (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :

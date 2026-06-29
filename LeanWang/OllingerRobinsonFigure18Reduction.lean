@@ -15623,20 +15623,45 @@ certificate for each board level.
 abbrev Figure18CanonicalRawBoundaryLevelCertificates : Prop :=
   HasCanonicalFigure16SourceRawBoundaryLevelCertificates
 
+/-- Explicit finite-check form of `Figure18CanonicalRawBoundaryLevelCertificates`. -/
+abbrev Figure18CanonicalRawBoundaryLevelChecks : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryLevelChecks
+
 theorem canonicalRawBoundaryMacroSquares_of_bool
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
     Figure18CanonicalRawBoundaryMacroSquares :=
   canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel
+
+theorem canonicalRawBoundaryLevelChecks_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryLevelChecks :=
+  canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryLevelCertificates_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryLevelCertificates :=
+  canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks hlevel
 
 theorem canonicalRawBoundaryMacroSquaresBool_of_levelCertificates
     (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
     Figure18CanonicalRawBoundaryMacroSquaresBool :=
   canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates hlevel
 
+theorem canonicalRawBoundaryMacroSquaresBool_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryMacroSquaresBool :=
+  canonicalCheckedFigure16SourceRawBoundaryBool_of_levelChecks hlevel
+
 theorem canonicalRawBoundaryMacroSquares_of_levelCertificates
     (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
     Figure18CanonicalRawBoundaryMacroSquares :=
   canonicalCheckedFigure16SourceRawBoundary_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryMacroSquares_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalRawBoundaryMacroSquares_of_levelCertificates
+    (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel)
 
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
@@ -16464,6 +16489,94 @@ theorem
     domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_position_source
       section7Routing
       (canonicalRawBoundaryMacroSquares_of_levelCertificates hlevel) h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and explicit source/free-grid level
+checks for canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_level_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_level_certs_position_source
+      section7Routing
+      (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel) h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and explicit source/free-grid level
+checks for canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_level_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_raw_boundary_fig16_level_certs_position_source
+      section7Routing
+      (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel) h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and explicit source/free-grid level
+checks for canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_level_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_level_certs_position_source
+      section7Routing
+      (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel) h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and explicit source/free-grid level
+checks for canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_level_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_raw_boundary_fig16_level_certs_position_source
+      section7Routing
+      (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
