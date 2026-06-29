@@ -2693,6 +2693,21 @@ def HasRobinsonSection7ObstructionRoutingInvariant
     (D : LayeredFigure18ScaffoldData) : Prop :=
   D.scaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
 
+/--
+Origin-zero active/corner windows supply the layered Robinson Section 7
+obstruction-routing invariant.  The layer data is irrelevant to this bridge;
+it only records the finite Figure 13/Figure 16 realization checks.
+-/
+def HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    {D : LayeredFigure18ScaffoldData}
+    (hwindows : HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+      D.table) :
+    D.HasRobinsonSection7ObstructionRoutingInvariant :=
+  Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    (D := D.scaffoldData)
+    (show HasFigure18IndexedActiveCornerOriginZeroWindowsForTable D.table from
+      hwindows)
+
 theorem activeSites_eq (D : LayeredFigure18ScaffoldData) :
     D.activeSites = D.activeSiteData.sites :=
   rfl
