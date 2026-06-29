@@ -382,6 +382,19 @@ theorem subdivideTileAt_eq_iff (t u : WangTile) (q r : Quadrant) :
   · rintro ⟨rfl, rfl⟩
     rfl
 
+theorem mem_of_subdivideTileAt_mem_subdivideTileSet {T : TileSet}
+    {t : WangTile} {q : Quadrant}
+    (h : subdivideTileAt t q ∈ subdivideTileSet T) :
+    t ∈ T := by
+  rw [subdivideTileSet, List.mem_flatMap] at h
+  rcases h with ⟨u, hu, hsub⟩
+  rw [subdivideTile] at hsub
+  rcases List.mem_map.1 hsub with ⟨r, _hr, hrt⟩
+  have hpair : (u, r) = (t, q) :=
+    subdivideTileAt_pair_injective hrt
+  have hut : u = t := congrArg Prod.fst hpair
+  exact hut ▸ hu
+
 theorem subdivideTile_nodup (t : WangTile) :
     (subdivideTile t).Nodup := by
   unfold subdivideTile
@@ -416,6 +429,43 @@ theorem subdivideTileSet_nodup_of_nodup {T : TileSet}
       rw [List.nodup_cons] at hT
       exact List.Nodup.append (subdivideTile_nodup t) (ih hT.2)
         (subdivideTile_disjoint_subdivideTileSet_of_not_mem hT.1)
+
+/--
+Compress an aligned 2-by-2 subdivision boundary certificate back to the
+underlying raw Wang rectangle.
+
+This is the local form needed when a construction works with quarter-sites:
+membership of one quarter recovers membership of the raw tile, and the
+east/north macro-edge matches are read from the corresponding subdivided
+boundary edges.
+-/
+theorem validRectangle_of_subdivideTileAt_boundaries {T : TileSet}
+    {w h : Nat} (x : Rectangle w h)
+    (hmem : ∀ i : Fin w, ∀ j : Fin h,
+      subdivideTileAt (x i j) .southwest ∈ subdivideTileSet T)
+    (hh : ∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+      WangTile.HMatches
+        (subdivideTileAt (x i j) .southeast)
+        (subdivideTileAt (x ⟨i.val + 1, hi⟩ j) .southwest))
+    (hv : ∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      WangTile.VMatches
+        (subdivideTileAt (x i j) .northwest)
+        (subdivideTileAt (x i ⟨j.val + 1, hj⟩) .southwest)) :
+    ValidRectangle T x := by
+  constructor
+  · intro i j
+    exact mem_of_subdivideTileAt_mem_subdivideTileSet (hmem i j)
+  constructor
+  · intro i j hi
+    exact
+      (hMatches_subdivideTileAt_iff
+        (x i j) (x ⟨i.val + 1, hi⟩ j)
+        Quadrant.southeast Quadrant.southwest).1 (hh i j hi)
+  · intro i j hj
+    exact
+      (vMatches_subdivideTileAt_iff
+        (x i j) (x i ⟨j.val + 1, hj⟩)
+        Quadrant.northwest Quadrant.southwest).1 (hv i j hj)
 
 private def intParityBit (z : Int) : Bool :=
   z % 2 = 1

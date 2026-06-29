@@ -932,6 +932,52 @@ theorem tileableSquare_of_compatible {n : Nat} (R : SiteRectangle n n)
   ⟨R.tileRect, R.validTileRect hh hv⟩
 
 /--
+An aligned Figure 18 quarter-site rectangle compresses to a raw Figure 13
+rectangle.
+
+The hypotheses are stated only on the macro-cell east and north boundaries.
+They are the boundary matches that remain after the four quarter-sites of each
+raw Figure 13 tile have already been grouped into one cell.
+-/
+theorem validRawTileRect_of_subdivideTileAt_boundaries {w h : Nat}
+    (R : SiteRectangle w h)
+    (hh : ∀ i : Fin w, ∀ j : Fin h, ∀ hi : i.val + 1 < w,
+      WangTile.HMatches
+        (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .southeast)
+        (TileSubdivision.subdivideTileAt
+          (R.rawTileRect ⟨i.val + 1, hi⟩ j) .southwest))
+    (hv : ∀ i : Fin w, ∀ j : Fin h, ∀ hj : j.val + 1 < h,
+      WangTile.VMatches
+        (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .northwest)
+        (TileSubdivision.subdivideTileAt
+          (R.rawTileRect i ⟨j.val + 1, hj⟩) .southwest)) :
+    ValidRectangle fig13Tiles R.rawTileRect := by
+  apply TileSubdivision.validRectangle_of_subdivideTileAt_boundaries
+  · intro i j
+    apply TileSubdivision.subdivideTileAt_mem_subdivideTileSet
+    rw [R.rawTileRect_eq i j]
+    unfold fig13Tile
+    exact List.getElem_mem _
+  · exact hh
+  · exact hv
+
+/-- A square form of `validRawTileRect_of_subdivideTileAt_boundaries`. -/
+theorem tileableRawSquare_of_subdivideTileAt_boundaries {n : Nat}
+    (R : SiteRectangle n n)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      WangTile.HMatches
+        (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .southeast)
+        (TileSubdivision.subdivideTileAt
+          (R.rawTileRect ⟨i.val + 1, hi⟩ j) .southwest))
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      WangTile.VMatches
+        (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .northwest)
+        (TileSubdivision.subdivideTileAt
+          (R.rawTileRect i ⟨j.val + 1, hj⟩) .southwest)) :
+    TileableSquare fig13Tiles n :=
+  ⟨R.rawTileRect, R.validRawTileRect_of_subdivideTileAt_boundaries hh hv⟩
+
+/--
 If the Robinson-board geometry supplies compatible Figure 18 site squares of
 every side length, then the shared Figure 18 scaffold tiles tile every centered
 box.
