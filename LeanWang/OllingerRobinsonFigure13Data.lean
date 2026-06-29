@@ -1679,6 +1679,87 @@ structure Figure16ExpandedSiteRectangle
           (Figure16.BlockGrid.doubledOffset i)
           (Figure16.BlockGrid.doubledOffset j)
 
+namespace Figure16ExpandedSiteRectangle
+
+/-- Finite checker for `Figure16ExpandedSiteRectangle`. -/
+def matchesBool
+    {w h : Nat} {source : SiteRectangle w h}
+    (stack : LayerStackRectangle layerData source)
+    (target : SiteRectangle (2 * w) (2 * h)) : Bool :=
+  ((List.finRange (2 * w)).all fun i =>
+    (List.finRange (2 * h)).all fun j =>
+      decide <| l2Component1SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .thin)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j)) &&
+  ((List.finRange (2 * w)).all fun i =>
+    (List.finRange (2 * h)).all fun j =>
+      decide <| l2Component2SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .thick)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j)) &&
+  ((List.finRange (2 * w)).all fun i =>
+    (List.finRange (2 * h)).all fun j =>
+      decide <| l3SymbolAtSite (target i j) =
+        Figure16.BlockGrid.expandedSymbol (stack.blockGrid .black)
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j)
+          (Figure16.BlockGrid.doubledOffset i)
+          (Figure16.BlockGrid.doubledOffset j))
+
+theorem of_matchesBool
+    {w h : Nat} {source : SiteRectangle w h}
+    {stack : LayerStackRectangle layerData source}
+    {target : SiteRectangle (2 * w) (2 * h)}
+    (hcheck : matchesBool stack target = true) :
+    Figure16ExpandedSiteRectangle source stack target := by
+  unfold matchesBool at hcheck
+  rw [Bool.and_eq_true, Bool.and_eq_true] at hcheck
+  refine ⟨?_, ?_, ?_⟩
+  · intro i j
+    have hi := List.all_eq_true.1 hcheck.1.1 i (List.mem_finRange i)
+    have hj := List.all_eq_true.1 hi j (List.mem_finRange j)
+    exact of_decide_eq_true hj
+  · intro i j
+    have hi := List.all_eq_true.1 hcheck.1.2 i (List.mem_finRange i)
+    have hj := List.all_eq_true.1 hi j (List.mem_finRange j)
+    exact of_decide_eq_true hj
+  · intro i j
+    have hi := List.all_eq_true.1 hcheck.2 i (List.mem_finRange i)
+    have hj := List.all_eq_true.1 hi j (List.mem_finRange j)
+    exact of_decide_eq_true hj
+
+theorem matchesBool_of
+    {w h : Nat} {source : SiteRectangle w h}
+    {stack : LayerStackRectangle layerData source}
+    {target : SiteRectangle (2 * w) (2 * h)}
+    (hrecognized : Figure16ExpandedSiteRectangle source stack target) :
+    matchesBool stack target = true := by
+  unfold matchesBool
+  rw [Bool.and_eq_true, Bool.and_eq_true]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    exact decide_eq_true (hrecognized.l2Component1 i j)
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    exact decide_eq_true (hrecognized.l2Component2 i j)
+  · apply List.all_eq_true.2
+    intro i _hi
+    apply List.all_eq_true.2
+    intro j _hj
+    exact decide_eq_true (hrecognized.l3 i j)
+
+end Figure16ExpandedSiteRectangle
+
 /--
 Figure 16-recognized macro-squares at every Robinson board/free-grid level.
 
