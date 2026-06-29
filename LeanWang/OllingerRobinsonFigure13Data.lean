@@ -5121,6 +5121,20 @@ theorem l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
   l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
+theorem l2Component1PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+theorem l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+    (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
+
 theorem l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
     (hboxes :
       ∀ r : Nat, 0 < r →
@@ -5192,6 +5206,20 @@ theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
       l2Component2Figure18ScaffoldData :=
   l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
+
+theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+theorem l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+    (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane
+    (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
 
 /--
 Direct origin-zero routed certificate for the first audited L2-blank candidate.
@@ -11968,6 +11996,90 @@ def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     (by
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+def ofL2C1Figure18ScaffoldDataPositiveFig13TileableBoxes
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes hboxes)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TileableBoxes
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes hboxes)
+
+def ofL2C1Figure18ScaffoldDataPositiveFig13CofinalSquares
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hsquares :
+      ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+          hsquares)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13CofinalSquares
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hsquares :
+      ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+          hsquares)
 
 def toCanonicalSiteRectTranslatedPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
