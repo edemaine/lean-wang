@@ -4890,6 +4890,95 @@ theorem figure18SiteCompatibleRectangleBool_of
       exact hcompatible.2 i j hj
     · simp [hj]
 
+set_option maxHeartbeats 800000 in
+-- Splitting doubled-neighbor compatibility unfolds several finite Figure 13 tile definitions.
+theorem figure18SiteCompatibleRectangle_canonicalExpanded_of_rawBoundaryCompatible
+    {w h : Nat} (R : SiteRectangle w h)
+    (hrawCompat : R.RawBoundaryCompatible) :
+    Figure18SiteCompatibleRectangle
+      (canonicalExpandedSiteRectangleOfSiteRectangle R) := by
+  constructor
+  · intro i j hi
+    rcases Figure16.BlockGrid.doubledOffset_eq_zero_or_one i with hzero | hone
+    · rcases Figure16.BlockGrid.doubled_succ_of_offset_zero i hi hzero with
+        ⟨hblock, hoff⟩
+      have hoff_i : Figure16.BlockGrid.doubledOffset i = ⟨0, by decide⟩ :=
+        Fin.ext hzero
+      simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+        canonicalExpandedSourceSite, hblock, hoff, hoff_i] using
+        (canonicalExpandedSourceSiteBlock
+          (R (Figure16.BlockGrid.doubledBlockCoord i)
+            (Figure16.BlockGrid.doubledBlockCoord j))).hWithin
+          (Figure16.BlockGrid.doubledOffset j)
+    · rcases Figure16.BlockGrid.doubled_succ_of_offset_one i hi hone with
+        ⟨hb, hblock, hoff⟩
+      have hoff_i : Figure16.BlockGrid.doubledOffset i = ⟨1, by decide⟩ :=
+        Fin.ext hone
+      have hraw : WangTile.HMatches
+          (R (Figure16.BlockGrid.doubledBlockCoord i)
+            (Figure16.BlockGrid.doubledBlockCoord j)).rawTile
+          (R ⟨(Figure16.BlockGrid.doubledBlockCoord i).val + 1, hb⟩
+            (Figure16.BlockGrid.doubledBlockCoord j)).rawTile := by
+        have hsub := hrawCompat.1
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j) hb
+        simpa [SiteRectangle.rawTileRect,
+          TileSubdivision.hMatches_subdivideTileAt_iff] using hsub
+      rcases Figure16.BlockGrid.doubledOffset_eq_zero_or_one j with
+        hzero_j | hone_j
+      · have hoff_j : Figure16.BlockGrid.doubledOffset j = ⟨0, by decide⟩ :=
+          Fin.ext hzero_j
+        simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+          canonicalExpandedSourceSite, hblock, hoff, hoff_i, hoff_j,
+          quadrantOfOffset, Figure18Site.hCompatible, Figure18Site.rawTile] using
+          (decide_eq_true hraw)
+      · have hoff_j : Figure16.BlockGrid.doubledOffset j = ⟨1, by decide⟩ :=
+          Fin.ext hone_j
+        simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+          canonicalExpandedSourceSite, hblock, hoff, hoff_i, hoff_j,
+          quadrantOfOffset, Figure18Site.hCompatible, Figure18Site.rawTile] using
+          (decide_eq_true hraw)
+  · intro i j hj
+    rcases Figure16.BlockGrid.doubledOffset_eq_zero_or_one j with hzero | hone
+    · rcases Figure16.BlockGrid.doubled_succ_of_offset_zero j hj hzero with
+        ⟨hblock, hoff⟩
+      have hoff_j : Figure16.BlockGrid.doubledOffset j = ⟨0, by decide⟩ :=
+        Fin.ext hzero
+      simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+        canonicalExpandedSourceSite, hblock, hoff, hoff_j] using
+        (canonicalExpandedSourceSiteBlock
+          (R (Figure16.BlockGrid.doubledBlockCoord i)
+            (Figure16.BlockGrid.doubledBlockCoord j))).vWithin
+          (Figure16.BlockGrid.doubledOffset i)
+    · rcases Figure16.BlockGrid.doubled_succ_of_offset_one j hj hone with
+        ⟨hb, hblock, hoff⟩
+      have hoff_j : Figure16.BlockGrid.doubledOffset j = ⟨1, by decide⟩ :=
+        Fin.ext hone
+      have hraw : WangTile.VMatches
+          (R (Figure16.BlockGrid.doubledBlockCoord i)
+            (Figure16.BlockGrid.doubledBlockCoord j)).rawTile
+          (R (Figure16.BlockGrid.doubledBlockCoord i)
+            ⟨(Figure16.BlockGrid.doubledBlockCoord j).val + 1, hb⟩).rawTile := by
+        have hsub := hrawCompat.2
+          (Figure16.BlockGrid.doubledBlockCoord i)
+          (Figure16.BlockGrid.doubledBlockCoord j) hb
+        simpa [SiteRectangle.rawTileRect,
+          TileSubdivision.vMatches_subdivideTileAt_iff] using hsub
+      rcases Figure16.BlockGrid.doubledOffset_eq_zero_or_one i with
+        hzero_i | hone_i
+      · have hoff_i : Figure16.BlockGrid.doubledOffset i = ⟨0, by decide⟩ :=
+          Fin.ext hzero_i
+        simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+          canonicalExpandedSourceSite, hblock, hoff, hoff_i, hoff_j,
+          quadrantOfOffset, Figure18Site.vCompatible, Figure18Site.rawTile] using
+          (decide_eq_true hraw)
+      · have hoff_i : Figure16.BlockGrid.doubledOffset i = ⟨1, by decide⟩ :=
+          Fin.ext hone_i
+        simpa [canonicalExpandedSiteRectangleOfSiteRectangle,
+          canonicalExpandedSourceSite, hblock, hoff, hoff_i, hoff_j,
+          quadrantOfOffset, Figure18Site.vCompatible, Figure18Site.rawTile] using
+          (decide_eq_true hraw)
+
 /--
 Figure 16-recognized macro-squares at every Robinson board/free-grid level.
 
@@ -5080,6 +5169,27 @@ def HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquare
             (checkedLayerStackOfSiteRectangle source hcompatible) target =
               true ∧
             figure18SiteCompatibleRectangleBool target = true
+
+theorem canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible
+    (hlevel : ∀ level : Nat,
+      ∃ source : SiteRectangle
+        (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+        ∃ _hcompatible :
+          (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+            layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+              true,
+          source.RawBoundaryCompatible) :
+    HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, hcompatible, hraw⟩
+  refine ⟨source, hcompatible,
+    canonicalExpandedSiteRectangleOfSiteRectangle source, ?_, ?_⟩
+  · exact
+      figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_canonicalExpanded
+        source hcompatible
+  · exact figure18SiteCompatibleRectangleBool_of
+      (figure18SiteCompatibleRectangle_canonicalExpanded_of_rawBoundaryCompatible
+        source hraw)
 
 theorem figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_checked
     (hlevel :
