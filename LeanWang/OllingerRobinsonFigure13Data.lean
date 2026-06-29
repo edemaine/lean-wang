@@ -4924,6 +4924,37 @@ def figure18ScaffoldDataOfNatSitesRoutedCertificateOfOriginZeroPairCompatibility
       simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites] using
         boxes)
 
+/--
+Origin-zero active/corner windows supply Robinson Section 7 obstruction routing
+for the concrete Nat-indexed Figure 18 scaffold data.
+
+This is the theorem-facing bridge from the local origin-zero geometry to
+Robinson's board argument: obstruction signals identify the free rows and
+columns, represented here by canonical free-site-rectangle routing.
+-/
+theorem figure18ScaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonSection7ObstructionRoutingInvariant := by
+  change
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  rw [figure18ScaffoldDataOfNatSites_table,
+    ← scaffoldDataOfNatSites_table]
+  exact
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+      originZeroWindows
+
 def l2Component1Figure18ScaffoldData : Figure18ScaffoldData :=
   figure18ScaffoldDataOfNatSites
     l2Component1BlankCandidateActiveSiteSpecs
@@ -4937,6 +4968,62 @@ def l2Component2Figure18ScaffoldData : Figure18ScaffoldData :=
     l2Component2BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.northeast
     l2Component2BlankCandidateSanity.cornerIndex_valid
+
+/--
+Robinson Section 7 obstruction routing for the first audited L2-blank
+candidate, from origin-zero active/corner windows.
+-/
+theorem l2Component1Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    l2Component1Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant := by
+  change
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasRobinsonSection7ObstructionRoutingInvariant
+  exact
+    figure18ScaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroWindows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      originZeroWindows
+
+/--
+Robinson Section 7 obstruction routing for the second audited L2-blank
+candidate, from origin-zero active/corner windows.
+-/
+theorem l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    l2Component2Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant := by
+  change
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasRobinsonSection7ObstructionRoutingInvariant
+  exact
+    figure18ScaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroWindows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      originZeroWindows
 
 theorem l2Component1Figure18ScaffoldDataNoHCompatibleAllowedSitesBool :
     noGeneratedStackAllowedSiteHPairsBool
