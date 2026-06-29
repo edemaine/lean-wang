@@ -1750,6 +1750,1580 @@ theorem expandedSourceSite?_eq_some_l3
       (blackBlockAtSite source).entry di dj := by
   exact siteOfSymbols?_eq_some_l3 hsite
 
+private theorem expandedSourceSite?_isSome_index_0
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨0, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_1
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨1, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_2
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨2, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_3
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨3, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_4
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨4, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_5
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨5, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_6
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨6, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_7
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨7, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_8
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨8, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_9
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨9, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_10
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨10, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_11
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨11, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_12
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨12, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_13
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨13, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_14
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨14, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_15
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨15, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_16
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨16, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_17
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨17, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_18
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨18, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_19
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨19, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_20
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨20, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_21
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨21, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_22
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨22, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_23
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨23, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_24
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨24, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_25
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨25, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_26
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨26, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_27
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨27, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_28
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨28, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_29
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨29, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_30
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨30, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_31
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨31, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_32
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨32, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_33
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨33, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_34
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨34, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_35
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨35, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_36
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨36, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_37
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨37, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_38
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨38, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_39
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨39, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_40
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨40, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_41
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨41, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_42
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨42, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_43
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨43, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_44
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨44, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_45
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨45, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_46
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨46, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_47
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨47, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_48
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨48, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_49
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨49, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_50
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨50, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_51
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨51, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_52
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨52, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_53
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨53, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_54
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨54, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_55
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨55, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_56
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨56, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_57
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨57, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_58
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨58, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_59
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨59, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_60
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨60, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_61
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨61, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_62
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨62, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_63
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨63, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_64
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨64, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_65
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨65, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_66
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨66, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_67
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨67, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_68
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨68, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_69
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨69, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_70
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨70, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_71
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨71, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_72
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨72, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_73
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨73, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_74
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨74, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_75
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨75, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_76
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨76, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_77
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨77, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_78
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨78, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_79
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨79, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_80
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨80, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_81
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨81, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_82
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨82, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_83
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨83, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_84
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨84, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_85
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨85, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_86
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨86, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_87
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨87, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_88
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨88, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_89
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨89, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_90
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨90, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+private theorem expandedSourceSite?_isSome_index_91
+    (quadrant : Quadrant) (di dj : Fin 2) :
+    (expandedSourceSite?
+      ({ index := ⟨91, by decide⟩, quadrant := quadrant } : Figure18Site)
+      di dj).isSome = true := by
+  rcases di with ⟨di, hdi⟩
+  rcases dj with ⟨dj, hdj⟩
+  have hdi_cases : di = 0 ∨ di = 1 := by omega
+  have hdj_cases : dj = 0 ∨ dj = 1 := by omega
+  rcases hdi_cases with rfl | rfl <;>
+    rcases hdj_cases with rfl | rfl <;>
+    cases quadrant <;>
+    decide +revert
+
+/--
+Every local Figure 16 expansion cell of an audited Figure 13 site has a
+matching Figure 18 site in the transcribed table.
+-/
+theorem expandedSourceSite?_isSome
+    (source : Figure18Site) (di dj : Fin 2) :
+    (expandedSourceSite? source di dj).isSome = true := by
+  rcases source with ⟨index, quadrant⟩
+  rcases index with ⟨n, hn⟩
+  by_cases h0 : n = 0
+  · subst n
+    exact expandedSourceSite?_isSome_index_0 quadrant di dj
+  by_cases h1 : n = 1
+  · subst n
+    exact expandedSourceSite?_isSome_index_1 quadrant di dj
+  by_cases h2 : n = 2
+  · subst n
+    exact expandedSourceSite?_isSome_index_2 quadrant di dj
+  by_cases h3 : n = 3
+  · subst n
+    exact expandedSourceSite?_isSome_index_3 quadrant di dj
+  by_cases h4 : n = 4
+  · subst n
+    exact expandedSourceSite?_isSome_index_4 quadrant di dj
+  by_cases h5 : n = 5
+  · subst n
+    exact expandedSourceSite?_isSome_index_5 quadrant di dj
+  by_cases h6 : n = 6
+  · subst n
+    exact expandedSourceSite?_isSome_index_6 quadrant di dj
+  by_cases h7 : n = 7
+  · subst n
+    exact expandedSourceSite?_isSome_index_7 quadrant di dj
+  by_cases h8 : n = 8
+  · subst n
+    exact expandedSourceSite?_isSome_index_8 quadrant di dj
+  by_cases h9 : n = 9
+  · subst n
+    exact expandedSourceSite?_isSome_index_9 quadrant di dj
+  by_cases h10 : n = 10
+  · subst n
+    exact expandedSourceSite?_isSome_index_10 quadrant di dj
+  by_cases h11 : n = 11
+  · subst n
+    exact expandedSourceSite?_isSome_index_11 quadrant di dj
+  by_cases h12 : n = 12
+  · subst n
+    exact expandedSourceSite?_isSome_index_12 quadrant di dj
+  by_cases h13 : n = 13
+  · subst n
+    exact expandedSourceSite?_isSome_index_13 quadrant di dj
+  by_cases h14 : n = 14
+  · subst n
+    exact expandedSourceSite?_isSome_index_14 quadrant di dj
+  by_cases h15 : n = 15
+  · subst n
+    exact expandedSourceSite?_isSome_index_15 quadrant di dj
+  by_cases h16 : n = 16
+  · subst n
+    exact expandedSourceSite?_isSome_index_16 quadrant di dj
+  by_cases h17 : n = 17
+  · subst n
+    exact expandedSourceSite?_isSome_index_17 quadrant di dj
+  by_cases h18 : n = 18
+  · subst n
+    exact expandedSourceSite?_isSome_index_18 quadrant di dj
+  by_cases h19 : n = 19
+  · subst n
+    exact expandedSourceSite?_isSome_index_19 quadrant di dj
+  by_cases h20 : n = 20
+  · subst n
+    exact expandedSourceSite?_isSome_index_20 quadrant di dj
+  by_cases h21 : n = 21
+  · subst n
+    exact expandedSourceSite?_isSome_index_21 quadrant di dj
+  by_cases h22 : n = 22
+  · subst n
+    exact expandedSourceSite?_isSome_index_22 quadrant di dj
+  by_cases h23 : n = 23
+  · subst n
+    exact expandedSourceSite?_isSome_index_23 quadrant di dj
+  by_cases h24 : n = 24
+  · subst n
+    exact expandedSourceSite?_isSome_index_24 quadrant di dj
+  by_cases h25 : n = 25
+  · subst n
+    exact expandedSourceSite?_isSome_index_25 quadrant di dj
+  by_cases h26 : n = 26
+  · subst n
+    exact expandedSourceSite?_isSome_index_26 quadrant di dj
+  by_cases h27 : n = 27
+  · subst n
+    exact expandedSourceSite?_isSome_index_27 quadrant di dj
+  by_cases h28 : n = 28
+  · subst n
+    exact expandedSourceSite?_isSome_index_28 quadrant di dj
+  by_cases h29 : n = 29
+  · subst n
+    exact expandedSourceSite?_isSome_index_29 quadrant di dj
+  by_cases h30 : n = 30
+  · subst n
+    exact expandedSourceSite?_isSome_index_30 quadrant di dj
+  by_cases h31 : n = 31
+  · subst n
+    exact expandedSourceSite?_isSome_index_31 quadrant di dj
+  by_cases h32 : n = 32
+  · subst n
+    exact expandedSourceSite?_isSome_index_32 quadrant di dj
+  by_cases h33 : n = 33
+  · subst n
+    exact expandedSourceSite?_isSome_index_33 quadrant di dj
+  by_cases h34 : n = 34
+  · subst n
+    exact expandedSourceSite?_isSome_index_34 quadrant di dj
+  by_cases h35 : n = 35
+  · subst n
+    exact expandedSourceSite?_isSome_index_35 quadrant di dj
+  by_cases h36 : n = 36
+  · subst n
+    exact expandedSourceSite?_isSome_index_36 quadrant di dj
+  by_cases h37 : n = 37
+  · subst n
+    exact expandedSourceSite?_isSome_index_37 quadrant di dj
+  by_cases h38 : n = 38
+  · subst n
+    exact expandedSourceSite?_isSome_index_38 quadrant di dj
+  by_cases h39 : n = 39
+  · subst n
+    exact expandedSourceSite?_isSome_index_39 quadrant di dj
+  by_cases h40 : n = 40
+  · subst n
+    exact expandedSourceSite?_isSome_index_40 quadrant di dj
+  by_cases h41 : n = 41
+  · subst n
+    exact expandedSourceSite?_isSome_index_41 quadrant di dj
+  by_cases h42 : n = 42
+  · subst n
+    exact expandedSourceSite?_isSome_index_42 quadrant di dj
+  by_cases h43 : n = 43
+  · subst n
+    exact expandedSourceSite?_isSome_index_43 quadrant di dj
+  by_cases h44 : n = 44
+  · subst n
+    exact expandedSourceSite?_isSome_index_44 quadrant di dj
+  by_cases h45 : n = 45
+  · subst n
+    exact expandedSourceSite?_isSome_index_45 quadrant di dj
+  by_cases h46 : n = 46
+  · subst n
+    exact expandedSourceSite?_isSome_index_46 quadrant di dj
+  by_cases h47 : n = 47
+  · subst n
+    exact expandedSourceSite?_isSome_index_47 quadrant di dj
+  by_cases h48 : n = 48
+  · subst n
+    exact expandedSourceSite?_isSome_index_48 quadrant di dj
+  by_cases h49 : n = 49
+  · subst n
+    exact expandedSourceSite?_isSome_index_49 quadrant di dj
+  by_cases h50 : n = 50
+  · subst n
+    exact expandedSourceSite?_isSome_index_50 quadrant di dj
+  by_cases h51 : n = 51
+  · subst n
+    exact expandedSourceSite?_isSome_index_51 quadrant di dj
+  by_cases h52 : n = 52
+  · subst n
+    exact expandedSourceSite?_isSome_index_52 quadrant di dj
+  by_cases h53 : n = 53
+  · subst n
+    exact expandedSourceSite?_isSome_index_53 quadrant di dj
+  by_cases h54 : n = 54
+  · subst n
+    exact expandedSourceSite?_isSome_index_54 quadrant di dj
+  by_cases h55 : n = 55
+  · subst n
+    exact expandedSourceSite?_isSome_index_55 quadrant di dj
+  by_cases h56 : n = 56
+  · subst n
+    exact expandedSourceSite?_isSome_index_56 quadrant di dj
+  by_cases h57 : n = 57
+  · subst n
+    exact expandedSourceSite?_isSome_index_57 quadrant di dj
+  by_cases h58 : n = 58
+  · subst n
+    exact expandedSourceSite?_isSome_index_58 quadrant di dj
+  by_cases h59 : n = 59
+  · subst n
+    exact expandedSourceSite?_isSome_index_59 quadrant di dj
+  by_cases h60 : n = 60
+  · subst n
+    exact expandedSourceSite?_isSome_index_60 quadrant di dj
+  by_cases h61 : n = 61
+  · subst n
+    exact expandedSourceSite?_isSome_index_61 quadrant di dj
+  by_cases h62 : n = 62
+  · subst n
+    exact expandedSourceSite?_isSome_index_62 quadrant di dj
+  by_cases h63 : n = 63
+  · subst n
+    exact expandedSourceSite?_isSome_index_63 quadrant di dj
+  by_cases h64 : n = 64
+  · subst n
+    exact expandedSourceSite?_isSome_index_64 quadrant di dj
+  by_cases h65 : n = 65
+  · subst n
+    exact expandedSourceSite?_isSome_index_65 quadrant di dj
+  by_cases h66 : n = 66
+  · subst n
+    exact expandedSourceSite?_isSome_index_66 quadrant di dj
+  by_cases h67 : n = 67
+  · subst n
+    exact expandedSourceSite?_isSome_index_67 quadrant di dj
+  by_cases h68 : n = 68
+  · subst n
+    exact expandedSourceSite?_isSome_index_68 quadrant di dj
+  by_cases h69 : n = 69
+  · subst n
+    exact expandedSourceSite?_isSome_index_69 quadrant di dj
+  by_cases h70 : n = 70
+  · subst n
+    exact expandedSourceSite?_isSome_index_70 quadrant di dj
+  by_cases h71 : n = 71
+  · subst n
+    exact expandedSourceSite?_isSome_index_71 quadrant di dj
+  by_cases h72 : n = 72
+  · subst n
+    exact expandedSourceSite?_isSome_index_72 quadrant di dj
+  by_cases h73 : n = 73
+  · subst n
+    exact expandedSourceSite?_isSome_index_73 quadrant di dj
+  by_cases h74 : n = 74
+  · subst n
+    exact expandedSourceSite?_isSome_index_74 quadrant di dj
+  by_cases h75 : n = 75
+  · subst n
+    exact expandedSourceSite?_isSome_index_75 quadrant di dj
+  by_cases h76 : n = 76
+  · subst n
+    exact expandedSourceSite?_isSome_index_76 quadrant di dj
+  by_cases h77 : n = 77
+  · subst n
+    exact expandedSourceSite?_isSome_index_77 quadrant di dj
+  by_cases h78 : n = 78
+  · subst n
+    exact expandedSourceSite?_isSome_index_78 quadrant di dj
+  by_cases h79 : n = 79
+  · subst n
+    exact expandedSourceSite?_isSome_index_79 quadrant di dj
+  by_cases h80 : n = 80
+  · subst n
+    exact expandedSourceSite?_isSome_index_80 quadrant di dj
+  by_cases h81 : n = 81
+  · subst n
+    exact expandedSourceSite?_isSome_index_81 quadrant di dj
+  by_cases h82 : n = 82
+  · subst n
+    exact expandedSourceSite?_isSome_index_82 quadrant di dj
+  by_cases h83 : n = 83
+  · subst n
+    exact expandedSourceSite?_isSome_index_83 quadrant di dj
+  by_cases h84 : n = 84
+  · subst n
+    exact expandedSourceSite?_isSome_index_84 quadrant di dj
+  by_cases h85 : n = 85
+  · subst n
+    exact expandedSourceSite?_isSome_index_85 quadrant di dj
+  by_cases h86 : n = 86
+  · subst n
+    exact expandedSourceSite?_isSome_index_86 quadrant di dj
+  by_cases h87 : n = 87
+  · subst n
+    exact expandedSourceSite?_isSome_index_87 quadrant di dj
+  by_cases h88 : n = 88
+  · subst n
+    exact expandedSourceSite?_isSome_index_88 quadrant di dj
+  by_cases h89 : n = 89
+  · subst n
+    exact expandedSourceSite?_isSome_index_89 quadrant di dj
+  by_cases h90 : n = 90
+  · subst n
+    exact expandedSourceSite?_isSome_index_90 quadrant di dj
+  · have h91 : n = 91 := by omega
+    subst n
+    exact expandedSourceSite?_isSome_index_91 quadrant di dj
+
 /--
 A doubled Figure 13 site rectangle recognized by a Figure 16 substitution
 expansion.
