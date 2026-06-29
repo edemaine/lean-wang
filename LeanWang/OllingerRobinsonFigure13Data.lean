@@ -5117,12 +5117,73 @@ def HasCanonicalFigure16SourceRawBoundaryLevelChecks : Prop :=
           true ∧
         source.rawBoundaryCompatibleBool = true
 
+/--
+Concrete row-major checked data for one Robinson source/free-grid level.
+
+This is the finite-data form expected from a generated or human-audited
+Robinson board construction: `sites` stores the selected Figure 18 sites as
+raw tile indices and quadrants, while the two boolean fields are exactly the
+checks needed by `HasCanonicalFigure16SourceRawBoundaryLevelChecks`.
+-/
+structure CanonicalFigure16SourceRawBoundaryCheckedLevelData
+    (level : Nat) where
+  sites : CheckedNatSiteRectangle
+    (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level)
+  stackCompatible :
+    (checkedLayerStackRectangleOfSiteRectangle sites.toSiteRectangle).compatibleBool
+      layerData
+      (checkedLayerStackRectangleOfSiteRectangle_lookupBool sites.toSiteRectangle) =
+        true
+  rawBoundary : sites.toSiteRectangle.rawBoundaryCompatibleBool = true
+
+/--
+Checked-list form of the canonical source/free-grid target.
+
+Compared with `HasCanonicalFigure16SourceRawBoundaryLevelChecks`, this exposes
+the chosen source rectangles as row-major checked lists of `(tile, quadrant)`
+pairs, which is a better target for finite generation and audit.
+-/
+def HasCanonicalFigure16SourceRawBoundaryCheckedLevelData : Prop :=
+  ∀ level : Nat,
+    Nonempty (CanonicalFigure16SourceRawBoundaryCheckedLevelData level)
+
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
   intro level
   rcases hlevel level with ⟨cert⟩
   exact ⟨cert.source, cert.stackCompatible, cert.rawBoundary⟩
+
+theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_checkedLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedLevelData) :
+    HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨data.sites.toSiteRectangle, data.stackCompatible,
+    data.rawBoundary⟩
+
+theorem canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
+    HasCanonicalFigure16SourceRawBoundaryCheckedLevelData := by
+  intro level
+  rcases hlevel level with ⟨source, hstack, hraw⟩
+  let sites := source.toCheckedNatSiteRectangle
+  have hsites : sites.toSiteRectangle = source :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool source)
+  exact ⟨{
+    sites := sites
+    stackCompatible := by
+      simpa [hsites] using hstack
+    rawBoundary := by
+      simpa [hsites] using hraw
+  }⟩
+
+theorem canonicalFigure16SourceRawBoundaryLevelChecks_iff_checkedLevelData :
+    HasCanonicalFigure16SourceRawBoundaryLevelChecks ↔
+      HasCanonicalFigure16SourceRawBoundaryCheckedLevelData :=
+  ⟨canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks,
+    canonicalFigure16SourceRawBoundaryLevelChecks_of_checkedLevelData⟩
 
 theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
