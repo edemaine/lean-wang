@@ -2650,6 +2650,17 @@ def presentation (D : LayeredFigure18ScaffoldData) :
 def scaffold (D : LayeredFigure18ScaffoldData) : Scaffold :=
   D.presentation.toScaffold
 
+/--
+Robinson Section 7 obstruction-routing target for layered Figure 13 data.
+
+The layer data is used for finite Figure 13/Figure 16 realization checks; the
+board/free-row obstruction routing itself is the underlying Figure 18 scaffold
+data obligation.
+-/
+def HasRobinsonSection7ObstructionRoutingInvariant
+    (D : LayeredFigure18ScaffoldData) : Prop :=
+  D.scaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+
 theorem activeSites_eq (D : LayeredFigure18ScaffoldData) :
     D.activeSites = D.activeSiteData.sites :=
   rfl
