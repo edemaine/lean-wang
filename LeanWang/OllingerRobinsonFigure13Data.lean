@@ -5147,6 +5147,42 @@ def HasCanonicalFigure16SourceRawBoundaryCheckedLevelData : Prop :=
   ∀ level : Nat,
     Nonempty (CanonicalFigure16SourceRawBoundaryCheckedLevelData level)
 
+/--
+Shifted Robinson board-level source/free-grid checks.
+
+Robinson's first nondegenerate board has side `4^1 - 1` and `2^1 + 1`
+free rows/columns.  This target indexes those boards by `level : Nat`, using
+`level + 1` for the underlying `RobinsonSquare` scale, and therefore avoids
+the degenerate `freeGridSide 0 = 2` case.
+-/
+def HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide (level + 1))
+      (RobinsonSquare.freeGridSide (level + 1)),
+      (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+        layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+          true ∧
+        source.rawBoundaryCompatibleBool = true
+
+/-- Row-major checked data for one shifted Robinson board level. -/
+structure CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    (level : Nat) where
+  sites : CheckedNatSiteRectangle
+    (RobinsonSquare.freeGridSide (level + 1))
+    (RobinsonSquare.freeGridSide (level + 1))
+  stackCompatible :
+    (checkedLayerStackRectangleOfSiteRectangle sites.toSiteRectangle).compatibleBool
+      layerData
+      (checkedLayerStackRectangleOfSiteRectangle_lookupBool sites.toSiteRectangle) =
+        true
+  rawBoundary : sites.toSiteRectangle.rawBoundaryCompatibleBool = true
+
+/-- Checked-list form of the shifted Robinson board-level target. -/
+def HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData : Prop :=
+  ∀ level : Nat,
+    Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData level)
+
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
@@ -5184,6 +5220,37 @@ theorem canonicalFigure16SourceRawBoundaryLevelChecks_iff_checkedLevelData :
       HasCanonicalFigure16SourceRawBoundaryCheckedLevelData :=
   ⟨canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks,
     canonicalFigure16SourceRawBoundaryLevelChecks_of_checkedLevelData⟩
+
+theorem canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
+    HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨data.sites.toSiteRectangle, data.stackCompatible,
+    data.rawBoundary⟩
+
+theorem canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData := by
+  intro level
+  rcases hlevel level with ⟨source, hstack, hraw⟩
+  let sites := source.toCheckedNatSiteRectangle
+  have hsites : sites.toSiteRectangle = source :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool source)
+  exact ⟨{
+    sites := sites
+    stackCompatible := by
+      simpa [hsites] using hstack
+    rawBoundary := by
+      simpa [hsites] using hraw
+  }⟩
+
+theorem canonicalFigure16SourceRawBoundaryBoardLevelChecks_iff_checkedBoardLevelData :
+    HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks ↔
+      HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData :=
+  ⟨canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks,
+    canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData⟩
 
 theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
@@ -5368,6 +5435,46 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_alignedMacroSquares
     (alignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary hlevel)
+
+/--
+Shifted Robinson board-level source raw-boundary checks supply cofinal aligned
+raw Figure 13 macro-squares.
+
+The shift by one level matches Robinson's Section 7 count, whose first board
+has `2^1 + 1 = 3` free rows/columns.  For a requested square of side `n`, the
+board indexed by `n` has side `freeGridSide (n + 1)`, which is large enough.
+-/
+theorem alignedMacroSquares_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    HasAlignedFigure13MacroSquares := by
+  intro n
+  rcases hlevel n with ⟨source, _hcompatible, hraw⟩
+  refine ⟨RobinsonSquare.freeGridSide (n + 1), ?_, source,
+    SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+  exact Nat.le_trans (Nat.le_succ n)
+    (RobinsonSquare.self_le_freeGridSide (n + 1))
+
+/--
+Shifted Robinson board-level source raw-boundary checks compactly determine a
+raw Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Row-major checked shifted board-level data compactly determines a raw Figure 13
+plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    (canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
+      hlevel)
 
 /--
 Figure 16-recognized macro-squares whose targets are compatible Figure 18
