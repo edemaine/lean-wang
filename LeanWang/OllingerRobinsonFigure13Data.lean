@@ -5039,6 +5039,25 @@ def HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :
               true ∧
             target.rawBoundaryCompatibleBool = true
 
+/--
+Canonical source-level raw-boundary macro-square target.
+
+This is the source-side form suggested by Robinson's board/free-line argument:
+at every board level, choose a square of Figure 13 sites whose audited Figure 16
+layer stack is locally compatible and whose raw Figure 13 tile boundaries match
+across adjacent source cells.  The canonical Figure 16 expansion of such a
+source square is compatible as a Figure 18 site rectangle.
+-/
+def HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ _hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        source.RawBoundaryCompatible
+
 theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
     (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
     HasFigure16RecognizedRobinsonBoardLevelMacroSquares := by
@@ -5113,6 +5132,29 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoard
   tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
     (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
       hlevel)
+
+/--
+Canonical source raw-boundary macro-squares supply cofinal aligned raw Figure
+13 macro-squares.
+-/
+theorem alignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    HasAlignedFigure13MacroSquares := by
+  intro n
+  rcases RobinsonSquare.exists_level_with_payload_capacity n with
+    ⟨level, hcap⟩
+  rcases hlevel level with ⟨source, _hcompatible, hraw⟩
+  exact ⟨RobinsonSquare.freeGridSide level, hcap, source, hraw⟩
+
+/--
+Canonical source raw-boundary macro-squares compactly determine a raw Figure 13
+plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary hlevel)
 
 /--
 Figure 16-recognized macro-squares whose targets are compatible Figure 18
@@ -5190,6 +5232,11 @@ theorem canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible
   · exact figure18SiteCompatibleRectangleBool_of
       (figure18SiteCompatibleRectangle_canonicalExpanded_of_rawBoundaryCompatible
         source hraw)
+
+theorem canonicalCheckedFigure16RecognizedCompatible_of_sourceRawBoundary
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares :=
+  canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible hlevel
 
 theorem figure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_of_checked
     (hlevel :

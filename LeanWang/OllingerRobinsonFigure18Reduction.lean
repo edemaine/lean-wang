@@ -15608,19 +15608,12 @@ Canonical Figure 16 macro-square hypothesis using only checked source layer
 stacks and raw Figure 13 boundary compatibility.
 -/
 abbrev Figure18CanonicalRawBoundaryMacroSquares : Prop :=
-  ∀ level : Nat,
-    ∃ source : OllingerRobinson.Figure13Layers.SiteRectangle
-      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
-      ∃ _hcompatible :
-        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
-          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
-            true,
-        source.RawBoundaryCompatible
+  HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares
 
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
-  canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible hlevel
+  canonicalCheckedFigure16RecognizedCompatible_of_sourceRawBoundary hlevel
 
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
@@ -15633,6 +15626,11 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
     hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary hlevel
 
 theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
     (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
