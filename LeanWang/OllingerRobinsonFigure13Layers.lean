@@ -837,6 +837,66 @@ def RawBoundaryCompatible {w h : Nat} (R : SiteRectangle w h) : Prop :=
         (TileSubdivision.subdivideTileAt
           (R.rawTileRect i ⟨j.val + 1, hj⟩) .southwest))
 
+def rawBoundaryCompatibleBool {w h : Nat} (R : SiteRectangle w h) : Bool :=
+  ((List.finRange w).all fun i =>
+    if hi : i.val + 1 < w then
+      (List.finRange h).all fun j =>
+        decide <| WangTile.HMatches
+          (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .southeast)
+          (TileSubdivision.subdivideTileAt
+            (R.rawTileRect ⟨i.val + 1, hi⟩ j) .southwest)
+    else
+      true) &&
+  ((List.finRange h).all fun j =>
+    if hj : j.val + 1 < h then
+      (List.finRange w).all fun i =>
+        decide <| WangTile.VMatches
+          (TileSubdivision.subdivideTileAt (R.rawTileRect i j) .northwest)
+          (TileSubdivision.subdivideTileAt
+            (R.rawTileRect i ⟨j.val + 1, hj⟩) .southwest)
+    else
+      true)
+
+set_option linter.flexible false in
+theorem rawBoundaryCompatible_of_rawBoundaryCompatibleBool
+    {w h : Nat} {R : SiteRectangle w h}
+    (hcheck : R.rawBoundaryCompatibleBool = true) :
+    R.RawBoundaryCompatible := by
+  unfold rawBoundaryCompatibleBool at hcheck
+  rw [Bool.and_eq_true] at hcheck
+  constructor
+  · intro i j hi
+    have hiCheck := List.all_eq_true.1 hcheck.1 i (List.mem_finRange i)
+    simp [hi] at hiCheck
+    exact hiCheck j
+  · intro i j hj
+    have hjCheck := List.all_eq_true.1 hcheck.2 j (List.mem_finRange j)
+    simp [hj] at hjCheck
+    exact hjCheck i
+
+set_option linter.flexible false in
+theorem rawBoundaryCompatibleBool_of_rawBoundaryCompatible
+    {w h : Nat} {R : SiteRectangle w h}
+    (hcompat : R.RawBoundaryCompatible) :
+    R.rawBoundaryCompatibleBool = true := by
+  unfold rawBoundaryCompatibleBool
+  rw [Bool.and_eq_true]
+  constructor
+  · apply List.all_eq_true.2
+    intro i _hiMem
+    by_cases hi : i.val + 1 < w
+    · simp [hi]
+      intro j
+      exact hcompat.1 i j hi
+    · simp [hi]
+  · apply List.all_eq_true.2
+    intro j _hjMem
+    by_cases hj : j.val + 1 < h
+    · simp [hj]
+      intro i
+      exact hcompat.2 i j hj
+    · simp [hj]
+
 theorem tileRect_eq {w h : Nat} (R : SiteRectangle w h)
     (i : Fin w) (j : Fin h) :
     R.tileRect i j =

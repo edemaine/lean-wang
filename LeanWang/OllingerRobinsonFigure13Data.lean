@@ -1780,6 +1780,30 @@ def HasFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :=
             target.RawBoundaryCompatible
 
 /--
+Finite-check version of the Figure 16-recognized Robinson board macro-square
+target.
+-/
+def HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares : Prop :=
+  ∀ level : Nat,
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ stack : LayerStackRectangle layerData source,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool stack target = true ∧
+            target.rawBoundaryCompatibleBool = true
+
+theorem figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked
+    (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    HasFigure16RecognizedRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, stack, target, hrecognized, hraw⟩
+  exact ⟨source, stack, target,
+    Figure16ExpandedSiteRectangle.of_matchesBool hrecognized,
+    SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+
+/--
 Figure 16-recognized Robinson board macro-squares supply the cofinal aligned
 raw Figure 13 macro-square target.
 -/
@@ -1804,6 +1828,16 @@ theorem tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquare
   tilesPlane_fig13Tiles_of_alignedMacroSquares
     (alignedMacroSquares_of_figure16RecognizedRobinsonBoardLevelMacroSquares
       hlevel)
+
+/--
+Finite-checked Figure 16-recognized Robinson board macro-squares compactly
+determine a raw Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+    (figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked hlevel)
 
 def l2Component1BlankSiteBool (site : Figure18Site) : Bool :=
   decide (l2Component1SymbolAtSite site = Figure16.Symbol.blank)
