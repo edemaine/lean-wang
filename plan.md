@@ -448,11 +448,15 @@ Next implementation targets:
    local signal tower and row-major checked board levels, and the wrappers
    `*_signal_tower_board_data_position_source` and
    `*_signal_tower_board_data_interiorRows` route this package through the
-   direct pair-free signal-tower certificate.  The immediate finite target can
-   also be stated directly as `Figure18CanonicalRawBoundaryBoardLevelChecks`
-   via the wrappers `*_signal_tower_board_checks_position_source` and
-   `*_signal_tower_board_checks_interiorRows`, avoiding an early conversion to
-   row-major checked levels.  The older
+   direct pair-free signal-tower certificate.  The adjacent source raw-boundary
+   board target exposed as `Figure18CanonicalRawBoundaryBoardLevelChecks` should
+   now be treated as a diagnostic, not as the next finite target: finite
+   predicates `sourceRawBoundaryHCompatiblePairBool` and
+   `sourceRawBoundaryVCompatiblePairBool` find no horizontal or vertical
+   two-cell source witnesses when checked layer-stack compatibility is combined
+   with raw Figure 13 boundary compatibility.  This matches the Section 7
+   reading that payload neighbors are routed through free board lines rather
+   than adjacent plane coordinates.  The older
    `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations` surface remains
    as a compatibility bridge, not as the desired final scaffold target.
 5. Add the semantic-final wrappers for the row-major Section 7 geometry route

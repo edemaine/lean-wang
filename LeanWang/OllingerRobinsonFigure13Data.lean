@@ -5188,6 +5188,74 @@ def HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData : Prop :=
   ∀ level : Nat,
     Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData level)
 
+/--
+Finite diagnostic for the over-strong source raw-boundary board target: a
+horizontal two-cell source edge satisfying both checked layer-stack
+compatibility and raw Figure 13 boundary compatibility.
+-/
+def sourceRawBoundaryHCompatiblePairBool
+    (left right : Figure18Site) : Bool :=
+  let source : SiteRectangle 2 1 := fun i _ =>
+    if i.val = 0 then left else right
+  (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+    layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) &&
+    source.rawBoundaryCompatibleBool
+
+/--
+Finite diagnostic for the over-strong source raw-boundary board target: a
+vertical two-cell source edge satisfying both checked layer-stack compatibility
+and raw Figure 13 boundary compatibility.
+-/
+def sourceRawBoundaryVCompatiblePairBool
+    (lower upper : Figure18Site) : Bool :=
+  let source : SiteRectangle 1 2 := fun _ j =>
+    if j.val = 0 then lower else upper
+  (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+    layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) &&
+    source.rawBoundaryCompatibleBool
+
+/--
+All horizontal two-cell witnesses for the current source raw-boundary board
+diagnostic.
+-/
+def sourceRawBoundaryHCompatiblePairs : List (Figure18Site × Figure18Site) :=
+  Figure18Site.all.flatMap fun left =>
+    Figure18Site.all.filterMap fun right =>
+      if sourceRawBoundaryHCompatiblePairBool left right then
+        some (left, right)
+      else
+        none
+
+/--
+All vertical two-cell witnesses for the current source raw-boundary board
+diagnostic.
+-/
+def sourceRawBoundaryVCompatiblePairs : List (Figure18Site × Figure18Site) :=
+  Figure18Site.all.flatMap fun lower =>
+    Figure18Site.all.filterMap fun upper =>
+      if sourceRawBoundaryVCompatiblePairBool lower upper then
+        some (lower, upper)
+      else
+        none
+
+/--
+Boolean no-witness form of `sourceRawBoundaryHCompatiblePairs`.  This avoids
+materializing the witness list inside the reflected proof term.
+-/
+def noSourceRawBoundaryHCompatiblePairsBool : Bool :=
+  Figure18Site.all.all fun left =>
+    Figure18Site.all.all fun right =>
+      !sourceRawBoundaryHCompatiblePairBool left right
+
+/--
+Boolean no-witness form of `sourceRawBoundaryVCompatiblePairs`.  This avoids
+materializing the witness list inside the reflected proof term.
+-/
+def noSourceRawBoundaryVCompatiblePairsBool : Bool :=
+  Figure18Site.all.all fun lower =>
+    Figure18Site.all.all fun upper =>
+      !sourceRawBoundaryVCompatiblePairBool lower upper
+
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
