@@ -18326,6 +18326,30 @@ def l2c2SignalTowerDirectObligationsOfTranslatedBoxData
   ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
     data.signalLocalTower data.translatedBoxes
 
+/-- The first Section 7 package provides the routed Figure 18 certificate. -/
+def l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+    (data : L2C1RobinsonSection7Data) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  (l2c1SignalTowerDirectObligationsOfTranslatedBoxData
+    (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)).toFigure18RoutedCertificate
+
+/-- The second Section 7 package provides the routed Figure 18 certificate. -/
+def l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+    (data : L2C2RobinsonSection7Data) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  (l2c2SignalTowerDirectObligationsOfTranslatedBoxData
+    (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)).toFigure18RoutedCertificate
+
 /-- Board-level checks give the first field-based signal-tower board package. -/
 def l2c1SignalTowerBoardDataOfBoardLevelChecks
     (signalLocalTower :
@@ -19862,9 +19886,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
-      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -19878,9 +19908,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
-      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -19894,9 +19930,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
-      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -19910,9 +19952,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
-      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -19926,9 +19974,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
-      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -19942,9 +19996,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
-      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -19958,9 +20018,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
-      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -19974,9 +20040,15 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
-      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
-      hlevel h
+    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+        (l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
