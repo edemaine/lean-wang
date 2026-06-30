@@ -18388,6 +18388,50 @@ def toFigure18RoutedCertificate
   natSiteFigure18RoutedCertificateOfGeomCombinedPositiveTranslatedBoxes
     O.geomCombinedSiteRouting O.positiveTranslatedIndexedBoxes
 
+def toSignalTowerDirectTranslatedBoxObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  signalLocalTower :=
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
+        O.geomCombinedSiteRouting)
+  positiveTranslatedIndexedBoxes := O.positiveTranslatedIndexedBoxes
+
+def toL2C1SignalTowerDirectTranslatedBoxObligations
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toSignalTowerDirectTranslatedBoxObligations
+
+def toL2C2SignalTowerDirectTranslatedBoxObligations
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toSignalTowerDirectTranslatedBoxObligations
+
 def ofL2C1Figure18ScaffoldDataPositiveTranslatedBoxes
     (geomCombinedSiteRouting :
       HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
