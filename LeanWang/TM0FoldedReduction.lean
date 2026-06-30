@@ -4500,6 +4500,22 @@ def positionSourceObligationsOfPositionCodeOneRows
     hcorrect
 
 /--
+Packaged generated one-row position-code decoder and translated statement-list
+uniqueness give the generated-position source obligations.  The uniqueness
+field is carried because it is part of the source-side blocker, although the
+generated-position construction itself only needs the row decoder.
+-/
+def positionSourceObligationsOfPositionCodeOneRowsWithStatementNodup
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeOneRows hrows.rows hcorrect
+
+/--
 Primitive recursiveness of the generated bounded-interior position-code rows
 gives the generated-position source obligations.
 -/
@@ -4516,6 +4532,21 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRows
     hcorrect
 
 /--
+Packaged generated bounded-interior position-code decoder and translated
+statement-list uniqueness give the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeBoundedInteriorRows
+    hbounded.rows hcorrect
+
+/--
 Primitive recursiveness of the generated interior position-code rows gives the
 generated-position source obligations.
 -/
@@ -4530,6 +4561,21 @@ def positionSourceObligationsOfPositionCodeInteriorRows
   positionSourceObligationsOfPositionCodeBoundedInteriorRows
     (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
     hcorrect
+
+/--
+Packaged generated interior position-code decoder and translated
+statement-list uniqueness give the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeInteriorRows
+    hinterior.rows hcorrect
 
 /--
 Primitive recursiveness of the source-level position-coded descriptor decoder
