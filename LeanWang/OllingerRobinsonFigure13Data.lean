@@ -14579,6 +14579,52 @@ def ofL2C2
 
 end NatSiteRobinsonTowerIndexedBoxObligations
 
+/--
+Direct routed Figure 18 certificate from Robinson's field-based local signal
+tower and positive-radius translated active-corner boxes.
+
+This is the direct version of the Section 7 scaffold route currently used by
+the proof surface: the signal tower gives routed free grids of every requested
+payload size, and the positive translated boxes supply the realization half of
+the scaffold certificate.
+-/
+def natSiteFigure18RoutedCertificateOfSignalLocalTowerPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table where
+  routedForces :=
+    hasFigure18RoutedFixedCornerSquares_of_robinsonBoardSignalLocalTower
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+        signalLocalTower)
+  realizes := by
+    have hrealizes :
+        Figure18ScaffoldData.HasRealizationInvariant
+          (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid) :=
+      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+        translatedBoxes
+    simpa [Figure18ScaffoldData.HasRealizationInvariant,
+      figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+      LayeredFigure18ScaffoldData.scaffold,
+      LayeredFigure18ScaffoldData.presentation,
+      LayeredFigure18ScaffoldData.table,
+      LayeredFigure18ScaffoldData.flatTable,
+      Figure18ScaffoldData.scaffold,
+      Figure18ScaffoldData.presentation,
+      Figure18ScaffoldData.table] using hrealizes
+
 namespace NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
 
 def toTowerIndexedBoxObligations
@@ -14598,6 +14644,32 @@ def toTowerIndexedBoxObligations
       O.signalLocalTower)
     O.pairCompatibility
     O.positiveTranslatedIndexedBoxes
+
+def toFigure18RoutedCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    Figure18RoutedCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18RoutedCertificateOfSignalLocalTowerPositiveTranslatedBoxes
+    O.signalLocalTower
+    (by
+      intro r hr
+      simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table] using
+        O.positiveTranslatedIndexedBoxes r hr)
 
 def ofFigure18ScaffoldDataPositiveTranslatedBoxes
     {activeSiteSpecs : List (Nat × Quadrant)}

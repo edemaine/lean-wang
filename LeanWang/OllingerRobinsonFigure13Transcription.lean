@@ -10109,6 +10109,22 @@ theorem hasFigure18RoutedFixedCornerSquares_of_indexed
   rcases hindexed x hx n hn with ⟨window⟩
   exact ⟨window.toRoutedFixedCornerSquare⟩
 
+theorem hasFigure18RoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    {table : Figure18RoleTable}
+    (hgrids : HasFigure18RobinsonBoardRoutedFreeGridsForTable table) :
+    HasFigure18RoutedFixedCornerSquares table :=
+  hasFigure18RoutedFixedCornerSquares_of_indexed
+    (hasFigure18IndexedRoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+      hgrids)
+
+theorem hasFigure18RoutedFixedCornerSquares_of_robinsonBoardSignalLocalTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    HasFigure18RoutedFixedCornerSquares table :=
+  hasFigure18RoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    (hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_localTower htower)
+
 theorem forcesFixedCornerSquares_of_figure18Routed
     {table : Figure18RoleTable}
     (hrouted : HasFigure18RoutedFixedCornerSquares table) :
@@ -10124,6 +10140,23 @@ theorem forcesFixedCornerSquares_of_figure18IndexedRouted
     ForcesFixedCornerSquares table.presentation.toScaffold :=
   forcesFixedCornerSquares_of_figure18Routed
     (hasFigure18RoutedFixedCornerSquares_of_indexed hindexed)
+
+theorem forcesFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    {table : Figure18RoleTable}
+    (hgrids : HasFigure18RobinsonBoardRoutedFreeGridsForTable table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18Routed
+    (hasFigure18RoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+      hgrids)
+
+theorem forcesFixedCornerSquares_of_robinsonBoardSignalLocalTower
+    {table : Figure18RoleTable}
+    (htower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_figure18Routed
+    (hasFigure18RoutedFixedCornerSquares_of_robinsonBoardSignalLocalTower
+      htower)
 
 theorem forcesFixedCornerSquares_of_figure18AdjacentCompatible
     {table : Figure18RoleTable}
