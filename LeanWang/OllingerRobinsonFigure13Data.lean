@@ -5571,6 +5571,18 @@ theorem alignedMacroSquares_of_canonicalFigure16SourceRawBoundaryBoardLevelCheck
     (RobinsonSquare.self_le_freeGridSide (n + 1))
 
 /--
+Shifted Robinson board-level source raw-boundary checks supply the positive
+board-level aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_canonicalBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨source, _hcompatible, hraw⟩
+  exact ⟨source,
+    SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool hraw⟩
+
+/--
 Shifted Robinson board-level source raw-boundary checks compactly determine a
 raw Figure 13 plane tiling.
 -/

@@ -16495,6 +16495,26 @@ theorem robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedLevelData
   robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryLevelChecks
     (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
 
+/--
+Shifted canonical board-level raw-boundary checks supply the positive
+Robinson-board aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_canonicalBoardLevelChecks
+    hlevel
+
+/--
+Row-major shifted canonical board-level raw-boundary data supplies the positive
+Robinson-board aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+    (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+
 def l2c1GeomCombinedRawBoundaryFig16Obligations
     (geomCombinedSiteRouting :
       OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
@@ -17536,8 +17556,7 @@ Robinson Section 7 scaffold data for the first audited L2-blank candidate.
 This is the paper-shaped remaining scaffold target: the obstruction-signal
 argument supplies a coherent local tower of free rows and columns, and the
 same red-board construction supplies raw Figure 13 macro-squares aligned at
-each Robinson board level.  The older canonical raw-boundary checked-level
-package is only one way to produce the aligned macro-square field.
+each positive Robinson board level.
 -/
 structure L2C1RobinsonSection7Data : Prop where
   signalLocalTower :
@@ -17546,7 +17565,7 @@ structure L2C1RobinsonSection7Data : Prop where
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-  alignedMacroSquares : HasFigure13RobinsonBoardLevelAlignedMacroSquares
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
 Robinson Section 7 scaffold data for the second audited L2-blank candidate.
@@ -17558,7 +17577,7 @@ structure L2C2RobinsonSection7Data : Prop where
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-  alignedMacroSquares : HasFigure13RobinsonBoardLevelAlignedMacroSquares
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
 Field-based Section 7 package for the first audited L2-blank candidate.
@@ -17708,19 +17727,193 @@ def l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
     (cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
       hlevel)
 
+/--
+The first translated-box package from a local signal tower and positive
+Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+The second translated-box package from a local signal tower and positive
+Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
 /-- The first Robinson Section 7 package feeds the preferred translated-box route. -/
 def l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data
     (data : L2C1RobinsonSection7Data) :
     L2C1SignalTowerTranslatedBoxData :=
-  l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
     data.signalLocalTower data.alignedMacroSquares
 
 /-- The second Robinson Section 7 package feeds the preferred translated-box route. -/
 def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
     (data : L2C2RobinsonSection7Data) :
     L2C2SignalTowerTranslatedBoxData :=
-  l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
     data.signalLocalTower data.alignedMacroSquares
+
+/--
+Local signal-tower data and positive Robinson-board aligned macro-squares give
+the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data where
+  signalLocalTower := signalLocalTower
+  alignedMacroSquares := hlevel
+
+/--
+Local signal-tower data and positive Robinson-board aligned macro-squares give
+the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data where
+  signalLocalTower := signalLocalTower
+  alignedMacroSquares := hlevel
+
+/--
+Unshifted Robinson-board aligned macro-squares are a compatibility source for
+the first Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+Unshifted Robinson-board aligned macro-squares are a compatibility source for
+the second Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+Shifted canonical board-level checks instantiate the first paper-shaped
+Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Shifted canonical board-level checks instantiate the second paper-shaped
+Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Row-major shifted canonical board-level data instantiates the first
+paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Row-major shifted canonical board-level data instantiates the second
+paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
 
 /--
 The first translated-box package from a local signal tower and canonical
