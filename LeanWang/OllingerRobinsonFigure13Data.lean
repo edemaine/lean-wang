@@ -11217,6 +11217,46 @@ def ofLevelCompatibleLayerPatches
     realizesActiveCornerSquares_of_realizesActiveCornerBoxes
       (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches patches)
 
+/--
+Positive-indexed-box version for already-compatible Robinson level grids.
+
+The radius-zero combined patch is supplied by the scaffold corner tile, so the
+finite realization side only has to construct active-corner indexed boxes at
+positive radii.
+-/
+def ofLevelCompatiblePositiveBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatibleLayerPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid levelCompatibleRoutedFreeGrids
+    (activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
+      (by
+        simpa [LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation] using
+          Figure18RoleTable.scaffold_corner_mem
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).table)
+      hboxes_pos)
+    hcheck
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
