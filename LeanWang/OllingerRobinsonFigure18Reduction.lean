@@ -17531,6 +17531,36 @@ structure L2C2SignalTowerBoardData : Prop where
   boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
 
 /--
+Robinson Section 7 scaffold data for the first audited L2-blank candidate.
+
+This is the paper-shaped remaining scaffold target: the obstruction-signal
+argument supplies a coherent local tower of free rows and columns, and the
+same red-board construction supplies raw Figure 13 macro-squares aligned at
+each Robinson board level.  The older canonical raw-boundary checked-level
+package is only one way to produce the aligned macro-square field.
+-/
+structure L2C1RobinsonSection7Data : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  alignedMacroSquares : HasFigure13RobinsonBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 scaffold data for the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7Data : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  alignedMacroSquares : HasFigure13RobinsonBoardLevelAlignedMacroSquares
+
+/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -17677,6 +17707,20 @@ def l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
   l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
     (cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
       hlevel)
+
+/-- The first Robinson Section 7 package feeds the preferred translated-box route. -/
+def l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data
+    (data : L2C1RobinsonSection7Data) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    data.signalLocalTower data.alignedMacroSquares
+
+/-- The second Robinson Section 7 package feeds the preferred translated-box route. -/
+def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
+    (data : L2C2RobinsonSection7Data) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    data.signalLocalTower data.alignedMacroSquares
 
 /--
 The first translated-box package from a local signal tower and canonical
@@ -24024,6 +24068,62 @@ theorem
       (l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
         signalLocalTower hlevel)
       h
+
+/--
+Encoded domino undecidability from the first Robinson Section 7 scaffold
+package: a local obstruction-signal tower and board-level aligned raw Figure 13
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+    (data : L2C1RobinsonSection7Data)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
+
+/--
+Unencoded domino undecidability from the first Robinson Section 7 scaffold
+package: a local obstruction-signal tower and board-level aligned raw Figure 13
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+    (data : L2C1RobinsonSection7Data)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
+
+/--
+Encoded domino undecidability from the second Robinson Section 7 scaffold
+package: a local obstruction-signal tower and board-level aligned raw Figure 13
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+    (data : L2C2RobinsonSection7Data)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
+
+/--
+Unencoded domino undecidability from the second Robinson Section 7 scaffold
+package: a local obstruction-signal tower and board-level aligned raw Figure 13
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+    (data : L2C2RobinsonSection7Data)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
