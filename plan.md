@@ -408,6 +408,17 @@ Next implementation targets:
    scaffold-side task is to construct/prove the shifted board-level
    raw-boundary finite data (or replace that over-strong diagnostic target
    with a leaner invariant derived directly from the board/free-line proof).
+   Robinson's original Section 7 text supports the leaner board route: prove a
+   field-based local signal tower whose free rows and columns are exactly the
+   unobstructed board lines, and use a raw `TilesPlane fig13Tiles` witness to
+   supply the translated board boxes.  The reduction module now exposes this
+   shape through
+   `encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source`,
+   `domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source`,
+   and the analogous L2 component-2 wrappers; the data-layer constructors
+   `ofL2C1SignalLocalTowerFig13TilesPlane` and
+   `ofL2C2SignalLocalTowerFig13TilesPlane` recenter the translated Robinson
+   board boxes into the existing indexed-box scaffold certificate.
 4. Add the semantic-final wrappers for the row-major Section 7 geometry route
    only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
    environment.  The light wrappers build in
