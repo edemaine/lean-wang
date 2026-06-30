@@ -50,8 +50,7 @@ transcription and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
     (D : OllingerRobinson.CheckedFlexibleTranscription)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -67,8 +66,7 @@ transcription and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
     (D : OllingerRobinson.CheckedFlexibleTranscription)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
