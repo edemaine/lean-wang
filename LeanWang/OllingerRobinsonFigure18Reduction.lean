@@ -61,8 +61,7 @@ rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_position_source_interiorRows
     (I : OllingerRobinson.Figure18Instance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -79,8 +78,7 @@ rows.
 -/
 theorem domino_problem_undecidable_of_figure18_position_source_interiorRows
     (I : OllingerRobinson.Figure18Instance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -121,8 +119,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_layered_figure18_position_source_interiorRows
     (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -139,8 +136,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_layered_figure18_position_source_interiorRows
     (I : OllingerRobinson.Figure13Layers.LayeredFigure18Instance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -181,8 +177,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
     (I : OllingerRobinson.Figure18IndexedRoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -199,8 +194,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_indexed_routed_position_source_interiorRows
     (I : OllingerRobinson.Figure18IndexedRoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -241,8 +235,7 @@ interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_layered_figure18_indexed_routed_interiorRows
     (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -259,8 +252,7 @@ interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_layered_figure18_indexed_routed_position_source_interiorRows
     (I : OllingerRobinson.Figure13Layers.LayeredFigure18IndexedRoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -302,8 +294,7 @@ position-code rows.
 theorem
 encoded_domino_problem_undecidable_of_figure18_adjacent_compatible_position_source_interiorRows
     (I : OllingerRobinson.Figure18AdjacentCompatibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -320,8 +311,7 @@ interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_adjacent_compatible_position_source_interiorRows
     (I : OllingerRobinson.Figure18AdjacentCompatibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -363,8 +353,7 @@ interior position-code rows.
 theorem
 encoded_domino_problem_undecidable_of_figure18_adjacent_product_witness_position_source_interiorRows
     (I : OllingerRobinson.Figure18AdjacentProductWitnessInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -382,8 +371,7 @@ interior position-code rows.
 theorem
 domino_problem_undecidable_of_figure18_adjacent_product_witness_position_source_interiorRows
     (I : OllingerRobinson.Figure18AdjacentProductWitnessInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -424,8 +412,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_decoded_site_interiorRows
     (I : OllingerRobinson.Figure18DecodedSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -442,8 +429,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_decoded_site_interiorRows
     (I : OllingerRobinson.Figure18DecodedSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -484,8 +470,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_flat_decoded_site_interiorRows
     (I : OllingerRobinson.Figure18FlatDecodedSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -502,8 +487,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_flat_decoded_site_interiorRows
     (I : OllingerRobinson.Figure18FlatDecodedSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -541,8 +525,7 @@ scaffold instance and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_listed_active_site_interiorRows
     (I : OllingerRobinson.Figure18ListedActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -558,8 +541,7 @@ scaffold instance and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_listed_active_site_interiorRows
     (I : OllingerRobinson.Figure18ListedActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -597,8 +579,7 @@ Encoded domino undecidability from a concrete checked listed active-site Figure
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_checked_listed_active_site_interiorRows
     (I : OllingerRobinson.Figure18CheckedListedActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -614,8 +595,7 @@ Unencoded domino undecidability from a concrete checked listed active-site Figur
 -/
 theorem domino_problem_undecidable_of_figure18_checked_listed_active_site_interiorRows
     (I : OllingerRobinson.Figure18CheckedListedActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -653,8 +633,7 @@ geometric invariants, and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_scaffold_data_interiorRows
     (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -670,8 +649,7 @@ geometric invariants, and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_scaffold_data_interiorRows
     (D : OllingerRobinson.Figure18ScaffoldData) (certificate : D.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -712,8 +690,7 @@ layered geometric certificate, and the generated interior position-code rows.
 theorem encoded_domino_problem_undecidable_of_layered_figure18_scaffold_data_interiorRows
     (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData)
     (certificate : D.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -730,8 +707,7 @@ layered geometric certificate, and the generated interior position-code rows.
 theorem domino_problem_undecidable_of_layered_figure18_scaffold_data_interiorRows
     (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData)
     (certificate : D.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -775,8 +751,7 @@ theorem
     encoded_domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_interiorRows
     (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData)
     (certificate : D.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -794,8 +769,7 @@ position-code rows.
 theorem domino_problem_undecidable_of_layered_scaffold_data_indexed_routed_interiorRows
     (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData)
     (certificate : D.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -840,8 +814,7 @@ theorem encoded_domino_problem_undecidable_of_checked_raw_layered_scaffold_inter
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
     (certificate : data.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -860,8 +833,7 @@ theorem domino_problem_undecidable_of_checked_raw_layered_scaffold_interiorRows
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
     (certificate : data.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -911,8 +883,7 @@ theorem
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
     (certificate : data.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -931,8 +902,7 @@ theorem domino_problem_undecidable_of_checked_raw_indexed_routed_interiorRows
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedRawData)
     (certificate : data.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -980,8 +950,7 @@ theorem
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData)
     (certificate : data.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1000,8 +969,7 @@ theorem domino_problem_undecidable_of_checked_sparse_raw_layered_scaffold_interi
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData)
     (certificate : data.Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1051,8 +1019,7 @@ theorem
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData)
     (certificate : data.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1071,8 +1038,7 @@ theorem domino_problem_undecidable_of_checked_sparse_raw_indexed_routed_interior
     (data :
       OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData)
     (certificate : data.IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1141,8 +1107,7 @@ theorem
     (certificate :
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1167,8 +1132,7 @@ theorem domino_problem_undecidable_of_checked_sparse_sites_indexed_routed_interi
     (certificate :
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.checkedSparseScaffoldDataOfSites
         layerRows activeSiteData cornerSite).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1234,8 +1198,7 @@ theorem
     (certificate :
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
         activeSiteData cornerSite).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1259,8 +1222,7 @@ theorem
     (certificate :
       (OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.sparseRawDataOfSites
         activeSiteData cornerSite).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1342,8 +1304,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1374,8 +1335,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1458,8 +1418,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1490,8 +1449,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1571,8 +1529,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1602,8 +1559,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1685,8 +1641,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1716,8 +1671,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1799,8 +1753,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1830,8 +1783,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1913,8 +1865,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -1944,8 +1895,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2037,8 +1987,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2072,8 +2021,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2165,8 +2113,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2200,8 +2147,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2262,8 +2208,7 @@ theorem
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
       (figure18ScaffoldDataOfSites activeSiteData cornerSite).Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2286,8 +2231,7 @@ theorem
     (cornerSite : OllingerRobinson.Figure18Site)
     (certificate :
       (figure18ScaffoldDataOfSites activeSiteData cornerSite).Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2362,8 +2306,7 @@ theorem
         (figure18ScaffoldDataOfSites activeSiteData cornerSite).table.toRoleTable)
     (realizes :
       (figure18ScaffoldDataOfSites activeSiteData cornerSite).HasRealizationInvariant)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2392,8 +2335,7 @@ theorem
         (figure18ScaffoldDataOfSites activeSiteData cornerSite).table.toRoleTable)
     (realizes :
       (figure18ScaffoldDataOfSites activeSiteData cornerSite).HasRealizationInvariant)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2475,8 +2417,7 @@ theorem
       (sparseRawDataOfNatSites
         activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
         cornerIndex_valid).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2506,8 +2447,7 @@ theorem
       (sparseRawDataOfNatSites
         activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
         cornerIndex_valid).IndexedRoutedCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2664,8 +2604,7 @@ theorem
       OllingerRobinson.Figure18RoutedCertificate
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2701,8 +2640,7 @@ theorem
       OllingerRobinson.Figure18RoutedCertificate
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2810,8 +2748,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2850,8 +2787,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2958,8 +2894,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -2998,8 +2933,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3124,8 +3058,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3170,8 +3103,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3287,8 +3219,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3330,8 +3261,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3438,8 +3368,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3478,8 +3407,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3586,8 +3514,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3626,8 +3553,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3734,8 +3660,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3774,8 +3699,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3882,8 +3806,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -3922,8 +3845,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4030,8 +3952,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4070,8 +3991,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4190,8 +4110,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4234,8 +4153,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4354,8 +4272,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4398,8 +4315,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4512,8 +4428,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4554,8 +4469,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4643,8 +4557,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfFlatRoleTable table).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4676,8 +4589,7 @@ theorem
     (realizes :
       RealizesActiveCornerSquares
         (scaffoldDataOfFlatRoleTable table).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4736,8 +4648,7 @@ theorem
     encoded_domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
     (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
     (obligations : FlatRoleTableObligations table)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4760,8 +4671,7 @@ theorem
     domino_problem_undecidable_of_figure13_flat_table_obligations_interiorRows
     (table : OllingerRobinson.Figure18RoleTable.FlatRoleTable)
     (obligations : FlatRoleTableObligations table)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4830,8 +4740,7 @@ theorem
     (hpair :
       generatedStackAllowedSitePairCompatibilityBool
         table.activeSiteData table.cornerSite = true)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4857,8 +4766,7 @@ theorem
     (hpair :
       generatedStackAllowedSitePairCompatibilityBool
         table.activeSiteData table.cornerSite = true)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4927,8 +4835,7 @@ theorem
     (hfailures :
       generatedStackAllowedSitePairFailures
         table.activeSiteData table.cornerSite = [])
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4954,8 +4861,7 @@ theorem
     (hfailures :
       generatedStackAllowedSitePairFailures
         table.activeSiteData table.cornerSite = [])
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5032,8 +4938,7 @@ theorem
     (certificate :
       (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5061,8 +4966,7 @@ theorem
     (certificate :
       (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).Certificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5194,8 +5098,7 @@ theorem
     (obligations :
       NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5226,8 +5129,7 @@ theorem
     (obligations :
       NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5257,8 +5159,7 @@ theorem
     (obligations :
       NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5288,8 +5189,7 @@ theorem
     (obligations :
       NatSiteObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5390,8 +5290,7 @@ theorem
         (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
         (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
           true)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5428,8 +5327,7 @@ theorem
         (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
         (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
           true)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5530,8 +5428,7 @@ theorem
         (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
         (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
           [])
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5568,8 +5465,7 @@ theorem
         (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
         (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
           [])
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5626,8 +5522,7 @@ Nat-site scaffold certificate and the generated interior position-code rows.
 theorem
     encoded_domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_interiorRows
     (C : NatSiteScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5648,8 +5543,7 @@ Nat-site scaffold certificate and the generated interior position-code rows.
 theorem
     domino_problem_undecidable_of_figure13_nat_site_scaffold_certificate_interiorRows
     (C : NatSiteScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5705,8 +5599,7 @@ position-code rows.
 theorem
     encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
     (C : NatSiteRobinsonScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5728,8 +5621,7 @@ position-code rows.
 theorem
     domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
     (C : NatSiteRobinsonScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5774,8 +5666,7 @@ and the generated interior position-code rows.
 theorem
     encoded_domino_problem_undecidable_of_figure13_indexed_box_certificate_interiorRows
     (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5792,8 +5683,7 @@ and the generated interior position-code rows.
 theorem
     domino_problem_undecidable_of_figure13_indexed_box_certificate_interiorRows
     (C : NatSiteRobinsonIndexedBoxScaffoldCertificate)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5899,8 +5789,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5940,8 +5829,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6066,8 +5954,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6112,8 +5999,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6240,8 +6126,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6286,8 +6171,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6408,8 +6292,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6452,8 +6335,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6575,8 +6457,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6620,8 +6501,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6743,8 +6623,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6788,8 +6667,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6899,8 +6777,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -6940,8 +6817,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7186,8 +7062,7 @@ theorem
       ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7226,8 +7101,7 @@ theorem
       ∀ r : Nat, Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7297,8 +7171,7 @@ theorem
     (O : NatSiteRobinsonTowerIndexedBoxObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7323,8 +7196,7 @@ theorem
     (O : NatSiteRobinsonTowerIndexedBoxObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7426,8 +7298,7 @@ theorem encoded_domino_problem_undecidable_of_figure13_tower_pos_boxes_interiorR
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7466,8 +7337,7 @@ theorem domino_problem_undecidable_of_figure13_tower_pos_boxes_interiorRows
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7574,8 +7444,7 @@ theorem
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7614,8 +7483,7 @@ theorem
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7719,8 +7587,7 @@ theorem encoded_domino_problem_undecidable_of_figure13_signal_tower_pos_boxes_in
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7758,8 +7625,7 @@ theorem domino_problem_undecidable_of_figure13_signal_tower_pos_boxes_interiorRo
       ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7799,8 +7665,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7839,8 +7704,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7950,8 +7814,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -7991,8 +7854,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8066,8 +7928,7 @@ theorem
     (obligations :
       NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
         activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8095,8 +7956,7 @@ theorem
     (obligations :
       NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
         activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8222,8 +8082,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8266,8 +8125,7 @@ theorem
       RealizesActiveCornerSquares
         (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
           cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8341,8 +8199,7 @@ theorem
     (obligations :
       NatSiteRobinsonObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8370,8 +8227,7 @@ theorem
     (obligations :
       NatSiteRobinsonObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8445,8 +8301,7 @@ theorem
     (obligations :
       NatSiteRobinsonLevelObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8474,8 +8329,7 @@ theorem
     (obligations :
       NatSiteRobinsonLevelObligations activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8589,8 +8443,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8631,8 +8484,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8745,8 +8597,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8787,8 +8638,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8909,8 +8759,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8953,8 +8802,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9075,8 +8923,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9119,8 +8966,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9235,8 +9081,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9277,8 +9122,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9393,8 +9237,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9435,8 +9278,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9625,8 +9467,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9667,8 +9508,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9709,8 +9549,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9751,8 +9590,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9942,8 +9780,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -9985,8 +9822,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10028,8 +9864,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10071,8 +9906,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10823,8 +10657,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10858,8 +10691,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10893,8 +10725,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -10928,8 +10759,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11084,8 +10914,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11119,8 +10948,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11154,8 +10982,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11189,8 +11016,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11343,8 +11169,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11377,8 +11202,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11411,8 +11235,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11445,8 +11268,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11600,8 +11422,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11636,8 +11457,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11672,8 +11492,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11708,8 +11527,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11860,8 +11678,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11895,8 +11712,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11930,8 +11746,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -11965,8 +11780,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12120,8 +11934,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12156,8 +11969,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12192,8 +12004,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12228,8 +12039,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12322,8 +12132,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12346,8 +12155,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12370,8 +12178,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12394,8 +12201,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12486,8 +12292,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12510,8 +12315,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12534,8 +12338,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -12558,8 +12361,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -13689,8 +13491,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -13715,8 +13516,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -13741,8 +13541,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -13767,8 +13566,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15103,8 +14901,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15129,8 +14926,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15155,8 +14951,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15181,8 +14976,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15207,8 +15001,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15233,8 +15026,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15259,8 +15051,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15285,8 +15076,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15573,8 +15363,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15601,8 +15390,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15629,8 +15417,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15657,8 +15444,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15681,8 +15467,7 @@ theorem
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
         l2Component1IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15705,8 +15490,7 @@ theorem
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
         l2Component1IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15729,8 +15513,7 @@ theorem
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
         l2Component2IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -15753,8 +15536,7 @@ theorem
       OllingerRobinson.HasFigure18IndexedActiveCornerWindows
         l2Component2IndexedActiveRoleTable)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16638,8 +16420,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16668,8 +16449,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16698,8 +16478,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16728,8 +16507,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16758,8 +16536,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16788,8 +16565,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16818,8 +16594,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16848,8 +16623,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -16970,8 +16744,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17000,8 +16773,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17030,8 +16802,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17060,8 +16831,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17182,8 +16952,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17212,8 +16981,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17242,8 +17010,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17272,8 +17039,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17385,8 +17151,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17414,8 +17179,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17443,8 +17207,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17472,8 +17235,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17739,8 +17501,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17762,8 +17523,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17785,8 +17545,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17808,8 +17567,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17831,8 +17589,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17854,8 +17611,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17877,8 +17633,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -17900,8 +17655,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18051,8 +17805,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_checks_interiorRows
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18074,8 +17827,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_checks_interiorRows
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18097,8 +17849,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_checks_interiorRows
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18120,8 +17871,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_checks_interiorRows
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18143,8 +17893,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorRows
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18166,8 +17915,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_rows_interiorRows
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18189,8 +17937,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorRows
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18212,8 +17959,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_rows_interiorRows
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18241,8 +17987,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18270,8 +18015,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18299,8 +18043,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -18328,8 +18071,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19326,8 +19068,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19354,8 +19095,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19382,8 +19122,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19410,8 +19149,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19438,8 +19176,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19466,8 +19203,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19494,8 +19230,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19522,8 +19257,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19550,8 +19284,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19578,8 +19311,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19606,8 +19338,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19634,8 +19365,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20014,8 +19744,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20042,8 +19771,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20070,8 +19798,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20098,8 +19825,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20126,8 +19852,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20154,8 +19879,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20182,8 +19906,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20210,8 +19933,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20238,8 +19960,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hsquares : Figure13CofinalTileableSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20266,8 +19987,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid))
     (hsquares : Figure13CofinalTileableSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20294,8 +20014,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hsquares : Figure13CofinalTileableSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20322,8 +20041,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid))
     (hsquares : Figure13CofinalTileableSquares)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20350,8 +20068,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20378,8 +20095,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20406,8 +20122,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20434,8 +20149,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20911,8 +20625,7 @@ theorem encoded_domino_problem_undecidable_l2c1_tower_pos_boxes_interiorRows
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20944,8 +20657,7 @@ theorem domino_problem_undecidable_l2c1_tower_pos_boxes_interiorRows
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20977,8 +20689,7 @@ theorem encoded_domino_problem_undecidable_l2c2_tower_pos_boxes_interiorRows
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21010,8 +20721,7 @@ theorem domino_problem_undecidable_l2c2_tower_pos_boxes_interiorRows
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21751,8 +21461,7 @@ theorem encoded_domino_problem_undecidable_l2c1_signal_tower_pos_boxes_interiorR
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21784,8 +21493,7 @@ theorem domino_problem_undecidable_l2c1_signal_tower_pos_boxes_interiorRows
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21817,8 +21525,7 @@ theorem encoded_domino_problem_undecidable_l2c2_signal_tower_pos_boxes_interiorR
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21850,8 +21557,7 @@ theorem domino_problem_undecidable_l2c2_signal_tower_pos_boxes_interiorRows
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r))
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21877,8 +21583,7 @@ theorem encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interio
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21905,8 +21610,7 @@ theorem domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interiorRows
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21932,8 +21636,7 @@ theorem encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interio
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21960,8 +21663,7 @@ theorem domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interiorRows
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21986,8 +21688,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22010,8 +21711,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22034,8 +21734,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22058,8 +21757,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22082,8 +21780,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22107,8 +21804,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22131,8 +21827,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22156,8 +21851,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22184,8 +21878,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22214,8 +21907,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22244,8 +21936,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22274,8 +21965,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22304,8 +21994,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22334,8 +22023,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22364,8 +22052,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22394,8 +22081,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22423,8 +22109,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22453,8 +22138,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22483,8 +22167,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22513,8 +22196,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22543,8 +22225,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22573,8 +22254,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22603,8 +22283,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22633,8 +22312,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23006,8 +22684,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23042,8 +22719,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23078,8 +22754,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23114,8 +22789,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23413,8 +23087,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23452,8 +23125,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23491,8 +23163,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23530,8 +23201,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23569,8 +23239,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23608,8 +23277,7 @@ theorem
           l2Component1BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23647,8 +23315,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23686,8 +23353,7 @@ theorem
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23786,8 +23452,7 @@ theorem
     (realizes :
       (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23823,8 +23488,7 @@ theorem
     (realizes :
       (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23871,8 +23535,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_flat_active_site_interiorRows
     (I : OllingerRobinson.Figure18FlatActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23889,8 +23552,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_flat_active_site_interiorRows
     (I : OllingerRobinson.Figure18FlatActiveSiteInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23931,8 +23593,7 @@ rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_routed_position_source_interiorRows
     (I : OllingerRobinson.Figure18RoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23949,8 +23610,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_routed_position_source_interiorRows
     (I : OllingerRobinson.Figure18RoutedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -23989,8 +23649,7 @@ a flexible certificate and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
     (I : OllingerRobinson.Figure18FlexibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -24006,8 +23665,7 @@ with a flexible certificate and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
     (I : OllingerRobinson.Figure18FlexibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
