@@ -17260,6 +17260,46 @@ def ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
 
+def ofL2C1Figure18ScaffoldDataPositiveFig13TileableBoxes
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes hboxes)
+
+def ofL2C2Figure18ScaffoldDataPositiveFig13TileableBoxes
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hboxes : ∀ r : Nat, TileableBox fig13Tiles r) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFig13TileableBoxes hboxes)
+
 end NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonIndexedActiveTranslatedPositiveBoxObligations
