@@ -16338,6 +16338,22 @@ structure L2C2CheckedSignalTowerFig13BoxData : Prop where
   checkedStacks : L2C2OriginZeroCheckedStacks
   fig13Boxes : Figure13TileableBoxes
 
+/--
+Preferred origin-zero scaffold package for the first audited L2-blank
+candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
+-/
+structure L2C1OriginZeroFig13BoxData : Prop where
+  originZeroWindows : L2C1OriginZeroWindows
+  fig13Boxes : Figure13TileableBoxes
+
+/--
+Preferred origin-zero scaffold package for the second audited L2-blank
+candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
+-/
+structure L2C2OriginZeroFig13BoxData : Prop where
+  originZeroWindows : L2C2OriginZeroWindows
+  fig13Boxes : Figure13TileableBoxes
+
 /-- Finite `fig13Tiles` boxes give the plane form for the first L2 candidate. -/
 def l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
     (data : L2C1CheckedSignalTowerFig13BoxData) :
@@ -16400,6 +16416,26 @@ def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
   checkedStacks :=
     l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
   fig13Boxes := hboxes
+
+/--
+The first preferred origin-zero box package generates the checked-stack/box
+package when the older checked-stack route is needed.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1CheckedSignalTowerFig13BoxData :=
+  l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The second preferred origin-zero box package generates the checked-stack/box
+package when the older checked-stack route is needed.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2CheckedSignalTowerFig13BoxData :=
+  l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    data.originZeroWindows data.fig13Boxes
 
 /--
 The first origin-zero box constructor has the expected plane-forgetting form.
@@ -16884,6 +16920,26 @@ def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
   l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
     originZeroWindows
     (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+The first preferred origin-zero box package feeds the preferred translated-box
+package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The second preferred origin-zero box package feeds the preferred translated-box
+package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    data.originZeroWindows data.fig13Boxes
 
 /--
 The first checked-stack/plane package feeds the preferred translated-box
@@ -21889,6 +21945,58 @@ theorem
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data) h
 
 /--
+Encoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+    (data : L2C1OriginZeroFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
+
+/--
+Unencoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+    (data : L2C1OriginZeroFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
+
+/--
+Encoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+    (data : L2C2OriginZeroFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
+
+/--
+Unencoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+    (data : L2C2OriginZeroFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via the
 bundled Robinson Section 7 signal-tower/translated-board-box obligation.
 -/
@@ -23358,6 +23466,82 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
       hinterior hcorrect
 
 /--

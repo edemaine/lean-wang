@@ -466,7 +466,12 @@ Next implementation targets:
    `l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, and
    `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, so the
    remaining scaffold statement can be read as origin-zero recognizability plus
-   raw Robinson plane/box tilability.  The adjacent
+   raw Robinson plane/box tilability.  That paired assumption is also now named
+   directly by `L2C1OriginZeroFig13BoxData` and
+   `L2C2OriginZeroFig13BoxData`, with theorem wrappers
+   `*_origin_zero_fig13_box_data_position_source` and
+   `*_origin_zero_fig13_box_data_interiorRows`; these are the cleanest current
+   scaffold-facing theorem surfaces.  The adjacent
    source raw-boundary board target exposed as
    `Figure18CanonicalRawBoundaryBoardLevelChecks` should
    now be treated as a diagnostic, not as the next finite target: finite
