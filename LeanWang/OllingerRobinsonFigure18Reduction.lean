@@ -17668,6 +17668,254 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 finite origin-zero checked layer stacks, shifted source/free-grid board-level
 checks, and generated position-source obligations.
 -/
