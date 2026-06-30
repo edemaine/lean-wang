@@ -16734,6 +16734,106 @@ def l2c2SignalTowerDirectObligationsOfCheckedBoardData
     (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
 
 /--
+Field-based Section 7 board package for the first audited L2-blank candidate.
+
+This is the preferred remaining scaffold target: prove the local signal tower
+and the checked board/free-line raw Figure 13 data independently, without
+routing through origin-zero checked stacks.
+-/
+structure L2C1SignalTowerBoardData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/--
+Field-based Section 7 board package for the second audited L2-blank candidate.
+-/
+structure L2C2SignalTowerBoardData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/-- Board-level checks give the first field-based signal-tower board package. -/
+def l2c1SignalTowerBoardDataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1SignalTowerBoardData where
+  signalLocalTower := signalLocalTower
+  boardLevels :=
+    canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks
+
+/-- Board-level checks give the second field-based signal-tower board package. -/
+def l2c2SignalTowerBoardDataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2SignalTowerBoardData where
+  signalLocalTower := signalLocalTower
+  boardLevels :=
+    canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks
+
+/--
+Origin-zero windows can still feed the first field-based board package, but
+only through the local signal-tower field.
+-/
+def l2c1SignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1SignalTowerBoardData where
+  signalLocalTower :=
+    l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows can still feed the second field-based board package, but
+only through the local signal-tower field.
+-/
+def l2c2SignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2SignalTowerBoardData where
+  signalLocalTower :=
+    l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/-- Origin-zero windows and board-level checks give the first field-based package. -/
+def l2c1SignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1SignalTowerBoardData :=
+  l2c1SignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/-- Origin-zero windows and board-level checks give the second field-based package. -/
+def l2c2SignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2SignalTowerBoardData :=
+  l2c2SignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
 macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
@@ -22246,6 +22346,70 @@ theorem
       (l2c2SignalTowerDirectObligationsOfCheckedBoardData data) h
 
 /--
+Encoded domino undecidability from the first field-based Section 7 board
+package and source-position obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_position_source
+    (data : L2C1SignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      h
+
+/--
+Unencoded domino undecidability from the first field-based Section 7 board
+package and source-position obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_board_data_position_source
+    (data : L2C1SignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      h
+
+/--
+Encoded domino undecidability from the second field-based Section 7 board
+package and source-position obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_position_source
+    (data : L2C2SignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_plane_position_source
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      h
+
+/--
+Unencoded domino undecidability from the second field-based Section 7 board
+package and source-position obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_board_data_position_source
+    (data : L2C2SignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_fig13_plane_position_source
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      h
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate, using
 origin-zero active/corner windows and shifted raw-boundary Figure 16 board
 checks routed through finite Figure 13 boxes.
@@ -23751,6 +23915,90 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
       (l2c2SignalTowerDirectObligationsOfCheckedBoardData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first field-based Section 7 board
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_interiorRows
+    (data : L2C1SignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interiorRows
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first field-based Section 7 board
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_board_data_interiorRows
+    (data : L2C1SignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interiorRows
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second field-based Section 7 board
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_interiorRows
+    (data : L2C2SignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interiorRows
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second field-based Section 7 board
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_board_data_interiorRows
+    (data : L2C2SignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interiorRows
+      data.signalLocalTower
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        data.boardLevels)
       hinterior hcorrect
 
 /--

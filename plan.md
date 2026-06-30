@@ -425,10 +425,12 @@ Next implementation targets:
    `l2c2OriginZeroCheckedStacksOfOriginZeroWindows` show that origin-zero
    active/corner windows plus the audited finite compatibility tables produce
    these checked-stack hypotheses, so the checked-stack route is connected to
-   the existing origin-zero scaffold interface.  The other remaining
-   scaffold-side task is to construct/prove the shifted board-level
-   raw-boundary finite data (or replace that over-strong diagnostic target
-   with a leaner invariant derived directly from the board/free-line proof).
+   the existing origin-zero scaffold interface.  This checked-stack route is a
+   useful bridge, but not the preferred final Section 7 target.
+   The remaining scaffold-side task is to construct/prove the field-based
+   local signal tower and the shifted board-level raw-boundary/free-line finite
+   data, or replace that over-strong raw-boundary diagnostic target with a
+   leaner invariant derived directly from the board/free-line proof.
    Robinson's original Section 7 text supports the leaner board route: prove a
    field-based local signal tower whose free rows and columns are exactly the
    unobstructed board lines, and use a raw `TilesPlane fig13Tiles` witness to
@@ -440,11 +442,15 @@ Next implementation targets:
    component-2 wrappers; the data-layer constructors
    `ofL2C1SignalLocalTowerFig13TilesPlane` and
    `ofL2C2SignalLocalTowerFig13TilesPlane` recenter the translated Robinson
-   board boxes into the existing indexed-box scaffold certificate.  The same
-   hypotheses are also bundled as
-   `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations`, with
-   `*_signal_tower_translated_obligations_*` wrappers exposing the current
-   proof-facing Section 7 target as one named object.
+   board boxes into the existing indexed-box scaffold certificate.  The
+   current proof-facing board package is
+   `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData`: it stores only the
+   local signal tower and row-major checked board levels, and the wrappers
+   `*_signal_tower_board_data_position_source` and
+   `*_signal_tower_board_data_interiorRows` route this package through the
+   direct pair-free signal-tower certificate.  The older
+   `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations` surface remains
+   as a compatibility bridge, not as the desired final scaffold target.
 5. Add the semantic-final wrappers for the row-major Section 7 geometry route
    only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
    environment.  The light wrappers build in
