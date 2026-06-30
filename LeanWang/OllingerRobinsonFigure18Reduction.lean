@@ -16178,6 +16178,246 @@ theorem
       (canonicalRawBoundaryMacroSquares_of_bool hlevel)
       h
 
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
 theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
     (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
     TilesPlane figure18ScaffoldTiles :=
