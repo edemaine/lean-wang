@@ -15922,6 +15922,262 @@ theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
   tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
     (canonicalRawBoundaryMacroSquares_of_bool hlevel)
 
+def l2c1GeomCombinedRawBoundaryFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares hlevel)
+
+def l2c2GeomCombinedRawBoundaryFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares hlevel)
+
+def l2c1GeomCombinedRawBoundaryFig16BoolObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedRawBoundaryFig16Obligations geomCombinedSiteRouting
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+def l2c2GeomCombinedRawBoundaryFig16BoolObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedRawBoundaryFig16Obligations geomCombinedSiteRouting
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
 theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
     (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
     TilesPlane figure18ScaffoldTiles :=
