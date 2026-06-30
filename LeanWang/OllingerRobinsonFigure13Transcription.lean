@@ -4422,6 +4422,11 @@ structure RobinsonBoardSignalGeometry (level : Nat) : Type where
 
 namespace RobinsonBoardSignalGeometry
 
+/-- A board coordinate pair lying at the intersection of a free column and row. -/
+def IsFreeCrossing {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) (column row : Int) : Prop :=
+  geometry.isFreeColumn column ∧ geometry.isFreeRow row
+
 /-- The free columns are exactly the columns enumerated by the geometry. -/
 theorem isFreeColumn_iff_exists_freeColumnCoord
     {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
@@ -4445,6 +4450,73 @@ theorem isFreeRow_iff_exists_freeRowCoord
   · exact geometry.freeRowCoord_complete row
   · rintro ⟨j, rfl⟩
     exact geometry.freeRowCoord_free j
+
+/-- Free crossings are exactly products of the enumerated free columns and rows. -/
+theorem isFreeCrossing_iff_exists_freeCoords
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (column row : Int) :
+    geometry.IsFreeCrossing column row ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        ∃ j : Fin (RobinsonSquare.freeGridSide level),
+          geometry.freeColumnCoord i = column ∧
+            geometry.freeRowCoord j = row := by
+  constructor
+  · rintro ⟨hcolumnFree, hrowFree⟩
+    rcases geometry.freeColumnCoord_complete column hcolumnFree with
+      ⟨i, hcolumn⟩
+    rcases geometry.freeRowCoord_complete row hrowFree with ⟨j, hrow⟩
+    exact ⟨i, j, hcolumn, hrow⟩
+  · rintro ⟨i, j, hcolumn, hrow⟩
+    exact ⟨hcolumn ▸ geometry.freeColumnCoord_free i,
+      hrow ▸ geometry.freeRowCoord_free j⟩
+
+/--
+A board coordinate pair is a free crossing exactly when its whole column has no
+vertical obstruction and its whole row has no horizontal obstruction.
+-/
+theorem isFreeCrossing_iff_clearLines
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column row : Int}
+    (hcolumn : geometry.isBoardColumn column)
+    (hrow : geometry.isBoardRow row) :
+    geometry.IsFreeCrossing column row ↔
+      (∀ y : Int, geometry.isBoardRow y →
+        ¬ geometry.hasVerticalObstruction column y) ∧
+      (∀ x : Int, geometry.isBoardColumn x →
+        ¬ geometry.hasHorizontalObstruction x row) := by
+  constructor
+  · rintro ⟨hcolumnFree, hrowFree⟩
+    exact ⟨
+      (geometry.freeColumn_iff_noVerticalObstruction column hcolumn).1
+        hcolumnFree,
+      (geometry.freeRow_iff_noHorizontalObstruction row hrow).1 hrowFree⟩
+  · rintro ⟨hclearColumn, hclearRow⟩
+    exact ⟨
+      (geometry.freeColumn_iff_noVerticalObstruction column hcolumn).2
+        hclearColumn,
+      (geometry.freeRow_iff_noHorizontalObstruction row hrow).2 hclearRow⟩
+
+/-- Enumerated free-column/free-row coordinates form free crossings. -/
+theorem isFreeCrossing_freeCoord
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    geometry.IsFreeCrossing
+      (geometry.freeColumnCoord i) (geometry.freeRowCoord j) :=
+  ⟨geometry.freeColumnCoord_free i, geometry.freeRowCoord_free j⟩
+
+/-- Any free crossing has no obstruction signal through the crossing cell. -/
+theorem noObstruction_of_isFreeCrossing
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column row : Int}
+    (hcolumn : geometry.isBoardColumn column)
+    (hrow : geometry.isBoardRow row)
+    (hcross : geometry.IsFreeCrossing column row) :
+    (¬ geometry.hasHorizontalObstruction column row) ∧
+      ¬ geometry.hasVerticalObstruction column row := by
+  have hclear := (geometry.isFreeCrossing_iff_clearLines
+    hcolumn hrow).1 hcross
+  exact ⟨hclear.2 column hcolumn, hclear.1 row hrow⟩
 
 /-- A selected free row has no horizontal obstruction at any board column. -/
 theorem noHorizontalObstruction_of_freeRowCoord
