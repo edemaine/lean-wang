@@ -16442,6 +16442,56 @@ structure L2C2CheckedSignalTowerBoardData : Prop where
   boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
 
 /--
+Origin-zero windows plus row-major checked board levels give the first checked
+signal-tower board package.  The checked stacks are generated from the audited
+finite compatibility table.
+-/
+def l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1CheckedSignalTowerBoardData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows plus row-major checked board levels give the second checked
+signal-tower board package.
+-/
+def l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2CheckedSignalTowerBoardData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows plus board-level checks give the first checked signal-tower
+board package, using the row-major checked-data constructor for the board
+levels.
+-/
+def l2c1CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1CheckedSignalTowerBoardData :=
+  l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
+Origin-zero windows plus board-level checks give the second checked
+signal-tower board package.
+-/
+def l2c2CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2CheckedSignalTowerBoardData :=
+  l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
 The checked board-level diagnostic package gives the cleaner checked
 signal-tower/`fig13Tiles` finite-box package for the first L2 candidate.
 -/
@@ -16464,6 +16514,38 @@ def l2c2CheckedSignalTowerFig13BoxDataOfBoardData
   fig13Boxes :=
     tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
       data.boardLevels
+
+/--
+For the first L2 candidate, forgetting origin-zero board data to Figure 13 boxes
+agrees with the direct origin-zero box constructor.
+-/
+theorem l2c1CheckedSignalTowerFig13BoxDataOfBoardData_originZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) =
+      l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+        originZeroWindows
+        (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+          boardLevels) :=
+  rfl
+
+/--
+For the second L2 candidate, forgetting origin-zero board data to Figure 13
+boxes agrees with the direct origin-zero box constructor.
+-/
+theorem l2c2CheckedSignalTowerFig13BoxDataOfBoardData_originZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) =
+      l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+        originZeroWindows
+        (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+          boardLevels) :=
+  rfl
 
 /--
 The first checked signal-tower board package is exactly a Robinson Section 7
