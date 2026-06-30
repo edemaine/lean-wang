@@ -5154,6 +5154,11 @@ Robinson's first nondegenerate board has side `4^1 - 1` and `2^1 + 1`
 free rows/columns.  This target indexes those boards by `level : Nat`, using
 `level + 1` for the underlying `RobinsonSquare` scale, and therefore avoids
 the degenerate `freeGridSide 0 = 2` case.
+
+This remains an over-strong diagnostic target: it asks the Figure 16 source
+components themselves to form a compatible source stack.  The Section 7
+construction should instead be proved through the board/free-line invariant and
+the expanded Figure 13 board data it induces.
 -/
 def HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks : Prop :=
   ∀ level : Nat,
@@ -5182,21 +5187,6 @@ structure CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
 def HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData : Prop :=
   ∀ level : Nat,
     Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData level)
-
-/--
-Recursive constructor for shifted Robinson board-level checked data.
-
-This matches Robinson's Section 7 board count: prove the first nondegenerate
-board (`level = 0`, with `freeGridSide 1 = 3`), then extend one board level at
-a time.
--/
-structure CanonicalFigure16SourceRawBoundaryCheckedBoardRecurrence : Prop where
-  base : Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData 0)
-  step :
-    ∀ level : Nat,
-      CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData level →
-        Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
-          (level + 1))
 
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
@@ -5266,24 +5256,6 @@ theorem canonicalFigure16SourceRawBoundaryBoardLevelChecks_iff_checkedBoardLevel
       HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData :=
   ⟨canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks,
     canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData⟩
-
-theorem canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_recurrence
-    (hrec : CanonicalFigure16SourceRawBoundaryCheckedBoardRecurrence) :
-    HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData := by
-  intro level
-  induction level with
-  | zero =>
-      exact hrec.base
-  | succ level ih =>
-      rcases ih with ⟨data⟩
-      exact hrec.step level data
-
-theorem canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_recurrence
-    (hrec : CanonicalFigure16SourceRawBoundaryCheckedBoardRecurrence) :
-    HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks :=
-  canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
-    (canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_recurrence
-      hrec)
 
 theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
@@ -5508,17 +5480,6 @@ theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardL
   tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
     (canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
       hlevel)
-
-/--
-Recursive shifted board-level checked data compactly determines a raw Figure 13
-plane tiling.
--/
-theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardRecurrence
-    (hrec : CanonicalFigure16SourceRawBoundaryCheckedBoardRecurrence) :
-    TilesPlane fig13Tiles :=
-  tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
-    (canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_recurrence
-      hrec)
 
 /--
 Figure 16-recognized macro-squares whose targets are compatible Figure 18
