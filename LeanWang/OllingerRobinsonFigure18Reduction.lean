@@ -15642,6 +15642,13 @@ abbrev Figure18CanonicalRawBoundaryBoardLevelChecks : Prop :=
 abbrev Figure18CanonicalRawBoundaryCheckedBoardLevels : Prop :=
   HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
 
+/--
+Recursive checked-list form of the shifted Robinson board-level raw-boundary
+obligation.
+-/
+abbrev Figure18CanonicalRawBoundaryCheckedBoardRecurrence : Prop :=
+  CanonicalFigure16SourceRawBoundaryCheckedBoardRecurrence
+
 theorem canonicalRawBoundaryMacroSquares_of_bool
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
     Figure18CanonicalRawBoundaryMacroSquares :=
@@ -15711,6 +15718,22 @@ theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
     hlevel
+
+theorem canonicalRawBoundaryCheckedBoardLevels_of_recurrence
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence) :
+    Figure18CanonicalRawBoundaryCheckedBoardLevels :=
+  canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_recurrence hrec
+
+theorem canonicalRawBoundaryBoardLevelChecks_of_recurrence
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence) :
+    Figure18CanonicalRawBoundaryBoardLevelChecks :=
+  canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_recurrence hrec
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardRecurrence
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardRecurrence
+    hrec
 
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
@@ -17221,6 +17244,102 @@ theorem
     domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
       section7Routing
       (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and recursive shifted checked
+source/free-grid board levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_raw_boundary_board_rec_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardRecurrence
+        hrec)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing and recursive shifted checked
+source/free-grid board levels.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_raw_boundary_board_rec_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardRecurrence
+        hrec)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and recursive shifted checked
+source/free-grid board levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_raw_boundary_board_rec_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardRecurrence
+        hrec)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing and recursive shifted checked
+source/free-grid board levels.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_raw_boundary_board_rec_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hrec : Figure18CanonicalRawBoundaryCheckedBoardRecurrence)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_fig13_tiles_plane_position_source
+      section7Routing
+      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardRecurrence
+        hrec)
       h
 
 /--
