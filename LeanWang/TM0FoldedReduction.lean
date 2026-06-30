@@ -2373,6 +2373,30 @@ abbrev SourcePositionCodeBoundedInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
     sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
 
+/--
+The statement-list uniqueness fact needed to identify support-search state
+codes with position-coded state codes for the translated source TM0 machines.
+-/
+abbrev SourceStatementListNodup : Prop :=
+  ∀ c : Code,
+    (TM0Route.partrecStartedTM0StatementList
+      (NatPartrecToToPartrec.translate c)).Nodup
+
+/-- Source-uniform one-row position-code decoder plus statement uniqueness. -/
+structure SourcePositionCodeOneRowsWithStatementNodup : Prop where
+  rows : SourcePositionCodeOneRowsPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+/-- Source-uniform bounded-interior position-code decoder plus statement uniqueness. -/
+structure SourcePositionCodeBoundedInteriorRowsWithStatementNodup : Prop where
+  rows : SourcePositionCodeBoundedInteriorRowsPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+/-- Source-uniform interior position-code decoder plus statement uniqueness. -/
+structure SourcePositionCodeInteriorRowsWithStatementNodup : Prop where
+  rows : SourcePositionCodeInteriorRowsPrimrec
+  statementList_nodup : SourceStatementListNodup
+
 /-- One-row generated position-code rows give the interior-row target. -/
 theorem sourcePositionCodeInteriorRowsPrimrec_of_oneRows
     (hrows : SourcePositionCodeOneRowsPrimrec) :
@@ -2397,6 +2421,35 @@ theorem sourcePositionCodeOneRowsPrimrec_of_interior
     SourcePositionCodeOneRowsPrimrec :=
   sourcePositionCodeOneRowsPrimrec_of_boundedInterior
     (sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior)
+
+/-- A one-row package also supplies the interior package. -/
+def sourcePositionCodeInteriorRowsWithStatementNodup_of_oneRows
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
+    SourcePositionCodeInteriorRowsWithStatementNodup where
+  rows := sourcePositionCodeInteriorRowsPrimrec_of_oneRows hrows.rows
+  statementList_nodup := hrows.statementList_nodup
+
+/-- An interior package also supplies the bounded-interior package. -/
+def sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    SourcePositionCodeBoundedInteriorRowsWithStatementNodup where
+  rows := sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior.rows
+  statementList_nodup := hinterior.statementList_nodup
+
+/-- A bounded-interior package also supplies the one-row package. -/
+def sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
+    SourcePositionCodeOneRowsWithStatementNodup where
+  rows := sourcePositionCodeOneRowsPrimrec_of_boundedInterior hbounded.rows
+  statementList_nodup := hbounded.statementList_nodup
+
+/-- An interior package also supplies the one-row package. -/
+def sourcePositionCodeOneRowsWithStatementNodup_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    SourcePositionCodeOneRowsWithStatementNodup :=
+  sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior
+    (sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
+      hinterior)
 
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
@@ -4578,6 +4631,22 @@ def sourceObligationsOfPositionCodeOneRowsStatementListNodup
     hcorrect
 
 /--
+Packaged one-row position-code decoder and translated statement-list
+uniqueness are enough to produce the source obligations needed by the final
+reduction.
+-/
+def sourceObligationsOfPositionCodeOneRowsWithStatementNodup
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfPositionCodeOneRowsStatementListNodup
+    hrows.rows hrows.statementList_nodup hcorrect
+
+/--
 Primitive recursiveness of the accumulator step for the source-level
 position-coded descriptor decoder and absence of duplicates in the translated
 TM0 statement-support list are enough to produce the source obligations needed
@@ -4622,6 +4691,22 @@ def sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
     hcorrect
 
 /--
+Packaged bounded-interior position-code decoder and translated statement-list
+uniqueness are enough to produce the source obligations needed by the final
+reduction.
+-/
+def sourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
+    hbounded.rows hbounded.statementList_nodup hcorrect
+
+/--
 Primitive recursiveness of the interior one-row position-code decoder and
 absence of duplicates in the translated TM0 statement-support list are enough
 to produce the source obligations needed by the final reduction.
@@ -4641,6 +4726,22 @@ def sourceObligationsOfPositionCodeInteriorRowsStatementListNodup
     (sourceProgramData_computable_of_source_positionCodeInteriorRows_statementListNodup'
       hinterior hnodup)
     hcorrect
+
+/--
+Packaged interior position-code decoder and translated statement-list
+uniqueness are enough to produce the source obligations needed by the final
+reduction.
+-/
+def sourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfPositionCodeInteriorRowsStatementListNodup
+    hinterior.rows hinterior.statementList_nodup hcorrect
 
 /--
 The current lowest-level folded computability target, phrased at source-code
