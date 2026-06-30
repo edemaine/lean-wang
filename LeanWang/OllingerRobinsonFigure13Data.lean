@@ -11183,6 +11183,40 @@ def ofLocalCompatibilityLayerPatches
     (activeCornerBoxPatches_of_layerBoxPatches patches)
     hcheck
 
+/--
+Layer-patch version for already-compatible Robinson level grids.
+
+This is the finite scaffold-target form used once the Section 7 construction
+has bundled the local horizontal and vertical Figure 18 compatibility into each
+level grid witness.
+-/
+def ofLevelCompatibleLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid where
+  levelCompatibleRoutedFreeGrids := levelCompatibleRoutedFreeGrids
+  pairCompatibility := hcheck
+  realizes :=
+    realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+      (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches patches)
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
