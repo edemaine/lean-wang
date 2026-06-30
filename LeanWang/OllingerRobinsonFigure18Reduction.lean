@@ -21513,6 +21513,110 @@ theorem
       (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hboxes h
 
 /--
+Encoded domino undecidability from the first bundled checked signal-tower and
+raw Figure 13 plane package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_position_source
+    (data : L2C1CheckedSignalTowerFig13PlaneData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+
+/--
+Unencoded domino undecidability from the first bundled checked signal-tower and
+raw Figure 13 plane package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_position_source
+    (data : L2C1CheckedSignalTowerFig13PlaneData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+
+/--
+Encoded domino undecidability from the second bundled checked signal-tower and
+raw Figure 13 plane package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_position_source
+    (data : L2C2CheckedSignalTowerFig13PlaneData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+
+/--
+Unencoded domino undecidability from the second bundled checked signal-tower and
+raw Figure 13 plane package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_position_source
+    (data : L2C2CheckedSignalTowerFig13PlaneData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+
+/--
+Encoded domino undecidability from the first bundled checked signal-tower and
+finite Figure 13 box package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_position_source
+    (data : L2C1CheckedSignalTowerFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+
+/--
+Unencoded domino undecidability from the first bundled checked signal-tower and
+finite Figure 13 box package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_position_source
+    (data : L2C1CheckedSignalTowerFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+
+/--
+Encoded domino undecidability from the second bundled checked signal-tower and
+finite Figure 13 box package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_position_source
+    (data : L2C2CheckedSignalTowerFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+
+/--
+Unencoded domino undecidability from the second bundled checked signal-tower and
+finite Figure 13 box package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_position_source
+    (data : L2C2CheckedSignalTowerFig13BoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate, using
 finite origin-zero checked layer stacks and shifted raw-boundary Figure 16
 board checks routed through the signal-tower/translated-box obligation surface.
@@ -22647,6 +22751,166 @@ theorem
   exact
     domino_problem_undecidable_l2c2_checked_signal_tower_fig13_boxes_position_source
       hchecked hboxes
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first bundled checked signal-tower and
+raw Figure 13 plane package, with generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_interiorRows
+    (data : L2C1CheckedSignalTowerFig13PlaneData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first bundled checked signal-tower and
+raw Figure 13 plane package, with generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_interiorRows
+    (data : L2C1CheckedSignalTowerFig13PlaneData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_plane_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second bundled checked signal-tower and
+raw Figure 13 plane package, with generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_interiorRows
+    (data : L2C2CheckedSignalTowerFig13PlaneData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second bundled checked signal-tower and
+raw Figure 13 plane package, with generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_interiorRows
+    (data : L2C2CheckedSignalTowerFig13PlaneData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_plane_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first bundled checked signal-tower and
+finite Figure 13 box package, with generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_interiorRows
+    (data : L2C1CheckedSignalTowerFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first bundled checked signal-tower and
+finite Figure 13 box package, with generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_interiorRows
+    (data : L2C1CheckedSignalTowerFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second bundled checked signal-tower and
+finite Figure 13 box package, with generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_interiorRows
+    (data : L2C2CheckedSignalTowerFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second bundled checked signal-tower and
+finite Figure 13 box package, with generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_interiorRows
+    (data : L2C2CheckedSignalTowerFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_box_data_position_source
+      data
       (positionSourceObligationsOfPositionCodeInteriorRows
         hinterior hcorrect)
 
