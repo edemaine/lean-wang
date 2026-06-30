@@ -11257,6 +11257,42 @@ def ofLevelCompatiblePositiveBoxes
       hboxes_pos)
     hcheck
 
+/--
+Translated-positive-box version for already-compatible Robinson level grids.
+
+This is the natural interface for boxes produced inside large Robinson boards:
+they may be centered at radius-dependent plane origins, and are recentered only
+when discharging the generic positive-box realization side.
+-/
+def ofLevelCompatiblePositiveTranslatedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatiblePositiveBoxes activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid levelCompatibleRoutedFreeGrids
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      translatedBoxes_pos)
+    hcheck
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
