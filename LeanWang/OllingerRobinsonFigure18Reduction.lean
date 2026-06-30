@@ -17936,6 +17936,138 @@ def l2c2RobinsonSection7DataOfSignalTowerBoardData
     data.signalLocalTower data.boardLevels
 
 /--
+Origin-zero recognizability and positive Robinson-board aligned
+macro-squares instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned
+macro-squares instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and shifted canonical board-level checks
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfBoardLevelChecks
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and shifted canonical board-level checks
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfBoardLevelChecks
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfBoardLevelChecks
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfBoardLevelChecks
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
 The first translated-box package from a local signal tower and canonical
 Figure 16 source raw-boundary macro-squares.
 -/
