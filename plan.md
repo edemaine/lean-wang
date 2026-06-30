@@ -289,10 +289,25 @@ The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`
 primitive-recursive facts, including the bounded-search decoder components, but
 they do not by themselves compose over the dependent family
-`tc = NatPartrecToToPartrec.translate c`. The next bridge should therefore
-construct the source-level statement/support lookup directly over encoded
-source codes, then connect it to the fixed-`tc` decoder by an extensional
-correctness theorem.
+`tc = NatPartrecToToPartrec.translate c`. In particular, the raw statement
+lookup
+`TM0Route.partrecStartedTM0StatementAt? (NatPartrecToToPartrec.translate c) k`
+has a result type depending on `c`, so it is not the right public `Primrec`
+target. The current Lean boundary names the nondependent row-level targets
+instead:
+
+```lean
+TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+```
+
+These abbreviations package the source-uniform generated descriptor rows after
+the statement lookup has been decoded into `List TM0FoldedCompiler.SimStepData`.
+The next bridge should therefore construct the source-level statement/support
+lookup directly over encoded source codes, prove an extensional correctness
+theorem for the generated descriptor rows, and discharge one of these row-level
+primitive-recursion targets.
 The flat label-index arithmetic has now been separated out in
 `TM0FoldedReduction.sourceLabelIndexFromSplit?` and the started wrapper
 `sourceLabelIndexStartSplit?`, with primitive-recursive proofs. These helpers
@@ -362,8 +377,14 @@ arithmetic.
 
 Next implementation targets:
 
-1. Prove source-level computability of the generated position-coded folded
-   finite-TM0 reduction:
+1. Prove one of the source-level generated position-code row targets, preferably
+   `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec` or directly
+   `TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec`. This should be done
+   by constructing a source-uniform executable statement/support decoder whose
+   output is compared extensionally to the existing dependent fixed-`tc`
+   decoder, then generating the folded TM0 descriptor rows.
+2. Use that row target to prove source-level computability of the generated
+   position-coded folded finite-TM0 reduction:
 
    ```lean
    Computable (fun c : Nat.Partrec.Code =>
@@ -374,10 +395,10 @@ Next implementation targets:
    This can use Mathlib's existing recursion theorem for `Nat.Partrec.Code`
    instead of first proving a general recursion theorem for
    `Turing.ToPartrec.Code`.
-2. Optionally strengthen the result to computability on all
+3. Optionally strengthen the result to computability on all
    `Turing.ToPartrec.Code` for a reusable folded-route corollary, but keep the
    public domino theorem surface on `PositionSourceObligations`.
-3. Finish the Robinson Section 7 scaffold proof.  The light reduction module
+4. Finish the Robinson Section 7 scaffold proof.  The light reduction module
    now exposes the intended route through
    `LayeredSection7ObstructionRoutingInvariant` and
    `Figure18CanonicalRawBoundaryBoardLevelChecks`, including row-major checked
@@ -424,19 +445,19 @@ Next implementation targets:
    `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations`, with
    `*_signal_tower_translated_obligations_*` wrappers exposing the current
    proof-facing Section 7 target as one named object.
-4. Add the semantic-final wrappers for the row-major Section 7 geometry route
+5. Add the semantic-final wrappers for the row-major Section 7 geometry route
    only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
    environment.  The light wrappers build in
    `LeanWang.OllingerRobinsonFigure18Reduction`; the semantic-final module
    imports the large folded correctness proof and currently requires the
    missing `.olean` for `TM0FoldedPositionReduction`.
-5. Specialize the concrete generated-position folded-route/scaffold
+6. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`
    and `domino_problem_undecidable_of_scaffold_position_source_positionCode`,
    to those concrete instances to recover the unconditional encoded and
    unencoded domino theorems.
-6. Optionally replace the current table-machine tiles by direct finite-TM0
+7. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0 instruction set is already close to the Wang-tile space-time
    simulation, so this should remove both the `PostProgram.toTableProgram`
    detour from the final theorem and the need for `TableProgram` as a live

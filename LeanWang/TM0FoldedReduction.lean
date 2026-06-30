@@ -2354,6 +2354,50 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRo
   sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step
     (sourcePositionCodeDecoderStep_primrec_of_indexVarRows hvarRows)
 
+/--
+The source-uniform primitive-recursion target for one generated position-code
+row.  This is the nondependent boundary where the translated source statement
+lookup has already been turned into concrete folded TM0 descriptor rows.
+-/
+abbrev SourcePositionCodeOneRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+    sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/-- Primitive-recursion target for interior generated position-code rows. -/
+abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+    sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/-- Primitive-recursion target for bounded interior generated position-code rows. -/
+abbrev SourcePositionCodeBoundedInteriorRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+    sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/-- One-row generated position-code rows give the interior-row target. -/
+theorem sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    SourcePositionCodeInteriorRowsPrimrec :=
+  sourcePositionCodeInteriorRowsIndexVar_primrec_of_oneRows hrows
+
+/-- Interior generated position-code rows give the bounded-interior target. -/
+theorem sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsPrimrec :=
+  sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior
+
+/-- Bounded interior generated position-code rows give the one-row target. -/
+theorem sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    SourcePositionCodeOneRowsPrimrec :=
+  sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hbounded
+
+/-- Interior generated position-code rows give the one-row target. -/
+theorem sourcePositionCodeOneRowsPrimrec_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    SourcePositionCodeOneRowsPrimrec :=
+  sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+    (sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior)
+
 /-- Source-code version of the canonical offset-start descriptor decoder. -/
 def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
