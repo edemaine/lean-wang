@@ -17363,6 +17363,88 @@ theorem l2c2CheckedSignalTowerFig13BoxDataOfBoardData_originZeroWindows
   rfl
 
 /--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares give the preferred first finite-box scaffold package.
+-/
+def l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares give the preferred second finite-box scaffold package.
+-/
+def l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and row-major checked board levels give the preferred
+first finite-box scaffold package.
+-/
+def l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      boardLevels
+
+/--
+Origin-zero windows and row-major checked board levels give the preferred
+second finite-box scaffold package.
+-/
+def l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      boardLevels
+
+/--
+For the first L2 candidate, the preferred origin-zero board-level package
+forgets to the older checked-stack Figure 13 box package in the direct way.
+-/
+theorem l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData_checkedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+        (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+          originZeroWindows boardLevels) =
+      l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) :=
+  rfl
+
+/--
+For the second L2 candidate, the preferred origin-zero board-level package
+forgets to the older checked-stack Figure 13 box package in the direct way.
+-/
+theorem l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData_checkedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+        (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+          originZeroWindows boardLevels) =
+      l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) :=
+  rfl
+
+/--
 The first checked signal-tower board package is exactly a Robinson Section 7
 signal-tower/translated-box obligation: checked stacks give the local signal
 tower, and the checked board levels give the raw Figure 13 plane tiling used to
