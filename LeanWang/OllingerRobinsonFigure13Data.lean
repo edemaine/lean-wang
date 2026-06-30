@@ -7393,6 +7393,35 @@ def scaffoldDataOfSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridChec
   CheckedSparseRawData.indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
     (sparseRawDataOfSites activeSiteData cornerSite) hchecked realizes
 
+/--
+Robinson Section 7 level-compatible free grids, together with the finite
+Figure 13/Figure 16 pair-compatibility check, give the preferred indexed-routed
+scaffold certificate.
+
+This is the direct board/free-row route from Robinson's argument: the geometry
+only has to produce compatible free grids at each board level, while arbitrary
+finite payload squares are obtained by restriction.
+-/
+def scaffoldDataOfSitesIndexedRoutedCertificateOfLevelCompatibleRobinsonFreeGrids
+    (activeSiteData : Figure18Site.CheckedNatSpecs)
+    (cornerSite : Figure18Site)
+    (hpair :
+      generatedStackAllowedSitePairCompatibilityBool activeSiteData cornerSite =
+        true)
+    (hgrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (Figure18RoleTable.FlatRoleTable.ofActiveSites
+          activeSiteData.sites cornerSite).toRoleTable)
+    (realizes :
+      RealizesActiveCornerSquares
+        (scaffoldDataOfSites activeSiteData cornerSite).table.presentation.toScaffold) :
+    (scaffoldDataOfSites activeSiteData cornerSite).IndexedRoutedCertificate := by
+  refine scaffoldDataOfSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
+    activeSiteData cornerSite ?_ realizes
+  exact
+    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
+      activeSiteData cornerSite hpair hgrids
+
 def scaffoldDataOfSitesIndexedRoutedCertificateOfAllowedRouted
     (activeSiteData : Figure18Site.CheckedNatSpecs)
     (cornerSite : Figure18Site)
