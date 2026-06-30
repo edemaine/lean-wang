@@ -5256,6 +5256,48 @@ def noSourceRawBoundaryVCompatiblePairsBool : Bool :=
     Figure18Site.all.all fun upper =>
       !sourceRawBoundaryVCompatiblePairBool lower upper
 
+theorem noSourceRawBoundaryHCompatiblePairsBool_eq_true_iff :
+    noSourceRawBoundaryHCompatiblePairsBool = true ↔
+      ∀ left right : Figure18Site,
+        sourceRawBoundaryHCompatiblePairBool left right = false := by
+  constructor
+  · intro hcheck left right
+    unfold noSourceRawBoundaryHCompatiblePairsBool at hcheck
+    have hleftCheck :=
+      List.all_eq_true.1 hcheck left (Figure18Site.mem_all left)
+    have hrightCheck :=
+      List.all_eq_true.1 hleftCheck right (Figure18Site.mem_all right)
+    cases hcompat : sourceRawBoundaryHCompatiblePairBool left right <;>
+      simp [hcompat] at hrightCheck ⊢
+  · intro hpairs
+    unfold noSourceRawBoundaryHCompatiblePairsBool
+    apply List.all_eq_true.2
+    intro left _
+    apply List.all_eq_true.2
+    intro right _
+    simp [hpairs left right]
+
+theorem noSourceRawBoundaryVCompatiblePairsBool_eq_true_iff :
+    noSourceRawBoundaryVCompatiblePairsBool = true ↔
+      ∀ lower upper : Figure18Site,
+        sourceRawBoundaryVCompatiblePairBool lower upper = false := by
+  constructor
+  · intro hcheck lower upper
+    unfold noSourceRawBoundaryVCompatiblePairsBool at hcheck
+    have hlowerCheck :=
+      List.all_eq_true.1 hcheck lower (Figure18Site.mem_all lower)
+    have hupperCheck :=
+      List.all_eq_true.1 hlowerCheck upper (Figure18Site.mem_all upper)
+    cases hcompat : sourceRawBoundaryVCompatiblePairBool lower upper <;>
+      simp [hcompat] at hupperCheck ⊢
+  · intro hpairs
+    unfold noSourceRawBoundaryVCompatiblePairsBool
+    apply List.all_eq_true.2
+    intro lower _
+    apply List.all_eq_true.2
+    intro upper _
+    simp [hpairs lower upper]
+
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
