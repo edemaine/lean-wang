@@ -18322,9 +18322,8 @@ def toTowerIndexedBoxObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid :=
   NatSiteRobinsonTowerIndexedBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedBoxes
-    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
-      (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_geometryTowerCombinedSites
-        O.geomCombinedSiteRouting))
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
+      O.geomCombinedSiteRouting)
     pairCompatibility
     (by
       intro r hr
