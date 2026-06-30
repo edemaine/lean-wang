@@ -14536,6 +14536,40 @@ def l2c2OriginZeroFig13BundledObligations
   ofL2C2Figure18ScaffoldDataPositiveFig13TilesPlane
     originZeroWindows hplane
 
+def l2c1OriginZeroSignalTowerFig13BundledObligations
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  (l2c1OriginZeroFig13BundledObligations originZeroWindows hplane)
+    |>.toL2C1SignalTowerTranslatedPositiveBoxObligations
+
+def l2c2OriginZeroSignalTowerFig13BundledObligations
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  (l2c2OriginZeroFig13BundledObligations originZeroWindows hplane)
+    |>.toL2C2SignalTowerTranslatedPositiveBoxObligations
+
 /--
 The Figure 18 role table whose indexed-active windows are needed for the first
 audited L2-blank candidate.
@@ -20970,6 +21004,98 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
+origin-zero active/corner windows and a raw Figure 13 plane tiling routed
+through the signal-tower/translated-box obligation surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_plane_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate,
+using origin-zero active/corner windows and a raw Figure 13 plane tiling routed
+through the signal-tower/translated-box obligation surface.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_plane_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate, using
+origin-zero active/corner windows and a raw Figure 13 plane tiling routed
+through the signal-tower/translated-box obligation surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_plane_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate,
+using origin-zero active/corner windows and a raw Figure 13 plane tiling routed
+through the signal-tower/translated-box obligation surface.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_plane_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate, using
 the field-based Robinson Section 7 local signal tower, positive-radius indexed
 boxes, and generated interior position-code rows.
 -/
@@ -21403,6 +21529,126 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
       O.toL2C2SignalTowerTranslatedPositiveBoxObligations hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate, using
+origin-zero active/corner windows, a raw Figure 13 plane tiling, and generated
+interior position-code rows routed through the signal-tower/translated-box
+obligation surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_plane_interiorRows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
+      (l2c1OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate,
+using origin-zero active/corner windows, a raw Figure 13 plane tiling, and
+generated interior position-code rows routed through the
+signal-tower/translated-box obligation surface.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_plane_interiorRows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
+      (l2c1OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate, using
+origin-zero active/corner windows, a raw Figure 13 plane tiling, and generated
+interior position-code rows routed through the signal-tower/translated-box
+obligation surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_plane_interiorRows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
+      (l2c2OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate,
+using origin-zero active/corner windows, a raw Figure 13 plane tiling, and
+generated interior position-code rows routed through the
+signal-tower/translated-box obligation surface.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_plane_interiorRows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
+      (l2c2OriginZeroSignalTowerFig13BundledObligations
+        originZeroWindows hplane)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
