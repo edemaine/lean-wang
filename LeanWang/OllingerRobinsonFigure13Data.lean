@@ -5397,6 +5397,17 @@ theorem tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquare
       hlevel)
 
 /--
+Figure 16-recognized Robinson board macro-squares supply every centered raw
+Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel : HasFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+      hlevel)
+
+/--
 Finite-checked Figure 16-recognized Robinson board macro-squares compactly
 determine a raw Figure 13 plane tiling.
 -/
@@ -5404,6 +5415,16 @@ theorem tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacr
     (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
+    (figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked hlevel)
+
+/--
+Finite-checked Figure 16-recognized Robinson board macro-squares supply every
+centered raw Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel : HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_figure16RecognizedRobinsonBoardLevelMacroSquares
     (figure16RecognizedRobinsonBoardLevelMacroSquares_of_checked hlevel)
 
 /--
@@ -5415,6 +5436,18 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoard
       HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
+      hlevel)
+
+/--
+Canonical finite-checked Figure 16-recognized Robinson board macro-squares
+supply every centered raw Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    (hlevel :
+      HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
     (checkedFigure16RecognizedRobinsonBoardLevelMacroSquares_of_canonical
       hlevel)
 
@@ -5439,6 +5472,16 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
     (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary hlevel)
+
+/--
+Canonical source raw-boundary macro-squares supply every centered raw Figure 13
+box.
+-/
+theorem tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_alignedMacroSquares
     (alignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary hlevel)
 
 /--
@@ -5471,6 +5514,17 @@ theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChe
       hlevel)
 
 /--
+Shifted Robinson board-level source raw-boundary checks supply every centered
+raw Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
 Row-major checked shifted board-level data compactly determines a raw Figure 13
 plane tiling.
 -/
@@ -5478,6 +5532,17 @@ theorem tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardL
     (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    (canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
+      hlevel)
+
+/--
+Row-major checked shifted board-level data supplies every centered raw Figure
+13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
     (canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
       hlevel)
 

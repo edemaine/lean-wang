@@ -1159,6 +1159,18 @@ theorem tilesPlane_fig13Tiles_of_cofinal_tileableSquares
   tilesPlane_of_cofinal_tileableSquares hsquares
 
 /--
+Cofinal finite square tilings of the raw Figure 13 tiles supply every centered
+finite box, without invoking compactness.
+-/
+theorem tileableBoxes_fig13Tiles_of_cofinal_tileableSquares
+    (hsquares : ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m) :
+    ∀ r : Nat, TileableBox fig13Tiles r := by
+  intro r
+  rcases hsquares (boxSide r) with ⟨m, hside, hsquare⟩
+  exact tileableBox_of_tileableSquare
+    (tileableSquare_crop hside hsquare)
+
+/--
 Aligned macro-squares of Figure 18 sites supply cofinal raw Figure 13 square
 tilings.
 -/
@@ -1190,6 +1202,26 @@ theorem cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSqua
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
     ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m :=
   cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares
+    (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
+
+/--
+Aligned macro-squares of Figure 18 sites supply every centered raw Figure 13
+box.
+-/
+theorem tileableBoxes_fig13Tiles_of_alignedMacroSquares
+    (hsquares : HasAlignedFigure13MacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_cofinal_tileableSquares
+    (cofinal_tileableSquares_fig13Tiles_of_alignedMacroSquares hsquares)
+
+/--
+Level-indexed Robinson-board aligned macro-squares supply every centered raw
+Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    ∀ r : Nat, TileableBox fig13Tiles r :=
+  tileableBoxes_fig13Tiles_of_alignedMacroSquares
     (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
 
 /--

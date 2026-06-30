@@ -16006,6 +16006,18 @@ theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
   tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
     hlevel
 
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    hlevel
+
 theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
@@ -16029,6 +16041,18 @@ theorem tilesPlane_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
   tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
     hlevel
 
+theorem tileableBoxes_fig13Tiles_of_checkedRecognizedMacroSquares
+    (hlevel : Figure13CheckedRecognizedMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
     (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
     TilesPlane fig13Tiles :=
@@ -16038,6 +16062,18 @@ theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
     TilesPlane fig13Tiles :=
   tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquares
     (canonicalRawBoundaryMacroSquares_of_bool hlevel)
 
 def l2c1GeomCombinedRawBoundaryFig16Obligations
@@ -21254,6 +21290,198 @@ theorem
     domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
       (l2c2OriginZeroSignalTowerFig13BoxBundledObligations
         originZeroWindows hboxes)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate, using
+origin-zero active/corner windows and shifted raw-boundary Figure 16 board
+checks routed through finite Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_checks_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate,
+using origin-zero active/corner windows and shifted raw-boundary Figure 16
+board checks routed through finite Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_checks_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+        hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate, using
+origin-zero active/corner windows and shifted raw-boundary Figure 16 board
+checks routed through finite Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_checks_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate,
+using origin-zero active/corner windows and shifted raw-boundary Figure 16
+board checks routed through finite Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_checks_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+        hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate, using
+origin-zero active/corner windows and row-major checked raw-boundary Figure 16
+board rows routed through finite Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate,
+using origin-zero active/corner windows and row-major checked raw-boundary
+Figure 16 board rows routed through finite Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate, using
+origin-zero active/corner windows and row-major checked raw-boundary Figure 16
+board rows routed through finite Figure 13 boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate,
+using origin-zero active/corner windows and row-major checked raw-boundary
+Figure 16 board rows routed through finite Figure 13 boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
+      originZeroWindows
+      (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+        hlevel)
       h
 
 /--
