@@ -20228,6 +20228,190 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 Robinson Section 7 obstruction routing, shifted row-major checked
 source/free-grid board levels, and generated interior position-code rows.
 -/
