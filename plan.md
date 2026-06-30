@@ -399,7 +399,12 @@ Next implementation targets:
    wrappers.  The light reduction module names the two concrete checked-stack
    hypotheses as `L2C1OriginZeroCheckedStacks` and
    `L2C2OriginZeroCheckedStacks`, and routes them through both board-level
-   checks and row-major board-level theorem surfaces.  The other remaining
+   checks and row-major board-level theorem surfaces.  The constructors
+   `l2c1OriginZeroCheckedStacksOfOriginZeroWindows` and
+   `l2c2OriginZeroCheckedStacksOfOriginZeroWindows` show that origin-zero
+   active/corner windows plus the audited finite compatibility tables produce
+   these checked-stack hypotheses, so the checked-stack route is connected to
+   the existing origin-zero scaffold interface.  The other remaining
    scaffold-side task is to construct/prove the shifted board-level
    raw-boundary finite data (or replace that over-strong diagnostic target
    with a leaner invariant derived directly from the board/free-line proof).

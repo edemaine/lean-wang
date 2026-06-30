@@ -16127,17 +16127,35 @@ def l2c2GeomCombinedSiteRoutingOfSection7
   exact ⟨⟨geometryTower, routing⟩⟩
 
 /--
+Origin-zero active/corner window hypothesis for the first audited L2-blank
+candidate.
+-/
+abbrev L2C1OriginZeroWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Origin-zero active/corner window hypothesis for the second audited L2-blank
+candidate.
+-/
+abbrev L2C2OriginZeroWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
 Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
 -/
 def l2c1Section7RoutingOfOriginZeroWindows
-    (originZeroWindows :
-      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
-        (scaffoldDataOfNatSites
-          l2Component1BlankCandidateActiveSiteSpecs
-          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.southwest
-          l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    (originZeroWindows : L2C1OriginZeroWindows) :
     LayeredSection7ObstructionRoutingInvariant
       (scaffoldDataOfNatSites
         l2Component1BlankCandidateActiveSiteSpecs
@@ -16152,13 +16170,7 @@ Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the second audited L2-blank candidate.
 -/
 def l2c2Section7RoutingOfOriginZeroWindows
-    (originZeroWindows :
-      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
-        (scaffoldDataOfNatSites
-          l2Component2BlankCandidateActiveSiteSpecs
-          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.northeast
-          l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    (originZeroWindows : L2C2OriginZeroWindows) :
     LayeredSection7ObstructionRoutingInvariant
       (scaffoldDataOfNatSites
         l2Component2BlankCandidateActiveSiteSpecs
@@ -16201,6 +16213,58 @@ abbrev L2C2OriginZeroCheckedStacks : Prop :=
           l2Component2BlankCandidateSanity.activeSiteSpecs_valid
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Origin-zero active/corner windows plus the audited finite compatibility table
+produce the concrete checked layer-stack hypothesis for the first L2 candidate.
+-/
+def l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1OriginZeroCheckedStacks := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C1OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C1OriginZeroCheckedStacks, scaffoldDataOfNatSites_table]
+  exact
+    sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      hwindows
+      l2Component1BlankCandidatePairCompatibilityBool
+
+/--
+Origin-zero active/corner windows plus the audited finite compatibility table
+produce the concrete checked layer-stack hypothesis for the second L2 candidate.
+-/
+def l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2OriginZeroCheckedStacks := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C2OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C2OriginZeroCheckedStacks, scaffoldDataOfNatSites_table]
+  exact
+    sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      hwindows
+      l2Component2BlankCandidatePairCompatibilityBool
 
 /--
 Finite origin-zero checked layer stacks give the layered Robinson Section 7
