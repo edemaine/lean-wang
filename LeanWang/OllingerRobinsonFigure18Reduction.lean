@@ -24617,9 +24617,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       h
 
 /--
@@ -24633,9 +24633,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       h
 
 /--
@@ -24649,9 +24649,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       h
 
 /--
@@ -24665,9 +24665,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       h
 
 /--
@@ -24681,8 +24681,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       h
 
@@ -24697,8 +24697,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       h
 
@@ -24713,8 +24713,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       h
 
@@ -24729,8 +24729,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       h
 
@@ -26855,9 +26855,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       hinterior hcorrect
 
 /--
@@ -26877,9 +26877,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       hinterior hcorrect
 
 /--
@@ -26899,9 +26899,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       hinterior hcorrect
 
 /--
@@ -26921,9 +26921,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
       hinterior hcorrect
 
 /--
@@ -26943,8 +26943,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       hinterior hcorrect
 
@@ -26965,8 +26965,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRows
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       hinterior hcorrect
 
@@ -26987,8 +26987,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       hinterior hcorrect
 
@@ -27009,8 +27009,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRows
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
       hinterior hcorrect
 
@@ -27031,11 +27031,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from first-component origin-zero recognizability,
@@ -27054,11 +27053,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from second-component origin-zero recognizability,
@@ -27077,11 +27075,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from second-component origin-zero recognizability,
@@ -27100,11 +27097,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
-        originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+        (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability,
@@ -27123,11 +27119,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from first-component origin-zero recognizability,
@@ -27146,11 +27141,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
-      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from second-component origin-zero recognizability,
@@ -27169,11 +27163,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from second-component origin-zero recognizability,
@@ -27192,11 +27185,10 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
-      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
         originZeroWindows hlevel)
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first preferred origin-zero/finite
