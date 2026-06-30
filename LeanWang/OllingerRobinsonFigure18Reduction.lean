@@ -16761,6 +16761,76 @@ structure L2C2SignalTowerBoardData : Prop where
       l2Component2BlankCandidateSanity.cornerIndex_valid
   boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
 
+/--
+Field-based Section 7 package for the first audited L2-blank candidate.
+
+This is the preferred proof-facing target after the raw-boundary board
+diagnostic: Robinson's free rows/columns provide the local signal tower, and
+large boards provide positive-radius translated active-corner boxes.
+-/
+structure L2C1SignalTowerTranslatedBoxData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  translatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+
+/--
+Field-based Section 7 package for the second audited L2-blank candidate.
+-/
+structure L2C2SignalTowerTranslatedBoxData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  translatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+
+open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+
+/--
+The first translated-box package is exactly the pair-free direct Section 7
+obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfTranslatedBoxData
+    (data : L2C1SignalTowerTranslatedBoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveTranslatedBoxes
+    data.signalLocalTower data.translatedBoxes
+
+/--
+The second translated-box package is exactly the pair-free direct Section 7
+obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfTranslatedBoxData
+    (data : L2C2SignalTowerTranslatedBoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
+    data.signalLocalTower data.translatedBoxes
+
 /-- Board-level checks give the first field-based signal-tower board package. -/
 def l2c1SignalTowerBoardDataOfBoardLevelChecks
     (signalLocalTower :
@@ -21640,6 +21710,58 @@ theorem
       O.toFigure18RoutedCertificate h
 
 /--
+Encoded domino undecidability from the first preferred field-based Section 7
+package: a local signal tower and positive translated active-corner boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfTranslatedBoxData data) h
+
+/--
+Unencoded domino undecidability from the first preferred field-based Section 7
+package: a local signal tower and positive translated active-corner boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfTranslatedBoxData data) h
+
+/--
+Encoded domino undecidability from the second preferred field-based Section 7
+package: a local signal tower and positive translated active-corner boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data) h
+
+/--
+Unencoded domino undecidability from the second preferred field-based Section 7
+package: a local signal tower and positive translated active-corner boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data) h
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via the
 bundled Robinson Section 7 signal-tower/translated-board-box obligation.
 -/
@@ -23042,6 +23164,82 @@ theorem
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
       O.toFigure18RoutedCertificate hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first preferred field-based Section 7
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
+      (l2c1SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first preferred field-based Section 7
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
+      (l2c1SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second preferred field-based Section 7
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
+      (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second preferred field-based Section 7
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
+      (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via the

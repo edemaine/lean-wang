@@ -443,13 +443,17 @@ Next implementation targets:
    `ofL2C1SignalLocalTowerFig13TilesPlane` and
    `ofL2C2SignalLocalTowerFig13TilesPlane` recenter the translated Robinson
    board boxes into the existing indexed-box scaffold certificate.  The
-   current proof-facing board package is
-   `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData`: it stores only the
-   local signal tower and row-major checked board levels, and the wrappers
-   `*_signal_tower_board_data_position_source` and
-   `*_signal_tower_board_data_interiorRows` route this package through the
-   direct pair-free signal-tower certificate.  The adjacent source raw-boundary
-   board target exposed as `Figure18CanonicalRawBoundaryBoardLevelChecks` should
+   current preferred proof-facing package is
+   `L2C1SignalTowerTranslatedBoxData` /
+   `L2C2SignalTowerTranslatedBoxData`: it stores the local signal tower and
+   positive translated active-corner boxes, and the wrappers
+   `*_signal_tower_translated_box_data_position_source` and
+   `*_signal_tower_translated_box_data_interiorRows` route this package through
+   the direct pair-free signal-tower certificate.  The older
+   `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData` package still exists
+   as a bridge through row-major checked board levels, but should not be the
+   main target.  The adjacent source raw-boundary board target exposed as
+   `Figure18CanonicalRawBoundaryBoardLevelChecks` should
    now be treated as a diagnostic, not as the next finite target: finite
    predicates `sourceRawBoundaryHCompatiblePairBool` and
    `sourceRawBoundaryVCompatiblePairBool` find no horizontal or vertical
