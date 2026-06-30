@@ -573,6 +573,19 @@ Figure 18 geometry.  The proof should target a board/free-grid certificate:
   proof should not require adjacent plane coordinates for consecutive virtual
   rows or columns.
 
+Robinson's original paper (`robinson.pdf`, used as local input but not checked
+in) supports this route more directly than Figure 18 alone.  In Section 7,
+after defining red borders and boards, Robinson states that no obstruction
+signals run along the free rows; a tile is in a free row iff no horizontal
+obstruction signal passes through it, and similarly for free columns.  He then
+superposes the Turing-machine signals on board tiles free in both directions,
+lets one-direction-free tiles transmit unchanged in their free direction, and
+observes that the board acts as though the free rows and columns were a
+contiguous square.  In Lean terms, prioritize the field-based
+`HasFigure18RobinsonBoardLevelSignalLocalTowerForTable` /
+`HasNatSiteSignalLocalTower` route over the stronger shifted raw-boundary
+diagnostic `Figure18CanonicalRawBoundaryBoardLevelChecks`.
+
 In Lean, this is represented by the
 `Figure18RobinsonBoardRoutedFreeGrid` target, which converts to the existing
 indexed-routed Figure 18 witness and then to `ForcesFixedCornerSquares`.
