@@ -16762,6 +16762,60 @@ def l2c2OriginZeroWindowsOfCheckedStacks
   hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked
 
 /--
+Origin-zero active/corner windows supply the field-based Robinson Section 7
+signal tower for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/--
+Origin-zero active/corner windows supply the field-based Robinson Section 7
+signal tower for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/--
+Finite origin-zero checked layer stacks supply the field-based Robinson
+Section 7 signal tower for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked layer stacks supply the field-based Robinson
+Section 7 signal tower for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
 Finite origin-zero checked layer stacks give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
 -/
@@ -20102,6 +20156,142 @@ theorem domino_problem_undecidable_l2c2_signal_tower_fig16_interiorRows
   exact
     domino_problem_undecidable_l2c2_signal_tower_fig16_position_source
       htower hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks and canonical checked compatible
+Figure 16 macro-squares.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig16_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_fig16_position_source
+      (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks and canonical checked compatible
+Figure 16 macro-squares.
+-/
+theorem domino_problem_undecidable_l2c1_checked_signal_tower_fig16_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_fig16_position_source
+      (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks and canonical checked compatible
+Figure 16 macro-squares.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig16_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_fig16_position_source
+      (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks and canonical checked compatible
+Figure 16 macro-squares.
+-/
+theorem domino_problem_undecidable_l2c2_checked_signal_tower_fig16_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_fig16_position_source
+      (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, canonical checked compatible
+Figure 16 macro-squares, and the generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig16_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig16_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, canonical checked compatible
+Figure 16 macro-squares, and the generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c1_checked_signal_tower_fig16_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_signal_tower_fig16_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, canonical checked compatible
+Figure 16 macro-squares, and the generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig16_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig16_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, canonical checked compatible
+Figure 16 macro-squares, and the generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_checked_signal_tower_fig16_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_signal_tower_fig16_position_source
+      hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows hinterior hcorrect)
 
 /--
