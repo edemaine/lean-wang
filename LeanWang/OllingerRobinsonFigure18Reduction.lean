@@ -16261,6 +16261,40 @@ structure L2C2CheckedSignalTowerBoardData : Prop where
   boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
 
 /--
+The first checked signal-tower board package is exactly a Robinson Section 7
+signal-tower/translated-box obligation: checked stacks give the local signal
+tower, and the checked board levels give the raw Figure 13 plane tiling used to
+build translated active-corner boxes.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels)
+
+/--
+The second checked signal-tower board package is exactly a Robinson Section 7
+signal-tower/translated-box obligation.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels)
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
 macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
@@ -21512,8 +21546,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_rows_position_source
-      data.checkedStacks data.boardLevels h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data) h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -21526,8 +21560,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_rows_position_source
-      data.checkedStacks data.boardLevels h
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
+      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data) h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -21539,8 +21573,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_rows_position_source
-      data.checkedStacks data.boardLevels h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data) h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -21553,8 +21587,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_rows_position_source
-      data.checkedStacks data.boardLevels h
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
+      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -22700,8 +22734,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_checked_signal_tower_fig13_rows_interiorRows
-      data.checkedStacks data.boardLevels hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
+      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -22719,8 +22754,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_checked_signal_tower_fig13_rows_interiorRows
-      data.checkedStacks data.boardLevels hinterior hcorrect
+    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
+      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -22738,8 +22774,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_checked_signal_tower_fig13_rows_interiorRows
-      data.checkedStacks data.boardLevels hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
+      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data)
+      hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -22757,8 +22794,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_checked_signal_tower_fig13_rows_interiorRows
-      data.checkedStacks data.boardLevels hinterior hcorrect
+    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
+      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
