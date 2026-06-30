@@ -5368,6 +5368,40 @@ theorem noObstruction_of_isFreeCrossing
   certificate.geometry.noObstruction_of_isFreeCrossing hcolumn hrow hcross
 
 /--
+If Robinson's obstruction signals show that a board column and row are clear,
+then the corresponding plane coordinate is one of the routed active free-grid
+cells, with the recorded scaffold/payload product tile.
+-/
+theorem activeProduct_of_clearLines
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hrow : certificate.isBoardRow row)
+    (hclear :
+      (∀ y : Int, certificate.isBoardRow y →
+        ¬ certificate.hasVerticalObstruction column y) ∧
+      (∀ x : Int, certificate.isBoardColumn x →
+        ¬ certificate.hasHorizontalObstruction x row)) :
+    ∃ i : Fin (RobinsonSquare.freeGridSide level),
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        certificate.freeColumnCoord i = column ∧
+          certificate.freeRowCoord j = row ∧
+          CellRole.isActive (table.roleAtSite (certificate.siteRect i j)) =
+            true ∧
+          WangTile.product (certificate.siteRect i j).tile
+              (certificate.payloadRect i j) =
+            (x (column, row)).1 := by
+  rcases (certificate.exists_freeCoords_iff_clearLines hcolumn hrow).2
+      hclear with ⟨i, j, hcolumn_eq, hrow_eq⟩
+  refine ⟨i, j, hcolumn_eq, hrow_eq, certificate.active i j, ?_⟩
+  simpa [hcolumn_eq, hrow_eq] using certificate.product i j
+
+/--
 Build a full signal certificate from board obstruction geometry and the routed
 Figure 18 payload data at the selected free crossings.
 -/
