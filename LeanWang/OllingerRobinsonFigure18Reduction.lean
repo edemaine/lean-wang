@@ -24162,6 +24162,134 @@ theorem
       (l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData data) h
 
 /--
+Encoded domino undecidability from first-component origin-zero recognizability
+and Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_board_aligned_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability
+and Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_board_aligned_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability
+and Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_board_aligned_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability
+and Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_board_aligned_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability
+and row-major checked raw-boundary board levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_board_levels_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability
+and row-major checked raw-boundary board levels.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_checked_board_levels_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability
+and row-major checked raw-boundary board levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_board_levels_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability
+and row-major checked raw-boundary board levels.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_checked_board_levels_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via the
 bundled Robinson Section 7 signal-tower/translated-board-box obligation.
 -/
