@@ -13602,6 +13602,182 @@ theorem
       O.toFigure18RoutedCertificate
       h
 
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, and the
+Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_position_source
+      O.toL2C1TowerIndexedBoxObligations h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, and the
+Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_position_source
+      O.toL2C1TowerIndexedBoxObligations h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, and the
+Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_position_source
+      O.toL2C2TowerIndexedBoxObligations h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, and the
+Robinson Section 7 tower/indexed-box certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_position_source
+      O.toL2C2TowerIndexedBoxObligations h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, the
+Robinson Section 7 tower/indexed-box certificate route, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_interiorRows
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
+      O.toL2C1TowerIndexedBoxObligations
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, the
+Robinson Section 7 tower/indexed-box certificate route, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_interiorRows
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
+      O.toL2C1TowerIndexedBoxObligations
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, the
+Robinson Section 7 tower/indexed-box certificate route, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_interiorRows
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
+      O.toL2C2TowerIndexedBoxObligations
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, translated active-box obligations, the
+Robinson Section 7 tower/indexed-box certificate route, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_interiorRows
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
+      O.toL2C2TowerIndexedBoxObligations
+      hinterior hcorrect
+
 open NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations in
 def l2c1GeomCombinedFig13Obligations
     (geomCombinedSiteRouting :
