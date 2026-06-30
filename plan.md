@@ -377,14 +377,38 @@ Next implementation targets:
 2. Optionally strengthen the result to computability on all
    `Turing.ToPartrec.Code` for a reusable folded-route corollary, but keep the
    public domino theorem surface on `PositionSourceObligations`.
-3. Add the actual Ollinger/Robinson scaffold tileset and prove `IsScaffold`.
-4. Specialize the concrete generated-position folded-route/scaffold
+3. Finish the Robinson Section 7 scaffold proof.  The light reduction module
+   now exposes the intended route through
+   `LayeredSection7ObstructionRoutingInvariant` and
+   `Figure18CanonicalRawBoundaryBoardLevelChecks`, including row-major checked
+   board-level wrappers:
+
+   ```lean
+   encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+   domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+   encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+   domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+   ```
+
+   and the analogous L2 component-2 wrappers.  The remaining scaffold-side
+   work is not another theorem alias: it is to prove the concrete
+   `LayeredSection7ObstructionRoutingInvariant` for the audited Figure 18
+   data, and to construct/prove the shifted board-level raw-boundary finite
+   data (or replace that over-strong diagnostic target with a leaner invariant
+   derived directly from the board/free-line proof).
+4. Add the semantic-final wrappers for the row-major Section 7 geometry route
+   only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
+   environment.  The light wrappers build in
+   `LeanWang.OllingerRobinsonFigure18Reduction`; the semantic-final module
+   imports the large folded correctness proof and currently requires the
+   missing `.olean` for `TM0FoldedPositionReduction`.
+5. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`
    and `domino_problem_undecidable_of_scaffold_position_source_positionCode`,
    to those concrete instances to recover the unconditional encoded and
    unencoded domino theorems.
-5. Optionally replace the current table-machine tiles by direct finite-TM0
+6. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0 instruction set is already close to the Wang-tile space-time
    simulation, so this should remove both the `PostProgram.toTableProgram`
    detour from the final theorem and the need for `TableProgram` as a live
