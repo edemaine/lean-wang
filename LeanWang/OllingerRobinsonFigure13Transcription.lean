@@ -10189,6 +10189,39 @@ theorem forcesFixedCornerSquares_of_robinsonBoardSignalLocalTower
     (hasFigure18RoutedFixedCornerSquares_of_robinsonBoardSignalLocalTower
       htower)
 
+/--
+Robinson Section 7 canonical free-site-rectangle routing directly supplies the
+abstract scaffold forcing invariant.
+
+This is the proof-facing bridge from the paper's obstruction/free-line
+argument to the general scaffold reduction: once free/free site rectangles are
+routed through the board corridors, the combined tiling forces arbitrarily
+large fixed-corner payload squares.
+-/
+theorem forcesFixedCornerSquares_of_robinsonBoardCanonicalFreeSiteRectRoutingForTable
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_robinsonBoardSignalLocalTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
+      hrouting)
+
+/--
+Listed-site version of
+`forcesFixedCornerSquares_of_robinsonBoardCanonicalFreeSiteRectRoutingForTable`.
+-/
+theorem forcesFixedCornerSquares_of_robinsonBoardCanonicalFreeSiteRectRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRouting
+        activeSites cornerSite) :
+    ForcesFixedCornerSquares
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_robinsonBoardCanonicalFreeSiteRectRoutingForTable
+    hrouting
+
 theorem forcesFixedCornerSquares_of_figure18AdjacentCompatible
     {table : Figure18RoleTable}
     (hadjacent : HasFigure18AdjacentCompatibleFixedCornerSquares table) :
