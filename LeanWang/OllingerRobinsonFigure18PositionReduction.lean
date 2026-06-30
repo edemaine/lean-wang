@@ -827,6 +827,98 @@ theorem
       (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
         hinterior)
 
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+compatible Robinson level grids and canonical checked compatible Figure 16
+macro-squares, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_level_fig16_interiorRowsCorrect
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_level_compatible_fig16_position_source
+      hgrids hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+compatible Robinson level grids and canonical checked compatible Figure 16
+macro-squares, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_level_fig16_interiorRowsCorrect
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_level_compatible_fig16_position_source
+      hgrids hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+compatible Robinson level grids and canonical checked compatible Figure 16
+macro-squares, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_level_fig16_interiorRowsCorrect
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_level_compatible_fig16_position_source
+      hgrids hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+compatible Robinson level grids and canonical checked compatible Figure 16
+macro-squares, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_level_fig16_interiorRowsCorrect
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_level_compatible_fig16_position_source
+      hgrids hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
 end TM0FoldedReduction
 
 end LeanWang
