@@ -17916,6 +17916,26 @@ def l2c2RobinsonSection7DataOfCheckedBoardLevels
       hlevel)
 
 /--
+The older first signal-tower board package is exactly a source for the
+paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfSignalTowerBoardData
+    (data : L2C1SignalTowerBoardData) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    data.signalLocalTower data.boardLevels
+
+/--
+The older second signal-tower board package is exactly a source for the
+paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfSignalTowerBoardData
+    (data : L2C2SignalTowerBoardData) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    data.signalLocalTower data.boardLevels
+
+/--
 The first translated-box package from a local signal tower and canonical
 Figure 16 source raw-boundary macro-squares.
 -/
@@ -25290,10 +25310,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfSignalTowerBoardData data)
       h
 
 /--
@@ -25306,10 +25324,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfSignalTowerBoardData data)
       h
 
 /--
@@ -25322,10 +25338,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_plane_position_source
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfSignalTowerBoardData data)
       h
 
 /--
@@ -25338,10 +25352,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_fig13_plane_position_source
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfSignalTowerBoardData data)
       h
 
 /--
@@ -25360,8 +25372,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_position_source
-      (l2c1SignalTowerBoardDataOfBoardLevelChecks
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       h
 
@@ -25381,8 +25393,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_board_data_position_source
-      (l2c1SignalTowerBoardDataOfBoardLevelChecks
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       h
 
@@ -25402,8 +25414,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_position_source
-      (l2c2SignalTowerBoardDataOfBoardLevelChecks
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       h
 
@@ -25423,8 +25435,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_board_data_position_source
-      (l2c2SignalTowerBoardDataOfBoardLevelChecks
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       h
 
@@ -26052,6 +26064,82 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first Robinson Section 7 scaffold
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+    (data : L2C1RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first Robinson Section 7 scaffold
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+    (data : L2C1RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second Robinson Section 7 scaffold
+package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+    (data : L2C2RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second Robinson Section 7 scaffold
+package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+    (data : L2C2RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
       hinterior hcorrect
 
 /--
@@ -27947,10 +28035,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interiorRows
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfSignalTowerBoardData data)
       hinterior hcorrect
 
 /--
@@ -27968,10 +28054,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_fig13_plane_interiorRows
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfSignalTowerBoardData data)
       hinterior hcorrect
 
 /--
@@ -27989,10 +28073,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interiorRows
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfSignalTowerBoardData data)
       hinterior hcorrect
 
 /--
@@ -28010,10 +28092,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_fig13_plane_interiorRows
-      data.signalLocalTower
-      (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-        data.boardLevels)
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfSignalTowerBoardData data)
       hinterior hcorrect
 
 /--
@@ -28037,8 +28117,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_interiorRows
-      (l2c1SignalTowerBoardDataOfBoardLevelChecks
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       hinterior hcorrect
 
@@ -28063,8 +28143,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_board_data_interiorRows
-      (l2c1SignalTowerBoardDataOfBoardLevelChecks
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       hinterior hcorrect
 
@@ -28089,8 +28169,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_interiorRows
-      (l2c2SignalTowerBoardDataOfBoardLevelChecks
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       hinterior hcorrect
 
@@ -28115,8 +28195,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_board_data_interiorRows
-      (l2c2SignalTowerBoardDataOfBoardLevelChecks
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
         signalLocalTower boardLevelChecks)
       hinterior hcorrect
 
