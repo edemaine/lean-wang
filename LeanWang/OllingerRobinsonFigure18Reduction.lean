@@ -17439,6 +17439,44 @@ def l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
       (l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
 
 /--
+The first translated-box package from a local signal tower and cofinal raw
+Figure 13 square tilings.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        hsquares)
+
+/--
+The second translated-box package from a local signal tower and cofinal raw
+Figure 13 square tilings.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        hsquares)
+
+/--
 Origin-zero windows and a raw Figure 13 plane tiling feed the first preferred
 translated-box package.
 -/
@@ -17461,6 +17499,30 @@ def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
   l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
     (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
     hplane
+
+/--
+Origin-zero windows and cofinal Figure 13 square tilings feed the first
+preferred translated-box package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13CofinalSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Origin-zero windows and cofinal Figure 13 square tilings feed the second
+preferred translated-box package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13CofinalSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hsquares
 
 /--
 Origin-zero windows and finite Figure 13 boxes feed the first preferred
@@ -23496,6 +23558,90 @@ theorem
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data) h
 
 /--
+Encoded domino undecidability from the first preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_cofinal_squares_position_source
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the first preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_fig13_cofinal_squares_position_source
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      h
+
+/--
+Encoded domino undecidability from the second preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_cofinal_squares_position_source
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the second preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_fig13_cofinal_squares_position_source
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      h
+
+/--
 Encoded domino undecidability from the first preferred origin-zero/finite
 Figure 13 box package.
 -/
@@ -25017,6 +25163,114 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings and generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_cofinal_squares_interiorRows
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings and generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_fig13_cofinal_squares_interiorRows
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings and generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_fig13_cofinal_squares_interiorRows
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second preferred field-based Section 7
+package specialized to cofinal raw Figure 13 square tilings and generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_fig13_cofinal_squares_interiorRows
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+        signalLocalTower hsquares)
       hinterior hcorrect
 
 /--
