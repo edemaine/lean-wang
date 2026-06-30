@@ -16239,6 +16239,110 @@ def l2c2Section7RoutingOfOriginZeroCheckedStacks
   l2Component2Section7ObstructionRoutingOfOriginZeroCheckedStacks hchecked
 
 /--
+Checked signal-tower data for the first audited L2-blank candidate, with the
+raw Figure 13 plane hypothesis stated directly.
+-/
+structure L2C1CheckedSignalTowerFig13PlaneData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  fig13Plane : TilesPlane fig13Tiles
+
+/--
+Checked signal-tower data for the second audited L2-blank candidate, with the
+raw Figure 13 plane hypothesis stated directly.
+-/
+structure L2C2CheckedSignalTowerFig13PlaneData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  fig13Plane : TilesPlane fig13Tiles
+
+/--
+Finite-box version of the checked signal-tower/`fig13Tiles` package for the
+first audited L2-blank candidate.
+-/
+structure L2C1CheckedSignalTowerFig13BoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  fig13Boxes : Figure13TileableBoxes
+
+/--
+Finite-box version of the checked signal-tower/`fig13Tiles` package for the
+second audited L2-blank candidate.
+-/
+structure L2C2CheckedSignalTowerFig13BoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  fig13Boxes : Figure13TileableBoxes
+
+/-- Finite `fig13Tiles` boxes give the plane form for the first L2 candidate. -/
+def l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1CheckedSignalTowerFig13PlaneData where
+  checkedStacks := data.checkedStacks
+  fig13Plane := tilesPlane_fig13Tiles_of_tileableBoxes data.fig13Boxes
+
+/-- Finite `fig13Tiles` boxes give the plane form for the second L2 candidate. -/
+def l2c2CheckedSignalTowerFig13PlaneDataOfBoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2CheckedSignalTowerFig13PlaneData where
+  checkedStacks := data.checkedStacks
+  fig13Plane := tilesPlane_fig13Tiles_of_tileableBoxes data.fig13Boxes
+
+/--
+The first checked signal-tower/plane package is exactly the Robinson Section 7
+signal-tower/translated-box obligation surface.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The second checked signal-tower/plane package is exactly the Robinson Section 7
+signal-tower/translated-box obligation surface.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The finite-box checked signal-tower package gives the Robinson Section 7
+obligation surface for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+The finite-box checked signal-tower package gives the Robinson Section 7
+obligation surface for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
 Finite checked scaffold package for the first audited L2-blank candidate.
 
 This is the current concrete target for the checked signal-tower route: prove
@@ -16261,6 +16365,30 @@ structure L2C2CheckedSignalTowerBoardData : Prop where
   boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
 
 /--
+The checked board-level diagnostic package gives the cleaner checked
+signal-tower/`fig13Tiles` finite-box package for the first L2 candidate.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    L2C1CheckedSignalTowerFig13BoxData where
+  checkedStacks := data.checkedStacks
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels
+
+/--
+The checked board-level diagnostic package gives the cleaner checked
+signal-tower/`fig13Tiles` finite-box package for the second L2 candidate.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    L2C2CheckedSignalTowerFig13BoxData where
+  checkedStacks := data.checkedStacks
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels
+
+/--
 The first checked signal-tower board package is exactly a Robinson Section 7
 signal-tower/translated-box obligation: checked stacks give the local signal
 tower, and the checked board levels give the raw Figure 13 plane tiling used to
@@ -16273,10 +16401,8 @@ def l2c1SignalTowerTranslatedObligationsOfCheckedBoardData
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
-  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TilesPlane
-    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
-    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-      data.boardLevels)
+  l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
 
 /--
 The second checked signal-tower board package is exactly a Robinson Section 7
@@ -16289,10 +16415,8 @@ def l2c2SignalTowerTranslatedObligationsOfCheckedBoardData
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
-  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TilesPlane
-    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
-    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
-      data.boardLevels)
+  l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
