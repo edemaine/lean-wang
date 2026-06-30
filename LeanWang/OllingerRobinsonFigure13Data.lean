@@ -11376,6 +11376,73 @@ def ofLevelCompatiblePositiveTranslatedBoxes
       translatedBoxes_pos)
     hcheck
 
+/--
+Paper-shaped Section 7 constructor: decoded combined-site corridor routing
+supplies the compatible routed free grids, while translated positive boxes
+provide the backward scaffold realization.
+-/
+def ofGeometryCombinedPositiveTranslatedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (geomCombinedSiteRouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatiblePositiveTranslatedBoxes activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerCombinedSites
+      geomCombinedSiteRouting)
+    translatedBoxes_pos hcheck
+
+/--
+Canonical decoded corridor routing version of
+`ofGeometryCombinedPositiveTranslatedBoxes`.
+-/
+def ofCanonicalCombinedPositiveTranslatedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatiblePositiveTranslatedBoxes activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCombinedSites
+      canonicalCombinedSiteRouting)
+    translatedBoxes_pos hcheck
+
 def ofLocalSignalCoordinateSteps
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -18480,6 +18547,64 @@ def toL2C2TowerIndexedBoxObligations
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   O.toTowerIndexedBoxObligations
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+def toCompatibleLevelObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofGeometryCombinedPositiveTranslatedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.geomCombinedSiteRouting
+    O.positiveTranslatedIndexedBoxes pairCompatibility
+
+def toL2C1CompatibleLevelObligations
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
+def toL2C2CompatibleLevelObligations
+    (O : NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
     (by
       simpa [l2Component2BlankCandidateActiveSiteData,
         l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
