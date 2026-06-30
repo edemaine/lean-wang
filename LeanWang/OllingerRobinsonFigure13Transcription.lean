@@ -8721,6 +8721,54 @@ theorem
       htower)
 
 /--
+Decoded combined-site corridor routing directly supplies compatible level
+routed free grids.  This is the finite-checker-facing form of Robinson's
+Section 7 route: the board/free-line argument supplies decoded crossings and
+corridor payload transmission, then each board level becomes a compatible
+virtual free grid.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerCombinedSites
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
+      hrouting)
+
+/--
+Fixed-geometry decoded corridor routing directly supplies compatible level
+routed free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_fixedGeometryCombinedSites
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerCombinedSites
+    (hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_fixed
+      hrouting)
+
+/--
+Canonical decoded corridor routing directly supplies compatible level routed
+free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCombinedSites
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerCombinedSites
+    (hasFigure18RobinsonBoardGeometryTowerCombinedSiteRoutingForTable_of_canonical
+      hrouting)
+
+/--
 A coherent local Section 7 tower directly supplies level routed free grids.
 -/
 theorem hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_localTower
@@ -9368,6 +9416,18 @@ theorem
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
     hrouting
 
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryCombinedSiteRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerCombinedSites
+    hrouting
+
 theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonical
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
     (hrouting :
@@ -9376,6 +9436,18 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonical
       (Figure18RoleTable.FlatRoleTable.ofActiveSites
         activeSites cornerSite).toRoleTable :=
   hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+    hrouting
+
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCombinedSiteRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCombinedSites
     hrouting
 
 theorem
