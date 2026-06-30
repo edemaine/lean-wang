@@ -11671,6 +11671,23 @@ def RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingLayerPatches
     canonicalRouting
     (HasRealizationInvariant.ofLayerPatches patches)
 
+/--
+Robinson Section 7 obstruction routing plus finite layer patches gives the
+routed scaffold certificate.
+
+This is the structured backward target suggested by the board/free-line proof:
+the Section 7 obstruction argument supplies the routed free-grid forcing side,
+while finite layer patches supply the realization side.
+-/
+def RoutedCertificate.ofRobinsonSection7LayerPatches
+    (D : Figure18ScaffoldData)
+    (section7Routing : D.HasRobinsonSection7ObstructionRoutingInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant D
+    section7Routing
+    (HasRealizationInvariant.ofLayerPatches patches)
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridPositiveTranslatedBoxes
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
