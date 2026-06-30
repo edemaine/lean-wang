@@ -10702,6 +10702,13 @@ def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSiteRect
     (hasFigure18RobinsonBoardCombinedSiteCorridorRoutingForGeometryTower_of_siteRect
       hrouting)
 
+def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofCanonicalCombinedSiteRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant) :
+    D.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant :=
+  hasFigure18RobinsonBoardGeometryTowerCombinedSiteRouting_of_canonical
+    hrouting
+
 def HasRobinsonBoardRoutedFreeGridInvariant.ofGeometryTowerCombinedSiteRouting
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant) :
@@ -10812,6 +10819,21 @@ def HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
     (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
     D.HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant :=
   hasFigure18RobinsonBoardCanonicalCombinedSiteRouting_of_freeSiteRect
+    hrouting
+
+def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofFreeSiteRect
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    D.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant :=
+  HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofCanonicalCombinedSiteRouting
+    (HasRobinsonBoardCanonicalCombinedSiteRoutingInvariant.ofFreeSiteRect
+      hrouting)
+
+def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSection7ObstructionRouting
+    {D : Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonSection7ObstructionRoutingInvariant) :
+    D.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant :=
+  HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofFreeSiteRect
     hrouting
 
 def HasRobinsonBoardCanonicalCorridorRoutingInvariant.ofFreeSiteRect
