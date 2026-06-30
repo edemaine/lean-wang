@@ -558,6 +558,13 @@ indexed-routed Figure 18 witness and then to `ForcesFixedCornerSquares`.
 The older adjacent/listed-active window targets remain useful only if a local
 Figure 18 extraction really produces adjacent plane coordinates.
 
+The current scaffold-facing route is the origin-zero active/corner window
+target, paired with generated finite stack compatibility and translated
+positive-radius boxes.  This now converts directly to the cleaner
+`NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations` surface, so the
+Figure 13/Figure 16 finite transcription can feed Robinson's Section 7 signal
+tower target without morally depending on canonical row equality.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,
