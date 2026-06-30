@@ -27,6 +27,7 @@ namespace TM0FoldedReduction
 open Nat.Partrec (Code)
 open OllingerRobinson
 open OllingerRobinson.Figure18ScaffoldData
+open OllingerRobinson.Figure13Layers
 open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 /--
@@ -16126,6 +16127,48 @@ def l2c2GeomCombinedSiteRoutingOfSection7
   exact ⟨⟨geometryTower, routing⟩⟩
 
 /--
+Origin-zero active/corner windows give the layered Robinson Section 7
+obstruction-routing hypothesis for the first audited L2-blank candidate.
+-/
+def l2c1Section7RoutingOfOriginZeroWindows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the layered Robinson Section 7
+obstruction-routing hypothesis for the second audited L2-blank candidate.
+-/
+def l2c2Section7RoutingOfOriginZeroWindows
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    originZeroWindows
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
 macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
@@ -17268,6 +17311,94 @@ theorem
       section7Routing
       (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
       h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
