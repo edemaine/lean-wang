@@ -396,9 +396,13 @@ Next implementation targets:
    which now feed `LayeredSection7ObstructionRoutingInvariant` directly via
    `scaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroCheckedStacks`
    and the `l2Component*_Section7ObstructionRoutingOfOriginZeroCheckedStacks`
-   wrappers, and to construct/prove the shifted board-level raw-boundary
-   finite data (or replace that over-strong diagnostic target with a leaner
-   invariant derived directly from the board/free-line proof).
+   wrappers.  The light reduction module names the two concrete checked-stack
+   hypotheses as `L2C1OriginZeroCheckedStacks` and
+   `L2C2OriginZeroCheckedStacks`, and routes them through both board-level
+   checks and row-major board-level theorem surfaces.  The other remaining
+   scaffold-side task is to construct/prove the shifted board-level
+   raw-boundary finite data (or replace that over-strong diagnostic target
+   with a leaner invariant derived directly from the board/free-line proof).
 4. Add the semantic-final wrappers for the row-major Section 7 geometry route
    only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
    environment.  The light wrappers build in
