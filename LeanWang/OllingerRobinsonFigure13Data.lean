@@ -13859,6 +13859,62 @@ def HasNatSiteSignalLocalTower
           cornerIndex cornerQuadrant cornerIndex_valid).table x)
 
 /--
+Origin-zero active/corner windows supply Robinson's field-based local signal
+tower for the selected Nat-indexed Figure 18 scaffold.
+
+This is the direct Section 7 bridge: obstruction signals identify the free
+rows and columns, and the resulting local tower is the geometry used by the
+signal-tower scaffold route.
+-/
+def hasNatSiteSignalLocalTowerOfOriginZeroWindows
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    HasNatSiteSignalLocalTower activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_originZeroWindows
+      originZeroWindows)
+
+/-- First L2 candidate version of `hasNatSiteSignalLocalTowerOfOriginZeroWindows`. -/
+def l2Component1SignalLocalTowerOfOriginZeroWindows
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  hasNatSiteSignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/-- Second L2 candidate version of `hasNatSiteSignalLocalTowerOfOriginZeroWindows`. -/
+def l2Component2SignalLocalTowerOfOriginZeroWindows
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  hasNatSiteSignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/--
 Robinson Section 7 scaffold target using a field-based local signal tower and
 positive-radius boxes at translated origins.
 
