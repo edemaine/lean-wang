@@ -452,7 +452,15 @@ Next implementation targets:
    the direct pair-free signal-tower certificate.  The older
    `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData` package still exists
    as a bridge through row-major checked board levels, but should not be the
-   main target.  The adjacent source raw-boundary board target exposed as
+   main target.  The bundled checked-stack/plane and checked-stack/box packages
+   now feed this preferred package through
+   `l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData`,
+   `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData`,
+   `l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`, and
+   `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`; the corresponding
+   theorem wrappers route through `*_signal_tower_translated_box_data_*`
+   instead of the lower-level direct-obligation constructors.  The adjacent
+   source raw-boundary board target exposed as
    `Figure18CanonicalRawBoundaryBoardLevelChecks` should
    now be treated as a diagnostic, not as the next finite target: finite
    predicates `sourceRawBoundaryHCompatiblePairBool` and

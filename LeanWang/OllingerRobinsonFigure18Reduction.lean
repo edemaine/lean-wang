@@ -16801,6 +16801,85 @@ structure L2C2SignalTowerTranslatedBoxData : Prop where
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid)
 
+/--
+The first translated-box package from a local signal tower and a raw Figure 13
+plane tiling.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+/--
+The second translated-box package from a local signal tower and a raw Figure 13
+plane tiling.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+/--
+The first checked-stack/plane package feeds the preferred translated-box
+package: checked stacks recover the local signal tower, and the Figure 13 plane
+tiling gives positive translated boxes.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component1SignalLocalTowerOfOriginZeroWindows
+      (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks))
+    data.fig13Plane
+
+/--
+The second checked-stack/plane package feeds the preferred translated-box
+package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component2SignalLocalTowerOfOriginZeroWindows
+      (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks))
+    data.fig13Plane
+
+/--
+Finite Figure 13 boxes feed the first translated-box package via compactness.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Finite Figure 13 boxes feed the second translated-box package via compactness.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
 open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
 
 /--
@@ -22171,8 +22250,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData data) h
 
 /--
 Unencoded domino undecidability from the first bundled checked signal-tower and
@@ -22184,8 +22263,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData data) h
 
 /--
 Encoded domino undecidability from the second bundled checked signal-tower and
@@ -22197,8 +22276,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData data) h
 
 /--
 Unencoded domino undecidability from the second bundled checked signal-tower and
@@ -22210,8 +22289,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData data) h
 
 /--
 Encoded domino undecidability from the first bundled checked signal-tower and
@@ -22223,8 +22302,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the first bundled checked signal-tower and
@@ -22236,8 +22315,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData data) h
 
 /--
 Encoded domino undecidability from the second bundled checked signal-tower and
@@ -22249,8 +22328,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the second bundled checked signal-tower and
@@ -22262,8 +22341,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData data) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
