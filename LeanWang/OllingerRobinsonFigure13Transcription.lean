@@ -4299,6 +4299,17 @@ def toIndexedRoutedFixedCornerSquare
     grid.hmatch
     grid.vmatch
 
+/-- A routed Robinson free grid directly yields the extracted payload square. -/
+theorem tileable
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {n : Nat} {hn : 0 < n}
+    (grid : Figure18RobinsonBoardRoutedFreeGrid table x n hn) :
+    TileableFixedCornerSquare T seed n :=
+  grid.toIndexedRoutedFixedCornerSquare.tileable
+
 /-- Restrict a routed free grid to its lower-left `n × n` subgrid. -/
 def restrict
     {table : Figure18RoleTable}
@@ -7307,6 +7318,20 @@ def toRoutedFreeGrid
   product := certificate.product
   hmatch := certificate.hmatch
   vmatch := certificate.vmatch
+
+/--
+After the obstruction-signal bookkeeping has selected and routed a Robinson
+free grid, the certificate yields the extracted fixed-corner payload square.
+-/
+theorem tileable
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    TileableFixedCornerSquare T seed (RobinsonSquare.freeGridSide level) :=
+  certificate.toRoutedFreeGrid.tileable
 
 /-- Local site compatibility transfers to the routed free-grid view. -/
 theorem siteCompatible_toRoutedFreeGrid
