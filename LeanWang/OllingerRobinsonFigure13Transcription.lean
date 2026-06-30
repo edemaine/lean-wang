@@ -4496,6 +4496,27 @@ theorem isFreeCrossing_iff_clearLines
         hclearColumn,
       (geometry.freeRow_iff_noHorizontalObstruction row hrow).2 hclearRow⟩
 
+/--
+Robinson's obstruction-signal characterization, in enumerated-grid form:
+inside a board, a coordinate pair is represented in the free grid exactly when
+its full column and row carry no obstruction signal.
+-/
+theorem exists_freeCoords_iff_clearLines
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column row : Int}
+    (hcolumn : geometry.isBoardColumn column)
+    (hrow : geometry.isBoardRow row) :
+    (∃ i : Fin (RobinsonSquare.freeGridSide level),
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        geometry.freeColumnCoord i = column ∧
+          geometry.freeRowCoord j = row) ↔
+      (∀ y : Int, geometry.isBoardRow y →
+        ¬ geometry.hasVerticalObstruction column y) ∧
+      (∀ x : Int, geometry.isBoardColumn x →
+        ¬ geometry.hasHorizontalObstruction x row) := by
+  rw [← geometry.isFreeCrossing_iff_exists_freeCoords column row]
+  exact geometry.isFreeCrossing_iff_clearLines hcolumn hrow
+
 /-- Enumerated free-column/free-row coordinates form free crossings. -/
 theorem isFreeCrossing_freeCoord
     {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
@@ -5304,6 +5325,31 @@ theorem isFreeCrossing_iff_clearLines
       (∀ x : Int, certificate.isBoardColumn x →
         ¬ certificate.hasHorizontalObstruction x row) :=
   certificate.geometry.isFreeCrossing_iff_clearLines hcolumn hrow
+
+/--
+Certificate-level form of Robinson's obstruction-signal characterization:
+clear board lines are exactly the coordinates that occur in the routed free
+grid.
+-/
+theorem exists_freeCoords_iff_clearLines
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hrow : certificate.isBoardRow row) :
+    (∃ i : Fin (RobinsonSquare.freeGridSide level),
+      ∃ j : Fin (RobinsonSquare.freeGridSide level),
+        certificate.freeColumnCoord i = column ∧
+          certificate.freeRowCoord j = row) ↔
+      (∀ y : Int, certificate.isBoardRow y →
+        ¬ certificate.hasVerticalObstruction column y) ∧
+      (∀ x : Int, certificate.isBoardColumn x →
+        ¬ certificate.hasHorizontalObstruction x row) :=
+  certificate.geometry.exists_freeCoords_iff_clearLines hcolumn hrow
 
 /-- Any certificate free crossing has no obstruction through the crossing cell. -/
 theorem noObstruction_of_isFreeCrossing
