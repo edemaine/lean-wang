@@ -8477,6 +8477,25 @@ theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRo
     geometryTower routing⟩
 
 /--
+Decoded combined-site corridor routing supplies the coherent local tower
+surface directly.
+
+This is the paper-shaped Section 7 route: the tiling supplies the board/free-line
+geometry, and the local corridor facts show that the selected free crossings
+carry a contiguous payload square.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable table :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_geometryTowerCombinedSites
+      hrouting)
+
+/--
 The fixed-geometry routing target supplies the existing coherent local tower
 surface used downstream.
 -/
@@ -9336,6 +9355,18 @@ theorem hasFigure18RobinsonBoardRoutedFreeGrids_of_fixedGeometryTowerRouting
   hasFigure18RobinsonBoardRoutedFreeGrids_of_geometryTowerRouting
     (hasFigure18RobinsonBoardGeometryTowerRouting_of_fixedGeometryTowerRouting
       hrouting)
+
+theorem
+    hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSiteRouting
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hrouting :
+      HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRouting
+        activeSites cornerSite) :
+    HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerCombinedSites
+    hrouting
 
 theorem hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonical
     {activeSites : List Figure18Site} {cornerSite : Figure18Site}
