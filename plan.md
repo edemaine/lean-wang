@@ -459,7 +459,14 @@ Next implementation targets:
    `l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`, and
    `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`; the corresponding
    theorem wrappers route through `*_signal_tower_translated_box_data_*`
-   instead of the lower-level direct-obligation constructors.  The adjacent
+   instead of the lower-level direct-obligation constructors.  The same is now
+   true one level earlier for origin-zero windows via
+   `l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane`,
+   `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane`,
+   `l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, and
+   `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, so the
+   remaining scaffold statement can be read as origin-zero recognizability plus
+   raw Robinson plane/box tilability.  The adjacent
    source raw-boundary board target exposed as
    `Figure18CanonicalRawBoundaryBoardLevelChecks` should
    now be treated as a diagnostic, not as the next finite target: finite

@@ -16838,6 +16838,54 @@ def l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
       (l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
 
 /--
+Origin-zero windows and a raw Figure 13 plane tiling feed the first preferred
+translated-box package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+/--
+Origin-zero windows and a raw Figure 13 plane tiling feed the second preferred
+translated-box package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+/--
+Origin-zero windows and finite Figure 13 boxes feed the first preferred
+translated-box package via compactness.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    originZeroWindows
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+Origin-zero windows and finite Figure 13 boxes feed the second preferred
+translated-box package via compactness.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    originZeroWindows
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
 The first checked-stack/plane package feeds the preferred translated-box
 package: checked stacks recover the local signal tower, and the Figure 13 plane
 tiling gives positive translated boxes.
@@ -22014,10 +22062,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -22037,10 +22084,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      h
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -22060,10 +22106,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -22083,10 +22128,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      h
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -22106,10 +22150,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -22129,10 +22172,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      h
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -22152,10 +22194,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -22175,10 +22216,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      h
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -23546,10 +23586,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -23575,10 +23614,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      hinterior hcorrect
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -23604,10 +23642,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -23633,10 +23670,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2OriginZeroSignalTowerFig13DirectObligations
-        originZeroWindows hplane)
-      hinterior hcorrect
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+        originZeroWindows hplane) hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -23662,10 +23698,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -23691,10 +23726,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      hinterior hcorrect
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -23720,10 +23754,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -23749,10 +23782,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
-        originZeroWindows hboxes)
-      hinterior hcorrect
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+        originZeroWindows hboxes) hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
