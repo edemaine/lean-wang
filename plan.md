@@ -419,7 +419,11 @@ Next implementation targets:
    component-2 wrappers; the data-layer constructors
    `ofL2C1SignalLocalTowerFig13TilesPlane` and
    `ofL2C2SignalLocalTowerFig13TilesPlane` recenter the translated Robinson
-   board boxes into the existing indexed-box scaffold certificate.
+   board boxes into the existing indexed-box scaffold certificate.  The same
+   hypotheses are also bundled as
+   `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations`, with
+   `*_signal_tower_translated_obligations_*` wrappers exposing the current
+   proof-facing Section 7 target as one named object.
 4. Add the semantic-final wrappers for the row-major Section 7 geometry route
    only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
    environment.  The light wrappers build in
