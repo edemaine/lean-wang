@@ -16488,6 +16488,66 @@ def l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
     (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
 
 /--
+The first checked signal-tower/plane package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1OriginZeroSignalTowerFig13DirectObligations
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The second checked signal-tower/plane package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2OriginZeroSignalTowerFig13DirectObligations
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The first finite-box checked signal-tower package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1OriginZeroSignalTowerFig13BoxDirectObligations
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Boxes
+
+/--
+The second finite-box checked signal-tower package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2OriginZeroSignalTowerFig13BoxDirectObligations
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Boxes
+
+/--
 Finite checked scaffold package for the first audited L2-blank candidate.
 
 This is the current concrete target for the checked signal-tower route: prove
@@ -16643,6 +16703,34 @@ def l2c2SignalTowerTranslatedObligationsOfCheckedBoardData
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The first checked signal-tower board package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The second checked signal-tower board package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData
     (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
 
 /--
@@ -21861,8 +21949,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
 
 /--
 Unencoded domino undecidability from the first bundled checked signal-tower and
@@ -21874,8 +21962,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
 
 /--
 Encoded domino undecidability from the second bundled checked signal-tower and
@@ -21887,8 +21975,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
 
 /--
 Unencoded domino undecidability from the second bundled checked signal-tower and
@@ -21900,8 +21988,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData data) h
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData data) h
 
 /--
 Encoded domino undecidability from the first bundled checked signal-tower and
@@ -21913,8 +22001,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the first bundled checked signal-tower and
@@ -21926,8 +22014,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
 
 /--
 Encoded domino undecidability from the second bundled checked signal-tower and
@@ -21939,8 +22027,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the second bundled checked signal-tower and
@@ -21952,8 +22040,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData data) h
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData data) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -22113,8 +22201,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedBoardData data) h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -22127,8 +22215,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_position_source
-      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data) h
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
+      (l2c1SignalTowerDirectObligationsOfCheckedBoardData data) h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -22140,8 +22228,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedBoardData data) h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -22154,8 +22242,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_position_source
-      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data) h
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
+      (l2c2SignalTowerDirectObligationsOfCheckedBoardData data) h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -23601,8 +23689,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
-      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data)
+    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
+      (l2c1SignalTowerDirectObligationsOfCheckedBoardData data)
       hinterior hcorrect
 
 /--
@@ -23621,8 +23709,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_obligations_interiorRows
-      (l2c1SignalTowerTranslatedObligationsOfCheckedBoardData data)
+    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
+      (l2c1SignalTowerDirectObligationsOfCheckedBoardData data)
       hinterior hcorrect
 
 /--
@@ -23641,8 +23729,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
-      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data)
+    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
+      (l2c2SignalTowerDirectObligationsOfCheckedBoardData data)
       hinterior hcorrect
 
 /--
@@ -23661,8 +23749,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_obligations_interiorRows
-      (l2c2SignalTowerTranslatedObligationsOfCheckedBoardData data)
+    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
+      (l2c2SignalTowerDirectObligationsOfCheckedBoardData data)
       hinterior hcorrect
 
 /--
