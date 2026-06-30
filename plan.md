@@ -415,7 +415,8 @@ Next implementation targets:
    shape through
    `encoded_domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source`,
    `domino_problem_undecidable_l2c1_signal_tower_fig13_plane_position_source`,
-   and the analogous L2 component-2 wrappers; the data-layer constructors
+   the corresponding generated `interiorRows` wrappers, and the analogous L2
+   component-2 wrappers; the data-layer constructors
    `ofL2C1SignalLocalTowerFig13TilesPlane` and
    `ofL2C2SignalLocalTowerFig13TilesPlane` recenter the translated Robinson
    board boxes into the existing indexed-box scaffold certificate.
