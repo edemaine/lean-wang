@@ -26227,6 +26227,86 @@ theorem
         hinterior hcorrect)
 
 /--
+Encoded domino undecidability from the first Robinson Section 7 scaffold
+package and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+    (data : L2C1RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorPackage
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first Robinson Section 7 scaffold
+package and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+    (data : L2C1RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorPackage
+      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second Robinson Section 7 scaffold
+package and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+    (data : L2C2RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorPackage
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second Robinson Section 7 scaffold
+package and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+    (data : L2C2RobinsonSection7Data)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorPackage
+      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to cofinal raw Figure 13 square tilings and generated
 interior position-code rows.
