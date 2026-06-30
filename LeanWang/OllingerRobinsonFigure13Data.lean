@@ -16560,6 +16560,50 @@ def natSiteFigure18RoutedCertificateOfCanonicalSiteRectRoutingPositiveTranslated
     translatedBoxes
 
 /--
+Direct flexible Figure 18 certificate from Robinson's canonical free-site-
+rectangle routing and positive-radius translated active-corner boxes.
+
+This is the same Section 7 proof-facing package as the routed constructor
+below, but it lands immediately on the abstract scaffold certificate.
+-/
+def natSiteFigure18FlexibleCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid)) :
+    Figure18FlexibleCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  Figure18FlexibleCertificate.ofRobinsonBoardCanonicalFreeSiteRectRouting
+    canonicalFreeSiteRectRouting
+    (by
+      have hrealizes :
+          Figure18ScaffoldData.HasRealizationInvariant
+            (figure18ScaffoldDataOfNatSites activeSiteSpecs
+              activeSiteSpecs_valid cornerIndex cornerQuadrant
+              cornerIndex_valid) :=
+        Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+          translatedBoxes
+      simpa [Figure18ScaffoldData.HasRealizationInvariant,
+        figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table] using hrealizes)
+
+/--
 Direct routed Figure 18 certificate from Robinson's canonical free-site-
 rectangle routing and positive-radius translated active-corner boxes.
 
@@ -17726,6 +17770,21 @@ def toFigure18RoutedCertificate
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).table :=
   natSiteFigure18RoutedCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
+    O.canonicalFreeSiteRectRouting O.positiveTranslatedIndexedBoxes
+
+def toFigure18FlexibleCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    Figure18FlexibleCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  natSiteFigure18FlexibleCertificateOfCanonicalFreeSiteRectRoutingPositiveTranslatedBoxes
     O.canonicalFreeSiteRectRouting O.positiveTranslatedIndexedBoxes
 
 end NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations

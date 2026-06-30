@@ -10384,6 +10384,39 @@ structure Figure18FlatActiveSiteCertificate
   realizes : RealizesActiveCornerSquares
     table.toRoleTable.presentation.toScaffold
 
+namespace Figure18FlexibleCertificate
+
+/--
+Build the abstract flexible scaffold certificate directly from Robinson
+Section 7 canonical free-site-rectangle routing.
+
+This keeps the proof-facing route aligned with the general scaffold theorem:
+the routing argument supplies `ForcesFixedCornerSquares`, while realization is
+kept as the separate positive-box/layer-patch obligation.
+-/
+def ofRobinsonBoardCanonicalFreeSiteRectRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table)
+    (realizes :
+      RealizesActiveCornerSquares table.presentation.toScaffold) :
+    Figure18FlexibleCertificate table where
+  forces :=
+    forcesFixedCornerSquares_of_robinsonBoardCanonicalFreeSiteRectRoutingForTable
+      hrouting
+  realizes := realizes
+
+theorem isScaffold
+    {table : Figure18RoleTable}
+    (certificate : Figure18FlexibleCertificate table) :
+    IsScaffold table.presentation.toScaffold :=
+  isScaffold_of_flexibleCertificate {
+    forces := certificate.forces
+    realizes := certificate.realizes
+  }
+
+end Figure18FlexibleCertificate
+
 namespace Figure18Certificate
 
 def toFlexibleCertificate
