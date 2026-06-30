@@ -14384,8 +14384,8 @@ def l2c1OriginZeroSignalTowerFig13BundledObligations
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
-  (l2c1OriginZeroFig13BundledObligations originZeroWindows hplane)
-    |>.toL2C1SignalTowerTranslatedPositiveBoxObligations
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TilesPlane
+    originZeroWindows hplane
 
 def l2c2OriginZeroSignalTowerFig13BundledObligations
     (originZeroWindows :
@@ -14401,8 +14401,8 @@ def l2c2OriginZeroSignalTowerFig13BundledObligations
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
-  (l2c2OriginZeroFig13BundledObligations originZeroWindows hplane)
-    |>.toL2C2SignalTowerTranslatedPositiveBoxObligations
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TilesPlane
+    originZeroWindows hplane
 
 def l2c1OriginZeroSignalTowerFig13BoxBundledObligations
     (originZeroWindows :
@@ -14418,8 +14418,8 @@ def l2c1OriginZeroSignalTowerFig13BoxBundledObligations
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
-  (l2c1OriginZeroFig13BoxBundledObligations originZeroWindows hboxes)
-    |>.toL2C1SignalTowerTranslatedPositiveBoxObligations
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TileableBoxes
+    originZeroWindows hboxes
 
 def l2c2OriginZeroSignalTowerFig13BoxBundledObligations
     (originZeroWindows :
@@ -14435,8 +14435,8 @@ def l2c2OriginZeroSignalTowerFig13BoxBundledObligations
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
-  (l2c2OriginZeroFig13BoxBundledObligations originZeroWindows hboxes)
-    |>.toL2C2SignalTowerTranslatedPositiveBoxObligations
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TileableBoxes
+    originZeroWindows hboxes
 
 /--
 The Figure 18 role table whose indexed-active windows are needed for the first
