@@ -26000,6 +26000,90 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package and the packaged generated interior position-code source
+route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorPackage
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package and the packaged generated interior position-code source
+route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorPackage
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package and the packaged generated interior position-code source
+route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorPackage
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package and the packaged generated interior position-code source
+route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorPackage
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via the
 bundled Robinson Section 7 signal-tower/translated-board-box obligation and
 generated interior position-code rows.
