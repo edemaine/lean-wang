@@ -28741,6 +28741,114 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first field-based local signal tower,
+explicit shifted board-level checks, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_signal_tower_board_checks_interiorPackage
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
+        signalLocalTower boardLevelChecks)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first field-based local signal tower,
+explicit shifted board-level checks, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_signal_tower_board_checks_interiorPackage
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfBoardLevelChecks
+        signalLocalTower boardLevelChecks)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second field-based local signal tower,
+explicit shifted board-level checks, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_signal_tower_board_checks_interiorPackage
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
+        signalLocalTower boardLevelChecks)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second field-based local signal tower,
+explicit shifted board-level checks, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_signal_tower_board_checks_interiorPackage
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfBoardLevelChecks
+        signalLocalTower boardLevelChecks)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate, using
 origin-zero active/corner windows, shifted raw-boundary Figure 16 board checks,
 and generated interior position-code rows.
