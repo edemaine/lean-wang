@@ -1227,6 +1227,130 @@ theorem domino_problem_undecidable_l2c2_checked_level_data_interiorRowsCorrect
       (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
         hinterior)
 
+/--
+Encoded domino undecidability from the first preferred field-based Section 7
+package, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRowsCorrect
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the first preferred field-based Section 7
+package, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRowsCorrect
+    (data : L2C1SignalTowerTranslatedBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the second preferred field-based Section 7
+package, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRowsCorrect
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the second preferred field-based Section 7
+package, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRowsCorrect
+    (data : L2C2SignalTowerTranslatedBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRowsCorrect
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the first preferred origin-zero/finite
+Figure 13 box package, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorRowsCorrect
+    (data : L2C1OriginZeroFig13BoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRowsCorrect
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the second preferred origin-zero/finite
+Figure 13 box package, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRowsCorrect
+    (data : L2C2OriginZeroFig13BoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
 end TM0FoldedReduction
 
 end LeanWang
