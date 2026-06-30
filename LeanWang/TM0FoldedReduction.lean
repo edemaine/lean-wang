@@ -3200,8 +3200,7 @@ theorem sourcePartrecVarIndex_getElem? (v : TM0Route.PartrecVar) :
   exact List.getElem?_eq_some_iff.2 ⟨hidx, of_decide_eq_true hfind.1⟩
 
 theorem sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows
-    (hrows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hrows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3227,8 +3226,7 @@ theorem sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows
       (v := p.2.2) (hnodup p.1) hv).symm
 
 theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3254,8 +3252,7 @@ theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInt
       (v := p.2.2) (hnodup p.1) hv).symm
 
 theorem sourceSearchCodeInteriorRowsVar_primrec_of_positionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3709,8 +3706,7 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
   (sourceProgramData_computable_of_source_searchCodeOneVarRows hvarRows).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3719,8 +3715,7 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionC
     (sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows hvarRows hnodup)
 
 theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows'
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3744,8 +3739,7 @@ theorem sourceProgramData_computable_of_source_boundedInteriorRows'
   (sourceProgramData_computable_of_source_boundedInteriorRows hinterior).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3755,8 +3749,7 @@ theorem sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBo
       hinterior hnodup)
 
 theorem sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3780,8 +3773,7 @@ theorem sourceProgramData_computable_of_source_interiorRows'
   (sourceProgramData_computable_of_source_interiorRows hinterior).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3791,8 +3783,7 @@ theorem sourceProgramData_computable_of_source_interiorRows_of_positionCodeInter
       hinterior hnodup)
 
 theorem sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -3880,8 +3871,7 @@ obligation. This is useful while the final theorem surface still exposes both
 decoder presentations.
 -/
 def sourceObligationsOfSearchCodeOneVarRowsPositionCodeOneRows
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -3901,8 +3891,7 @@ Primitive recursiveness of the bounded interior position-code decoder, plus
 statement support-list nodup, also supplies the bounded-search row obligation.
 -/
 def sourceObligationsOfSearchCodeBoundedInteriorRowsPositionCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -3923,8 +3912,7 @@ statement support-list nodup, also supplies the full interior search-row
 obligation.
 -/
 def sourceObligationsOfSearchCodeInteriorRowsPositionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -4033,8 +4021,7 @@ program-data computability once the generated position-coded rows are known to
 match the semantic folded simulation rows.
 -/
 theorem sourceProgramData_computable_of_source_positionCodeOneRows
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4046,8 +4033,7 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows
     hrows
 
 theorem sourceProgramData_computable_of_source_positionCodeOneRows'
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4058,8 +4044,7 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows'
     hvarRows hrows).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4070,8 +4055,7 @@ theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows
     hrows
 
 theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4082,8 +4066,7 @@ theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows'
     hinterior hrows).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4094,8 +4077,7 @@ theorem sourceProgramData_computable_of_source_positionCodeInteriorRows
     hrows
 
 theorem sourceProgramData_computable_of_source_positionCodeInteriorRows'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4176,8 +4158,7 @@ first-occurrence minimality for every decoded support position, gives
 program-data computability.
 -/
 theorem sourceProgramData_computable_of_source_positionCodeOneRows_minimal
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
       ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
         TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
@@ -4192,8 +4173,7 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows_minimal
     hmin
 
 theorem sourceProgramData_computable_of_source_positionCodeOneRows_minimal'
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
       ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
         TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
@@ -4207,8 +4187,7 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows_minimal'
     hvarRows hmin).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4221,8 +4200,7 @@ theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementList
         (c := c) (hnodup c) hq)
 
 theorem sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup'
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4257,8 +4235,7 @@ theorem sourceProgramData_computable_of_source_positionCodeDecoderStep_statement
     hstep hnodup).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4268,8 +4245,7 @@ theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_s
     hnodup
 
 theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4279,8 +4255,7 @@ theorem sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_s
     hinterior hnodup).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeInteriorRows_statementListNodup
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4290,8 +4265,7 @@ theorem sourceProgramData_computable_of_source_positionCodeInteriorRows_statemen
     hnodup
 
 theorem sourceProgramData_computable_of_source_positionCodeInteriorRows_statementListNodup'
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup) :
@@ -4355,8 +4329,7 @@ simulation rows, gives the exact source obligations needed by the final
 reduction.
 -/
 def sourceObligationsOfPositionCodeOneRows
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4379,8 +4352,7 @@ canonical folded simulation rows, gives the exact source obligations needed by
 the final reduction.
 -/
 def sourceObligationsOfPositionCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4403,8 +4375,7 @@ simulation rows, gives the exact source obligations needed by the final
 reduction.
 -/
 def sourceObligationsOfPositionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hrows : ∀ c : Code,
       TM0FoldedCompiler.simRowsOfStepData
           (sourceSimStepDataByLabelIndexWithPositionCode c) =
@@ -4463,8 +4434,7 @@ Primitive recursiveness of the generated one-row position-code decoder gives
 the generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeOneRows
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4481,8 +4451,7 @@ Primitive recursiveness of the generated bounded-interior position-code rows
 gives the generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4498,8 +4467,7 @@ Primitive recursiveness of the generated interior position-code rows gives the
 generated-position source obligations.
 -/
 def positionSourceObligationsOfPositionCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -4569,8 +4537,7 @@ first-occurrence minimality for every decoded support position are enough to
 produce the source obligations needed by the final reduction.
 -/
 def sourceObligationsOfPositionCodeOneRowsMinimal
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
       ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
         TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
@@ -4595,8 +4562,7 @@ duplicates in the translated TM0 statement-support list are enough to produce
 the source obligations needed by the final reduction.
 -/
 def sourceObligationsOfPositionCodeOneRowsStatementListNodup
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -4640,8 +4606,7 @@ and absence of duplicates in the translated TM0 statement-support list are
 enough to produce the source obligations needed by the final reduction.
 -/
 def sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -4662,8 +4627,7 @@ absence of duplicates in the translated TM0 statement-support list are enough
 to produce the source obligations needed by the final reduction.
 -/
 def sourceObligationsOfPositionCodeInteriorRowsStatementListNodup
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
       (TM0Route.partrecStartedTM0StatementList
         (NatPartrecToToPartrec.translate c)).Nodup)
@@ -5000,8 +4964,7 @@ position-code decoder.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeOneRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5017,8 +4980,7 @@ position-code decoder.
 -/
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeOneRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hvarRows : SourcePositionCodeOneRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5034,8 +4996,7 @@ interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeBoundedRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5052,8 +5013,7 @@ interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeBoundedRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5070,8 +5030,7 @@ position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5088,8 +5047,7 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeInteriorRows
     (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5106,8 +5064,7 @@ the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5123,8 +5080,7 @@ the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_presented_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5140,8 +5096,7 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_checked_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.CheckedPresentedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5157,8 +5112,7 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checked_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.CheckedPresentedInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5175,8 +5129,7 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 theorem
 encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedFlexibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -5192,8 +5145,7 @@ Ollinger/Robinson scaffold and the generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRows
     (I : OllingerRobinson.PresentedFlexibleInstance)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
