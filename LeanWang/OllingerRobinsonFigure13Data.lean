@@ -9037,6 +9037,34 @@ theorem figure18ScaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroWind
     hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
       originZeroWindows
 
+/--
+Finite origin-zero checked layer stacks supply Robinson Section 7 obstruction
+routing for the concrete Nat-indexed layered Figure 18 scaffold data.
+
+This is the checked-data version of the origin-zero route: the finite
+Figure 13/Figure 16 stack certificate first recovers the origin-zero
+active/corner windows, and then Robinson's board argument identifies the free
+rows and columns.
+-/
+theorem scaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroCheckedStacks
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasIndexedActiveOriginZeroWindowCheckedStacks
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonSection7ObstructionRoutingInvariant := by
+  exact
+    CheckedSparseRawData.hasRobinsonSection7ObstructionRoutingInvariant_of_originZeroCheckedStacks
+      hchecked
+
 def l2Component1Figure18ScaffoldData : Figure18ScaffoldData :=
   figure18ScaffoldDataOfNatSites
     l2Component1BlankCandidateActiveSiteSpecs
@@ -9106,6 +9134,66 @@ theorem l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWi
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
       originZeroWindows
+
+/--
+Robinson Section 7 obstruction routing for the first audited L2-blank
+candidate, from finite origin-zero checked layer stacks.
+-/
+theorem l2Component1Section7ObstructionRoutingOfOriginZeroCheckedStacks
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasRobinsonSection7ObstructionRoutingInvariant :=
+  scaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroCheckedStacks
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    hchecked
+
+/--
+Robinson Section 7 obstruction routing for the second audited L2-blank
+candidate, from finite origin-zero checked layer stacks.
+-/
+theorem l2Component2Section7ObstructionRoutingOfOriginZeroCheckedStacks
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasRobinsonSection7ObstructionRoutingInvariant :=
+  scaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroCheckedStacks
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    hchecked
 
 theorem l2Component1Figure18ScaffoldDataNoHCompatibleAllowedSitesBool :
     noGeneratedStackAllowedSiteHPairsBool

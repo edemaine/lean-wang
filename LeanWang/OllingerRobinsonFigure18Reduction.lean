@@ -16169,6 +16169,56 @@ def l2c2Section7RoutingOfOriginZeroWindows
     originZeroWindows
 
 /--
+Finite origin-zero checked layer stacks give the layered Robinson Section 7
+obstruction-routing hypothesis for the first audited L2-blank candidate.
+-/
+def l2c1Section7RoutingOfOriginZeroCheckedStacks
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).table) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  l2Component1Section7ObstructionRoutingOfOriginZeroCheckedStacks hchecked
+
+/--
+Finite origin-zero checked layer stacks give the layered Robinson Section 7
+obstruction-routing hypothesis for the second audited L2-blank candidate.
+-/
+def l2c2Section7RoutingOfOriginZeroCheckedStacks
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).table) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  l2Component2Section7ObstructionRoutingOfOriginZeroCheckedStacks hchecked
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
 macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
@@ -17398,6 +17448,114 @@ theorem
   exact
     domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
       (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_rows_position_source
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroCheckedStacks hchecked)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_rows_position_source
+    (hchecked :
+      (sparseRawDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+          |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroCheckedStacks hchecked)
       hlevel h
 
 /--
