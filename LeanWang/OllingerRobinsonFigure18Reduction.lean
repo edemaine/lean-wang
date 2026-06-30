@@ -16285,6 +16285,83 @@ def l2c2CheckedSignalTowerFig13PlaneDataOfBoxData
   fig13Plane := tilesPlane_fig13Tiles_of_tileableBoxes data.fig13Boxes
 
 /--
+Origin-zero windows, together with a raw Figure 13 plane tiling, give the first
+checked signal-tower/plane package.  The checked stacks are generated from the
+audited finite compatibility table.
+-/
+def l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1CheckedSignalTowerFig13PlaneData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Plane := hplane
+
+/--
+Origin-zero windows, together with a raw Figure 13 plane tiling, give the second
+checked signal-tower/plane package.
+-/
+def l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2CheckedSignalTowerFig13PlaneData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Plane := hplane
+
+/--
+Origin-zero windows and finite Figure 13 boxes give the first checked
+signal-tower/box package.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1CheckedSignalTowerFig13BoxData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+Origin-zero windows and finite Figure 13 boxes give the second checked
+signal-tower/box package.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2CheckedSignalTowerFig13BoxData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+The first origin-zero box constructor has the expected plane-forgetting form.
+-/
+theorem l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows_boxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
+        (l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+          originZeroWindows hboxes) =
+      l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+        originZeroWindows
+        (tilesPlane_fig13Tiles_of_tileableBoxes hboxes) :=
+  rfl
+
+/--
+The second origin-zero box constructor has the expected plane-forgetting form.
+-/
+theorem l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows_boxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    l2c2CheckedSignalTowerFig13PlaneDataOfBoxData
+        (l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+          originZeroWindows hboxes) =
+      l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+        originZeroWindows
+        (tilesPlane_fig13Tiles_of_tileableBoxes hboxes) :=
+  rfl
+
+/--
 The first checked signal-tower/plane package is exactly the Robinson Section 7
 signal-tower/translated-box obligation surface.
 -/
