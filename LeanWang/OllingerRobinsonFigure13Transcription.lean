@@ -5230,6 +5230,97 @@ theorem geometry_freeRowCoord_apply
     certificate.geometry.freeRowCoord i = certificate.freeRowCoord i :=
   rfl
 
+/-- A coordinate pair lying at a free crossing of the certificate board. -/
+def IsFreeCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) : Prop :=
+  certificate.geometry.IsFreeCrossing column row
+
+/-- Certificate free crossings are free columns crossed with free rows. -/
+theorem isFreeCrossing_iff
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) :
+    certificate.IsFreeCrossing column row ↔
+      certificate.isFreeColumn column ∧ certificate.isFreeRow row := by
+  rfl
+
+/-- Certificate free crossings are exactly the enumerated free coordinates. -/
+theorem isFreeCrossing_iff_exists_freeCoords
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) :
+    certificate.IsFreeCrossing column row ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        ∃ j : Fin (RobinsonSquare.freeGridSide level),
+          certificate.freeColumnCoord i = column ∧
+            certificate.freeRowCoord j = row :=
+  certificate.geometry.isFreeCrossing_iff_exists_freeCoords column row
+
+/-- The selected free-column/free-row coordinates are certificate free crossings. -/
+theorem isFreeCrossing_freeCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    certificate.IsFreeCrossing
+      (certificate.freeColumnCoord i) (certificate.freeRowCoord j) :=
+  certificate.geometry.isFreeCrossing_freeCoord i j
+
+/--
+A certificate coordinate pair is a free crossing exactly when its board column
+has no vertical obstruction and its board row has no horizontal obstruction.
+-/
+theorem isFreeCrossing_iff_clearLines
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hrow : certificate.isBoardRow row) :
+    certificate.IsFreeCrossing column row ↔
+      (∀ y : Int, certificate.isBoardRow y →
+        ¬ certificate.hasVerticalObstruction column y) ∧
+      (∀ x : Int, certificate.isBoardColumn x →
+        ¬ certificate.hasHorizontalObstruction x row) :=
+  certificate.geometry.isFreeCrossing_iff_clearLines hcolumn hrow
+
+/-- Any certificate free crossing has no obstruction through the crossing cell. -/
+theorem noObstruction_of_isFreeCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    {column row : Int}
+    (hcolumn : certificate.isBoardColumn column)
+    (hrow : certificate.isBoardRow row)
+    (hcross : certificate.IsFreeCrossing column row) :
+    (¬ certificate.hasHorizontalObstruction column row) ∧
+      ¬ certificate.hasVerticalObstruction column row :=
+  certificate.geometry.noObstruction_of_isFreeCrossing hcolumn hrow hcross
+
 /--
 Build a full signal certificate from board obstruction geometry and the routed
 Figure 18 payload data at the selected free crossings.
@@ -6024,6 +6115,70 @@ structure SiteRectRouting
           (siteRect i j) (siteRect i ⟨j.val + 1, hj⟩) = true)
 
 namespace SiteRectRouting
+
+/-- The selected coordinate of a site-rectangle routing is a free crossing. -/
+theorem selectedCoord_isFreeCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (_routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    geometry.IsFreeCrossing
+      (geometry.freeColumnCoord i) (geometry.freeRowCoord j) :=
+  geometry.isFreeCrossing_freeCoord i j
+
+/--
+The site rectangle records the decoded combined-tile site at each selected
+free crossing.
+-/
+theorem combinedSite_eq_at_selectedCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    table.combinedSite
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)) =
+      routing.siteRect i j :=
+  routing.site_eq i j
+
+/-- The decoded site at each selected free crossing is active. -/
+theorem active_at_selectedCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    CellRole.isActive (table.roleAtSite
+      (table.combinedSite
+        (x (geometry.freeColumnCoord i, geometry.freeRowCoord j)))) = true := by
+  simpa [routing.combinedSite_eq_at_selectedCoord i j] using
+    routing.active i j
+
+/-- Selected free crossings have neither obstruction through the crossing cell. -/
+theorem noObstruction_at_selectedCoord
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat} {geometry : RobinsonBoardSignalGeometry level}
+    (_routing : SiteRectRouting table x geometry)
+    (i : Fin (RobinsonSquare.freeGridSide level))
+    (j : Fin (RobinsonSquare.freeGridSide level)) :
+    (¬ geometry.hasHorizontalObstruction
+        (geometry.freeColumnCoord i) (geometry.freeRowCoord j)) ∧
+      ¬ geometry.hasVerticalObstruction
+        (geometry.freeColumnCoord i) (geometry.freeRowCoord j) :=
+  geometry.noObstruction_at_freeCrossing i j
 
 /-- Forget the named site rectangle after using it to build combined routing. -/
 noncomputable def toCombinedSiteCorridorRouting
