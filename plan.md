@@ -701,7 +701,11 @@ It now also exposes `toBoardFreeLineActiveCorner` and
 `toCompatibleLevelObligationsOfLayerPatches`, making the finite-check-facing
 route explicit: origin-zero windows provide Robinson's board/free-line
 active-corner invariant, and the centered layer patches provide the backward
-scaffold realization.
+scaffold realization.  The default generic
+`NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.toCompatibleLevelObligations`
+projection now uses this layer-patch route, so the origin-zero theorem wrappers
+no longer silently detour through the older canonical/free-site translated-box
+constructor.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

@@ -18995,8 +18995,7 @@ def toCompatibleLevelObligations
     NatSiteRobinsonCompatibleLevelObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid :=
-  O.toCanonicalFreeSiteRectTranslatedPositiveBoxObligations
-    |>.toCompatibleLevelObligations O.pairCompatibility
+  O.toCompatibleLevelObligationsOfLayerPatches
 
 def toL2C1CompatibleLevelObligations
     (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
