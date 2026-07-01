@@ -27579,6 +27579,78 @@ theorem
       h
 
 /--
+Encoded domino undecidability from the first proof-facing board/free-line
+invariant and a raw Figure 13 plane tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      h
+
+/--
+Unencoded domino undecidability from the first proof-facing board/free-line
+invariant and a raw Figure 13 plane tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      h
+
+/--
+Encoded domino undecidability from the second proof-facing board/free-line
+invariant and a raw Figure 13 plane tiling.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      h
+
+/--
+Unencoded domino undecidability from the second proof-facing board/free-line
+invariant and a raw Figure 13 plane tiling.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      h
+
+/--
 Encoded domino undecidability from the first active/corner recognition
 obligation at canonical Robinson free crossings and exact positive board-level
 raw Figure 13 square tilings.
@@ -30375,6 +30447,102 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and generated interior position-code
+rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_interiorRows
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_interiorRows
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and generated interior position-code
+rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_interiorRows
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_interiorRows
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and generated interior position-code
+rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_interiorRows
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_interiorRows
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and generated interior position-code
+rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_interiorRows
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_interiorRows
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first active/corner recognition
 obligation at canonical Robinson free crossings, exact positive board-level
 raw Figure 13 square tilings, and generated interior position-code rows.
@@ -32357,6 +32525,102 @@ theorem
       boardFreeLineActiveCorner hsquares
       (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
         hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and the packaged generated interior
+position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_interiorPackage
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_interiorPackage
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and the packaged generated interior
+position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_fig13_tiles_plane_interiorPackage
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_interiorPackage
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and the packaged generated interior
+position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_interiorPackage
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_interiorPackage
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second proof-facing board/free-line
+invariant, a raw Figure 13 plane tiling, and the packaged generated interior
+position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_interiorPackage
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_interiorPackage
+      boardFreeLineActiveCorner
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first active/corner recognition
