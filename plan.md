@@ -706,6 +706,13 @@ scaffold realization.  The default generic
 projection now uses this layer-patch route, so the origin-zero theorem wrappers
 no longer silently detour through the older canonical/free-site translated-box
 constructor.
+The generic finite-check-facing surface is now named
+`NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations`: it records
+Robinson board/free-line active-corner recognition, generated Figure 13/Figure
+16 pair compatibility, and finite active-corner layer patches, then converts
+directly to `NatSiteRobinsonCompatibleLevelObligations`.  Origin-zero
+obligations project through this named surface before reaching the compatible
+level-grid theorem.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

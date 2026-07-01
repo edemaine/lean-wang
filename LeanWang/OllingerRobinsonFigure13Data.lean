@@ -10946,6 +10946,36 @@ structure NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
             cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin)
 
 /--
+Robinson Section 7 board/free-line target with finite active-corner layer
+patches.
+
+This is the finite-check-facing scaffold surface closest to the current proof
+plan: Robinson's obstruction/free-line argument supplies active/corner
+recognition at canonical free crossings, the Figure 13/Figure 16 finite decoder
+supplies layer patches for all positive boxes, and the generated pair
+compatibility check connects the local Figure 18 sites.
+-/
+structure NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true) : Prop where
+  boardFreeLineActiveCorner :
+    Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid)
+  pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+        true
+  patches :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
+
+/--
 Origin-zero active/corner window target with generated finite compatibility and
 positive translated boxes.
 
@@ -18815,6 +18845,53 @@ def toFigure18FlexibleCertificate
 
 end NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
 
+namespace NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+
+def toCompatibleLevelObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofSection7BoardFreeLineLayerPatches
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.boardFreeLineActiveCorner O.patches
+    O.pairCompatibility
+
+def toL2C1CompatibleLevelObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+
+def toL2C2CompatibleLevelObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+
+end NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+
 namespace NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
 
 def toCanonicalFreeSiteRectTranslatedPositiveBoxObligations
@@ -18966,6 +19043,22 @@ def toBoardFreeLineActiveCorner
     hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
       O.originZeroWindows
 
+def toSection7BoardFreeLineLayerPatchObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  boardFreeLineActiveCorner := O.toBoardFreeLineActiveCorner
+  pairCompatibility := O.pairCompatibility
+  patches := O.toActiveCornerLayerBoxPatches
+
 def toCompatibleLevelObligationsOfLayerPatches
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -18978,10 +19071,7 @@ def toCompatibleLevelObligationsOfLayerPatches
     NatSiteRobinsonCompatibleLevelObligations
       activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
       cornerIndex_valid :=
-  NatSiteRobinsonCompatibleLevelObligations.ofSection7BoardFreeLineLayerPatches
-    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-    cornerIndex_valid O.toBoardFreeLineActiveCorner
-    O.toActiveCornerLayerBoxPatches O.pairCompatibility
+  O.toSection7BoardFreeLineLayerPatchObligations.toCompatibleLevelObligations
 
 def toCompatibleLevelObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
