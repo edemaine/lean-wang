@@ -18827,7 +18827,7 @@ def l2c2SignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
@@ -18850,7 +18850,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
@@ -18873,7 +18873,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
@@ -18896,7 +18896,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, and the Robinson Section 7 tower/indexed-box certificate route.
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
@@ -19015,7 +19015,7 @@ theorem
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19044,7 +19044,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19073,7 +19073,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19102,7 +19102,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
-macro-squares, the Robinson Section 7 tower/indexed-box certificate route, and
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19247,7 +19247,7 @@ theorem
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, and the Robinson Section 7 tower/indexed-box certificate route.
+board levels, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
@@ -19270,7 +19270,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, and the Robinson Section 7 tower/indexed-box certificate route.
+board levels, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
@@ -19293,7 +19293,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, and the Robinson Section 7 tower/indexed-box certificate route.
+board levels, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
@@ -19316,7 +19316,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, and the Robinson Section 7 tower/indexed-box certificate route.
+board levels, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
@@ -19339,7 +19339,7 @@ theorem
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, the Robinson Section 7 tower/indexed-box certificate route, and
+board levels, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19368,7 +19368,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, the Robinson Section 7 tower/indexed-box certificate route, and
+board levels, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19397,7 +19397,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, the Robinson Section 7 tower/indexed-box certificate route, and
+board levels, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19426,7 +19426,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
-board levels, the Robinson Section 7 tower/indexed-box certificate route, and
+board levels, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19455,7 +19455,7 @@ theorem
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, and the Robinson Section 7 tower/indexed-box certificate route.
+checks, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
@@ -19478,7 +19478,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, and the Robinson Section 7 tower/indexed-box certificate route.
+checks, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
@@ -19501,7 +19501,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, and the Robinson Section 7 tower/indexed-box certificate route.
+checks, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     encoded_domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
@@ -19524,7 +19524,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, and the Robinson Section 7 tower/indexed-box certificate route.
+checks, and the Robinson Section 7 compatible-level certificate route.
 -/
 theorem
     domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
@@ -19547,7 +19547,7 @@ theorem
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, the Robinson Section 7 tower/indexed-box certificate route, and
+checks, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19576,7 +19576,7 @@ theorem
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, the Robinson Section 7 tower/indexed-box certificate route, and
+checks, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19605,7 +19605,7 @@ theorem
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, the Robinson Section 7 tower/indexed-box certificate route, and
+checks, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
@@ -19634,7 +19634,7 @@ theorem
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
 tiling-dependent Robinson geometry, shifted source/free-grid board-level
-checks, the Robinson Section 7 tower/indexed-box certificate route, and
+checks, the Robinson Section 7 compatible-level certificate route, and
 generated interior position-code rows.
 -/
 theorem
