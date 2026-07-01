@@ -136,11 +136,22 @@ theorem block_validRectangle_symbolTileSet (component : LayerComponent) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
   exact component.ruleSource.block_validRectangle_symbolTileSet
 
+theorem block_tileableSquare_symbolTileSet (component : LayerComponent) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  component.ruleSource.block_tileableSquare_symbolTileSet
+
 theorem certifiedBlock_validRectangle_symbolTileSet
     (component : LayerComponent) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle := by
   simpa [block] using
     Figure16.certifiedSubstitutionTable.source_block_validRectangle
+      component.ruleSource
+
+theorem certifiedBlock_tileableSquare_symbolTileSet
+    (component : LayerComponent) :
+    TileableSquare Figure16.Symbol.tileSet 2 := by
+  simpa [block] using
+    Figure16.certifiedSubstitutionTable.source_block_tileableSquare
       component.ruleSource
 
 @[simp]
@@ -350,6 +361,14 @@ theorem validRectangle_of_mem_ruleSources
     ⟨component, _hcomponent, rfl⟩
   exact component.block_validRectangle_symbolTileSet
 
+theorem tileableSquare_of_mem_ruleSources
+    {components : Components} {source : Figure16.RuleSource}
+    (hsource : source ∈ components.ruleSources) :
+    TileableSquare Figure16.Symbol.tileSet 2 := by
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  exact component.block_tileableSquare_symbolTileSet
+
 theorem certifiedValidRectangle_of_mem_ruleSources
     {components : Components} {source : Figure16.RuleSource}
     (hsource : source ∈ components.ruleSources) :
@@ -357,6 +376,14 @@ theorem certifiedValidRectangle_of_mem_ruleSources
   rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
     ⟨component, _hcomponent, rfl⟩
   exact component.certifiedBlock_validRectangle_symbolTileSet
+
+theorem certifiedTileableSquare_of_mem_ruleSources
+    {components : Components} {source : Figure16.RuleSource}
+    (hsource : source ∈ components.ruleSources) :
+    TileableSquare Figure16.Symbol.tileSet 2 := by
+  rcases mem_ruleSources_iff_exists_layerComponent.1 hsource with
+    ⟨component, _hcomponent, rfl⟩
+  exact component.certifiedBlock_tileableSquare_symbolTileSet
 
 theorem mem_symbols_all
     {components : Components} {symbol : Figure16.Symbol}
@@ -489,11 +516,23 @@ theorem validRectangle_of_mem_ruleSourcesAt
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   Components.validRectangle_of_mem_ruleSources hsource
 
+theorem tileableSquare_of_mem_ruleSourcesAt
+    (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAt index) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  Components.tileableSquare_of_mem_ruleSources hsource
+
 theorem certifiedValidRectangle_of_mem_ruleSourcesAt
     (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
     (hsource : source ∈ D.ruleSourcesAt index) :
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   Components.certifiedValidRectangle_of_mem_ruleSources hsource
+
+theorem certifiedTileableSquare_of_mem_ruleSourcesAt
+    (D : Transcription) (index : Fin 92) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAt index) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  Components.certifiedTileableSquare_of_mem_ruleSources hsource
 
 /--
 Layer components at a Figure 18 quarter-site.  The layer annotation belongs to
@@ -582,11 +621,23 @@ theorem validRectangle_of_mem_ruleSourcesAtSite
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   D.validRectangle_of_mem_ruleSourcesAt site.index hsource
 
+theorem tileableSquare_of_mem_ruleSourcesAtSite
+    (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAtSite site) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  D.tileableSquare_of_mem_ruleSourcesAt site.index hsource
+
 theorem certifiedValidRectangle_of_mem_ruleSourcesAtSite
     (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
     (hsource : source ∈ D.ruleSourcesAtSite site) :
     ValidRectangle Figure16.Symbol.tileSet source.block.rectangle :=
   D.certifiedValidRectangle_of_mem_ruleSourcesAt site.index hsource
+
+theorem certifiedTileableSquare_of_mem_ruleSourcesAtSite
+    (D : Transcription) (site : Figure18Site) {source : Figure16.RuleSource}
+    (hsource : source ∈ D.ruleSourcesAtSite site) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  D.certifiedTileableSquare_of_mem_ruleSourcesAt site.index hsource
 
 theorem componentAtSiteLayer_block_validRectangle
     {D : Transcription} {site : Figure18Site} {layer : Layer}
@@ -595,12 +646,26 @@ theorem componentAtSiteLayer_block_validRectangle
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle :=
   component.block_validRectangle_symbolTileSet
 
+theorem componentAtSiteLayer_block_tileableSquare
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (_hcomponent : D.componentAtSiteLayer site layer = some component) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  component.block_tileableSquare_symbolTileSet
+
 theorem componentAtSiteLayer_certifiedBlock_validRectangle
     {D : Transcription} {site : Figure18Site} {layer : Layer}
     {component : LayerComponent}
     (_hcomponent : D.componentAtSiteLayer site layer = some component) :
     ValidRectangle Figure16.Symbol.tileSet component.block.rectangle :=
   component.certifiedBlock_validRectangle_symbolTileSet
+
+theorem componentAtSiteLayer_certifiedBlock_tileableSquare
+    {D : Transcription} {site : Figure18Site} {layer : Layer}
+    {component : LayerComponent}
+    (_hcomponent : D.componentAtSiteLayer site layer = some component) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  component.certifiedBlock_tileableSquare_symbolTileSet
 
 end Transcription
 
@@ -1500,6 +1565,12 @@ theorem block_validRectangle_symbolTileSet
     (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
     ValidRectangle Figure16.Symbol.tileSet (C.blockGrid i j).rectangle :=
   (C.componentRect i j).block_validRectangle_symbolTileSet
+
+theorem block_tileableSquare_symbolTileSet
+    {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
+    (C : LayerComponentRectangle D R layer) (i : Fin w) (j : Fin h) :
+    TileableSquare Figure16.Symbol.tileSet 2 :=
+  (C.componentRect i j).block_tileableSquare_symbolTileSet
 
 theorem symbol_mem_all
     {D : Transcription} {w h : Nat} {R : SiteRectangle w h} {layer : Layer}
