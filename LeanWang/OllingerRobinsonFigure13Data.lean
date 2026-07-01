@@ -5228,6 +5228,113 @@ def HasFigure13PositiveBoardLevelRawData : Prop :=
   ∀ level : Nat, Nonempty (Figure13PositiveBoardLevelRawData level)
 
 /--
+Membership in the raw Figure 13 tile list gives the corresponding scanned
+tile index.
+
+This is the decoding direction needed when a construction produces an ordinary
+raw Figure 13 rectangle first, rather than a rectangle of Figure 18 sites.
+-/
+theorem exists_fig13Tile_eq_of_mem_fig13Tiles {tile : WangTile}
+    (hmem : tile ∈ fig13Tiles) :
+    ∃ index : Fin 92, fig13Tile index = tile := by
+  have hidx : fig13Tiles.idxOf tile < fig13Tiles.length :=
+    List.idxOf_lt_length_of_mem hmem
+  refine ⟨⟨fig13Tiles.idxOf tile, by simpa [fig13Tiles_length] using hidx⟩, ?_⟩
+  unfold fig13Tile
+  have hget : fig13Tiles[fig13Tiles.idxOf tile]? = some tile :=
+    List.getElem?_idxOf hmem
+  have hgetSome : some fig13Tiles[fig13Tiles.idxOf tile] = some tile := by
+    rw [List.getElem?_eq_getElem hidx] at hget
+    exact hget
+  have hgetElem : fig13Tiles[fig13Tiles.idxOf tile] = tile :=
+    Option.some.inj hgetSome
+  change fig13Tiles[fig13Tiles.idxOf tile] = tile
+  exact hgetElem
+
+/-- A chosen scanned Figure 13 index for a known raw tile-list member. -/
+noncomputable def fig13IndexOfMem {tile : WangTile}
+    (hmem : tile ∈ fig13Tiles) : Fin 92 :=
+  Classical.choose (exists_fig13Tile_eq_of_mem_fig13Tiles hmem)
+
+theorem fig13Tile_fig13IndexOfMem {tile : WangTile}
+    (hmem : tile ∈ fig13Tiles) :
+    fig13Tile (fig13IndexOfMem hmem) = tile :=
+  Classical.choose_spec (exists_fig13Tile_eq_of_mem_fig13Tiles hmem)
+
+/--
+Choose Figure 18 sites over a valid raw Figure 13 rectangle by decoding each
+raw tile to its scanned Figure 13 index.
+
+All sites use the southwest quadrant because this object records only the raw
+macro-tile identities; the positive-board raw-data target below depends on
+`rawTileRect`, not on the chosen quarter.
+-/
+noncomputable def siteRectangleOfValidFig13Rectangle {w h : Nat}
+    (x : Rectangle w h) (hx : ValidRectangle fig13Tiles x) :
+    SiteRectangle w h :=
+  fun i j => {
+    index := fig13IndexOfMem (hx.1 i j)
+    quadrant := .southwest
+  }
+
+theorem rawTileRect_siteRectangleOfValidFig13Rectangle {w h : Nat}
+    (x : Rectangle w h) (hx : ValidRectangle fig13Tiles x) :
+    (siteRectangleOfValidFig13Rectangle x hx).rawTileRect = x := by
+  funext i j
+  exact fig13Tile_fig13IndexOfMem (hx.1 i j)
+
+/--
+A valid raw Figure 13 rectangle induces the raw-boundary compatibility predicate
+used by the positive-board interface.
+-/
+theorem rawBoundaryCompatible_siteRectangleOfValidFig13Rectangle {w h : Nat}
+    (x : Rectangle w h) (hx : ValidRectangle fig13Tiles x) :
+    (siteRectangleOfValidFig13Rectangle x hx).RawBoundaryCompatible := by
+  constructor
+  · intro i j hi
+    have hmatch := TileSubdivision.hMatches_southeast_southwest_of_hMatches
+      (hx.2.1 i j hi)
+    simpa [rawTileRect_siteRectangleOfValidFig13Rectangle x hx] using hmatch
+  · intro i j hj
+    have hmatch := TileSubdivision.vMatches_northwest_southwest_of_vMatches
+      (hx.2.2 i j hj)
+    simpa [rawTileRect_siteRectangleOfValidFig13Rectangle x hx] using hmatch
+
+/-- Package one valid raw Figure 13 board-level square as positive-board raw data. -/
+noncomputable def positiveBoardLevelRawDataOfValidFig13Rectangle
+    (level : Nat)
+    {x : Rectangle
+      (RobinsonSquare.freeGridSide (level + 1))
+      (RobinsonSquare.freeGridSide (level + 1))}
+    (hx : ValidRectangle fig13Tiles x) :
+    Figure13PositiveBoardLevelRawData level := by
+  let sites :=
+    (siteRectangleOfValidFig13Rectangle x hx).toCheckedNatSiteRectangle
+  have hsites : sites.toSiteRectangle =
+      siteRectangleOfValidFig13Rectangle x hx :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool
+        (siteRectangleOfValidFig13Rectangle x hx))
+  exact {
+    sites := sites
+    rawBoundary := by
+      simpa [hsites] using
+        rawBoundaryCompatible_siteRectangleOfValidFig13Rectangle x hx
+  }
+
+/--
+Board-level raw Figure 13 square tilings supply the exact positive-board raw
+data interface.
+-/
+theorem rawPositiveBoardLevelData_of_positiveBoardLevelTileableSquares
+    (hsquares : ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1))) :
+    HasFigure13PositiveBoardLevelRawData := by
+  intro level
+  rcases hsquares level with ⟨x, hx⟩
+  exact ⟨positiveBoardLevelRawDataOfValidFig13Rectangle level hx⟩
+
+/--
 Finite diagnostic for the over-strong source raw-boundary board target: a
 horizontal two-cell source edge satisfying both checked layer-stack
 compatibility and raw Figure 13 boundary compatibility.
