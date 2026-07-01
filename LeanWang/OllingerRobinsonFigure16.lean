@@ -719,6 +719,25 @@ def HasPositiveCompatibleBlockSquares : Prop :=
   ∀ n : Nat, 0 < n → Nonempty (CompatibleBlockSquare n)
 
 /--
+Cofinal compatible block squares in the expanded Figure 16 symbol grid.
+
+This is weaker than `HasPositiveCompatibleBlockSquares` and better matched to
+the substitution proof: it is enough to produce compatible block squares along
+an unbounded scale sequence, because compactness can crop the expanded symbol
+squares.
+-/
+def HasCofinalCompatibleBlockSquares : Prop :=
+  ∀ n : Nat, ∃ m : Nat, n ≤ 2 * m ∧ Nonempty (CompatibleBlockSquare m)
+
+/--
+Compatible block squares at all powers of two.
+
+This is the natural target for iterating the Figure 16 substitutions.
+-/
+def HasPowerCompatibleBlockSquares : Prop :=
+  ∀ level : Nat, Nonempty (CompatibleBlockSquare (2 ^ level))
+
+/--
 Positive compatible block squares give tileable doubled squares over the
 component-symbol tileset.
 -/
@@ -728,6 +747,66 @@ theorem tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
   intro n hn
   rcases hsquares n hn with ⟨square⟩
   exact square.tileableExpandedSquare
+
+/--
+Cofinal compatible block squares give cofinal tileable squares over the
+component-symbol tileset.
+-/
+theorem cofinalTileableSquares_symbolTileSet_of_cofinalCompatibleBlockSquares
+    (hsquares : HasCofinalCompatibleBlockSquares) :
+  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m := by
+  intro n
+  rcases hsquares n with ⟨m, hnm, square⟩
+  rcases square with ⟨square⟩
+  exact ⟨2 * m, hnm, square.tileableExpandedSquare⟩
+
+/--
+Cofinal compatible Figure 16 block squares compactly determine a plane tiling
+by the component-symbol tileset.
+-/
+theorem tilesPlane_symbolTileSet_of_cofinalCompatibleBlockSquares
+    (hsquares : HasCofinalCompatibleBlockSquares) :
+    TilesPlane Symbol.tileSet :=
+  tilesPlane_of_cofinal_tileableSquares
+    (cofinalTileableSquares_symbolTileSet_of_cofinalCompatibleBlockSquares
+      hsquares)
+
+private theorem nat_le_two_pow (n : Nat) : n ≤ 2 ^ n := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      have hpos : 1 ≤ 2 ^ n := by
+        exact Nat.succ_le_of_lt (pow_pos (by decide : 0 < 2) n)
+      calc
+        n + 1 ≤ 2 ^ n + 1 := Nat.succ_le_succ ih
+        _ ≤ 2 ^ n + 2 ^ n := Nat.add_le_add_left hpos (2 ^ n)
+        _ = 2 ^ (n + 1) := by
+          rw [pow_succ]
+          omega
+
+/--
+Power-of-two compatible block squares are cofinal after expansion to symbol
+squares.
+-/
+theorem cofinalCompatibleBlockSquares_of_powerCompatibleBlockSquares
+    (hsquares : HasPowerCompatibleBlockSquares) :
+    HasCofinalCompatibleBlockSquares := by
+  intro n
+  refine ⟨2 ^ n, ?_, hsquares n⟩
+  have hle : n ≤ 2 ^ n := nat_le_two_pow n
+  have hpos : 0 < 2 ^ n := pow_pos (by decide : 0 < 2) n
+  omega
+
+/--
+Power-of-two compatible Figure 16 block squares compactly determine a plane
+tiling by the component-symbol tileset.
+-/
+theorem tilesPlane_symbolTileSet_of_powerCompatibleBlockSquares
+    (hsquares : HasPowerCompatibleBlockSquares) :
+    TilesPlane Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_cofinalCompatibleBlockSquares
+    (cofinalCompatibleBlockSquares_of_powerCompatibleBlockSquares hsquares)
 
 /--
 Compatible Figure 16 block squares at every positive side compactly determine a
