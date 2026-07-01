@@ -26646,6 +26646,78 @@ theorem
 
 /--
 Encoded domino undecidability from the first proof-facing board/free-line
+invariant and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+        boardFreeLineActiveCorner hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the first proof-facing board/free-line
+invariant and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+        boardFreeLineActiveCorner hsquares)
+      h
+
+/--
+Encoded domino undecidability from the second proof-facing board/free-line
+invariant and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+        boardFreeLineActiveCorner hsquares)
+      h
+
+/--
+Unencoded domino undecidability from the second proof-facing board/free-line
+invariant and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+        boardFreeLineActiveCorner hsquares)
+      h
+
+/--
+Encoded domino undecidability from the first proof-facing board/free-line
 invariant and finite raw Figure 13 boxes.
 -/
 theorem
