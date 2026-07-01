@@ -716,7 +716,11 @@ Robinson board/free-line active-corner recognition, generated Figure 13/Figure
 16 pair compatibility, and finite active-corner layer patches, then converts
 directly to `NatSiteRobinsonCompatibleLevelObligations`.  Origin-zero
 obligations project through this named surface before reaching the compatible
-level-grid theorem.
+level-grid theorem.  The L2-specific layer-patch data packages now also project
+to this named surface directly, using the audited generated pair-compatibility
+checks for the two blank candidates; the L2 layer-patch theorem wrappers route
+through the generic Section 7 board/free-line layer-patch theorem family rather
+than through an unnamed compatible-level detour.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

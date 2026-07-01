@@ -19217,6 +19217,38 @@ def
 
 /--
 The first layer-patch board/free-line Section 7 package feeds the
+finite-check-facing Nat-site Section 7 obligation surface.
+-/
+def
+    l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  pairCompatibility := l2Component1BlankCandidatePairCompatibilityBool
+  patches := data.patches
+
+/--
+The second layer-patch board/free-line Section 7 package feeds the
+finite-check-facing Nat-site Section 7 obligation surface.
+-/
+def
+    l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  pairCompatibility := l2Component2BlankCandidatePairCompatibilityBool
+  patches := data.patches
+
+/--
+The first layer-patch board/free-line Section 7 package feeds the
 compatible-level route without translating finite layer patches into boxes.
 -/
 def
@@ -19227,9 +19259,8 @@ def
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
-    (open NatSiteRobinsonCompatibleLevelObligations in
-      ofL2Component1Section7BoardFreeLineLayerPatches
-        data.boardFreeLineActiveCorner data.patches)
+  (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    data).toL2C1CompatibleLevelObligations
 
 /--
 The second layer-patch board/free-line Section 7 package feeds the
@@ -19243,9 +19274,8 @@ def
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
-    (open NatSiteRobinsonCompatibleLevelObligations in
-      ofL2Component2Section7BoardFreeLineLayerPatches
-        data.boardFreeLineActiveCorner data.patches)
+  (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    data).toL2C2CompatibleLevelObligations
 
 /--
 Positive active-corner indexed boxes instantiate the first finite layer-patch
@@ -27880,12 +27910,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       h
 
@@ -27899,12 +27929,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       h
 
@@ -27918,12 +27948,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       h
 
@@ -27937,12 +27967,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       h
 
@@ -34450,12 +34480,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       hinterior hcorrect
 
@@ -34475,12 +34505,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       hinterior hcorrect
 
@@ -34500,12 +34530,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       hinterior hcorrect
 
@@ -34525,12 +34555,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         data)
       hinterior hcorrect
 
