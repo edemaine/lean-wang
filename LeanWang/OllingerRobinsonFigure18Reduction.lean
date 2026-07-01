@@ -27687,6 +27687,70 @@ theorem
         hlevel) h
 
 /--
+Encoded domino undecidability from finite origin-zero checked stacks for the
+first audited L2-blank candidate and row-major checked raw-boundary board
+levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_active_corner_checked_pos_board_position_source
+      hchecked
+      (checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels hlevel) h
+
+/--
+Unencoded domino undecidability from finite origin-zero checked stacks for the
+first audited L2-blank candidate and row-major checked raw-boundary board
+levels.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_active_corner_checked_pos_board_position_source
+      hchecked
+      (checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels hlevel) h
+
+/--
+Encoded domino undecidability from finite origin-zero checked stacks for the
+second audited L2-blank candidate and row-major checked raw-boundary board
+levels.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_active_corner_checked_pos_board_position_source
+      hchecked
+      (checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels hlevel) h
+
+/--
+Unencoded domino undecidability from finite origin-zero checked stacks for the
+second audited L2-blank candidate and row-major checked raw-boundary board
+levels.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_active_corner_checked_pos_board_position_source
+      hchecked
+      (checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels hlevel) h
+
+/--
 Encoded domino undecidability from the first proof-facing board/free-line
 invariant and finite raw Figure 13 boxes.
 -/
