@@ -34007,6 +34007,82 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first finite checked board package via
+the proof-facing active/corner raw-board route and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_data_active_corner_interiorRows
+    (data : L2C1CheckedSignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_interiorRows
+      data.checkedStacks data.boardLevels hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first finite checked board package via
+the proof-facing active/corner raw-board route and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_data_active_corner_interiorRows
+    (data : L2C1CheckedSignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_interiorRows
+      data.checkedStacks data.boardLevels hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second finite checked board package via
+the proof-facing active/corner raw-board route and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_data_active_corner_interiorRows
+    (data : L2C2CheckedSignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_interiorRows
+      data.checkedStacks data.boardLevels hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second finite checked board package via
+the proof-facing active/corner raw-board route and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_data_active_corner_interiorRows
+    (data : L2C2CheckedSignalTowerBoardData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_interiorRows
+      data.checkedStacks data.boardLevels hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first field-based Section 7 board
 package and generated interior position-code rows.
 -/
