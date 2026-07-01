@@ -18912,6 +18912,37 @@ def toFigure18RoutedCertificate
         cornerIndex cornerQuadrant cornerIndex_valid).table :=
   O.toSignalTowerDirectTranslatedBoxObligations.toFigure18RoutedCertificate
 
+@[reducible] def positiveActiveCornerIndexedBoxes
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).scaffold r) :=
+  TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+    O.positiveTranslatedIndexedBoxes
+
+def toActiveCornerLayerBoxPatches
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.positiveActiveCornerIndexedBoxes
+
 def toCompatibleLevelObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :

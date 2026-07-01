@@ -693,6 +693,10 @@ constructors
 `scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes` isolate
 the exact remaining backward-realization task: produce positive active-corner
 indexed boxes, either centered or translated, for the concrete L2 scaffold.
+The generic origin-zero translated obligation namespace also exposes
+`positiveActiveCornerIndexedBoxes` and `toActiveCornerLayerBoxPatches`, so
+future concrete certificates can stay on the origin-zero surface while still
+feeding the layer-patch realization theorem directly.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
