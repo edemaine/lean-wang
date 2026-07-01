@@ -720,7 +720,10 @@ level-grid theorem.  The L2-specific layer-patch data packages now also project
 to this named surface directly, using the audited generated pair-compatibility
 checks for the two blank candidates; the L2 layer-patch theorem wrappers route
 through the generic Section 7 board/free-line layer-patch theorem family rather
-than through an unnamed compatible-level detour.
+than through an unnamed compatible-level detour.  The same is now exposed for
+origin-zero translated obligations via the
+`*_origin_zero_section7_layer_patches_*` theorem family, which should be the
+preferred origin-zero theorem surface over the older signal-tower detour.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
