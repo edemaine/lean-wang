@@ -8737,6 +8737,91 @@ theorem
       htower)
 
 /--
+Geometry plus per-level Figure 18 routing directly supplies compatible level
+routed free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardGeometryTowerRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_geometryTowerRouting
+      hrouting)
+
+/--
+Fixed-geometry routing directly supplies compatible level routed free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_fixedGeometryTowerRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardFixedGeometryTowerRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_geometryTowerRouting
+    (hasFigure18RobinsonBoardGeometryTowerRoutingForTable_of_fixedGeometryTowerRouting
+      hrouting)
+
+/--
+Canonical Robinson-board routing directly supplies compatible level routed
+free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalRouting
+    {table : Figure18RoleTable}
+    (hrouting : HasFigure18RobinsonBoardCanonicalRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalRouting
+      hrouting)
+
+/--
+Canonical product-witness routing directly supplies compatible level routed
+free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalProductWitnessRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalProductWitnessRouting
+      hrouting)
+
+/--
+Canonical corridor-transmission routing directly supplies compatible level
+routed free grids.  This is the closest theorem-facing form to Robinson's
+Section 7 statement that the board transmits payload signals along the selected
+unobstructed free rows and columns as a contiguous square.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCorridorRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalProductWitnessRouting
+    (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
+      hrouting)
+
+/--
+Canonical free-site-rectangle routing directly supplies compatible level routed
+free grids.
+-/
+theorem
+    hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalFreeSiteRectRouting
+    {table : Figure18RoleTable}
+    (hrouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable table) :
+    HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
+      hrouting)
+
+/--
 Decoded combined-site corridor routing directly supplies compatible level
 routed free grids.  This is the finite-checker-facing form of Robinson's
 Section 7 route: the board/free-line argument supplies decoded crossings and
