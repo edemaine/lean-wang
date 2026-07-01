@@ -7885,10 +7885,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_position_source
-      (NatSiteRobinsonScaffoldCertificate.ofCompatibleLevelObligations
-        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-        cornerIndex_valid obligations)
+    encoded_domino_problem_undecidable_of_checked_flexible_transcription_position_source
+      obligations.flexibleInstance.checkedFlexibleTranscription
       h
 
 /--
@@ -7908,10 +7906,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_robinson_certificate_position_source
-      (NatSiteRobinsonScaffoldCertificate.ofCompatibleLevelObligations
-        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-        cornerIndex_valid obligations)
+    domino_problem_undecidable_of_checked_flexible_transcription_position_source
+      obligations.flexibleInstance.checkedFlexibleTranscription
       h
 
 /--
@@ -7936,10 +7932,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
-      (NatSiteRobinsonScaffoldCertificate.ofCompatibleLevelObligations
-        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-        cornerIndex_valid obligations)
+    encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+      obligations.flexibleInstance.checkedFlexibleTranscription
       hinterior hcorrect
 
 /--
@@ -7964,10 +7958,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_robinson_certificate_interiorRows
-      (NatSiteRobinsonScaffoldCertificate.ofCompatibleLevelObligations
-        activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
-        cornerIndex_valid obligations)
+    domino_problem_undecidable_of_checked_transcription_position_source_interiorRows
+      obligations.flexibleInstance.checkedFlexibleTranscription
       hinterior hcorrect
 
 /--
