@@ -26467,6 +26467,78 @@ theorem
       h
 
 /--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      h
+
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      h
+
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      h
+
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      h
+
+/--
 Encoded domino undecidability from the first paper-facing obstruction-routing
 package, routed through the older signal-tower Section 7 theorem surface.
 -/
@@ -28688,6 +28760,98 @@ theorem
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
       (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRows
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRows
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorRows
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorRows
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
       hinterior hcorrect
 
 /--
