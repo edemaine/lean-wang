@@ -22832,6 +22832,122 @@ theorem domino_problem_undecidable_l2c2_level_compatible_fig16_interiorRows
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing, canonical checked
+compatible Figure 16 macro-squares, and the generated interior position-code
+rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_compatible_fig16_interiorRows
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_level_compatible_fig16_interiorRows
+      (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCorridorRouting
+        canonicalCorridorRouting)
+      hlevel hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing, canonical checked
+compatible Figure 16 macro-squares, and the generated interior position-code
+rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_corridor_compatible_fig16_interiorRows
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_level_compatible_fig16_interiorRows
+      (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCorridorRouting
+        canonicalCorridorRouting)
+      hlevel hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing, canonical checked
+compatible Figure 16 macro-squares, and the generated interior position-code
+rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_compatible_fig16_interiorRows
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_level_compatible_fig16_interiorRows
+      (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCorridorRouting
+        canonicalCorridorRouting)
+      hlevel hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing, canonical checked
+compatible Figure 16 macro-squares, and the generated interior position-code
+rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_corridor_compatible_fig16_interiorRows
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_level_compatible_fig16_interiorRows
+      (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_canonicalCorridorRouting
+        canonicalCorridorRouting)
+      hlevel hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 the field-based Robinson Section 7 signal tower and canonical checked
 compatible Figure 16 macro-squares.
 -/
