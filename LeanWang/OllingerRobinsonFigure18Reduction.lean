@@ -19532,6 +19532,34 @@ def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
       data.boardFreeLineActiveCorner translatedBoxes
 
 /--
+The first proof-facing board/free-line package supplies the finite Nat-site
+Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+
+/--
+The second proof-facing board/free-line package supplies the finite Nat-site
+Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+
+/--
 Origin-zero active/corner windows and translated boxes instantiate the first
 board/free-line Section 7 package.
 -/
@@ -29814,8 +29842,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       h
 
 /--
@@ -29828,8 +29860,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       h
 
 /--
@@ -29842,8 +29878,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       h
 
 /--
@@ -29856,8 +29896,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       h
 
 /--
@@ -32800,8 +32844,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
-        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       hinterior hcorrect
 
 /--
@@ -32824,8 +32867,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
-        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       hinterior hcorrect
 
 /--
@@ -32848,8 +32890,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
-        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       hinterior hcorrect
 
 /--
@@ -32872,8 +32913,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
-        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData data)
       hinterior hcorrect
 
 /--
