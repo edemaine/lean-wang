@@ -19108,26 +19108,112 @@ def
         data.boardFreeLineActiveCorner data.patches)
 
 /--
+Positive active-corner indexed boxes instantiate the first finite layer-patch
+board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  patches :=
+    scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      hboxes_pos
+
+/--
+Positive active-corner indexed boxes instantiate the second finite layer-patch
+board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  patches :=
+    scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      hboxes_pos
+
+/--
+Positive translated active-corner indexed boxes instantiate the first finite
+layer-patch board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    boardFreeLineActiveCorner
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      hboxes_pos)
+
+/--
+Positive translated active-corner indexed boxes instantiate the second finite
+layer-patch board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    boardFreeLineActiveCorner
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      hboxes_pos)
+
+/--
 The existing first translated-box package also supplies the finite layer-patch
 package.
 -/
 def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
     (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData) :
-    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
-  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
-  patches :=
-    activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
-      (by
-        simpa [LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation] using
-          Figure18RoleTable.scaffold_corner_mem
-            (scaffoldDataOfNatSites
-              l2Component1BlankCandidateActiveSiteSpecs
-              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-              0 Quadrant.southwest
-              l2Component1BlankCandidateSanity.cornerIndex_valid).table)
-      (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
-        data.translatedBoxes)
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    data.boardFreeLineActiveCorner data.translatedBoxes
 
 /--
 The existing second translated-box package also supplies the finite layer-patch
@@ -19135,21 +19221,9 @@ package.
 -/
 def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
     (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData) :
-    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
-  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
-  patches :=
-    activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
-      (by
-        simpa [LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation] using
-          Figure18RoleTable.scaffold_corner_mem
-            (scaffoldDataOfNatSites
-              l2Component2BlankCandidateActiveSiteSpecs
-              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-              0 Quadrant.northeast
-              l2Component2BlankCandidateSanity.cornerIndex_valid).table)
-      (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
-        data.translatedBoxes)
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    data.boardFreeLineActiveCorner data.translatedBoxes
 
 /--
 Origin-zero active/corner windows and translated boxes instantiate the first

@@ -8813,6 +8813,62 @@ def scaffoldDataOfNatSitesRealizesOfActiveCornerIndexedBoxes
     (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches
       (activeCornerLayerBoxPatches_of_activeCornerIndexedBoxes hboxes))
 
+/--
+Layer-patch realization of a Nat-site Figure 18 scaffold from
+positive-radius active-corner indexed boxes.
+
+This is the finite backward target used by the Section 7 layer-patch route:
+the radius-zero layer patch is supplied by the distinguished scaffold corner,
+so concrete proofs only need to construct positive-radius indexed boxes.
+-/
+def scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).scaffold r)) :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold :=
+  activeCornerLayerBoxPatches_of_positiveActiveCornerIndexedBoxes
+    (by
+      simpa [LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation] using
+        Figure18RoleTable.scaffold_corner_mem
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    hboxes_pos
+
+/--
+Layer-patch realization of a Nat-site Figure 18 scaffold from translated
+positive-radius active-corner indexed boxes.
+-/
+def scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r
+            origin)) :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      hboxes_pos)
+
 def scaffoldDataOfNatSitesCertificateOfCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :

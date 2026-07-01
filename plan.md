@@ -683,7 +683,11 @@ This should be the preferred target while finishing the concrete finite
 scaffold instantiation.  The existing translated-box and origin-zero translated
 obligation surfaces now coerce into this layer-patch package as well, so older
 Section 7 routes remain usable while the finite layer-patch checks are being
-finished.
+finished.  The reusable Nat-site constructors
+`scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes` and
+`scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes` isolate
+the exact remaining backward-realization task: produce positive active-corner
+indexed boxes, either centered or translated, for the concrete L2 scaffold.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
