@@ -5543,6 +5543,34 @@ theorem hasRobinsonSection7ObstructionRoutingInvariant_of_originZeroCheckedStack
   LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
     (hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked)
 
+/--
+Origin-zero checked layer stacks supply the proof-facing Section 7
+board/free-line target.  The obstruction geometry is canonical; the checked
+stacks recover the origin-zero active/corner windows.
+-/
+theorem hasRobinsonSection7BoardFreeLineActiveCornerInvariant_of_originZeroCheckedStacks
+    {data : CheckedSparseRawData}
+    (hchecked :
+      data.HasIndexedActiveOriginZeroWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table) :
+    data.toLayeredFigure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofOriginZeroWindows
+    (hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked)
+
+/--
+Equivalently, origin-zero checked layer stacks prove the remaining concrete
+active/corner recognition obligation at Robinson's canonical free crossings.
+-/
+theorem hasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant_of_originZeroCheckedStacks
+    {data : CheckedSparseRawData}
+    (hchecked :
+      data.HasIndexedActiveOriginZeroWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table) :
+    Figure18ScaffoldData.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
+      data.toLayeredFigure18ScaffoldData.scaffoldData :=
+  (hasRobinsonSection7BoardFreeLineActiveCornerInvariant_of_originZeroCheckedStacks
+    hchecked).2
+
 theorem hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks
     {data : CheckedSparseRawData} {table : Figure18RoleTable}
     (hchecked : data.HasIndexedRoutedFixedCornerSquareCheckedStacks table) :
