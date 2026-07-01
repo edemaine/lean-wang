@@ -16467,6 +16467,58 @@ theorem
   robinsonPositiveBoardLevelAlignedMacroSquares_of_rawPositiveBoardLevels
     (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
 
+/--
+Propositional positive-board raw data supplies exact board-level raw Figure 13
+square tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    Figure13PositiveBoardLevelTileableSquares := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact data.sites.toSiteRectangle.tileableRawSquare_of_rawBoundaryCompatible
+    data.rawBoundary
+
+/--
+Checked positive-board data supplies exact board-level raw Figure 13 square
+tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData hlevel)
+
+/--
+Positive Robinson-board aligned macro-squares are equivalent to exact
+board-level raw Figure 13 square tilings at the same shifted board sizes.
+-/
+theorem positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    Figure13PositiveBoardLevelTileableSquares := by
+  intro level
+  rcases hlevel level with ⟨R, hcompat⟩
+  exact R.tileableRawSquare_of_rawBoundaryCompatible hcompat
+
+/--
+The exact board-level raw Figure 13 square-tiling surface is equivalent to the
+positive-board raw-data surface.
+-/
+theorem positiveBoardLevelTileableSquares_iff_rawPositiveBoardLevels :
+    Figure13PositiveBoardLevelTileableSquares ↔ Figure13PositiveBoardLevelRaw :=
+  ⟨rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels⟩
+
+/--
+The exact board-level raw Figure 13 square-tiling surface is equivalent to the
+positive Robinson-board aligned macro-square surface.
+-/
+theorem positiveBoardLevelTileableSquares_iff_robinsonPositiveBoardLevelAlignedMacroSquares :
+    Figure13PositiveBoardLevelTileableSquares ↔
+      HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
+
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     TilesPlane fig13Tiles :=
