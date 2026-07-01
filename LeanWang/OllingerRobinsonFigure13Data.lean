@@ -5447,6 +5447,40 @@ theorem noSourceRawBoundaryVCompatiblePairsBool_eq_true_iff :
     intro upper _
     simp [hpairs lower upper]
 
+/--
+The over-strong source/raw-boundary board diagnostic has no horizontal
+two-cell witness in the current Figure 13/Figure 16 transcription.
+-/
+theorem noSourceRawBoundaryHCompatiblePairsBool_eq_true :
+    noSourceRawBoundaryHCompatiblePairsBool = true := by
+  native_decide
+
+/--
+The over-strong source/raw-boundary board diagnostic has no vertical two-cell
+witness in the current Figure 13/Figure 16 transcription.
+-/
+theorem noSourceRawBoundaryVCompatiblePairsBool_eq_true :
+    noSourceRawBoundaryVCompatiblePairsBool = true := by
+  native_decide
+
+/--
+Pointwise horizontal form of the reflected no-witness check.
+-/
+theorem sourceRawBoundaryHCompatiblePairBool_eq_false
+    (left right : Figure18Site) :
+    sourceRawBoundaryHCompatiblePairBool left right = false :=
+  noSourceRawBoundaryHCompatiblePairsBool_eq_true_iff.1
+    noSourceRawBoundaryHCompatiblePairsBool_eq_true left right
+
+/--
+Pointwise vertical form of the reflected no-witness check.
+-/
+theorem sourceRawBoundaryVCompatiblePairBool_eq_false
+    (lower upper : Figure18Site) :
+    sourceRawBoundaryVCompatiblePairBool lower upper = false :=
+  noSourceRawBoundaryVCompatiblePairsBool_eq_true_iff.1
+    noSourceRawBoundaryVCompatiblePairsBool_eq_true lower upper
+
 theorem canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
     HasCanonicalFigure16SourceRawBoundaryLevelChecks := by

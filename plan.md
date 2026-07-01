@@ -755,6 +755,14 @@ The checked signal-tower board packages now also feed this route directly via
 `l2c2CheckedStackLayerPatchDataOfCheckedBoardData`, and origin-zero
 checked-board-level/check wrappers, so raw-boundary board-level finite checks
 are enough once origin-zero recognizability is available.
+The old over-strong source/raw-boundary diagnostic route is now explicitly
+closed off by the reflected finite checks
+`noSourceRawBoundaryHCompatiblePairsBool_eq_true` and
+`noSourceRawBoundaryVCompatiblePairsBool_eq_true`: there are no horizontal or
+vertical two-cell witnesses satisfying both source-stack compatibility and raw
+Figure 13 boundary compatibility.  The remaining scaffold proof should
+therefore use compatible Figure 18 macro-squares / board-free-line data, not
+the source raw-boundary diagnostic as a final target.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.
