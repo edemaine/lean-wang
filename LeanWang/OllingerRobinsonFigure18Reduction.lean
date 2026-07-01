@@ -27616,6 +27616,94 @@ theorem
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and generated
+interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and generated
+interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability,
 row-major checked raw-boundary board levels, and generated interior position-code
 rows.
 -/
@@ -27788,6 +27876,94 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
       (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
         (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and the
+packaged generated interior position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and the
+packaged generated interior position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and the
+packaged generated interior position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability,
+positive Robinson board-level aligned raw Figure 13 macro-squares, and the
+packaged generated interior position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
       hinterior hcorrect
 
 /--
