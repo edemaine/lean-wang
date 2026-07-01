@@ -19377,6 +19377,38 @@ def
 
 /--
 The first origin-zero/translated-box obligation surface also instantiates the
+centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+/--
+The second origin-zero/translated-box obligation surface also instantiates the
+centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+/--
+The first origin-zero/translated-box obligation surface also instantiates the
 finite layer-patch board/free-line package.
 -/
 def
