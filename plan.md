@@ -697,6 +697,11 @@ The generic origin-zero translated obligation namespace also exposes
 `positiveActiveCornerIndexedBoxes` and `toActiveCornerLayerBoxPatches`, so
 future concrete certificates can stay on the origin-zero surface while still
 feeding the layer-patch realization theorem directly.
+It now also exposes `toBoardFreeLineActiveCorner` and
+`toCompatibleLevelObligationsOfLayerPatches`, making the finite-check-facing
+route explicit: origin-zero windows provide Robinson's board/free-line
+active-corner invariant, and the centered layer patches provide the backward
+scaffold realization.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

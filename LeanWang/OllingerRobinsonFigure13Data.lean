@@ -18943,6 +18943,46 @@ def toActiveCornerLayerBoxPatches
     activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
     cornerIndex_valid O.positiveActiveCornerIndexedBoxes
 
+def toBoardFreeLineActiveCorner
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+        |>.HasRobinsonSection7BoardFreeLineActiveCornerInvariant := by
+  refine ⟨hasRobinsonBoardSignalGeometryTower, ?_⟩
+  change
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  rw [figure18ScaffoldDataOfNatSites_table,
+    ← scaffoldDataOfNatSites_table]
+  exact
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+      O.originZeroWindows
+
+def toCompatibleLevelObligationsOfLayerPatches
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofSection7BoardFreeLineLayerPatches
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid O.toBoardFreeLineActiveCorner
+    O.toActiveCornerLayerBoxPatches O.pairCompatibility
+
 def toCompatibleLevelObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
