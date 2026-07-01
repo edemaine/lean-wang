@@ -18101,6 +18101,40 @@ def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
     data.signalLocalTower data.alignedMacroSquares
 
 set_option linter.style.longLine false in
+/--
+The first obstruction-routing Section 7 package also supplies the older
+signal-tower Section 7 package.
+
+Robinson's obstruction/free-line argument is the cleaner geometric premise;
+this bridge lets theorem surfaces that still use the field-based tower route
+consume that premise without restating origin-zero windows.
+-/
+def l2c1RobinsonSection7DataOfObstructionData
+    (data : L2C1RobinsonSection7ObstructionData) :
+    L2C1RobinsonSection7Data where
+  signalLocalTower := by
+    exact
+      hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+        (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+          data.section7Routing)
+  alignedMacroSquares := data.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/--
+The second obstruction-routing Section 7 package also supplies the older
+signal-tower Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfObstructionData
+    (data : L2C2RobinsonSection7ObstructionData) :
+    L2C2RobinsonSection7Data where
+  signalLocalTower := by
+    exact
+      hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+        (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+          data.section7Routing)
+  alignedMacroSquares := data.alignedMacroSquares
+
+set_option linter.style.longLine false in
 /-- The first obstruction-routing package feeds the compatible-level route. -/
 def l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
     (data : L2C1RobinsonSection7ObstructionData) :
@@ -25724,6 +25758,58 @@ theorem
       l2Component2BlankCandidateSanity.cornerIndex_valid
       (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
       h
+
+/--
+Encoded domino undecidability from the first paper-facing obstruction-routing
+package, routed through the older signal-tower Section 7 theorem surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_obstruction_as_signal_tower_position_source
+    (data : L2C1RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfObstructionData data) h
+
+/--
+Unencoded domino undecidability from the first paper-facing obstruction-routing
+package, routed through the older signal-tower Section 7 theorem surface.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_obstruction_as_signal_tower_position_source
+    (data : L2C1RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfObstructionData data) h
+
+/--
+Encoded domino undecidability from the second paper-facing obstruction-routing
+package, routed through the older signal-tower Section 7 theorem surface.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_obstruction_as_signal_tower_position_source
+    (data : L2C2RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfObstructionData data) h
+
+/--
+Unencoded domino undecidability from the second paper-facing obstruction-routing
+package, routed through the older signal-tower Section 7 theorem surface.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_obstruction_as_signal_tower_position_source
+    (data : L2C2RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfObstructionData data) h
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
