@@ -18879,10 +18879,10 @@ def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTile
     (originZeroWindows : L2C1OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares) :
     L2C1RobinsonSection7ObstructionData :=
-  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
-    (l2Component1Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
-      originZeroWindows)
-    hsquares
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+      (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+      hsquares)
 
 /--
 Origin-zero recognizability and exact positive board-level raw Figure 13
@@ -18892,10 +18892,10 @@ def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTile
     (originZeroWindows : L2C2OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares) :
     L2C2RobinsonSection7ObstructionData :=
-  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
-    (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
-      originZeroWindows)
-    hsquares
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+      (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+      hsquares)
 
 /--
 Origin-zero recognizability and exact positive board-level raw Figure 13 square
@@ -18923,15 +18923,37 @@ def l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTi
 
 /--
 Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
 macro-squares instantiate the first paper-facing obstruction package.
 -/
 def l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
     L2C1RobinsonSection7ObstructionData :=
-  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
-    (l2Component1Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
-      (l2c1OriginZeroWindowsOfCheckedStacks hchecked)) hlevel
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+      hchecked hlevel)
 
 /--
 Finite origin-zero checked stacks and positive Robinson-board aligned
@@ -18941,9 +18963,31 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedM
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
     L2C2RobinsonSection7ObstructionData :=
-  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
-    (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
-      (l2c2OriginZeroWindowsOfCheckedStacks hchecked)) hlevel
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hsquares
 
 /--
 Finite origin-zero checked stacks and exact positive board-level raw Figure 13
@@ -18953,8 +18997,9 @@ def l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileable
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares) :
     L2C1RobinsonSection7ObstructionData :=
-  l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+      hchecked hsquares)
 
 /--
 Finite origin-zero checked stacks and exact positive board-level raw Figure 13
@@ -18964,8 +19009,35 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileable
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares) :
     L2C2RobinsonSection7ObstructionData :=
-  l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+      hchecked hsquares)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
 
 /--
 Finite origin-zero checked stacks and shifted canonical board-level checks
@@ -18975,10 +19047,9 @@ def l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     L2C1RobinsonSection7ObstructionData :=
-  l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
-    hchecked
-    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
-      hlevel)
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+      hchecked hlevel)
 
 /--
 Finite origin-zero checked stacks and shifted canonical board-level checks
@@ -18988,9 +19059,34 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     L2C2RobinsonSection7ObstructionData :=
-  l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
     hchecked
-    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
       hlevel)
 
 /--
@@ -19001,10 +19097,9 @@ def l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
     L2C1RobinsonSection7ObstructionData :=
-  l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
-    hchecked
-    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
-      hlevel)
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+      hchecked hlevel)
 
 /--
 Finite origin-zero checked stacks and row-major checked board levels instantiate
@@ -19014,10 +19109,9 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
     L2C2RobinsonSection7ObstructionData :=
-  l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
-    hchecked
-    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
-      hlevel)
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+      hchecked hlevel)
 
 /--
 Origin-zero recognizability and exact checked positive board-level raw Figure
