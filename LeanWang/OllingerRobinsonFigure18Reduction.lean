@@ -18736,6 +18736,32 @@ def l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
   alignedMacroSquares := data.alignedMacroSquares
 
 /--
+The first board/free-line Section 7 package feeds the compatible-level route.
+-/
+def l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData data)
+
+/--
+The second board/free-line Section 7 package feeds the compatible-level route.
+-/
+def l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData data)
+
+/--
 Board/free-line active-corner recognition and positive board-level aligned
 macro-squares instantiate the first proof-facing Section 7 package.
 -/
