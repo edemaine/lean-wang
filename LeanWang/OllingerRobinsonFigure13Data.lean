@@ -11377,6 +11377,24 @@ end NatSiteRobinsonLevelObligations
 
 namespace NatSiteRobinsonCompatibleLevelObligations
 
+/--
+The compatible level-grid part of the Nat-site Section 7 obligation is exactly
+the forward forcing half of the abstract scaffold instance.
+-/
+def forces
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
+    ForcesFixedCornerSquares
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_robinsonBoardLevelCompatibleRoutedFreeGridsForTable
+    O.levelCompatibleRoutedFreeGrids
+
 def ofLocalCompatibility
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :

@@ -10252,6 +10252,25 @@ theorem forcesFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
     (hasFigure18RoutedFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
       hgrids)
 
+/--
+Compatible level-indexed Robinson board/free-grid witnesses directly force
+fixed-corner payload squares.
+
+This is the Section 7 board route in its proof-facing form: the geometric
+argument supplies a compatible routed free grid at each Robinson board level,
+and the existing cofinality of board levels gives routed payload squares of
+every requested finite size.
+-/
+theorem forcesFixedCornerSquares_of_robinsonBoardLevelCompatibleRoutedFreeGridsForTable
+    {table : Figure18RoleTable}
+    (hgrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable table) :
+    ForcesFixedCornerSquares table.presentation.toScaffold :=
+  forcesFixedCornerSquares_of_robinsonBoardRoutedFreeGridsForTable
+    (hasFigure18RobinsonBoardRoutedFreeGridsForTable_of_level
+      (hasFigure18RobinsonBoardLevelRoutedFreeGridsForTable_of_compatible
+        hgrids))
+
 theorem forcesFixedCornerSquares_of_robinsonBoardSignalLocalTower
     {table : Figure18RoleTable}
     (htower :
