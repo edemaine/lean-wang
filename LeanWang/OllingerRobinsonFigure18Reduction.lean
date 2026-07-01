@@ -23185,6 +23185,52 @@ def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
   ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSquares
     canonicalFreeSiteRectRouting hlevel
 
+/--
+Checked compatible Figure 16 level data supplies the first bundled
+free-site-rectangle Section 7 obligation package.
+-/
+def l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    canonicalFreeSiteRectRouting
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies the second bundled
+free-site-rectangle Section 7 obligation package.
+-/
+def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    canonicalFreeSiteRectRouting
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
 def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
     (hgrids :
       OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
@@ -23331,6 +23377,96 @@ def l2c2SignalTowerCanonicalCheckedCompatibleFig16Obligations
       (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower htower))
     hlevel
 
+/--
+Checked compatible Figure 16 level data supplies the first compatible-level
+Robinson Section 7 obligation package.
+-/
+def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    hgrids
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies the second compatible-level
+Robinson Section 7 obligation package.
+-/
+def l2c2CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    hgrids
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data plus the first signal tower supplies
+the first compatible-level Robinson Section 7 obligation package.
+-/
+def l2c1SignalTowerCanonicalCheckedCompatibleFig16LevelDataObligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    htower
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data plus the second signal tower supplies
+the second compatible-level Robinson Section 7 obligation package.
+-/
+def l2c2SignalTowerCanonicalCheckedCompatibleFig16LevelDataObligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    htower
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
 def l2c1CheckedCompatibleFig16IsolatedBoxes
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
     Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
@@ -23368,6 +23504,54 @@ def l2c2CheckedCompatibleFig16ActiveCornerBoxes
       l2Component2Figure18ScaffoldData :=
   Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
     (l2c2CheckedCompatibleFig16IsolatedBoxes hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive isolated active
+boxes for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16LevelDataIsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1CheckedCompatibleFig16IsolatedBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive isolated active
+boxes for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16LevelDataIsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2CheckedCompatibleFig16IsolatedBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive active-corner boxes
+for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1CheckedCompatibleFig16ActiveCornerBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive active-corner boxes
+for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16LevelDataActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2CheckedCompatibleFig16ActiveCornerBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
 
 /--
 Canonical checked compatible Figure 16 macro-squares supply the finite layer
@@ -23458,6 +23642,80 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleF
   l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
     (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
     hlevel
+
+/--
+Checked compatible Figure 16 level data supplies the finite layer patches
+needed by the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies the finite layer patches
+needed by the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
 
 def l2c1GeomCombinedCanonicalCheckedCompatibleFig16Obligations
     (geomCombinedSiteRouting :
