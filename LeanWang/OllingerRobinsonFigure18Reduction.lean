@@ -33717,6 +33717,90 @@ theorem
         hinterior hcorrect)
 
 /--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorPackage
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorPackage
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorPackage
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorPackage
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
 Encoded domino undecidability from origin-zero active/corner windows, finite
 active-corner layer patches, and the packaged source-uniform generated interior
 position-code decoder for the first audited L2-blank candidate.
