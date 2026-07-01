@@ -15488,9 +15488,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
-      O.toL2C1TowerIndexedBoxObligations
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -15513,9 +15516,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
-      O.toL2C1TowerIndexedBoxObligations
-      hinterior hcorrect
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -15538,9 +15544,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
-      O.toL2C2TowerIndexedBoxObligations
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -15563,9 +15572,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
-      O.toL2C2TowerIndexedBoxObligations
-      hinterior hcorrect
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -15588,9 +15600,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
-      O.toL2C1TowerIndexedBoxObligations
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -15613,9 +15628,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_l2c1_towerBoxObligations_interiorRows
-      O.toL2C1TowerIndexedBoxObligations
-      hinterior hcorrect
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -15638,9 +15656,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
-      O.toL2C2TowerIndexedBoxObligations
-      hinterior hcorrect
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -15663,9 +15684,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_l2c2_towerBoxObligations_interiorRows
-      O.toL2C2TowerIndexedBoxObligations
-      hinterior hcorrect
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -28982,12 +29006,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate hinterior hcorrect
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -29009,12 +29033,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate hinterior hcorrect
+      O.toL2C1CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -29036,12 +29060,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate hinterior hcorrect
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -29063,12 +29087,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_interiorRows
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate hinterior hcorrect
+      O.toL2C2CompatibleLevelObligations hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using

@@ -15478,6 +15478,53 @@ def toTowerIndexedBoxObligations
     O.pairCompatibility
     O.positiveTranslatedIndexedBoxes
 
+def toCompatibleLevelObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofLevelCompatiblePositiveTranslatedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+        O.signalLocalTower))
+    O.positiveTranslatedIndexedBoxes
+    O.pairCompatibility
+
+def toL2C1CompatibleLevelObligations
+    (O : NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+
+def toL2C2CompatibleLevelObligations
+    (O : NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+
 def toFigure18RoutedCertificate
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
