@@ -5596,6 +5596,42 @@ theorem rawPositiveBoardLevelData_iff_checkedPositiveBoardLevelData :
     rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData⟩
 
 /--
+Propositional positive-board raw data gives the exact board-level raw Figure 13
+square tilings at Robinson's shifted Section 7 free-grid sizes.
+-/
+theorem positiveBoardLevelTileableSquares_of_rawPositiveBoardLevelData
+    (hlevel : HasFigure13PositiveBoardLevelRawData) :
+    ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1)) := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact data.sites.toSiteRectangle.tileableRawSquare_of_rawBoundaryCompatible
+    data.rawBoundary
+
+/--
+Boolean checked positive-board data gives the exact board-level raw Figure 13
+square tilings at Robinson's shifted Section 7 free-grid sizes.
+-/
+theorem positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+    (hlevel : HasFigure13PositiveBoardLevelCheckedData) :
+    ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1)) :=
+  positiveBoardLevelTileableSquares_of_rawPositiveBoardLevelData
+    (rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData hlevel)
+
+/--
+Positive Robinson-board aligned macro-squares are exactly ordinary raw Figure
+13 square tilings at the shifted Section 7 free-grid sizes.
+-/
+theorem positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1)) := by
+  intro level
+  rcases hlevel level with ⟨R, hcompat⟩
+  exact R.tileableRawSquare_of_rawBoundaryCompatible hcompat
+
+/--
 The over-strong row-major checked Figure 16 source raw-boundary board target
 forgets to the exact positive board-level raw Figure 13 checked data.
 -/
@@ -5615,6 +5651,30 @@ theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryBoardLevelChecks
     HasFigure13PositiveBoardLevelCheckedData :=
   checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
     (canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+      hlevel)
+
+/--
+The over-strong row-major Figure 16 source raw-boundary board data gives the
+exact board-level raw Figure 13 square tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_canonicalRawBoundaryCheckedBoardLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
+    ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1)) :=
+  positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+    (checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+      hlevel)
+
+/--
+The over-strong Figure 16 source raw-boundary board checks give the exact
+board-level raw Figure 13 square tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_canonicalRawBoundaryBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    ∀ level : Nat,
+      TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1)) :=
+  positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+    (checkedPositiveBoardLevelData_of_canonicalRawBoundaryBoardLevelChecks
       hlevel)
 
 theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
