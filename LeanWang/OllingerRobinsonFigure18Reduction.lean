@@ -18563,6 +18563,36 @@ def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
   alignedMacroSquares := hlevel
 
 /--
+Robinson Section 7 obstruction routing and exact positive board-level raw
+Figure 13 square tilings instantiate the first paper-facing obstruction
+package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (section7Routing :
+      l2Component1Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    section7Routing
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Robinson Section 7 obstruction routing and exact positive board-level raw
+Figure 13 square tilings instantiate the second paper-facing obstruction
+package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (section7Routing :
+      l2Component2Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    section7Routing
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
 Origin-zero recognizability and positive Robinson-board aligned macro-squares
 instantiate the first paper-facing obstruction package.
 -/
@@ -18589,6 +18619,32 @@ def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlig
     hlevel
 
 /--
+Origin-zero recognizability and exact positive board-level raw Figure 13
+square tilings instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (l2Component1Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+      originZeroWindows)
+    hsquares
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13
+square tilings instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+      originZeroWindows)
+    hsquares
+
+/--
 Finite origin-zero checked stacks and positive Robinson-board aligned
 macro-squares instantiate the first paper-facing obstruction package.
 -/
@@ -18611,6 +18667,28 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedM
   l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
     (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
       (l2c2OriginZeroWindowsOfCheckedStacks hchecked)) hlevel
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hsquares
 
 /--
 Finite origin-zero checked stacks and shifted canonical board-level checks
@@ -26218,10 +26296,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       h
 
 /--
@@ -26235,10 +26312,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       h
 
 /--
@@ -26252,10 +26328,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       h
 
 /--
@@ -26269,10 +26344,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       h
 
 /--
@@ -28920,10 +28994,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorRows
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -28943,10 +29016,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorRows
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -28966,10 +29038,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorRows
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorRows
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -28989,10 +29060,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorRows
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorRows
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -29368,10 +29438,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -29391,10 +29460,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
+      (l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -29414,10 +29482,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
@@ -29437,10 +29504,9 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
-      originZeroWindows
-      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
-        hsquares)
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
+      (l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       hinterior hcorrect
 
 /--
