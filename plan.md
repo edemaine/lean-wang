@@ -2,7 +2,11 @@
 
 ## Recommendation
 
-Use the Berger/Robinson proof route as presented in [Jeandel and Vanier's notes](cirm.pdf), via the Ollinger/Robinson intrinsically substitutive scaffold.
+Use the Berger/Robinson proof route as presented in [Jeandel and Vanier's
+notes](cirm.pdf), via the Ollinger/Robinson intrinsically substitutive scaffold.
+Robinson's original paper [Undecidability and Nonperiodicity for Tilings of the
+Plane](robinson.pdf) is the primary source for the board/free-line Section 7
+argument.
 
 The proposed proof pipeline is:
 
@@ -611,8 +615,8 @@ Figure 18 geometry.  The proof should target a board/free-grid certificate:
   proof should not require adjacent plane coordinates for consecutive virtual
   rows or columns.
 
-Robinson's original paper (`robinson.pdf`, used as local input but not checked
-in) supports this route more directly than Figure 18 alone.  In Section 7,
+Robinson's original paper [`robinson.pdf`](robinson.pdf) supports this route
+more directly than Figure 18 alone.  In Section 7,
 after defining red borders and boards, Robinson states that no obstruction
 signals run along the free rows; a tile is in a free row iff no horizontal
 obstruction signal passes through it, and similarly for free columns.  He then

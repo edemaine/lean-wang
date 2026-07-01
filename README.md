@@ -5,6 +5,10 @@ Lean formalization project for the undecidability of plane tiling by Wang tiles.
 The proof plan is in [`plan.md`](plan.md). The current implementation starts with
 the concrete definitions needed for the Berger/Robinson route:
 
+Primary source PDFs used by the proof plan are checked in as [`cirm.pdf`](cirm.pdf)
+and [`robinson.pdf`](robinson.pdf), with provenance notes in [`cirm.txt`](cirm.txt)
+and [`robinson.txt`](robinson.txt).
+
 - `LeanWang.Basic`: Wang tiles, plane and quarter-plane tilings, finite rectangle
   tilings, executable finite rectangle search, canonical natural-number
   encoding/decoding for finite tilesets, and the easy compactness restriction
