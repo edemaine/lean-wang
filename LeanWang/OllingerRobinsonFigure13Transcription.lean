@@ -4660,6 +4660,126 @@ theorem noObstruction_at_freeCrossing
   · exact geometry.noVerticalObstruction_of_freeColumnCoord
       i (geometry.freeRowCoord j) (geometry.freeRowCoord_board j)
 
+/--
+The free columns selected by a Robinson board geometry are exactly the finite
+index set of size `freeGridSide level`.
+-/
+noncomputable def freeColumnEquivFin
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { column : Int // geometry.isFreeColumn column } ≃
+      Fin (RobinsonSquare.freeGridSide level) where
+  toFun column :=
+    Classical.choose
+      (geometry.freeColumnCoord_complete column.1 column.2)
+  invFun i :=
+    ⟨geometry.freeColumnCoord i, geometry.freeColumnCoord_free i⟩
+  left_inv column := by
+    apply Subtype.ext
+    exact Classical.choose_spec
+      (geometry.freeColumnCoord_complete column.1 column.2)
+  right_inv i := by
+    apply geometry.freeColumnCoord_injective
+    exact Classical.choose_spec
+      (geometry.freeColumnCoord_complete
+        (geometry.freeColumnCoord i) (geometry.freeColumnCoord_free i))
+
+/--
+The free rows selected by a Robinson board geometry are exactly the finite index
+set of size `freeGridSide level`.
+-/
+noncomputable def freeRowEquivFin
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { row : Int // geometry.isFreeRow row } ≃
+      Fin (RobinsonSquare.freeGridSide level) where
+  toFun row :=
+    Classical.choose
+      (geometry.freeRowCoord_complete row.1 row.2)
+  invFun j :=
+    ⟨geometry.freeRowCoord j, geometry.freeRowCoord_free j⟩
+  left_inv row := by
+    apply Subtype.ext
+    exact Classical.choose_spec
+      (geometry.freeRowCoord_complete row.1 row.2)
+  right_inv j := by
+    apply geometry.freeRowCoord_injective
+    exact Classical.choose_spec
+      (geometry.freeRowCoord_complete
+        (geometry.freeRowCoord j) (geometry.freeRowCoord_free j))
+
+/--
+Robinson's horizontal obstruction criterion selects exactly `freeGridSide level`
+unobstructed board rows.
+-/
+noncomputable def unobstructedRowEquivFin
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { row : Int //
+        geometry.isBoardRow row ∧
+          ∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column row } ≃
+      Fin (RobinsonSquare.freeGridSide level) where
+  toFun row :=
+    Classical.choose
+      (geometry.freeRowCoord_complete row.1
+        ((geometry.freeRow_iff_noHorizontalObstruction
+          row.1 row.2.1).2 row.2.2))
+  invFun j :=
+    ⟨geometry.freeRowCoord j,
+      geometry.freeRowCoord_board j,
+      fun column hcolumn =>
+        geometry.noHorizontalObstruction_of_freeRowCoord column hcolumn j⟩
+  left_inv row := by
+    apply Subtype.ext
+    exact Classical.choose_spec
+      (geometry.freeRowCoord_complete row.1
+        ((geometry.freeRow_iff_noHorizontalObstruction
+          row.1 row.2.1).2 row.2.2))
+  right_inv j := by
+    apply geometry.freeRowCoord_injective
+    exact Classical.choose_spec
+      (geometry.freeRowCoord_complete
+        (geometry.freeRowCoord j)
+        ((geometry.freeRow_iff_noHorizontalObstruction
+          (geometry.freeRowCoord j) (geometry.freeRowCoord_board j)).2
+          (fun column hcolumn =>
+            geometry.noHorizontalObstruction_of_freeRowCoord column hcolumn j)))
+
+/--
+Robinson's vertical obstruction criterion selects exactly `freeGridSide level`
+unobstructed board columns.
+-/
+noncomputable def unobstructedColumnEquivFin
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { column : Int //
+        geometry.isBoardColumn column ∧
+          ∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction column row } ≃
+      Fin (RobinsonSquare.freeGridSide level) where
+  toFun column :=
+    Classical.choose
+      (geometry.freeColumnCoord_complete column.1
+        ((geometry.freeColumn_iff_noVerticalObstruction
+          column.1 column.2.1).2 column.2.2))
+  invFun i :=
+    ⟨geometry.freeColumnCoord i,
+      geometry.freeColumnCoord_board i,
+      fun row hrow =>
+        geometry.noVerticalObstruction_of_freeColumnCoord i row hrow⟩
+  left_inv column := by
+    apply Subtype.ext
+    exact Classical.choose_spec
+      (geometry.freeColumnCoord_complete column.1
+        ((geometry.freeColumn_iff_noVerticalObstruction
+          column.1 column.2.1).2 column.2.2))
+  right_inv i := by
+    apply geometry.freeColumnCoord_injective
+    exact Classical.choose_spec
+      (geometry.freeColumnCoord_complete
+        (geometry.freeColumnCoord i)
+        ((geometry.freeColumn_iff_noVerticalObstruction
+          (geometry.freeColumnCoord i) (geometry.freeColumnCoord_board i)).2
+          (fun row hrow =>
+            geometry.noVerticalObstruction_of_freeColumnCoord i row hrow)))
+
 /-- Column-coordinate recurrence between consecutive Robinson board geometries. -/
 def ColumnCoordinateStep
     {level : Nat}
