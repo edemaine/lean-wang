@@ -22544,6 +22544,190 @@ theorem domino_problem_undecidable_l2c2_canonical_corridor_compatible_fig16_posi
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and canonical
+raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_raw_boundary_fig16_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_compatible_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and canonical
+raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_corridor_raw_boundary_fig16_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_canonical_corridor_compatible_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and canonical
+raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_raw_boundary_fig16_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_compatible_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and canonical
+raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_corridor_raw_boundary_fig16_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_canonical_corridor_compatible_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and finite-checked
+canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_fig16_bool_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_canonical_corridor_raw_boundary_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and finite-checked
+canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_corridor_fig16_bool_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_canonical_corridor_raw_boundary_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and finite-checked
+canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_fig16_bool_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_canonical_corridor_raw_boundary_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+canonical Robinson Section 7 corridor-transmission routing and finite-checked
+canonical raw-boundary Figure 16 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_corridor_fig16_bool_position_source
+    (canonicalCorridorRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_canonical_corridor_raw_boundary_fig16_position_source
+      canonicalCorridorRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 compatible Robinson level grids, canonical checked compatible Figure 16
 macro-squares, and the generated interior position-code rows.
 -/
