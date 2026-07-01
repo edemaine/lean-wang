@@ -312,6 +312,13 @@ The next bridge should therefore construct the source-level statement/support
 lookup directly over encoded source codes, prove an extensional correctness
 theorem for the generated descriptor rows, and discharge one of these row-level
 primitive-recursion targets.
+The source route also has package-level computability wrappers
+`sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup`,
+`sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup`,
+and `sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup`
+plus exact-shape primed variants.  These consume the same row-plus-statement
+nodup packages used by the theorem surfaces, so future decoder work should aim
+to construct one package rather than separately threading the fields.
 The flat label-index arithmetic has now been separated out in
 `TM0FoldedReduction.sourceLabelIndexFromSplit?` and the started wrapper
 `sourceLabelIndexStartSplit?`, with primitive-recursive proofs. These helpers

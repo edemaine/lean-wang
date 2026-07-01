@@ -3777,6 +3777,23 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionC
   (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
     hvarRows hnodup).of_eq fun _ => rfl
 
+/--
+Packaged one-row generated position-code rows give source-level computability
+of the normalized folded finite-TM0 program data.
+-/
+theorem sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
+    hrows.rows hrows.statementList_nodup
+
+theorem sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup'
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup
+    hrows).of_eq fun _ => rfl
+
 theorem sourceProgramData_computable_of_source_boundedInteriorRows
     (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
@@ -3811,6 +3828,23 @@ theorem sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBo
   (sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows
     hinterior hnodup).of_eq fun _ => rfl
 
+/--
+Packaged bounded-interior generated position-code rows give source-level
+computability of the normalized folded finite-TM0 program data.
+-/
+theorem sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows
+    hbounded.rows hbounded.statementList_nodup
+
+theorem sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup'
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup
+    hbounded).of_eq fun _ => rfl
+
 theorem sourceProgramData_computable_of_source_interiorRows
     (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
       sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2)) :
@@ -3844,6 +3878,23 @@ theorem sourceProgramData_computable_of_source_interiorRows_of_positionCodeInter
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows
     hinterior hnodup).of_eq fun _ => rfl
+
+/--
+Packaged interior generated position-code rows give source-level computability
+of the normalized folded finite-TM0 program data.
+-/
+theorem sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows
+    hinterior.rows hinterior.statementList_nodup
+
+theorem sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup'
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup
+    hinterior).of_eq fun _ => rfl
 
 /--
 The remaining bounded-search descriptor decoder proof, together with normalized
