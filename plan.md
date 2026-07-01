@@ -750,6 +750,11 @@ directly into this target via
 `l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData`.  Thus finite Figure 13
 box data is already enough to supply the layer-patch field; the remaining
 concrete scaffold work can focus on proving the checked-stack/box package.
+The checked signal-tower board packages now also feed this route directly via
+`l2c1CheckedStackLayerPatchDataOfCheckedBoardData`,
+`l2c2CheckedStackLayerPatchDataOfCheckedBoardData`, and origin-zero
+checked-board-level/check wrappers, so raw-boundary board-level finite checks
+are enough once origin-zero recognizability is available.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.

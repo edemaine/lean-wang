@@ -20530,6 +20530,74 @@ def l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
   l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData
     (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
 
+/--
+The first checked signal-tower board package supplies the preferred
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The second checked signal-tower board package supplies the preferred
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+Origin-zero windows plus row-major checked board levels supply the first
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus row-major checked board levels supply the second
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus checked board-level finite checks supply the first
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+/--
+Origin-zero windows plus checked board-level finite checks supply the second
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
 open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
 
 /--
