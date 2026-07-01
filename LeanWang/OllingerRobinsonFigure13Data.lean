@@ -11395,6 +11395,49 @@ def forces
   forcesFixedCornerSquares_of_robinsonBoardLevelCompatibleRoutedFreeGridsForTable
     O.levelCompatibleRoutedFreeGrids
 
+/-- Compatible level Nat-site obligations are already a flexible Figure 18 certificate. -/
+def flexibleCertificate
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
+    Figure18FlexibleCertificate
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table where
+  forces := O.forces
+  realizes := O.realizes
+
+/-- Package compatible level Nat-site obligations as a flexible Figure 18 instance. -/
+def flexibleInstance
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
+    Figure18FlexibleInstance where
+  table :=
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).table
+  certificate := O.flexibleCertificate
+
+/-- The direct flexible instance keeps the audited Figure 13 scaffold tiles. -/
+theorem flexibleInstance_presentation_tiles
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid) :
+    O.flexibleInstance.presentation.tiles =
+      TileSubdivision.subdivideTileSet fig13Tiles :=
+  O.flexibleInstance.presentation_tiles
+
 def ofLocalCompatibility
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
