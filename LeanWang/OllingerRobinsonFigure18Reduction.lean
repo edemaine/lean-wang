@@ -23335,6 +23335,118 @@ def l2c2CheckedCompatibleFig16IsolatedBoxes
     l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
       hlevel
 
+/--
+Canonical checked compatible Figure 16 macro-squares supply positive
+active-corner boxes for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16ActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+    (l2c1CheckedCompatibleFig16IsolatedBoxes hlevel)
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply positive
+active-corner boxes for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16ActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+    (l2c2CheckedCompatibleFig16IsolatedBoxes hlevel)
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply the finite layer
+patches needed by the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        l2c1CheckedCompatibleFig16ActiveCornerBoxes hlevel r hr)
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply the finite layer
+patches needed by the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        l2c2CheckedCompatibleFig16ActiveCornerBoxes hlevel r hr)
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches :=
+    l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches :=
+    l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
 def l2c1GeomCombinedCanonicalCheckedCompatibleFig16Obligations
     (geomCombinedSiteRouting :
       OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
