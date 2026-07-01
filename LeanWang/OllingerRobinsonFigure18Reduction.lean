@@ -18579,6 +18579,58 @@ def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedM
       (l2c2OriginZeroWindowsOfCheckedStacks hchecked)) hlevel
 
 /--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
 Origin-zero recognizability and exact checked positive board-level raw Figure
 13 data instantiate the first paper-facing obstruction package.
 -/
@@ -20475,13 +20527,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
           hchecked hlevel))
       h
 
@@ -20497,13 +20549,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
           hchecked hlevel))
       h
 
@@ -20519,13 +20571,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
           hchecked hlevel))
       h
 
@@ -20541,13 +20593,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
           hchecked hlevel))
       h
 
@@ -20563,13 +20615,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
           hchecked hlevel))
       h
 
@@ -20585,13 +20637,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
           hchecked hlevel))
       h
 
@@ -20607,13 +20659,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
           hchecked hlevel))
       h
 
@@ -20629,13 +20681,13 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2Figure18RoutedCertificateOfRobinsonSection7Data
-        (l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
           hchecked hlevel))
       h
 
