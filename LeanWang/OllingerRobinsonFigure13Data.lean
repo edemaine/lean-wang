@@ -11721,6 +11721,45 @@ def ofGeometryCombinedPositiveTranslatedBoxes
       geomCombinedSiteRouting)
     translatedBoxes_pos hcheck
 
+set_option linter.style.longLine false in
+/--
+Robinson Section 7 obstruction-routing version of
+`ofGeometryCombinedPositiveTranslatedBoxes`.
+
+This is the paper-facing constructor: the obstruction/free-line argument is
+recorded as `HasRobinsonSection7ObstructionRoutingInvariant`; the existing
+Figure 18 scaffold bridges turn it into compatible routed level grids.
+-/
+def ofSection7ObstructionRoutingPositiveTranslatedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (section7Routing :
+      Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatiblePositiveTranslatedBoxes activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+        section7Routing))
+    translatedBoxes_pos hcheck
+
 /--
 Canonical decoded corridor routing version of
 `ofGeometryCombinedPositiveTranslatedBoxes`.
@@ -12231,6 +12270,42 @@ def ofL2Component1BlankCandidatePatches
     (realizesActiveCornerSquares_of_realizesActiveCornerBoxes
       (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches))
 
+/-- L2 component-1 specialization of the Section 7 obstruction-routing constructor. -/
+def ofL2Component1Section7ObstructionRoutingPositiveTranslatedBoxes
+    (section7Routing :
+      Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7ObstructionRoutingPositiveTranslatedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    section7Routing translatedBoxes_pos
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
 /--
 Compatible-level L2 component-1 entry point using Robinson finite layer patches.
 -/
@@ -12311,6 +12386,42 @@ def ofL2Component2BlankCandidatePatches
   ofL2Component2BlankCandidate levelCompatibleRoutedFreeGrids
     (realizesActiveCornerSquares_of_realizesActiveCornerBoxes
       (realizesActiveCornerBoxes_of_activeCornerBoxPatches patches))
+
+/-- L2 component-2 specialization of the Section 7 obstruction-routing constructor. -/
+def ofL2Component2Section7ObstructionRoutingPositiveTranslatedBoxes
+    (section7Routing :
+      Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7ObstructionRoutingPositiveTranslatedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    section7Routing translatedBoxes_pos
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
 
 /--
 Compatible-level L2 component-2 entry point using Robinson finite layer patches.
