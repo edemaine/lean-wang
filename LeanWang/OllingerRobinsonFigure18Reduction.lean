@@ -17190,6 +17190,28 @@ abbrev L2C2OriginZeroWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Finite active-corner layer patches for the first audited L2-blank candidate.
+-/
+abbrev L2C1ActiveCornerLayerPatches : Prop :=
+  HasActiveCornerLayerBoxPatches
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+/--
+Finite active-corner layer patches for the second audited L2-blank candidate.
+-/
+abbrev L2C2ActiveCornerLayerPatches : Prop :=
+  HasActiveCornerLayerBoxPatches
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+/--
 Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
 -/
@@ -19478,6 +19500,30 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
   boardFreeLineActiveCorner :=
     l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
   translatedBoxes := translatedBoxes
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the first board/free-line Section 7 layer-patch package directly.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the second board/free-line Section 7 layer-patch package directly.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  patches := patches
 
 /--
 The first origin-zero/translated-box obligation surface is a specialization of
@@ -27987,6 +28033,70 @@ theorem
       h
 
 /--
+Encoded domino undecidability from origin-zero active/corner windows plus finite
+active-corner layer patches for the first audited L2-blank candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+        originZeroWindows patches)
+      h
+
+/--
+Unencoded domino undecidability from origin-zero active/corner windows plus
+finite active-corner layer patches for the first audited L2-blank candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+        originZeroWindows patches)
+      h
+
+/--
+Encoded domino undecidability from origin-zero active/corner windows plus finite
+active-corner layer patches for the second audited L2-blank candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+        originZeroWindows patches)
+      h
+
+/--
+Unencoded domino undecidability from origin-zero active/corner windows plus
+finite active-corner layer patches for the second audited L2-blank candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+        originZeroWindows patches)
+      h
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to cofinal raw Figure 13 square tilings.
 -/
@@ -32087,6 +32197,94 @@ theorem
   exact
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
       data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the packaged source-uniform generated interior
+position-code decoder for the first audited L2-blank candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+      originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the packaged source-uniform generated interior
+position-code decoder for the first audited L2-blank candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+      originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the packaged source-uniform generated interior
+position-code decoder for the second audited L2-blank candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+      originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the packaged source-uniform generated interior
+position-code decoder for the second audited L2-blank candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+      originZeroWindows patches
       (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
         hinterior hcorrect)
 
