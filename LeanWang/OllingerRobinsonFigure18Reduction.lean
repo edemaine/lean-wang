@@ -17081,6 +17081,28 @@ def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
     data.originZeroWindows data.fig13Boxes
 
 /--
+Origin-zero windows and raw Figure 13 boxes give the first preferred
+origin-zero/finite-box package.
+-/
+def l2c1OriginZeroFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+Origin-zero windows and raw Figure 13 boxes give the second preferred
+origin-zero/finite-box package.
+-/
+def l2c2OriginZeroFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes := hboxes
+
+/--
 Finite origin-zero checked stacks and raw Figure 13 boxes give the first
 preferred origin-zero/finite-box package.
 -/
@@ -25544,8 +25566,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfOriginZeroWindows
         originZeroWindows hboxes) h
 
 /--
@@ -25566,8 +25588,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1OriginZeroSignalTowerFig13BoxDirectObligations
+    domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
+      (l2c1OriginZeroFig13BoxDataOfOriginZeroWindows
         originZeroWindows hboxes) h
 
 /--
@@ -25588,8 +25610,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfOriginZeroWindows
         originZeroWindows hboxes) h
 
 /--
@@ -25610,8 +25632,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2OriginZeroSignalTowerFig13BoxDirectObligations
+    domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
+      (l2c2OriginZeroFig13BoxDataOfOriginZeroWindows
         originZeroWindows hboxes) h
 
 /--
