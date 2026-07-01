@@ -16567,6 +16567,26 @@ theorem positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
     (RobinsonSquare.freeGridSide (level + 1))
 
 /--
+Finite raw Figure 13 boxes supply the exact positive Robinson board-level raw
+Figure 13 squares.
+-/
+theorem positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles
+    (hboxes : Figure13TileableBoxes) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+Cofinal raw Figure 13 square tilings supply the exact positive Robinson
+board-level raw Figure 13 squares.
+-/
+theorem positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
+    (hsquares : Figure13CofinalTileableSquares) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
+    (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
+
+/--
 The exact board-level raw Figure 13 square-tiling surface is equivalent to the
 positive-board raw-data surface.
 -/
@@ -18845,6 +18865,92 @@ def l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
   l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
     boardFreeLineActiveCorner
     (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and a raw Figure 13 plane tiling
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13TilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Board/free-line active-corner recognition and a raw Figure 13 plane tiling
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13TilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Board/free-line active-corner recognition and finite raw Figure 13 boxes
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13TileableBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Board/free-line active-corner recognition and finite raw Figure 13 boxes
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13TileableBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Board/free-line active-corner recognition and cofinal raw Figure 13 squares
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and cofinal raw Figure 13 squares
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
       hsquares)
 
 /--
