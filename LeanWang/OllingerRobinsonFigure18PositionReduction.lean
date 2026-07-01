@@ -1352,6 +1352,158 @@ theorem domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorRowsC
         hinterior)
 
 /--
+Encoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the first origin-zero Section 7 layer-patch
+obligation surface, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_interiorRowsCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
+      O
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the first origin-zero Section 7 layer-patch
+obligation surface, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_interiorRowsCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
+      O
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Encoded domino undecidability from the second origin-zero Section 7 layer-patch
+obligation surface, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_interiorRowsCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
+      O
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
+Unencoded domino undecidability from the second origin-zero Section 7
+layer-patch obligation surface, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_interiorRowsCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
+      O
+      (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+        hinterior)
+
+/--
 Encoded domino undecidability from the first proof-facing board/free-line
 invariant and exact positive board-level raw Figure 13 square tilings, with
 `positionProgramData` semantic correctness discharged.
