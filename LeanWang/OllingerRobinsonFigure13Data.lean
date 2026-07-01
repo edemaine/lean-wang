@@ -6099,6 +6099,56 @@ def HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquare
               true ∧
             figure18SiteCompatibleRectangleBool target = true
 
+/--
+Concrete row-major checked data for one compatible Figure 16 recognized
+Robinson board/free-grid level.
+
+This is the finite-data form of
+`HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares`:
+`sourceSites` stores the selected source Figure 18 sites, `targetSites` stores
+the doubled Figure 16 expansion target, and the three boolean fields are the
+checked layer-stack compatibility, Figure 16 recognition, and target Figure 18
+site compatibility checks.
+-/
+structure CanonicalCheckedFigure16RecognizedCompatibleLevelData
+    (level : Nat) where
+  sourceSites : CheckedNatSiteRectangle
+    (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level)
+  stackCompatible :
+    (checkedLayerStackRectangleOfSiteRectangle sourceSites.toSiteRectangle).compatibleBool
+      layerData
+      (checkedLayerStackRectangleOfSiteRectangle_lookupBool sourceSites.toSiteRectangle) =
+        true
+  targetSites : CheckedNatSiteRectangle
+    (2 * RobinsonSquare.freeGridSide level)
+    (2 * RobinsonSquare.freeGridSide level)
+  recognized :
+    Figure16ExpandedSiteRectangle.matchesBool
+      (checkedLayerStackOfSiteRectangle sourceSites.toSiteRectangle stackCompatible)
+      targetSites.toSiteRectangle = true
+  targetCompatible :
+    figure18SiteCompatibleRectangleBool targetSites.toSiteRectangle = true
+
+/--
+Checked-list form of the compatible Figure 16 recognized Robinson board/free-grid
+target.
+
+Compared with the canonical existential target, this exposes both source and
+target rectangles as row-major checked lists of `(tile, quadrant)` pairs, which
+is the expected shape for generated finite certificates.
+-/
+def HasCanonicalCheckedFigure16RecognizedCompatibleLevelData : Prop :=
+  ∀ level : Nat,
+    Nonempty (CanonicalCheckedFigure16RecognizedCompatibleLevelData level)
+
+theorem canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData
+    (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
+    HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨data.sourceSites.toSiteRectangle, data.stackCompatible,
+    data.targetSites.toSiteRectangle, data.recognized, data.targetCompatible⟩
+
 theorem canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible
     (hlevel : ∀ level : Nat,
       ∃ source : SiteRectangle
