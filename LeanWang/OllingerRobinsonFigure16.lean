@@ -693,8 +693,10 @@ end BlockGrid
 /--
 A compatible square of Figure 16 substitution blocks.
 
-This is the finite object the substitutive scaffold proof should produce at
-arbitrarily large scales before the generic `2 × 2` block expansion is applied.
+This is useful for checking small local patches of the human Figure 16
+transcription.  It is not the final substitution-iteration target: the Figure
+16 rules do not form a plain self-substitution on all `Block`s, because blank
+and line symbols appear inside rules without themselves being rule sources.
 -/
 structure CompatibleBlockSquare (n : Nat) where
   grid : BlockGrid n n
@@ -712,30 +714,26 @@ theorem tileableExpandedSquare {n : Nat}
 end CompatibleBlockSquare
 
 /--
-The Figure 16 substitution-iteration target: compatible block squares exist at
-every positive source side.
+Over-strong diagnostic target: compatible block squares exist at every
+positive source side.
+
+This is enough for compactness after expanding each `Block` to a `2 × 2`
+symbol square, but it should not be used as the final Figure 16 substitution
+target.
 -/
 def HasPositiveCompatibleBlockSquares : Prop :=
   ∀ n : Nat, 0 < n → Nonempty (CompatibleBlockSquare n)
 
 /--
-Cofinal compatible block squares in the expanded Figure 16 symbol grid.
+The proof-facing Figure 16 compactness target: produce symbol-square tilings at
+cofinally many side lengths.
 
-This is weaker than `HasPositiveCompatibleBlockSquares` and better matched to
-the substitution proof: it is enough to produce compatible block squares along
-an unbounded scale sequence, because compactness can crop the expanded symbol
-squares.
+This avoids forcing the substitution argument through a false block-grid
+self-substitution.  The actual iteration only has to build valid rectangles
+over `Symbol.tileSet`.
 -/
-def HasCofinalCompatibleBlockSquares : Prop :=
-  ∀ n : Nat, ∃ m : Nat, n ≤ 2 * m ∧ Nonempty (CompatibleBlockSquare m)
-
-/--
-Compatible block squares at all powers of two.
-
-This is the natural target for iterating the Figure 16 substitutions.
--/
-def HasPowerCompatibleBlockSquares : Prop :=
-  ∀ level : Nat, Nonempty (CompatibleBlockSquare (2 ^ level))
+def HasCofinalSymbolSquares : Prop :=
+  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m
 
 /--
 Positive compatible block squares give tileable doubled squares over the
@@ -749,64 +747,46 @@ theorem tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
   exact square.tileableExpandedSquare
 
 /--
-Cofinal compatible block squares give cofinal tileable squares over the
+Positive compatible block squares give cofinal tileable squares over the
 component-symbol tileset.
 -/
-theorem cofinalTileableSquares_symbolTileSet_of_cofinalCompatibleBlockSquares
-    (hsquares : HasCofinalCompatibleBlockSquares) :
-  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m := by
+theorem cofinalSymbolSquares_of_positiveCompatibleBlockSquares
+    (hsquares : HasPositiveCompatibleBlockSquares) :
+    HasCofinalSymbolSquares := by
   intro n
-  rcases hsquares n with ⟨m, hnm, square⟩
-  rcases square with ⟨square⟩
-  exact ⟨2 * m, hnm, square.tileableExpandedSquare⟩
-
-/--
-Cofinal compatible Figure 16 block squares compactly determine a plane tiling
-by the component-symbol tileset.
--/
-theorem tilesPlane_symbolTileSet_of_cofinalCompatibleBlockSquares
-    (hsquares : HasCofinalCompatibleBlockSquares) :
-    TilesPlane Symbol.tileSet :=
-  tilesPlane_of_cofinal_tileableSquares
-    (cofinalTileableSquares_symbolTileSet_of_cofinalCompatibleBlockSquares
-      hsquares)
-
-private theorem nat_le_two_pow (n : Nat) : n ≤ 2 ^ n := by
-  induction n with
-  | zero =>
-      simp
-  | succ n ih =>
-      have hpos : 1 ≤ 2 ^ n := by
-        exact Nat.succ_le_of_lt (pow_pos (by decide : 0 < 2) n)
-      calc
-        n + 1 ≤ 2 ^ n + 1 := Nat.succ_le_succ ih
-        _ ≤ 2 ^ n + 2 ^ n := Nat.add_le_add_left hpos (2 ^ n)
-        _ = 2 ^ (n + 1) := by
-          rw [pow_succ]
-          omega
-
-/--
-Power-of-two compatible block squares are cofinal after expansion to symbol
-squares.
--/
-theorem cofinalCompatibleBlockSquares_of_powerCompatibleBlockSquares
-    (hsquares : HasPowerCompatibleBlockSquares) :
-    HasCofinalCompatibleBlockSquares := by
-  intro n
-  refine ⟨2 ^ n, ?_, hsquares n⟩
-  have hle : n ≤ 2 ^ n := nat_le_two_pow n
-  have hpos : 0 < 2 ^ n := pow_pos (by decide : 0 < 2) n
+  let sourceSide := n + 1
+  have hsourceSide : 0 < sourceSide := Nat.succ_pos n
+  rcases hsquares sourceSide hsourceSide with ⟨square⟩
+  refine ⟨2 * sourceSide, ?_, square.tileableExpandedSquare⟩
   omega
 
 /--
-Power-of-two compatible Figure 16 block squares compactly determine a plane
-tiling by the component-symbol tileset.
+Cofinal symbol-square tilings compactly determine a plane tiling by the
+component-symbol tileset.
 -/
-theorem tilesPlane_symbolTileSet_of_powerCompatibleBlockSquares
-    (hsquares : HasPowerCompatibleBlockSquares) :
+theorem tilesPlane_symbolTileSet_of_cofinalSymbolSquares
+    (hsquares : HasCofinalSymbolSquares) :
     TilesPlane Symbol.tileSet :=
-  tilesPlane_symbolTileSet_of_cofinalCompatibleBlockSquares
-    (cofinalCompatibleBlockSquares_of_powerCompatibleBlockSquares hsquares)
+  tilesPlane_of_cofinal_tileableSquares hsquares
+
+/--
+Spelled-out version of `HasCofinalSymbolSquares`, useful as a theorem-facing
+surface for generated or reflected finite Figure 16 checks.
+-/
+theorem tilesPlane_symbolTileSet_of_cofinalTileableSquares
+    (hsquares :
+      ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m) :
+    TilesPlane Symbol.tileSet :=
+  tilesPlane_symbolTileSet_of_cofinalSymbolSquares hsquares
+
+/--
+The diagnostic positive block-square target implies the proof-facing cofinal
+symbol-square target.
+-/
+theorem cofinalTileableSquares_symbolTileSet_of_positiveCompatibleBlockSquares
+    (hsquares : HasPositiveCompatibleBlockSquares) :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m := by
+  exact cofinalSymbolSquares_of_positiveCompatibleBlockSquares hsquares
 
 /--
 Compatible Figure 16 block squares at every positive side compactly determine a
@@ -815,9 +795,8 @@ plane tiling by the component-symbol tileset.
 theorem tilesPlane_symbolTileSet_of_positiveCompatibleBlockSquares
     (hsquares : HasPositiveCompatibleBlockSquares) :
     TilesPlane Symbol.tileSet :=
-  tilesPlane_of_all_positive_doubled_tileableSquares
-    (tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
-      hsquares)
+  tilesPlane_symbolTileSet_of_cofinalSymbolSquares
+    (cofinalSymbolSquares_of_positiveCompatibleBlockSquares hsquares)
 
 /-- `phi_L1(*)`. -/
 def phiL1Star : Block :=
