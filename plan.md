@@ -660,6 +660,15 @@ payload matches between neighboring virtual free-grid crossings, and the finite
 Figure 13/Figure 16 layer checks certify the local stack data at those routed
 crossings.
 
+The theorem surface now also has the more Robinson-shaped
+`L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` /
+`L2C2RobinsonSection7BoardFreeLineTranslatedBoxData` packages.  These replace
+the refuted raw macro-square premise with two direct Section 7 obligations:
+board/free-line active-corner recognition, and positive translated active-corner
+indexed boxes for the backward scaffold realization.  The next concrete proof
+work should instantiate those two fields, rather than revive any standalone
+Figure 13 or Figure 18 square-tiling target.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,

@@ -18234,6 +18234,49 @@ structure L2C2RobinsonSection7BoardFreeLineData : Prop where
   alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
+Robinson Section 7 board/free-line data plus translated active-corner boxes for
+the first audited L2-blank candidate.
+
+Unlike `L2C1RobinsonSection7BoardFreeLineData`, this proof-facing package does
+not ask the raw Figure 13 tiles to form board-level macro-squares.  The board
+argument supplies active/corner recognition on the free-line grid, while the
+backward scaffold construction supplies translated positive boxes directly.
+-/
+structure L2C1RobinsonSection7BoardFreeLineTranslatedBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  translatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+          r origin)
+
+/--
+Robinson Section 7 board/free-line data plus translated active-corner boxes for
+the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLineTranslatedBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  translatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+          r origin)
+
+/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -18962,6 +19005,38 @@ def l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
     (open NatSiteRobinsonCompatibleLevelObligations in
       ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
         data.boardFreeLineActiveCorner translatedBoxes)
+
+/--
+The first translated board/free-line Section 7 package feeds the compatible-level
+route without passing through raw Figure 13 macro-square assumptions.
+-/
+def
+    l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner data.translatedBoxes)
+
+/--
+The second translated board/free-line Section 7 package feeds the compatible-level
+route without passing through raw Figure 13 macro-square assumptions.
+-/
+def
+    l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner data.translatedBoxes)
 
 /--
 Board/free-line active-corner recognition and positive board-level aligned
@@ -27135,6 +27210,82 @@ theorem
       (l2c2SignalTowerDirectObligationsOfTranslatedBoxData data) h
 
 /--
+Encoded domino undecidability from the first Section 7 board/free-line package
+with translated active-corner boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      h
+
+/--
+Unencoded domino undecidability from the first Section 7 board/free-line package
+with translated active-corner boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      h
+
+/--
+Encoded domino undecidability from the second Section 7 board/free-line package
+with translated active-corner boxes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      h
+
+/--
+Unencoded domino undecidability from the second Section 7 board/free-line package
+with translated active-corner boxes.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      h
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to cofinal raw Figure 13 square tilings.
 -/
@@ -33421,6 +33572,102 @@ theorem
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
       O.toL2C2CompatibleLevelObligations hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first Section 7 board/free-line package
+with translated active-corner boxes and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first Section 7 board/free-line package
+with translated active-corner boxes and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second Section 7 board/free-line package
+with translated active-corner boxes and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_interiorRows
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second Section 7 board/free-line package
+with translated active-corner boxes and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_interiorRows
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+        data)
+      hinterior hcorrect
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
