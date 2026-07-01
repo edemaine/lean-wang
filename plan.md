@@ -680,8 +680,12 @@ board/free-line active-corner recognition field, but replaces the
 positive-translated-box field by `HasActiveCornerLayerBoxPatches`, matching the
 kind of certificate produced by the Figure 13/Figure 16 layer transcription.
 This should be the preferred target while finishing the concrete finite
-scaffold instantiation.  The existing translated-box and origin-zero translated
-obligation surfaces now coerce into this layer-patch package as well, so older
+scaffold instantiation.  There is also a centered positive-box package,
+`L2C1RobinsonSection7BoardFreeLinePositiveBoxData` /
+`L2C2RobinsonSection7BoardFreeLinePositiveBoxData`, which records exactly the
+remaining backward geometry before the generic layer-patch conversion.  The
+existing translated-box and origin-zero translated obligation surfaces now
+coerce through this positive-box package into the layer-patch package, so older
 Section 7 routes remain usable while the finite layer-patch checks are being
 finished.  The reusable Nat-site constructors
 `scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes` and
