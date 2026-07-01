@@ -19625,6 +19625,70 @@ def l2c2Figure18RoutedCertificateOfRobinsonSection7Data
   (l2c2SignalTowerDirectObligationsOfTranslatedBoxData
     (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)).toFigure18RoutedCertificate
 
+/--
+The first board/free-line Section 7 package provides the routed Figure 18
+certificate without passing through the older signal-tower package.
+-/
+def l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+          data.alignedMacroSquares))
+  let certificate :
+      l2Component1Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLinePositiveTranslatedBoxes
+      l2Component1Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      translatedBoxes
+  simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
+/--
+The second board/free-line Section 7 package provides the routed Figure 18
+certificate without passing through the older signal-tower package.
+-/
+def l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+          data.alignedMacroSquares))
+  let certificate :
+      l2Component2Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLinePositiveTranslatedBoxes
+      l2Component2Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      translatedBoxes
+  simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
 /-- Board-level checks give the first field-based signal-tower board package. -/
 def l2c1SignalTowerBoardDataOfBoardLevelChecks
     (signalLocalTower :
