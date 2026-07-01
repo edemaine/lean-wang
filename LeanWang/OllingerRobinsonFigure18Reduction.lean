@@ -26016,9 +26016,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
-      (l2c1RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
       h
 
 /--
@@ -26032,9 +26032,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
-      (l2c1RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
       h
 
 /--
@@ -26048,9 +26048,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
-      (l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
-        originZeroWindows hlevel)
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
       h
 
 /--
@@ -26064,9 +26064,9 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
-      (l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
-        originZeroWindows hlevel)
+    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
       h
 
 /--
@@ -26080,9 +26080,10 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
-      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-        originZeroWindows hsquares)
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+        hsquares)
       h
 
 /--
@@ -26096,9 +26097,10 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
-      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-        originZeroWindows hsquares)
+    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+        hsquares)
       h
 
 /--
@@ -26112,9 +26114,10 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
-      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-        originZeroWindows hsquares)
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+        hsquares)
       h
 
 /--
@@ -26128,9 +26131,10 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
-      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
-        originZeroWindows hsquares)
+    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+      originZeroWindows
+      (checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+        hsquares)
       h
 
 /--
