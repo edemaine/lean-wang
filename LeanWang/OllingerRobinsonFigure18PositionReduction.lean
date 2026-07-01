@@ -2120,6 +2120,74 @@ theorem
       TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 /--
+Encoded domino undecidability from the first audited L2-blank candidate via
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged generated interior position-code decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_fig16_interiorPackageCorrect
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
+      originZeroWindows hlevel hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged generated interior position-code decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_fig16_interiorPackageCorrect
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
+      originZeroWindows hlevel hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged generated interior position-code decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_fig16_interiorPackageCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
+      originZeroWindows hlevel hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged generated interior position-code decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_fig16_interiorPackageCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
+      originZeroWindows hlevel hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
 Encoded domino undecidability from the first origin-zero Section 7 layer-patch
 obligation surface and the packaged generated interior position-code decoder,
 with `positionProgramData` semantic correctness discharged.
