@@ -16292,8 +16292,7 @@ construction: at board level `level + 1`, the free-row/free-column grid has
 side `RobinsonSquare.freeGridSide (level + 1)`.
 -/
 abbrev Figure13PositiveBoardLevelTileableSquares : Prop :=
-  ∀ level : Nat, TileableSquare fig13Tiles
-    (RobinsonSquare.freeGridSide (level + 1))
+  HasFigure13PositiveBoardLevelTileableSquares
 
 /-- Finite checked Figure 16-recognized Robinson board macro-square hypothesis. -/
 abbrev Figure13CheckedRecognizedMacroSquares : Prop :=
