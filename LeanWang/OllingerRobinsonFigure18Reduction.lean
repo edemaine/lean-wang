@@ -27832,6 +27832,94 @@ theorem
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorRows
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and generated interior
+position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and generated interior
+position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorRows
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability,
 row-major checked raw-boundary board levels, and generated interior position-code
 rows.
 -/
@@ -28091,6 +28179,94 @@ theorem
   exact
     domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
       (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and the packaged
+generated interior position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and the packaged
+generated interior position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and the packaged
+generated interior position-code source route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability,
+exact checked positive board-level raw Figure 13 data, and the packaged
+generated interior position-code source route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
         originZeroWindows hlevel)
       hinterior hcorrect
 
