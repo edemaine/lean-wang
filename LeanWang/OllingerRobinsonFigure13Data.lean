@@ -5210,6 +5210,24 @@ def HasFigure13PositiveBoardLevelCheckedData : Prop :=
   ∀ level : Nat, Nonempty (Figure13PositiveBoardLevelCheckedData level)
 
 /--
+Propositional raw-boundary form of one positive Robinson board-level raw Figure
+13 macro-square.
+
+This is convenient for the eventual board/free-line proof, which should derive
+the local horizontal and vertical boundary matches as propositions.  The
+Boolean checked form above remains the better finite-audit target.
+-/
+structure Figure13PositiveBoardLevelRawData (level : Nat) where
+  sites : CheckedNatSiteRectangle
+    (RobinsonSquare.freeGridSide (level + 1))
+    (RobinsonSquare.freeGridSide (level + 1))
+  rawBoundary : sites.toSiteRectangle.RawBoundaryCompatible
+
+/-- Propositional form of the exact positive board-level raw Figure 13 target. -/
+def HasFigure13PositiveBoardLevelRawData : Prop :=
+  ∀ level : Nat, Nonempty (Figure13PositiveBoardLevelRawData level)
+
+/--
 Finite diagnostic for the over-strong source raw-boundary board target: a
 horizontal two-cell source edge satisfying both checked layer-stack
 compatibility and raw Figure 13 boundary compatibility.
@@ -5427,6 +5445,48 @@ theorem checkedPositiveBoardLevelData_iff_robinsonPositiveBoardLevelAlignedMacro
       HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
   ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevelData,
     checkedPositiveBoardLevelData_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
+
+/--
+Propositional positive-board raw data supplies the Boolean checked positive
+board-level data.
+-/
+theorem checkedPositiveBoardLevelData_of_rawPositiveBoardLevelData
+    (hlevel : HasFigure13PositiveBoardLevelRawData) :
+    HasFigure13PositiveBoardLevelCheckedData := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨{
+    sites := data.sites
+    rawBoundary :=
+      SiteRectangle.rawBoundaryCompatibleBool_of_rawBoundaryCompatible
+        data.rawBoundary
+  }⟩
+
+/--
+Boolean checked positive-board data supplies the propositional raw-boundary
+form.
+-/
+theorem rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData
+    (hlevel : HasFigure13PositiveBoardLevelCheckedData) :
+    HasFigure13PositiveBoardLevelRawData := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨{
+    sites := data.sites
+    rawBoundary :=
+      SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool
+        data.rawBoundary
+  }⟩
+
+/--
+The propositional and Boolean checked forms of exact positive-board raw Figure
+13 data are equivalent.
+-/
+theorem rawPositiveBoardLevelData_iff_checkedPositiveBoardLevelData :
+    HasFigure13PositiveBoardLevelRawData ↔
+      HasFigure13PositiveBoardLevelCheckedData :=
+  ⟨checkedPositiveBoardLevelData_of_rawPositiveBoardLevelData,
+    rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData⟩
 
 /--
 The over-strong row-major checked Figure 16 source raw-boundary board target
