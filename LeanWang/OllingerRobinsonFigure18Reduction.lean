@@ -16229,6 +16229,17 @@ abbrev Figure13TileableBoxes : Prop :=
 abbrev Figure13CofinalTileableSquares : Prop :=
   ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
 
+/--
+Exact positive Robinson board-level raw Figure 13 square-tiling hypothesis.
+
+This is the ordinary Wang-rectangle form of Robinson's Section 7 board/free-row
+construction: at board level `level + 1`, the free-row/free-column grid has
+side `RobinsonSquare.freeGridSide (level + 1)`.
+-/
+abbrev Figure13PositiveBoardLevelTileableSquares : Prop :=
+  ∀ level : Nat, TileableSquare fig13Tiles
+    (RobinsonSquare.freeGridSide (level + 1))
+
 /-- Finite checked Figure 16-recognized Robinson board macro-square hypothesis. -/
 abbrev Figure13CheckedRecognizedMacroSquares : Prop :=
   HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
@@ -16426,6 +16437,35 @@ theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawPositiveBoardLevels
     HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
   robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
     (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
+
+/--
+Board-level raw Figure 13 square tilings supply propositional positive-board
+raw data.
+-/
+theorem rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13PositiveBoardLevelRaw :=
+  rawPositiveBoardLevelData_of_positiveBoardLevelTileableSquares hsquares
+
+/--
+Board-level raw Figure 13 square tilings supply checked positive-board data.
+-/
+theorem checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Board-level raw Figure 13 square tilings supply the positive Robinson-board
+aligned macro-square interface.
+-/
+theorem
+    robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
 
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
@@ -18142,6 +18182,30 @@ def l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
   l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
     originZeroWindows
     (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
+
+/--
+Origin-zero recognizability and exact board-level raw Figure 13 square tilings
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    originZeroWindows
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Origin-zero recognizability and exact board-level raw Figure 13 square tilings
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    originZeroWindows
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
 
 /--
 Origin-zero recognizability and shifted canonical board-level checks
@@ -25598,6 +25662,70 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_data_position_source
       (l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
         originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability
+and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_pos_board_squares_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
+      h
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability
+and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_pos_board_squares_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
+      h
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability
+and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_pos_board_squares_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
+      h
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability
+and exact positive board-level raw Figure 13 square tilings.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_pos_board_squares_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+        originZeroWindows hsquares)
       h
 
 /--
