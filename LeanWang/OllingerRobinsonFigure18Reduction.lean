@@ -27754,13 +27754,14 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       h
 
 /--
@@ -27773,13 +27774,14 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       h
 
 /--
@@ -27792,13 +27794,14 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       h
 
 /--
@@ -27811,13 +27814,14 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       h
 
 /--
@@ -27830,12 +27834,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       h
@@ -27850,12 +27854,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       h
@@ -27870,12 +27874,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       h
@@ -27890,15 +27894,21 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       h
+
+/- The translated-box and positive-box wrappers above intentionally build the
+layer-patch data package before calling the generic Section 7 theorem. Keeping
+the finite-check-facing obligation as the single proof path avoids maintaining
+parallel Section 7 theorem surfaces.
+-/
 
 /--
 Encoded domino undecidability from the first Section 7 board/free-line package
@@ -34367,13 +34377,14 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       hinterior hcorrect
 
 /--
@@ -34391,13 +34402,14 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       hinterior hcorrect
 
 /--
@@ -34415,13 +34427,14 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       hinterior hcorrect
 
 /--
@@ -34439,13 +34452,14 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
-        data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+          data))
       hinterior hcorrect
 
 /--
@@ -34464,12 +34478,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       hinterior hcorrect
@@ -34490,12 +34504,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       hinterior hcorrect
@@ -34516,12 +34530,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       hinterior hcorrect
@@ -34542,12 +34556,12 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
         (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
           data))
       hinterior hcorrect
