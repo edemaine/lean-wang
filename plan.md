@@ -637,32 +637,28 @@ positive-radius boxes.  This now converts directly to the cleaner
 Figure 13/Figure 16 finite transcription can feed Robinson's Section 7 signal
 tower target without morally depending on canonical row equality.
 
-Current proof frontier: the raw Figure 13 board-level route has been refuted.
-The transcribed raw Figure 13 macro tiles do not tile even a `2 x 2` square, so
-`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares` and
-`Figure13PositiveBoardLevelTileableSquares` are now kept only as diagnostic
-dead ends.  The proof-facing theorem surface is the corrected subdivided
-Figure 18 route:
+Current proof frontier: two tempting standalone tileability routes are now
+diagnostics, not proof-facing assumptions.
 
-- `Figure18CompatibleScaffoldSquares` / `HasCompatibleFigure18ScaffoldSquares`
-  for compatible quarter-site squares of every side length;
-- `L2C1RobinsonSection7CompatibleData` and its `l2c2` analogue, pairing the
-  local signal tower with compatible subdivided Figure 18 squares;
-- `encoded_domino_problem_undecidable_l2c1_robinson_section7_compatible_data_position_source`
-  and the matching unencoded/`l2c2` variants;
-- the corresponding
-  `_robinson_section7_compatible_data_interiorRowsCorrect` final wrappers in
-  `OllingerRobinsonFigure18PositionReduction`.
+- The raw Figure 13 macro-tile route is false: the raw tile list does not tile
+  even a `2 x 2` square (`not_tileableSquare_fig13Tiles_two`), so
+  `HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares` is only a legacy
+  diagnostic surface.
+- The standalone subdivided Figure 18 site route is also false: the Figure 18
+  site graph has no compatible `3 x 3` square
+  (`Figure18Site.hasRectangleStackBool_three_three_eq_false`), so
+  `HasCompatibleFigure18ScaffoldSquares` / `TilesPlane figure18ScaffoldTiles`
+  should not be used as the scaffold-instantiation target.
 
-The next concrete scaffold obligation is therefore to prove
-`HasCompatibleFigure18ScaffoldSquares` from the Robinson board/free-line
-construction.  Robinson's Section 7 text is useful precisely here: the
-obstruction signals identify the free rows and columns, and the board behaves
-as though those free rows/columns formed a contiguous computation square.  In
-Lean, the remaining construction should build compatible Figure 18 site
-rectangles over that virtual square, using the Figure 16 layer data to justify
-the local site choices and the routed boundary matches between neighboring
-virtual cells.
+The proof-facing route is therefore the Section 7 active-corner/translated-box
+route.  The board/free-line construction should produce the active/corner boxes
+needed by `L2C1SignalTowerTranslatedBoxData` / `L2C2SignalTowerTranslatedBoxData`
+(or the underlying
+`NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations`) directly:
+obstruction signals identify free rows and columns, routed board cells carry
+payload matches between neighboring virtual free-grid crossings, and the finite
+Figure 13/Figure 16 layer checks certify the local stack data at those routed
+crossings.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

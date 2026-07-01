@@ -739,6 +739,71 @@ theorem exists_ofTile?_eq_some_of_mem_all_tiles {tile : WangTile}
       exact ⟨site, rfl, ofTile?_eq_some_mem hfind,
         ofTile?_eq_some_tile hfind⟩
 
+/--
+All length-`n` row tails that can be appended to a fixed Figure 18 site.
+
+The first element of each returned tail is a valid east neighbor of `left`,
+and consecutive entries in the tail are also east-compatible.
+-/
+def rowTailsAfter (left : Figure18Site) : Nat → List (List Figure18Site)
+  | 0 => [[]]
+  | n + 1 =>
+      all.flatMap fun right =>
+        if hCompatible left right then
+          (rowTailsAfter right n).map fun tail => right :: tail
+        else
+          []
+
+/-- All horizontally compatible Figure 18 site rows of the requested width. -/
+def compatibleRows : Nat → List (List Figure18Site)
+  | 0 => [[]]
+  | n + 1 =>
+      all.flatMap fun first =>
+        (rowTailsAfter first n).map fun tail => first :: tail
+
+/-- Pointwise vertical compatibility of two Figure 18 site rows. -/
+def rowsVCompatible : List Figure18Site → List Figure18Site → Bool
+  | [], [] => true
+  | lower :: lowers, upper :: uppers =>
+      vCompatible lower upper && rowsVCompatible lowers uppers
+  | _, _ => false
+
+/--
+Possible top rows after stacking `height + 1` compatible rows of fixed width.
+
+This dynamic program is used only for finite diagnostics; it avoids enumerating
+all rectangles explicitly.
+-/
+def rowStackTops (width : Nat) : Nat → List (List Figure18Site)
+  | 0 => compatibleRows width
+  | height + 1 =>
+      let rows := compatibleRows width
+      (rowStackTops width height).flatMap fun lower =>
+        rows.filter fun upper => rowsVCompatible lower upper
+
+/-- Fast row-DP existence check for a Figure 18 site rectangle of the given size. -/
+def hasRectangleStackBool (width height : Nat) : Bool :=
+  match height with
+  | 0 => true
+  | depth + 1 => !(rowStackTops width depth).isEmpty
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 200000 in
+set_option maxHeartbeats 1000000 in
+-- Native evaluation keeps this finite diagnostic from forcing a huge kernel reduction.
+/--
+Diagnostic obstruction: the subdivided Figure 18 site graph does not contain a
+compatible `3 × 3` square.
+
+Thus `HasCompatibleFigure18ScaffoldSquares` is also too strong as a standalone
+scaffold-plane target.  The remaining scaffold proof must use the routed
+active-corner/board invariant rather than plane tileability of all subdivided
+Figure 13 scaffold sites.
+-/
+theorem hasRectangleStackBool_three_three_eq_false :
+    hasRectangleStackBool 3 3 = false := by
+  native_decide
+
 /-- Offset of a quadrant in the flat Figure 18 role transcription order. -/
 def quadrantOffset : Quadrant → Nat
   | .southwest => 0

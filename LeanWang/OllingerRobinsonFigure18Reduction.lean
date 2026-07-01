@@ -16351,24 +16351,6 @@ abbrev Figure18CanonicalCheckedRecognizedCompatibleMacroSquares : Prop :=
   HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
 
 /--
-Corrected subdivided Figure 18 scaffold-square hypothesis.
-
-This is the post-diagnostic scaffold target: Robinson's board/free-line
-argument should construct compatible squares of quarter-sites, not raw Figure
-13 macro-tile squares.
--/
-abbrev Figure18CompatibleScaffoldSquares : Prop :=
-  HasCompatibleFigure18ScaffoldSquares
-
-/-- Finite-box form of the corrected subdivided Figure 18 scaffold target. -/
-abbrev Figure18ScaffoldTileableBoxes : Prop :=
-  ∀ r : Nat, TileableBox figure18ScaffoldTiles r
-
-/-- Plane-tiling form of the corrected subdivided Figure 18 scaffold target. -/
-abbrev Figure18ScaffoldPlane : Prop :=
-  TilesPlane figure18ScaffoldTiles
-
-/--
 Canonical Figure 16 macro-square hypothesis using only checked source layer
 stacks and raw Figure 13 boundary compatibility.
 -/
@@ -16479,25 +16461,6 @@ theorem canonicalRawBoundaryMacroSquares_of_checkedLevelData
     Figure18CanonicalRawBoundaryMacroSquares :=
   canonicalRawBoundaryMacroSquares_of_levelChecks
     (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
-
-theorem figure18ScaffoldTileableBoxes_of_compatibleScaffoldSquares
-    (hsquares : Figure18CompatibleScaffoldSquares) :
-    Figure18ScaffoldTileableBoxes :=
-  tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares
-
-theorem figure18ScaffoldPlane_of_compatibleScaffoldSquares
-    (hsquares : Figure18CompatibleScaffoldSquares) :
-    Figure18ScaffoldPlane :=
-  tilesPlane_of_compatibleFigure18ScaffoldSquares hsquares
-
-theorem compatibleScaffoldSquares_of_figure18ScaffoldPlane
-    (hplane : Figure18ScaffoldPlane) :
-    Figure18CompatibleScaffoldSquares :=
-  compatibleFigure18ScaffoldSquares_of_tilesPlane hplane
-
-theorem compatibleScaffoldSquares_iff_figure18ScaffoldPlane :
-    Figure18CompatibleScaffoldSquares ↔ Figure18ScaffoldPlane :=
-  compatibleFigure18ScaffoldSquares_iff_tilesPlane
 
 theorem canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
@@ -16671,27 +16634,6 @@ theorem positiveBoardLevelTileableSquares_iff_robinsonPositiveBoardLevelAlignedM
       HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
   ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares,
     positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
-
-/--
-The raw positive-board square-tiling surface is contradictory for the current
-Figure 13 transcription.
--/
-theorem not_figure13PositiveBoardLevelTileableSquares :
-    ¬ Figure13PositiveBoardLevelTileableSquares :=
-  not_hasFigure13PositiveBoardLevelTileableSquares
-
-/--
-The raw positive-board aligned macro-square surface is also contradictory.
-
-This quarantines the older Section 7 raw-boundary shortcut: Robinson's argument
-must be instantiated through subdivided Figure 18 compatible squares instead.
--/
-theorem not_robinsonPositiveBoardLevelAlignedMacroSquares :
-    ¬ HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares := by
-  intro hlevel
-  exact not_figure13PositiveBoardLevelTileableSquares
-    (positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
-      hlevel)
 
 /--
 Exact positive board-level raw Figure 13 square tilings are cofinal among all
@@ -18292,36 +18234,6 @@ structure L2C2RobinsonSection7BoardFreeLineData : Prop where
   alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
-Corrected Robinson Section 7 scaffold data for the first audited L2-blank
-candidate.
-
-Robinson's obstruction/free-line argument should ultimately produce compatible
-subdivided Figure 18 site squares.  This avoids the raw Figure 13 macro-square
-surface, which is now known to be contradictory for the transcribed tiles.
--/
-structure L2C1RobinsonSection7CompatibleData : Prop where
-  signalLocalTower :
-    HasNatSiteSignalLocalTower
-      l2Component1BlankCandidateActiveSiteSpecs
-      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-      0 Quadrant.southwest
-      l2Component1BlankCandidateSanity.cornerIndex_valid
-  compatibleScaffoldSquares : Figure18CompatibleScaffoldSquares
-
-/--
-Corrected Robinson Section 7 scaffold data for the second audited L2-blank
-candidate.
--/
-structure L2C2RobinsonSection7CompatibleData : Prop where
-  signalLocalTower :
-    HasNatSiteSignalLocalTower
-      l2Component2BlankCandidateActiveSiteSpecs
-      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-      0 Quadrant.northeast
-      l2Component2BlankCandidateSanity.cornerIndex_valid
-  compatibleScaffoldSquares : Figure18CompatibleScaffoldSquares
-
-/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -18436,50 +18348,6 @@ def l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
         hsquares)
 
 /--
-The first translated-box package from a local signal tower and compatible
-subdivided Figure 18 scaffold squares.
--/
-def l2c1SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component1BlankCandidateActiveSiteSpecs
-        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.southwest
-        l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares) :
-    L2C1SignalTowerTranslatedBoxData where
-  signalLocalTower := signalLocalTower
-  translatedBoxes :=
-    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
-      (by
-        simpa [l2Component1Figure18ScaffoldData,
-          figure18ScaffoldDataOfNatSites] using
-          l2Component1PositiveTranslatedIsolatedBoxesOfCompatibleSquares
-            hsquares)
-
-/--
-The second translated-box package from a local signal tower and compatible
-subdivided Figure 18 scaffold squares.
--/
-def l2c2SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component2BlankCandidateActiveSiteSpecs
-        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.northeast
-        l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares) :
-    L2C2SignalTowerTranslatedBoxData where
-  signalLocalTower := signalLocalTower
-  translatedBoxes :=
-    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
-      (by
-        simpa [l2Component2Figure18ScaffoldData,
-          figure18ScaffoldDataOfNatSites] using
-          l2Component2PositiveTranslatedIsolatedBoxesOfCompatibleSquares
-            hsquares)
-
-/--
 The first translated-box package from a local signal tower and Robinson
 board-level aligned raw Figure 13 macro-squares.
 -/
@@ -18560,20 +18428,6 @@ def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
     L2C2SignalTowerTranslatedBoxData :=
   l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
     data.signalLocalTower data.alignedMacroSquares
-
-/-- The first corrected Robinson Section 7 package feeds the translated-box route. -/
-def l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData
-    (data : L2C1RobinsonSection7CompatibleData) :
-    L2C1SignalTowerTranslatedBoxData :=
-  l2c1SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-    data.signalLocalTower data.compatibleScaffoldSquares
-
-/-- The second corrected Robinson Section 7 package feeds the translated-box route. -/
-def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData
-    (data : L2C2RobinsonSection7CompatibleData) :
-    L2C2SignalTowerTranslatedBoxData :=
-  l2c2SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-    data.signalLocalTower data.compatibleScaffoldSquares
 
 set_option linter.style.longLine false in
 /--
@@ -27366,90 +27220,6 @@ theorem
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
-package specialized to compatible subdivided Figure 18 scaffold squares.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c1_signal_tower_compatible_squares_position_source
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component1BlankCandidateActiveSiteSpecs
-        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.southwest
-        l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
-      (l2c1SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-        signalLocalTower hsquares)
-      h
-
-/--
-Unencoded domino undecidability from the first preferred field-based Section 7
-package specialized to compatible subdivided Figure 18 scaffold squares.
--/
-theorem
-    domino_problem_undecidable_l2c1_signal_tower_compatible_squares_position_source
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component1BlankCandidateActiveSiteSpecs
-        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.southwest
-        l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
-      (l2c1SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-        signalLocalTower hsquares)
-      h
-
-/--
-Encoded domino undecidability from the second preferred field-based Section 7
-package specialized to compatible subdivided Figure 18 scaffold squares.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c2_signal_tower_compatible_squares_position_source
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component2BlankCandidateActiveSiteSpecs
-        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.northeast
-        l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
-      (l2c2SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-        signalLocalTower hsquares)
-      h
-
-/--
-Unencoded domino undecidability from the second preferred field-based Section 7
-package specialized to compatible subdivided Figure 18 scaffold squares.
--/
-theorem
-    domino_problem_undecidable_l2c2_signal_tower_compatible_squares_position_source
-    (signalLocalTower :
-      HasNatSiteSignalLocalTower
-        l2Component2BlankCandidateActiveSiteSpecs
-        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.northeast
-        l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hsquares : Figure18CompatibleScaffoldSquares)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
-      (l2c2SignalTowerTranslatedBoxDataOfCompatibleScaffoldSquares
-        signalLocalTower hsquares)
-      h
-
-/--
-Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to Robinson board-level aligned raw Figure 13
 macro-squares.
 -/
@@ -27591,66 +27361,6 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
       (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
-
-/--
-Encoded domino undecidability from the first corrected Robinson Section 7
-package: a local obstruction-signal tower and compatible subdivided Figure 18
-scaffold squares.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c1_robinson_section7_compatible_data_position_source
-    (data : L2C1RobinsonSection7CompatibleData)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
-      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      h
-
-/--
-Unencoded domino undecidability from the first corrected Robinson Section 7
-package: a local obstruction-signal tower and compatible subdivided Figure 18
-scaffold squares.
--/
-theorem
-    domino_problem_undecidable_l2c1_robinson_section7_compatible_data_position_source
-    (data : L2C1RobinsonSection7CompatibleData)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
-      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      h
-
-/--
-Encoded domino undecidability from the second corrected Robinson Section 7
-package: a local obstruction-signal tower and compatible subdivided Figure 18
-scaffold squares.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c2_robinson_section7_compatible_data_position_source
-    (data : L2C2RobinsonSection7CompatibleData)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
-      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      h
-
-/--
-Unencoded domino undecidability from the second corrected Robinson Section 7
-package: a local obstruction-signal tower and compatible subdivided Figure 18
-scaffold squares.
--/
-theorem
-    domino_problem_undecidable_l2c2_robinson_section7_compatible_data_position_source
-    (data : L2C2RobinsonSection7CompatibleData)
-    (h : PositionSourceObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
-      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      h
 
 /--
 Encoded domino undecidability from the first paper-facing Robinson Section 7
@@ -30454,82 +30164,6 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
       (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
-      hinterior hcorrect
-
-/--
-Encoded domino undecidability from the first corrected Robinson Section 7
-package and generated interior position-code rows.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c1_robinson_section7_compatible_data_interiorRows
-    (data : L2C1RobinsonSection7CompatibleData)
-    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
-      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      hinterior hcorrect
-
-/--
-Unencoded domino undecidability from the first corrected Robinson Section 7
-package and generated interior position-code rows.
--/
-theorem
-    domino_problem_undecidable_l2c1_robinson_section7_compatible_data_interiorRows
-    (data : L2C1RobinsonSection7CompatibleData)
-    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
-      (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      hinterior hcorrect
-
-/--
-Encoded domino undecidability from the second corrected Robinson Section 7
-package and generated interior position-code rows.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c2_robinson_section7_compatible_data_interiorRows
-    (data : L2C2RobinsonSection7CompatibleData)
-    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
-      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
-      hinterior hcorrect
-
-/--
-Unencoded domino undecidability from the second corrected Robinson Section 7
-package and generated interior position-code rows.
--/
-theorem
-    domino_problem_undecidable_l2c2_robinson_section7_compatible_data_interiorRows
-    (data : L2C2RobinsonSection7CompatibleData)
-    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
-      (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7CompatibleData data)
       hinterior hcorrect
 
 /--
