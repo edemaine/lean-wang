@@ -18126,6 +18126,75 @@ def toCanonicalTranslatedPositiveBoxObligations
   O.toCanonicalSiteRectTranslatedPositiveBoxObligations
     |>.toCanonicalTranslatedPositiveBoxObligations
 
+/--
+Canonical free-site-rectangle routing plus translated positive boxes supplies
+the compatible level-grid obligation surface.
+
+The only extra input is the generated finite pair-compatibility check used by
+the Figure 13/Figure 16 stack decoder.
+-/
+def toCompatibleLevelObligations
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofLevelCompatiblePositiveTranslatedBoxes
+    activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+    cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_canonicalFreeSiteRectRouting
+        O.canonicalFreeSiteRectRouting))
+    O.positiveTranslatedIndexedBoxes
+    pairCompatibility
+
+def toL2C1CompatibleLevelObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
+def toL2C2CompatibleLevelObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  O.toCompatibleLevelObligations
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
 def toTowerIndexedBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
