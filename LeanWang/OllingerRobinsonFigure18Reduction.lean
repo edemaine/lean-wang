@@ -27303,8 +27303,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1SignalTowerDirectObligationsOfOriginZeroFig13BoxData data)
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
       hinterior hcorrect
 
 /--
@@ -27322,8 +27322,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_interiorRows
-      (l2c1SignalTowerDirectObligationsOfOriginZeroFig13BoxData data)
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorRows
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
       hinterior hcorrect
 
 /--
@@ -27341,8 +27341,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData data)
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
       hinterior hcorrect
 
 /--
@@ -27360,8 +27360,8 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_interiorRows
-      (l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData data)
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorRows
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data)
       hinterior hcorrect
 
 /--
