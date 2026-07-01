@@ -11859,6 +11859,46 @@ def ofSection7ObstructionRoutingPositiveTranslatedBoxes
         section7Routing))
     translatedBoxes_pos hcheck
 
+set_option linter.style.longLine false in
+/--
+Robinson Section 7 board/free-line version of
+`ofSection7ObstructionRoutingPositiveTranslatedBoxes`.
+
+This is the most direct constructor for Robinson's wording: the board/free-line
+argument supplies the canonical geometry together with active/corner
+recognition at the free crossings.  The lower-level bridge then packages this
+as the obstruction-routing data needed by the compatible routed-grid checker.
+-/
+def ofSection7BoardFreeLinePositiveTranslatedBoxes
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+              cornerIndex cornerQuadrant cornerIndex_valid).scaffold r origin))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatiblePositiveTranslatedBoxes activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofBoardFreeLineActiveCorner
+        boardFreeLine))
+    translatedBoxes_pos hcheck
+
 /--
 Canonical decoded corridor routing version of
 `ofGeometryCombinedPositiveTranslatedBoxes`.
@@ -12405,6 +12445,42 @@ def ofL2Component1Section7ObstructionRoutingPositiveTranslatedBoxes
         NatSiteSpecSanity.cornerSite] using
         l2Component1BlankCandidatePairCompatibilityBool)
 
+/-- L2 component-1 specialization of the Section 7 board/free-line constructor. -/
+def ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7BoardFreeLinePositiveTranslatedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine translatedBoxes_pos
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
 /--
 Compatible-level L2 component-1 entry point using Robinson finite layer patches.
 -/
@@ -12516,6 +12592,42 @@ def ofL2Component2Section7ObstructionRoutingPositiveTranslatedBoxes
     0 Quadrant.northeast
     l2Component2BlankCandidateSanity.cornerIndex_valid
     section7Routing translatedBoxes_pos
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+/-- L2 component-2 specialization of the Section 7 board/free-line constructor. -/
+def ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (translatedBoxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7BoardFreeLinePositiveTranslatedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine translatedBoxes_pos
     (by
       simpa [l2Component2BlankCandidateActiveSiteData,
         l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,

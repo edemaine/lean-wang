@@ -11239,6 +11239,14 @@ def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSection7Obstruct
   HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofFreeSiteRect
     hrouting
 
+def HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant :=
+  HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSection7ObstructionRouting
+    (HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      hboard)
+
 def HasRobinsonBoardCanonicalCorridorRoutingInvariant.ofFreeSiteRect
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
@@ -11287,12 +11295,28 @@ def HasRobinsonBoardRoutedFreeGridInvariant.ofSection7ObstructionRouting
   HasRobinsonBoardRoutedFreeGridInvariant.ofCanonicalFreeSiteRectRouting
     hrouting
 
+def HasRobinsonBoardRoutedFreeGridInvariant.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonBoardRoutedFreeGridInvariant :=
+  HasRobinsonBoardRoutedFreeGridInvariant.ofSection7ObstructionRouting
+    (HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      hboard)
+
 def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
     {D : Figure18ScaffoldData}
     (hrouting : D.HasRobinsonSection7ObstructionRoutingInvariant) :
     D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
   HasRobinsonBoardLevelSignalLocalTowerInvariant.ofCanonicalFreeSiteRectRouting
     hrouting
+
+def HasRobinsonBoardLevelSignalLocalTowerInvariant.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonBoardLevelSignalLocalTowerInvariant :=
+  HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+    (HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      hboard)
 
 def HasIndexedRoutedForces.ofRobinsonBoardGeometryTowerRouting
     {D : Figure18ScaffoldData}
@@ -11381,6 +11405,14 @@ def HasIndexedRoutedForces.ofRobinsonSection7ObstructionRouting
     D.HasIndexedRoutedForces :=
   HasIndexedRoutedForces.ofRobinsonBoardCanonicalFreeSiteRectRouting
     hrouting
+
+def HasIndexedRoutedForces.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasIndexedRoutedForces :=
+  HasIndexedRoutedForces.ofRobinsonSection7ObstructionRouting
+    (HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      hboard)
 
 def HasRealizationInvariant (D : Figure18ScaffoldData) : Prop :=
   RealizesActiveCornerSquares D.scaffold

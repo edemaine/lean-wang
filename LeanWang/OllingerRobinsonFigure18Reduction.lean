@@ -18763,9 +18763,19 @@ def l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
-      l2Component1BlankCandidateSanity.cornerIndex_valid :=
-  l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
-    (l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData data)
+      l2Component1BlankCandidateSanity.cornerIndex_valid := by
+  have translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner translatedBoxes)
 
 /--
 The second board/free-line Section 7 package feeds the compatible-level route.
@@ -18776,9 +18786,19 @@ def l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
-      l2Component2BlankCandidateSanity.cornerIndex_valid :=
-  l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
-    (l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData data)
+      l2Component2BlankCandidateSanity.cornerIndex_valid := by
+  have translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner translatedBoxes)
 
 /--
 Board/free-line active-corner recognition and positive board-level aligned
