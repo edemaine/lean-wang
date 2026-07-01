@@ -306,6 +306,140 @@ theorem fig13Tile_eq_iff (i j : Fin 92) :
     fig13Tile i = fig13Tile j ↔ i = j :=
   ⟨fun h => fig13Tile_injective h, fun h => h ▸ rfl⟩
 
+/-- A raw Figure 13 tile-list member decoded to its scanned Figure 13 index. -/
+theorem exists_fig13Tile_eq_of_mem_fig13Tiles {tile : WangTile}
+    (hmem : tile ∈ fig13Tiles) :
+    ∃ index : Fin 92, fig13Tile index = tile := by
+  have hidx : fig13Tiles.idxOf tile < fig13Tiles.length :=
+    List.idxOf_lt_length_of_mem hmem
+  refine ⟨⟨fig13Tiles.idxOf tile, by simpa [fig13Tiles_length] using hidx⟩, ?_⟩
+  unfold fig13Tile
+  have hget : fig13Tiles[fig13Tiles.idxOf tile]? = some tile :=
+    List.getElem?_idxOf hmem
+  have hgetSome : some fig13Tiles[fig13Tiles.idxOf tile] = some tile := by
+    rw [List.getElem?_eq_getElem hidx] at hget
+    exact hget
+  exact Option.some.inj hgetSome
+
+/-- Boolean raw horizontal compatibility for two indexed Figure 13 tiles. -/
+def fig13RawHCompatiblePairBool (left right : Fin 92) : Bool :=
+  decide (WangTile.HMatches (fig13Tile left) (fig13Tile right))
+
+/-- Boolean raw vertical compatibility for two indexed Figure 13 tiles. -/
+def fig13RawVCompatiblePairBool (lower upper : Fin 92) : Bool :=
+  decide (WangTile.VMatches (fig13Tile lower) (fig13Tile upper))
+
+/-- All pairs of raw Figure 13 tile indices. -/
+def fig13RawIndexPairs : List (Fin 92 × Fin 92) :=
+  (List.finRange 92).product (List.finRange 92)
+
+theorem mem_fig13RawIndexPairs (pair : Fin 92 × Fin 92) :
+    pair ∈ fig13RawIndexPairs := by
+  rcases pair with ⟨left, right⟩
+  simp [fig13RawIndexPairs]
+
+/-- Horizontally compatible indexed raw Figure 13 tile pairs. -/
+def fig13RawHCompatiblePairs : List (Fin 92 × Fin 92) :=
+  fig13RawIndexPairs.filter fun pair =>
+    fig13RawHCompatiblePairBool pair.1 pair.2
+
+theorem mem_fig13RawHCompatiblePairs_iff
+    {pair : Fin 92 × Fin 92} :
+    pair ∈ fig13RawHCompatiblePairs ↔
+      fig13RawHCompatiblePairBool pair.1 pair.2 = true := by
+  simp [fig13RawHCompatiblePairs, mem_fig13RawIndexPairs pair]
+
+/--
+Fast finite check for a raw Figure 13 `2 × 2` square.
+
+The raw Figure 13 tiles are superimposed macro tiles, not a standalone plane
+tileset.  This checker first enumerates the small list of horizontally
+compatible rows and then tests whether two such rows can be stacked.
+-/
+def fig13RawTwoByTwoSquareBool : Bool :=
+  fig13RawHCompatiblePairs.any fun bottom =>
+    fig13RawHCompatiblePairs.any fun top =>
+      fig13RawVCompatiblePairBool bottom.1 top.1 &&
+        fig13RawVCompatiblePairBool bottom.2 top.2
+
+set_option maxRecDepth 200000 in
+set_option maxHeartbeats 1000000 in
+-- The indexed check computes all raw horizontal pairs among 92 tiles once,
+-- then checks the resulting small row list for a stackable `2 × 2` witness.
+/--
+Diagnostic obstruction: the raw Figure 13 macro-tile list does not tile a
+`2 × 2` square by itself.
+
+The proof-facing scaffold route must therefore use the subdivided Figure 18
+site compatibility / board-free-line interfaces, not raw `TilesPlane
+fig13Tiles` as a standalone target.
+-/
+theorem fig13RawTwoByTwoSquareBool_eq_false :
+    fig13RawTwoByTwoSquareBool = false := by
+  decide
+
+theorem fig13RawTwoByTwoSquareBool_eq_true_of_indices
+    {southwest southeast northwest northeast : Fin 92}
+    (hbottom :
+      WangTile.HMatches (fig13Tile southwest) (fig13Tile southeast))
+    (htop :
+      WangTile.HMatches (fig13Tile northwest) (fig13Tile northeast))
+    (hleft :
+      WangTile.VMatches (fig13Tile southwest) (fig13Tile northwest))
+    (hright :
+      WangTile.VMatches (fig13Tile southeast) (fig13Tile northeast)) :
+    fig13RawTwoByTwoSquareBool = true := by
+  unfold fig13RawTwoByTwoSquareBool
+  apply List.any_eq_true.2
+  refine ⟨(southwest, southeast), ?_, ?_⟩
+  · rw [mem_fig13RawHCompatiblePairs_iff]
+    exact decide_eq_true hbottom
+  · apply List.any_eq_true.2
+    refine ⟨(northwest, northeast), ?_, ?_⟩
+    · rw [mem_fig13RawHCompatiblePairs_iff]
+      exact decide_eq_true htop
+    · simp [fig13RawVCompatiblePairBool, hleft, hright]
+
+/-- The raw Figure 13 macro-tile list cannot tile a `2 × 2` square. -/
+theorem not_tileableSquare_fig13Tiles_two :
+    ¬ TileableSquare fig13Tiles 2 := by
+  rintro ⟨x, hx⟩
+  let west : Fin 2 := ⟨0, by decide⟩
+  let east : Fin 2 := ⟨1, by decide⟩
+  let south : Fin 2 := ⟨0, by decide⟩
+  let north : Fin 2 := ⟨1, by decide⟩
+  rcases exists_fig13Tile_eq_of_mem_fig13Tiles (hx.1 west south) with
+    ⟨southwest, hsw⟩
+  rcases exists_fig13Tile_eq_of_mem_fig13Tiles (hx.1 east south) with
+    ⟨southeast, hse⟩
+  rcases exists_fig13Tile_eq_of_mem_fig13Tiles (hx.1 west north) with
+    ⟨northwest, hnw⟩
+  rcases exists_fig13Tile_eq_of_mem_fig13Tiles (hx.1 east north) with
+    ⟨northeast, hne⟩
+  have hbottom : WangTile.HMatches (fig13Tile southwest) (fig13Tile southeast) := by
+    rw [hsw, hse]
+    exact hx.2.1 west south (by decide)
+  have htop : WangTile.HMatches (fig13Tile northwest) (fig13Tile northeast) := by
+    rw [hnw, hne]
+    exact hx.2.1 west north (by decide)
+  have hleft : WangTile.VMatches (fig13Tile southwest) (fig13Tile northwest) := by
+    rw [hsw, hnw]
+    exact hx.2.2 west south (by decide)
+  have hright : WangTile.VMatches (fig13Tile southeast) (fig13Tile northeast) := by
+    rw [hse, hne]
+    exact hx.2.2 east south (by decide)
+  have htrue := fig13RawTwoByTwoSquareBool_eq_true_of_indices
+    hbottom htop hleft hright
+  rw [fig13RawTwoByTwoSquareBool_eq_false] at htrue
+  contradiction
+
+/-- The raw Figure 13 macro-tile list is not a standalone plane tileset. -/
+theorem not_tilesPlane_fig13Tiles :
+    ¬ TilesPlane fig13Tiles := by
+  intro hplane
+  exact not_tileableSquare_fig13Tiles_two
+    (tileableSquare_of_tilesPlane hplane 2)
+
 /-- A named quadrant tile in the subdivided Figure 13 scaffold. -/
 def fig13QuarterTile (i : Fin 92) (q : Quadrant) : WangTile :=
   TileSubdivision.subdivideTileAt (fig13Tile i) q

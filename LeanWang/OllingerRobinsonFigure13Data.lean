@@ -5234,34 +5234,26 @@ Figure 13 target.
 This is Robinson's Section 7 board/free-grid surface after forgetting the
 chosen Figure 18 sites: for each positive board level, tile the virtual
 free-row/free-column square of side `freeGridSide (level + 1)`.
+
+This is now kept only as a diagnostic comparison surface.  The raw Figure 13
+macro tiles do not tile even a `2 × 2` square; the proof-facing scaffold route
+must use subdivided Figure 18 site compatibility instead.
 -/
 def HasFigure13PositiveBoardLevelTileableSquares : Prop :=
   ∀ level : Nat,
     TileableSquare fig13Tiles (RobinsonSquare.freeGridSide (level + 1))
 
 /--
-Membership in the raw Figure 13 tile list gives the corresponding scanned
-tile index.
-
-This is the decoding direction needed when a construction produces an ordinary
-raw Figure 13 rectangle first, rather than a rectangle of Figure 18 sites.
+The raw positive-board square-tiling surface is false for the current Figure 13
+macro-tile transcription.
 -/
-theorem exists_fig13Tile_eq_of_mem_fig13Tiles {tile : WangTile}
-    (hmem : tile ∈ fig13Tiles) :
-    ∃ index : Fin 92, fig13Tile index = tile := by
-  have hidx : fig13Tiles.idxOf tile < fig13Tiles.length :=
-    List.idxOf_lt_length_of_mem hmem
-  refine ⟨⟨fig13Tiles.idxOf tile, by simpa [fig13Tiles_length] using hidx⟩, ?_⟩
-  unfold fig13Tile
-  have hget : fig13Tiles[fig13Tiles.idxOf tile]? = some tile :=
-    List.getElem?_idxOf hmem
-  have hgetSome : some fig13Tiles[fig13Tiles.idxOf tile] = some tile := by
-    rw [List.getElem?_eq_getElem hidx] at hget
-    exact hget
-  have hgetElem : fig13Tiles[fig13Tiles.idxOf tile] = tile :=
-    Option.some.inj hgetSome
-  change fig13Tiles[fig13Tiles.idxOf tile] = tile
-  exact hgetElem
+theorem not_hasFigure13PositiveBoardLevelTileableSquares :
+    ¬ HasFigure13PositiveBoardLevelTileableSquares := by
+  intro hsquares
+  have hsquare := hsquares 0
+  exact not_tileableSquare_fig13Tiles_two
+    (tileableSquare_crop (by decide : 2 ≤ RobinsonSquare.freeGridSide (0 + 1))
+      hsquare)
 
 /-- A chosen scanned Figure 13 index for a known raw tile-list member. -/
 noncomputable def fig13IndexOfMem {tile : WangTile}
