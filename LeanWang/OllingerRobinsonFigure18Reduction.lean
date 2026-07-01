@@ -18476,6 +18476,24 @@ structure L2C2RobinsonSection7BoardFreeLineLayerPatchData : Prop where
         l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
 
 /--
+Checked finite scaffold data for the first audited L2-blank candidate.  This is
+the direct finite-transcription target for the preferred Section 7 route:
+checked origin-zero layer stacks provide Robinson's board/free-line
+recognizability, and finite layer patches provide active-corner box
+realizability.
+-/
+structure L2C1CheckedStackLayerPatchData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  patches : L2C1ActiveCornerLayerPatches
+
+/--
+Checked finite scaffold data for the second audited L2-blank candidate.
+-/
+structure L2C2CheckedStackLayerPatchData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  patches : L2C2ActiveCornerLayerPatches
+
+/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -19523,6 +19541,75 @@ def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
     L2C2RobinsonSection7BoardFreeLineLayerPatchData where
   boardFreeLineActiveCorner :=
     l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches instantiate
+the first board/free-line Section 7 layer-patch package directly.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked
+  patches := patches
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches instantiate
+the second board/free-line Section 7 layer-patch package directly.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked
+  patches := patches
+
+/--
+The first checked-stack/layer-patch package is exactly the checked finite
+scaffold data needed by the preferred Section 7 route.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    data.checkedStacks data.patches
+
+/--
+The second checked-stack/layer-patch package is exactly the checked finite
+scaffold data needed by the preferred Section 7 route.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    data.checkedStacks data.patches
+
+/--
+Origin-zero windows and active-corner layer patches produce the first checked
+finite scaffold package by generating the checked stacks from the audited
+compatibility table.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Origin-zero windows and active-corner layer patches produce the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
   patches := patches
 
 /--
@@ -28097,6 +28184,66 @@ theorem
       h
 
 /--
+Encoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the direct source-level position obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+    (data : L2C1CheckedStackLayerPatchData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      h
+
+/--
+Unencoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the direct source-level position obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+    (data : L2C1CheckedStackLayerPatchData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      h
+
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the direct source-level position obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (data : L2C2CheckedStackLayerPatchData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      h
+
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the direct source-level position obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (data : L2C2CheckedStackLayerPatchData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      h
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to cofinal raw Figure 13 square tilings.
 -/
@@ -32285,6 +32432,90 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the packaged source-uniform generated interior position
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
+    (data : L2C1CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the packaged source-uniform generated interior position
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
+    (data : L2C1CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the packaged source-uniform generated interior position
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the packaged source-uniform generated interior position
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      data
       (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
         hinterior hcorrect)
 
