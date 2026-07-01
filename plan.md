@@ -637,6 +637,32 @@ positive-radius boxes.  This now converts directly to the cleaner
 Figure 13/Figure 16 finite transcription can feed Robinson's Section 7 signal
 tower target without morally depending on canonical row equality.
 
+Current proof frontier: the final theorem surfaces now accept origin-zero
+recognizability together with
+`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares`, matching the
+shifted board levels in Robinson's Section 7 argument.  The relevant wrappers
+are:
+
+- `l2c1OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares`
+  and its `l2c2` analogue;
+- `encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_position_source`
+  and the matching unencoded/`l2c2` variants;
+- the corresponding
+  `_origin_zero_positive_board_aligned_interiorRows` and
+  `_origin_zero_positive_board_aligned_interiorPackage` theorem surfaces.
+
+The next concrete scaffold obligation is therefore to prove
+`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares` from the Robinson
+board/free-line construction.  The existing
+`Figure18CanonicalRawBoundaryBoardLevelChecks` route already implies it via
+`robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks`,
+but this is deliberately an over-strong diagnostic: it asks the selected source
+Figure 13 cells themselves to satisfy the checked Figure 16 stack compatibility
+and raw-boundary predicate.  A cleaner proof should construct the positive
+board-level aligned macro-squares directly from the free-row/free-column
+invariant, using the Figure 16 layer data only to justify the local site choices
+and boundary matches.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,
