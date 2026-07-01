@@ -25090,8 +25090,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfOriginZeroFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the first preferred origin-zero/finite
@@ -25103,8 +25103,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_signal_tower_direct_obligations_position_source
-      (l2c1SignalTowerDirectObligationsOfOriginZeroFig13BoxData data) h
+    domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
+      (l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
 
 /--
 Encoded domino undecidability from the second preferred origin-zero/finite
@@ -25116,8 +25116,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData data) h
+    encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
 
 /--
 Unencoded domino undecidability from the second preferred origin-zero/finite
@@ -25129,8 +25129,8 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
-      (l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData data) h
+    domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
+      (l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData data) h
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability
