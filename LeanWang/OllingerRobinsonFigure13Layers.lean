@@ -3129,6 +3129,18 @@ def HasRobinsonSection7BoardFreeLineActiveCornerInvariant
   D.scaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
 
 /--
+For layered Figure 13 data, the proof-facing Section 7 board/free-line target
+is equivalent to active/corner recognition for the underlying Figure 18
+scaffold data: the obstruction-geometry tower is canonical.
+-/
+theorem hasRobinsonSection7BoardFreeLineActiveCornerInvariant_iff_activeCorner
+    (D : LayeredFigure18ScaffoldData) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant ↔
+      D.scaffoldData.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
+  Figure18ScaffoldData.hasRobinsonSection7BoardFreeLineActiveCornerInvariant_iff_activeCorner
+    D.scaffoldData
+
+/--
 Origin-zero active/corner windows supply the layered Robinson Section 7
 obstruction-routing invariant.  The layer data is irrelevant to this bridge;
 it only records the finite Figure 13/Figure 16 realization checks.

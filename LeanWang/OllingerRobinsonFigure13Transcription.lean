@@ -11267,6 +11267,25 @@ def HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofActiveCorner
     D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
   ⟨hasRobinsonBoardSignalGeometryTower, hactiveCorner⟩
 
+def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
+  hboard.2
+
+/--
+The pure obstruction-geometry half of the proof-facing Section 7 board/free-line
+target is already supplied by the canonical Robinson tower.  Thus the remaining
+concrete scaffold obligation is exactly active/corner recognition at the
+canonical free crossings.
+-/
+theorem hasRobinsonSection7BoardFreeLineActiveCornerInvariant_iff_activeCorner
+    (D : Figure18ScaffoldData) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant ↔
+      D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
+  ⟨HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofBoardFreeLineActiveCorner,
+    HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofActiveCorner⟩
+
 def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
     {D : Figure18ScaffoldData}
     (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
