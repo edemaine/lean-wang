@@ -667,7 +667,11 @@ the refuted raw macro-square premise with two direct Section 7 obligations:
 board/free-line active-corner recognition, and positive translated active-corner
 indexed boxes for the backward scaffold realization.  The next concrete proof
 work should instantiate those two fields, rather than revive any standalone
-Figure 13 or Figure 18 square-tiling target.
+Figure 13 or Figure 18 square-tiling target.  The existing origin-zero
+translated-box obligations now coerce into this board/free-line package, so the
+remaining scaffold work can be phrased either as origin-zero recognition plus
+translated boxes, or directly as the board/free-line active-corner/translated-box
+fields.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

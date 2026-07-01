@@ -19039,6 +19039,78 @@ def
         data.boardFreeLineActiveCorner data.translatedBoxes)
 
 /--
+Origin-zero active/corner windows and translated boxes instantiate the first
+board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (translatedBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  translatedBoxes := translatedBoxes
+
+/--
+Origin-zero active/corner windows and translated boxes instantiate the second
+board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (translatedBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  translatedBoxes := translatedBoxes
+
+/--
+The first origin-zero/translated-box obligation surface is a specialization of
+the board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    O.originZeroWindows O.positiveTranslatedIndexedBoxes
+
+/--
+The second origin-zero/translated-box obligation surface is a specialization of
+the board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    O.originZeroWindows O.positiveTranslatedIndexedBoxes
+
+/--
 Board/free-line active-corner recognition and positive board-level aligned
 macro-squares instantiate the first proof-facing Section 7 package.
 -/
