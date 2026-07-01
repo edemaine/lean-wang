@@ -723,7 +723,12 @@ through the generic Section 7 board/free-line layer-patch theorem family rather
 than through an unnamed compatible-level detour.  The same is now exposed for
 origin-zero translated obligations via the
 `*_origin_zero_section7_layer_patches_*` theorem family, which should be the
-preferred origin-zero theorem surface over the older signal-tower detour.
+preferred origin-zero theorem surface over the older signal-tower detour.  The
+light reduction module also exposes packaged
+`SourcePositionCodeInteriorRowsWithStatementNodup` wrappers for the L2
+board/free-line layer-patch data packages and for the origin-zero Section 7
+layer-patch obligation family, so downstream code can use the preferred finite
+surface without manually rebuilding `PositionSourceObligations`.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
