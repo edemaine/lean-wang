@@ -5696,6 +5696,17 @@ def IsFreeCrossing
     (column row : Int) : Prop :=
   certificate.geometry.IsFreeCrossing column row
 
+/-- A certificate coordinate pair whose full board row and column are clear. -/
+def IsClearCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) : Prop :=
+  certificate.geometry.IsClearCrossing column row
+
 /-- Certificate free crossings are free columns crossed with free rows. -/
 theorem isFreeCrossing_iff
     {table : Figure18RoleTable}
@@ -5724,6 +5735,108 @@ theorem isFreeCrossing_iff_exists_freeCoords
           certificate.freeColumnCoord i = column ∧
             certificate.freeRowCoord j = row :=
   certificate.geometry.isFreeCrossing_iff_exists_freeCoords column row
+
+/-- Certificate clear crossings are exactly certificate free crossings. -/
+theorem isClearCrossing_iff_isFreeCrossing
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) :
+    certificate.IsClearCrossing column row ↔
+      certificate.IsFreeCrossing column row :=
+  certificate.geometry.isClearCrossing_iff_isFreeCrossing column row
+
+/-- Certificate clear crossings are exactly the enumerated free coordinates. -/
+theorem isClearCrossing_iff_exists_freeCoords
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level)
+    (column row : Int) :
+    certificate.IsClearCrossing column row ↔
+      ∃ i : Fin (RobinsonSquare.freeGridSide level),
+        ∃ j : Fin (RobinsonSquare.freeGridSide level),
+          certificate.freeColumnCoord i = column ∧
+            certificate.freeRowCoord j = row := by
+  rw [certificate.isClearCrossing_iff_isFreeCrossing,
+    certificate.isFreeCrossing_iff_exists_freeCoords]
+
+/-- Certificate free crossings form the virtual board square. -/
+noncomputable def freeCrossingEquivFinProd
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    { p : Int × Int // certificate.IsFreeCrossing p.1 p.2 } ≃
+      Fin (RobinsonSquare.freeGridSide level) ×
+        Fin (RobinsonSquare.freeGridSide level) :=
+  certificate.geometry.freeCrossingEquivFinProd
+
+@[reducible]
+noncomputable def freeCrossingFintype
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    Fintype { p : Int × Int // certificate.IsFreeCrossing p.1 p.2 } :=
+  certificate.geometry.freeCrossingFintype
+
+theorem freeCrossing_card_eq_two_pow_add_one_mul
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    @Fintype.card { p : Int × Int // certificate.IsFreeCrossing p.1 p.2 }
+      (certificate.freeCrossingFintype) =
+        (2 ^ level + 1) * (2 ^ level + 1) :=
+  certificate.geometry.freeCrossing_card_eq_two_pow_add_one_mul
+
+/-- Certificate clear crossings form the obstruction-defined virtual square. -/
+noncomputable def clearCrossingEquivFinProd
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    { p : Int × Int // certificate.IsClearCrossing p.1 p.2 } ≃
+      Fin (RobinsonSquare.freeGridSide level) ×
+        Fin (RobinsonSquare.freeGridSide level) :=
+  certificate.geometry.clearCrossingEquivFinProd
+
+@[reducible]
+noncomputable def clearCrossingFintype
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    Fintype { p : Int × Int // certificate.IsClearCrossing p.1 p.2 } :=
+  certificate.geometry.clearCrossingFintype
+
+theorem clearCrossing_card_eq_two_pow_add_one_mul
+    {table : Figure18RoleTable}
+    {T : TileSet} {seed : WangTile}
+    {x : Int × Int → TileIn
+      (combineWithScaffold table.presentation.toScaffold T seed)}
+    {level : Nat}
+    (certificate : Figure18RobinsonBoardSignalCertificate table x level) :
+    @Fintype.card { p : Int × Int // certificate.IsClearCrossing p.1 p.2 }
+      (certificate.clearCrossingFintype) =
+        (2 ^ level + 1) * (2 ^ level + 1) :=
+  certificate.geometry.clearCrossing_card_eq_two_pow_add_one_mul
 
 /-- The selected free-column/free-row coordinates are certificate free crossings. -/
 theorem isFreeCrossing_freeCoord
