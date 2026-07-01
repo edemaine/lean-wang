@@ -11786,6 +11786,21 @@ def RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant
   RoutedCertificate.ofRobinsonBoardCanonicalFreeSiteRectRoutingInvariant D
     section7Routing realizes
 
+/--
+Robinson Section 7 board/free-line geometry plus realization gives the routed
+scaffold certificate directly.
+-/
+def RoutedCertificate.ofRobinsonSection7BoardFreeLineActiveCornerInvariant
+    (D : Figure18ScaffoldData)
+    (boardFreeLineActiveCorner :
+      D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant)
+    (realizes : D.HasRealizationInvariant) :
+    D.RoutedCertificate where
+  indexedRoutedForces :=
+    HasIndexedRoutedForces.ofBoardFreeLineActiveCorner
+      boardFreeLineActiveCorner
+  realizes := realizes
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)
@@ -12002,6 +12017,20 @@ def RoutedCertificate.ofRobinsonSection7PositiveTranslatedBoxes
     D.RoutedCertificate :=
   RoutedCertificate.ofRobinsonSection7ObstructionRoutingInvariant D
     section7Routing
+    (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
+
+/--
+Robinson Section 7 board/free-line geometry plus positive translated active
+corner boxes gives the routed scaffold certificate directly.
+-/
+def RoutedCertificate.ofRobinsonSection7BoardFreeLinePositiveTranslatedBoxes
+    (D : Figure18ScaffoldData)
+    (boardFreeLineActiveCorner :
+      D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant)
+    (boxes : D.HasPositiveTranslatedActiveCornerIndexedBoxInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonSection7BoardFreeLineActiveCornerInvariant D
+    boardFreeLineActiveCorner
     (HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes boxes)
 
 def RoutedCertificate.toIndexedRoutedCertificate
