@@ -28477,6 +28477,74 @@ theorem
       h
 
 /--
+Encoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows and canonical checked compatible Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows and canonical checked compatible Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows and canonical checked compatible Figure 16
+macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows and canonical checked compatible Figure 16
+macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      h
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to cofinal raw Figure 13 square tilings.
 -/
@@ -32753,6 +32821,98 @@ theorem
         hinterior hcorrect)
 
 /--
+Encoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first origin-zero Section 7
 layer-patch obligation surface and the packaged source-uniform generated
 interior position-code decoder.
@@ -35678,6 +35838,94 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRows
       (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
         data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRows
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRows
+      (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, canonical checked compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
+      (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+        originZeroWindows hlevel)
       hinterior hcorrect
 
 /--
