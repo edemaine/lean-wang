@@ -16669,6 +16669,56 @@ theorem tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares
     (cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
       hsquares)
 
+/--
+Positive Robinson board-level raw Figure 13 square tilings are exactly raw
+Figure 13 plane tileability: the board levels are cofinal, and a plane tiling
+restricts to every board-level square.
+-/
+theorem positiveBoardLevelTileableSquares_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelTileableSquares ↔ TilesPlane fig13Tiles :=
+  ⟨tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles⟩
+
+/--
+The propositional positive-board raw-data surface is equivalent to raw Figure
+13 plane tileability.
+-/
+theorem rawPositiveBoardLevels_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelRaw ↔ TilesPlane fig13Tiles :=
+  positiveBoardLevelTileableSquares_iff_rawPositiveBoardLevels.symm.trans
+    positiveBoardLevelTileableSquares_iff_tilesPlane_fig13Tiles
+
+/--
+The checked positive-board data surface is equivalent to raw Figure 13 plane
+tileability.
+-/
+theorem checkedPositiveBoardLevels_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelChecked ↔ TilesPlane fig13Tiles := by
+  constructor
+  · intro hchecked
+    exact tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares
+      (positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevels
+        hchecked)
+  · intro hplane
+    exact checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Positive Robinson-board aligned macro-squares are equivalent to raw Figure 13
+plane tileability.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_iff_tilesPlane_fig13Tiles :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares ↔
+      TilesPlane fig13Tiles := by
+  constructor
+  · intro hlevel
+    exact tilesPlane_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+  · intro hplane
+    exact
+      robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+        (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     TilesPlane fig13Tiles :=
