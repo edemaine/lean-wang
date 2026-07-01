@@ -437,6 +437,15 @@ theorem validRectangle_symbolTileSet_of_compatible {B : Block} (h : B.Compatible
   · exact rectangle_hMatches_of_compatible h
   · exact rectangle_vMatches_of_compatible h
 
+/--
+A locally compatible Figure 16 substitution block is a tileable `2 × 2`
+symbol square.
+-/
+theorem tileableSquare_symbolTileSet_of_compatible {B : Block}
+    (h : B.Compatible) :
+    TileableSquare Symbol.tileSet 2 :=
+  ⟨B.rectangle, validRectangle_symbolTileSet_of_compatible h⟩
+
 /-- East-west compatibility between adjacent `2 × 2` blocks. -/
 def hBoundaryMatches (left right : Block) : Prop :=
   WangTile.HMatches (Symbol.tile left.southeast) (Symbol.tile right.southwest) ∧
@@ -1050,6 +1059,10 @@ theorem phiL1Star_validRectangle_symbolTileSet :
     ValidRectangle Symbol.tileSet phiL1Star.rectangle :=
   Block.validRectangle_symbolTileSet_of_compatible phiL1Star_compatible
 
+theorem phiL1Star_tileableSquare_symbolTileSet :
+    TileableSquare Symbol.tileSet 2 :=
+  Block.tileableSquare_symbolTileSet_of_compatible phiL1Star_compatible
+
 theorem phiL2Component1_compatible (component : Thin) :
     (phiL2Component1 component).Compatible := by
   cases component <;> decide
@@ -1062,6 +1075,11 @@ theorem phiL2Component1_validRectangle (component : Thin) :
 theorem phiL2Component1_validRectangle_symbolTileSet (component : Thin) :
     ValidRectangle Symbol.tileSet (phiL2Component1 component).rectangle :=
   Block.validRectangle_symbolTileSet_of_compatible
+    (phiL2Component1_compatible component)
+
+theorem phiL2Component1_tileableSquare_symbolTileSet (component : Thin) :
+    TileableSquare Symbol.tileSet 2 :=
+  Block.tileableSquare_symbolTileSet_of_compatible
     (phiL2Component1_compatible component)
 
 theorem phiL2Component2_compatible (component : Thick) :
@@ -1078,6 +1096,11 @@ theorem phiL2Component2_validRectangle_symbolTileSet (component : Thick) :
   Block.validRectangle_symbolTileSet_of_compatible
     (phiL2Component2_compatible component)
 
+theorem phiL2Component2_tileableSquare_symbolTileSet (component : Thick) :
+    TileableSquare Symbol.tileSet 2 :=
+  Block.tileableSquare_symbolTileSet_of_compatible
+    (phiL2Component2_compatible component)
+
 theorem phiL3_compatible (component : Black) :
     (phiL3 component).Compatible := by
   cases component <;> decide
@@ -1089,6 +1112,10 @@ theorem phiL3_validRectangle (component : Black) :
 theorem phiL3_validRectangle_symbolTileSet (component : Black) :
     ValidRectangle Symbol.tileSet (phiL3 component).rectangle :=
   Block.validRectangle_symbolTileSet_of_compatible (phiL3_compatible component)
+
+theorem phiL3_tileableSquare_symbolTileSet (component : Black) :
+    TileableSquare Symbol.tileSet 2 :=
+  Block.tileableSquare_symbolTileSet_of_compatible (phiL3_compatible component)
 
 namespace RuleSource
 
@@ -1106,6 +1133,10 @@ theorem block_compatible (source : RuleSource) : source.block.Compatible := by
 theorem block_validRectangle_symbolTileSet (source : RuleSource) :
     ValidRectangle Symbol.tileSet source.block.rectangle :=
   Block.validRectangle_symbolTileSet_of_compatible source.block_compatible
+
+theorem block_tileableSquare_symbolTileSet (source : RuleSource) :
+    TileableSquare Symbol.tileSet 2 :=
+  Block.tileableSquare_symbolTileSet_of_compatible source.block_compatible
 
 end RuleSource
 
@@ -1134,6 +1165,11 @@ theorem block_validRectangle_symbolTileSet {rule : SubstitutionRule}
     ValidRectangle Symbol.tileSet rule.block.rectangle := by
   rw [block_eq_source_block h]
   exact rule.source.block_validRectangle_symbolTileSet
+
+theorem block_tileableSquare_symbolTileSet {rule : SubstitutionRule}
+    (h : rule ∈ substitutionRules) :
+    TileableSquare Symbol.tileSet 2 :=
+  ⟨rule.block.rectangle, block_validRectangle_symbolTileSet h⟩
 
 theorem ofSource_mem (source : RuleSource) :
     ofSource source ∈ substitutionRules := by
@@ -1264,6 +1300,11 @@ theorem source_block_validRectangle
   rcases table.exists_rule_for_source source with ⟨rule, hmem, hsource⟩
   simpa [table.block_eq_source_block_of_source hmem hsource] using
     table.valid hmem
+
+theorem source_block_tileableSquare
+    (table : CertifiedSubstitutionTable) (source : RuleSource) :
+    TileableSquare Symbol.tileSet 2 :=
+  ⟨source.block.rectangle, table.source_block_validRectangle source⟩
 
 end CertifiedSubstitutionTable
 
