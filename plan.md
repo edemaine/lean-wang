@@ -740,6 +740,8 @@ The L2-specific checked finite scaffold target is now also packaged as
 `L2C1CheckedStackLayerPatchData` / `L2C2CheckedStackLayerPatchData`, with
 constructors from origin-zero windows and theorem wrappers for both direct
 `PositionSourceObligations` and the packaged source-uniform interior decoder.
+It also has wrappers for the lighter generated `SourcePositionCodeInteriorRowsPrimrec`
+route.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.

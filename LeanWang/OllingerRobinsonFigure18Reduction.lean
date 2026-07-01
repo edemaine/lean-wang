@@ -35368,6 +35368,86 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRows
+    (data : L2C1CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRows
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRows
+    (data : L2C1CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRows
+      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRows
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRows
+      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+        data)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first audited L2-blank candidate via
 origin-zero active/corner windows, routed through the named Robinson Section 7
 board/free-line layer-patch obligation surface and generated interior
