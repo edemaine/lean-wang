@@ -5189,6 +5189,27 @@ def HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData : Prop :=
     Nonempty (CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData level)
 
 /--
+Row-major checked data for one positive Robinson board-level raw Figure 13
+macro-square.
+
+This is the exact finite-data form of
+`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares`: it records only the
+selected Figure 18 sites and the raw Figure 13 boundary check.  Unlike
+`CanonicalFigure16SourceRawBoundaryCheckedBoardLevelData`, it does not require
+the selected sites themselves to satisfy the over-strong Figure 16 source-stack
+compatibility diagnostic.
+-/
+structure Figure13PositiveBoardLevelCheckedData (level : Nat) where
+  sites : CheckedNatSiteRectangle
+    (RobinsonSquare.freeGridSide (level + 1))
+    (RobinsonSquare.freeGridSide (level + 1))
+  rawBoundary : sites.toSiteRectangle.rawBoundaryCompatibleBool = true
+
+/-- Checked-list form of the exact positive board-level raw Figure 13 target. -/
+def HasFigure13PositiveBoardLevelCheckedData : Prop :=
+  ∀ level : Nat, Nonempty (Figure13PositiveBoardLevelCheckedData level)
+
+/--
 Finite diagnostic for the over-strong source raw-boundary board target: a
 horizontal two-cell source edge satisfying both checked layer-stack
 compatibility and raw Figure 13 boundary compatibility.
@@ -5366,6 +5387,68 @@ theorem canonicalFigure16SourceRawBoundaryBoardLevelChecks_iff_checkedBoardLevel
       HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData :=
   ⟨canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks,
     canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData⟩
+
+/--
+Exact positive board-level raw Figure 13 checked data supplies the Section 7
+positive-board aligned macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevelData
+    (hlevel : HasFigure13PositiveBoardLevelCheckedData) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨data.sites.toSiteRectangle,
+    SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool
+      data.rawBoundary⟩
+
+/--
+The positive-board aligned macro-square interface can be re-expressed as exact
+row-major checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_robinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    HasFigure13PositiveBoardLevelCheckedData := by
+  intro level
+  rcases hlevel level with ⟨source, hraw⟩
+  let sites := source.toCheckedNatSiteRectangle
+  have hsites : sites.toSiteRectangle = source :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool source)
+  refine ⟨{ sites := sites, rawBoundary := ?_ }⟩
+  rw [hsites]
+  exact SiteRectangle.rawBoundaryCompatibleBool_of_rawBoundaryCompatible hraw
+
+/--
+Exact checked data is equivalent to the positive-board aligned macro-square
+interface.
+-/
+theorem checkedPositiveBoardLevelData_iff_robinsonPositiveBoardLevelAlignedMacroSquares :
+    HasFigure13PositiveBoardLevelCheckedData ↔
+      HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevelData,
+    checkedPositiveBoardLevelData_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
+
+/--
+The over-strong row-major checked Figure 16 source raw-boundary board target
+forgets to the exact positive board-level raw Figure 13 checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData) :
+    HasFigure13PositiveBoardLevelCheckedData := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact ⟨{ sites := data.sites, rawBoundary := data.rawBoundary }⟩
+
+/--
+The over-strong Figure 16 source raw-boundary board checks imply the exact
+positive board-level raw Figure 13 checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryBoardLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks) :
+    HasFigure13PositiveBoardLevelCheckedData :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+    (canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+      hlevel)
 
 theorem canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks
     (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :

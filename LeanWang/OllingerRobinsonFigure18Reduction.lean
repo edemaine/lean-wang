@@ -16293,6 +16293,14 @@ abbrev Figure18CanonicalRawBoundaryBoardLevelChecks : Prop :=
 abbrev Figure18CanonicalRawBoundaryCheckedBoardLevels : Prop :=
   HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
 
+/--
+Row-major checked-list form of the exact positive Robinson board-level raw
+Figure 13 macro-square target, without the over-strong Figure 16 source-stack
+diagnostic.
+-/
+abbrev Figure13PositiveBoardLevelChecked : Prop :=
+  HasFigure13PositiveBoardLevelCheckedData
+
 theorem canonicalRawBoundaryMacroSquares_of_bool
     (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
     Figure18CanonicalRawBoundaryMacroSquares :=
@@ -16361,6 +16369,36 @@ theorem canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     Figure18CanonicalRawBoundaryCheckedBoardLevels :=
   canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+    hlevel
+
+/--
+Exact positive board-level checked data is equivalent to the positive
+Robinson-board aligned macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevelData
+    hlevel
+
+/--
+The over-strong row-major Figure 16 source raw-boundary board data forgets to
+the exact positive raw Figure 13 board-level checked data.
+-/
+theorem checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+    hlevel
+
+/--
+The over-strong Figure 16 source raw-boundary board checks forget to the exact
+positive raw Figure 13 board-level checked data.
+-/
+theorem checkedPositiveBoardLevels_of_rawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryBoardLevelChecks
     hlevel
 
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
@@ -18028,6 +18066,32 @@ def l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSqu
     L2C2RobinsonSection7Data :=
   l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
     (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
 
 /--
 Origin-zero recognizability and shifted canonical board-level checks
@@ -25355,6 +25419,70 @@ theorem
   exact
     domino_problem_undecidable_l2c2_robinson_section7_data_position_source
       (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability
+and exact checked positive board-level raw Figure 13 data.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability
+and exact checked positive board-level raw Figure 13 data.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability
+and exact checked positive board-level raw Figure 13 data.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability
+and exact checked positive board-level raw Figure 13 data.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
         originZeroWindows hlevel)
       h
 
