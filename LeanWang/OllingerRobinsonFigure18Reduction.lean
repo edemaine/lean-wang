@@ -17882,6 +17882,39 @@ structure L2C2RobinsonSection7Data : Prop where
   alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
+Paper-facing Robinson Section 7 scaffold data for the first audited L2-blank
+candidate.
+
+This version records the obstruction/free-line routing invariant directly,
+matching Robinson's Section 7 argument.  The existing
+`L2C1RobinsonSection7Data` surface remains useful for callers that have
+already converted the obstruction geometry into a local signal tower.
+-/
+structure L2C1RobinsonSection7ObstructionData : Prop where
+  section7Routing :
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Paper-facing Robinson Section 7 scaffold data for the second audited L2-blank
+candidate.
+-/
+structure L2C2RobinsonSection7ObstructionData : Prop where
+  section7Routing :
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -18076,6 +18109,44 @@ def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
     L2C2SignalTowerTranslatedBoxData :=
   l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
     data.signalLocalTower data.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/-- The first obstruction-routing package feeds the compatible-level route. -/
+def l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (data : L2C1RobinsonSection7ObstructionData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofL2Component1Section7ObstructionRoutingPositiveTranslatedBoxes
+      data.section7Routing
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (by
+          simpa [l2Component1Figure18ScaffoldData,
+            figure18ScaffoldDataOfNatSites] using
+            l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+              (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+                data.alignedMacroSquares)))
+
+set_option linter.style.longLine false in
+/-- The second obstruction-routing package feeds the compatible-level route. -/
+def l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (data : L2C2RobinsonSection7ObstructionData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofL2Component2Section7ObstructionRoutingPositiveTranslatedBoxes
+      data.section7Routing
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (by
+          simpa [l2Component2Figure18ScaffoldData,
+            figure18ScaffoldDataOfNatSites] using
+            l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+              (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+                data.alignedMacroSquares)))
 
 /--
 Local signal-tower data and positive Robinson-board aligned macro-squares give
@@ -25415,6 +25486,78 @@ theorem
       (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data) h
 
 /--
+Encoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+    (data : L2C1RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      h
+
+/--
+Unencoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+    (data : L2C1RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      h
+
+/--
+Encoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+    (data : L2C2RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      h
+
+/--
+Unencoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+    (data : L2C2RobinsonSection7ObstructionData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      h
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package specialized to canonical Figure 16 source raw-boundary macro-squares.
 -/
@@ -27491,6 +27634,98 @@ theorem
       hinterior hcorrect
 
 /--
+Encoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorRows
+    (data : L2C1RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorRows
+    (data : L2C1RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorRows
+    (data : L2C2RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorRows
+    (data : L2C2RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData data)
+      hinterior hcorrect
+
+/--
 Encoded domino undecidability from the first preferred field-based Section 7
 package and the packaged source-uniform generated interior position-code
 decoder.
@@ -27653,6 +27888,90 @@ theorem
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorPackage
       (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)
       hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
+    (data : L2C1RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first paper-facing Robinson Section 7
+obstruction-routing package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
+    (data : L2C1RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
+    (data : L2C2RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second paper-facing Robinson Section 7
+obstruction-routing package and the packaged source-uniform generated interior
+position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
+    (data : L2C2RobinsonSection7ObstructionData)
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
