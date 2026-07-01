@@ -4780,6 +4780,135 @@ noncomputable def unobstructedColumnEquivFin
           (fun row hrow =>
             geometry.noVerticalObstruction_of_freeColumnCoord i row hrow)))
 
+@[reducible]
+noncomputable def freeColumnFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype { column : Int // geometry.isFreeColumn column } :=
+  Fintype.ofEquiv (Fin (RobinsonSquare.freeGridSide level))
+    (geometry.freeColumnEquivFin.symm)
+
+@[reducible]
+noncomputable def freeRowFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype { row : Int // geometry.isFreeRow row } :=
+  Fintype.ofEquiv (Fin (RobinsonSquare.freeGridSide level))
+    (geometry.freeRowEquivFin.symm)
+
+@[reducible]
+noncomputable def unobstructedRowFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype
+      { row : Int //
+        geometry.isBoardRow row ∧
+          ∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column row } :=
+  Fintype.ofEquiv (Fin (RobinsonSquare.freeGridSide level))
+    (geometry.unobstructedRowEquivFin.symm)
+
+@[reducible]
+noncomputable def unobstructedColumnFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype
+      { column : Int //
+        geometry.isBoardColumn column ∧
+          ∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction column row } :=
+  Fintype.ofEquiv (Fin (RobinsonSquare.freeGridSide level))
+    (geometry.unobstructedColumnEquivFin.symm)
+
+/--
+Robinson's Section 7 count: the free columns of a level-`n` board form a
+finite set of size `freeGridSide n`.
+-/
+theorem freeColumn_card_eq_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { column : Int // geometry.isFreeColumn column }
+      (geometry.freeColumnFintype) = RobinsonSquare.freeGridSide level := by
+  letI := geometry.freeColumnFintype
+  rw [← Fintype.card_fin (RobinsonSquare.freeGridSide level)]
+  exact Fintype.card_congr (geometry.freeColumnEquivFin)
+
+/--
+Robinson's Section 7 count: the free rows of a level-`n` board form a finite
+set of size `freeGridSide n`.
+-/
+theorem freeRow_card_eq_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { row : Int // geometry.isFreeRow row }
+      (geometry.freeRowFintype) = RobinsonSquare.freeGridSide level := by
+  letI := geometry.freeRowFintype
+  rw [← Fintype.card_fin (RobinsonSquare.freeGridSide level)]
+  exact Fintype.card_congr (geometry.freeRowEquivFin)
+
+/--
+Robinson's obstruction criterion selects exactly `freeGridSide n`
+unobstructed board rows.
+-/
+theorem unobstructedRow_card_eq_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card
+      { row : Int //
+        geometry.isBoardRow row ∧
+          ∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column row }
+      (geometry.unobstructedRowFintype) = RobinsonSquare.freeGridSide level := by
+  letI := geometry.unobstructedRowFintype
+  rw [← Fintype.card_fin (RobinsonSquare.freeGridSide level)]
+  exact Fintype.card_congr (geometry.unobstructedRowEquivFin)
+
+/--
+Robinson's obstruction criterion selects exactly `freeGridSide n`
+unobstructed board columns.
+-/
+theorem unobstructedColumn_card_eq_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card
+      { column : Int //
+        geometry.isBoardColumn column ∧
+          ∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction column row }
+      (geometry.unobstructedColumnFintype) =
+        RobinsonSquare.freeGridSide level := by
+  letI := geometry.unobstructedColumnFintype
+  rw [← Fintype.card_fin (RobinsonSquare.freeGridSide level)]
+  exact Fintype.card_congr (geometry.unobstructedColumnEquivFin)
+
+theorem freeColumn_card_eq_two_pow_add_one
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { column : Int // geometry.isFreeColumn column }
+      (geometry.freeColumnFintype) = 2 ^ level + 1 := by
+  rw [geometry.freeColumn_card_eq_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
+theorem freeRow_card_eq_two_pow_add_one
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { row : Int // geometry.isFreeRow row }
+      (geometry.freeRowFintype) = 2 ^ level + 1 := by
+  rw [geometry.freeRow_card_eq_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
+theorem unobstructedRow_card_eq_two_pow_add_one
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card
+      { row : Int //
+        geometry.isBoardRow row ∧
+          ∀ column : Int, geometry.isBoardColumn column →
+            ¬ geometry.hasHorizontalObstruction column row }
+      (geometry.unobstructedRowFintype) = 2 ^ level + 1 := by
+  rw [geometry.unobstructedRow_card_eq_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
+theorem unobstructedColumn_card_eq_two_pow_add_one
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card
+      { column : Int //
+        geometry.isBoardColumn column ∧
+          ∀ row : Int, geometry.isBoardRow row →
+            ¬ geometry.hasVerticalObstruction column row }
+      (geometry.unobstructedColumnFintype) = 2 ^ level + 1 := by
+  rw [geometry.unobstructedColumn_card_eq_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
 /-- Column-coordinate recurrence between consecutive Robinson board geometries. -/
 def ColumnCoordinateStep
     {level : Nat}
