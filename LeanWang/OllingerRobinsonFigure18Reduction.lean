@@ -16519,6 +16519,40 @@ theorem positiveBoardLevelTileableSquares_iff_robinsonPositiveBoardLevelAlignedM
   ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares,
     positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
 
+/--
+Exact positive board-level raw Figure 13 square tilings are cofinal among all
+finite square sizes.
+-/
+theorem cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13CofinalTileableSquares := by
+  intro n
+  refine ⟨RobinsonSquare.freeGridSide (n + 1), ?_, hsquares n⟩
+  exact Nat.le_trans (Nat.le_succ n)
+    (RobinsonSquare.self_le_freeGridSide (n + 1))
+
+/--
+Exact positive board-level raw Figure 13 square tilings supply every centered
+finite raw Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_cofinal_tileableSquares
+    (cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Exact positive board-level raw Figure 13 square tilings compactly determine a
+raw Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+    (cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+      hsquares)
+
 theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
     TilesPlane fig13Tiles :=
