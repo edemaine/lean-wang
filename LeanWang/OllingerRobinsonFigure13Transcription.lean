@@ -4909,6 +4909,61 @@ theorem unobstructedColumn_card_eq_two_pow_add_one
   rw [geometry.unobstructedColumn_card_eq_freeGridSide,
     RobinsonSquare.freeGridSide_eq_two_pow_add_one]
 
+/--
+Free crossings form the product of the enumerated free columns and free rows.
+This is the finite-set version of Robinson's statement that the selected board
+lines act as a contiguous square.
+-/
+noncomputable def freeCrossingEquivFinProd
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { p : Int × Int // geometry.IsFreeCrossing p.1 p.2 } ≃
+      Fin (RobinsonSquare.freeGridSide level) ×
+        Fin (RobinsonSquare.freeGridSide level) where
+  toFun p :=
+    (geometry.freeColumnEquivFin ⟨p.1.1, p.2.1⟩,
+      geometry.freeRowEquivFin ⟨p.1.2, p.2.2⟩)
+  invFun ij :=
+    ⟨(geometry.freeColumnCoord ij.1, geometry.freeRowCoord ij.2),
+      geometry.isFreeCrossing_freeCoord ij.1 ij.2⟩
+  left_inv p := by
+    apply Subtype.ext
+    apply Prod.ext
+    · have h := geometry.freeColumnEquivFin.left_inv ⟨p.1.1, p.2.1⟩
+      exact congrArg Subtype.val h
+    · have h := geometry.freeRowEquivFin.left_inv ⟨p.1.2, p.2.2⟩
+      exact congrArg Subtype.val h
+  right_inv ij := by
+    apply Prod.ext
+    · exact geometry.freeColumnEquivFin.right_inv ij.1
+    · exact geometry.freeRowEquivFin.right_inv ij.2
+
+@[reducible]
+noncomputable def freeCrossingFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype { p : Int × Int // geometry.IsFreeCrossing p.1 p.2 } :=
+  Fintype.ofEquiv
+    (Fin (RobinsonSquare.freeGridSide level) ×
+      Fin (RobinsonSquare.freeGridSide level))
+    (geometry.freeCrossingEquivFinProd.symm)
+
+theorem freeCrossing_card_eq_freeGridSide_mul_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { p : Int × Int // geometry.IsFreeCrossing p.1 p.2 }
+      (geometry.freeCrossingFintype) =
+        RobinsonSquare.freeGridSide level *
+          RobinsonSquare.freeGridSide level := by
+  letI := geometry.freeCrossingFintype
+  have h := Fintype.card_congr (geometry.freeCrossingEquivFinProd)
+  simpa [Fintype.card_prod, Fintype.card_fin] using h
+
+theorem freeCrossing_card_eq_two_pow_add_one_mul
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { p : Int × Int // geometry.IsFreeCrossing p.1 p.2 }
+      (geometry.freeCrossingFintype) =
+        (2 ^ level + 1) * (2 ^ level + 1) := by
+  rw [geometry.freeCrossing_card_eq_freeGridSide_mul_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
 /-- Column-coordinate recurrence between consecutive Robinson board geometries. -/
 def ColumnCoordinateStep
     {level : Nat}
