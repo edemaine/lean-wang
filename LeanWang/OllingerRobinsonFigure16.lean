@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Basic
+import LeanWang.Compactness
 
 /-!
 Figure 16 substitution data for the Ollinger/Robinson scaffold.
@@ -690,6 +690,56 @@ theorem tileableExpandedSquare {n : Nat} {G : BlockGrid n n}
 
 end BlockGrid
 
+/--
+A compatible square of Figure 16 substitution blocks.
+
+This is the finite object the substitutive scaffold proof should produce at
+arbitrarily large scales before the generic `2 × 2` block expansion is applied.
+-/
+structure CompatibleBlockSquare (n : Nat) where
+  grid : BlockGrid n n
+  compatible : grid.Compatible
+
+namespace CompatibleBlockSquare
+
+/-- Expanding a compatible `n × n` block square gives a valid `2n × 2n`
+symbol-tile square. -/
+theorem tileableExpandedSquare {n : Nat}
+    (square : CompatibleBlockSquare n) :
+    TileableSquare Symbol.tileSet (2 * n) :=
+  BlockGrid.tileableExpandedSquare square.compatible
+
+end CompatibleBlockSquare
+
+/--
+The Figure 16 substitution-iteration target: compatible block squares exist at
+every positive source side.
+-/
+def HasPositiveCompatibleBlockSquares : Prop :=
+  ∀ n : Nat, 0 < n → Nonempty (CompatibleBlockSquare n)
+
+/--
+Positive compatible block squares give tileable doubled squares over the
+component-symbol tileset.
+-/
+theorem tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
+    (hsquares : HasPositiveCompatibleBlockSquares) :
+    ∀ n : Nat, 0 < n → TileableSquare Symbol.tileSet (2 * n) := by
+  intro n hn
+  rcases hsquares n hn with ⟨square⟩
+  exact square.tileableExpandedSquare
+
+/--
+Compatible Figure 16 block squares at every positive side compactly determine a
+plane tiling by the component-symbol tileset.
+-/
+theorem tilesPlane_symbolTileSet_of_positiveCompatibleBlockSquares
+    (hsquares : HasPositiveCompatibleBlockSquares) :
+    TilesPlane Symbol.tileSet :=
+  tilesPlane_of_all_positive_doubled_tileableSquares
+    (tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
+      hsquares)
+
 /-- `phi_L1(*)`. -/
 def phiL1Star : Block :=
   .mkRows .L1d .L1b .L1a .L1c
@@ -1081,6 +1131,91 @@ theorem phiL2Component1_tileableSquare_symbolTileSet (component : Thin) :
     TileableSquare Symbol.tileSet 2 :=
   Block.tileableSquare_symbolTileSet_of_compatible
     (phiL2Component1_compatible component)
+
+/-- A checked `1 × 1` compatible block square from the `phi_L1(*)` rule. -/
+def phiL1StarCompatibleBlockSquare1 : CompatibleBlockSquare 1 where
+  grid := fun _ _ => phiL1Star
+  compatible := by
+    constructor
+    · intro _ _
+      exact phiL1Star_compatible
+    constructor
+    · intro i _ hi
+      omega
+    · intro _ j hj
+      omega
+
+/--
+A checked `2 × 2` compatible block square using the four `phi_L2` component-1
+rules.
+
+The rows are listed north-to-south in the comment:
+
+```text
+phi_L2_component1(L1c)  phi_L2_component1(L1a)
+phi_L2_component1(L1b)  phi_L2_component1(L1d)
+```
+-/
+def phiL2Component1BlockGrid2 : BlockGrid 2 2 := fun i j =>
+  if j.val = 0 then
+    if i.val = 0 then phiL2Component1 .b else phiL2Component1 .d
+  else
+    if i.val = 0 then phiL2Component1 .c else phiL2Component1 .a
+
+private theorem fin_two_eq_zero_or_one (i : Fin 2) :
+    i = ⟨0, by decide⟩ ∨ i = ⟨1, by decide⟩ := by
+  rcases i with ⟨i, hi⟩
+  have hi_cases : i = 0 ∨ i = 1 := by omega
+  rcases hi_cases with rfl | rfl <;> simp
+
+theorem phiL2Component1BlockGrid2_compatible :
+    phiL2Component1BlockGrid2.Compatible := by
+  constructor
+  · intro i j
+    rcases fin_two_eq_zero_or_one i with rfl | rfl <;>
+      rcases fin_two_eq_zero_or_one j with rfl | rfl
+    · change (phiL2Component1 .b).Compatible
+      exact phiL2Component1_compatible .b
+    · change (phiL2Component1 .c).Compatible
+      exact phiL2Component1_compatible .c
+    · change (phiL2Component1 .d).Compatible
+      exact phiL2Component1_compatible .d
+    · change (phiL2Component1 .a).Compatible
+      exact phiL2Component1_compatible .a
+  constructor
+  · intro i j hi
+    rcases fin_two_eq_zero_or_one i with rfl | rfl
+    · rcases fin_two_eq_zero_or_one j with rfl | rfl
+      · change (phiL2Component1 .b).hBoundaryMatches
+          (phiL2Component1 .d)
+        decide
+      · change (phiL2Component1 .c).hBoundaryMatches
+          (phiL2Component1 .a)
+        decide
+    · simp at hi
+  · intro i j hj
+    rcases fin_two_eq_zero_or_one j with rfl | rfl
+    · rcases fin_two_eq_zero_or_one i with rfl | rfl
+      · change (phiL2Component1 .b).vBoundaryMatches
+          (phiL2Component1 .c)
+        decide
+      · change (phiL2Component1 .d).vBoundaryMatches
+          (phiL2Component1 .a)
+        decide
+    · simp at hj
+
+def phiL2Component1CompatibleBlockSquare2 : CompatibleBlockSquare 2 where
+  grid := phiL2Component1BlockGrid2
+  compatible := by
+    exact phiL2Component1BlockGrid2_compatible
+
+theorem phiL1Star_tileableExpandedSquare_symbolTileSet :
+    TileableSquare Symbol.tileSet 2 :=
+  phiL1StarCompatibleBlockSquare1.tileableExpandedSquare
+
+theorem phiL2Component1_tileableExpandedSquare_symbolTileSet :
+    TileableSquare Symbol.tileSet 4 :=
+  phiL2Component1CompatibleBlockSquare2.tileableExpandedSquare
 
 theorem phiL2Component2_compatible (component : Thick) :
     (phiL2Component2 component).Compatible := by
