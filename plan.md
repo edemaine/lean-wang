@@ -637,31 +637,32 @@ positive-radius boxes.  This now converts directly to the cleaner
 Figure 13/Figure 16 finite transcription can feed Robinson's Section 7 signal
 tower target without morally depending on canonical row equality.
 
-Current proof frontier: the final theorem surfaces now accept origin-zero
-recognizability together with
-`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares`, matching the
-shifted board levels in Robinson's Section 7 argument.  The relevant wrappers
-are:
+Current proof frontier: the raw Figure 13 board-level route has been refuted.
+The transcribed raw Figure 13 macro tiles do not tile even a `2 x 2` square, so
+`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares` and
+`Figure13PositiveBoardLevelTileableSquares` are now kept only as diagnostic
+dead ends.  The proof-facing theorem surface is the corrected subdivided
+Figure 18 route:
 
-- `l2c1OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares`
-  and its `l2c2` analogue;
-- `encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_position_source`
+- `Figure18CompatibleScaffoldSquares` / `HasCompatibleFigure18ScaffoldSquares`
+  for compatible quarter-site squares of every side length;
+- `L2C1RobinsonSection7CompatibleData` and its `l2c2` analogue, pairing the
+  local signal tower with compatible subdivided Figure 18 squares;
+- `encoded_domino_problem_undecidable_l2c1_robinson_section7_compatible_data_position_source`
   and the matching unencoded/`l2c2` variants;
 - the corresponding
-  `_origin_zero_positive_board_aligned_interiorRows` and
-  `_origin_zero_positive_board_aligned_interiorPackage` theorem surfaces.
+  `_robinson_section7_compatible_data_interiorRowsCorrect` final wrappers in
+  `OllingerRobinsonFigure18PositionReduction`.
 
 The next concrete scaffold obligation is therefore to prove
-`HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares` from the Robinson
-board/free-line construction.  The existing
-`Figure18CanonicalRawBoundaryBoardLevelChecks` route already implies it via
-`robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks`,
-but this is deliberately an over-strong diagnostic: it asks the selected source
-Figure 13 cells themselves to satisfy the checked Figure 16 stack compatibility
-and raw-boundary predicate.  A cleaner proof should construct the positive
-board-level aligned macro-squares directly from the free-row/free-column
-invariant, using the Figure 16 layer data only to justify the local site choices
-and boundary matches.
+`HasCompatibleFigure18ScaffoldSquares` from the Robinson board/free-line
+construction.  Robinson's Section 7 text is useful precisely here: the
+obstruction signals identify the free rows and columns, and the board behaves
+as though those free rows/columns formed a contiguous computation square.  In
+Lean, the remaining construction should build compatible Figure 18 site
+rectangles over that virtual square, using the Figure 16 layer data to justify
+the local site choices and the routed boundary matches between neighboring
+virtual cells.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
