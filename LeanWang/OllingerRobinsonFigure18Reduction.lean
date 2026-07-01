@@ -17016,6 +17016,27 @@ def l2c1BoardFreeLineActiveCornerOfOriginZeroWindows
     originZeroWindows
 
 /--
+The first layered board/free-line Section 7 target supplies the older layered
+obstruction-routing target.
+-/
+def l2c1Section7RoutingOfBoardFreeLineActiveCorner
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid)) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    boardFreeLine
+
+/--
 Origin-zero active/corner windows give the bare Figure 18 board/free-line
 target for the first audited L2-blank candidate.
 -/
@@ -17056,6 +17077,27 @@ def l2c2BoardFreeLineActiveCornerOfOriginZeroWindows
         l2Component2BlankCandidateSanity.cornerIndex_valid) :=
   LayeredFigure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
     originZeroWindows
+
+/--
+The second layered board/free-line Section 7 target supplies the older layered
+obstruction-routing target.
+-/
+def l2c2Section7RoutingOfBoardFreeLineActiveCorner
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid)) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    boardFreeLine
 
 /--
 Origin-zero active/corner windows give the bare Figure 18 board/free-line
@@ -20332,6 +20374,94 @@ theorem
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
 Robinson Section 7 obstruction routing, shifted source/free-grid board-level
 checks, and generated interior position-code rows.
 -/
@@ -20439,6 +20569,118 @@ theorem
   exact
     domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
       section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
         hinterior hcorrect)
 
