@@ -17453,6 +17453,34 @@ def l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
       hlevel
 
 /--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares give the preferred first finite-box scaffold package in the
+shifted Section 7 indexing.
+-/
+def l2c1OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares give the preferred second finite-box scaffold package in the
+shifted Section 7 indexing.
+-/
+def l2c2OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
 Origin-zero windows and row-major checked board levels give the preferred
 first finite-box scaffold package.
 -/
@@ -18250,6 +18278,32 @@ def l2c2SignalTowerTranslatedBoxDataOfOriginZeroRobinsonBoardLevelAlignedMacroSq
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
     L2C2SignalTowerTranslatedBoxData :=
   l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares feed the first preferred translated-box package in the shifted
+Section 7 indexing.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares feed the second preferred translated-box package in the shifted
+Section 7 indexing.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
     (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
     hlevel
 
@@ -25238,6 +25292,70 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_data_position_source
       (l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
         (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel)
+      h
+
+/--
+Encoded domino undecidability from first-component origin-zero recognizability
+and positive Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from first-component origin-zero recognizability
+and positive Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_data_position_source
+      (l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from second-component origin-zero recognizability
+and positive Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
+      h
+
+/--
+Unencoded domino undecidability from second-component origin-zero recognizability
+and positive Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_data_position_source
+      (l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+        originZeroWindows hlevel)
       h
 
 /--
