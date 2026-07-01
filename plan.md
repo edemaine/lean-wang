@@ -680,7 +680,10 @@ board/free-line active-corner recognition field, but replaces the
 positive-translated-box field by `HasActiveCornerLayerBoxPatches`, matching the
 kind of certificate produced by the Figure 13/Figure 16 layer transcription.
 This should be the preferred target while finishing the concrete finite
-scaffold instantiation.
+scaffold instantiation.  The existing translated-box and origin-zero translated
+obligation surfaces now coerce into this layer-patch package as well, so older
+Section 7 routes remain usable while the finite layer-patch checks are being
+finished.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
