@@ -673,6 +673,15 @@ remaining scaffold work can be phrased either as origin-zero recognition plus
 translated boxes, or directly as the board/free-line active-corner/translated-box
 fields.
 
+There is now an even more finite-check-facing theorem surface:
+`L2C1RobinsonSection7BoardFreeLineLayerPatchData` /
+`L2C2RobinsonSection7BoardFreeLineLayerPatchData`.  It uses the same
+board/free-line active-corner recognition field, but replaces the
+positive-translated-box field by `HasActiveCornerLayerBoxPatches`, matching the
+kind of certificate produced by the Figure 13/Figure 16 layer transcription.
+This should be the preferred target while finishing the concrete finite
+scaffold instantiation.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,

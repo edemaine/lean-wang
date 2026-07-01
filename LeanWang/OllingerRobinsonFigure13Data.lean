@@ -11891,6 +11891,42 @@ def ofSection7BoardFreeLinePositiveTranslatedBoxes
         boardFreeLine))
     translatedBoxes_pos hcheck
 
+set_option linter.style.longLine false in
+/--
+Robinson Section 7 board/free-line version with finite layer patches.
+
+This is the finite-check-facing form of `ofSection7BoardFreeLinePositiveTranslatedBoxes`:
+the board/free-line argument supplies the compatible routed free grids, while
+the layer patches supply the active-corner realization directly.
+-/
+def ofSection7BoardFreeLineLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid))
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true) :
+    NatSiteRobinsonCompatibleLevelObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid :=
+  ofLevelCompatibleLayerPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofBoardFreeLineActiveCorner
+        boardFreeLine))
+    patches hcheck
+
 /--
 Canonical decoded corridor routing version of
 `ofGeometryCombinedPositiveTranslatedBoxes`.
@@ -12474,6 +12510,42 @@ def ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
         l2Component1BlankCandidatePairCompatibilityBool)
 
 /--
+L2 component-1 specialization of the Section 7 board/free-line layer-patch
+constructor.
+-/
+def ofL2Component1Section7BoardFreeLineLayerPatches
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7BoardFreeLineLayerPatches
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine patches
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
+/--
 Compatible-level L2 component-1 entry point using Robinson finite layer patches.
 -/
 def ofL2Component1BlankCandidateLayerPatches
@@ -12620,6 +12692,42 @@ def ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
     0 Quadrant.northeast
     l2Component2BlankCandidateSanity.cornerIndex_valid
     boardFreeLine translatedBoxes_pos
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+/--
+L2 component-2 specialization of the Section 7 board/free-line layer-patch
+constructor.
+-/
+def ofL2Component2Section7BoardFreeLineLayerPatches
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofSection7BoardFreeLineLayerPatches
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine patches
     (by
       simpa [l2Component2BlankCandidateActiveSiteData,
         l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
