@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Compactness
+import LeanWang.Basic
 
 /-!
 Figure 16 substitution data for the Ollinger/Robinson scaffold.
@@ -285,6 +285,75 @@ theorem mem_all (symbol : Symbol) : symbol ∈ all := by
 theorem tile_mem_tileSet (symbol : Symbol) :
     tile symbol ∈ tileSet :=
   List.mem_map.2 ⟨symbol, mem_all symbol, rfl⟩
+
+/-- Boolean horizontal edge compatibility between Figure 16 component symbols. -/
+def hMatchesBool (left right : Symbol) : Bool :=
+  decide (WangTile.HMatches (tile left) (tile right))
+
+/-- Boolean vertical edge compatibility between Figure 16 component symbols. -/
+def vMatchesBool (lower upper : Symbol) : Bool :=
+  decide (WangTile.VMatches (tile lower) (tile upper))
+
+/-- All symbols that can appear immediately to the east of `left`. -/
+def hFollowers (left : Symbol) : List Symbol :=
+  all.filter fun right => hMatchesBool left right
+
+/--
+Horizontally compatible row tails after a fixed preceding symbol.
+
+`rowTailsAfter left n` returns all length-`n` lists that can be appended to
+the east of `left`.
+-/
+def rowTailsAfter (left : Symbol) : Nat → List (List Symbol)
+  | 0 => [[]]
+  | n + 1 =>
+      (hFollowers left).flatMap fun right =>
+        (rowTailsAfter right n).map fun tail => right :: tail
+
+/-- Horizontally compatible symbol rows of the given width. -/
+def compatibleRows : Nat → List (List Symbol)
+  | 0 => [[]]
+  | n + 1 =>
+      all.flatMap fun first =>
+        (rowTailsAfter first n).map fun tail => first :: tail
+
+/-- Boolean pointwise vertical compatibility of two symbol rows. -/
+def vCompatibleRowsBool : List Symbol → List Symbol → Bool
+  | [], [] => true
+  | lower :: lowers, upper :: uppers =>
+      vMatchesBool lower upper && vCompatibleRowsBool lowers uppers
+  | _, _ => false
+
+/--
+Possible top rows of a positive-height symbol rectangle.
+
+`rowStackTops width depth` computes the possible top rows after stacking
+`depth + 1` horizontally compatible rows.
+-/
+def rowStackTops (width : Nat) : Nat → List (List Symbol)
+  | 0 => compatibleRows width
+  | depth + 1 =>
+      let rows := compatibleRows width
+      (rowStackTops width depth).flatMap fun lower =>
+        rows.filter fun upper => vCompatibleRowsBool lower upper
+
+/-- Fast row-DP existence check for a symbol rectangle of the given size. -/
+def hasRectangleStackBool (width height : Nat) : Bool :=
+  match height with
+  | 0 => true
+  | depth + 1 => !(rowStackTops width depth).isEmpty
+
+/--
+Diagnostic obstruction: the raw Figure 16 component-symbol tiles do not even
+tile a `6 × 6` square.
+
+This confirms that `Symbol.tileSet` is only a local checking device for the
+Figure 16 substitution blocks, not the standalone scaffold tileset whose
+cofinal square tilings should drive compactness.
+-/
+theorem hasRectangleStackBool_six_six_eq_false :
+    hasRectangleStackBool 6 6 = false := by
+  decide
 
 end Symbol
 
@@ -725,17 +794,6 @@ def HasPositiveCompatibleBlockSquares : Prop :=
   ∀ n : Nat, 0 < n → Nonempty (CompatibleBlockSquare n)
 
 /--
-The proof-facing Figure 16 compactness target: produce symbol-square tilings at
-cofinally many side lengths.
-
-This avoids forcing the substitution argument through a false block-grid
-self-substitution.  The actual iteration only has to build valid rectangles
-over `Symbol.tileSet`.
--/
-def HasCofinalSymbolSquares : Prop :=
-  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m
-
-/--
 Positive compatible block squares give tileable doubled squares over the
 component-symbol tileset.
 -/
@@ -745,58 +803,6 @@ theorem tileableDoubledSquares_symbolTileSet_of_positiveCompatibleBlockSquares
   intro n hn
   rcases hsquares n hn with ⟨square⟩
   exact square.tileableExpandedSquare
-
-/--
-Positive compatible block squares give cofinal tileable squares over the
-component-symbol tileset.
--/
-theorem cofinalSymbolSquares_of_positiveCompatibleBlockSquares
-    (hsquares : HasPositiveCompatibleBlockSquares) :
-    HasCofinalSymbolSquares := by
-  intro n
-  let sourceSide := n + 1
-  have hsourceSide : 0 < sourceSide := Nat.succ_pos n
-  rcases hsquares sourceSide hsourceSide with ⟨square⟩
-  refine ⟨2 * sourceSide, ?_, square.tileableExpandedSquare⟩
-  omega
-
-/--
-Cofinal symbol-square tilings compactly determine a plane tiling by the
-component-symbol tileset.
--/
-theorem tilesPlane_symbolTileSet_of_cofinalSymbolSquares
-    (hsquares : HasCofinalSymbolSquares) :
-    TilesPlane Symbol.tileSet :=
-  tilesPlane_of_cofinal_tileableSquares hsquares
-
-/--
-Spelled-out version of `HasCofinalSymbolSquares`, useful as a theorem-facing
-surface for generated or reflected finite Figure 16 checks.
--/
-theorem tilesPlane_symbolTileSet_of_cofinalTileableSquares
-    (hsquares :
-      ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m) :
-    TilesPlane Symbol.tileSet :=
-  tilesPlane_symbolTileSet_of_cofinalSymbolSquares hsquares
-
-/--
-The diagnostic positive block-square target implies the proof-facing cofinal
-symbol-square target.
--/
-theorem cofinalTileableSquares_symbolTileSet_of_positiveCompatibleBlockSquares
-    (hsquares : HasPositiveCompatibleBlockSquares) :
-    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare Symbol.tileSet m := by
-  exact cofinalSymbolSquares_of_positiveCompatibleBlockSquares hsquares
-
-/--
-Compatible Figure 16 block squares at every positive side compactly determine a
-plane tiling by the component-symbol tileset.
--/
-theorem tilesPlane_symbolTileSet_of_positiveCompatibleBlockSquares
-    (hsquares : HasPositiveCompatibleBlockSquares) :
-    TilesPlane Symbol.tileSet :=
-  tilesPlane_symbolTileSet_of_cofinalSymbolSquares
-    (cofinalSymbolSquares_of_positiveCompatibleBlockSquares hsquares)
 
 /-- `phi_L1(*)`. -/
 def phiL1Star : Block :=
