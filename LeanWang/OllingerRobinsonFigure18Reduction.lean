@@ -20477,6 +20477,59 @@ def l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData
   l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
     (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
 
+/--
+Checked origin-zero stacks plus a raw Figure 13 plane tiling provide the first
+checked-stack/layer-patch finite scaffold package.  The checked stacks give
+Robinson's board/free-line recognizability; the Figure 13 plane tiling gives
+positive translated active-corner boxes, which are converted to finite layer
+patches.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := data.checkedStacks
+  patches :=
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      (l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+        data.checkedStacks)
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+        data).translatedBoxes).patches
+
+/--
+Checked origin-zero stacks plus a raw Figure 13 plane tiling provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := data.checkedStacks
+  patches :=
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+        data.checkedStacks)
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+        data).translatedBoxes).patches
+
+/--
+Finite checked-stack/Figure 13 box data provide the first checked-stack/layer
+patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Finite checked-stack/Figure 13 box data provide the second checked-stack/layer
+patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
 open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
 
 /--

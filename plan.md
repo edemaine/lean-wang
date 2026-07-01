@@ -742,6 +742,14 @@ constructors from origin-zero windows and theorem wrappers for both direct
 `PositionSourceObligations` and the packaged source-uniform interior decoder.
 It also has wrappers for the lighter generated `SourcePositionCodeInteriorRowsPrimrec`
 route.
+The existing checked signal-tower Figure 13 plane/box packages now convert
+directly into this target via
+`l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData`,
+`l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData`,
+`l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData`, and
+`l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData`.  Thus finite Figure 13
+box data is already enough to supply the layer-patch field; the remaining
+concrete scaffold work can focus on proving the checked-stack/box package.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.
