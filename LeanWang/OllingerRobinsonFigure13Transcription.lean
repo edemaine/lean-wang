@@ -4454,6 +4454,21 @@ def IsFreeCrossing {level : Nat}
     (geometry : RobinsonBoardSignalGeometry level) (column row : Int) : Prop :=
   geometry.isFreeColumn column ∧ geometry.isFreeRow row
 
+/--
+A board coordinate pair whose full column and row carry no obstruction signal.
+
+This is Robinson's obstruction-signal description of a free crossing: the
+predicate is phrased in terms of the signals emitted and absorbed by borders,
+rather than in terms of the already-enumerated free rows and columns.
+-/
+def IsClearCrossing {level : Nat}
+    (geometry : RobinsonBoardSignalGeometry level) (column row : Int) : Prop :=
+  geometry.isBoardColumn column ∧ geometry.isBoardRow row ∧
+    (∀ y : Int, geometry.isBoardRow y →
+      ¬ geometry.hasVerticalObstruction column y) ∧
+    (∀ x : Int, geometry.isBoardColumn x →
+      ¬ geometry.hasHorizontalObstruction x row)
+
 /-- The free columns are exactly the columns enumerated by the geometry. -/
 theorem isFreeColumn_iff_exists_freeColumnCoord
     {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
@@ -4522,6 +4537,43 @@ theorem isFreeCrossing_iff_clearLines
       (geometry.freeColumn_iff_noVerticalObstruction column hcolumn).2
         hclearColumn,
       (geometry.freeRow_iff_noHorizontalObstruction row hrow).2 hclearRow⟩
+
+/-- Every free column is a board column. -/
+theorem isBoardColumn_of_isFreeColumn
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {column : Int} (hfree : geometry.isFreeColumn column) :
+    geometry.isBoardColumn column := by
+  rcases geometry.freeColumnCoord_complete column hfree with ⟨i, hcoord⟩
+  rw [← hcoord]
+  exact geometry.freeColumnCoord_board i
+
+/-- Every free row is a board row. -/
+theorem isBoardRow_of_isFreeRow
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    {row : Int} (hfree : geometry.isFreeRow row) :
+    geometry.isBoardRow row := by
+  rcases geometry.freeRowCoord_complete row hfree with ⟨j, hcoord⟩
+  rw [← hcoord]
+  exact geometry.freeRowCoord_board j
+
+/--
+Robinson's obstruction-signal predicate is equivalent to the enumerated free
+crossing predicate.
+-/
+theorem isClearCrossing_iff_isFreeCrossing
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level)
+    (column row : Int) :
+    geometry.IsClearCrossing column row ↔
+      geometry.IsFreeCrossing column row := by
+  constructor
+  · intro hclear
+    exact (geometry.isFreeCrossing_iff_clearLines hclear.1 hclear.2.1).2
+      ⟨hclear.2.2.1, hclear.2.2.2⟩
+  · intro hfree
+    have hcolumn := geometry.isBoardColumn_of_isFreeColumn hfree.1
+    have hrow := geometry.isBoardRow_of_isFreeRow hfree.2
+    have hclear := (geometry.isFreeCrossing_iff_clearLines hcolumn hrow).1 hfree
+    exact ⟨hcolumn, hrow, hclear.1, hclear.2⟩
 
 /--
 Robinson's obstruction-signal characterization, in enumerated-grid form:
@@ -4962,6 +5014,57 @@ theorem freeCrossing_card_eq_two_pow_add_one_mul
       (geometry.freeCrossingFintype) =
         (2 ^ level + 1) * (2 ^ level + 1) := by
   rw [geometry.freeCrossing_card_eq_freeGridSide_mul_freeGridSide,
+    RobinsonSquare.freeGridSide_eq_two_pow_add_one]
+
+/-- Clear crossings and free crossings are the same finite subtype. -/
+noncomputable def clearCrossingEquivFreeCrossing
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { p : Int × Int // geometry.IsClearCrossing p.1 p.2 } ≃
+      { p : Int × Int // geometry.IsFreeCrossing p.1 p.2 } where
+  toFun p :=
+    ⟨p.1, (geometry.isClearCrossing_iff_isFreeCrossing p.1.1 p.1.2).1 p.2⟩
+  invFun p :=
+    ⟨p.1, (geometry.isClearCrossing_iff_isFreeCrossing p.1.1 p.1.2).2 p.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/--
+The obstruction-defined clear crossings form the same virtual square as the
+enumerated free rows and columns.
+-/
+noncomputable def clearCrossingEquivFinProd
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    { p : Int × Int // geometry.IsClearCrossing p.1 p.2 } ≃
+      Fin (RobinsonSquare.freeGridSide level) ×
+        Fin (RobinsonSquare.freeGridSide level) :=
+  (geometry.clearCrossingEquivFreeCrossing).trans
+    geometry.freeCrossingEquivFinProd
+
+@[reducible]
+noncomputable def clearCrossingFintype
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    Fintype { p : Int × Int // geometry.IsClearCrossing p.1 p.2 } :=
+  Fintype.ofEquiv
+    (Fin (RobinsonSquare.freeGridSide level) ×
+      Fin (RobinsonSquare.freeGridSide level))
+    (geometry.clearCrossingEquivFinProd.symm)
+
+theorem clearCrossing_card_eq_freeGridSide_mul_freeGridSide
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { p : Int × Int // geometry.IsClearCrossing p.1 p.2 }
+      (geometry.clearCrossingFintype) =
+        RobinsonSquare.freeGridSide level *
+          RobinsonSquare.freeGridSide level := by
+  letI := geometry.clearCrossingFintype
+  have h := Fintype.card_congr (geometry.clearCrossingEquivFinProd)
+  simpa [Fintype.card_prod, Fintype.card_fin] using h
+
+theorem clearCrossing_card_eq_two_pow_add_one_mul
+    {level : Nat} (geometry : RobinsonBoardSignalGeometry level) :
+    @Fintype.card { p : Int × Int // geometry.IsClearCrossing p.1 p.2 }
+      (geometry.clearCrossingFintype) =
+        (2 ^ level + 1) * (2 ^ level + 1) := by
+  rw [geometry.clearCrossing_card_eq_freeGridSide_mul_freeGridSide,
     RobinsonSquare.freeGridSide_eq_two_pow_add_one]
 
 /-- Column-coordinate recurrence between consecutive Robinson board geometries. -/
