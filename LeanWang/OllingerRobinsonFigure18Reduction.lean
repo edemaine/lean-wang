@@ -16455,6 +16455,13 @@ abbrev Figure18CanonicalCheckedRecognizedCompatibleMacroSquares : Prop :=
   HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
 
 /--
+Row-major checked-data form of
+`Figure18CanonicalCheckedRecognizedCompatibleMacroSquares`.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleLevelData : Prop :=
+  HasCanonicalCheckedFigure16RecognizedCompatibleLevelData
+
+/--
 Canonical Figure 16 macro-square hypothesis using only checked source layer
 stacks and raw Figure 13 boundary compatibility.
 -/
@@ -16857,6 +16864,11 @@ theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundaryBool
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
   canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
     (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
 
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
@@ -28542,6 +28554,78 @@ theorem
     domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
       (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
         originZeroWindows hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows and row-major checked compatible Figure 16
+level data.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_position_source
+      originZeroWindows
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate using
+origin-zero active/corner windows and row-major checked compatible Figure 16
+level data.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_position_source
+      originZeroWindows
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+        hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows and row-major checked compatible Figure 16
+level data.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_level_data_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_position_source
+      originZeroWindows
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+        hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows and row-major checked compatible Figure 16
+level data.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_level_data_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_position_source
+      originZeroWindows
+      (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+        hlevel)
       h
 
 /--
