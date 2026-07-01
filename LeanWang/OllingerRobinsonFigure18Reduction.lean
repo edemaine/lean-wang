@@ -25924,12 +25924,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate h
+      O.toL2C1CompatibleLevelObligations h
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -25945,12 +25945,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate h
+      O.toL2C1CompatibleLevelObligations h
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -25966,12 +25966,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate h
+      O.toL2C2CompatibleLevelObligations h
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -25987,12 +25987,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_nat_sites_routed_position_source
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      O.toFigure18RoutedCertificate h
+      O.toL2C2CompatibleLevelObligations h
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
