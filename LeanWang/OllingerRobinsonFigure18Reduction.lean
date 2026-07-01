@@ -32795,12 +32795,13 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
       hinterior hcorrect
 
 /--
@@ -32818,12 +32819,13 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component1BlankCandidateActiveSiteSpecs
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
-      (l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
       hinterior hcorrect
 
 /--
@@ -32841,12 +32843,13 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
       hinterior hcorrect
 
 /--
@@ -32864,12 +32867,13 @@ theorem
           TM0Route.partrecStartedTM0Input).Dom) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_of_figure13_compatible_level_obligations_interiorRows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_interiorRows
       l2Component2BlankCandidateActiveSiteSpecs
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
-      (l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData data)
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+        (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data))
       hinterior hcorrect
 
 /--
