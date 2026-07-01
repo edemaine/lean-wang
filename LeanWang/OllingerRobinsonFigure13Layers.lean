@@ -3047,6 +3047,17 @@ def HasRobinsonSection7ObstructionRoutingInvariant
   D.scaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
 
 /--
+Layered version of the Robinson Section 7 board/free-line target.
+
+The layer data is still only the finite Figure 13/Figure 16 transcription; the
+board/free-line geometry and active/corner recognition live in the underlying
+Figure 18 scaffold data.
+-/
+def HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+    (D : LayeredFigure18ScaffoldData) : Prop :=
+  D.scaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+
+/--
 Origin-zero active/corner windows supply the layered Robinson Section 7
 obstruction-routing invariant.  The layer data is irrelevant to this bridge;
 it only records the finite Figure 13/Figure 16 realization checks.
@@ -3060,6 +3071,40 @@ def HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
     (D := D.scaffoldData)
     (show HasFigure18IndexedActiveCornerOriginZeroWindowsForTable D.table from
       hwindows)
+
+/--
+The layered board/free-line Section 7 target supplies the existing layered
+obstruction-routing invariant.
+-/
+def HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    {D : LayeredFigure18ScaffoldData}
+    (hboard : D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonSection7ObstructionRoutingInvariant :=
+  Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    (D := D.scaffoldData) hboard
+
+/--
+Origin-zero active/corner windows also supply the layered board/free-line
+target, using the canonical Robinson obstruction-geometry tower.
+-/
+def HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofOriginZeroWindows
+    {D : LayeredFigure18ScaffoldData}
+    (hwindows : HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+      D.table) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  Figure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    (D := D.scaffoldData)
+    (show HasFigure18IndexedActiveCornerOriginZeroWindowsForTable D.table from
+      hwindows)
+
+/-- Short alias for the layered origin-zero-to-board/free-line Section 7 bridge. -/
+def boardFreeLineActiveCornerOfOriginZeroWindows
+    {D : LayeredFigure18ScaffoldData}
+    (hwindows : HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+      D.table) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofOriginZeroWindows
+    hwindows
 
 theorem activeSites_eq (D : LayeredFigure18ScaffoldData) :
     D.activeSites = D.activeSiteData.sites :=

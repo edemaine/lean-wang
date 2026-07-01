@@ -16261,6 +16261,21 @@ abbrev LayeredSection7ObstructionRoutingInvariant
     Prop :=
   D.HasRobinsonSection7ObstructionRoutingInvariant
 
+/--
+Short local name for the proof-facing Robinson Section 7 board/free-line
+target: pure obstruction geometry plus active/corner recognition at canonical
+free crossings.
+-/
+abbrev LayeredSection7BoardFreeLineActiveCornerInvariant
+    (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData) :
+    Prop :=
+  D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+
+/-- Short local name for the bare Figure 18 board/free-line target. -/
+abbrev Section7BoardFreeLineActiveCornerInvariant
+    (D : OllingerRobinson.Figure18ScaffoldData) : Prop :=
+  D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+
 /-- Finite-box form of the raw Figure 13 scaffold hypothesis. -/
 abbrev Figure13TileableBoxes : Prop :=
   ∀ r : Nat, TileableBox fig13Tiles r
@@ -16986,6 +17001,33 @@ def l2c1Section7RoutingOfOriginZeroWindows
     originZeroWindows
 
 /--
+Origin-zero active/corner windows give the proof-facing board/free-line
+Section 7 target for the first audited L2-blank candidate.
+-/
+def l2c1BoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    LayeredSection7BoardFreeLineActiveCornerInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the bare Figure 18 board/free-line
+target for the first audited L2-blank candidate.
+-/
+def l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  Figure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    (D := l2Component1Figure18ScaffoldData)
+    originZeroWindows
+
+/--
 Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the second audited L2-blank candidate.
 -/
@@ -16998,6 +17040,33 @@ def l2c2Section7RoutingOfOriginZeroWindows
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid) :=
   LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the proof-facing board/free-line
+Section 7 target for the second audited L2-blank candidate.
+-/
+def l2c2BoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    LayeredSection7BoardFreeLineActiveCornerInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the bare Figure 18 board/free-line
+target for the second audited L2-blank candidate.
+-/
+def l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  Figure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    (D := l2Component2Figure18ScaffoldData)
     originZeroWindows
 
 /--
@@ -17916,6 +17985,31 @@ structure L2C2RobinsonSection7ObstructionData : Prop where
   alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
+Robinson Section 7 board/free-line data for the first audited L2-blank
+candidate.
+
+This is closer to Robinson's Section 7 text than
+`L2C1RobinsonSection7ObstructionData`: it records the pure board/free-line
+geometry plus active/corner recognition before packaging the remaining
+free-site routing fields.
+-/
+structure L2C1RobinsonSection7BoardFreeLineData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 board/free-line data for the second audited L2-blank
+candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLineData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
 This is the preferred proof-facing target after the raw-boundary board
@@ -18574,6 +18668,58 @@ def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
   alignedMacroSquares := hlevel
 
 /--
+The first proof-facing board/free-line package supplies the existing
+obstruction-data package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    L2C1RobinsonSection7ObstructionData where
+  section7Routing :=
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      (D := l2Component1Figure18ScaffoldData)
+      data.boardFreeLineActiveCorner
+  alignedMacroSquares := data.alignedMacroSquares
+
+/--
+The second proof-facing board/free-line package supplies the existing
+obstruction-data package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    L2C2RobinsonSection7ObstructionData where
+  section7Routing :=
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      (D := l2Component2Figure18ScaffoldData)
+      data.boardFreeLineActiveCorner
+  alignedMacroSquares := data.alignedMacroSquares
+
+/--
+Board/free-line active-corner recognition and positive board-level aligned
+macro-squares instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  alignedMacroSquares := hlevel
+
+/--
+Board/free-line active-corner recognition and positive board-level aligned
+macro-squares instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  alignedMacroSquares := hlevel
+
+/--
 Robinson Section 7 obstruction routing and exact positive board-level raw
 Figure 13 square tilings instantiate the first paper-facing obstruction
 package.
@@ -18604,6 +18750,36 @@ def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
       hsquares)
 
 /--
+Board/free-line active-corner recognition and exact positive board-level raw
+Figure 13 square tilings instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    boardFreeLineActiveCorner
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and exact positive board-level raw
+Figure 13 square tilings instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    boardFreeLineActiveCorner
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
 Origin-zero recognizability and positive Robinson-board aligned macro-squares
 instantiate the first paper-facing obstruction package.
 -/
@@ -18630,6 +18806,30 @@ def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlig
     hlevel
 
 /--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
 Origin-zero recognizability and exact positive board-level raw Figure 13
 square tilings instantiate the first paper-facing obstruction package.
 -/
@@ -18653,6 +18853,30 @@ def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTile
   l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
     (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
       originZeroWindows)
+    hsquares
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13 square
+tilings instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13 square
+tilings instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
     hsquares
 
 /--

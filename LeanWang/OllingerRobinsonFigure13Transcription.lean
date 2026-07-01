@@ -10987,6 +10987,23 @@ def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
   HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCorner
     D.activeSites D.cornerSite
 
+/--
+Robinson Section 7 board/free-line target before the final routing fields are
+packaged.
+
+The first component is the pure obstruction geometry: red borders produce
+boards whose unobstructed rows and columns form the virtual square.  The second
+component is the finite local recognition that the canonical free crossings are
+active Figure 18 sites and that the lower-left crossing is the distinguished
+corner.  The remaining payload transmission and site-compatibility fields are
+then supplied by valid tiling edges in
+`HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner`.
+-/
+def HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+    (D : Figure18ScaffoldData) : Prop :=
+  HasRobinsonBoardSignalGeometryTower ∧
+    D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
+
 def HasIndexedActiveCornerOriginZeroWindowInvariant
     (D : Figure18ScaffoldData) : Prop :=
   HasFigure18IndexedActiveCornerOriginZeroWindowsForTable D.table.toRoleTable
@@ -11141,11 +11158,55 @@ def HasRobinsonSection7ObstructionRoutingInvariant.ofActiveCorner
   HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant.ofActiveCorner
     hactiveCorner
 
+/--
+The board/free-line Section 7 target supplies the existing obstruction-routing
+invariant.  The pure geometry component is kept in the source invariant so the
+proof obligation matches Robinson's board argument, while the canonical routing
+bridge uses the already fixed canonical tower.
+-/
+def HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    {D : Figure18ScaffoldData}
+    (hboard :
+      D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant) :
+    D.HasRobinsonSection7ObstructionRoutingInvariant :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofActiveCorner hboard.2
+
+/--
+Canonical Robinson board/free-line geometry plus active/corner recognition at
+canonical free crossings gives the proof-facing Section 7 target.
+-/
+def HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofActiveCorner
+    {D : Figure18ScaffoldData}
+    (hactiveCorner :
+      D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  ⟨hasRobinsonBoardSignalGeometryTower, hactiveCorner⟩
+
 def HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
     {D : Figure18ScaffoldData}
     (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
     D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant :=
   hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+    hwindows
+
+/--
+Origin-zero active/corner windows supply the bare Figure 18 board/free-line
+Section 7 target.
+-/
+def HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofActiveCorner
+    (HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofOriginZeroWindows
+      hwindows)
+
+/-- Short alias for the origin-zero-to-board/free-line Section 7 bridge. -/
+def boardFreeLineActiveCornerOfOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant :=
+  HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofOriginZeroWindows
     hwindows
 
 def HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
