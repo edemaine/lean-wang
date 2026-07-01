@@ -17841,6 +17841,44 @@ def l2c2CheckedSignalTowerFig13BoxDataOfBoardData
       data.boardLevels
 
 /--
+The first finite checked board package supplies the active/corner recognition
+field used by the proof-facing Section 7 route.
+-/
+def l2c1ActiveCornerOfCheckedSignalTowerBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1ActiveCornerOfOriginZeroCheckedStacks data.checkedStacks
+
+/--
+The second finite checked board package supplies the active/corner recognition
+field used by the proof-facing Section 7 route.
+-/
+def l2c2ActiveCornerOfCheckedSignalTowerBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2ActiveCornerOfOriginZeroCheckedStacks data.checkedStacks
+
+/--
+The first finite checked board package supplies the checked positive
+board-level raw Figure 13 data needed by the active/corner route.
+-/
+def l2c1PositiveBoardLevelsOfCheckedSignalTowerBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels data.boardLevels
+
+/--
+The second finite checked board package supplies the checked positive
+board-level raw Figure 13 data needed by the active/corner route.
+-/
+def l2c2PositiveBoardLevelsOfCheckedSignalTowerBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels data.boardLevels
+
+/--
 For the first L2 candidate, forgetting origin-zero board data to Figure 13 boxes
 agrees with the direct origin-zero box constructor.
 -/
@@ -29111,6 +29149,58 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_direct_obligations_position_source
       (l2c2SignalTowerDirectObligationsOfCheckedBoardData data) h
+
+/--
+Encoded domino undecidability from the first finite checked board package via
+the proof-facing active/corner raw-board route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_data_active_corner_position_source
+    (data : L2C1CheckedSignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_position_source
+      data.checkedStacks data.boardLevels h
+
+/--
+Unencoded domino undecidability from the first finite checked board package via
+the proof-facing active/corner raw-board route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_data_active_corner_position_source
+    (data : L2C1CheckedSignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_position_source
+      data.checkedStacks data.boardLevels h
+
+/--
+Encoded domino undecidability from the second finite checked board package via
+the proof-facing active/corner raw-board route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_data_active_corner_position_source
+    (data : L2C2CheckedSignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_position_source
+      data.checkedStacks data.boardLevels h
+
+/--
+Unencoded domino undecidability from the second finite checked board package via
+the proof-facing active/corner raw-board route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_data_active_corner_position_source
+    (data : L2C2CheckedSignalTowerBoardData)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_position_source
+      data.checkedStacks data.boardLevels h
 
 /--
 Encoded domino undecidability from the first field-based Section 7 board
