@@ -3790,6 +3790,22 @@ theorem freeGridSide_pos (level : Nat) : 0 < freeGridSide level := by
   unfold freeGridSide
   exact Nat.succ_pos (2 ^ level)
 
+/--
+Robinson's Section 7 closed form for the number of free rows or columns in the
+red-board of a given level.
+-/
+theorem freeGridSide_eq_two_pow_add_one (level : Nat) :
+    freeGridSide level = 2 ^ level + 1 := by
+  rfl
+
+/--
+The shifted positive-board interface uses the first nondegenerate red board at
+`level + 1`, whose free grid has side `2^(level+1) + 1`.
+-/
+theorem positiveBoardFreeGridSide_eq_two_pow_add_one (level : Nat) :
+    freeGridSide (level + 1) = 2 ^ (level + 1) + 1 := by
+  rfl
+
 theorem redBorderSide_pos (level : Nat) : 0 < redBorderSide level := by
   unfold redBorderSide
   exact pow_pos (by decide : 0 < 4) level
