@@ -838,6 +838,15 @@ positive-board Figure 13 checks and the direct
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
 kept only as diagnostic surfaces.
 
+For build locality, the concrete Figure 18 reduction implementation is now
+split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
+is a public import wrapper, `LeanWang.OllingerRobinsonFigure18Reduction.Core`
+contains the generic Figure 18/folded-reduction adapters, and
+`LeanWang.OllingerRobinsonFigure18Reduction.Section7` contains the scaffold
+packages and proof-facing Section 7 routes.  Future concrete scaffold work
+should prefer editing the Section 7 module so the earlier generic wrapper layer
+stays cached.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,
