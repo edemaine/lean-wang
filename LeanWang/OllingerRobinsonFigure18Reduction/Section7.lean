@@ -7015,10 +7015,8 @@ def l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
-  l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
-    canonicalFreeSiteRectRouting
-    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
-      hlevel)
+  NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations.ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    canonicalFreeSiteRectRouting hlevel
 
 /--
 Checked compatible Figure 16 level data supplies the second bundled
@@ -7038,10 +7036,8 @@ def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
-  l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
-    canonicalFreeSiteRectRouting
-    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
-      hlevel)
+  NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations.ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    canonicalFreeSiteRectRouting hlevel
 
 def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
     (hgrids :
@@ -7357,9 +7353,8 @@ def l2c1CheckedCompatibleFig16LevelDataIsolatedBoxes
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
       l2Component1Figure18ScaffoldData :=
-  l2c1CheckedCompatibleFig16IsolatedBoxes
-    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
-      hlevel)
+  l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    hlevel
 
 /--
 Checked compatible Figure 16 level data supplies positive isolated active
@@ -7369,9 +7364,8 @@ def l2c2CheckedCompatibleFig16LevelDataIsolatedBoxes
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
       l2Component2Figure18ScaffoldData :=
-  l2c2CheckedCompatibleFig16IsolatedBoxes
-    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
-      hlevel)
+  l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    hlevel
 
 /--
 Checked compatible Figure 16 level data supplies positive active-corner boxes
