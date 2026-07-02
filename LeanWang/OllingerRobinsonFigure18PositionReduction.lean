@@ -1842,6 +1842,70 @@ theorem
         hinterior)
 
 /--
+Encoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
+      data hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Unencoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
+      data hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Encoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_interiorRowsCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_interiorRows
+      data hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Unencoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_interiorRowsCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_interiorRows
+      data hinterior
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
 Encoded domino undecidability from the first finite-check-facing Section 7
 board/free-line layer-patch package and the source-specialized position-code
 label-index decoder, with `positionProgramData` semantic correctness
@@ -1902,6 +1966,70 @@ theorem
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Encoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Encoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_position_source
       data
       (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
 
