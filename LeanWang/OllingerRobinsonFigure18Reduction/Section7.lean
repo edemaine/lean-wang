@@ -947,6 +947,30 @@ abbrev L2C2OriginZeroWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Canonical free-site-rectangle routing hypothesis for the first audited
+L2-blank candidate.
+-/
+abbrev L2C1CanonicalFreeSiteRectRouting : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Canonical free-site-rectangle routing hypothesis for the second audited
+L2-blank candidate.
+-/
+abbrev L2C2CanonicalFreeSiteRectRouting : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
 Finite active-corner layer patches for the first audited L2-blank candidate.
 -/
 abbrev L2C1ActiveCornerLayerPatches : Prop :=

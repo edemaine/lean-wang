@@ -277,6 +277,20 @@ structure FinalSection7PositiveBoxSourcePositionCodeConstructionObligations : Pr
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
+Free-site-rectangle Section 7 obligations with the source-specialized
+position-code label-index source target.
+
+This is the scaffold-facing target closest to the current Robinson route:
+Section 7 supplies canonical free-site-rectangle routing, the checked Figure 16
+level data supplies positive translated active boxes, and the source field is
+the weakest current source-code assumption.
+-/
+structure FinalFreeSiteRectSourcePositionCodeConstructionObligations : Prop where
+  routing : TM0FoldedReduction.L2C1CanonicalFreeSiteRectRouting
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
 Raw-boundary diagnostic variant of the remaining proof obligations.
 
 This route is useful for testing finite Figure 13/Figure 16 data plumbing, but
@@ -331,6 +345,19 @@ def section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
     TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
   TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
     originZeroWindows fig16
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus checked compatible Figure 16 level
+data produce the paper-facing Section 7 positive-box scaffold package.
+-/
+def section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelData
+    (routing : TM0FoldedReduction.L2C1CanonicalFreeSiteRectRouting)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (TM0FoldedReduction.l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+      routing fig16)
 
 namespace FinalReductionInputs
 
@@ -1462,6 +1489,39 @@ theorem domino_problem_undecidable
 
 end FinalSection7PositiveBoxSourcePositionCodeConstructionObligations
 
+namespace FinalFreeSiteRectSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the free-site-rectangle source-specialized package into the
+paper-facing Section 7 positive-box package.
+-/
+def toSection7PositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalFreeSiteRectSourcePositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelData
+      h.routing h.fig16
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the free-site-rectangle source-specialized package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFreeSiteRectSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSection7PositiveBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the free-site-rectangle source-specialized package. -/
+theorem domino_problem_undecidable
+    (h : FinalFreeSiteRectSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSection7PositiveBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFreeSiteRectSourcePositionCodeConstructionObligations
+
 namespace FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1811,6 +1871,26 @@ source-specialized label-index construction obligations.
 -/
 theorem domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from free-site-rectangle routing, checked
+Figure 16 level data, and the source-specialized label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_freeSiteRectSourcePositionCodeConstructionObligations
+    (h : FinalFreeSiteRectSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from free-site-rectangle routing, checked Figure 16
+level data, and the source-specialized label-index decoder.
+-/
+theorem domino_problem_undecidable_of_freeSiteRectSourcePositionCodeConstructionObligations
+    (h : FinalFreeSiteRectSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
