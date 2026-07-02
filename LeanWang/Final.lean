@@ -956,6 +956,19 @@ end FinalSourcePositionCodeConstructionObligations
 
 namespace FinalConstructionObligations
 
+/--
+Convert the older interior-row final obligation package into the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalConstructionObligations) :
+    FinalSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  fig16 := h.fig16
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
 /-- Convert the preferred final obligation package into the low-level endpoint. -/
 def toFinalReductionInputs
     (h : FinalConstructionObligations) :
@@ -1124,6 +1137,16 @@ def toConstructionObligations
     TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
   fig16 := h.fig16
   sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the finite-check-facing row-source package into the source-specialized
+label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedConstructionObligations) :
+    FinalSourcePositionCodeConstructionObligations :=
+  h.toConstructionObligations.toSourcePositionCodeConstructionObligations
 
 /-- Convert the finite-check-facing obligation package into the endpoint. -/
 def toFinalReductionInputs

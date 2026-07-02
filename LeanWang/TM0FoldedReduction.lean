@@ -2448,6 +2448,38 @@ abbrev SourcePositionCodeBoundedInteriorRowsPrimrec : Prop :=
     sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
 
 /--
+Primitive recursiveness of the generated one-row position-code decoder implies
+the source-specialized position-code label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRows
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the generated bounded-interior position-code rows
+implies the source-specialized position-code label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+    (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hbounded)
+
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the generated interior position-code rows implies
+the source-specialized position-code label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+    (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
+
+/--
 The statement-list uniqueness fact needed to identify support-search state
 codes with position-coded state codes for the translated source TM0 machines.
 -/
