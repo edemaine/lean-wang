@@ -494,12 +494,10 @@ Next implementation targets:
    than adjacent plane coordinates.  The older
    `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations` surface remains
    as a compatibility bridge, not as the desired final scaffold target.
-5. Add the semantic-final wrappers for the row-major Section 7 geometry route
-   only after `LeanWang.TM0FoldedPositionReduction` can be built in the local
-   environment.  The light wrappers build in
-   `LeanWang.OllingerRobinsonFigure18Reduction`; the semantic-final module
-   imports the large folded correctness proof and currently requires the
-   missing `.olean` for `TM0FoldedPositionReduction`.
+5. Add the semantic-final wrappers for the row-major Section 7 geometry route.
+   `LeanWang.TM0FoldedPositionReduction` is now an import wrapper split into
+   `SourceObligations` and `Theorems` submodules, so the large folded
+   correctness proof can be cached below the final theorem-facing wrappers.
 6. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`
