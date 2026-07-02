@@ -71,8 +71,9 @@ construction interfaces:
 - `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`: the
   source-uniform generated position-code row primitive-recursion proof for the
   folded TM0 reduction.
-- `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`: the checked finite
-  Ollinger/Robinson scaffold package for the preferred Section 7 route.
+- `TM0FoldedReduction.L2C1OriginZeroFig13BoxData`: the origin-zero
+  Ollinger/Robinson scaffold package: origin-zero active/corner windows plus
+  finite raw Figure 13 boxes.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The
