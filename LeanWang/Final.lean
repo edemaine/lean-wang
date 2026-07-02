@@ -256,6 +256,23 @@ def ofCheckedStacksAndCompatibleFig16LevelData
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the packaged generated interior
+position-code decoder.
+-/
+def ofCheckedStacksAndCompatibleFig16LevelDataPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    FinalReductionInputs :=
+  ofCheckedStacksAndCompatibleFig16LevelDataSource
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+      sourceRows
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from origin-zero active/corner windows plus row-major
 checked compatible Figure 16 level data.
 -/
@@ -333,7 +350,8 @@ def toConstructionObligations
 def toFinalReductionInputs
     (h : FinalCheckedConstructionObligations) :
     FinalReductionInputs :=
-  h.toConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataPackage
+    h.checkedStacks h.fig16 h.sourceRows
 
 end FinalCheckedConstructionObligations
 
