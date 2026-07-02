@@ -10,11 +10,11 @@ Final theorem surface for the Wang-tile undecidability proof.
 
 This module keeps the public endpoint small.  The remaining work is isolated in
 `FinalReductionInputs`: the finite-transcription-facing Robinson Section 7
-board/free-line layer-patch scaffold package and the source-uniform generated
-row primitive-recursion proof for the folded TM0 reduction.  Constructors below
-also expose the origin-zero-window route, which derives the checked stacks from
-the geometric origin-zero scaffold invariant and the audited finite Figure 13 /
-Figure 16 pair-compatibility table.
+board/free-line layer-patch scaffold package and the generated-position source
+obligations for the folded TM0 reduction.  Constructors below also expose the
+source-row route and the origin-zero-window route, which derives the checked
+stacks from the geometric origin-zero scaffold invariant and the audited finite
+Figure 13 / Figure 16 pair-compatibility table.
 -/
 
 noncomputable section
@@ -27,31 +27,64 @@ the domino problem.
 
 `scaffold` packages the Section 7 board/free-line active-corner recognition and
 the finite active-corner layer patches for the audited first L2 candidate.
-`sourceRows` is the source-uniform generated position-code row
-primitive-recursion proof for the folded TM0 reduction.  The final
-`positionProgramData` route does not need the stronger statement-list
+`source` packages the generated-position source reduction obligations.  The
+final `positionProgramData` route does not need the stronger statement-list
 uniqueness package used by the older canonical-row-equality route.
 -/
 structure FinalReductionInputs : Prop where
   scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData
-  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+  source : TM0FoldedReduction.PositionSourceObligations
 
 namespace FinalReductionInputs
+
+/-- Build the final inputs directly from the scaffold package and source obligations. -/
+def ofScaffoldAndSource
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs where
+  scaffold := scaffold
+  source := source
+
+/--
+Build the final inputs directly from the scaffold package and generated
+interior position-code rows.
+-/
+def ofScaffoldAndSourceRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
 
 /--
 Build the final inputs from the two split finite scaffold obligations for the
 first audited L2 candidate: checked origin-zero stacks and finite active-corner
 layer patches.
 -/
-def ofCheckedStacksAndLayerPatches
+def ofCheckedStacksAndLayerPatchesSource
     (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
-    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    (source : TM0FoldedReduction.PositionSourceObligations) :
     FinalReductionInputs where
   scaffold :=
     TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
       checkedStacks patches
-  sourceRows := sourceRows
+  source := source
+
+/--
+Build the final inputs from the two split finite scaffold obligations and
+generated interior position-code rows.
+-/
+def ofCheckedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    sourceRows
 
 /--
 Build the final inputs from the concrete checked-stack/layer-patch finite
@@ -60,29 +93,56 @@ side: checked origin-zero stacks imply the Section 7 board/free-line
 active-corner recognition field, while the supplied patches give the backward
 active-corner box realization.
 -/
-def ofCheckedStackLayerPatchData
+def ofCheckedStackLayerPatchDataSource
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
-    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    (source : TM0FoldedReduction.PositionSourceObligations) :
     FinalReductionInputs where
   scaffold :=
     TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
       scaffold
-  sourceRows := sourceRows
+  source := source
+
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and generated interior position-code rows.
+-/
+def ofCheckedStackLayerPatchData
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    sourceRows
 
 /--
 Build the final inputs from checked origin-zero stacks plus compatible Figure
 16 macro-squares.  The Figure 16 certificate supplies the active-corner layer
 patches for the first audited L2 candidate.
 -/
+def ofCheckedStacksAndCompatibleFig16Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      checkedStacks fig16)
+    source
+
+/--
+Build the final inputs from checked origin-zero stacks, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
 def ofCheckedStacksAndCompatibleFig16
     (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofCheckedStackLayerPatchData
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
-      checkedStacks fig16)
-    sourceRows
+  ofCheckedStacksAndCompatibleFig16Source
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -91,45 +151,91 @@ Figure 16 macro-squares.  The checked-stack part is derived from the
 origin-zero windows using the audited finite Figure 13/Figure 16
 pair-compatibility table.
 -/
+def ofOriginZeroWindowsAndCompatibleFig16Source
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      originZeroWindows fig16)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, compatible
+Figure 16 macro-squares, and generated interior position-code rows.
+-/
 def ofOriginZeroWindowsAndCompatibleFig16
     (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofCheckedStackLayerPatchData
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
-      originZeroWindows fig16)
-    sourceRows
+  ofOriginZeroWindowsAndCompatibleFig16Source
+    originZeroWindows fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
 Build the final inputs from checked origin-zero stacks plus row-major checked
 compatible Figure 16 level data.
 -/
+def ofCheckedStacksAndCompatibleFig16LevelDataSource
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+      checkedStacks fig16)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and generated interior position-code rows.
+-/
 def ofCheckedStacksAndCompatibleFig16LevelData
     (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofCheckedStackLayerPatchData
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
-      checkedStacks fig16)
-    sourceRows
+  ofCheckedStacksAndCompatibleFig16LevelDataSource
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
 Build the final inputs from origin-zero active/corner windows plus row-major
 checked compatible Figure 16 level data.
 -/
+def ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+      originZeroWindows fig16)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and generated interior position-code
+rows.
+-/
 def ofOriginZeroWindowsAndCompatibleFig16LevelData
     (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofCheckedStackLayerPatchData
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
-      originZeroWindows fig16)
-    sourceRows
+  ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+    originZeroWindows fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
 
 end FinalReductionInputs
 
@@ -138,16 +244,40 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
-      h.scaffold h.sourceRows
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
 
 set_option linter.style.longLine false in
 /-- Wang domino undecidability from the final construction inputs. -/
 theorem domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
-      h.scaffold h.sourceRows
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSource
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSource scaffold source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSource
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSource scaffold source)
 
 set_option linter.style.longLine false in
 /--
@@ -231,6 +361,34 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from checked origin-zero stacks, compatible
+Figure 16 macro-squares, and generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16Source
+      checkedStacks fig16 source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, compatible Figure 16
+macro-squares, and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16Source
+      checkedStacks fig16 source)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from origin-zero active/corner windows and
 compatible Figure 16 macro-squares.
 -/
@@ -256,6 +414,34 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16
       originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+compatible Figure 16 macro-squares, and generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16Source
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16Source
+      originZeroWindows fig16 source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, compatible
+Figure 16 macro-squares, and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16Source
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16Source
+      originZeroWindows fig16 source)
 
 set_option linter.style.longLine false in
 /--
@@ -287,6 +473,35 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from checked origin-zero stacks, row-major
+checked compatible Figure 16 level data, and generated-position source
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataSource
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSource
+      checkedStacks fig16 source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataSource
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSource
+      checkedStacks fig16 source)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from origin-zero active/corner windows and
 row-major checked compatible Figure 16 level data.
 -/
@@ -312,6 +527,36 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDa
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelData
       originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+row-major checked compatible Figure 16 level data, and generated-position
+source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataSource
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+      originZeroWindows fig16 source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and generated-position source
+obligations.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataSource
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+      originZeroWindows fig16 source)
 
 end LeanWang
 
