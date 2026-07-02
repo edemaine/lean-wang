@@ -5447,6 +5447,9 @@ theorem noSourceRawBoundaryVCompatiblePairsBool_eq_true_iff :
     intro upper _
     simp [hpairs lower upper]
 
+set_option linter.style.nativeDecide false in
+-- Native evaluation keeps this finite diagnostic from expanding a large
+-- reflected pair search into a kernel proof term.
 /--
 The over-strong source/raw-boundary board diagnostic has no horizontal
 two-cell witness in the current Figure 13/Figure 16 transcription.
@@ -5455,6 +5458,9 @@ theorem noSourceRawBoundaryHCompatiblePairsBool_eq_true :
     noSourceRawBoundaryHCompatiblePairsBool = true := by
   native_decide
 
+set_option linter.style.nativeDecide false in
+-- Native evaluation keeps this finite diagnostic from expanding a large
+-- reflected pair search into a kernel proof term.
 /--
 The over-strong source/raw-boundary board diagnostic has no vertical two-cell
 witness in the current Figure 13/Figure 16 transcription.
