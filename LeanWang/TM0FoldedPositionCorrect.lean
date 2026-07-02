@@ -218,7 +218,9 @@ theorem FoldedConfigRel_position_runEmpty_two (tc : Turing.ToPartrec.Code) :
   rw [positionProgramData_runEmpty_two]
   refine ⟨FoldSide.right, ?_, ?_, ?_⟩
   · simpa [Turing.TM0.init] using default_mem_partrecStartedTM0LabelList tc
-  · simp [foldedSimStartState, Turing.TM0.init]
+  · simp [foldedSimStartState, foldedSimStartStateCode, foldedSimStateCode,
+      foldedSimStateOfCode, TM0Route.partrecStartedTM0Start,
+      TM0FiniteCompiler.stateCode_default tc, Turing.TM0.init]
   · exact FoldedTapeRel_init_right_zero tc
 
 theorem positionProgramData_haltsEmpty_of_tm0_eval_dom

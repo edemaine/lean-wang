@@ -21,6 +21,8 @@ namespace LeanWang
 
 namespace TM0FoldedReduction
 
+open Nat.Partrec (Code)
+
 /--
 Generated-position source obligations from only the source-level computability
 proof, using the semantic correctness theorem for `positionProgramData`.
@@ -92,6 +94,7 @@ def positionSourceObligationsOfPositionCodeInteriorRowsCorrect
   positionSourceObligationsOfPositionCodeInteriorRows hinterior
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
+set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from a scaffold and the generated interior
 position-code rows, with `positionProgramData` semantic correctness discharged.
@@ -192,6 +195,7 @@ theorem domino_problem_undecidable_of_scaffold_position_source_positionCodeInter
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
 
+set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from a flexibly certified presented
 Ollinger/Robinson scaffold and the generated interior position-code rows, with
@@ -205,6 +209,7 @@ theorem encoded_domino_problem_undecidable_of_presented_flexible_position_source
   encoded_domino_problem_undecidable_of_presented_flexible_position_source
     I (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
 
+set_option linter.style.longLine false in
 /--
 Unencoded domino undecidability from a flexibly certified presented
 Ollinger/Robinson scaffold and the generated interior position-code rows, with
@@ -218,6 +223,7 @@ theorem domino_problem_undecidable_of_presented_flexible_position_source_positio
   domino_problem_undecidable_of_presented_flexible_position_source
     I (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
 
+set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from a checked flexible finite scaffold
 transcription and the generated interior position-code rows, with
@@ -231,6 +237,7 @@ theorem encoded_domino_problem_undecidable_of_checked_transcription_position_sou
   encoded_domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
     D.toPresentedFlexibleInstance hinterior
 
+set_option linter.style.longLine false in
 /--
 Unencoded domino undecidability from a checked flexible finite scaffold
 transcription and the generated interior position-code rows, with
