@@ -29,6 +29,7 @@ namespace LeanWang
 
 open Nat.Partrec (Code)
 open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData
+open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 set_option linter.style.longLine false in
 /--
@@ -47,6 +48,31 @@ generated position-code accumulator step by specializing to `fuel = 1`.
 -/
 abbrev GlobalPositionCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
+Scaffold-side target for the first audited L2-blank candidate: Section 7
+board/free-line active-corner recognition.
+-/
+abbrev L2C1Section7BoardFreeLineActiveCorner : Prop :=
+  TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+    l2Component1Figure18ScaffoldData
+
+/--
+Narrower scaffold-side target for the first audited L2-blank candidate:
+active/corner recognition at Robinson's canonical free crossings.  This is
+equivalent to `L2C1Section7BoardFreeLineActiveCorner`, but usually closer to
+the local recognizability proof.
+-/
+abbrev L2C1Section7CanonicalActiveCorner : Prop :=
+  TM0FoldedReduction.Section7CanonicalFreeSiteRectActiveCornerInvariant
+    l2Component1Figure18ScaffoldData
+
+/--
+Raw Figure 13 board-level square-tiling target at the positive Robinson board
+sizes used by the Section 7 construction.
+-/
+abbrev Figure13PositiveBoardLevelTileableSquares : Prop :=
+  TM0FoldedReduction.Figure13PositiveBoardLevelTileableSquares
 
 /-- The global position-code label-index target implies the decoder-step target. -/
 theorem sourceDecoderStepPrimrec_of_globalLabelIndex
@@ -201,6 +227,63 @@ structure FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations : Pr
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
+Paper-facing Section 7 final obligations split into the two geometric facts
+that Robinson's construction naturally proves: board/free-line active-corner
+recognition and positive board-level raw Figure 13 squares.
+-/
+structure FinalSection7BoardLevelConstructionObligations : Prop where
+  boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Board-level Section 7 obligations with the narrower decoder-step source target.
+-/
+structure FinalSection7BoardLevelDecoderStepConstructionObligations : Prop where
+  boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Board-level Section 7 obligations with the global position-code label-index
+source target.
+-/
+structure FinalSection7BoardLevelGlobalPositionCodeConstructionObligations : Prop where
+  boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
+Most local scaffold-facing Section 7 final obligations: active/corner
+recognition only at canonical free crossings plus positive board-level raw
+Figure 13 squares.
+-/
+structure FinalSection7ActiveCornerBoardLevelConstructionObligations : Prop where
+  activeCorner : L2C1Section7CanonicalActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Canonical-active-corner board-level obligations with the narrower decoder-step
+source target.
+-/
+structure FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations :
+    Prop where
+  activeCorner : L2C1Section7CanonicalActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Canonical-active-corner board-level obligations with the global position-code
+label-index source target.
+-/
+structure FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations :
+    Prop where
+  activeCorner : L2C1Section7CanonicalActiveCorner
+  positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
 Raw-boundary diagnostic variant of the remaining proof obligations.
 
 This route is useful for testing finite Figure 13/Figure 16 data plumbing, but
@@ -292,6 +375,134 @@ def ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
     (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
   ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+set_option maxHeartbeats 800000 in
+-- This constructor unfolds the Section 7 board-level bridge into finite
+-- layer-patch data, which is large but still a one-time endpoint conversion.
+/--
+Build the final inputs from Section 7 board/free-line active-corner recognition,
+positive board-level raw Figure 13 square tilings, and source obligations.
+-/
+def ofSection7BoardLevelSource
+    (boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+        boardFreeLineActiveCorner positiveBoardLevels))
+    source
+
+/--
+Build the final inputs from Section 7 board/free-line active-corner recognition,
+positive board-level raw Figure 13 square tilings, and generated interior
+position-code rows.
+-/
+def ofSection7BoardLevel
+    (boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofSection7BoardLevelSource
+    boardFreeLineActiveCorner positiveBoardLevels
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from Section 7 board/free-line active-corner recognition,
+positive board-level raw Figure 13 square tilings, and the primitive recursive
+generated position-code accumulator step.
+-/
+def ofSection7BoardLevelDecoderStep
+    (boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofSection7BoardLevelSource
+    boardFreeLineActiveCorner positiveBoardLevels
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from Section 7 board/free-line active-corner recognition,
+positive board-level raw Figure 13 square tilings, and the global primitive
+recursive position-code label-index decoder.
+-/
+def ofSection7BoardLevelGlobalPositionCodeLabelIndexFrom
+    (boardFreeLineActiveCorner : L2C1Section7BoardFreeLineActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofSection7BoardLevelSource
+    boardFreeLineActiveCorner positiveBoardLevels
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from canonical free-crossing active/corner recognition,
+positive board-level raw Figure 13 square tilings, and source obligations.
+-/
+def ofSection7ActiveCornerBoardLevelSource
+    (activeCorner : L2C1Section7CanonicalActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofSection7BoardLevelSource
+    (TM0FoldedReduction.section7BoardFreeLineActiveCorner_of_activeCorner
+      activeCorner)
+    positiveBoardLevels source
+
+/--
+Build the final inputs from canonical free-crossing active/corner recognition,
+positive board-level raw Figure 13 square tilings, and generated interior
+position-code rows.
+-/
+def ofSection7ActiveCornerBoardLevel
+    (activeCorner : L2C1Section7CanonicalActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofSection7ActiveCornerBoardLevelSource
+    activeCorner positiveBoardLevels
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from canonical free-crossing active/corner recognition,
+positive board-level raw Figure 13 square tilings, and the primitive recursive
+generated position-code accumulator step.
+-/
+def ofSection7ActiveCornerBoardLevelDecoderStep
+    (activeCorner : L2C1Section7CanonicalActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofSection7ActiveCornerBoardLevelSource
+    activeCorner positiveBoardLevels
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from canonical free-crossing active/corner recognition,
+positive board-level raw Figure 13 square tilings, and the global primitive
+recursive position-code label-index decoder.
+-/
+def ofSection7ActiveCornerBoardLevelGlobalPositionCodeLabelIndexFrom
+    (activeCorner : L2C1Section7CanonicalActiveCorner)
+    (positiveBoardLevels : Figure13PositiveBoardLevelTileableSquares)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofSection7ActiveCornerBoardLevelSource
+    activeCorner positiveBoardLevels
     (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
       hindex)
 
@@ -1091,6 +1302,103 @@ theorem domino_problem_undecidable
 
 end FinalSection7PositiveBoxConstructionObligations
 
+namespace FinalSection7BoardLevelDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the board-level Section 7 decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7BoardLevelDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7BoardLevelDecoderStep
+    h.boardFreeLineActiveCorner h.positiveBoardLevels h.decoderStep
+
+end FinalSection7BoardLevelDecoderStepConstructionObligations
+
+namespace FinalSection7BoardLevelGlobalPositionCodeConstructionObligations
+
+/--
+Convert the board-level Section 7 global-label-index package into the
+decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7BoardLevelGlobalPositionCodeConstructionObligations) :
+    FinalSection7BoardLevelDecoderStepConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  positiveBoardLevels := h.positiveBoardLevels
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the board-level Section 7 global-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7BoardLevelGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7BoardLevelGlobalPositionCodeLabelIndexFrom
+    h.boardFreeLineActiveCorner h.positiveBoardLevels h.labelIndex
+
+end FinalSection7BoardLevelGlobalPositionCodeConstructionObligations
+
+namespace FinalSection7BoardLevelConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the board-level Section 7 package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7BoardLevelConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7BoardLevel
+    h.boardFreeLineActiveCorner h.positiveBoardLevels h.sourceRows
+
+end FinalSection7BoardLevelConstructionObligations
+
+namespace FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the canonical-active-corner board-level decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7ActiveCornerBoardLevelDecoderStep
+    h.activeCorner h.positiveBoardLevels h.decoderStep
+
+end FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations
+
+namespace FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations
+
+/--
+Convert the canonical-active-corner board-level global-label-index package into
+the decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations) :
+    FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations where
+  activeCorner := h.activeCorner
+  positiveBoardLevels := h.positiveBoardLevels
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the canonical-active-corner board-level global-label-index package into
+the endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7ActiveCornerBoardLevelGlobalPositionCodeLabelIndexFrom
+    h.activeCorner h.positiveBoardLevels h.labelIndex
+
+end FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations
+
+namespace FinalSection7ActiveCornerBoardLevelConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the canonical-active-corner board-level package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7ActiveCornerBoardLevelConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7ActiveCornerBoardLevel
+    h.activeCorner h.positiveBoardLevels h.sourceRows
+
+end FinalSection7ActiveCornerBoardLevelConstructionObligations
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -1325,6 +1633,125 @@ global-label-index construction obligations.
 -/
 theorem domino_problem_undecidable_of_section7PositiveBoxGlobalPositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board/free-line active-corner
+recognition plus positive board-level raw Figure 13 squares.
+-/
+theorem encoded_domino_problem_undecidable_of_section7BoardLevelConstructionObligations
+    (h : FinalSection7BoardLevelConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board/free-line active-corner
+recognition plus positive board-level raw Figure 13 squares.
+-/
+theorem domino_problem_undecidable_of_section7BoardLevelConstructionObligations
+    (h : FinalSection7BoardLevelConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board-level decoder-step
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7BoardLevelDecoderStepConstructionObligations
+    (h : FinalSection7BoardLevelDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board-level decoder-step obligations.
+-/
+theorem domino_problem_undecidable_of_section7BoardLevelDecoderStepConstructionObligations
+    (h : FinalSection7BoardLevelDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board-level global-label-index
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7BoardLevelGlobalPositionCodeConstructionObligations
+    (h : FinalSection7BoardLevelGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board-level global-label-index
+obligations.
+-/
+theorem domino_problem_undecidable_of_section7BoardLevelGlobalPositionCodeConstructionObligations
+    (h : FinalSection7BoardLevelGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-crossing active/corner
+recognition plus positive board-level raw Figure 13 squares.
+-/
+theorem encoded_domino_problem_undecidable_of_section7ActiveCornerBoardLevelConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-crossing active/corner
+recognition plus positive board-level raw Figure 13 squares.
+-/
+theorem domino_problem_undecidable_of_section7ActiveCornerBoardLevelConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical-active-corner board-level
+decoder-step obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7ActiveCornerBoardLevelDecoderStepConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical-active-corner board-level decoder-step
+obligations.
+-/
+theorem domino_problem_undecidable_of_section7ActiveCornerBoardLevelDecoderStepConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical-active-corner board-level
+global-label-index obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical-active-corner board-level
+global-label-index obligations.
+-/
+theorem domino_problem_undecidable_of_section7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations
+    (h : FinalSection7ActiveCornerBoardLevelGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
