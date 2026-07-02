@@ -3753,6 +3753,25 @@ theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositio
   sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
     (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_from hindex)
 
+set_option linter.style.longLine false in
+/--
+The global position-code label-index decoder gives computability of the
+source-specialized generated position-coded folded program.
+-/
+theorem sourcePositionProgramData_computable_of_globalPositionCodeLabelIndexFrom
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global hindex)
+
+set_option linter.style.longLine false in
+theorem sourcePositionProgramData_computable_of_globalPositionCodeLabelIndexFrom'
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)) :=
+  (sourcePositionProgramData_computable_of_globalPositionCodeLabelIndexFrom hindex).of_eq
+    fun _ => rfl
+
 /--
 Primitive recursiveness of the source-level canonical numeric-state decoder is
 enough for computability of the normalized folded finite-TM0 program data.
@@ -4705,7 +4724,7 @@ def positionSourceObligationsOfPositionCodeDecoderStep
 set_option linter.style.longLine false in
 /--
 Primitive recursiveness of the global position-code label-index decoder gives
-the generated-position source obligations via the accumulator-step route.
+the generated-position source obligations directly.
 -/
 def positionSourceObligationsOfGlobalPositionCodeLabelIndexFrom
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec)
@@ -4715,9 +4734,8 @@ def positionSourceObligationsOfGlobalPositionCodeLabelIndexFrom
           (TM0Route.partrecStartedTM0Machine tc)
           TM0Route.partrecStartedTM0Input).Dom) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeDecoderStep
-    (sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
-      hindex)
+  positionSourceObligationsOfLabelIndexFromWithPositionCode
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global hindex)
     hcorrect
 
 /--
