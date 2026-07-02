@@ -2600,10 +2600,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig1
     (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
-      originZeroWindows fig16 hindex)
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_sourceCodeCorrect
+      originZeroWindows fig16 hindex
 
 set_option linter.style.longLine false in
 /--
@@ -2615,10 +2615,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDa
     (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
-      originZeroWindows fig16 hindex)
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_sourceCodeCorrect
+      originZeroWindows fig16 hindex
 
 set_option linter.style.longLine false in
 /--
