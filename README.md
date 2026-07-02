@@ -105,7 +105,14 @@ The corresponding packaged-source aliases
 `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
 and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
 use `TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup` as
-the source-side input.
+the source-side input.  The same final surface is also exposed through the
+lower-level decoder-step aliases
+`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`
+and
+`domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`,
+whose source-side input is primitive recursiveness of the global generated
+position-code accumulator step
+`TM0FoldedReduction.sourcePositionCodeDecoderStep`.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

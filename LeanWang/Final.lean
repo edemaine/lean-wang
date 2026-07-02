@@ -27,6 +27,8 @@ noncomputable section
 
 namespace LeanWang
 
+open Nat.Partrec (Code)
+
 /--
 The two remaining construction interfaces for the current preferred route to
 the domino problem.
@@ -144,6 +146,23 @@ def ofScaffoldAndSourceRows
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and the primitive
+recursive generated position-code accumulator step.  This is a lower-level
+source route than `ofScaffoldAndSourceRows`: it asks only for the global
+decoder step, then uses the semantic folded-position proof to package the
+source obligations.
+-/
+def ofScaffoldAndSourceDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
 
 set_option linter.style.longLine false in
 /--
@@ -329,6 +348,23 @@ def ofCheckedStacksAndCompatibleFig16LevelDataPackage
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
       sourceRows
       TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the primitive recursive generated
+position-code accumulator step.
+-/
+def ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    FinalReductionInputs :=
+  ofCheckedStacksAndCompatibleFig16LevelDataSource
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
 
 set_option linter.style.longLine false in
 /--
@@ -762,6 +798,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourcePackage
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the primitive recursive generated
+position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the primitive recursive generated
+position-code accumulator step.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the checked-stack/layer-patch finite
 scaffold certificate and generated-position source obligations.
 -/
@@ -1005,6 +1069,38 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPa
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataPackage
       checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, row-major
+checked compatible Figure 16 level data, and the primitive recursive generated
+position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
+      checkedStacks fig16 hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the primitive recursive generated
+position-code accumulator step.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
+      checkedStacks fig16 hstep)
 
 set_option linter.style.longLine false in
 /--
