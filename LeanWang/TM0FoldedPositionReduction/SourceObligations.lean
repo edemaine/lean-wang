@@ -46,6 +46,18 @@ def positionSourceObligationsOfLabelIndexFromWithPositionCodeCorrect
   positionSourceObligationsOfLabelIndexFromWithPositionCode hindex
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the source-specialized position-code label-index
+decoder gives the full generated-position source obligations once the semantic
+folded proof is imported.
+-/
+def positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFrom hindex
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
 /--
 Primitive recursiveness of the generated position-code accumulator step gives
 the full generated-position source obligations once the semantic folded proof

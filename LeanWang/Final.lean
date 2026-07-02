@@ -48,11 +48,35 @@ generated position-code accumulator step by specializing to `fuel = 1`.
 abbrev GlobalPositionCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec
 
+/--
+Source-specialized primitive-recursion target for the generated position-code
+label-index decoder.  This is weaker than
+`GlobalPositionCodeLabelIndexFromPrimrec`, because the final reduction only
+needs codes of the form `NatPartrecToToPartrec.translate c`.
+-/
+abbrev SourcePositionCodeLabelIndexFromPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec
+
 /-- The global position-code label-index target implies the decoder-step target. -/
 theorem sourceDecoderStepPrimrec_of_globalLabelIndex
     (h : GlobalPositionCodeLabelIndexFromPrimrec) :
     SourcePositionCodeDecoderStepPrimrec :=
   TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    h
+
+set_option linter.style.longLine false in
+/-- The global position-code label-index target implies the source-specialized target. -/
+theorem sourceLabelIndexPrimrec_of_globalLabelIndex
+    (h : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    h
+
+/-- The source-specialized label-index target implies the decoder-step target. -/
+theorem sourceDecoderStepPrimrec_of_sourceLabelIndex
+    (h : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFromPrimrec
     h
 
 /--
@@ -184,6 +208,18 @@ structure FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations :
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
+Weakest source-facing variant of the current finite-scaffold proof frontier.
+
+Compared with
+`FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations`, this
+asks only for the position-code label-index decoder on translated
+`Nat.Partrec.Code` inputs.
+-/
+structure FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
@@ -309,6 +345,19 @@ def ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs directly from the scaffold package and the
+source-specialized position-code label-index decoder target.
+-/
+def ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs directly from the scaffold package and the packaged
 generated interior position-code decoder.
 
@@ -410,6 +459,21 @@ def ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
   ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+def ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
       scaffold)
     hindex
@@ -946,6 +1010,17 @@ namespace FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Forget the global decoder target to the source-specialized decoder target used
+by the current final route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Convert the concrete checked-stack/layer-patch global-label-index package into
 the endpoint.
 -/
@@ -956,6 +1031,21 @@ def toFinalReductionInputs
     h.scaffold h.labelIndex
 
 end FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+
+namespace FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the concrete checked-stack/layer-patch source-label-index package into
+the endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
 
 namespace FinalCheckedConstructionObligations
 
@@ -1358,6 +1448,28 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchGlobalPositionCodeCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
@@ -1557,6 +1669,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIn
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the checked-stack/layer-patch finite
 scaffold certificate and generated-position source obligations.
 -/
@@ -1654,6 +1794,33 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and the source-specialized position-code label-index
+target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and the source-specialized position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
       scaffold hindex)
 
 set_option linter.style.longLine false in

@@ -2426,6 +2426,17 @@ abbrev GlobalPositionCodeLabelIndexFromPrimrec : Prop :=
     TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
       p.1 p.2.1 p.2.2.1 p.2.2.2)
 
+set_option linter.style.longLine false in
+/--
+Primitive-recursion target for the source-specialized position-code label-index
+decoder.  This is weaker than `GlobalPositionCodeLabelIndexFromPrimrec`: the
+final reduction only needs the decoder after translating `Nat.Partrec.Code`
+into Mathlib's `Turing.ToPartrec.Code`.
+-/
+abbrev SourcePositionCodeLabelIndexFromPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat × Nat =>
+    sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)
+
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
@@ -3118,6 +3129,16 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global
 
 set_option linter.style.longLine false in
 /--
+The global position-code label-index decoder target implies the source-specific
+target by precomposing with `NatPartrecToToPartrec.translate`.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global hindex
+
+set_option linter.style.longLine false in
+/--
 The global position-code label-index decoder target implies the generated
 source-code accumulator-step target used by the preferred final route.
 -/
@@ -3136,6 +3157,16 @@ theorem sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFrom
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     SourcePositionCodeDecoderStepPrimrec :=
   sourcePositionCodeDecoderStep_primrec_of_global_labelIndexFromWithPositionCode hindex
+
+set_option linter.style.longLine false in
+/--
+The source-specific position-code label-index decoder target implies the
+generated source-code accumulator-step target used by the final route.
+-/
+theorem sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFromPrimrec
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeDecoderStep_primrec_of_labelIndexFromWithPositionCode hindex
 
 theorem sourceLabelAtByStatementFromWithPositionCode_code_mem_states
     {c : Code} {fuel k i : Nat}
@@ -4703,6 +4734,21 @@ def positionSourceObligationsOfLabelIndexFromWithPositionCode
     ((sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
       hindex).of_eq fun _ => rfl)
     hcorrect
+
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the source-specialized position-code label-index
+decoder gives the generated-position source obligations directly.
+-/
+def positionSourceObligationsOfSourcePositionCodeLabelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfLabelIndexFromWithPositionCode hindex hcorrect
 
 /--
 Primitive recursiveness of the generated position-code accumulator step gives
