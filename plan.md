@@ -769,11 +769,12 @@ that single package to the final Section 7 reduction.
 
 The current public final surface follows the proof-facing board/free-line
 route: `FinalReductionInputs` asks for `L2C1OriginZeroCheckedStacks`,
-`Figure18CanonicalRawBoundaryBoardLevelChecks`, and
-`SourcePositionCodeInteriorRowsPrimrec`.  The board-level raw-boundary checks
-are the concrete scaffold target to instantiate next; the direct
-`Figure18CanonicalRawBoundaryCheckedLevelData` source/raw-boundary target is
-kept only as a diagnostic surface.
+`Figure13PositiveBoardLevelChecked`, and
+`SourcePositionCodeInteriorRowsPrimrec`.  The exact positive board-level raw
+Figure 13 checks are the concrete scaffold target to instantiate next; the
+direct `Figure18CanonicalRawBoundaryCheckedLevelData` and
+`Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
+kept only as diagnostic surfaces.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 

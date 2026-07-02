@@ -73,8 +73,8 @@ construction interfaces:
   folded TM0 reduction.
 - `TM0FoldedReduction.L2C1OriginZeroCheckedStacks`: the checked finite
   origin-zero stack certificate for the first audited L2 candidate.
-- `TM0FoldedReduction.Figure18CanonicalRawBoundaryBoardLevelChecks`: shifted
-  Robinson board/free-line raw-boundary finite checks. This is the proof-facing
+- `TM0FoldedReduction.Figure13PositiveBoardLevelChecked`: exact positive
+  Robinson board-level raw Figure 13 finite checks. This is the proof-facing
   scaffold surface; the over-strong Figure 16 source/raw-boundary diagnostic has
   no adjacent two-cell witnesses in the current transcription.
 
