@@ -27,3 +27,4 @@ import LeanWang.TM0FoldedTranscriptionReduction
 import LeanWang.TM0FoldedPositionReduction
 import LeanWang.OllingerRobinsonFigure18Reduction
 import LeanWang.OllingerRobinsonFigure18PositionReduction
+import LeanWang.Final

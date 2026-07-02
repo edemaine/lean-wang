@@ -52,7 +52,10 @@ and [`robinson.txt`](robinson.txt).
   finite one-sided TM0 reduction. The folded program stores the two sides of
   Mathlib's TM0 tape in one local tape cell and proves the semantic halting
   equivalence.
-- `LeanWang.Theorems`: the main theorem surface and remaining proof obligations.
+- `LeanWang.Theorems`: generic scaffold and machine-tiling theorem surfaces.
+- `LeanWang.Final`: the current top-level undecidability theorem surface,
+  conditional on the two remaining construction interfaces bundled as
+  `FinalReductionInputs`.
 
 Current build:
 
@@ -62,17 +65,14 @@ lake build
 
 The build succeeds.
 
-The main theorem surface is currently conditional on two construction
-interfaces, plus the scaffold construction:
+The main theorem surface in `LeanWang.Final` is currently conditional on two
+construction interfaces:
 
-- `TM0FiniteCompiler`: the preferred machine-side route. It reduces Mathlib's
-  code-specific started TM0 evaluator to finite one-sided TM0 program data.
-- `PostProgram.toTableProgram`: a temporary backend bridge from finite
-  one-sided TM0 programs to the existing table-machine Wang-tile layer. This
-  should be replaced by direct finite-TM0 tiles later; it starts only after the
-  Mathlib machine has already been reduced to finite one-sided TM0 data.
-- `IsScaffold`: prove a concrete scaffold converts fixed-corner finite-square
-  instances to ordinary plane tiling.
+- `TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup`:
+  the source-uniform generated position-code decoder package for the folded TM0
+  reduction.
+- `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`: the checked finite
+  Ollinger/Robinson scaffold package for the preferred Section 7 route.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The
