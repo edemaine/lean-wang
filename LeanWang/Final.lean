@@ -372,6 +372,36 @@ def ofCheckedStackLayerPatchData
       scaffold)
     sourceRows
 
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and the primitive recursive generated position-code accumulator
+step.
+-/
+def ofCheckedStackLayerPatchDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and the global primitive recursive position-code label-index
+decoder.
+-/
+def ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
 /--
 Build the final inputs from checked origin-zero stacks plus compatible Figure
 16 macro-squares.  The Figure 16 certificate supplies the active-corner layer
@@ -1514,6 +1544,59 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchData
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and the generated position-code decoder-step target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
+      scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and the generated position-code decoder-step target.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
+      scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and the global position-code label-index target.
+-/
+theorem
+    encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
 
 set_option linter.style.longLine false in
 /--
