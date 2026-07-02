@@ -17536,6 +17536,38 @@ def l2c2SignalTowerOfOriginZeroCheckedStacks
     (l2c2OriginZeroWindowsOfCheckedStacks hchecked)
 
 /--
+Origin-zero active/corner windows supply compatible routed free grids for the
+first audited L2-blank candidate.
+-/
+def l2c1CompatibleRoutedFreeGridsOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+      (l2c1SignalTowerOfOriginZeroWindows originZeroWindows))
+
+/--
+Origin-zero active/corner windows supply compatible routed free grids for the
+second audited L2-blank candidate.
+-/
+def l2c2CompatibleRoutedFreeGridsOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+      (l2c2SignalTowerOfOriginZeroWindows originZeroWindows))
+
+/--
 Finite origin-zero checked layer stacks give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
 -/
@@ -23560,6 +23592,38 @@ def l2c2SignalTowerCanonicalCheckedCompatibleFig16LevelDataObligations
     htower
     (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
       hlevel)
+
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+supply the first compatible-level Robinson Section 7 obligation package.
+-/
+def l2c1OriginZeroCanonicalCheckedCompatibleFig16LevelDataObligations
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (l2c1CompatibleRoutedFreeGridsOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+supply the second compatible-level Robinson Section 7 obligation package.
+-/
+def l2c2OriginZeroCanonicalCheckedCompatibleFig16LevelDataObligations
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (l2c2CompatibleRoutedFreeGridsOfOriginZeroWindows originZeroWindows)
+    hlevel
 
 def l2c1CheckedCompatibleFig16IsolatedBoxes
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
