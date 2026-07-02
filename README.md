@@ -77,25 +77,29 @@ lake build LeanWang.TM0FoldedPositionReduction
 ```
 
 The main theorem surface in `LeanWang.Final` is currently conditional on the
-scaffold construction plus a source construction interface.  The weakest
-source-facing package for the current checked-stack/layer-patch route is
-`FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations`, whose
-fields are:
+scaffold construction plus a source construction interface.  The preferred
+split-obligation source-facing package is
+`FinalSourcePositionCodeConstructionObligations`, whose fields are:
 
-- `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`: the finite
-  checked-stack/layer-patch certificate for the first audited L2 candidate.
+- `TM0FoldedReduction.L2C1OriginZeroWindows`: the geometric origin-zero
+  active/corner window invariant for the first audited L2 candidate.
+- `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`:
+  the row-major checked Figure 16 level data that supplies the finite
+  active-corner layer patches.
 - `SourcePositionCodeLabelIndexFromPrimrec`: primitive recursiveness of the
   position-code label-index decoder after specializing to translated
   `Nat.Partrec.Code` inputs.  This source-specialized target implies the
   generated position-code accumulator step
   `TM0FoldedReduction.sourcePositionCodeDecoderStep`.
 
-The broader split-obligation route is still exposed as
-`FinalGlobalPositionCodeConstructionObligations`, whose scaffold fields are the
-geometric origin-zero active/corner window invariant
-`TM0FoldedReduction.L2C1OriginZeroWindows` and the row-major checked Figure 16
-level data
-`TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+For the finite checked-stack/layer-patch route, the same source target is
+exposed as
+`FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations`; its
+scaffold field is the concrete finite certificate
+`TM0FoldedReduction.L2C1CheckedStackLayerPatchData`.
+
+The broader global-label-index split route remains available as
+`FinalGlobalPositionCodeConstructionObligations`.
 
 The still lower-level `FinalReductionInputs` endpoint consists of:
 
