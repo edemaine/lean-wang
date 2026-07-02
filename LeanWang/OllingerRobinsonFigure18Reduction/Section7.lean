@@ -971,6 +971,26 @@ abbrev L2C2CanonicalFreeSiteRectRouting : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Origin-zero active/corner windows give canonical free-site-rectangle routing
+for the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1CanonicalFreeSiteRectRouting :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give canonical free-site-rectangle routing
+for the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2CanonicalFreeSiteRectRouting :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    originZeroWindows
+
+/--
 Finite active-corner layer patches for the first audited L2-blank candidate.
 -/
 abbrev L2C1ActiveCornerLayerPatches : Prop :=

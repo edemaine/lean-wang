@@ -1046,6 +1046,20 @@ def toSection7PositiveBoxSourcePositionCodeConstructionObligations
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
+/--
+Convert the origin-zero/checked-Figure-16 source-specialized package into the
+free-site-rectangle source-specialized package.
+-/
+def toFreeSiteRectSourcePositionCodeConstructionObligations
+    (h : FinalSourcePositionCodeConstructionObligations) :
+    FinalFreeSiteRectSourcePositionCodeConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+      h.originZeroWindows
+  fig16 := h.fig16
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
 /-- Convert the source-specialized label-index final obligation package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalSourcePositionCodeConstructionObligations) :
@@ -1058,20 +1072,24 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  let hfree := h.toFreeSiteRectSourcePositionCodeConstructionObligations
   exact
     TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
-      h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
-      h.labelIndex
+      (section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelData
+        hfree.routing hfree.fig16)
+      hfree.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from origin-zero windows, checked Figure 16 level data, and source-specialized label-index data. -/
 theorem domino_problem_undecidable
     (h : FinalSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  let hfree := h.toFreeSiteRectSourcePositionCodeConstructionObligations
   exact
     TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
-      h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
-      h.labelIndex
+      (section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelData
+        hfree.routing hfree.fig16)
+      hfree.labelIndex
 
 end FinalSourcePositionCodeConstructionObligations
 
