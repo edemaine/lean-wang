@@ -27,6 +27,8 @@ open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 namespace TM0FoldedReduction
 
+set_option linter.style.longLine false
+
 /--
 Encoded domino undecidability from the first audited L2-blank Figure 18
 candidate, fixed Robinson Section 7 obstruction-geometry routing,
