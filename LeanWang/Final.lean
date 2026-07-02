@@ -40,6 +40,21 @@ abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeDecoderStepPrimrec
 
 /--
+Source-side primitive-recursion target for the global position-code label-index
+decoder.  This is the current cleanest source-facing target: it implies the
+generated position-code accumulator step by specializing to `fuel = 1`.
+-/
+abbrev GlobalPositionCodeLabelIndexFromPrimrec : Prop :=
+  TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec
+
+/-- The global position-code label-index target implies the decoder-step target. -/
+theorem sourceDecoderStepPrimrec_of_globalLabelIndex
+    (h : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    h
+
+/--
 The two remaining construction interfaces for the current preferred route to
 the domino problem.
 
@@ -82,6 +97,17 @@ structure FinalDecoderStepConstructionObligations : Prop where
   decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 /--
+Preferred source-facing variant using the global position-code label-index
+decoder.  This is slightly closer to the generated folded-program construction
+than `FinalDecoderStepConstructionObligations`; the decoder step is derived
+uniformly from this label-index decoder.
+-/
+structure FinalGlobalPositionCodeConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
 Finite-check-facing variant of the preferred remaining proof obligations.
 
 The checked stack field is a finite transcription target for the audited first
@@ -107,6 +133,16 @@ structure FinalCheckedDecoderStepConstructionObligations : Prop where
   decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 /--
+Finite-check-facing variant with the global position-code label-index source
+target.  The checked scaffold fields remain concrete finite targets; the
+source field is the uniform generated label-index decoder.
+-/
+structure FinalCheckedGlobalPositionCodeConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
@@ -126,6 +162,14 @@ decoder-step source target.
 structure FinalSection7PositiveBoxDecoderStepConstructionObligations : Prop where
   section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
   decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Paper-facing Section 7 board/free-line obligations with the global
+position-code label-index source target.
+-/
+structure FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
 Raw-boundary diagnostic variant of the remaining proof obligations.
@@ -426,6 +470,22 @@ def ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the global primitive recursive
+position-code label-index decoder.
+-/
+def ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStacksAndCompatibleFig16LevelDataSource
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from origin-zero active/corner windows plus row-major
 checked compatible Figure 16 level data.
 -/
@@ -471,6 +531,22 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
     originZeroWindows fig16
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the global primitive recursive
+position-code label-index decoder.
+-/
+def ofOriginZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+    originZeroWindows fig16
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -596,6 +672,29 @@ def toFinalReductionInputs
 
 end FinalDecoderStepConstructionObligations
 
+namespace FinalGlobalPositionCodeConstructionObligations
+
+/--
+Convert the global-label-index final obligation package into the decoder-step
+obligation package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalGlobalPositionCodeConstructionObligations) :
+    FinalDecoderStepConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  fig16 := h.fig16
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the global-label-index final obligation package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    h.originZeroWindows h.fig16 h.labelIndex
+
+end FinalGlobalPositionCodeConstructionObligations
+
 namespace FinalConstructionObligations
 
 /-- Convert the preferred final obligation package into the low-level endpoint. -/
@@ -629,6 +728,41 @@ def toFinalReductionInputs
     h.checkedStacks h.fig16 h.decoderStep
 
 end FinalCheckedDecoderStepConstructionObligations
+
+namespace FinalCheckedGlobalPositionCodeConstructionObligations
+
+/--
+Convert the finite-check-facing global-label-index package into the
+window-based global-label-index obligation package.
+-/
+def toGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    FinalGlobalPositionCodeConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  fig16 := h.fig16
+  labelIndex := h.labelIndex
+
+/--
+Convert the finite-check-facing global-label-index package into the
+decoder-step package.
+-/
+def toCheckedDecoderStepConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    FinalCheckedDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 := h.fig16
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the finite-check-facing global-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    h.checkedStacks h.fig16 h.labelIndex
+
+end FinalCheckedGlobalPositionCodeConstructionObligations
 
 namespace FinalCheckedConstructionObligations
 
@@ -747,6 +881,29 @@ def toFinalReductionInputs
 
 end FinalSection7PositiveBoxDecoderStepConstructionObligations
 
+namespace FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations
+
+/--
+Convert the paper-facing Section 7 global-label-index package into the
+decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxDecoderStepConstructionObligations where
+  section7 := h.section7
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+/-- Convert the paper-facing Section 7 global-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.labelIndex
+
+end FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations
+
 namespace FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -802,6 +959,24 @@ theorem domino_problem_undecidable_of_decoderStepConstructionObligations
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
+/--
+Encoded Wang domino undecidability from the preferred global-label-index final
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_globalPositionCodeConstructionObligations
+    (h : FinalGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Wang domino undecidability from the preferred global-label-index final
+obligations.
+-/
+theorem domino_problem_undecidable_of_globalPositionCodeConstructionObligations
+    (h : FinalGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
 /-- Encoded Wang domino undecidability from the preferred final obligations. -/
 theorem encoded_domino_problem_undecidable_of_constructionObligations
     (h : FinalConstructionObligations) :
@@ -850,6 +1025,24 @@ theorem domino_problem_undecidable_of_checkedDecoderStepConstructionObligations
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
+/--
+Encoded Wang domino undecidability from the finite-check-facing
+global-label-index final obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Wang domino undecidability from the finite-check-facing global-label-index
+final obligations.
+-/
+theorem domino_problem_undecidable_of_checkedGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the paper-facing Section 7
@@ -887,6 +1080,26 @@ decoder-step construction obligations.
 -/
 theorem domino_problem_undecidable_of_section7PositiveBoxDecoderStepConstructionObligations
     (h : FinalSection7PositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line global-label-index construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+global-label-index construction obligations.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
@@ -1310,6 +1523,36 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDe
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from checked origin-zero stacks, row-major
+checked compatible Figure 16 level data, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+      checkedStacks fig16 hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+      checkedStacks fig16 hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, row-major
 checked compatible Figure 16 level data, and generated-position source
 obligations.
 -/
@@ -1509,6 +1752,36 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDa
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
       originZeroWindows fig16 hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+row-major checked compatible Figure 16 level data, and the global primitive
+recursive position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+      originZeroWindows fig16 hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+      originZeroWindows fig16 hindex)
 
 set_option linter.style.longLine false in
 /--

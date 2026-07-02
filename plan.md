@@ -529,14 +529,17 @@ Next implementation targets:
    The corresponding decoder-step construction packages
    `FinalDecoderStepConstructionObligations`,
    `FinalCheckedDecoderStepConstructionObligations`, and
-   `FinalSection7PositiveBoxDecoderStepConstructionObligations` are now the
-   preferred source-facing theorem surfaces: their source obligation is
+   `FinalSection7PositiveBoxDecoderStepConstructionObligations` expose the
+   intermediate source-facing theorem surface: their source obligation is
    `SourcePositionCodeDecoderStepPrimrec`, primitive recursiveness of
    `sourcePositionCodeDecoderStep`, rather than the stronger
    `SourcePositionCodeInteriorRowsPrimrec`.
-   The source side now also has a bridge from
-   `GlobalPositionCodeLabelIndexFromPrimrec` to
-   `SourcePositionCodeDecoderStepPrimrec`, by specializing the global
+   The preferred source-facing theorem surfaces are now
+   `FinalGlobalPositionCodeConstructionObligations`,
+   `FinalCheckedGlobalPositionCodeConstructionObligations`, and
+   `FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations`.
+   They use `GlobalPositionCodeLabelIndexFromPrimrec`, which is bridged to
+   `SourcePositionCodeDecoderStepPrimrec` by specializing the global
    position-code label-index decoder to `fuel = 1` on valid variable slots.
    This makes the remaining machine/source target closer to the actual
    generated folded-program decoder.
@@ -810,9 +813,12 @@ that single package to the final Section 7 reduction.
 The current public final surface follows the proof-facing board/free-line
 route: `FinalReductionInputs` asks for
 `L2C1RobinsonSection7BoardFreeLineLayerPatchData` and
-`SourcePositionCodeInteriorRowsPrimrec`.  The Section 7 layer-patch package is
-the proof-facing scaffold target.  `LeanWang.Final` also exposes wrappers from
-the more concrete finite transcription target
+`PositionSourceObligations`.  The preferred higher-level theorem packages ask
+for the same scaffold data plus `GlobalPositionCodeLabelIndexFromPrimrec`,
+which derives those source obligations through the generated position-code
+decoder-step bridge.  The Section 7 layer-patch package is the proof-facing
+scaffold target.  `LeanWang.Final` also exposes wrappers from the more concrete
+finite transcription target
 `L2C1CheckedStackLayerPatchData`, which packages checked origin-zero stacks
 with active-corner layer patches and constructs the Section 7 input.  The raw
 positive-board Figure 13 checks and the direct

@@ -79,15 +79,16 @@ lake build LeanWang.TM0FoldedPositionReduction
 The main theorem surface in `LeanWang.Final` is currently conditional on the
 scaffold construction plus a source construction interface.  The preferred
 source-facing final package is
-`FinalDecoderStepConstructionObligations`, whose fields are:
+`FinalGlobalPositionCodeConstructionObligations`, whose fields are:
 
 - `TM0FoldedReduction.L2C1OriginZeroWindows`: the geometric origin-zero
   active/corner window invariant for the first audited L2 candidate.
 - `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`:
   the row-major checked Figure 16 level data that supplies the finite
   active-corner layer patches.
-- `SourcePositionCodeDecoderStepPrimrec`: primitive recursiveness of the
-  global generated position-code accumulator step
+- `GlobalPositionCodeLabelIndexFromPrimrec`: primitive recursiveness of the
+  global position-code label-index decoder, which specializes to the generated
+  position-code accumulator step
   `TM0FoldedReduction.sourcePositionCodeDecoderStep`.
 
 The still lower-level `FinalReductionInputs` endpoint consists of:
@@ -99,14 +100,12 @@ The still lower-level `FinalReductionInputs` endpoint consists of:
 - `TM0FoldedReduction.PositionSourceObligations`: the generated-position source
   reduction obligations.
 
-The older row-based wrappers remain available through
-`FinalConstructionObligations` and
-`TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`, but they are a
-stronger source-side target than the decoder-step route.
-The decoder-step route can also be supplied by
-`TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec` via
-`TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec`;
-`LeanWang.Final` exposes this as
+The older row-based and decoder-step wrappers remain available through
+`FinalConstructionObligations`,
+`TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`, and
+`FinalDecoderStepConstructionObligations`, but they are less directly aligned
+with the generated folded-program decoder than the global label-index route.
+`LeanWang.Final` also exposes raw-scaffold aliases
 `encoded_domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`
 and
 `domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`.
@@ -136,12 +135,17 @@ and
 `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`,
 whose source-side input is primitive recursiveness of the global generated
 position-code accumulator step
-`TM0FoldedReduction.sourcePositionCodeDecoderStep`.  The corresponding
-origin-zero-window aliases
-`encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep`
+`TM0FoldedReduction.sourcePositionCodeDecoderStep`.  The preferred
+global-label-index aliases are
+`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
 and
-`domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep`
-combine the same decoder-step source target with the cleaner geometric
+`domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`.
+The corresponding
+origin-zero-window aliases
+`encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
+and
+`domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
+combine the same global label-index source target with the cleaner geometric
 origin-zero scaffold hypothesis.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
