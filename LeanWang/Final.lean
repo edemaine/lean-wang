@@ -172,6 +172,18 @@ structure FinalCheckedGlobalPositionCodeConstructionObligations : Prop where
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
+Lowest finite-scaffold-facing variant of the current proof frontier.
+
+The scaffold field is the concrete checked-stack/layer-patch package for the
+first audited L2 candidate.  Thus the remaining assumptions are exactly the
+finite Section 7 scaffold certificate and the source-uniform global
+position-code label-index decoder.
+-/
+structure FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
@@ -930,6 +942,21 @@ def toFinalReductionInputs
 
 end FinalCheckedGlobalPositionCodeConstructionObligations
 
+namespace FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the concrete checked-stack/layer-patch global-label-index package into
+the endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+
 namespace FinalCheckedConstructionObligations
 
 /--
@@ -1305,6 +1332,27 @@ final obligations.
 -/
 theorem domino_problem_undecidable_of_checkedGlobalPositionCodeConstructionObligations
     (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and the global primitive recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
