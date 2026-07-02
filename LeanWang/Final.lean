@@ -399,6 +399,23 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelData
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the primitive recursive generated
+position-code accumulator step.
+-/
+def ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+    originZeroWindows fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from origin-zero active/corner windows plus row-major
 checked raw-boundary Figure 16 level data.
 -/
@@ -1272,6 +1289,38 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDa
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
       originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+row-major checked compatible Figure 16 level data, and the primitive recursive
+generated position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+      originZeroWindows fig16 hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the primitive recursive generated
+position-code accumulator step.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+      originZeroWindows fig16 hstep)
 
 set_option linter.style.longLine false in
 /--

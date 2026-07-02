@@ -112,7 +112,13 @@ and
 `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`,
 whose source-side input is primitive recursiveness of the global generated
 position-code accumulator step
-`TM0FoldedReduction.sourcePositionCodeDecoderStep`.
+`TM0FoldedReduction.sourcePositionCodeDecoderStep`.  The corresponding
+origin-zero-window aliases
+`encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep`
+and
+`domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataDecoderStep`
+combine the same decoder-step source target with the cleaner geometric
+origin-zero scaffold hypothesis.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
