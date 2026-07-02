@@ -1842,6 +1842,70 @@ theorem
         hinterior)
 
 /--
+Encoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Encoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package and the source-specialized position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
 Encoded domino undecidability from the first origin-zero Section 7 layer-patch
 obligation surface, with `positionProgramData` semantic correctness
 discharged.
@@ -2060,6 +2124,66 @@ theorem
     domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
       data hinterior
       TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Encoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
+    (data : L2C1CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the first checked-stack/layer-patch finite
+scaffold package and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
+    (data : L2C1CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch finite
+scaffold package and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+      data
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
 
 /--
 Encoded domino undecidability from the first finite-check-facing Section 7
