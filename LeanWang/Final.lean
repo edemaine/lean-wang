@@ -979,6 +979,36 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from checked origin-zero stacks, row-major
+checked compatible Figure 16 level data, and the packaged generated interior
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataPackage
+      checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the packaged generated interior
+position-code decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataPackage
+      checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, row-major
 checked compatible Figure 16 level data, and generated-position source
 obligations.
 -/

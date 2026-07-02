@@ -101,6 +101,11 @@ The more finite Figure 16 route is exposed as
 `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
 and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`;
 there the Figure 16 compatibility certificate supplies the layer patches.
+The corresponding packaged-source aliases
+`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
+and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
+use `TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup` as
+the source-side input.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
