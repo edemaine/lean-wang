@@ -57,6 +57,25 @@ def ofScaffoldAndSourceRows
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       sourceRows)
 
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and the packaged
+generated interior position-code decoder.
+
+This is the proof-facing source route: the package carries the row generator
+and translated statement-list uniqueness, while
+`positionProgramData_haltsEmpty_iff_tm0_eval_dom` discharges semantic
+correctness against the Mathlib TM0 evaluator.
+-/
+def ofScaffoldAndSourcePackage
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+      sourceRows
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+
 /--
 Build the final inputs from the two split finite scaffold obligations for the
 first audited L2 candidate: checked origin-zero stacks and finite active-corner
@@ -237,6 +256,23 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelData
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       sourceRows)
 
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the packaged generated interior
+position-code decoder.
+-/
+def ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
+    originZeroWindows fig16
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+      sourceRows
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+
 end FinalReductionInputs
 
 set_option linter.style.longLine false in
@@ -254,6 +290,30 @@ theorem domino_problem_undecidable (h : FinalReductionInputs) :
   exact
     TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       h.scaffold h.source
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourcePackage
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePackage scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and packaged source decoder.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourcePackage
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePackage scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -526,6 +586,36 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDa
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelData
+      originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+row-major checked compatible Figure 16 level data, and the packaged generated
+interior position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataPackage
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
+      originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, row-major
+checked compatible Figure 16 level data, and the packaged generated interior
+position-code decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataPackage
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
       originZeroWindows fig16 sourceRows)
 
 set_option linter.style.longLine false in
