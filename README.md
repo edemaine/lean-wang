@@ -76,6 +76,12 @@ construction interfaces:
   active-corner recognition with finite active-corner layer patches for the
   first audited L2 candidate.
 
+`LeanWang.Final` also exposes
+`encoded_domino_problem_undecidable_of_checkedStackLayerPatchData` and
+`domino_problem_undecidable_of_checkedStackLayerPatchData`, which build the
+Section 7 scaffold input from the concrete finite transcription target
+`TM0FoldedReduction.L2C1CheckedStackLayerPatchData`.
+
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
 do not tile even a `2 x 2` square, and the over-strong Figure 16

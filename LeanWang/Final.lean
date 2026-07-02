@@ -33,6 +33,26 @@ structure FinalReductionInputs : Prop where
   scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+namespace FinalReductionInputs
+
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate.  This is the current finite transcription target for the scaffold
+side: checked origin-zero stacks imply the Section 7 board/free-line
+active-corner recognition field, while the supplied patches give the backward
+active-corner box realization.
+-/
+def ofCheckedStackLayerPatchData
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs where
+  scaffold :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold
+  sourceRows := sourceRows
+
+end FinalReductionInputs
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -48,6 +68,30 @@ theorem domino_problem_undecidable (h : FinalReductionInputs) :
   exact
     TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
       h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchData
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchData
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
 
 end LeanWang
 

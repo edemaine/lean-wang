@@ -771,8 +771,11 @@ The current public final surface follows the proof-facing board/free-line
 route: `FinalReductionInputs` asks for
 `L2C1RobinsonSection7BoardFreeLineLayerPatchData` and
 `SourcePositionCodeInteriorRowsPrimrec`.  The Section 7 layer-patch package is
-the concrete scaffold target to instantiate next; the raw positive-board
-Figure 13 checks and the direct
+the proof-facing scaffold target.  `LeanWang.Final` also exposes wrappers from
+the more concrete finite transcription target
+`L2C1CheckedStackLayerPatchData`, which packages checked origin-zero stacks
+with active-corner layer patches and constructs the Section 7 input.  The raw
+positive-board Figure 13 checks and the direct
 `Figure18CanonicalRawBoundaryCheckedLevelData` /
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
 kept only as diagnostic surfaces.
