@@ -77,6 +77,33 @@ structure FinalRawBoundaryConstructionObligations : Prop where
   rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedLevelData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+/--
+Raw-boundary level-check variant of the preferred remaining proof obligations.
+
+This exposes the finite-check statement directly: for each Figure 16 level,
+produce a source/free-grid rectangle whose ordinary compatibility and
+raw-boundary compatibility Boolean checks pass.  The checked-data packaging is
+derived from these level checks.
+-/
+structure FinalRawBoundaryLevelChecksConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelChecks
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Raw-boundary level-certificate variant of the preferred remaining proof
+obligations.
+
+This is the proof-facing form of the same scaffold target: for each level,
+provide the actual source/free-grid rectangle together with compatibility and
+raw-boundary proofs.  It is equivalent to the level-check form, but usually
+more convenient when the construction is not just a finite Boolean audit.
+-/
+structure FinalRawBoundaryLevelCertificatesConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/
@@ -349,6 +376,68 @@ def ofOriginZeroWindowsAndRawBoundaryCheckedLevelData
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from origin-zero active/corner windows plus raw-boundary
+Figure 16 level checks.
+-/
+def ofOriginZeroWindowsAndRawBoundaryLevelChecksSource
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelChecks)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndRawBoundaryCheckedLevelDataSource
+    originZeroWindows
+    (TM0FoldedReduction.canonicalRawBoundaryCheckedLevelData_of_levelChecks
+      rawBoundary)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, raw-boundary
+Figure 16 level checks, and generated interior position-code rows.
+-/
+def ofOriginZeroWindowsAndRawBoundaryLevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndRawBoundaryLevelChecksSource
+    originZeroWindows rawBoundary
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows plus
+raw-boundary Figure 16 level certificates.
+-/
+def ofOriginZeroWindowsAndRawBoundaryLevelCertificatesSource
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndRawBoundaryLevelChecksSource
+    originZeroWindows
+    (TM0FoldedReduction.canonicalRawBoundaryLevelChecks_of_levelCertificates
+      rawBoundary)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero active/corner windows, raw-boundary
+Figure 16 level certificates, and generated interior position-code rows.
+-/
+def ofOriginZeroWindowsAndRawBoundaryLevelCertificates
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndRawBoundaryLevelCertificatesSource
+    originZeroWindows rawBoundary
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from origin-zero active/corner windows, row-major
 checked compatible Figure 16 level data, and the packaged generated interior
 position-code decoder.
@@ -424,6 +513,63 @@ def toFinalReductionInputs
 
 end FinalRawBoundaryConstructionObligations
 
+namespace FinalRawBoundaryLevelChecksConstructionObligations
+
+/--
+Convert the raw-boundary level-check final obligation package into the
+checked-data raw-boundary package.
+-/
+def toRawBoundaryConstructionObligations
+    (h : FinalRawBoundaryLevelChecksConstructionObligations) :
+    FinalRawBoundaryConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  rawBoundary :=
+    TM0FoldedReduction.canonicalRawBoundaryCheckedLevelData_of_levelChecks
+      h.rawBoundary
+  sourceRows := h.sourceRows
+
+/-- Convert the raw-boundary level-check package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalRawBoundaryLevelChecksConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelChecks
+    h.originZeroWindows h.rawBoundary h.sourceRows
+
+end FinalRawBoundaryLevelChecksConstructionObligations
+
+namespace FinalRawBoundaryLevelCertificatesConstructionObligations
+
+/--
+Convert the raw-boundary level-certificate final obligation package into the
+level-check package.
+-/
+def toRawBoundaryLevelChecksConstructionObligations
+    (h : FinalRawBoundaryLevelCertificatesConstructionObligations) :
+    FinalRawBoundaryLevelChecksConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  rawBoundary :=
+    TM0FoldedReduction.canonicalRawBoundaryLevelChecks_of_levelCertificates
+      h.rawBoundary
+  sourceRows := h.sourceRows
+
+/--
+Convert the raw-boundary level-certificate final obligation package into the
+checked-data raw-boundary package.
+-/
+def toRawBoundaryConstructionObligations
+    (h : FinalRawBoundaryLevelCertificatesConstructionObligations) :
+    FinalRawBoundaryConstructionObligations :=
+  h.toRawBoundaryLevelChecksConstructionObligations.toRawBoundaryConstructionObligations
+
+/-- Convert the raw-boundary level-certificate package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalRawBoundaryLevelCertificatesConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelCertificates
+    h.originZeroWindows h.rawBoundary h.sourceRows
+
+end FinalRawBoundaryLevelCertificatesConstructionObligations
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -486,6 +632,46 @@ Wang domino undecidability from the raw-boundary construction obligations.
 -/
 theorem domino_problem_undecidable_of_rawBoundaryConstructionObligations
     (h : FinalRawBoundaryConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the raw-boundary level-check
+construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_rawBoundaryLevelChecksConstructionObligations
+    (h : FinalRawBoundaryLevelChecksConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the raw-boundary level-check construction
+obligations.
+-/
+theorem domino_problem_undecidable_of_rawBoundaryLevelChecksConstructionObligations
+    (h : FinalRawBoundaryLevelChecksConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the raw-boundary level-certificate
+construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_rawBoundaryLevelCertificatesConstructionObligations
+    (h : FinalRawBoundaryLevelCertificatesConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the raw-boundary level-certificate construction
+obligations.
+-/
+theorem domino_problem_undecidable_of_rawBoundaryLevelCertificatesConstructionObligations
+    (h : FinalRawBoundaryLevelCertificatesConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
@@ -812,6 +998,62 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndRawBoundaryCheckedLeve
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryCheckedLevelData
+      originZeroWindows rawBoundary sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows and
+raw-boundary Figure 16 level checks.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndRawBoundaryLevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelChecks
+      originZeroWindows rawBoundary sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows and
+raw-boundary Figure 16 level checks.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndRawBoundaryLevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelChecks
+      originZeroWindows rawBoundary sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows and
+raw-boundary Figure 16 level certificates.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndRawBoundaryLevelCertificates
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelCertificates
+      originZeroWindows rawBoundary sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows and
+raw-boundary Figure 16 level certificates.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndRawBoundaryLevelCertificates
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroWindowsAndRawBoundaryLevelCertificates
       originZeroWindows rawBoundary sourceRows)
 
 set_option linter.style.longLine false in
