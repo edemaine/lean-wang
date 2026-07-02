@@ -68,9 +68,9 @@ The build succeeds.
 The main theorem surface in `LeanWang.Final` is currently conditional on two
 construction interfaces:
 
-- `TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup`:
-  the source-uniform generated position-code decoder package for the folded TM0
-  reduction.
+- `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`: the
+  source-uniform generated position-code row primitive-recursion proof for the
+  folded TM0 reduction.
 - `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`: the checked finite
   Ollinger/Robinson scaffold package for the preferred Section 7 route.
 
