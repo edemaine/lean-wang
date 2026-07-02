@@ -94,6 +94,18 @@ def positionSourceObligationsOfPositionCodeOneRowsCorrect
   positionSourceObligationsOfPositionCodeOneRows hvarRows
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
+set_option linter.style.longLine false in
+/--
+Packaged generated one-row position-code decoder and translated statement-list
+uniqueness give the full generated-position source obligations once the
+semantic folded proof is imported.
+-/
+def positionSourceObligationsOfPositionCodeOneRowsWithStatementNodupCorrect
+    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeOneRowsWithStatementNodup hrows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
 /--
 Primitive recursiveness of the generated bounded-interior position-code rows
 gives the full generated-position source obligations once the semantic folded
@@ -106,6 +118,18 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
   positionSourceObligationsOfPositionCodeBoundedInteriorRows hbounded
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
+set_option linter.style.longLine false in
+/--
+Packaged generated bounded-interior position-code decoder and translated
+statement-list uniqueness give the full generated-position source obligations
+once the semantic folded proof is imported.
+-/
+def positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodupCorrect
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
+    hbounded TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
 /--
 Primitive recursiveness of the generated interior position-code rows gives the
 full generated-position source obligations once the semantic folded proof is
@@ -117,6 +141,18 @@ def positionSourceObligationsOfPositionCodeInteriorRowsCorrect
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeInteriorRows hinterior
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Packaged generated interior position-code decoder and translated statement-list
+uniqueness give the full generated-position source obligations once the
+semantic folded proof is imported.
+-/
+def positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
+    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
+    hinterior TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end TM0FoldedReduction
 
