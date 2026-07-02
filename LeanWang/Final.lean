@@ -1026,6 +1026,26 @@ def toFinalReductionInputs
   FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
     h.originZeroWindows h.fig16 h.labelIndex
 
+set_option linter.style.longLine false in
+/-- Encoded endpoint from origin-zero windows, checked Figure 16 level data, and source-specialized label-index data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+      h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
+      h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from origin-zero windows, checked Figure 16 level data, and source-specialized label-index data. -/
+theorem domino_problem_undecidable
+    (h : FinalSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+      h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
+      h.labelIndex
+
 end FinalSourcePositionCodeConstructionObligations
 
 namespace FinalConstructionObligations
@@ -1533,7 +1553,7 @@ level data, and the source-specialized position-code label-index decoder.
 theorem encoded_domino_problem_undecidable_of_sourcePositionCodeConstructionObligations
     (h : FinalSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable h.toFinalReductionInputs
+  h.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -1543,7 +1563,7 @@ data, and the source-specialized position-code label-index decoder.
 theorem domino_problem_undecidable_of_sourcePositionCodeConstructionObligations
     (h : FinalSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable h.toFinalReductionInputs
+  h.domino_problem_undecidable
 
 /-- Encoded Wang domino undecidability from the preferred final obligations. -/
 theorem encoded_domino_problem_undecidable_of_constructionObligations
