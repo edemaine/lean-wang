@@ -103,6 +103,13 @@ The older row-based wrappers remain available through
 `FinalConstructionObligations` and
 `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`, but they are a
 stronger source-side target than the decoder-step route.
+The decoder-step route can also be supplied by
+`TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec` via
+`TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec`;
+`LeanWang.Final` exposes this as
+`encoded_domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`
+and
+`domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`.
 
 `LeanWang.Final` also exposes
 `encoded_domino_problem_undecidable_of_checkedStackLayerPatchData` and

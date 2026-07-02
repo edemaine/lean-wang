@@ -2169,6 +2169,57 @@ theorem sourcePositionCodeDecoderStep_primrec_of_indexVarRows
   sourcePositionCodeDecoderStep_primrec_of_stepNone
     (sourcePositionCodeDecoderStepNone_primrec_of_indexVarRows hvarRows)
 
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the source-specialized position-code label-index
+decoder is enough for the generated position-code accumulator step.
+
+This avoids asking for primitive recursiveness of
+`sourcePositionCodeOneRowsIndexVar` at arbitrary numeric variable slots.  The
+accumulator step only uses slots that successfully decode through the fixed
+`partrecVarList`, and in that branch the one-row payload is exactly the
+`fuel = 1` position-code label-index decoder.
+-/
+theorem sourcePositionCodeDecoderStep_primrec_of_labelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2) := by
+  apply sourcePositionCodeDecoderStep_primrec_of_stepNone
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun p : Code × Nat × Nat =>
+      (p.2.1 + 1, p.2.2 - TM0Route.partrecVarList.length,
+        (none : Option (List TM0FoldedCompiler.SimStepData)))) := by
+    exact Primrec.pair
+      (Primrec.succ.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec.pair
+        (Primrec.nat_sub.comp (Primrec.snd.comp Primrec.snd)
+          (Primrec.const TM0Route.partrecVarList.length))
+        (Primrec.const (none : Option (List TM0FoldedCompiler.SimStepData))))
+  have hrows : Primrec (fun p : Code × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 1 p.2.1 p.2.2) :=
+    hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.const 1) Primrec.snd))
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun _v : TM0Route.PartrecVar =>
+      (p.2.1, p.2.2,
+        some (sourceSimStepDataForLabelIndexFromWithPositionCode p.1 1 p.2.1 p.2.2))) := by
+    apply Primrec₂.mk
+    exact Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+      (Primrec.pair
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.option_some.comp (hrows.comp Primrec.fst)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2.2]? with
+    | none =>
+        simp [sourcePositionCodeDecoderStepNone, h]
+    | some v =>
+        simp [sourcePositionCodeDecoderStepNone, h,
+          sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows]
+
 def sourcePositionCodeDecoderStateFrom
     (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
     SourceSearchCodeDecoderState :=
@@ -2362,6 +2413,18 @@ lookup has already been turned into concrete folded TM0 descriptor rows.
 abbrev SourcePositionCodeOneRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
     sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/-- Primitive-recursion target for the generated position-code accumulator step. -/
+abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
+  Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+    sourcePositionCodeDecoderStep p.1 p.2)
+
+set_option linter.style.longLine false in
+/-- Primitive-recursion target for the global position-code label-index decoder. -/
+abbrev GlobalPositionCodeLabelIndexFromPrimrec : Prop :=
+  Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+      p.1 p.2.1 p.2.2.1 p.2.2.2)
 
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
@@ -3052,6 +3115,27 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global
       Primrec.snd)).of_eq fun p => by
         unfold sourceSimStepDataForLabelIndexFromWithPositionCode
         rfl
+
+set_option linter.style.longLine false in
+/--
+The global position-code label-index decoder target implies the generated
+source-code accumulator-step target used by the preferred final route.
+-/
+theorem sourcePositionCodeDecoderStep_primrec_of_global_labelIndexFromWithPositionCode
+    (hindex : Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+      TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2) :=
+  sourcePositionCodeDecoderStep_primrec_of_labelIndexFromWithPositionCode
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_global hindex)
+
+set_option linter.style.longLine false in
+/-- Named version of `sourcePositionCodeDecoderStep_primrec_of_global_labelIndexFromWithPositionCode`. -/
+theorem sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeDecoderStep_primrec_of_global_labelIndexFromWithPositionCode hindex
 
 theorem sourceLabelAtByStatementFromWithPositionCode_code_mem_states
     {c : Code} {fuel k i : Nat}
@@ -4616,6 +4700,24 @@ def positionSourceObligationsOfPositionCodeDecoderStep
     PositionSourceObligations :=
   positionSourceObligationsOfLabelIndexFromWithPositionCode
     (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step hstep)
+    hcorrect
+
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the global position-code label-index decoder gives
+the generated-position source obligations via the accumulator-step route.
+-/
+def positionSourceObligationsOfGlobalPositionCodeLabelIndexFrom
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeDecoderStep
+    (sourcePositionCodeDecoderStepPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+      hindex)
     hcorrect
 
 /--

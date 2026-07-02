@@ -534,6 +534,12 @@ Next implementation targets:
    `SourcePositionCodeDecoderStepPrimrec`, primitive recursiveness of
    `sourcePositionCodeDecoderStep`, rather than the stronger
    `SourcePositionCodeInteriorRowsPrimrec`.
+   The source side now also has a bridge from
+   `GlobalPositionCodeLabelIndexFromPrimrec` to
+   `SourcePositionCodeDecoderStepPrimrec`, by specializing the global
+   position-code label-index decoder to `fuel = 1` on valid variable slots.
+   This makes the remaining machine/source target closer to the actual
+   generated folded-program decoder.
 8. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`

@@ -37,8 +37,7 @@ global accumulator step primitive recursive, then derive the program-data source
 obligations through `PositionSourceObligations`.
 -/
 abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
-  Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
-    TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)
+  TM0FoldedReduction.SourcePositionCodeDecoderStepPrimrec
 
 /--
 The two remaining construction interfaces for the current preferred route to
@@ -206,6 +205,22 @@ def ofScaffoldAndSourceDecoderStep
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and the global
+position-code label-index decoder target.  This is a slightly higher-level
+source route than `ofScaffoldAndSourceDecoderStep`: it derives the generated
+position-code accumulator step by specializing the label-index decoder to
+`fuel = 1` on valid variable slots.
+-/
+def ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -985,6 +1000,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourceDecoderStep
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourceDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
 
 set_option linter.style.longLine false in
 /--
