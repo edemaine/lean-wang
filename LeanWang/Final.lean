@@ -1102,6 +1102,16 @@ end FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations
 namespace FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
+/-- Convert the paper-facing Section 7 source-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.sourceRows
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 board/free-line obligations. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7PositiveBoxConstructionObligations) :
@@ -1306,7 +1316,7 @@ board/free-line construction obligations.
 theorem encoded_domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.encoded_domino_problem_undecidable
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
 
 set_option linter.style.longLine false in
 /--
@@ -1316,7 +1326,7 @@ construction obligations.
 theorem domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.domino_problem_undecidable
+  domino_problem_undecidable h.toFinalReductionInputs
 
 set_option linter.style.longLine false in
 /--
