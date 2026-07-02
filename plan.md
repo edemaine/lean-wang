@@ -498,6 +498,10 @@ Next implementation targets:
    `LeanWang.TM0FoldedPositionReduction` is now an import wrapper split into
    `SourceObligations` and `Theorems` submodules, so the large folded
    correctness proof can be cached below the final theorem-facing wrappers.
+   The public wrapper target now builds directly with
+   `lake build LeanWang.TM0FoldedPositionReduction`, so this split should remain
+   the default way to check theorem-surface edits before attempting a full
+   project build.
 6. Use the split final bridge
    `encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches` /
    `domino_problem_undecidable_of_checkedStacksAndLayerPatches` as the main

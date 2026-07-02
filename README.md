@@ -52,6 +52,10 @@ and [`robinson.txt`](robinson.txt).
   finite one-sided TM0 reduction. The folded program stores the two sides of
   Mathlib's TM0 tape in one local tape cell and proves the semantic halting
   equivalence.
+- `LeanWang.TM0FoldedPositionReduction`: semantic final wrappers for the
+  generated position-coded folded reduction.  This public import is split into
+  `SourceObligations` and `Theorems` submodules so edits to theorem surfaces do
+  not force unnecessary rechecking of the folded semantic proof.
 - `LeanWang.Theorems`: generic scaffold and machine-tiling theorem surfaces.
 - `LeanWang.Final`: the current top-level undecidability theorem surface,
   conditional on the two remaining construction interfaces bundled as
@@ -64,6 +68,13 @@ lake build
 ```
 
 The build succeeds.
+
+The formerly monolithic generated-position wrapper target is also split and
+builds directly:
+
+```bash
+lake build LeanWang.TM0FoldedPositionReduction
+```
 
 The main theorem surface in `LeanWang.Final` is currently conditional on two
 construction interfaces:
