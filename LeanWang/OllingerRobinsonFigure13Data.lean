@@ -6141,13 +6141,31 @@ def HasCanonicalCheckedFigure16RecognizedCompatibleLevelData : Prop :=
   ∀ level : Nat,
     Nonempty (CanonicalCheckedFigure16RecognizedCompatibleLevelData level)
 
+theorem canonicalCheckedFigure16RecognizedCompatibleLevel_of_data
+    {level : Nat}
+    (data : CanonicalCheckedFigure16RecognizedCompatibleLevelData level) :
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
+              true ∧
+            figure18SiteCompatibleRectangleBool target = true :=
+  ⟨data.sourceSites.toSiteRectangle, data.stackCompatible,
+    data.targetSites.toSiteRectangle, data.recognized, data.targetCompatible⟩
+
 theorem canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData
     (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
     HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
   intro level
   rcases hlevel level with ⟨data⟩
-  exact ⟨data.sourceSites.toSiteRectangle, data.stackCompatible,
-    data.targetSites.toSiteRectangle, data.recognized, data.targetCompatible⟩
+  exact canonicalCheckedFigure16RecognizedCompatibleLevel_of_data data
 
 set_option linter.style.longLine false in
 /--

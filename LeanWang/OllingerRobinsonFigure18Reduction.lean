@@ -16870,6 +16870,24 @@ theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
   canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
 
+theorem canonicalCheckedRecognizedCompatibleLevel_of_levelData
+    {level : Nat}
+    (data : CanonicalCheckedFigure16RecognizedCompatibleLevelData level) :
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
+              true ∧
+            figure18SiteCompatibleRectangleBool target = true :=
+  canonicalCheckedFigure16RecognizedCompatibleLevel_of_data data
+
 theorem canonicalCheckedRecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
     (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
     Figure18CanonicalCheckedRecognizedCompatibleLevelData :=
