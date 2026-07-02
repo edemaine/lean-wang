@@ -9,9 +9,9 @@ import LeanWang.OllingerRobinsonFigure18PositionReduction
 Final theorem surface for the Wang-tile undecidability proof.
 
 This module keeps the public endpoint small.  The remaining work is isolated in
-`FinalReductionInputs`: the checked origin-zero stack certificate, the exact
-positive Robinson board-level raw Figure 13 certificate, and the source-uniform
-generated row primitive-recursion proof for the folded TM0 reduction.
+`FinalReductionInputs`: the finite-transcription-facing Robinson Section 7
+board/free-line layer-patch scaffold package and the source-uniform generated
+row primitive-recursion proof for the folded TM0 reduction.
 -/
 
 noncomputable section
@@ -22,47 +22,32 @@ namespace LeanWang
 The two remaining construction interfaces for the current preferred route to
 the domino problem.
 
-`checkedStacks` is the finite origin-zero checked-stack certificate for the
-audited first L2 candidate.  `positiveBoards` is the exact positive
-board-level raw Figure 13 finite-check surface, avoiding the over-strong
-Figure 16 source-stack/raw-boundary diagnostic target.
+`scaffold` packages the Section 7 board/free-line active-corner recognition and
+the finite active-corner layer patches for the audited first L2 candidate.
 `sourceRows` is the source-uniform generated position-code row
 primitive-recursion proof for the folded TM0 reduction.  The final
 `positionProgramData` route does not need the stronger statement-list
 uniqueness package used by the older canonical-row-equality route.
 -/
 structure FinalReductionInputs : Prop where
-  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
-  positiveBoards : TM0FoldedReduction.Figure13PositiveBoardLevelChecked
+  scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
-
-namespace FinalReductionInputs
-
-/--
-The checked-stack certificate also supplies the origin-zero active/corner
-windows used by older intermediate theorem surfaces.
--/
-def originZeroWindows (h : FinalReductionInputs) :
-    TM0FoldedReduction.L2C1OriginZeroWindows :=
-  TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
-
-end FinalReductionInputs
 
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_positive_board_interiorRowsCorrect
-      h.checkedStacks h.positiveBoards h.sourceRows
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
+      h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /-- Wang domino undecidability from the final construction inputs. -/
 theorem domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_positive_board_interiorRowsCorrect
-      h.checkedStacks h.positiveBoards h.sourceRows
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorRowsCorrect
+      h.scaffold h.sourceRows
 
 end LeanWang
 

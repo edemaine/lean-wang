@@ -768,11 +768,12 @@ prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.
 
 The current public final surface follows the proof-facing board/free-line
-route: `FinalReductionInputs` asks for `L2C1OriginZeroCheckedStacks`,
-`Figure13PositiveBoardLevelChecked`, and
-`SourcePositionCodeInteriorRowsPrimrec`.  The exact positive board-level raw
-Figure 13 checks are the concrete scaffold target to instantiate next; the
-direct `Figure18CanonicalRawBoundaryCheckedLevelData` and
+route: `FinalReductionInputs` asks for
+`L2C1RobinsonSection7BoardFreeLineLayerPatchData` and
+`SourcePositionCodeInteriorRowsPrimrec`.  The Section 7 layer-patch package is
+the concrete scaffold target to instantiate next; the raw positive-board
+Figure 13 checks and the direct
+`Figure18CanonicalRawBoundaryCheckedLevelData` /
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
 kept only as diagnostic surfaces.
 

@@ -71,12 +71,16 @@ construction interfaces:
 - `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`: the
   source-uniform generated position-code row primitive-recursion proof for the
   folded TM0 reduction.
-- `TM0FoldedReduction.L2C1OriginZeroCheckedStacks`: the checked finite
-  origin-zero stack certificate for the first audited L2 candidate.
-- `TM0FoldedReduction.Figure13PositiveBoardLevelChecked`: exact positive
-  Robinson board-level raw Figure 13 finite checks. This is the proof-facing
-  scaffold surface; the over-strong Figure 16 source/raw-boundary diagnostic has
-  no adjacent two-cell witnesses in the current transcription.
+- `TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData`: the
+  proof-facing Section 7 scaffold package, combining board/free-line
+  active-corner recognition with finite active-corner layer patches for the
+  first audited L2 candidate.
+
+The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
+surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
+do not tile even a `2 x 2` square, and the over-strong Figure 16
+source/raw-boundary diagnostic has no adjacent two-cell witnesses in the current
+transcription.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The

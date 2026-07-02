@@ -2713,44 +2713,6 @@ theorem domino_problem_undecidable_l2c2_board_free_line_fig13_tiles_plane_interi
       hinterior
 
 /--
-Encoded domino undecidability from finite origin-zero checked stacks for the
-first audited L2-blank candidate, exact checked positive board-level raw Figure
-13 data, and generated interior position-code rows, with `positionProgramData`
-semantic correctness discharged.
--/
-theorem
-    encoded_domino_problem_undecidable_l2c1_checked_positive_board_interiorRowsCorrect
-    (hchecked : L2C1OriginZeroCheckedStacks)
-    (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
-      (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
-      hlevel hinterior
-      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
-
-/--
-Unencoded domino undecidability from finite origin-zero checked stacks for the
-first audited L2-blank candidate, exact checked positive board-level raw Figure
-13 data, and generated interior position-code rows, with `positionProgramData`
-semantic correctness discharged.
--/
-theorem
-    domino_problem_undecidable_l2c1_checked_positive_board_interiorRowsCorrect
-    (hchecked : L2C1OriginZeroCheckedStacks)
-    (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorRows
-      (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
-      hlevel hinterior
-      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
-
-/--
 Encoded domino undecidability from the first proof-facing board/free-line
 invariant and finite raw Figure 13 boxes, with `positionProgramData` semantic
 correctness discharged.
