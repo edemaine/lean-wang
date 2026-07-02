@@ -16462,6 +16462,18 @@ abbrev Figure18CanonicalCheckedRecognizedCompatibleLevelData : Prop :=
   HasCanonicalCheckedFigure16RecognizedCompatibleLevelData
 
 /--
+Proof-facing finite-check form of
+`Figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+
+This is definitionally the compatible canonical macro-square target: for each
+level, provide source and target site rectangles together with the checked
+layer-stack compatibility, Figure 16 recognition, and target Figure 18
+site-compatibility Boolean checks.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleLevelChecks : Prop :=
+  Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+
+/--
 Canonical Figure 16 macro-square hypothesis using only checked source layer
 stacks and raw Figure 13 boundary compatibility.
 -/
@@ -16572,6 +16584,12 @@ theorem canonicalRawBoundaryMacroSquares_of_checkedLevelData
     Figure18CanonicalRawBoundaryMacroSquares :=
   canonicalRawBoundaryMacroSquares_of_levelChecks
     (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
+
+/-- Row-major compatible Figure 16 checked data forgets to level checks. -/
+theorem canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleLevelChecks :=
+  canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
 
 theorem canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :

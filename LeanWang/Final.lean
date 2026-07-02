@@ -407,6 +407,19 @@ def ofOriginZeroWindowsAndCompatibleFig16
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from origin-zero active/corner windows plus proof-facing
+compatible Figure 16 level checks.
+-/
+def ofOriginZeroWindowsAndCompatibleFig16LevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroWindowsAndCompatibleFig16
+    originZeroWindows fig16 sourceRows
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from checked origin-zero stacks plus row-major checked
 compatible Figure 16 level data.
 -/
@@ -1431,6 +1444,32 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16
       originZeroWindows fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows and
+proof-facing compatible Figure 16 level checks.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16
+    originZeroWindows fig16 sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows and
+proof-facing compatible Figure 16 level checks.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelChecks
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16
+    originZeroWindows fig16 sourceRows
 
 set_option linter.style.longLine false in
 /--
