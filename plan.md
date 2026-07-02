@@ -767,6 +767,14 @@ This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.
 
+The current public final surface follows the proof-facing board/free-line
+route: `FinalReductionInputs` asks for `L2C1OriginZeroCheckedStacks`,
+`Figure18CanonicalRawBoundaryBoardLevelChecks`, and
+`SourcePositionCodeInteriorRowsPrimrec`.  The board-level raw-boundary checks
+are the concrete scaffold target to instantiate next; the direct
+`Figure18CanonicalRawBoundaryCheckedLevelData` source/raw-boundary target is
+kept only as a diagnostic surface.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,
