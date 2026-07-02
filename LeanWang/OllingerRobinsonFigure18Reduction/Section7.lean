@@ -7397,6 +7397,52 @@ def l2c2CheckedCompatibleFig16LevelDataActiveCornerBoxes
     (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
       hlevel)
 
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+produce the first paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+      translatedBoxes := by
+        intro r hr
+        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+          l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes hlevel r hr
+    }
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+produce the second paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+      translatedBoxes := by
+        intro r hr
+        simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+          l2c2CheckedCompatibleFig16LevelDataActiveCornerBoxes hlevel r hr
+    }
+
 /--
 Canonical checked compatible Figure 16 macro-squares supply the finite layer
 patches needed by the first audited L2-blank candidate.

@@ -329,21 +329,8 @@ def section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
     (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
-  TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
-    {
-      boardFreeLineActiveCorner :=
-        TM0FoldedReduction.l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
-          originZeroWindows
-      translatedBoxes := by
-        intro r hr
-        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-          TM0FoldedReduction.l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
-            fig16 r hr
-    }
+  TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    originZeroWindows fig16
 
 namespace FinalReductionInputs
 
