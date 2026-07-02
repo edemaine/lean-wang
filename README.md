@@ -81,6 +81,11 @@ construction interfaces:
 `domino_problem_undecidable_of_checkedStackLayerPatchData`, which build the
 Section 7 scaffold input from the concrete finite transcription target
 `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`.
+For the same route with the scaffold obligations split, it exposes
+`encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches` and
+`domino_problem_undecidable_of_checkedStacksAndLayerPatches`, whose scaffold
+arguments are exactly `TM0FoldedReduction.L2C1OriginZeroCheckedStacks` and
+`TM0FoldedReduction.L2C1ActiveCornerLayerPatches`.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

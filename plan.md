@@ -498,13 +498,19 @@ Next implementation targets:
    `LeanWang.TM0FoldedPositionReduction` is now an import wrapper split into
    `SourceObligations` and `Theorems` submodules, so the large folded
    correctness proof can be cached below the final theorem-facing wrappers.
-6. Specialize the concrete generated-position folded-route/scaffold
+6. Use the split final bridge
+   `encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches` /
+   `domino_problem_undecidable_of_checkedStacksAndLayerPatches` as the main
+   scaffold-facing theorem surface.  Its finite scaffold inputs are exactly
+   `L2C1OriginZeroCheckedStacks` and `L2C1ActiveCornerLayerPatches`, plus the
+   source-side `SourcePositionCodeInteriorRowsPrimrec`.
+7. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`
    and `domino_problem_undecidable_of_scaffold_position_source_positionCode`,
    to those concrete instances to recover the unconditional encoded and
    unencoded domino theorems.
-7. Optionally replace the current table-machine tiles by direct finite-TM0
+8. Optionally replace the current table-machine tiles by direct finite-TM0
    tiles. The TM0 instruction set is already close to the Wang-tile space-time
    simulation, so this should remove both the `PostProgram.toTableProgram`
    detour from the final theorem and the need for `TableProgram` as a live

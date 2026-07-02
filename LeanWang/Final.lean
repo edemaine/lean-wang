@@ -36,6 +36,21 @@ structure FinalReductionInputs : Prop where
 namespace FinalReductionInputs
 
 /--
+Build the final inputs from the two split finite scaffold obligations for the
+first audited L2 candidate: checked origin-zero stacks and finite active-corner
+layer patches.
+-/
+def ofCheckedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs where
+  scaffold :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches
+  sourceRows := sourceRows
+
+/--
 Build the final inputs from the concrete checked-stack/layer-patch finite
 certificate.  This is the current finite transcription target for the scaffold
 side: checked origin-zero stacks imply the Section 7 board/free-line
@@ -92,6 +107,34 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchData
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatches
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatches
+      checkedStacks patches sourceRows)
 
 end LeanWang
 
