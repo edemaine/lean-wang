@@ -1422,6 +1422,24 @@ def toFinalReductionInputs
       h.section7)
     h.labelIndex
 
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the paper-facing Section 7 source-specialized label-index package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+      h.section7 h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the paper-facing Section 7 source-specialized label-index package. -/
+theorem domino_problem_undecidable
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+      h.section7 h.labelIndex
+
 end FinalSection7PositiveBoxSourcePositionCodeConstructionObligations
 
 namespace FinalSection7PositiveBoxConstructionObligations
@@ -1764,7 +1782,7 @@ board/free-line source-specialized label-index construction obligations.
 theorem encoded_domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable h.toFinalReductionInputs
+  h.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -1774,7 +1792,7 @@ source-specialized label-index construction obligations.
 theorem domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable h.toFinalReductionInputs
+  h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
