@@ -5633,6 +5633,62 @@ theorem rawPositiveBoardLevelData_iff_checkedPositiveBoardLevelData :
     rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData⟩
 
 /--
+Unshifted canonical Figure 16 source/raw-boundary checked level data is already
+too strong for the current transcription: shifting level `n` to `n + 1`
+forgets to exact positive board-level raw Figure 13 checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedLevelData) :
+    HasFigure13PositiveBoardLevelCheckedData := by
+  intro level
+  rcases hlevel (level + 1) with ⟨data⟩
+  exact ⟨{
+    sites := data.sites
+    rawBoundary := data.rawBoundary
+  }⟩
+
+/--
+Canonical Figure 16 source/raw-boundary level checks are too strong: they
+forget to exact positive board-level raw Figure 13 checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryLevelChecks
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelChecks) :
+    HasFigure13PositiveBoardLevelCheckedData :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedLevelData
+    (canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks hlevel)
+
+/--
+Canonical Figure 16 source/raw-boundary level certificates are too strong:
+they forget to exact positive board-level raw Figure 13 checked data.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryLevelCertificates
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryLevelCertificates) :
+    HasFigure13PositiveBoardLevelCheckedData :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryLevelChecks
+    (canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates hlevel)
+
+/--
+Canonical Figure 16 source/raw-boundary macro-square witnesses are too strong:
+they forget to exact positive board-level raw Figure 13 checked data after the
+same level shift.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryMacroSquares
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :
+    HasFigure13PositiveBoardLevelCheckedData := by
+  intro level
+  rcases hlevel (level + 1) with ⟨source, _hstack, hraw⟩
+  let sites := source.toCheckedNatSiteRectangle
+  have hsites : sites.toSiteRectangle = source :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool source)
+  exact ⟨{
+    sites := sites
+    rawBoundary := by
+      rw [hsites]
+      exact SiteRectangle.rawBoundaryCompatibleBool_of_rawBoundaryCompatible hraw
+  }⟩
+
+/--
 Propositional positive-board raw data gives the exact board-level raw Figure 13
 square tilings at Robinson's shifted Section 7 free-grid sizes.
 -/
@@ -5814,6 +5870,93 @@ theorem canonicalCheckedFigure16SourceRawBoundary_of_levelCertificates
     HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares :=
   canonicalCheckedFigure16SourceRawBoundary_of_bool
     (canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates hlevel)
+
+/--
+Boolean canonical Figure 16 source/raw-boundary macro-square witnesses are too
+strong for the same reason as their propositional form.
+-/
+theorem checkedPositiveBoardLevelData_of_canonicalRawBoundaryMacroSquaresBool
+    (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool) :
+    HasFigure13PositiveBoardLevelCheckedData :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryMacroSquares
+    (canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel)
+
+/--
+The unshifted canonical Figure 16 source/raw-boundary checked level-data
+surface is impossible for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData :
+    ¬ HasCanonicalFigure16SourceRawBoundaryCheckedLevelData := by
+  intro hlevel
+  exact not_hasFigure13PositiveBoardLevelTileableSquares
+    (positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+      (checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedLevelData
+        hlevel))
+
+/--
+The unshifted canonical Figure 16 source/raw-boundary level-check surface is
+impossible for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalFigure16SourceRawBoundaryLevelChecks :
+    ¬ HasCanonicalFigure16SourceRawBoundaryLevelChecks := by
+  intro hlevel
+  exact not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData
+    (canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks hlevel)
+
+/--
+The unshifted canonical Figure 16 source/raw-boundary level-certificate surface
+is impossible for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalFigure16SourceRawBoundaryLevelCertificates :
+    ¬ HasCanonicalFigure16SourceRawBoundaryLevelCertificates := by
+  intro hlevel
+  exact not_hasCanonicalFigure16SourceRawBoundaryLevelChecks
+    (canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates hlevel)
+
+/--
+The canonical Figure 16 source/raw-boundary macro-square surface is impossible
+for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares :
+    ¬ HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares := by
+  intro hlevel
+  exact not_hasFigure13PositiveBoardLevelTileableSquares
+    (positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+      (checkedPositiveBoardLevelData_of_canonicalRawBoundaryMacroSquares
+        hlevel))
+
+/--
+The Boolean canonical Figure 16 source/raw-boundary macro-square surface is
+impossible for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool :
+    ¬ HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool := by
+  intro hlevel
+  exact not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares
+    (canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel)
+
+/--
+The shifted board-level source/raw-boundary checked data is also impossible:
+it is exactly a checked positive board-level raw Figure 13 target.
+-/
+theorem not_hasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData :
+    ¬ HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData := by
+  intro hlevel
+  exact not_hasFigure13PositiveBoardLevelTileableSquares
+    (positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevelData
+      (checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+        hlevel))
+
+/--
+The shifted board-level source/raw-boundary level-check surface is impossible
+for the current Figure 13 transcription.
+-/
+theorem not_hasCanonicalFigure16SourceRawBoundaryBoardLevelChecks :
+    ¬ HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks := by
+  intro hlevel
+  exact not_hasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    (canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+      hlevel)
 
 theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
     (hlevel : HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares) :

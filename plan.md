@@ -502,7 +502,13 @@ Next implementation targets:
    two-cell source witnesses when checked layer-stack compatibility is combined
    with raw Figure 13 boundary compatibility.  This matches the Section 7
    reading that payload neighbors are routed through free board lines rather
-   than adjacent plane coordinates.  The older
+   than adjacent plane coordinates.  This is now formalized at the all-level
+   interface too: `not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData`,
+   `not_hasCanonicalFigure16SourceRawBoundaryLevelChecks`,
+   `not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool`, and
+   `not_hasCanonicalFigure16SourceRawBoundaryBoardLevelChecks` show that these
+   source/raw-boundary surfaces would imply the refuted positive-board raw
+   Figure 13 square tilings.  The older
    `NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations` surface remains
    as a compatibility bridge, not as the desired final scaffold target.
 5. Add the semantic-final wrappers for the row-major Section 7 geometry route.
@@ -803,7 +809,13 @@ closed off by the reflected finite checks
 `noSourceRawBoundaryHCompatiblePairsBool_eq_true` and
 `noSourceRawBoundaryVCompatiblePairsBool_eq_true`: there are no horizontal or
 vertical two-cell witnesses satisfying both source-stack compatibility and raw
-Figure 13 boundary compatibility.  The remaining scaffold proof should
+Figure 13 boundary compatibility.  It is also closed at the theorem-surface
+level by `not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData`,
+`not_hasCanonicalFigure16SourceRawBoundaryLevelChecks`,
+`not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool`, and
+`not_hasCanonicalFigure16SourceRawBoundaryBoardLevelChecks`, which reduce these
+all-level raw-boundary surfaces to the already refuted positive-board raw
+Figure 13 square tilings.  The remaining scaffold proof should
 therefore use compatible Figure 18 macro-squares / board-free-line data, not
 the source raw-boundary diagnostic as a final target.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:

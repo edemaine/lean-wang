@@ -152,7 +152,14 @@ The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
 do not tile even a `2 x 2` square, and the over-strong Figure 16
 source/raw-boundary diagnostic has no adjacent two-cell witnesses in the current
-transcription.
+transcription.  `LeanWang.OllingerRobinsonFigure13Data` now also proves the
+global contradiction wrappers
+`not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData`,
+`not_hasCanonicalFigure16SourceRawBoundaryLevelChecks`,
+`not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool`, and
+`not_hasCanonicalFigure16SourceRawBoundaryBoardLevelChecks`: any all-level
+canonical source/raw-boundary route would imply positive-board raw Figure 13
+square tilings, contradicting the checked finite obstruction.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The
