@@ -530,19 +530,17 @@ set_option linter.style.longLine false in
 Build the final inputs directly from the scaffold package and the packaged
 generated interior position-code decoder.
 
-This is the proof-facing source route: the package carries the row generator
-and translated statement-list uniqueness, while
-`positionProgramData_haltsEmpty_iff_tm0_eval_dom` discharges semantic
-correctness against the Mathlib TM0 evaluator.
+This is the proof-facing source route: the package carries the row generator,
+translated statement-list uniqueness, and semantic correctness against the
+Mathlib TM0 evaluator.
 -/
 def ofScaffoldAndSourcePackage
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
     FinalReductionInputs :=
   ofScaffoldAndSource scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-      sourceRows
-      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
+      sourceRows)
 
 /--
 Build the final inputs from the two split finite scaffold obligations for the
@@ -827,9 +825,8 @@ def ofCheckedStacksAndCompatibleFig16LevelDataPackage
     FinalReductionInputs :=
   ofCheckedStacksAndCompatibleFig16LevelDataSource
     checkedStacks fig16
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-      sourceRows
-      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -1051,9 +1048,8 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
     FinalReductionInputs :=
   ofOriginZeroWindowsAndCompatibleFig16LevelDataSource
     originZeroWindows fig16
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-      sourceRows
-      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
+      sourceRows)
 
 end FinalReductionInputs
 
