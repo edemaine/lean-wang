@@ -35,6 +35,22 @@ structure FinalReductionInputs : Prop where
   scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData
   source : TM0FoldedReduction.PositionSourceObligations
 
+/--
+Preferred remaining proof obligations for the current construction route.
+
+These are the three proof-facing facts still to be supplied by the scaffold
+and source-code construction:
+* the Section 7 origin-zero active/corner window invariant for the first
+  audited L2 blank candidate;
+* row-major checked compatible Figure 16 level data, which supplies the finite
+  active-corner layer patches;
+* the packaged generated-position source decoder.
+-/
+structure FinalConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/
@@ -275,6 +291,17 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
 
 end FinalReductionInputs
 
+namespace FinalConstructionObligations
+
+/-- Convert the preferred final obligation package into the low-level endpoint. -/
+def toFinalReductionInputs
+    (h : FinalConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
+    h.originZeroWindows h.fig16 h.sourceRows
+
+end FinalConstructionObligations
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -290,6 +317,18 @@ theorem domino_problem_undecidable (h : FinalReductionInputs) :
   exact
     TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       h.scaffold h.source
+
+/-- Encoded Wang domino undecidability from the preferred final obligations. -/
+theorem encoded_domino_problem_undecidable_of_constructionObligations
+    (h : FinalConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/-- Wang domino undecidability from the preferred final obligations. -/
+theorem domino_problem_undecidable_of_constructionObligations
+    (h : FinalConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
 
 set_option linter.style.longLine false in
 /--
