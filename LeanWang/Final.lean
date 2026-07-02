@@ -51,6 +51,19 @@ structure FinalConstructionObligations : Prop where
   fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
 
+/--
+Finite-check-facing variant of the preferred remaining proof obligations.
+
+The checked stack field is a finite transcription target for the audited first
+L2 blank candidate.  It implies the origin-zero active/corner window invariant
+used by the scaffold package, so this is the cleaner theorem surface for the
+next scaffold-instantiation step.
+-/
+structure FinalCheckedConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/
@@ -302,6 +315,28 @@ def toFinalReductionInputs
 
 end FinalConstructionObligations
 
+namespace FinalCheckedConstructionObligations
+
+/--
+Convert the finite-check-facing obligation package into the window-based
+preferred final obligation package.
+-/
+def toConstructionObligations
+    (h : FinalCheckedConstructionObligations) :
+    FinalConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  fig16 := h.fig16
+  sourceRows := h.sourceRows
+
+/-- Convert the finite-check-facing obligation package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedConstructionObligations) :
+    FinalReductionInputs :=
+  h.toConstructionObligations.toFinalReductionInputs
+
+end FinalCheckedConstructionObligations
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -327,6 +362,24 @@ theorem encoded_domino_problem_undecidable_of_constructionObligations
 /-- Wang domino undecidability from the preferred final obligations. -/
 theorem domino_problem_undecidable_of_constructionObligations
     (h : FinalConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Encoded Wang domino undecidability from the finite-check-facing preferred
+final obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedConstructionObligations
+    (h : FinalCheckedConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Wang domino undecidability from the finite-check-facing preferred final
+obligations.
+-/
+theorem domino_problem_undecidable_of_checkedConstructionObligations
+    (h : FinalCheckedConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
