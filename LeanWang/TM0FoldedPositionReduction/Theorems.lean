@@ -61,6 +61,30 @@ theorem domino_problem_undecidable_of_scaffold_position_source_decoderStepCorrec
     (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
 
 /--
+Encoded domino undecidability from a scaffold and the global position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_globalCodeCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+/--
+Unencoded domino undecidability from a scaffold and the global position-code
+label-index decoder, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_globalCodeCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+/--
 Encoded domino undecidability from a scaffold and the generated one-row
 position-code decoder, with `positionProgramData` semantic correctness
 discharged.
