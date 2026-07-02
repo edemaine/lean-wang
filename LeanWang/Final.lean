@@ -316,6 +316,35 @@ structure FinalRawBoundaryLevelCertificatesConstructionObligations : Prop where
   rawBoundary : TM0FoldedReduction.Figure18CanonicalRawBoundaryLevelCertificates
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+produce the paper-facing Section 7 positive-box scaffold package.
+
+The origin-zero windows supply the board/free-line active-corner invariant.
+The checked Figure 16 level data supplies positive translated active-corner
+boxes, which are centered to match the positive-box surface.
+-/
+def section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        TM0FoldedReduction.l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
+          originZeroWindows
+      translatedBoxes := by
+        intro r hr
+        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+          TM0FoldedReduction.l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
+            fig16 r hr
+    }
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/
@@ -902,6 +931,19 @@ end FinalReductionInputs
 
 namespace FinalDecoderStepConstructionObligations
 
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero/checked-Figure-16 decoder-step package into the
+paper-facing Section 7 positive-box decoder-step package.
+-/
+def toSection7PositiveBoxDecoderStepConstructionObligations
+    (h : FinalDecoderStepConstructionObligations) :
+    FinalSection7PositiveBoxDecoderStepConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
+      h.originZeroWindows h.fig16
+  decoderStep := h.decoderStep
+
 /-- Convert the decoder-step final obligation package into the low-level endpoint. -/
 def toFinalReductionInputs
     (h : FinalDecoderStepConstructionObligations) :
@@ -935,6 +977,19 @@ def toSourcePositionCodeConstructionObligations
   originZeroWindows := h.originZeroWindows
   fig16 := h.fig16
   labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero/checked-Figure-16 global-label-index package into the
+paper-facing Section 7 positive-box global-label-index package.
+-/
+def toSection7PositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalGlobalPositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
+      h.originZeroWindows h.fig16
+  labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Convert the global-label-index final obligation package into the endpoint. -/
@@ -972,21 +1027,8 @@ def toSection7PositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalSourcePositionCodeConstructionObligations) :
     FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
   section7 :=
-    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
-      {
-        boardFreeLineActiveCorner :=
-          TM0FoldedReduction.l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
-            h.originZeroWindows
-        translatedBoxes := by
-          intro r hr
-          simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-            scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-            LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-            LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-            Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-            TM0FoldedReduction.l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
-              h.fig16 r hr
-      }
+    section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
+      h.originZeroWindows h.fig16
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -1013,6 +1055,19 @@ def toSourcePositionCodeConstructionObligations
   labelIndex :=
     TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
       h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero/checked-Figure-16 row-source package into the
+paper-facing Section 7 positive-box row-source package.
+-/
+def toSection7PositiveBoxConstructionObligations
+    (h : FinalConstructionObligations) :
+    FinalSection7PositiveBoxConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfOriginZeroWindowsAndCompatibleFig16LevelData
+      h.originZeroWindows h.fig16
+  sourceRows := h.sourceRows
 
 /-- Convert the preferred final obligation package into the low-level endpoint. -/
 def toFinalReductionInputs
