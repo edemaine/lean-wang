@@ -3786,6 +3786,25 @@ theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositio
 
 set_option linter.style.longLine false in
 /--
+The source-specialized position-code label-index decoder gives computability
+of the source-specialized generated position-coded folded program.
+-/
+theorem sourcePositionProgramData_computable_of_sourcePositionCodeLabelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
+    hindex
+
+set_option linter.style.longLine false in
+theorem sourcePositionProgramData_computable_of_sourcePositionCodeLabelIndexFrom'
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.positionProgramData (NatPartrecToToPartrec.translate c)) :=
+  (sourcePositionProgramData_computable_of_sourcePositionCodeLabelIndexFrom hindex).of_eq
+    fun _ => rfl
+
+set_option linter.style.longLine false in
+/--
 The global position-code label-index decoder gives computability of the
 source-specialized generated position-coded folded program.
 -/
@@ -4314,6 +4333,34 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode'
   (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode
     hindex hrows).of_eq fun _ => rfl
 
+set_option linter.style.longLine false in
+/--
+The source-specialized position-code label-index decoder is enough for
+program-data computability once the generated indexed rows are known to match
+the semantic folded simulation rows.
+-/
+theorem sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec)
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c)) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithPositionCode
+    hindex hrows
+
+set_option linter.style.longLine false in
+theorem sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom'
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec)
+    (hrows : ∀ c : Code,
+      TM0FoldedCompiler.simRowsOfStepData
+          (sourceSimStepDataByLabelIndexWithPositionCode c) =
+        TM0FoldedCompiler.simRows (NatPartrecToToPartrec.translate c)) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom
+    hindex hrows).of_eq fun _ => rfl
+
 theorem sourceProgramData_computable_of_source_positionCodeDecoderStep
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
       sourcePositionCodeDecoderStep p.1 p.2))
@@ -4443,6 +4490,40 @@ theorem sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_mi
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal
+    hindex hmin).of_eq fun _ => rfl
+
+set_option linter.style.longLine false in
+/--
+The source-specialized position-code decoder gives program-data computability
+once each decoded position is known to be the first occurrence of that label in
+the support list.
+-/
+theorem sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom_minimal
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec)
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_labelIndexFromWithPositionCode_minimal
+    hindex hmin
+
+set_option linter.style.longLine false in
+theorem sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom_minimal'
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec)
+    (hmin : ∀ c : Code, ∀ i, i < sourceLabelCount c →
+      ∀ q : TM0FoldedCompiler.SourceLabel (NatPartrecToToPartrec.translate c) × Nat,
+        TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i = some q →
+          ∀ m, m < q.2 →
+            (TM0Route.partrecStartedTM0LabelSupportList
+              (NatPartrecToToPartrec.translate c))[m]? ≠ some q.1) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_sourcePositionCodeLabelIndexFrom_minimal
     hindex hmin).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_positionCodeDecoderStep_minimal
