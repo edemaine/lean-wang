@@ -16,11 +16,11 @@ source-row route and the origin-zero-window route, which derives the checked
 stacks from the geometric origin-zero scaffold invariant and the audited finite
 Figure 13 / Figure 16 pair-compatibility table.
 
-The cleanest proof-facing scaffold surface is
-`FinalSection7BoardFreeLineConstructionObligations`: Robinson Section 7
-board/free-line active-corner recognition plus positive board-level aligned raw
-Figure 13 macro-squares.  The lower-level layer-patch and checked-Figure-16
-surfaces are retained as finite-transcription routes.
+The cleanest paper-facing scaffold surface is
+`FinalSection7PositiveBoxConstructionObligations`: Robinson Section 7
+board/free-line active-corner recognition plus centered positive active-corner
+boxes.  The lower-level layer-patch and checked-Figure-16 surfaces are retained
+as finite-transcription routes.
 -/
 
 noncomputable section
@@ -74,13 +74,13 @@ structure FinalCheckedConstructionObligations : Prop where
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
-geometry supplies active/corner recognition, and positive board-level aligned
-raw Figure 13 macro-squares supply the large boxes needed by the backward
-construction.  It avoids the over-strong source-stack raw-boundary diagnostic
-interfaces below.
+geometry supplies active/corner recognition, and centered positive active-corner
+boxes supply the finite layer patches needed by the backward construction.  It
+avoids the false raw Figure 13 macro-square diagnostic route and the over-strong
+source-stack raw-boundary diagnostic interfaces below.
 -/
-structure FinalSection7BoardFreeLineConstructionObligations : Prop where
-  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineData
+structure FinalSection7PositiveBoxConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
@@ -89,7 +89,7 @@ Raw-boundary diagnostic variant of the remaining proof obligations.
 This route is useful for testing finite Figure 13/Figure 16 data plumbing, but
 it is stronger than Robinson Section 7 because it asks the source Figure 16
 layer stack itself to be compatible along raw Figure 13 boundaries.  The
-paper-shaped proof should use `FinalSection7BoardFreeLineConstructionObligations`
+paper-shaped proof should use `FinalSection7PositiveBoxConstructionObligations`
 instead.
 -/
 structure FinalRawBoundaryConstructionObligations : Prop where
@@ -589,25 +589,27 @@ def toFinalReductionInputs
 
 end FinalRawBoundaryLevelCertificatesConstructionObligations
 
-namespace FinalSection7BoardFreeLineConstructionObligations
+namespace FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 board/free-line obligations. -/
 theorem encoded_domino_problem_undecidable
-    (h : FinalSection7BoardFreeLineConstructionObligations) :
+    (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRowsCorrect
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
     h.section7 h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 board/free-line obligations. -/
 theorem domino_problem_undecidable
-    (h : FinalSection7BoardFreeLineConstructionObligations) :
+    (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRowsCorrect
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
     h.section7 h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
-end FinalSection7BoardFreeLineConstructionObligations
+end FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
@@ -660,8 +662,8 @@ set_option linter.style.longLine false in
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
-theorem encoded_domino_problem_undecidable_of_section7BoardFreeLineConstructionObligations
-    (h : FinalSection7BoardFreeLineConstructionObligations) :
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
+    (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   h.encoded_domino_problem_undecidable
 
@@ -670,8 +672,8 @@ set_option linter.style.longLine false in
 Wang domino undecidability from the paper-facing Section 7 board/free-line
 construction obligations.
 -/
-theorem domino_problem_undecidable_of_section7BoardFreeLineConstructionObligations
-    (h : FinalSection7BoardFreeLineConstructionObligations) :
+theorem domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
+    (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
