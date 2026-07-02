@@ -28,6 +28,7 @@ noncomputable section
 namespace LeanWang
 
 open Nat.Partrec (Code)
+open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData
 
 set_option linter.style.longLine false in
 /--
@@ -790,6 +791,16 @@ end FinalCheckedConstructionObligations
 namespace FinalRawBoundaryConstructionObligations
 
 /--
+The raw-boundary final obligation package is inconsistent for the current
+Figure 13/Figure 16 transcription: its raw-boundary field would imply the
+refuted positive-board raw Figure 13 square tilings.
+-/
+theorem impossible : ¬ FinalRawBoundaryConstructionObligations := by
+  intro h
+  exact ConcreteData.not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData
+    h.rawBoundary
+
+/--
 Convert the raw-boundary final obligation package into the compatible-level
 obligation package.
 -/
@@ -814,6 +825,15 @@ end FinalRawBoundaryConstructionObligations
 namespace FinalRawBoundaryLevelChecksConstructionObligations
 
 /--
+The raw-boundary level-check final obligation package is inconsistent for the
+current Figure 13/Figure 16 transcription.
+-/
+theorem impossible : ¬ FinalRawBoundaryLevelChecksConstructionObligations := by
+  intro h
+  exact ConcreteData.not_hasCanonicalFigure16SourceRawBoundaryLevelChecks
+    h.rawBoundary
+
+/--
 Convert the raw-boundary level-check final obligation package into the
 checked-data raw-boundary package.
 -/
@@ -836,6 +856,16 @@ def toFinalReductionInputs
 end FinalRawBoundaryLevelChecksConstructionObligations
 
 namespace FinalRawBoundaryLevelCertificatesConstructionObligations
+
+/--
+The raw-boundary level-certificate final obligation package is inconsistent
+for the current Figure 13/Figure 16 transcription.
+-/
+theorem impossible :
+    ¬ FinalRawBoundaryLevelCertificatesConstructionObligations := by
+  intro h
+  exact ConcreteData.not_hasCanonicalFigure16SourceRawBoundaryLevelCertificates
+    h.rawBoundary
 
 /--
 Convert the raw-boundary level-certificate final obligation package into the
