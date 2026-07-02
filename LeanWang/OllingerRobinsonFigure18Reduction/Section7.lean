@@ -73,6 +73,41 @@ theorem activeCorner_of_section7BoardFreeLineActiveCorner
   HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofBoardFreeLineActiveCorner
     hboard
 
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+part used by the board/free-line Section 7 package.
+-/
+theorem activeCorner_of_canonicalFreeSiteRectRouting
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant D := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing supplies the board/free-line
+active/corner recognition package.
+-/
+theorem section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    Section7BoardFreeLineActiveCornerInvariant D :=
+  section7BoardFreeLineActiveCorner_of_activeCorner
+    (activeCorner_of_canonicalFreeSiteRectRouting hrouting)
+
 theorem section7BoardFreeLineActiveCorner_iff_activeCorner
     (D : OllingerRobinson.Figure18ScaffoldData) :
     Section7BoardFreeLineActiveCornerInvariant D ↔
@@ -3210,6 +3245,66 @@ def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
   positiveBoxes :=
     TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
       data.translatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        by
+          have hboard :
+              Section7BoardFreeLineActiveCornerInvariant
+                (figure18ScaffoldDataOfNatSites
+                  l2Component1BlankCandidateActiveSiteSpecs
+                  l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+                  0 Quadrant.southwest
+                  l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+            section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+              O.canonicalFreeSiteRectRouting
+          simpa [l2Component1Figure18ScaffoldData] using hboard
+      translatedBoxes := O.positiveTranslatedIndexedBoxes
+    }
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        by
+          have hboard :
+              Section7BoardFreeLineActiveCornerInvariant
+                (figure18ScaffoldDataOfNatSites
+                  l2Component2BlankCandidateActiveSiteSpecs
+                  l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+                  0 Quadrant.northeast
+                  l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+            section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+              O.canonicalFreeSiteRectRouting
+          simpa [l2Component2Figure18ScaffoldData] using hboard
+      translatedBoxes := O.positiveTranslatedIndexedBoxes
+    }
 
 /--
 The existing first translated-box package also supplies the finite layer-patch
@@ -7400,19 +7495,11 @@ def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonical
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
-  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
-    {
-      boardFreeLineActiveCorner :=
-        l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
-      translatedBoxes := by
-        intro r hr
-        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-          l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes hlevel r hr
-    }
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+      (hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+        originZeroWindows)
+      hlevel)
 
 set_option linter.style.longLine false in
 /--
@@ -7423,19 +7510,11 @@ def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonical
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
-  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
-    {
-      boardFreeLineActiveCorner :=
-        l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
-      translatedBoxes := by
-        intro r hr
-        simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-          LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-          LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-          Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-          l2c2CheckedCompatibleFig16LevelDataActiveCornerBoxes hlevel r hr
-    }
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+      (hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+        originZeroWindows)
+      hlevel)
 
 /--
 Canonical checked compatible Figure 16 macro-squares supply the finite layer
