@@ -6149,6 +6149,41 @@ theorem canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData
   exact ⟨data.sourceSites.toSiteRectangle, data.stackCompatible,
     data.targetSites.toSiteRectangle, data.recognized, data.targetCompatible⟩
 
+set_option linter.style.longLine false in
+/--
+Canonical source raw-boundary checked level data canonically generates checked
+compatible Figure 16 level data by using the doubled canonical Figure 16
+expansion as the target rectangle.
+-/
+theorem canonicalCheckedFigure16RecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
+    (hlevel : HasCanonicalFigure16SourceRawBoundaryCheckedLevelData) :
+    HasCanonicalCheckedFigure16RecognizedCompatibleLevelData := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  let source := data.sites.toSiteRectangle
+  let target := canonicalExpandedSiteRectangleOfSiteRectangle source
+  let targetSites := target.toCheckedNatSiteRectangle
+  have htarget : targetSites.toSiteRectangle = target :=
+    CheckedNatSiteRectangle.toSiteRectangle_eq_of_matchesSiteRectangleBool
+      (SiteRectangle.toCheckedNatSiteRectangle_matchesSiteRectangleBool target)
+  exact ⟨{
+    sourceSites := data.sites
+    stackCompatible := data.stackCompatible
+    targetSites := targetSites
+    recognized := by
+      simpa [source, target, targetSites, htarget] using
+        figure16ExpandedSiteRectangle_matchesBool_checkedLayerStack_canonicalExpanded
+          source data.stackCompatible
+    targetCompatible := by
+      have hraw : source.RawBoundaryCompatible :=
+        SiteRectangle.rawBoundaryCompatible_of_rawBoundaryCompatibleBool
+          data.rawBoundary
+      simpa [source, target, targetSites, htarget] using
+        figure18SiteCompatibleRectangleBool_of
+          (figure18SiteCompatibleRectangle_canonicalExpanded_of_rawBoundaryCompatible
+            source hraw)
+  }⟩
+
 theorem canonicalCheckedFigure16RecognizedCompatible_of_rawBoundaryCompatible
     (hlevel : ∀ level : Nat,
       ∃ source : SiteRectangle

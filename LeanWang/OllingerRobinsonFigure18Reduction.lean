@@ -16870,6 +16870,12 @@ theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
     Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
   canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
 
+theorem canonicalCheckedRecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleLevelData :=
+  canonicalCheckedFigure16RecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
+    hlevel
+
 theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
     (hlevel : Figure13CheckedRecognizedMacroSquares) :
     TilesPlane fig13Tiles :=
