@@ -10246,6 +10246,14 @@ theorem
     (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
       hlevel)
 
+theorem
+    l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+    (canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel)
+
 theorem l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
     (hboxes :
       ∀ r : Nat, 0 < r →
@@ -10373,6 +10381,14 @@ theorem
   l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
       hlevel)
+
+theorem
+    l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+    (canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel)
 
 /--
 Direct origin-zero routed certificate for the first audited L2-blank candidate.
@@ -18918,6 +18934,48 @@ def ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSqu
     (by
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+          hlevel)
+
+def ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+          hlevel)
+
+def ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    (canonicalFreeSiteRectRouting :
+      HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : HasCanonicalCheckedFigure16RecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    canonicalFreeSiteRectRouting
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
           hlevel)
 
 def toCanonicalSiteRectTranslatedPositiveBoxObligations
