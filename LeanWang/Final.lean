@@ -44,12 +44,12 @@ and source-code construction:
   audited L2 blank candidate;
 * row-major checked compatible Figure 16 level data, which supplies the finite
   active-corner layer patches;
-* the packaged generated-position source decoder.
+* the source-uniform generated-position interior row decoder.
 -/
 structure FinalConstructionObligations : Prop where
   originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
   fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
-  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
 Finite-check-facing variant of the preferred remaining proof obligations.
@@ -62,7 +62,7 @@ next scaffold-instantiation step.
 structure FinalCheckedConstructionObligations : Prop where
   checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
   fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
-  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 namespace FinalReductionInputs
 
@@ -327,7 +327,7 @@ namespace FinalConstructionObligations
 def toFinalReductionInputs
     (h : FinalConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
+  FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelData
     h.originZeroWindows h.fig16 h.sourceRows
 
 end FinalConstructionObligations
@@ -350,7 +350,7 @@ def toConstructionObligations
 def toFinalReductionInputs
     (h : FinalCheckedConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataPackage
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelData
     h.checkedStacks h.fig16 h.sourceRows
 
 end FinalCheckedConstructionObligations
