@@ -433,6 +433,18 @@ def section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelData
     (TM0FoldedReduction.l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
       routing fig16)
 
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus proof-facing compatible Figure 16
+level checks produce the paper-facing Section 7 positive-box scaffold package.
+-/
+def section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelChecks
+    (routing : TM0FoldedReduction.L2C1CanonicalFreeSiteRectRouting)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    routing fig16
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/
@@ -1840,36 +1852,62 @@ end FinalFreeSiteRectGlobalPositionCodeConstructionObligations
 namespace FinalFreeSiteRectLevelChecksConstructionObligations
 
 set_option linter.style.longLine false in
+/--
+Convert the free-site-rectangle level-check row-source package into the
+paper-facing Section 7 positive-box row-source package.
+-/
+def toSection7PositiveBoxConstructionObligations
+    (h : FinalFreeSiteRectLevelChecksConstructionObligations) :
+    FinalSection7PositiveBoxConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelChecks
+      h.routing h.fig16
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the free-site-rectangle level-check row-source package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
-      h.sourceRows)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
+    h.toSection7PositiveBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the free-site-rectangle level-check row-source package. -/
 theorem domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
-      h.sourceRows)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
+    h.toSection7PositiveBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFreeSiteRectLevelChecksConstructionObligations
 
 namespace FinalFreeSiteRectLevelChecksDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
+/--
+Convert the free-site-rectangle level-check decoder-step package into the
+paper-facing Section 7 positive-box decoder-step package.
+-/
+def toSection7PositiveBoxDecoderStepConstructionObligations
+    (h : FinalFreeSiteRectLevelChecksDecoderStepConstructionObligations) :
+    FinalSection7PositiveBoxDecoderStepConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelChecks
+      h.routing h.fig16
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the free-site-rectangle level-check decoder-step package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+    h.toSection7PositiveBoxDecoderStepConstructionObligations.section7
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
@@ -1878,14 +1916,27 @@ set_option linter.style.longLine false in
 theorem domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+    h.toSection7PositiveBoxDecoderStepConstructionObligations.section7
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
 end FinalFreeSiteRectLevelChecksDecoderStepConstructionObligations
 
 namespace FinalFreeSiteRectLevelChecksGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the free-site-rectangle level-check global-label-index package into
+the paper-facing Section 7 positive-box global-label-index package.
+-/
+def toSection7PositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFreeSiteRectLevelChecksGlobalPositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelChecks
+      h.routing h.fig16
+  labelIndex := h.labelIndex
 
 /--
 Forget the global decoder target to the free-site level-check
@@ -1903,44 +1954,53 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    h.toSection7PositiveBoxGlobalPositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the free-site-rectangle level-check global-label-index package. -/
 theorem domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    h.toSection7PositiveBoxGlobalPositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 end FinalFreeSiteRectLevelChecksGlobalPositionCodeConstructionObligations
 
 namespace FinalFreeSiteRectLevelChecksSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
+/--
+Convert the free-site-rectangle level-check source-specialized package into
+the paper-facing Section 7 positive-box source-specialized package.
+-/
+def toSection7PositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalFreeSiteRectLevelChecksSourcePositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    section7PositiveBoxOfFreeSiteRectRoutingAndCompatibleFig16LevelChecks
+      h.routing h.fig16
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the free-site-rectangle level-check source-specialized package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the free-site-rectangle level-check source-specialized package. -/
 theorem domino_problem_undecidable
     (h : FinalFreeSiteRectLevelChecksSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_free_site_rect_compatible_fig16_position_source
-    h.routing h.fig16
-    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_sourceCodeCorrect
+    h.toSection7PositiveBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 end FinalFreeSiteRectLevelChecksSourcePositionCodeConstructionObligations
 

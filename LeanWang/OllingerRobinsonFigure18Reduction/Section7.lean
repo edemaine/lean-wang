@@ -7560,6 +7560,60 @@ def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonical
         originZeroWindows)
       hlevel)
 
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus proof-facing compatible Figure 16
+level checks produce the first paper-facing Section 7 positive-box scaffold
+package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (canonicalFreeSiteRectRouting : L2C1CanonicalFreeSiteRectRouting)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+      canonicalFreeSiteRectRouting hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus proof-facing compatible Figure 16
+level checks produce the second paper-facing Section 7 positive-box scaffold
+package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (canonicalFreeSiteRectRouting : L2C2CanonicalFreeSiteRectRouting)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+      canonicalFreeSiteRectRouting hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus proof-facing compatible Figure 16 level
+checks produce the first paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus proof-facing compatible Figure 16 level
+checks produce the second paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows originZeroWindows)
+    hlevel
+
 /--
 Canonical checked compatible Figure 16 macro-squares supply the finite layer
 patches needed by the first audited L2-blank candidate.
