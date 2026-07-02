@@ -28,7 +28,11 @@ noncomputable section
 namespace LeanWang
 
 open Nat.Partrec (Code)
+open OllingerRobinson
+open OllingerRobinson.Figure18ScaffoldData
+open OllingerRobinson.Figure13Layers
 open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData
+open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 set_option linter.style.longLine false in
 /--
@@ -954,6 +958,36 @@ def toDecoderStepConstructionObligations
   originZeroWindows := h.originZeroWindows
   fig16 := h.fig16
   decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero/checked-Figure-16 source-specialized package into the
+paper-facing Section 7 positive-box package.
+
+The origin-zero windows supply the board/free-line active-corner invariant,
+while the checked Figure 16 level data supplies positive translated boxes,
+which are centered to match the Section 7 positive-box surface.
+-/
+def toSection7PositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalSourcePositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+      {
+        boardFreeLineActiveCorner :=
+          TM0FoldedReduction.l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
+            h.originZeroWindows
+        translatedBoxes := by
+          intro r hr
+          simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+            scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+            LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+            LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+            Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+            TM0FoldedReduction.l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
+              h.fig16 r hr
+      }
+  labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Convert the source-specialized label-index final obligation package into the endpoint. -/
