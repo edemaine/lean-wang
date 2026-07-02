@@ -262,6 +262,17 @@ structure FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations : Pr
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
+Paper-facing Section 7 board/free-line obligations with the source-specialized
+position-code label-index source target.
+
+Compared with the global-label-index variant, this asks only for primitive
+recursiveness after specializing to translated `Nat.Partrec.Code` inputs.
+-/
+structure FinalSection7PositiveBoxSourcePositionCodeConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
 Raw-boundary diagnostic variant of the remaining proof obligations.
 
 This route is useful for testing finite Figure 13/Figure 16 data plumbing, but
@@ -1292,6 +1303,16 @@ def toDecoderStepConstructionObligations
   section7 := h.section7
   decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
 
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the narrowed source-facing Section 7 route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
 /-- Convert the paper-facing Section 7 global-label-index package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
@@ -1302,6 +1323,30 @@ def toFinalReductionInputs
     h.labelIndex
 
 end FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalSection7PositiveBoxSourcePositionCodeConstructionObligations
+
+/--
+Convert the paper-facing Section 7 source-specialized label-index package into
+the decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalSection7PositiveBoxDecoderStepConstructionObligations where
+  section7 := h.section7
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the paper-facing Section 7 source-specialized label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.labelIndex
+
+end FinalSection7PositiveBoxSourcePositionCodeConstructionObligations
 
 namespace FinalSection7PositiveBoxConstructionObligations
 
@@ -1632,6 +1677,26 @@ global-label-index construction obligations.
 -/
 theorem domino_problem_undecidable_of_section7PositiveBoxGlobalPositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line source-specialized label-index construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+source-specialized label-index construction obligations.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
