@@ -71,8 +71,10 @@ construction interfaces:
 - `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`: the
   source-uniform generated position-code row primitive-recursion proof for the
   folded TM0 reduction.
-- `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`: the checked finite
-  Ollinger/Robinson Section 7 scaffold package: origin-zero checked stacks plus
+- `TM0FoldedReduction.L2C1OriginZeroCheckedStacks`: the checked finite
+  origin-zero stack certificate for the first audited L2 candidate.
+- `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`:
+  row-major checked compatible Figure 16 level data, used to supply the
   active-corner layer patches.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
