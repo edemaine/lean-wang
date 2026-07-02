@@ -3278,6 +3278,53 @@ theorem sourceSearchCodeOneRowsVar_primrec_of_positionCodeOneRows
       (c := p.1) (k := p.2.1) (i := sourcePartrecVarIndex p.2.2)
       (v := p.2.2) (hnodup p.1) hv).symm
 
+set_option linter.style.longLine false in
+/--
+The generated position-code accumulator step computes the bounded-search
+one-row branch on the valid Partrec-variable index path.
+
+This is weaker than `SourcePositionCodeOneRowsPrimrec`, which intentionally
+keeps the numeric position-code slot independent of the variable.  It is
+nevertheless the exact bridge needed to compare the generated position-code
+decoder with the older bounded-search source presentation.
+-/
+theorem sourceSearchCodeOneRowsVar_primrec_of_positionCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hnodup : SourceStatementListNodup) :
+    Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2) := by
+  have hidx : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePartrecVarIndex p.2.2) :=
+    sourcePartrecVarIndex_primrec.comp (Primrec.snd.comp Primrec.snd)
+  have hinput : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      (p.2.1, sourcePartrecVarIndex p.2.2,
+        (none : Option (List TM0FoldedCompiler.SimStepData)))) :=
+    Primrec.pair
+      (Primrec.fst.comp Primrec.snd)
+      (Primrec.pair hidx (Primrec.const none))
+  have hstate : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeDecoderStep p.1
+        (p.2.1, sourcePartrecVarIndex p.2.2,
+          (none : Option (List TM0FoldedCompiler.SimStepData)))) :=
+    hstep.comp (Primrec.pair Primrec.fst hinput)
+  have hrows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeDecoderRows
+        (sourcePositionCodeDecoderStep p.1
+          (p.2.1, sourcePartrecVarIndex p.2.2,
+            (none : Option (List TM0FoldedCompiler.SimStepData))))) :=
+    sourceSearchCodeDecoderRows_primrec.comp hstate
+  exact hrows.of_eq fun p => by
+    have hv :
+        TM0Route.partrecVarList[sourcePartrecVarIndex p.2.2]? =
+          some p.2.2 :=
+      sourcePartrecVarIndex_getElem? p.2.2
+    simpa only [sourceSearchCodeDecoderRows, sourcePositionCodeDecoderStep,
+      sourcePositionCodeDecoderStepNone, hv, Option.getD_some] using
+      (sourceSearchCodeOneRowsVar_eq_positionCodeOneRowsIndexVar_of_statementList_nodup
+      (c := p.1) (k := p.2.1) (i := sourcePartrecVarIndex p.2.2)
+      (v := p.2.2) (hnodup p.1) hv).symm
+
 theorem sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInteriorRows
     (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
     (hnodup : ∀ c : Code,
@@ -3777,6 +3824,24 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionC
   (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
     hvarRows hnodup).of_eq fun _ => rfl
 
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hnodup : SourceStatementListNodup) :
+    Computable sourceProgramData :=
+  sourceProgramData_computable_of_source_searchCodeOneVarRows
+    (sourceSearchCodeOneRowsVar_primrec_of_positionCodeDecoderStep
+      hstep hnodup)
+
+theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep'
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hnodup : SourceStatementListNodup) :
+    Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
+  (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep
+    hstep hnodup).of_eq fun _ => rfl
+
 /--
 Packaged one-row generated position-code rows give source-level computability
 of the normalized folded finite-TM0 program data.
@@ -3988,6 +4053,26 @@ def sourceObligationsOfSearchCodeOneVarRowsPositionCodeOneRows
   sourceObligationsOfProgramData
     (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows'
       hvarRows hnodup)
+    hcorrect
+
+/--
+Primitive recursiveness of the generated position-code accumulator step, plus
+statement support-list nodup, also supplies the variable-branch bounded-search
+row obligation on the valid Partrec-variable index path.
+-/
+def sourceObligationsOfSearchCodeOneVarRowsPositionCodeDecoderStep
+    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2))
+    (hnodup : SourceStatementListNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep'
+      hstep hnodup)
     hcorrect
 
 /--

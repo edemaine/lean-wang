@@ -319,6 +319,17 @@ and `sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup`
 plus exact-shape primed variants.  These consume the same row-plus-statement
 nodup packages used by the theorem surfaces, so future decoder work should aim
 to construct one package rather than separately threading the fields.
+The generated position-code accumulator-step target now also bridges back to
+the older bounded-search presentation on the valid Partrec-variable index path:
+`sourceSearchCodeOneRowsVar_primrec_of_positionCodeDecoderStep`,
+`sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep`,
+and `sourceObligationsOfSearchCodeOneVarRowsPositionCodeDecoderStep` show that
+the decoder-step proof plus translated statement-list nodup supplies the
+variable-branch search-row route.  This does not close
+`SourcePositionCodeOneRowsPrimrec`, because that stronger row target keeps the
+numeric position slot independent of the variable; it does make precise that
+the remaining arbitrary-slot work is the only gap between the generated
+position-code step and the older source-row presentation.
 The flat label-index arithmetic has now been separated out in
 `TM0FoldedReduction.sourceLabelIndexFromSplit?` and the started wrapper
 `sourceLabelIndexStartSplit?`, with primitive-recursive proofs. These helpers
