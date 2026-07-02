@@ -29,6 +29,17 @@ namespace LeanWang
 
 open Nat.Partrec (Code)
 
+set_option linter.style.longLine false in
+/--
+Source-side primitive-recursion target for the generated position-coded folded
+program.  This is the narrower target preferred by the final route: prove the
+global accumulator step primitive recursive, then derive the program-data source
+obligations through `PositionSourceObligations`.
+-/
+abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
+  Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
+    TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)
+
 /--
 The two remaining construction interfaces for the current preferred route to
 the domino problem.
@@ -60,6 +71,18 @@ structure FinalConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+Preferred source-facing variant of the remaining proof obligations.
+
+Compared with `FinalConstructionObligations`, this asks for primitive
+recursiveness of the generated position-code decoder step directly, instead of
+the stronger interior-row generator package.
+-/
+structure FinalDecoderStepConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
 Finite-check-facing variant of the preferred remaining proof obligations.
 
 The checked stack field is a finite transcription target for the audited first
@@ -73,6 +96,18 @@ structure FinalCheckedConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+Finite-check-facing variant with the narrower decoder-step source target.
+
+The scaffold fields are the concrete checked origin-zero stacks plus audited
+Figure 16 level data; the source field is only the generated position-code
+accumulator-step primitive-recursion proof.
+-/
+structure FinalCheckedDecoderStepConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
@@ -84,6 +119,14 @@ source-stack raw-boundary diagnostic interfaces below.
 structure FinalSection7PositiveBoxConstructionObligations : Prop where
   section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Paper-facing Section 7 board/free-line obligations with the narrower
+decoder-step source target.
+-/
+structure FinalSection7PositiveBoxDecoderStepConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 /--
 Raw-boundary diagnostic variant of the remaining proof obligations.
@@ -527,6 +570,17 @@ def ofOriginZeroWindowsAndCompatibleFig16LevelDataPackage
 
 end FinalReductionInputs
 
+namespace FinalDecoderStepConstructionObligations
+
+/-- Convert the decoder-step final obligation package into the low-level endpoint. -/
+def toFinalReductionInputs
+    (h : FinalDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroWindowsAndCompatibleFig16LevelDataDecoderStep
+    h.originZeroWindows h.fig16 h.decoderStep
+
+end FinalDecoderStepConstructionObligations
+
 namespace FinalConstructionObligations
 
 /-- Convert the preferred final obligation package into the low-level endpoint. -/
@@ -537,6 +591,29 @@ def toFinalReductionInputs
     h.originZeroWindows h.fig16 h.sourceRows
 
 end FinalConstructionObligations
+
+namespace FinalCheckedDecoderStepConstructionObligations
+
+/--
+Convert the finite-check-facing decoder-step package into the window-based
+decoder-step obligation package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedDecoderStepConstructionObligations) :
+    FinalDecoderStepConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  fig16 := h.fig16
+  decoderStep := h.decoderStep
+
+/-- Convert the finite-check-facing decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
+    h.checkedStacks h.fig16 h.decoderStep
+
+end FinalCheckedDecoderStepConstructionObligations
 
 namespace FinalCheckedConstructionObligations
 
@@ -642,6 +719,19 @@ def toFinalReductionInputs
 
 end FinalRawBoundaryLevelCertificatesConstructionObligations
 
+namespace FinalSection7PositiveBoxDecoderStepConstructionObligations
+
+/-- Convert the paper-facing Section 7 decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.decoderStep
+
+end FinalSection7PositiveBoxDecoderStepConstructionObligations
+
 namespace FinalSection7PositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -680,6 +770,23 @@ theorem domino_problem_undecidable (h : FinalReductionInputs) :
     TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       h.scaffold h.source
 
+/--
+Encoded Wang domino undecidability from the preferred decoder-step final
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_decoderStepConstructionObligations
+    (h : FinalDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Wang domino undecidability from the preferred decoder-step final obligations.
+-/
+theorem domino_problem_undecidable_of_decoderStepConstructionObligations
+    (h : FinalDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
 /-- Encoded Wang domino undecidability from the preferred final obligations. -/
 theorem encoded_domino_problem_undecidable_of_constructionObligations
     (h : FinalConstructionObligations) :
@@ -710,6 +817,24 @@ theorem domino_problem_undecidable_of_checkedConstructionObligations
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
+/--
+Encoded Wang domino undecidability from the finite-check-facing decoder-step
+final obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedDecoderStepConstructionObligations
+    (h : FinalCheckedDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+/--
+Wang domino undecidability from the finite-check-facing decoder-step final
+obligations.
+-/
+theorem domino_problem_undecidable_of_checkedDecoderStepConstructionObligations
+    (h : FinalCheckedDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the paper-facing Section 7
@@ -729,6 +854,26 @@ theorem domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line decoder-step construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxDecoderStepConstructionObligations
+    (h : FinalSection7PositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+decoder-step construction obligations.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxDecoderStepConstructionObligations
+    (h : FinalSection7PositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
 
 set_option linter.style.longLine false in
 /--

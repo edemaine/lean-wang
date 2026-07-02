@@ -524,8 +524,16 @@ Next implementation targets:
    `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
    / `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`.
    It replaces the abstract layer-patch input by
-   `Figure18CanonicalCheckedRecognizedCompatibleLevelData`, while retaining the
-   checked origin-zero stack and source-row obligations.
+   `Figure18CanonicalCheckedRecognizedCompatibleLevelData`, while retaining
+   the checked origin-zero stack and source-side obligation.
+   The corresponding decoder-step construction packages
+   `FinalDecoderStepConstructionObligations`,
+   `FinalCheckedDecoderStepConstructionObligations`, and
+   `FinalSection7PositiveBoxDecoderStepConstructionObligations` are now the
+   preferred source-facing theorem surfaces: their source obligation is
+   `SourcePositionCodeDecoderStepPrimrec`, primitive recursiveness of
+   `sourcePositionCodeDecoderStep`, rather than the stronger
+   `SourcePositionCodeInteriorRowsPrimrec`.
 8. Specialize the concrete generated-position folded-route/scaffold
    corollaries, in particular
    `encoded_domino_problem_undecidable_of_scaffold_position_source_positionCode`

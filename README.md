@@ -76,16 +76,33 @@ builds directly:
 lake build LeanWang.TM0FoldedPositionReduction
 ```
 
-The main theorem surface in `LeanWang.Final` is currently conditional on two
-construction interfaces:
+The main theorem surface in `LeanWang.Final` is currently conditional on the
+scaffold construction plus a source construction interface.  The preferred
+source-facing final package is
+`FinalDecoderStepConstructionObligations`, whose fields are:
 
-- `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`: the
-  source-uniform generated position-code row primitive-recursion proof for the
-  folded TM0 reduction.
+- `TM0FoldedReduction.L2C1OriginZeroWindows`: the geometric origin-zero
+  active/corner window invariant for the first audited L2 candidate.
+- `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`:
+  the row-major checked Figure 16 level data that supplies the finite
+  active-corner layer patches.
+- `SourcePositionCodeDecoderStepPrimrec`: primitive recursiveness of the
+  global generated position-code accumulator step
+  `TM0FoldedReduction.sourcePositionCodeDecoderStep`.
+
+The still lower-level `FinalReductionInputs` endpoint consists of:
+
 - `TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData`: the
   proof-facing Section 7 scaffold package, combining board/free-line
   active-corner recognition with finite active-corner layer patches for the
   first audited L2 candidate.
+- `TM0FoldedReduction.PositionSourceObligations`: the generated-position source
+  reduction obligations.
+
+The older row-based wrappers remain available through
+`FinalConstructionObligations` and
+`TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`, but they are a
+stronger source-side target than the decoder-step route.
 
 `LeanWang.Final` also exposes
 `encoded_domino_problem_undecidable_of_checkedStackLayerPatchData` and
