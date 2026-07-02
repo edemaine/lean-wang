@@ -86,6 +86,10 @@ For the same route with the scaffold obligations split, it exposes
 `domino_problem_undecidable_of_checkedStacksAndLayerPatches`, whose scaffold
 arguments are exactly `TM0FoldedReduction.L2C1OriginZeroCheckedStacks` and
 `TM0FoldedReduction.L2C1ActiveCornerLayerPatches`.
+The more finite Figure 16 route is exposed as
+`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
+and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`;
+there the Figure 16 compatibility certificate supplies the layer patches.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

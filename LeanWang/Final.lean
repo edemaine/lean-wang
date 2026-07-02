@@ -66,6 +66,36 @@ def ofCheckedStackLayerPatchData
       scaffold
   sourceRows := sourceRows
 
+/--
+Build the final inputs from checked origin-zero stacks plus compatible Figure
+16 macro-squares.  The Figure 16 certificate supplies the active-corner layer
+patches for the first audited L2 candidate.
+-/
+def ofCheckedStacksAndCompatibleFig16
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchData
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      checkedStacks fig16)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks plus row-major checked
+compatible Figure 16 level data.
+-/
+def ofCheckedStacksAndCompatibleFig16LevelData
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchData
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+      checkedStacks fig16)
+    sourceRows
+
 end FinalReductionInputs
 
 set_option linter.style.longLine false in
@@ -135,6 +165,62 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatches
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStacksAndLayerPatches
       checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks and
+compatible Figure 16 macro-squares.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16
+      checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks and compatible
+Figure 16 macro-squares.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16
+      checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks and row-major
+checked compatible Figure 16 level data.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelData
+      checkedStacks fig16 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks and row-major checked
+compatible Figure 16 level data.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelData
+      checkedStacks fig16 sourceRows)
 
 end LeanWang
 
