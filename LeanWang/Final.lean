@@ -35,23 +35,43 @@ structure FinalReductionInputs : Prop where
   fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+namespace FinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+The two scaffold-side final inputs package into the finite-check-facing Section
+7 scaffold data used by the current reduction chain.
+-/
+def checkedStackLayerPatchData (h : FinalReductionInputs) :
+    TM0FoldedReduction.L2C1CheckedStackLayerPatchData :=
+  TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    h.checkedStacks h.fig16
+
+/--
+The checked-stack certificate also supplies the origin-zero active/corner
+windows used by older intermediate theorem surfaces.
+-/
+def originZeroWindows (h : FinalReductionInputs) :
+    TM0FoldedReduction.L2C1OriginZeroWindows :=
+  TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+
+end FinalReductionInputs
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_fig16_level_data_interiorRowsCorrect
-      (TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks)
-      h.fig16 h.sourceRows
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsCorrect
+      h.checkedStackLayerPatchData h.sourceRows
 
 set_option linter.style.longLine false in
 /-- Wang domino undecidability from the final construction inputs. -/
 theorem domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_fig16_level_data_interiorRowsCorrect
-      (TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks)
-      h.fig16 h.sourceRows
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsCorrect
+      h.checkedStackLayerPatchData h.sourceRows
 
 end LeanWang
 
