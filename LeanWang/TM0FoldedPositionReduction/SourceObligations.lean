@@ -65,8 +65,8 @@ is imported.
 def positionSourceObligationsOfPositionCodeDecoderStepCorrect
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-    (sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep hstep)
+  positionSourceObligationsOfPositionCodeDecoderStep hstep
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
@@ -77,9 +77,8 @@ is imported.
 def positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-    (sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
-      hindex)
+  positionSourceObligationsOfGlobalPositionCodeLabelIndexFrom hindex
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 /--
 Primitive recursiveness of the generated one-row position-code decoder gives
