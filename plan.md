@@ -991,6 +991,10 @@ source-label variants:
 `FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations`,
 and
 `FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations`.
+The reduction layer now also has direct source-specialized label-index
+endpoints for Section 7 translated-box data:
+`encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect`
+and the L2C2/unencoded analogues.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

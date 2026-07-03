@@ -1220,14 +1220,18 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the origin-zero Figure 16 source-label-index package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    h.labelIndex
 
 end FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
 
