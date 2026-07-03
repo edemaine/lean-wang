@@ -1802,6 +1802,28 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_of_block_var_get?
     exact Nat.mod_eq_of_lt hi
   simp [hmod]
 
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_var_get?
+    {c : Code} {fuel i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c (fuel + 1) 0 i = [] := by
+  simpa using
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_of_block_var_get?
+      (c := c) (fuel := fuel + 1) (k := 0) (block := 0)
+      (i := i) (v := v) (Nat.zero_lt_succ fuel) hv
+      (sourceStatementAt_zero c)).trans
+      (TM0FoldedCompiler.simStepDataForStmtLabelWithCode_none
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode 0 i
+          (none : Option (Turing.TM1.Stmt
+            (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+            (Turing.TM2to1.Λ'
+              TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+              (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+              TM0Route.PartrecVar)
+            TM0Route.PartrecVar))
+          v)
+        v)
+
 def sourcePositionCodeOneRowsIndexVar
     (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
@@ -2808,6 +2830,24 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get?
     sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
       (c := c) (block := 0) (i := i) (v := v)
       (sourceStatementCount_pos c) hv (sourceStatementAt_zero c)
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get?_eq_nil
+    {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i = [] := by
+  rw [sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get? hv]
+  exact TM0FoldedCompiler.simStepDataForStmtLabelWithCode_none
+    (NatPartrecToToPartrec.translate c)
+    (TM0FoldedCompiler.labelPositionCode 0 i
+      (none : Option (Turing.TM1.Stmt
+        (Turing.TM2to1.Γ' TM0Route.PartrecStack TM0Route.PartrecStackSymbol)
+        (Turing.TM2to1.Λ'
+          TM0Route.PartrecStack TM0Route.PartrecStackSymbol
+          (TM0Route.StartedLabel (NatPartrecToToPartrec.translate c))
+          TM0Route.PartrecVar)
+        TM0Route.PartrecVar))
+      v)
+    v
 
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
