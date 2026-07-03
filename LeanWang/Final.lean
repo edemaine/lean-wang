@@ -656,6 +656,26 @@ structure FinalL2C2CheckedStackLayerPatchConstructionObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Second-candidate checked-stack/layer-patch route with generated one-row
+position-code rows.
+-/
+structure FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/layer-patch route with generated
+bounded-interior position-code rows.
+-/
+structure FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate checked-stack/layer-patch route with the narrower generated
 decoder-step source target.
 -/
@@ -5446,6 +5466,32 @@ def ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
 set_option linter.style.longLine false in
 /--
 Build the second-candidate final inputs directly from the scaffold package and
+generated one-row position-code rows.
+-/
+def ofScaffoldAndSourceOneRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
+generated bounded-interior position-code rows.
+-/
+def ofScaffoldAndSourceBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
 generated interior position-code rows.
 -/
 def ofScaffoldAndSourceRows
@@ -8330,6 +8376,170 @@ theorem domino_problem_undecidable
   h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchConstructionObligations
+
+namespace FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch one-row package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch one-row package to the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch one-row data to the Figure
+13 board/free-line/layer-patch one-row final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch one-row package into
+the compact board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourceOneRows
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch finite scaffold
+package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch finite scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations
+
+namespace FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch bounded-row package to
+the one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch bounded-row package to
+the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch bounded-row package to
+the source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch bounded-row data to the
+Figure 13 board/free-line/layer-patch bounded-row final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/layer-patch bounded-row package
+into the compact board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourceBoundedRows
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch finite scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch finite scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations
 
 namespace FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
 
@@ -13369,6 +13579,46 @@ package and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchConstructionObligations
     (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
