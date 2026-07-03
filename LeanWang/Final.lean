@@ -9088,6 +9088,26 @@ def toCheckedStackLayerPatchConstructionObligations
       h.scaffold
   sourceRows := h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchConstructionObligations.domino_problem_undecidable
+
 end FinalL2C2CheckedStackPositiveBoxConstructionObligations
 
 namespace FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations
@@ -9104,6 +9124,26 @@ def toCheckedStackLayerPatchOneRowsConstructionObligations
     TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
       h.scaffold
   sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated one-row position-code data.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchOneRowsConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated one-row position-code data.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchOneRowsConstructionObligations.domino_problem_undecidable
 
 end FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations
 
@@ -9122,6 +9162,26 @@ def toCheckedStackLayerPatchBoundedRowsConstructionObligations
       h.scaffold
   sourceRows := h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchBoundedRowsConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchBoundedRowsConstructionObligations.domino_problem_undecidable
+
 end FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations
 
 namespace FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
@@ -9138,6 +9198,26 @@ def toCheckedStackLayerPatchDecoderStepConstructionObligations
     TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
       h.scaffold
   decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchDecoderStepConstructionObligations.domino_problem_undecidable
 
 end FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
 
@@ -9156,6 +9236,26 @@ def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
       h.scaffold
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.domino_problem_undecidable
+
 end FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
 
 namespace FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
@@ -9172,6 +9272,28 @@ def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
     TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
       h.scaffold
   labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the source-specialized position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and the source-specialized position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
 
