@@ -828,9 +828,11 @@ diagnostic compatibility bridges rather than proof-facing obligations.  The
 finite raw Figure 13 box hypothesis is itself refuted in Lean by
 `not_tileableBoxes_fig13Tiles`, reducing it to the already known positive-board
 raw Figure 13 obstruction.  Accordingly, the origin-zero Figure 13 box package
-and `LeanWang.Final`'s `FinalOriginZeroFig13BoxData` wrappers are diagnostic
-surfaces only; future concrete scaffold work should not try to prove a
-checked-stack/box package containing `Figure13TileableBoxes`.
+is diagnostic only, and `LeanWang.Final` no longer exports the
+`FinalOriginZeroFig13BoxData`, `FinalCheckedSignalTowerFig13BoxData`, or
+checked-recognized-Figure-13 theorem routes as public final routes.  Future
+concrete scaffold work should not try to prove a checked-stack/box package
+containing `Figure13TileableBoxes`.
 The checked signal-tower board packages now also feed this route directly via
 `l2c1CheckedStackLayerPatchDataOfCheckedBoardData`,
 `l2c2CheckedStackLayerPatchDataOfCheckedBoardData`, and origin-zero
@@ -869,7 +871,8 @@ positive-board Figure 13 checks and the direct
 `Figure18CanonicalRawBoundaryCheckedLevelData` /
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
 kept only as lower-level diagnostic surfaces; `LeanWang.Final` no longer
-exports them as final theorem routes.
+exports them, the raw Figure 13 box routes, or the checked-recognized raw
+Figure 13 routes as final theorem routes.
 The generic concrete Figure 18 scaffold layer now also has
 `RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches`, and the two
 L2 candidates expose
