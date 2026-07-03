@@ -1382,10 +1382,11 @@ conditions have been narrowed to two proof-facing fronts:
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now
-   `FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations`
-   (or its row-source variant).  This asks for canonical free-site
-   active/corner recognition and tileable boxes of the shared Figure 18
-   scaffold tiles.  Canonical free-site active/corner recognition implies the
+   `FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations`
+   (or its row-source variant).  This asks for Robinson Section 7
+   board/free-line active/corner recognition and tileable boxes of the shared
+   Figure 18 scaffold tiles.  Board/free-line active/corner recognition implies
+   canonical free-site active/corner recognition, which then implies the
    decoded origin-zero active/corner windows used by
    `FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations`.
    Tileable Figure 18 scaffold boxes imply valid translated boxes for the
