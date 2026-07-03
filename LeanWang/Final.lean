@@ -2260,6 +2260,38 @@ namespace FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructi
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/isolated-box package to the generic Nat-site
+indexed-window source-label endpoint.  Combined origin-zero windows give the
+translation-invariant indexed-window hypothesis, while isolated active boxes
+give the realization invariant.
+-/
+def toNatSitesIndexedWindowSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations where
+  activeSiteSpecs := l2Component2BlankCandidateActiveSiteSpecs
+  activeSiteSpecs_valid :=
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+  cornerIndex := 0
+  cornerQuadrant := Quadrant.northeast
+  cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
+  indexedActiveWindows :=
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+        h.combinedActiveCornerWindows)
+  realizes := by
+    have hboxes :
+        Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+          l2Component2Figure18ScaffoldData :=
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (D := l2Component2Figure18ScaffoldData) h.isolatedBoxes
+    simpa [l2Component2Figure18ScaffoldData] using
+      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+        (D := l2Component2Figure18ScaffoldData) hboxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/isolated-box package to the existing
 origin-zero/translated-positive-box source-label endpoint.
 -/
@@ -2286,8 +2318,11 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.encoded_domino_problem_undecidable
+  let hindexed := h.toNatSitesIndexedWindowSourcePositionCodeConstructionObligations
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -2299,8 +2334,11 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.domino_problem_undecidable
+  let hindexed := h.toNatSitesIndexedWindowSourcePositionCodeConstructionObligations
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.labelIndex
 
 end FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
 
@@ -2320,6 +2358,35 @@ def toSourcePositionCodeConstructionObligations
   labelIndex :=
     TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
       h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/isolated-box package to the generic
+Nat-site indexed-window row-source endpoint.
+-/
+def toNatSitesIndexedWindowConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowConstructionObligations where
+  activeSiteSpecs := l2Component2BlankCandidateActiveSiteSpecs
+  activeSiteSpecs_valid :=
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+  cornerIndex := 0
+  cornerQuadrant := Quadrant.northeast
+  cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
+  indexedActiveWindows :=
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+        h.combinedActiveCornerWindows)
+  realizes := by
+    have hboxes :
+        Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+          l2Component2Figure18ScaffoldData :=
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (D := l2Component2Figure18ScaffoldData) h.isolatedBoxes
+    simpa [l2Component2Figure18ScaffoldData] using
+      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+        (D := l2Component2Figure18ScaffoldData) hboxes
+  sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -2368,7 +2435,12 @@ translated isolated active boxes, and generated interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  let hindexed := h.toNatSitesIndexedWindowConstructionObligations
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_interiorRows
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
@@ -2378,7 +2450,12 @@ translated isolated active boxes, and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  let hindexed := h.toNatSitesIndexedWindowConstructionObligations
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_interiorRows
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
 set_option linter.style.longLine true
