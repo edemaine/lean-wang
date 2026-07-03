@@ -82,6 +82,23 @@ theorem sourceDecoderStepPrimrec_of_sourceLabelIndex
   TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFromPrimrec
     h
 
+/-- The decoder-step target implies the source-specialized label-index target. -/
+theorem sourceLabelIndexPrimrec_of_decoderStep
+    (h : SourcePositionCodeDecoderStepPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep h
+
+/--
+The final source-side decoder-step and source-specialized label-index targets
+are equivalent.  The decoder-step spelling is the narrower preferred final
+target, while the label-index spelling is often more convenient for generated
+position-source constructors.
+-/
+theorem sourceDecoderStepPrimrec_iff_sourceLabelIndexPrimrec :
+    SourcePositionCodeDecoderStepPrimrec ↔ SourcePositionCodeLabelIndexFromPrimrec :=
+  ⟨sourceLabelIndexPrimrec_of_decoderStep,
+    sourceDecoderStepPrimrec_of_sourceLabelIndex⟩
+
 /--
 The two remaining construction interfaces for the current preferred route to
 the domino problem.
@@ -8180,7 +8197,7 @@ def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligatio
       h.scaffold.checkedStacks
   layerPatches := h.scaffold.patches
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -8668,7 +8685,7 @@ def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObl
       h.scaffold.checkedStacks
   validTranslatedBoxes := h.scaffold.validTranslatedBoxes
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -9638,7 +9655,7 @@ def toSourcePositionCodeConstructionObligations
   boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
   layerPatches := h.layerPatches
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -9911,7 +9928,7 @@ def toSourcePositionCodeConstructionObligations
   canonicalProductRouting := h.canonicalProductRouting
   layerPatches := h.layerPatches
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -10157,7 +10174,7 @@ def toSourcePositionCodeConstructionObligations
   canonicalProductRouting := h.canonicalProductRouting
   positiveIndexedBoxes := h.positiveIndexedBoxes
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -10536,7 +10553,7 @@ def toSourcePositionCodeConstructionObligations
   canonicalProductRouting := h.canonicalProductRouting
   positiveTranslatedIndexedBoxes := h.positiveTranslatedIndexedBoxes
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -10937,7 +10954,7 @@ def toSourcePositionCodeConstructionObligations
     FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
   scaffold := h.scaffold
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -11346,7 +11363,7 @@ def toSourcePositionCodeConstructionObligations
     FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
   scaffold := h.scaffold
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
@@ -13488,7 +13505,7 @@ def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonic
     finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
       h.canonicalActiveCorner h.scaffoldPlane
   labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
 
 set_option linter.style.longLine false in
