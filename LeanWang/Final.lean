@@ -6260,7 +6260,8 @@ generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -6270,7 +6271,8 @@ generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalCheckedStackPositiveBoxOneRowsConstructionObligations
 
@@ -6305,7 +6307,8 @@ generated bounded-interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -6315,7 +6318,8 @@ generated bounded-interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations
 
@@ -6350,7 +6354,8 @@ the generated position-code decoder step.
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -6360,7 +6365,8 @@ the generated position-code decoder step.
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 end FinalCheckedStackPositiveBoxDecoderStepConstructionObligations
 
@@ -6395,7 +6401,8 @@ the global position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -6405,7 +6412,8 @@ the global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
 
@@ -6440,7 +6448,8 @@ the source-specialized position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -6450,7 +6459,8 @@ the source-specialized position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations
 
@@ -9796,7 +9806,8 @@ active-corner boxes, and generated one-row position-code data.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -9806,7 +9817,8 @@ active-corner boxes, and generated one-row position-code data.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations
 
@@ -9844,7 +9856,8 @@ active-corner boxes, and generated bounded-interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -9854,7 +9867,8 @@ active-corner boxes, and generated bounded-interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations
 
@@ -9892,7 +9906,8 @@ active-corner boxes, and the generated position-code decoder step.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -9902,7 +9917,8 @@ active-corner boxes, and the generated position-code decoder step.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 end FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
 
@@ -9940,7 +9956,8 @@ active-corner boxes, and the global position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -9950,7 +9967,8 @@ active-corner boxes, and the global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
 
@@ -9989,7 +10007,8 @@ decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -10000,7 +10019,8 @@ decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
 
