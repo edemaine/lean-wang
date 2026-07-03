@@ -6044,6 +6044,32 @@ def l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
     Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
     certificate.toRoutedCertificate
 
+set_option linter.style.longLine false in
+/--
+The first board/free-line layer-patch Section 7 package closes the abstract
+scaffold interface for the corresponding Figure 18 scaffold.
+-/
+theorem l2c1IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+    l2Component1Figure18ScaffoldData
+    data.boardFreeLineActiveCorner
+    data.patches).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second board/free-line layer-patch Section 7 package closes the abstract
+scaffold interface for the corresponding Figure 18 scaffold.
+-/
+theorem l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+    l2Component2Figure18ScaffoldData
+    data.boardFreeLineActiveCorner
+    data.patches).isScaffold
+
 /--
 Finite origin-zero checked stacks and active-corner layer patches provide the
 first routed Figure 18 certificate.
@@ -6107,6 +6133,30 @@ def l2c2Figure18RoutedCertificateOfCheckedStackLayerPatchData
         l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
   l2c2Figure18RoutedCertificateOfCheckedStacksLayerPatches
     data.checkedStacks data.patches
+
+set_option linter.style.longLine false in
+/--
+The first concrete checked-stack/layer-patch package closes the abstract
+scaffold interface.
+-/
+theorem l2c1IsScaffoldOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  l2c1IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      data)
+
+set_option linter.style.longLine false in
+/--
+The second concrete checked-stack/layer-patch package closes the abstract
+scaffold interface.
+-/
+theorem l2c2IsScaffoldOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      data)
 
 /-- Board-level checks give the first field-based signal-tower board package. -/
 def l2c1SignalTowerBoardDataOfBoardLevelChecks
