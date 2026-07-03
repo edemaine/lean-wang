@@ -532,6 +532,17 @@ Next implementation targets:
    It replaces the abstract layer-patch input by
    `Figure18CanonicalCheckedRecognizedCompatibleLevelData`, while retaining
    the checked origin-zero stack and source-side obligation.
+   Current warning: the first attempted direct instantiation exposed that this
+   interface is still too strong as stated.  The checked source-stack
+   compatibility is phrased in terms of adjacent Figure 16 substitution-block
+   boundaries; the audited Figure 13 black layer has no horizontally or
+   vertically matching adjacent `phi_L3` block boundaries at all, formalized by
+   `blackBlockAtSite_no_hBoundary` and `blackBlockAtSite_no_vBoundary` in
+   `LeanWang.OllingerRobinsonFigure13Obstructions`.
+   Therefore the next scaffold step should replace or weaken this finite-data
+   bridge so recognized macro-square compatibility is routed through the
+   Section 7 free-line geometry, not through adjacent black-layer source-stack
+   block boundaries.
    The corresponding decoder-step construction packages
    `FinalDecoderStepConstructionObligations`,
    `FinalCheckedDecoderStepConstructionObligations`, and
