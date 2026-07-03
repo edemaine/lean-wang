@@ -1994,11 +1994,16 @@ def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
   h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
     |>.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
 
+set_option linter.style.longLine false in
 /-- Convert the finite Figure 16 compatible global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+        h.checkedStacks h.compatibleMacroSquares))
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
@@ -2008,7 +2013,12 @@ macro-squares, and the global position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+        h.checkedStacks h.compatibleMacroSquares))
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 set_option linter.style.longLine false in
 /--
@@ -2018,7 +2028,12 @@ macro-squares, and the global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+        h.checkedStacks h.compatibleMacroSquares))
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 end FinalFigure16CompatibleGlobalPositionCodeConstructionObligations
 
@@ -2559,25 +2574,40 @@ def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
   h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
     |>.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
 
+set_option linter.style.longLine false in
 /-- Convert the canonical-free-site Figure 16 global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        h.canonicalActiveCorner h.compatibleMacroSquares))
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the canonical-free-site Figure 16 global-label package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        h.canonicalActiveCorner h.compatibleMacroSquares))
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the canonical-free-site Figure 16 global-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        h.canonicalActiveCorner h.compatibleMacroSquares))
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 end FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
 
@@ -3262,25 +3292,35 @@ def toSourcePositionCodeConstructionObligations
   scaffoldPlane := h.scaffoldPlane
   labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
 
+set_option linter.style.longLine false in
 /-- Convert the checked-stack scaffold-tiling global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  (FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations.toFinalReductionInputs
+    { originZeroWindows := TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+      scaffoldPlane := h.scaffoldPlane
+      labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex })
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the checked-stack scaffold-tiling global-label package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  (FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { originZeroWindows := TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+      scaffoldPlane := h.scaffoldPlane
+      labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex })
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the checked-stack scaffold-tiling global-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  (FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations.domino_problem_undecidable
+    { originZeroWindows := TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+      scaffoldPlane := h.scaffoldPlane
+      labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex })
 
 end FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations
 

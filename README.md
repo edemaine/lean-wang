@@ -167,6 +167,9 @@ Those Figure 16 compatible wrappers now also project to the matching
 `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers, and the
 source-label endpoint routes through the checked-stack/valid-box source
 endpoint.
+The global-label Figure 16 wrappers now specialize through the same
+source-label translated-box route rather than detouring through decoder-step
+wrappers.
 The origin-zero-window Figure 16 wrappers expose the same projections by first
 recovering checked stacks from the origin-zero active/corner windows and then
 using that checked-stack/valid-box bridge.
@@ -304,6 +307,8 @@ stack plus scaffold-plane route directly through
 and the corresponding source-label semantic-correctness-discharged endpoints.
 The checked-stack scaffold-plane source-label final-input wrapper also uses
 the origin-zero source-label projection directly.
+Its global-label sibling now uses the same source-specialized origin-zero
+projection after applying the global-to-source label-index bridge.
 The standalone `TileableSquare figure18ScaffoldTiles` cofinal target is not a
 final route: the direct Figure 18 site-square problem is a diagnostic surface,
 while the proof-facing scaffold target is the Section 7 checked-stack plus

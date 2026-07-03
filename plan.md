@@ -1172,6 +1172,8 @@ recovering checked stacks from origin-zero active/corner windows and then using
 the checked-stack/valid-box bridge.
 The source-label final-input wrapper now uses that origin-zero translated-box
 source-label projection directly instead of rebuilding the decoder-step route.
+The global-label Figure 16 wrappers now use the same source-label translated-box
+route after applying the global-to-source label-index bridge.
 The reduction layer now also has direct source-specialized label-index
 endpoints for Section 7 translated-box data:
 `encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect`
@@ -1259,6 +1261,9 @@ surface.
 The L2C1 canonical-free-site scaffold-plane global-label and source-label
 wrappers now reuse the origin-zero source-label route instead of detouring
 through the decoder-step or direct canonical-free-site source-code endpoints.
+The checked-stack scaffold-plane global-label wrapper now follows that same
+source-specialized origin-zero route after forgetting the global label-index
+target.
 The Section 7 reduction layer now has the same direct route:
 canonical free-site active/corner recognition plus `TilesPlane
 figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBoxData`,
