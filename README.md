@@ -300,8 +300,13 @@ first-candidate wrapper style.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
-`not_figure18CanonicalCheckedRecognizedCompatibleLevelData`; final routes
-should use `Figure18CanonicalCheckedRecognizedCompatibleLevelChecks` instead.
+`not_figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+The proof-facing canonical level-check spelling
+`Figure18CanonicalCheckedRecognizedCompatibleLevelChecks` is also diagnostic:
+`not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks` rules it out by
+the same level-0 checked source-stack obstruction.  Final scaffold work should
+use the Section 7 checked-stack/layer-patch and translated-positive-box
+interfaces instead.
 For the Figure 18 scaffold-plane route, `LeanWang.Final` now also exposes
 checked-stack variants
 `FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations` and the

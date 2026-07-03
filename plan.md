@@ -1080,11 +1080,12 @@ decoder-step/global-label/source-label variants.  The top-level aliases
 `encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
 and
 `domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
-use the live finite-check spelling
-`Figure18CanonicalCheckedRecognizedCompatibleLevelChecks`, which is
-definitionally the compatible macro-square target.  Do not target the row-major
-`Figure18CanonicalCheckedRecognizedCompatibleLevelData` surface for final use:
-it is intentionally refuted by
+are now diagnostic surfaces rather than live scaffold targets:
+`Figure18CanonicalCheckedRecognizedCompatibleLevelChecks` is definitionally the
+canonical compatible macro-square target, and it is refuted by
+`not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks`.  Do not target
+the row-major `Figure18CanonicalCheckedRecognizedCompatibleLevelData` surface
+either; it is intentionally refuted by
 `not_figure18CanonicalCheckedRecognizedCompatibleLevelData`.
 The first-candidate canonical-free-site Figure 16 wrappers now project to the
 matching `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers
@@ -1095,9 +1096,11 @@ free-site/compatible-Figure-16 source-label route directly, for both audited
 L2 candidates, through
 `encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect`
 and its L2C2/unencoded analogues.  These theorems take exactly the three live
-assumptions for this route: canonical free-site active/corner recognition,
-finite compatible Figure 16 level checks, and
-`SourcePositionCodeLabelIndexFromPrimrec`.
+assumptions of the diagnostic route: canonical free-site active/corner
+recognition, finite compatible Figure 16 level checks, and
+`SourcePositionCodeLabelIndexFromPrimrec`.  Because the level-check assumption
+is refuted, the live scaffold path remains the Section 7
+translated-positive-box/layer-patch interface.
 `LeanWang.Final` now exposes the same preferred source-label package for the
 second audited candidate as
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`,
@@ -1383,10 +1386,12 @@ conditions have been narrowed to two proof-facing fronts:
    proof.  This asks for origin-zero active/corner recognition and translated
    positive active-corner boxes for the human-audited L2C2 Figure 13 data.
 
-Do not spend more effort on the diagnostic raw-boundary routes.  The shifted
-raw-boundary board-level interfaces and the raw Figure 13 plane/box routes are
-formally refuted in Lean, and `LeanWang.Final` no longer exposes the refuted
-board-row package endpoints as live final theorem routes.
+Do not spend more effort on the diagnostic raw-boundary or canonical checked
+Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
+the raw Figure 13 plane/box routes, and
+`Figure18CanonicalCheckedRecognizedCompatibleLevelChecks` are formally refuted
+in Lean.  The live scaffold work should stay on the Section 7 translated
+positive-box/layer-patch interfaces.
 
 ### 7. Final Undecidability Theorem
 

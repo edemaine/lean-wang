@@ -98,6 +98,48 @@ theorem not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero :
   contradiction
 
 /--
+The canonical checked Figure 16 recognized-compatible macro-square interface is
+already inconsistent at Robinson level 0.
+
+This is the existential, proof-facing version of
+`not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`: the
+contradiction uses only the checked source-stack compatibility field and does
+not depend on row-major checked-list data.
+-/
+theorem
+    not_canonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_zero :
+    (∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide 0) (RobinsonSquare.freeGridSide 0),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide 0)
+          (2 * RobinsonSquare.freeGridSide 0),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
+              true ∧
+            figure18SiteCompatibleRectangleBool target = true) → False := by
+  rintro ⟨R, hcompatible, _target, _hrecognized, _htarget⟩
+  let S := checkedLayerStackOfSiteRectangle R hcompatible
+  let i0 : Fin (RobinsonSquare.freeGridSide 0) := ⟨0, by decide⟩
+  let j0 : Fin (RobinsonSquare.freeGridSide 0) := ⟨0, by decide⟩
+  have hi0 : i0.val + 1 < RobinsonSquare.freeGridSide 0 := by decide
+  have hboundary := S.blackCompatible.hBoundary i0 j0 hi0
+  change ((S.blockGrid .black i0 j0).hBoundaryMatches
+      (S.blockGrid .black ⟨i0.val + 1, hi0⟩ j0)) at hboundary
+  rw [checkedLayerStackOfSiteRectangle_black_blockGrid R hcompatible i0 j0]
+    at hboundary
+  rw [checkedLayerStackOfSiteRectangle_black_blockGrid R hcompatible
+      ⟨i0.val + 1, hi0⟩ j0] at hboundary
+  have hfalse : decide ((blackBlockAtSite (R i0 j0)).hBoundaryMatches
+      (blackBlockAtSite (R ⟨i0.val + 1, hi0⟩ j0))) = true :=
+    decide_eq_true hboundary
+  rw [blackBlockAtSite_no_hBoundary] at hfalse
+  contradiction
+
+/--
 All-level form of `not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`.
 
 This confirms that theorem surfaces requiring
@@ -109,6 +151,22 @@ theorem not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData :
   intro hlevel
   rcases hlevel 0 with ⟨data⟩
   exact not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero data
+
+/--
+All-level form of
+`not_canonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_zero`.
+
+This rules out the canonical compatible Figure 16 level-check interface too;
+the live scaffold route must avoid checked source-stack adjacency and use the
+Section 7 geometry/layer-patch route instead.
+-/
+theorem
+    not_hasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares :
+    ¬ HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares := by
+  intro hlevel
+  exact
+    not_canonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares_zero
+      (hlevel 0)
 
 end ConcreteData
 end LayeredFigure18ScaffoldData
