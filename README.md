@@ -169,6 +169,10 @@ The still more Robinson-facing variant is
 `FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations`,
 which assumes canonical free-site-rectangle routing and extracts the
 active/corner recognition required by Section 7.
+The stronger origin-zero invariant now has the same finite-square surface,
+`FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations`;
+it derives canonical routing from the origin-zero windows and then reuses the
+cofinal canonical-routing endpoint.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

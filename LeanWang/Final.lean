@@ -382,6 +382,22 @@ structure FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObli
     ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare figure18ScaffoldTiles m
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Origin-zero route with the scaffold-tiling obligation stated as cofinal finite
+square tilings of the concrete Figure 18 scaffold tiles.
+
+This keeps the stronger origin-zero geometric invariant available while
+exposing the same finite-square scaffold target as the canonical-routing final
+surface.
+-/
+structure FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  scaffoldSquares :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare figure18ScaffoldTiles m
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Second-candidate version of the finite checked-stack/layer-patch construction
 route.
@@ -2124,6 +2140,44 @@ theorem domino_problem_undecidable
 
 end FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations
 
+namespace FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert origin-zero windows to canonical routing and reuse the cofinal
+canonical-routing endpoint.
+-/
+def toCofinalCanonicalRoutingSourceCodeConstructionObligations
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
+    FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations where
+  canonicalRouting :=
+    TM0FoldedReduction.l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+      h.originZeroWindows
+  scaffoldSquares := h.scaffoldSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the origin-zero cofinal-square scaffold package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCofinalCanonicalRoutingSourceCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from origin-zero windows and cofinal Figure 18 scaffold squares. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCofinalCanonicalRoutingSourceCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from origin-zero windows and cofinal Figure 18 scaffold squares. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCofinalCanonicalRoutingSourceCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations
+
 namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
@@ -3453,6 +3507,28 @@ source-specialized position-code label-index source target.
 -/
 theorem domino_problem_undecidable_of_figure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations
     (h : FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+cofinal finite square tilings of the concrete Figure 18 scaffold tiles, and
+the source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, cofinal
+finite square tilings of the concrete Figure 18 scaffold tiles, and the
+source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations
+    (h : FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

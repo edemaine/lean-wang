@@ -1078,6 +1078,11 @@ whose geometric field is `L2C1CanonicalFreeSiteRectRouting`.  Section 7 now
 extracts `L2C1CanonicalFreeSiteRectActiveCorner` from this routing package, so
 future scaffold work can target the full board/free-line routing invariant
 without separately proving an active/corner-only theorem.
+The stronger origin-zero route is exposed as
+`FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations`:
+it assumes `L2C1OriginZeroWindows`, the cofinal finite scaffold-square target,
+and the source-label index, then converts the origin-zero windows to canonical
+routing and reuses the canonical-routing final route.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
