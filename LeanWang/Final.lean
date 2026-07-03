@@ -3963,12 +3963,44 @@ structure FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations : Pro
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+L2-specialized signal-tower/translated-positive-box construction route with
+generated one-row position-code rows.
+-/
+structure FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations : Prop where
+  scaffold : FinalL2C1SignalTowerTranslatedPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+/--
+L2-specialized signal-tower/translated-positive-box construction route with
+generated bounded-interior position-code rows.
+-/
+structure FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations : Prop where
+  scaffold : FinalL2C1SignalTowerTranslatedPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+/--
 Section 7 translated-box construction route with generated interior-row source
 target.
 -/
 structure FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Section 7 translated-box construction route with generated one-row position-code
+rows.
+-/
+structure FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+/--
+Section 7 translated-box construction route with generated bounded-interior
+position-code rows.
+-/
+structure FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 /--
 Origin-zero translated-box construction route with the generated decoder-step
@@ -10261,6 +10293,78 @@ theorem domino_problem_undecidable
 
 end FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
 
+namespace FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the L2-specialized signal-tower/translated-positive-box one-row package
+to the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the L2-specialized signal-tower one-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the L2-specialized signal-tower one-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toConstructionObligations.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+
+namespace FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the L2-specialized signal-tower/translated-positive-box bounded-row
+package to the one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the L2-specialized signal-tower/translated-positive-box bounded-row
+package to the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the L2-specialized signal-tower bounded-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOneRowsConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the L2-specialized signal-tower bounded-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOneRowsConstructionObligations.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+
 namespace FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations
 
 set_option linter.style.longLine false in
@@ -10299,6 +10403,108 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations
+
+namespace FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the proof-facing Section 7 translated-box data one-row package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the Section 7 translated-box data one-row package to the L2-specialized
+signal-tower route.
+-/
+def toL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations where
+  scaffold :=
+    finalL2C1SignalTowerTranslatedPositiveBoxDataOfSignalTowerTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the proof-facing Section 7 translated-box one-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the proof-facing Section 7 translated-box one-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations
+
+namespace FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the proof-facing Section 7 translated-box data bounded-row package to
+the one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the proof-facing Section 7 translated-box data bounded-row package to
+the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Section 7 translated-box data bounded-row package to the
+L2-specialized signal-tower route.
+-/
+def toL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations where
+  scaffold :=
+    finalL2C1SignalTowerTranslatedPositiveBoxDataOfSignalTowerTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the proof-facing Section 7 translated-box bounded-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the proof-facing Section 7 translated-box bounded-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations
 
 namespace FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
@@ -13995,6 +14201,50 @@ theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxConstr
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated one-row
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated one-row
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the proof-facing Section 7
 translated-box package and generated interior position-code rows.
 -/
@@ -14010,6 +14260,46 @@ package and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataConstructionObligations
     (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Section 7
+translated-box package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Section 7 translated-box
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataOneRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Section 7
+translated-box package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Section 7 translated-box
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
