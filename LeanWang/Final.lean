@@ -2266,6 +2266,17 @@ def toCheckedStackValidTranslatedBoxConstructionObligations
       h.canonicalActiveCorner h.compatibleMacroSquares
   sourceRows := h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 row-source package to the
+origin-zero translated-box row-source package.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations
+    |>.toOriginZeroTranslatedBoxConstructionObligations
+
 /-- Convert the canonical-free-site Figure 16 package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
@@ -2328,6 +2339,17 @@ def toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
     TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
       h.canonicalActiveCorner h.compatibleMacroSquares
   decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 decoder-step package to the
+origin-zero translated-box decoder-step package.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    |>.toOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
 /-- Convert the canonical-free-site Figure 16 decoder-step package into the endpoint. -/
 def toFinalReductionInputs
@@ -2398,6 +2420,17 @@ def toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
       h.canonicalActiveCorner h.compatibleMacroSquares
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 global-label package to the
+origin-zero translated-box global-label package.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+
 /-- Convert the canonical-free-site Figure 16 global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
@@ -2444,6 +2477,17 @@ def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
       h.canonicalActiveCorner h.compatibleMacroSquares
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 source-label package to the
+origin-zero translated-box source-label package.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+
 /-- Convert the canonical-free-site Figure 16 source-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
@@ -2455,16 +2499,14 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
-    h.canonicalActiveCorner h.compatibleMacroSquares h.labelIndex
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the canonical-free-site Figure 16 source-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
-    h.canonicalActiveCorner h.compatibleMacroSquares h.labelIndex
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
 

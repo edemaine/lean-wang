@@ -90,6 +90,9 @@ is exposed by
 `FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
 Its fields are canonical Robinson free-site active/corner recognition, finite
 compatible Figure 16 checks, and `SourcePositionCodeLabelIndexFromPrimrec`.
+The first-candidate canonical-free-site Figure 16 wrappers now also project to
+the matching `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers
+through the checked-stack/valid-translated-box bridge.
 
 For the finite checked-stack/layer-patch route, the same source target is
 exposed as

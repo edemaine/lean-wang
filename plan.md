@@ -1038,6 +1038,10 @@ definitionally the compatible macro-square target.  Do not target the row-major
 `Figure18CanonicalCheckedRecognizedCompatibleLevelData` surface for final use:
 it is intentionally refuted by
 `not_figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+The first-candidate canonical-free-site Figure 16 wrappers now project to the
+matching `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers
+through the checked-stack/valid-translated-box bridge; the source-label endpoint
+also routes through the checked-stack/valid-box source endpoint.
 The generated-position integration layer now exposes the same canonical
 free-site/compatible-Figure-16 source-label route directly, for both audited
 L2 candidates, through
