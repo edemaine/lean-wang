@@ -978,6 +978,25 @@ theorem sourcePositionCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithPosit
   unfold sourcePositionCodeDecoder sourcePositionCodeDecoderState sourceSearchCodeDecoderInit
   exact sourcePositionCodeDecoderRows_stateFrom_none_eq c fuel k i
 
+set_option linter.style.longLine false in
+/--
+For each fixed source code, the full generated position-code label-index
+decoder is primitive recursive in the fuel, statement offset, and flat label
+index.
+
+The remaining final-reduction target is the uniform source-code version, where
+the source code itself is an input.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_fixed
+    (c : Code) :
+    Primrec (fun p : Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode c p.1 p.2.1 p.2.2) := by
+  let tc := NatPartrecToToPartrec.translate c
+  exact (TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode_primrec_fixed
+    tc).of_eq fun p => by
+      unfold sourceSimStepDataForLabelIndexFromWithPositionCode
+      rfl
+
 theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
       sourcePositionCodeDecoderStep p.1 p.2)) :
