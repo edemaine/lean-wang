@@ -8386,6 +8386,58 @@ def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCom
     (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
     hlevel
 
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      hchecked hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      hchecked hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
 /--
 Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
 first checked-stack/layer-patch finite scaffold package.
@@ -8538,6 +8590,62 @@ def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCom
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     L2C2CheckedStackValidTranslatedBoxData :=
   l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
     originZeroWindows
     (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
       hlevel)
