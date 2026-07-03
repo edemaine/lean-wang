@@ -1415,6 +1415,13 @@ conditions have been narrowed to two proof-facing fronts:
    recursiveness of the vacuous tail `sourceStatementCount c + offset`.  Thus
    the remaining source-side content is the bounded interior descriptor payload,
    not padding rows beyond the generated source statement list.
+   That payload now has a direct numeric-slot target:
+   `SourcePositionCodeInteriorRowsAtIndexPrimrec`.  It feeds
+   `SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec` by cutting off the
+   post-statement tail, and therefore feeds
+   `SourcePositionCodeLabelIndexFromPrimrec`.  This is currently the cleanest
+   source-side theorem to attack before attempting the stronger arbitrary-variable
+   `SourcePositionCodeInteriorRowsPrimrec`.
    The auxiliary `SourceStatementListNodup` gap is no longer a completely
    opaque list fact: `TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint`
    and

@@ -189,6 +189,17 @@ abbrev SourcePositionCodePostStatementRowsAtIndexPrimrec : Prop :=
       (sourceStatementCount p.1 + p.2.1) p.2.2)
 
 /--
+Primitive-recursion target for generated position-code interior rows at a
+concrete numeric label slot.  This is the natural source-side target for the
+descriptor payload: it excludes the known empty row zero and the known empty
+post-statement tail while still avoiding the stronger arbitrary-variable row
+target.
+-/
+abbrev SourcePositionCodeInteriorRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat =>
+    sourcePositionCodeInteriorRowsAtIndex p.1 p.2.1 p.2.2)
+
+/--
 Primitive-recursion target for bounded interior generated position-code rows
 at a concrete numeric label slot.
 -/
@@ -260,6 +271,26 @@ theorem sourcePositionCodePostStatementRowsAtIndexPrimrec :
 
 set_option linter.style.longLine false in
 /--
+The exact one-row-at-index target gives interior rows by shifting the row index
+by one.
+-/
+theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeInteriorRowsAtIndex_primrec_of_oneRowsAtIndex hrows
+
+set_option linter.style.longLine false in
+/--
+Interior numeric-slot rows give bounded-interior numeric-slot rows by cutting
+off the known empty post-statement tail.
+-/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_interiorAtIndex hinterior
+
+set_option linter.style.longLine false in
+/--
 The generated one-row-at-index target gives the accumulator-step target.
 -/
 theorem sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex
@@ -285,7 +316,8 @@ because bounded row `j` is the one-row decoder at row `j + 1`.
 theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
     (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
     SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
-  sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_oneRowsAtIndex hrows
+  sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+    (sourcePositionCodeInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex hrows)
 
 set_option linter.style.longLine false in
 /--
@@ -299,6 +331,17 @@ theorem sourcePositionCodeDecoderStepPrimrec_of_boundedInteriorAtIndex
 
 set_option linter.style.longLine false in
 /--
+Bounded-interior at-index rows imply the source-specialized position-code
+label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    (sourcePositionCodeDecoderStepPrimrec_of_boundedInteriorAtIndex hbounded)
+
+set_option linter.style.longLine false in
+/--
 The generated one-row-at-index target implies the source-specialized
 position-code label-index decoder target.
 -/
@@ -307,6 +350,18 @@ theorem sourcePositionCodeLabelIndexFromPrimrec_of_oneRowsAtIndex
     SourcePositionCodeLabelIndexFromPrimrec :=
   sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
     (sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
+Interior numeric-slot rows imply the source-specialized position-code
+label-index decoder target through the bounded-interior accumulator route.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+    (sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+      hinterior)
 
 set_option linter.style.longLine false in
 /--
@@ -417,6 +472,16 @@ theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_positionCodeBound
 
 set_option linter.style.longLine false in
 /--
+The arbitrary-variable interior target implies the exact interior-at-index
+target used by the generated position-code route.
+-/
+theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_positionCodeInteriorRows
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior hinterior
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of the generated bounded-interior position-code rows
 implies the source-specialized position-code label-index decoder target.
 -/
@@ -434,8 +499,10 @@ the source-specialized position-code label-index decoder target.
 theorem sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
     (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
     SourcePositionCodeLabelIndexFromPrimrec :=
-  sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-    (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
+  sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+    (sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+      (sourcePositionCodeInteriorRowsAtIndexPrimrec_of_positionCodeInteriorRows
+        hinterior))
 
 /--
 The statement-list uniqueness fact needed to identify support-search state
