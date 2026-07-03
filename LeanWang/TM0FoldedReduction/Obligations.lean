@@ -978,9 +978,9 @@ def positionSourceObligationsOfPositionCodeOneRows
           (TM0Route.partrecStartedTM0Machine tc)
           TM0Route.partrecStartedTM0Input).Dom) :
     PositionSourceObligations :=
-  positionSourceObligationsOfLabelIndexFromWithPositionCode
-    (sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRows
-      hvarRows)
+  positionSourceObligationsOfProgramData
+    ((sourcePositionProgramData_computable_of_source_positionCodeOneRows hvarRows).of_eq
+      fun _ => rfl)
     hcorrect
 
 /--
@@ -1011,8 +1011,9 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRows
           (TM0Route.partrecStartedTM0Machine tc)
           TM0Route.partrecStartedTM0Input).Dom) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeOneRows
-    (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hinterior)
+  positionSourceObligationsOfProgramData
+    ((sourcePositionProgramData_computable_of_source_positionCodeBoundedInteriorRows
+      hinterior).of_eq fun _ => rfl)
     hcorrect
 
 /--

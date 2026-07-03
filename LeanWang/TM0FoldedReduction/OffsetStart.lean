@@ -1482,6 +1482,19 @@ theorem sourcePositionProgramData_computable_of_source_positionCodeInteriorRows
   sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
     (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows hinterior)
 
+theorem sourcePositionProgramData_computable_of_source_positionCodeBoundedInteriorRows
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_positionCodeInteriorRows
+    (sourcePositionCodeInteriorRowsIndexVar_primrec_of_oneRows
+      (sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior hbounded))
+
+theorem sourcePositionProgramData_computable_of_source_positionCodeOneRows
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_positionCodeInteriorRows
+    (sourcePositionCodeInteriorRowsIndexVar_primrec_of_oneRows hrows)
+
 theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
       sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
