@@ -592,6 +592,23 @@ structure FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionO
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical-free-site Figure 16 route with generated interior
+position-code rows.
+
+This is the row-source analogue of
+`FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`:
+the existing source-side bridge turns `sourceRows` into the source-specialized
+label-index decoder used by the current endpoint.
+-/
+structure FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate canonical-free-site Figure 16 route with the
 source-specialized position-code label-index source target.
 
@@ -3279,6 +3296,59 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
+namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 row-source package
+to the source-label package by using the existing generated-row decoder bridge.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleLevelChecks := h.compatibleLevelChecks
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 row-source package
+to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleLevelChecks
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate canonical free-site recognition,
+finite compatible Figure 16 level checks, and generated interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate canonical free-site recognition,
+finite compatible Figure 16 level checks, and generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+
 namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -5156,6 +5226,26 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSourcePo
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the second-candidate canonical
+free-site/Figure 16 row-source final package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second-candidate canonical free-site/Figure
+16 row-source final package.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second-candidate canonical
 free-site/Figure 16 source-specialized final package.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
@@ -5206,6 +5296,40 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16Lev
     { canonicalActiveCorner := canonicalActiveCorner
       compatibleLevelChecks := compatibleLevelChecks
       labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleLevelChecks := compatibleLevelChecks
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure16CompatibleCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleLevelChecks := compatibleLevelChecks
+      sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--

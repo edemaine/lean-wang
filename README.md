@@ -171,6 +171,10 @@ also exposes the exact source-label endpoints
 `encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect`
 and the L2C2/unencoded analogues; the L2C2 source-label final surface is
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
+The row-source L2C2 analogue is
+`FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations`, with
+top-level aliases ending in
+`l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

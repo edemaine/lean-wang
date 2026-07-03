@@ -1037,6 +1037,12 @@ second audited candidate as
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`,
 with top-level aliases under
 `*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom`.
+It also exposes the generated-interior-row version
+`FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations`, with
+top-level aliases under
+`*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`;
+this route uses the existing source-side bridge from interior rows to the
+source-specialized label-index decoder.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero
