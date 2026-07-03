@@ -295,6 +295,29 @@ abbrev FinalOriginZeroTranslatedBoxData : Prop :=
     l2Component1BlankCandidateSanity.cornerIndex_valid
 
 /--
+Concrete origin-zero Figure 13 finite-box scaffold target for the first audited
+L2 candidate.
+
+This is one step closer to the human transcription data than
+`FinalOriginZeroTranslatedBoxData`: origin-zero recognizability plus finite raw
+Figure 13 boxes build the translated active-corner boxes by the existing
+Robinson compactness/positive-box route.
+-/
+abbrev FinalOriginZeroFig13BoxData : Prop :=
+  TM0FoldedReduction.L2C1OriginZeroFig13BoxData
+
+set_option linter.style.longLine false in
+/--
+Origin-zero recognizability plus finite Figure 13 boxes instantiate the
+origin-zero translated-box scaffold target.
+-/
+def finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData
+    (data : FinalOriginZeroFig13BoxData) :
+    FinalOriginZeroTranslatedBoxData :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofL2C1Figure18ScaffoldDataPositiveFig13TileableBoxes
+    data.originZeroWindows data.fig13Boxes
+
+/--
 Origin-zero translated-box construction route with the generated interior-row
 source target.
 -/
@@ -324,6 +347,38 @@ position-code label-index source target.
 -/
 structure FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations : Prop where
   scaffold : FinalOriginZeroTranslatedBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
+Origin-zero Figure 13 finite-box construction route with the generated
+interior-row source target.
+-/
+structure FinalOriginZeroFig13BoxConstructionObligations : Prop where
+  scaffold : FinalOriginZeroFig13BoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Origin-zero Figure 13 finite-box construction route with the generated
+decoder-step source target.
+-/
+structure FinalOriginZeroFig13BoxDecoderStepConstructionObligations : Prop where
+  scaffold : FinalOriginZeroFig13BoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Origin-zero Figure 13 finite-box construction route with the global
+position-code label-index source target.
+-/
+structure FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations : Prop where
+  scaffold : FinalOriginZeroFig13BoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
+Origin-zero Figure 13 finite-box construction route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations : Prop where
+  scaffold : FinalOriginZeroFig13BoxData
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
@@ -899,6 +954,72 @@ def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
   ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
       scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero recognizability plus finite Figure 13
+boxes and generated-position source obligations.
+-/
+def ofOriginZeroFig13BoxDataSource
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofOriginZeroTranslatedBoxSource
+    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero recognizability plus finite Figure 13
+boxes and generated interior position-code rows.
+-/
+def ofOriginZeroFig13BoxData
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroTranslatedBox
+    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero recognizability plus finite Figure 13
+boxes and the primitive recursive generated position-code accumulator step.
+-/
+def ofOriginZeroFig13BoxDataDecoderStep
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroTranslatedBoxDecoderStep
+    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero recognizability plus finite Figure 13
+boxes and the global primitive recursive position-code label-index decoder.
+-/
+def ofOriginZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from origin-zero recognizability plus finite Figure 13
+boxes and the source-specialized primitive recursive position-code label-index
+decoder.
+-/
+def ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
     hindex
 
 /--
@@ -1927,6 +2048,109 @@ def toFinalReductionInputs
     h.scaffold h.labelIndex
 
 end FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+
+namespace FinalOriginZeroFig13BoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero Figure 13 finite-box data to the translated-box package
+used by the current final route.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalOriginZeroFig13BoxConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations where
+  scaffold := finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero Figure 13 finite-box row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroFig13BoxConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroFig13BoxData
+    h.scaffold h.sourceRows
+
+end FinalOriginZeroFig13BoxConstructionObligations
+
+namespace FinalOriginZeroFig13BoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero Figure 13 finite-box data to the translated-box
+decoder-step package used by the current final route.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalOriginZeroFig13BoxDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData h.scaffold
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero Figure 13 finite-box decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroFig13BoxDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroFig13BoxDataDecoderStep
+    h.scaffold h.decoderStep
+
+end FinalOriginZeroFig13BoxDecoderStepConstructionObligations
+
+namespace FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the current final route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero Figure 13 finite-box data to the translated-box
+global-label-index package used by the current final route.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations where
+  scaffold := finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero Figure 13 finite-box global-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations
+
+namespace FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero Figure 13 finite-box data to the translated-box
+source-label-index package used by the current final route.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero Figure 13 finite-box source-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations
 
 namespace FinalCheckedConstructionObligations
 
@@ -2974,6 +3198,90 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeC
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxConstructionObligations
+    (h : FinalOriginZeroFig13BoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxConstructionObligations
+    (h : FinalOriginZeroFig13BoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxDecoderStepConstructionObligations
+    (h : FinalOriginZeroFig13BoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the primitive recursive generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxDecoderStepConstructionObligations
+    (h : FinalOriginZeroFig13BoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the global primitive recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroFig13BoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
@@ -3431,6 +3739,130 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeL
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability and finite
+Figure 13 boxes with generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxDataSource
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataSource scaffold source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability and finite Figure
+13 boxes with generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxDataSource
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataSource scaffold source)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxData
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxData
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the generated position-code decoder-step target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxDataDecoderStep
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the generated position-code decoder-step target.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxDataDecoderStep
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognizability, finite
+Figure 13 boxes, and the source-specialized position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognizability, finite Figure 13
+boxes, and the source-specialized position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_originZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroFig13BoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
       scaffold hindex)
 
 set_option linter.style.longLine false in
