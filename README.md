@@ -207,6 +207,10 @@ The still lower routing sibling
 `FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations`
 uses canonical product-witness routing plus those finite layer patches, deriving
 the compatible routed free-grid premise internally.
+The positive-box sibling
+`FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations`
+replaces layer patches by positive-radius `ActiveCornerIndexedBox` witnesses;
+the radius-zero patch is supplied by the scaffold corner.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

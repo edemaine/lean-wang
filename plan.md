@@ -1086,6 +1086,12 @@ It asks for canonical product-witness routing and finite active-corner layer
 patches for the concrete L2C2 scaffold, then derives the compatible routed
 free-grid field through
 `NatSiteRobinsonCompatibleLevelObligations.ofL2C2CanonicalProductRoutingLayerPatches`.
+The positive-box variant
+`FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations`
+is now exposed too.  It asks for canonical product-witness routing and
+positive-radius `ActiveCornerIndexedBox` witnesses for the same concrete L2C2
+scaffold, then derives finite layer patches via
+`scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero
