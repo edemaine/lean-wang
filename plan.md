@@ -1170,6 +1170,8 @@ These origin-zero-window wrappers now also project to the corresponding
 `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers by first
 recovering checked stacks from origin-zero active/corner windows and then using
 the checked-stack/valid-box bridge.
+The source-label final-input wrapper now uses that origin-zero translated-box
+source-label projection directly instead of rebuilding the decoder-step route.
 The reduction layer now also has direct source-specialized label-index
 endpoints for Section 7 translated-box data:
 `encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect`

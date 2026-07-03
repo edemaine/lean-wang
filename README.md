@@ -170,6 +170,8 @@ endpoint.
 The origin-zero-window Figure 16 wrappers expose the same projections by first
 recovering checked stacks from the origin-zero active/corner windows and then
 using that checked-stack/valid-box bridge.
+Their source-label final-input wrapper now uses the origin-zero translated-box
+source-label projection directly instead of rebuilding the decoder-step route.
 The generated-position integration layer also exposes the corresponding
 semantic-correctness-discharged wrappers for Section 7 translated boxes and
 checked-stack/valid-translated-box data.
@@ -300,6 +302,8 @@ stack plus scaffold-plane route directly through
 `l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane`,
 `encoded_domino_problem_undecidable_l2c1_checked_stacks_figure18_scaffold_tiles_plane_position_source`,
 and the corresponding source-label semantic-correctness-discharged endpoints.
+The checked-stack scaffold-plane source-label final-input wrapper also uses
+the origin-zero source-label projection directly.
 The standalone `TileableSquare figure18ScaffoldTiles` cofinal target is not a
 final route: the direct Figure 18 site-square problem is a diagnostic surface,
 while the proof-facing scaffold target is the Section 7 checked-stack plus

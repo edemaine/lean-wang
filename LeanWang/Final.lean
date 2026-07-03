@@ -2345,7 +2345,9 @@ def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations.scaffold
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the origin-zero Figure 16 source-label-index package. -/
@@ -3322,7 +3324,7 @@ def toOriginZeroSourcePositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  h.toOriginZeroSourcePositionCodeConstructionObligations.toFinalReductionInputs
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the checked-stack scaffold-tiling source-label package. -/
