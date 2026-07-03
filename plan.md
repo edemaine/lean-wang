@@ -1448,6 +1448,20 @@ conditions have been narrowed to two proof-facing fronts:
    The same L2C2 checked-stack/layer-patch public endpoint now also exposes
    generated one-row and bounded-interior source-row wrappers, matching the
    weaker source targets already available for the first L2 route.
+   The split finite-scaffold entry point now exposes the same weaker source
+   targets directly as
+   `encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesOneRows`,
+   `domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesOneRows`,
+   `encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesBoundedRows`,
+   and
+   `domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesBoundedRows`.
+   Thus the finite Figure 13/Figure 16 target can keep checked origin-zero
+   stacks and active-corner layer patches as separate fields while using the
+   currently most accessible source-row obligations.
+   The lower position-reduction layer now also has matching first-candidate
+   Section 7 board/free-line layer-patch one-row and bounded-row correctness
+   wrappers, so the L2C1 and L2C2 finite-check-facing scaffold routes expose
+   the same source-row frontier.
    The lower `TM0FoldedPositionReduction.Theorems` layer now exposes the
    matching L2C2 decoder-step, one-row, and bounded-interior checked-stack
    wrappers with `positionProgramData` correctness discharged; the older

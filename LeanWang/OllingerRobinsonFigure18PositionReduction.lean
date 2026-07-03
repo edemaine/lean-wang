@@ -1261,6 +1261,70 @@ theorem
       data
       (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the generated one-row position-code
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_oneRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the generated one-row position-code
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_oneRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the generated bounded-interior
+position-code rows, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_boundedRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and the generated bounded-interior
+position-code rows, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_boundedRowsCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
 /--
 Encoded domino undecidability from the second finite-check-facing Section 7
 board/free-line layer-patch package and the source-specialized position-code
