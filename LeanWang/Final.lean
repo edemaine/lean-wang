@@ -66,6 +66,14 @@ abbrev SourcePositionCodeBoundedInteriorRowsPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 /--
+Source-side primitive-recursion target for one generated position-code row at
+the concrete numeric label slots decoded by the final position-code
+accumulator.
+-/
+abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeOneRowsAtIndexPrimrec
+
+/--
 Source-side primitive-recursion target for generated bounded-interior
 position-code rows at the concrete numeric label slots decoded by the final
 position-code accumulator.
@@ -177,6 +185,28 @@ theorem sourceBoundedInteriorRowsAtIndexPrimrec_of_interiorRows
 
 set_option linter.style.longLine false in
 /--
+One-row at-index generated position-code rows imply the bounded-interior
+at-index target by shifting bounded row `j` to one-row row `j + 1`.
+-/
+theorem sourceBoundedInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    (h : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    h
+
+set_option linter.style.longLine false in
+/--
+Bounded-interior at-index generated position-code rows recover the exact
+one-row at-index target, including the zero and padding rows.
+-/
+theorem sourceOneRowsAtIndexPrimrec_of_boundedInteriorRowsAtIndex
+    (h : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeOneRowsAtIndexPrimrec_of_boundedInteriorAtIndex
+    h
+
+set_option linter.style.longLine false in
+/--
 The at-index bounded-interior target implies the final generated position-code
 decoder-step target.
 -/
@@ -188,6 +218,16 @@ theorem sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex
 
 set_option linter.style.longLine false in
 /--
+The at-index one-row target implies the final generated position-code
+decoder-step target.
+-/
+theorem sourceDecoderStepPrimrec_of_oneRowsAtIndex
+    (h : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex h
+
+set_option linter.style.longLine false in
+/--
 The at-index bounded-interior target implies the final source-specialized
 position-code label-index target.
 -/
@@ -196,6 +236,17 @@ theorem sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex
     SourcePositionCodeLabelIndexFromPrimrec :=
   sourceLabelIndexPrimrec_of_decoderStep
     (sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex h)
+
+set_option linter.style.longLine false in
+/--
+The at-index one-row target implies the final source-specialized position-code
+label-index target.
+-/
+theorem sourceLabelIndexPrimrec_of_oneRowsAtIndex
+    (h : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceLabelIndexPrimrec_of_decoderStep
+    (sourceDecoderStepPrimrec_of_oneRowsAtIndex h)
 
 set_option linter.style.longLine false in
 /-- The final one-row and interior source-row targets are equivalent. -/
@@ -216,6 +267,13 @@ theorem sourceInteriorRowsPrimrec_iff_boundedInteriorRowsPrimrec :
     SourcePositionCodeInteriorRowsPrimrec ↔
       SourcePositionCodeBoundedInteriorRowsPrimrec :=
   TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_iff_boundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/-- The final one-row-at-index and bounded-interior-at-index targets are equivalent. -/
+theorem sourceOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec :
+    SourcePositionCodeOneRowsAtIndexPrimrec ↔
+      SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /-- One-row generated position-code rows imply the source-specialized label-index target. -/
