@@ -96,6 +96,18 @@ structure FinalReductionInputs : Prop where
   scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData
   source : TM0FoldedReduction.PositionSourceObligations
 
+set_option linter.style.longLine false in
+/--
+The two remaining construction interfaces for the preferred second-candidate
+route.
+
+This mirrors `FinalReductionInputs` for the audited L2C2 scaffold, which is
+the current proof-facing Figure 13/Figure 16 target.
+-/
+structure FinalL2C2ReductionInputs : Prop where
+  scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  source : TM0FoldedReduction.PositionSourceObligations
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch construction route.
 
@@ -2994,6 +3006,116 @@ def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
     hindex
 
 end FinalReductionInputs
+
+namespace FinalL2C2ReductionInputs
+
+/--
+Build the second-candidate final inputs directly from the scaffold package and
+source obligations.
+-/
+def ofScaffoldAndSource
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalL2C2ReductionInputs where
+  scaffold := scaffold
+  source := source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
+the source-specialized position-code label-index decoder target.
+-/
+def ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
+generated interior position-code rows.
+-/
+def ofScaffoldAndSourceRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from the split board/free-line
+active-corner recognition and finite layer patches.
+-/
+def ofBoardFreeLineLayerPatchesAndSource
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSource
+    { boardFreeLineActiveCorner := boardFreeLineActiveCorner
+      patches := layerPatches }
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from the split board/free-line
+layer-patch scaffold fields and the source-specialized label-index target.
+-/
+def ofBoardFreeLineLayerPatchesSourcePositionCodeLabelIndexFrom
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofBoardFreeLineLayerPatchesAndSource
+    boardFreeLineActiveCorner layerPatches
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from the split board/free-line
+layer-patch scaffold fields and generated interior position-code rows.
+-/
+def ofBoardFreeLineLayerPatchesRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofBoardFreeLineLayerPatchesSourcePositionCodeLabelIndexFrom
+    boardFreeLineActiveCorner layerPatches
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the preferred second-candidate final inputs. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2ReductionInputs) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the preferred second-candidate final inputs. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2ReductionInputs) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
+
+end FinalL2C2ReductionInputs
 
 namespace FinalCheckedStackLayerPatchConstructionObligations
 
@@ -6262,6 +6384,18 @@ def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the source-label board/free-line/layer-patch package to the compact
+second-candidate final inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesSourcePositionCodeLabelIndexFrom
+    h.boardFreeLineActiveCorner h.layerPatches h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the concrete second-candidate Figure 13 board/free-line
 layer-patch scaffold package and the source-specialized generated
 position-code label-index decoder.
@@ -6270,7 +6404,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toFinalL2C2ReductionInputs
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -6283,7 +6417,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toFinalL2C2ReductionInputs
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
@@ -6550,13 +6684,24 @@ def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the row-source board/free-line/layer-patch package to the compact
+second-candidate final inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesRows
+    h.boardFreeLineActiveCorner h.layerPatches h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from Section 7 board/free-line active/corner recognition,
 finite layer patches, and generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toFinalL2C2ReductionInputs
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -6567,7 +6712,7 @@ finite layer patches, and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toFinalL2C2ReductionInputs
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
