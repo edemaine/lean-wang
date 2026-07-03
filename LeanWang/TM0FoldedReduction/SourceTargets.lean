@@ -3,14 +3,14 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.TM0FoldedReduction.SourceCore
+import LeanWang.TM0FoldedReduction.SourcePositionCode
 
 /-!
 Public primitive-recursion targets and equivalences for the source-level
 position-coded folded reduction.
 
-The decoder construction lives in `SourceCore`; this module keeps the theorem
-surface cheap to edit and rebuild.
+The decoder construction lives in `SourcePositionCode`; this module keeps the
+theorem surface cheap to edit and rebuild.
 -/
 
 noncomputable section
