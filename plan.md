@@ -985,6 +985,12 @@ It also exposes
 field is the origin-zero active/corner window certificate; checked origin-zero
 stacks are derived by
 `l2c1OriginZeroCheckedStacksOfOriginZeroWindows`.
+The same origin-zero Figure 16 surface now has decoder-step, global-label, and
+source-label variants:
+`FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations`,
+`FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations`,
+and
+`FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations`.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
