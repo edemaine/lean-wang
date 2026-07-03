@@ -4524,6 +4524,38 @@ def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
   patches := patches
 
 /--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the first Nat-site Section 7 layer-patch obligation surface
+directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations.ofL2C1OriginZeroWindowsLayerPatches
+    originZeroWindows patches
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the second Nat-site Section 7 layer-patch obligation surface
+directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations.ofL2C2OriginZeroWindowsLayerPatches
+    originZeroWindows patches
+
+/--
 Finite origin-zero checked stacks and active-corner layer patches instantiate
 the first board/free-line Section 7 layer-patch package directly.
 -/
