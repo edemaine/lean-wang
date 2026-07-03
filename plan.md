@@ -1034,6 +1034,15 @@ candidates. This ties the last local-free-square window route to the existing
 translated-box realization route: origin-zero windows supply recognizability,
 while `TilesPlane figure18ScaffoldTiles` supplies the positive translated
 active-corner boxes.
+The origin-zero recognizability target has been factored once more into the
+actual semantic obligation needed from Robinson geometry:
+`L2C1OriginZeroCombinedActiveCornerWindows` and
+`L2C2OriginZeroCombinedActiveCornerWindows`. These ask only that the decoded
+Figure 18 scaffold site `table.combinedSite` is active throughout each
+origin-zero square and that the lower-left decoded site is the corner. The
+generic bridge reconstructs the indexed Figure 13 coordinates and payload
+product witnesses automatically, yielding the existing `L2C*OriginZeroWindows`
+interfaces.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

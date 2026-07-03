@@ -8693,6 +8693,84 @@ def HasFigure18IndexedActiveCornerOriginZeroWindows
       activeSites cornerSite).toRoleTable
 
 /--
+Semantic origin-zero active/corner windows, phrased directly in terms of the
+decoded scaffold site of each combined tile.
+
+This is the leaner target for the geometric Section 7 proof: once the Figure 18
+site decoded at each origin-zero coordinate is known to be active, and the
+lower-left site is known to be the distinguished corner, the Figure 13 index,
+quadrant, and product witnesses required by
+`Figure18IndexedActiveCornerWindow` are recovered automatically from the
+combined-tile decomposition.
+-/
+def HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (table : Figure18RoleTable) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile}
+    (x : Int × Int → TileIn (combineWithScaffold
+      table.presentation.toScaffold T seed)),
+    ValidPlaneTiling (combineWithScaffold
+      table.presentation.toScaffold T seed) x →
+      ∀ n : Nat, 0 < n →
+        (∀ i : Fin n, ∀ j : Fin n,
+          CellRole.isActive
+            (table.roleAtSite
+              (table.combinedSite
+                (x (Int.ofNat i.val, Int.ofNat j.val)))) = true) ∧
+        table.roleAtSite (table.combinedSite (x (0, 0))) = CellRole.corner
+
+/--
+Decoded-site origin-zero active/corner windows supply indexed origin-zero
+windows.  The proof extracts Figure 13 indices, quadrants, and payload product
+witnesses from `table.combinedSite` and `table.combinedPayload`.
+-/
+theorem
+    hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    {table : Figure18RoleTable}
+    (hwindows :
+      HasFigure18OriginZeroCombinedActiveCornerWindowsForTable table) :
+    HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨hactive, hcorner⟩
+  let siteAt : Fin n → Fin n → Figure18Site :=
+    fun i j => table.combinedSite (x (Int.ofNat i.val, Int.ofNat j.val))
+  refine ⟨⟨{
+    origin := (0, 0)
+    indexRect := fun i j => (siteAt i j).index
+    quadrantRect := fun i j => (siteAt i j).quadrant
+    active := ?_
+    corner := ?_
+    product := ?_
+  }, rfl⟩⟩
+  · intro i j
+    simpa [siteAt, Figure18RoleTable.roleAtSite] using hactive i j
+  · simpa [siteAt, Figure18RoleTable.roleAtSite] using hcorner
+  · intro i j
+    refine ⟨table.combinedPayload
+      (x (Int.ofNat i.val, Int.ofNat j.val)), ?_⟩
+    simpa [siteAt, Figure18Site.tile] using
+      table.combinedPayload_product
+        (x (Int.ofNat i.val, Int.ofNat j.val))
+
+def HasFigure18OriginZeroCombinedActiveCornerWindows
+    (activeSites : List Figure18Site) (cornerSite : Figure18Site) :
+    Prop :=
+  HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (Figure18RoleTable.FlatRoleTable.ofActiveSites
+      activeSites cornerSite).toRoleTable
+
+/--
+Decoded-site origin-zero active/corner windows supply indexed origin-zero
+windows for a concrete active-site/corner-site list.
+-/
+theorem hasFigure18IndexedActiveCornerOriginZeroWindows_of_combinedActiveCornerWindows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18OriginZeroCombinedActiveCornerWindows activeSites cornerSite) :
+    HasFigure18IndexedActiveCornerOriginZeroWindows activeSites cornerSite :=
+  hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    hwindows
+
+/--
 Origin-zero indexed active/corner windows are a stronger form of the ordinary
 translation-invariant indexed active/corner window hypothesis.
 -/

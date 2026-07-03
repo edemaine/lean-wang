@@ -982,6 +982,55 @@ abbrev L2C2OriginZeroWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Decoded-site origin-zero active/corner hypothesis for the first audited
+L2-blank candidate.
+
+This is the leaner geometric target below `L2C1OriginZeroWindows`: it only asks
+that the decoded Figure 18 site at each origin-zero coordinate is active and
+that the lower-left decoded site is the corner.  The indexed Figure 13 data and
+payload product witnesses are recovered automatically.
+-/
+abbrev L2C1OriginZeroCombinedActiveCornerWindows : Prop :=
+  OllingerRobinson.HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Decoded-site origin-zero active/corner hypothesis for the second audited
+L2-blank candidate.
+-/
+abbrev L2C2OriginZeroCombinedActiveCornerWindows : Prop :=
+  OllingerRobinson.HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+The leaner decoded-site origin-zero target supplies the existing indexed
+origin-zero window target for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroWindowsOfCombinedActiveCornerWindows
+    (hwindows : L2C1OriginZeroCombinedActiveCornerWindows) :
+    L2C1OriginZeroWindows :=
+  OllingerRobinson.hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    hwindows
+
+/--
+The leaner decoded-site origin-zero target supplies the existing indexed
+origin-zero window target for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+    (hwindows : L2C2OriginZeroCombinedActiveCornerWindows) :
+    L2C2OriginZeroWindows :=
+  OllingerRobinson.hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    hwindows
+
+/--
 Translation-invariant indexed active/corner window hypothesis for the first
 audited L2-blank candidate.
 -/
