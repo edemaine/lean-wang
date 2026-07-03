@@ -1857,6 +1857,41 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_full_range
   sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_range_eq_nil
     c fuel TM0Route.partrecVarList.length (le_refl _)
 
+theorem flatMap_range_dropPrefix {α : Type} (f : Nat → List α) {n count : Nat}
+    (hn : n ≤ count) :
+    (List.range count).flatMap f =
+      (List.range n).flatMap f ++ (List.Ico n count).flatMap f := by
+  have hsplit :
+      List.range count = List.range n ++ List.Ico n count := by
+    calc
+      List.range count = List.Ico 0 count := by
+        exact (List.Ico.zero_bot count).symm
+      _ = List.Ico 0 n ++ List.Ico n count := by
+        exact (List.Ico.append_consecutive (Nat.zero_le n) hn).symm
+      _ = List.range n ++ List.Ico n count := by
+        rw [List.Ico.zero_bot]
+  rw [hsplit]
+  simp [List.flatMap_append]
+
+theorem sourcePartrecVarList_length_le_partrecVarList_length_mul_succ
+    (fuel : Nat) :
+    TM0Route.partrecVarList.length ≤
+      TM0Route.partrecVarList.length * (fuel + 1) := by
+  nth_rewrite 1 [← Nat.mul_one TM0Route.partrecVarList.length]
+  exact Nat.mul_le_mul_left _ (Nat.succ_le_succ (Nat.zero_le fuel))
+
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_tail_after_zero_block
+    (c : Code) (fuel : Nat) :
+    (List.range (TM0Route.partrecVarList.length * (fuel + 1))).flatMap
+        (sourceSimStepDataForLabelIndexFromWithPositionCode c (fuel + 1) 0) =
+      (List.Ico TM0Route.partrecVarList.length
+          (TM0Route.partrecVarList.length * (fuel + 1))).flatMap
+        (sourceSimStepDataForLabelIndexFromWithPositionCode c (fuel + 1) 0) := by
+  rw [flatMap_range_dropPrefix
+    (sourceSimStepDataForLabelIndexFromWithPositionCode c (fuel + 1) 0)
+    (sourcePartrecVarList_length_le_partrecVarList_length_mul_succ fuel)]
+  simp [sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_full_range_eq_nil c fuel]
+
 def sourcePositionCodeOneRowsIndexVar
     (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=

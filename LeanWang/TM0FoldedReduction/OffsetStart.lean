@@ -292,6 +292,12 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_firstBlock_eq_nil
   sourceSimStepDataForLabelIndexStartWithPositionCode_range_eq_nil
     c TM0Route.partrecVarList.length (le_refl _)
 
+theorem sourcePartrecVarList_length_le_sourceLabelCount (c : Code) :
+    TM0Route.partrecVarList.length ≤ sourceLabelCount c := by
+  rw [sourceLabelCount_eq_statementCount_mul]
+  nth_rewrite 1 [← Nat.one_mul TM0Route.partrecVarList.length]
+  exact Nat.mul_le_mul_right _ (Nat.succ_le_of_lt (sourceStatementCount_pos c))
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
     (hv : TM0Route.partrecVarList[i]? = some v) :
@@ -334,6 +340,17 @@ def sourceSimStepDataByLabelIndexWithPositionCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithPositionCode c)
+
+theorem sourceSimStepDataByLabelIndexWithPositionCode_eq_tail_after_firstBlock
+    (c : Code) :
+    sourceSimStepDataByLabelIndexWithPositionCode c =
+      (List.Ico TM0Route.partrecVarList.length (sourceLabelCount c)).flatMap
+        (sourceSimStepDataForLabelIndexStartWithPositionCode c) := by
+  unfold sourceSimStepDataByLabelIndexWithPositionCode
+  rw [flatMap_range_dropPrefix
+    (sourceSimStepDataForLabelIndexStartWithPositionCode c)
+    (sourcePartrecVarList_length_le_sourceLabelCount c)]
+  simp [sourceSimStepDataForLabelIndexStartWithPositionCode_firstBlock_eq_nil c]
 
 theorem sourceSimStepDataForLabelIndexStart_eq (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexStart c i =
