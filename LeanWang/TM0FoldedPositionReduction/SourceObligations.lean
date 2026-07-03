@@ -78,8 +78,9 @@ is imported.
 def positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfGlobalPositionCodeLabelIndexFrom hindex
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+      hindex)
 
 /--
 Primitive recursiveness of the generated one-row position-code decoder gives
@@ -90,20 +91,21 @@ def positionSourceObligationsOfPositionCodeOneRowsCorrect
     (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeOneRows hvarRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows hvarRows)
 
 set_option linter.style.longLine false in
 /--
-Packaged generated one-row position-code decoder and translated statement-list
-uniqueness give the full generated-position source obligations once the
-semantic folded proof is imported.
+The packaged generated one-row position-code decoder also gives the full
+generated-position source obligations once the semantic folded proof is
+imported.  The package keeps translated statement-list uniqueness for the
+older normalized-program route; this generated-position route only needs the
+row decoder field.
 -/
 def positionSourceObligationsOfPositionCodeOneRowsWithStatementNodupCorrect
     (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeOneRowsWithStatementNodup hrows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfPositionCodeOneRowsCorrect hrows.rows
 
 /--
 Primitive recursiveness of the generated bounded-interior position-code rows
@@ -114,20 +116,21 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
     (hbounded : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeBoundedInteriorRows hbounded
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      hbounded)
 
 set_option linter.style.longLine false in
 /--
-Packaged generated bounded-interior position-code decoder and translated
-statement-list uniqueness give the full generated-position source obligations
-once the semantic folded proof is imported.
+The packaged generated bounded-interior position-code decoder also gives the
+full generated-position source obligations once the semantic folded proof is
+imported.  The translated statement-list uniqueness field is retained for the
+older normalized-program route.
 -/
 def positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodupCorrect
     (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
-    hbounded TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded.rows
 
 /--
 Primitive recursiveness of the generated interior position-code rows gives the
@@ -138,20 +141,21 @@ def positionSourceObligationsOfPositionCodeInteriorRowsCorrect
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
       sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeInteriorRows hinterior
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      hinterior)
 
 set_option linter.style.longLine false in
 /--
-Packaged generated interior position-code decoder and translated statement-list
-uniqueness give the full generated-position source obligations once the
-semantic folded proof is imported.
+The packaged generated interior position-code decoder also gives the full
+generated-position source obligations once the semantic folded proof is
+imported.  The translated statement-list uniqueness field is retained for the
+older normalized-program route.
 -/
 def positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
     (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-    hinterior TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior.rows
 
 end TM0FoldedReduction
 
