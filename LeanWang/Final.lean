@@ -154,6 +154,50 @@ theorem sourceOneRowsPrimrec_of_interiorRows
   TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_interior h
 
 set_option linter.style.longLine false in
+/--
+Bounded-interior generated position-code rows imply the at-index target used by
+the final position-code accumulator.
+-/
+theorem sourceBoundedInteriorRowsAtIndexPrimrec_of_boundedInteriorRows
+    (h : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_positionCodeBoundedInteriorRows
+    h
+
+set_option linter.style.longLine false in
+/--
+Interior generated position-code rows imply the at-index target used by the
+final position-code accumulator.
+-/
+theorem sourceBoundedInteriorRowsAtIndexPrimrec_of_interiorRows
+    (h : SourcePositionCodeInteriorRowsPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourceBoundedInteriorRowsAtIndexPrimrec_of_boundedInteriorRows
+    (sourceBoundedInteriorRowsPrimrec_of_interiorRows h)
+
+set_option linter.style.longLine false in
+/--
+The at-index bounded-interior target implies the final generated position-code
+decoder-step target.
+-/
+theorem sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex
+    (h : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_boundedInteriorAtIndex
+    h
+
+set_option linter.style.longLine false in
+/--
+The at-index bounded-interior target implies the final source-specialized
+position-code label-index target.
+-/
+theorem sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex
+    (h : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceLabelIndexPrimrec_of_decoderStep
+    (sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex h)
+
+set_option linter.style.longLine false in
 /-- The final one-row and interior source-row targets are equivalent. -/
 theorem sourceOneRowsPrimrec_iff_interiorRowsPrimrec :
     SourcePositionCodeOneRowsPrimrec ↔ SourcePositionCodeInteriorRowsPrimrec :=
