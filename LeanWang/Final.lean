@@ -2449,8 +2449,7 @@ source obligations.
 -/
 def ofScaffoldAndSourceDecoderStep
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
-      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     FinalReductionInputs :=
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
@@ -9798,8 +9797,7 @@ position-code accumulator step.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceDecoderStep
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
-      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourceDecoderStep scaffold hstep)
@@ -9812,8 +9810,7 @@ position-code accumulator step.
 -/
 theorem domino_problem_undecidable_of_scaffoldAndSourceDecoderStep
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hstep : Primrec (fun p : Code × TM0FoldedReduction.SourceSearchCodeDecoderState =>
-      TM0FoldedReduction.sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourceDecoderStep scaffold hstep)

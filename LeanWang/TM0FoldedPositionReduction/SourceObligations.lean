@@ -63,8 +63,7 @@ the full generated-position source obligations once the semantic folded proof
 is imported.
 -/
 def positionSourceObligationsOfPositionCodeDecoderStepCorrect
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     PositionSourceObligations :=
   positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
     (sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep hstep)

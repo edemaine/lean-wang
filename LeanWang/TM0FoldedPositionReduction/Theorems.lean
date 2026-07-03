@@ -42,8 +42,7 @@ accumulator step, with `positionProgramData` semantic correctness discharged.
 -/
 theorem encoded_domino_problem_undecidable_of_scaffold_position_source_decoderStepCorrect
     (S : Scaffold) (hS : IsScaffold S)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
@@ -54,8 +53,7 @@ accumulator step, with `positionProgramData` semantic correctness discharged.
 -/
 theorem domino_problem_undecidable_of_scaffold_position_source_decoderStepCorrect
     (S : Scaffold) (hS : IsScaffold S)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
@@ -116,8 +114,7 @@ certificate and the generated position-code accumulator step, with
 -/
 theorem encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_decoderStepCorrect
     (data : L2C1CheckedStackLayerPatchData)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
     data (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
@@ -130,8 +127,7 @@ Unencoded domino undecidability from the first checked-stack/layer-patch Section
 -/
 theorem domino_problem_undecidable_l2c1_checked_stack_layer_patches_decoderStepCorrect
     (data : L2C1CheckedStackLayerPatchData)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
     data (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
@@ -170,8 +166,7 @@ Encoded domino undecidability from the second checked-stack/layer-patch Section
 -/
 theorem encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_decoderStepCorrect
     (data : L2C2CheckedStackLayerPatchData)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
     data (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
@@ -184,8 +179,7 @@ Unencoded domino undecidability from the second checked-stack/layer-patch Sectio
 -/
 theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_decoderStepCorrect
     (data : L2C2CheckedStackLayerPatchData)
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2)) :
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
     data (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
