@@ -2199,6 +2199,27 @@ abbrev FinalCheckedSignalTowerFig13BoxData : Prop :=
   TM0FoldedReduction.L2C1CheckedSignalTowerFig13BoxData
 
 /--
+Diagnostic origin-zero Figure 13 finite-box scaffold target for the second
+audited L2 candidate.
+
+Like `FinalOriginZeroFig13BoxData`, this lives only as a record of a refuted
+route through raw Figure 13 finite boxes.  The live L2C2 scaffold targets use
+the checked layer-patch and translated-box interfaces instead.
+-/
+abbrev FinalL2C2OriginZeroFig13BoxData : Prop :=
+  TM0FoldedReduction.L2C2OriginZeroFig13BoxData
+
+/--
+Diagnostic checked-stack Figure 13 finite-box scaffold target for the second
+audited L2 candidate.
+
+This asks for checked origin-zero stacks together with the impossible finite
+raw Figure 13 boxes, so it is useful only for excluding this route.
+-/
+abbrev FinalL2C2CheckedSignalTowerFig13BoxData : Prop :=
+  TM0FoldedReduction.L2C2CheckedSignalTowerFig13BoxData
+
+/--
 The origin-zero Figure 13 finite-box final package is diagnostic only: its raw
 Figure 13 box field is refuted by the finite Figure 13 obstruction.
 -/
@@ -2212,6 +2233,23 @@ it contains the same impossible raw Figure 13 box field.
 theorem not_finalCheckedSignalTowerFig13BoxData :
     ¬ FinalCheckedSignalTowerFig13BoxData := by
   exact TM0FoldedReduction.not_l2c1CheckedSignalTowerFig13BoxData
+
+/--
+The second-candidate origin-zero Figure 13 finite-box final package is
+diagnostic only: its raw Figure 13 box field is refuted by the finite Figure 13
+obstruction.
+-/
+theorem not_finalL2C2OriginZeroFig13BoxData :
+    ¬ FinalL2C2OriginZeroFig13BoxData := by
+  exact TM0FoldedReduction.not_l2c2OriginZeroFig13BoxData
+
+/--
+The second-candidate checked-stack Figure 13 finite-box final package is also
+diagnostic only: it contains the same impossible raw Figure 13 box field.
+-/
+theorem not_finalL2C2CheckedSignalTowerFig13BoxData :
+    ¬ FinalL2C2CheckedSignalTowerFig13BoxData := by
+  exact TM0FoldedReduction.not_l2c2CheckedSignalTowerFig13BoxData
 
 set_option linter.style.longLine false in
 /--
