@@ -5044,6 +5044,123 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatches
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchConstructionObligations.domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with the generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations.domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with the global position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations.domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndex := labelIndex }
+
 namespace FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
