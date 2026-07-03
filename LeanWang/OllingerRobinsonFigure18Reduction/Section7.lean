@@ -17415,6 +17415,110 @@ theorem
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid O h
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first audited L2-blank candidate through
+the direct Robinson Section 7 board/free-line layer-patch package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_layer_patch_obligations_boundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_layer_patch_obligations_position_source
+      O
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndex
+        hbounded hcorrect)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate
+through the direct Robinson Section 7 board/free-line layer-patch package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_layer_patch_obligations_boundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_layer_patch_obligations_position_source
+      O
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndex
+        hbounded hcorrect)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate
+through the direct Robinson Section 7 board/free-line layer-patch package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_layer_patch_obligations_boundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_layer_patch_obligations_position_source
+      O
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndex
+        hbounded hcorrect)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+through the direct Robinson Section 7 board/free-line layer-patch package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_layer_patch_obligations_boundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_layer_patch_obligations_position_source
+      O
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndex
+        hbounded hcorrect)
+
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
 origin-zero active/corner windows routed through the named Robinson Section 7
