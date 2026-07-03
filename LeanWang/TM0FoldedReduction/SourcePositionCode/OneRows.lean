@@ -237,6 +237,24 @@ theorem sourcePositionCodeOneRowsIndexVar_statementCount_add_primrec :
     (sourcePositionCodeOneRowsIndexVar_statementCount_add
       p.1 p.2.1 p.2.2.1 p.2.2.2).symm
 
+theorem sourcePositionCodeOneRowsAtIndex_statementCount_add
+    (c : Code) (offset i : Nat) :
+    sourcePositionCodeOneRowsAtIndex c (sourceStatementCount c + offset) i = [] := by
+  cases hv : TM0Route.partrecVarList[i]? with
+  | none =>
+      simp [sourcePositionCodeOneRowsAtIndex, hv]
+  | some v =>
+      simp [sourcePositionCodeOneRowsAtIndex, hv,
+        sourcePositionCodeOneRowsIndexVar_statementCount_add c offset i v]
+
+theorem sourcePositionCodeOneRowsAtIndex_statementCount_add_primrec :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1
+        (sourceStatementCount p.1 + p.2.1) p.2.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourcePositionCodeOneRowsAtIndex_statementCount_add
+      p.1 p.2.1 p.2.2).symm
+
 theorem sourcePositionCodeOneRowsIndexVar_stmt_some
     {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt

@@ -179,6 +179,16 @@ abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
     sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)
 
 /--
+Primitive-recursion target for the vacuous tail of generated position-code rows
+at numeric label slots.  Rows at `sourceStatementCount c + offset` are past the
+translated source program's finite statement support, so they decode to `[]`.
+-/
+abbrev SourcePositionCodePostStatementRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat =>
+    sourcePositionCodeOneRowsAtIndex p.1
+      (sourceStatementCount p.1 + p.2.1) p.2.2)
+
+/--
 Primitive-recursion target for bounded interior generated position-code rows
 at a concrete numeric label slot.
 -/
@@ -239,6 +249,14 @@ theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_sourcePositionCodeLabelIndexF
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     SourcePositionCodeOneRowsAtIndexPrimrec :=
   sourcePositionCodeOneRowsAtIndex_primrec_of_labelIndexFrom hindex
+
+/--
+Generated position-code rows past the translated source program's finite
+statement support are primitive recursive at numeric label slots.
+-/
+theorem sourcePositionCodePostStatementRowsAtIndexPrimrec :
+    SourcePositionCodePostStatementRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndex_statementCount_add_primrec
 
 set_option linter.style.longLine false in
 /--

@@ -1409,6 +1409,12 @@ conditions have been narrowed to two proof-facing fronts:
    The source-specialized label-index target is now also exposed as equivalent
    to the generated position-code accumulator-step target, so either proof can
    feed the decoder-step theorem surfaces without an extra ad hoc bridge.
+   Rows past the translated program's finite statement support are also closed
+   for the exact numeric slots used by the accumulator:
+   `sourcePositionCodePostStatementRowsAtIndexPrimrec` proves primitive
+   recursiveness of the vacuous tail `sourceStatementCount c + offset`.  Thus
+   the remaining source-side content is the bounded interior descriptor payload,
+   not padding rows beyond the generated source statement list.
    The auxiliary `SourceStatementListNodup` gap is no longer a completely
    opaque list fact: `TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint`
    and
