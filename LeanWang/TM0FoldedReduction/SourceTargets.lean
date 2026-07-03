@@ -104,11 +104,47 @@ theorem sourceSearchCodeLabelIndexFromPrimrec_of_oneRows
     SourceSearchCodeLabelIndexFromPrimrec :=
   sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneRows hrows
 
+/--
+The full bounded-search label-index decoder target specializes back to the
+one-fuel row target.
+-/
+theorem sourceSearchCodeOneRowsPrimrec_of_labelIndexFrom
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeOneRowsPrimrec :=
+  hindex.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.const 1) Primrec.snd))
+
 /-- Variable-branch one-row bounded-search rows generate the full label-index decoder target. -/
 theorem sourceSearchCodeLabelIndexFromPrimrec_of_oneVarRows
     (hrows : SourceSearchCodeOneVarRowsPrimrec) :
     SourceSearchCodeLabelIndexFromPrimrec :=
   sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneVarRows hrows
+
+/-- The full bounded-search label-index decoder target generates the decoder step. -/
+theorem sourceSearchCodeDecoderStepPrimrec_of_labelIndexFrom
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeDecoderStepPrimrec :=
+  sourceSearchCodeDecoderStepPrimrec_of_oneRows
+    (sourceSearchCodeOneRowsPrimrec_of_labelIndexFrom hindex)
+
+/--
+For the bounded-search source route, primitive recursiveness of the full
+label-index decoder and of the accumulator step are equivalent.
+-/
+theorem sourceSearchCodeDecoderStepPrimrec_iff_labelIndexFromPrimrec :
+    SourceSearchCodeDecoderStepPrimrec ↔ SourceSearchCodeLabelIndexFromPrimrec :=
+  ⟨sourceSearchCodeLabelIndexFromPrimrec_of_decoderStep,
+    sourceSearchCodeDecoderStepPrimrec_of_labelIndexFrom⟩
+
+/--
+For the bounded-search source route, primitive recursiveness of the one-fuel
+label-index rows and of the full label-index decoder are equivalent.
+-/
+theorem sourceSearchCodeOneRowsPrimrec_iff_labelIndexFromPrimrec :
+    SourceSearchCodeOneRowsPrimrec ↔ SourceSearchCodeLabelIndexFromPrimrec :=
+  ⟨sourceSearchCodeLabelIndexFromPrimrec_of_oneRows,
+    sourceSearchCodeOneRowsPrimrec_of_labelIndexFrom⟩
 
 /--
 The one-row and interior bounded-search row targets are equivalent through the
