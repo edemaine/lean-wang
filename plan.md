@@ -1059,6 +1059,12 @@ the decoder-step/global-label/source-label variants.  These project through the
 origin-zero scaffold-plane route, so the final theorem statement can now assume
 canonical Robinson free-site active/corner recognition instead of the stronger
 origin-zero window certificate.
+The Section 7 reduction layer now has the same direct route:
+canonical free-site active/corner recognition plus `TilesPlane
+figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBoxData`,
+ordinary `Figure18ScaffoldData.Certificate`s/`IsScaffold`, and both encoded and
+unencoded position-source undecidability endpoints for the two audited L2
+candidates.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
