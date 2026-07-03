@@ -1461,6 +1461,9 @@ conditions have been narrowed to two proof-facing fronts:
    surface aligned with the current finite Figure 16 work without requiring
    valid translated boxes or positive isolated boxes as intermediate public
    hypotheses.
+   The older decoded-window/isolated-box and decoded-window/valid-box packages
+   now also project to this layer-patch family, so existing finite-box routes
+   remain connected while the direct Figure 16 layer-patch checks are developed.
 
    The remaining first-candidate and L2C2 Figure 16 compatible final-package
    structures are now explicitly proved uninhabited in `LeanWang.Final`, via

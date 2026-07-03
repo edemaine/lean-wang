@@ -2726,6 +2726,29 @@ def finalFigure13L2C2LayerPatchDataOfCombinedWindows
       windows)
     patches
 
+set_option linter.style.longLine false in
+/--
+Positive translated isolated active boxes supply the finite active-corner layer
+patches for the second audited L2 blank candidate.
+-/
+def finalFigure13L2C2LayerPatchesOfIsolatedBoxes
+    (boxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    TM0FoldedReduction.L2C2ActiveCornerLayerPatches :=
+  TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    boxes
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes supply the finite active-corner layer patches for the
+second audited L2 blank candidate.
+-/
+def finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes
+    (boxes : FinalFigure13L2C2ValidTranslatedBoxes) :
+    TM0FoldedReduction.L2C2ActiveCornerLayerPatches :=
+  TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes boxes
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
 
@@ -3139,6 +3162,19 @@ def toNatSitesIndexedWindowSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/isolated-box package to the decoded-window/layer-patch
+source-label endpoint.
+-/
+def toCombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/isolated-box package to the existing
 origin-zero/translated-positive-box source-label endpoint.
 -/
@@ -3215,6 +3251,19 @@ def toNatSitesIndexedWindowDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/isolated-box package to the decoded-window/layer-patch
+decoder-step endpoint.
+-/
+def toCombinedWindowLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from decoded origin-zero active/corner windows, positive
 translated isolated active boxes, and the generated position-code decoder step.
 -/
@@ -3267,6 +3316,19 @@ def toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
     finalFigure13L2C2IndexedWindowsOfCombinedWindows
       h.combinedActiveCornerWindows
   realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/isolated-box package to the decoded-window/layer-patch
+global-label endpoint.
+-/
+def toCombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -3338,6 +3400,18 @@ def toNatSitesIndexedWindowConstructionObligations
     finalFigure13L2C2IndexedWindowsOfCombinedWindows
       h.combinedActiveCornerWindows
   realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/isolated-box package to the row-source
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
   sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
@@ -3446,6 +3520,18 @@ def toConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project the one-row decoded-window/isolated-box package to the one-row
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/isolated-box package to the one-row
 origin-zero/translated-positive-box route.
 -/
 def toOriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
@@ -3540,6 +3626,18 @@ def toConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project the bounded-row decoded-window/isolated-box package to the bounded-row
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := finalFigure13L2C2LayerPatchesOfIsolatedBoxes h.isolatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/isolated-box package to the bounded-row
 origin-zero/translated-positive-box route.
 -/
 def toOriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
@@ -3612,6 +3710,20 @@ def toCombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/valid-box package to the decoded-window/layer-patch
+source-label endpoint.
+-/
+def toCombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/valid-box package to the existing
 origin-zero/translated-positive-box source-label endpoint.
 -/
@@ -3668,6 +3780,20 @@ def toCombinedWindowIsolatedBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/valid-box package to the decoded-window/layer-patch
+decoder-step endpoint.
+-/
+def toCombinedWindowLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/valid-box decoder-step package to the generic
 Nat-site indexed-window decoder-step endpoint.
 -/
@@ -3720,6 +3846,20 @@ def toCombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
   isolatedBoxes :=
     finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
       h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box package to the decoded-window/layer-patch
+global-label endpoint.
+-/
+def toCombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -3789,6 +3929,19 @@ def toCombinedWindowIsolatedBoxConstructionObligations
   isolatedBoxes :=
     finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
       h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/valid-box package to the row-source
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
   sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
@@ -3895,6 +4048,19 @@ def toCombinedWindowIsolatedBoxOneRowsConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project the one-row decoded-window/valid-box package to the one-row
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the one-row
 origin-zero/translated-positive-box route.
 -/
 def toOriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
@@ -3992,6 +4158,19 @@ def toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
   isolatedBoxes :=
     finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
       h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the bounded-row
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
   sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
