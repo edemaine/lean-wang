@@ -87,11 +87,10 @@ the full generated-position source obligations once the semantic folded proof
 is imported.
 -/
 def positionSourceObligationsOfPositionCodeOneRowsCorrect
-    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    (hvarRows : SourcePositionCodeOneRowsPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows hvarRows)
+  positionSourceObligationsOfPositionCodeOneRows hvarRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
@@ -112,12 +111,10 @@ gives the full generated-position source obligations once the semantic folded
 proof is imported.
 -/
 def positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
-    (hbounded : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-      hbounded)
+  positionSourceObligationsOfPositionCodeBoundedInteriorRows hbounded
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
@@ -137,12 +134,10 @@ full generated-position source obligations once the semantic folded proof is
 imported.
 -/
 def positionSourceObligationsOfPositionCodeInteriorRowsCorrect
-    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
-      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
     PositionSourceObligations :=
-  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
-    (sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
-      hinterior)
+  positionSourceObligationsOfPositionCodeInteriorRows hinterior
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
