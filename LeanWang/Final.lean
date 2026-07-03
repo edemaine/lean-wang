@@ -7781,6 +7781,62 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchSourcePositionCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDataOneRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.mk
+    scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      sourceRows)).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDataOneRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.mk
+    scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      sourceRows)).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.mk
+    scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      sourceRows)).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.mk
+    scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      sourceRows)).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from second-candidate checked origin-zero
 stacks, valid translated scaffold boxes, and the primitive recursive generated
 position-code decoder step.

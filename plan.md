@@ -1410,6 +1410,10 @@ conditions have been narrowed to two proof-facing fronts:
    finite checked-stack target no longer has to detour through valid translated
    boxes to reach the preferred scaffold-facing endpoint.
 
+   The same L2C2 checked-stack/layer-patch public endpoint now also exposes
+   generated one-row and bounded-interior source-row wrappers, matching the
+   weaker source targets already available for the first L2 route.
+
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
 the raw Figure 13 plane/box routes, and
