@@ -12388,6 +12388,38 @@ theorem domino_problem_undecidable
 
 end FinalFigure13L2C2CompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
 
+set_option linter.style.longLine false in
+/--
+Section 7 board/free-line active/corner recognition plus finite layer patches
+supplies compatible routed free grids for the L2C2 compatible-level surface.
+-/
+def finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table :=
+  (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2Section7BoardFreeLineLayerPatches
+    boardFreeLineActiveCorner layerPatches).levelCompatibleRoutedFreeGrids
+
+set_option linter.style.longLine false in
+/--
+Canonical product-witness routing plus finite layer patches supplies compatible
+routed free grids for the L2C2 compatible-level surface.
+-/
+def finalFigure13L2C2CompatibleRoutedFreeGridsOfCanonicalProductLayerPatches
+    (canonicalProductRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+        FinalFigure13L2C2CompatibleLevelScaffoldData.table)
+    (layerPatches :
+      HasActiveCornerLayerBoxPatches
+        FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table :=
+  (NatSiteRobinsonCompatibleLevelObligations.ofL2C2CanonicalProductRoutingLayerPatches
+    canonicalProductRouting layerPatches).levelCompatibleRoutedFreeGrids
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
 
@@ -12401,8 +12433,8 @@ def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
       FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations where
   compatibleRoutedFreeGrids :=
-    (NatSiteRobinsonCompatibleLevelObligations.ofL2Component2Section7BoardFreeLineLayerPatches
-      h.boardFreeLineActiveCorner h.layerPatches).levelCompatibleRoutedFreeGrids
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
   layerPatches := h.layerPatches
   labelIndex := h.labelIndex
 
@@ -12478,6 +12510,20 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the one-row board/free-line/layer-patch package directly to the one-row
+compatible-level/layer-patch surface.
+-/
+def toCompatibleLevelLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchOneRowsConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
+  layerPatches := h.layerPatches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from Section 7 board/free-line active/corner recognition,
 finite layer patches, and generated one-row position-code rows.
 -/
@@ -12548,6 +12594,20 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the bounded-row board/free-line/layer-patch package directly to the
+bounded-row compatible-level/layer-patch surface.
+-/
+def toCompatibleLevelLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchBoundedRowsConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
+  layerPatches := h.layerPatches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from Section 7 board/free-line active/corner recognition,
 finite layer patches, and generated bounded-interior position-code rows.
 -/
@@ -12599,6 +12659,20 @@ set_option linter.style.longLine false in
 /--
 Project the decoder-step board/free-line/layer-patch package to the compatible
 level/layer-patch final route.
+-/
+def toCompatibleLevelLayerPatchDecoderStepConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchDecoderStepConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
+  layerPatches := h.layerPatches
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Forget the decoder-step board/free-line/layer-patch package to the source-label
+compatible-level/layer-patch route.
 -/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
@@ -12662,11 +12736,25 @@ set_option linter.style.longLine false in
 Project the global-label board/free-line/layer-patch package to the compatible
 level/layer-patch final route.
 -/
+def toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
+  layerPatches := h.layerPatches
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Forget the global-label board/free-line/layer-patch package to the source-label
+compatible-level/layer-patch route.
+-/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
-  h.toSourcePositionCodeConstructionObligations
-    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
+    |>.toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -12714,11 +12802,25 @@ set_option linter.style.longLine false in
 Project the row-source board/free-line/layer-patch package to the compatible
 level/layer-patch final route.
 -/
+def toCompatibleLevelLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfBoardFreeLineLayerPatches
+      h.boardFreeLineActiveCorner h.layerPatches
+  layerPatches := h.layerPatches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source board/free-line/layer-patch package to the source-label
+compatible-level/layer-patch route.
+-/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
-  h.toSourcePositionCodeConstructionObligations
-    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchConstructionObligations
+    |>.toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -12875,8 +12977,8 @@ def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations where
   compatibleRoutedFreeGrids :=
-    (NatSiteRobinsonCompatibleLevelObligations.ofL2C2CanonicalProductRoutingLayerPatches
-      h.canonicalProductRouting h.layerPatches).levelCompatibleRoutedFreeGrids
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfCanonicalProductLayerPatches
+      h.canonicalProductRouting h.layerPatches
   layerPatches := h.layerPatches
   labelIndex := h.labelIndex
 
@@ -12928,11 +13030,25 @@ set_option linter.style.longLine false in
 Convert canonical product-witness routing plus finite layer patches and
 generated interior rows to the compatible-level/layer-patch final route.
 -/
+def toCompatibleLevelLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfCanonicalProductLayerPatches
+      h.canonicalProductRouting h.layerPatches
+  layerPatches := h.layerPatches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert canonical product-witness routing plus finite layer patches and
+generated interior rows to the source-label compatible-level/layer-patch route.
+-/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
-  h.toSourcePositionCodeConstructionObligations
-    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchConstructionObligations
+    |>.toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -12943,7 +13059,7 @@ position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -12955,7 +13071,7 @@ position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations
@@ -12982,6 +13098,21 @@ set_option linter.style.longLine false in
 Convert canonical product-witness routing plus finite layer patches and the
 generated decoder step to the compatible-level/layer-patch final route.
 -/
+def toCompatibleLevelLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchDecoderStepConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfCanonicalProductLayerPatches
+      h.canonicalProductRouting h.layerPatches
+  layerPatches := h.layerPatches
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Convert canonical product-witness routing plus finite layer patches and the
+generated decoder step to the source-label compatible-level/layer-patch route.
+-/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
@@ -12999,7 +13130,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchDecoderStepConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -13012,7 +13143,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchDecoderStepConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations
@@ -13039,12 +13170,28 @@ Convert canonical product-witness routing plus finite layer patches and the
 global position-code label-index target to the compatible-level/layer-patch
 final route.
 -/
+def toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    finalFigure13L2C2CompatibleRoutedFreeGridsOfCanonicalProductLayerPatches
+      h.canonicalProductRouting h.layerPatches
+  layerPatches := h.layerPatches
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert canonical product-witness routing plus finite layer patches and the
+global position-code label-index target to the source-label compatible-level
+layer-patch route.
+-/
 def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
     FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
-  h.toSourcePositionCodeConstructionObligations
-    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
+    |>.toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -13056,7 +13203,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -13069,7 +13216,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+  h.toCompatibleLevelLayerPatchGlobalPositionCodeConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations

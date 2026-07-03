@@ -1469,6 +1469,10 @@ conditions have been narrowed to two proof-facing fronts:
    global label-index, and source-label.  Thus compatible routed free grids plus
    finite layer patches can be tested independently of board/free-line
    recognition and still feed whichever source-side target is closed first.
+   The board/free-line/layer-patch and canonical-product/layer-patch packages
+   now project directly to these compatible-level variants where the matching
+   source target exists, so those scaffold routes no longer have to coerce
+   through source-label just to reach the intermediate compatible-level surface.
 
    The remaining first-candidate and L2C2 Figure 16 compatible final-package
    structures are now explicitly proved uninhabited in `LeanWang.Final`, via
