@@ -1343,6 +1343,48 @@ abbrev L2C2ActiveCornerLayerPatches : Prop :=
 
 set_option linter.style.longLine false in
 /--
+Positive centered active-corner indexed boxes instantiate the finite layer
+patches for the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveBoxes
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Positive centered active-corner indexed boxes instantiate the finite layer
+patches for the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    hboxes_pos
+
+set_option linter.style.longLine false in
+/--
 Positive translated active-corner boxes instantiate the finite layer patches
 for the first audited L2-blank candidate.
 
