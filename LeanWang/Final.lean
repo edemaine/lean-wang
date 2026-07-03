@@ -1040,6 +1040,30 @@ structure FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructi
       l2Component2Figure18ScaffoldData
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks provide the decoded origin-zero active/corner
+windows used by the current L2C2 scaffold surface.
+-/
+def finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+    (hchecked : TM0FoldedReduction.L2C2OriginZeroCheckedStacks) :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows :=
+  TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+    (TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks hchecked)
+
+set_option linter.style.longLine false in
+/--
+Valid translated L2C2 boxes provide the isolated-box invariant used by the
+current scaffold surface.
+-/
+def finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
+    (data : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData := by
+  simpa [l2Component2Figure18ScaffoldData] using
+    l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
+      data.validTranslatedBoxes
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
@@ -4043,17 +4067,30 @@ def toCheckedStackLayerPatchConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box row-source data to
-the origin-zero/translated-positive-box source-label final surface.
+the decoded-window/isolated-box final surface.
+-/
+def toFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations where
+  combinedActiveCornerWindows :=
+    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+      h.scaffold.checkedStacks
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box row-source data to
+the origin-zero/translated-positive-box source-label final surface through the
+decoded-window/isolated-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
-    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
-  scaffold :=
-    TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
-      h.scaffold
-  labelIndex :=
-    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
-      h.sourceRows
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4097,17 +4134,32 @@ def toCheckedStackLayerPatchDecoderStepConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box decoder-step data
-to the origin-zero/translated-positive-box source-label final surface.
+to the decoded-window/isolated-box source-label final surface.
 -/
-def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+def toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
-    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
-  scaffold :=
-    TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+    FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows :=
+    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+      h.scaffold.checkedStacks
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
       h.scaffold
   labelIndex :=
     TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
       h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box decoder-step data
+to the origin-zero/translated-positive-box source-label final surface through
+the decoded-window/isolated-box route.
+-/
+def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4167,15 +4219,31 @@ def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box global-label data
-to the origin-zero/translated-positive-box source-label final surface.
+to the decoded-window/isolated-box source-label final surface.
+-/
+def toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows :=
+    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+      h.scaffold.checkedStacks
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-label data
+to the origin-zero/translated-positive-box source-label final surface through
+the decoded-window/isolated-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
-    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
-  scaffold :=
-    TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
-      h.scaffold
-  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4227,15 +4295,31 @@ def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box data to the
-origin-zero/translated-positive-box final surface.
+decoded-window/isolated-box source-label final surface.
+-/
+def toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows :=
+    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+      h.scaffold.checkedStacks
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box data to the
+origin-zero/translated-positive-box final surface through the
+decoded-window/isolated-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
-    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
-  scaffold :=
-    TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
-      h.scaffold
-  labelIndex := h.labelIndex
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--

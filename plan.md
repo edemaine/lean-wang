@@ -1388,7 +1388,11 @@ conditions have been narrowed to two proof-facing fronts:
    for the human-audited L2C2 Figure 13 data; the projection to
    `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
    then supplies the finite generated pair-compatibility check and existing
-   translated-positive-box endpoint.
+   translated-positive-box endpoint.  The older
+   `FinalL2C2CheckedStackValidTranslatedBox*` wrappers now pass through this
+   decoded-window/isolated-box surface: checked stacks provide canonical
+   active/corner recognition and hence decoded origin-zero combined windows,
+   while valid translated boxes provide the isolated-box invariant.
 
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
