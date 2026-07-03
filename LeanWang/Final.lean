@@ -3992,6 +3992,22 @@ structure FinalSection7PositiveBoxConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+Paper-facing Section 7 board/free-line final obligations with generated
+one-row position-code rows.
+-/
+structure FinalSection7PositiveBoxOneRowsConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+/--
+Paper-facing Section 7 board/free-line final obligations with generated
+bounded-interior position-code rows.
+-/
+structure FinalSection7PositiveBoxBoundedRowsConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+/--
 Paper-facing Section 7 board/free-line translated-box final obligations.
 
 This is one step below the centered positive-box route: the scaffold side gives
@@ -10461,6 +10477,130 @@ theorem domino_problem_undecidable
 
 end FinalSection7PositiveBoxConstructionObligations
 
+namespace FinalSection7PositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the one-row Section 7 positive-box package to the interior-row
+positive-box package.
+-/
+def toConstructionObligations
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    FinalSection7PositiveBoxConstructionObligations where
+  section7 := h.section7
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the one-row Section 7 positive-box package to the source-specialized
+label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the one-row Section 7 positive-box package into the final-input
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceOneRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the paper-facing Section 7 positive-box one-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the paper-facing Section 7 positive-box one-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalSection7PositiveBoxOneRowsConstructionObligations
+
+namespace FinalSection7PositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the bounded-row Section 7 positive-box package to the one-row
+positive-box package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    FinalSection7PositiveBoxOneRowsConstructionObligations where
+  section7 := h.section7
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the bounded-row Section 7 positive-box package to the interior-row
+positive-box package.
+-/
+def toConstructionObligations
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    FinalSection7PositiveBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the bounded-row Section 7 positive-box package to the source-specialized
+label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the bounded-row Section 7 positive-box package into the final-input
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceBoundedRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      h.section7)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the paper-facing Section 7 positive-box bounded-row package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the paper-facing Section 7 positive-box bounded-row package. -/
+theorem domino_problem_undecidable
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalSection7PositiveBoxBoundedRowsConstructionObligations
+
 namespace FinalSection7TranslatedBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -13934,6 +14074,46 @@ theorem domino_problem_undecidable_of_section7PositiveBoxConstructionObligations
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line one-row construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxOneRowsConstructionObligations
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+one-row construction obligations.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxOneRowsConstructionObligations
+    (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line bounded-row construction obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxBoundedRowsConstructionObligations
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+bounded-row construction obligations.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxBoundedRowsConstructionObligations
+    (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
