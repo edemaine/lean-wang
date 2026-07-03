@@ -5501,6 +5501,105 @@ def ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and generated-position source obligations.
+-/
+def ofCheckedStackPositiveBoxDataSource
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and generated interior position-code rows.
+-/
+def ofCheckedStackPositiveBoxData
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchData
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and generated one-row position-code rows.
+-/
+def ofCheckedStackPositiveBoxDataOneRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataOneRows
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and generated bounded-interior position-code rows.
+-/
+def ofCheckedStackPositiveBoxDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataBoundedRows
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and the generated position-code decoder step.
+-/
+def ofCheckedStackPositiveBoxDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataDecoderStep
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and the global position-code label-index decoder.
+-/
+def ofCheckedStackPositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and the source-specialized position-code label-index
+decoder.
+-/
+def ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from the origin-zero translated-box finite scaffold
 certificate and generated-position source obligations.
 -/
@@ -5906,7 +6005,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofCheckedStackPositiveBoxData
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from first checked stacks and positive active-corner boxes. -/
@@ -5944,7 +6044,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackLayerPatchOneRowsConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataOneRows
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -5988,7 +6089,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackLayerPatchBoundedRowsConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataBoundedRows
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -6032,10 +6134,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
-      h.scaffold)
-    h.decoderStep
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataDecoderStep
+    h.scaffold h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -6079,10 +6179,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
-      h.scaffold)
-    h.labelIndex
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -6126,10 +6224,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
-      h.scaffold)
-    h.labelIndex
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
