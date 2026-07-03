@@ -78,6 +78,32 @@ theorem domino_problem_undecidable_of_scaffold_position_source_oneRowsAtIndexCor
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect hrows)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a scaffold and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_boundedRowsAtIndexCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a scaffold and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_boundedRowsAtIndexCorrect
+    (S : Scaffold) (hS : IsScaffold S)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
 /--
 Encoded domino undecidability from a scaffold and the global position-code
 label-index decoder, with `positionProgramData` semantic correctness
