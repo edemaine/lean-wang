@@ -165,20 +165,10 @@ and
 `domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
 combine the same global label-index source target with the cleaner geometric
 origin-zero scaffold hypothesis.
-The canonical free-site source-label route now also has a cofinal finite-square
-surface,
-`FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations`.
-It replaces the `TilesPlane figure18ScaffoldTiles` field by
-`∀ n, ∃ m ≥ n, TileableSquare figure18ScaffoldTiles m`, then uses compactness
-to recover the plane-tiling input.
-The still more Robinson-facing variant is
-`FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations`,
-which assumes canonical free-site-rectangle routing and extracts the
-active/corner recognition required by Section 7.
-The stronger origin-zero invariant now has the same finite-square surface,
-`FinalFigure18ScaffoldCofinalOriginZeroSourceCodeConstructionObligations`;
-it derives canonical routing from the origin-zero windows and then reuses the
-cofinal canonical-routing endpoint.
+The standalone `TileableSquare figure18ScaffoldTiles` cofinal target is not a
+final route: the direct Figure 18 site-square problem is a diagnostic surface,
+while the proof-facing scaffold target is the Section 7 checked-stack plus
+valid-translated-box/layer-patch route.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
