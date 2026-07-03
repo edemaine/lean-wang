@@ -277,6 +277,55 @@ structure FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations :
   scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero translated-box finite scaffold target for the first
+audited L2 candidate.
+
+This is the current most direct Section 7 finite-check surface: it contains the
+origin-zero recognizability, pair compatibility, and translated positive
+active-corner boxes needed to build the checked-stack/layer-patch package used
+by the final reduction.
+-/
+abbrev FinalOriginZeroTranslatedBoxData : Prop :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+
+/--
+Origin-zero translated-box construction route with the generated interior-row
+source target.
+-/
+structure FinalOriginZeroTranslatedBoxConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Origin-zero translated-box construction route with the generated decoder-step
+source target.
+-/
+structure FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Origin-zero translated-box construction route with the global position-code
+label-index source target.
+-/
+structure FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
+Origin-zero translated-box construction route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Paper-facing Section 7 board/free-line final obligations.
 
@@ -776,6 +825,79 @@ def ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
     FinalReductionInputs :=
   ofScaffoldAndSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and generated-position source obligations.
+-/
+def ofOriginZeroTranslatedBoxSource
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSource
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and generated interior position-code rows.
+-/
+def ofOriginZeroTranslatedBox
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchData
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and the primitive recursive generated position-code accumulator
+step.
+-/
+def ofOriginZeroTranslatedBoxDecoderStep
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataDecoderStep
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and the global primitive recursive position-code label-index
+decoder.
+-/
+def ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
       scaffold)
     hindex
 
@@ -1694,6 +1816,117 @@ def toFinalReductionInputs
     h.scaffold h.labelIndex
 
 end FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+
+namespace FinalOriginZeroTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the checked-stack/layer-patch
+package used by the older final route.
+-/
+def toCheckedStackLayerPatchConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    FinalCheckedStackLayerPatchConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBox
+    h.scaffold h.sourceRows
+
+end FinalOriginZeroTranslatedBoxConstructionObligations
+
+namespace FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the checked-stack/layer-patch
+decoder-step package used by the older final route.
+-/
+def toCheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      h.scaffold
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxDecoderStep
+    h.scaffold h.decoderStep
+
+end FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations
+
+namespace FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the current final route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the checked-stack/layer-patch
+global-label-index package used by the older final route.
+-/
+def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box global-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the checked-stack/layer-patch
+source-label-index package used by the older final route.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box source-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+end FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
 
 namespace FinalCheckedConstructionObligations
 
@@ -2989,6 +3222,131 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxSource
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSource scaffold source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxSource
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSource scaffold source)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBox
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBox scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBox
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBox scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and the generated position-code decoder-step target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxDecoderStep
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and the generated position-code decoder-step target.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxDecoderStep
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxDecoderStep scaffold hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and the source-specialized position-code label-index
+target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and the source-specialized position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
       scaffold hindex)
 
 set_option linter.style.longLine false in
