@@ -243,6 +243,17 @@ theorem sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex
 
 set_option linter.style.longLine false in
 /--
+The generated one-row-at-index target implies the source-specialized
+position-code label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_oneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    (sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
 The generated accumulator-step target gives the one-row-at-index target.
 -/
 theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_decoderStep

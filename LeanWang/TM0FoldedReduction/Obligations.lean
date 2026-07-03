@@ -935,6 +935,23 @@ def positionSourceObligationsOfPositionCodeDecoderStep
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of the generated one-row-at-index decoder gives the
+generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeOneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFrom
+    (sourcePositionCodeLabelIndexFromPrimrec_of_oneRowsAtIndex hrows)
+    hcorrect
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of the global position-code label-index decoder gives
 the generated-position source obligations directly.
 -/

@@ -1504,6 +1504,18 @@ theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositio
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of the generated one-row-at-index decoder is enough
+for computability of the source-specialized generated position-coded folded
+program.
+-/
+theorem sourcePositionProgramData_computable_of_source_positionCodeOneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
+    (sourcePositionCodeLabelIndexFromPrimrec_of_oneRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
 The source-specialized position-code label-index decoder gives computability
 of the source-specialized generated position-coded folded program.
 -/

@@ -70,6 +70,18 @@ def positionSourceObligationsOfPositionCodeDecoderStepCorrect
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of the generated one-row-at-index decoder gives the
+full generated-position source obligations once the semantic folded proof is
+imported.
+-/
+def positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeOneRowsAtIndex hrows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of the global position-code label-index decoder gives
 the full generated-position source obligations once the semantic folded proof
 is imported.
