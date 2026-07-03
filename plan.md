@@ -551,14 +551,16 @@ Next implementation targets:
    `not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData`, using the
    level-0 contradiction
    `not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`.
-   `LeanWang.Final` no longer exports theorem wrappers whose scaffold input is
-   a compatible Figure 16 macro-square or level-check assumption; the final
-   theorem surfaces route through `L2C1RobinsonSection7BoardFreeLineLayerPatchData`
-   or the concrete `L2C1CheckedStackLayerPatchData` package instead.  Lower-level
-   compatible-level definitions may remain as diagnostics, but the concrete
-   scaffold proof should route recognized macro-square compatibility through
-   Section 7 free-line geometry and active-corner layer patches, not through
-   adjacent black-layer source-stack block boundaries.
+   `LeanWang.Final` and
+   `LeanWang.OllingerRobinsonFigure18PositionReduction` no longer export theorem
+   wrappers whose scaffold input is a compatible Figure 16 macro-square or
+   level-check assumption; the public theorem surfaces route through
+   `L2C1RobinsonSection7BoardFreeLineLayerPatchData` or the concrete
+   `L2C1CheckedStackLayerPatchData` package instead.  Lower-level compatible-level
+   definitions may remain as diagnostics, but the concrete scaffold proof should
+   route recognized macro-square compatibility through Section 7 free-line
+   geometry and active-corner layer patches, not through adjacent black-layer
+   source-stack block boundaries.
    The corresponding decoder-step construction package
    `FinalSection7PositiveBoxDecoderStepConstructionObligations` exposes the
    intermediate source-facing theorem surface: its source obligation is
