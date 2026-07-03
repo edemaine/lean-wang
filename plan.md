@@ -899,7 +899,13 @@ module exposes the first-candidate route as
 `FinalCheckedStackValidTranslatedBoxConstructionObligations`, with encoded and
 unencoded endpoint theorems.  This gives the concrete scaffold work a
 lower-level target than `L2C1ActiveCornerLayerPatches` without falling back to
-the refuted raw Figure 13 box assumptions.
+the refuted raw Figure 13 box assumptions.  The compatible Figure 16 route now
+also exposes this intermediate target directly:
+`l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16` and
+`l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16` derive valid
+translated scaffold boxes from compatible checked macro-squares, and the
+checked-stack/origin-zero-window constructors package those boxes before
+passing through the existing finite no-neighbor active-site checks.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

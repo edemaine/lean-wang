@@ -7656,6 +7656,48 @@ theorem
   tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
     hlevel
 
+set_option linter.style.longLine false in
+/--
+Canonical checked compatible Figure 16 macro-squares supply valid translated
+Figure 18 scaffold boxes for the first audited L2-blank candidate.
+-/
+def l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base :=
+  Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+    l2Component1Figure18ScaffoldData
+    (fun r _hr =>
+      tileableBoxes_of_compatibleFigure18ScaffoldSquares
+        (compatibleFigure18ScaffoldSquares_of_tilesPlane
+          (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+            hlevel)) r)
+
+set_option linter.style.longLine false in
+/--
+Canonical checked compatible Figure 16 macro-squares supply valid translated
+Figure 18 scaffold boxes for the second audited L2-blank candidate.
+-/
+def l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base :=
+  Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+    l2Component2Figure18ScaffoldData
+    (fun r _hr =>
+      tileableBoxes_of_compatibleFigure18ScaffoldSquares
+        (compatibleFigure18ScaffoldSquares_of_tilesPlane
+          (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+            hlevel)) r)
+
 open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
 def l2c1FreeSiteRectCanonicalCheckedFig16BundledObligations
     (canonicalFreeSiteRectRouting :
@@ -8228,6 +8270,54 @@ def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
 
 /--
 Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData where
+  checkedStacks := hchecked
+  validTranslatedBoxes :=
+    l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData where
+  checkedStacks := hchecked
+  validTranslatedBoxes :=
+    l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
 first checked-stack/layer-patch finite scaffold package.
 -/
 def l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
@@ -8293,6 +8383,92 @@ def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16LevelData
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
     L2C2ActiveCornerLayerPatches :=
   l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked compatible Figure 16 level data supplies valid translated Figure 18
+scaffold boxes for the first audited L2-blank candidate.
+-/
+def l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base :=
+  l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked compatible Figure 16 level data supplies valid translated Figure 18
+scaffold boxes for the second audited L2-blank candidate.
+-/
+def l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base :=
+  l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
     (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
       hlevel)
 
