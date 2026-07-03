@@ -15558,8 +15558,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
         originZeroWindows patches)
       h
 
@@ -15574,8 +15578,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
         originZeroWindows patches)
       h
 
@@ -15590,8 +15598,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   exact
-    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    encoded_domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
         originZeroWindows patches)
       h
 
@@ -15606,8 +15618,12 @@ theorem
     (h : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   exact
-    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-      (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    domino_problem_undecidable_of_figure13_section7_board_free_line_layer_patches_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
         originZeroWindows patches)
       h
 
