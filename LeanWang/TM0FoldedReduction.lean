@@ -1884,10 +1884,29 @@ theorem sourcePositionCodeOneRowsIndexVar_zero_primrec :
   exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
     (sourcePositionCodeOneRowsIndexVar_zero p.1 p.2.1 p.2.2).symm
 
+theorem sourcePositionCodeOneRowsIndexVar_one
+    (c : Code) (i : Nat) (v : TM0Route.PartrecVar) :
+    sourcePositionCodeOneRowsIndexVar c 1 i v =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode 1 i (sourceStatementOne c) v)
+        (sourceStatementOne c) v := by
+  exact sourcePositionCodeOneRowsIndexVar_stmt_some (sourceStatementAt_one c)
+
 def sourcePositionCodeInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   sourcePositionCodeOneRowsIndexVar c (j + 1) i v
+
+theorem sourcePositionCodeInteriorRowsIndexVar_zero
+    (c : Code) (i : Nat) (v : TM0Route.PartrecVar) :
+    sourcePositionCodeInteriorRowsIndexVar c 0 i v =
+      TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c)
+        (TM0FoldedCompiler.labelPositionCode 1 i (sourceStatementOne c) v)
+        (sourceStatementOne c) v := by
+  simpa [sourcePositionCodeInteriorRowsIndexVar] using
+    sourcePositionCodeOneRowsIndexVar_one c i v
 
 theorem sourcePositionCodeInteriorRowsIndexVar_primrec_of_oneRows
     (hrows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
