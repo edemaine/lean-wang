@@ -138,6 +138,12 @@ proved for both audited L2 candidates as
 `TM0FoldedReduction.l2c2CheckedStacksForListedActiveSiteRectangles`; the
 remaining checked-stack bridge is the Robinson geometry that supplies
 origin-zero active/corner windows.
+Canonical free-site active/corner recognition now feeds this bridge directly
+through
+`TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner`
+and its L2C2 analogue, and the corresponding
+`*_CanonicalFreeSiteCanonicalCheckedCompatibleFig16*` constructors combine it
+with the audited Figure 16 data to produce the checked-stack finite packages.
 The lower valid-translated-box target also has decoder-step, global-label, and
 source-label final packages:
 `FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations`,

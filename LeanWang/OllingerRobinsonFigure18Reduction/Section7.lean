@@ -1733,6 +1733,28 @@ def l2c2OriginZeroCheckedStacksOfOriginZeroWindows
       l2Component2BlankCandidatePairCompatibilityBool
 
 /--
+Canonical Robinson free-site active/corner recognition plus the audited finite
+rectangle-stack checks produce origin-zero checked stacks for the first L2
+candidate.
+-/
+def l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroCheckedStacks :=
+  l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner hactiveCorner)
+
+/--
+Canonical Robinson free-site active/corner recognition plus the audited finite
+rectangle-stack checks produce origin-zero checked stacks for the second L2
+candidate.
+-/
+def l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroCheckedStacks :=
+  l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner hactiveCorner)
+
+/--
 Finite origin-zero checked layer stacks recover origin-zero active/corner
 windows for the first audited L2-blank candidate.
 -/
@@ -9049,6 +9071,36 @@ def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCom
 
 set_option linter.style.longLine false in
 /--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the first checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the second checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
 Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
 first board/free-line translated-box Section 7 package.
 -/
@@ -9145,6 +9197,36 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleF
     L2C2CheckedStackLayerPatchData :=
   l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
     (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the first checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the second checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
     hlevel
 
 /--
@@ -9257,6 +9339,36 @@ def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCom
 
 set_option linter.style.longLine false in
 /--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the first checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the second checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
 Checked origin-zero stacks plus checked compatible Figure 16 level data provide
 the first board/free-line translated-box Section 7 package.
 -/
@@ -9360,6 +9472,36 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleF
     L2C2CheckedStackLayerPatchData :=
   l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
     originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the first checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the second checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
     (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
       hlevel)
 

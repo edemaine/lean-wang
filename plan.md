@@ -863,6 +863,16 @@ Figure 13/Figure 16 generated pair-compatibility checks for every locally
 compatible listed active-site rectangle.  Thus the remaining bridge to
 `L2C*OriginZeroCheckedStacks` is the Robinson geometry selecting origin-zero
 active/corner windows, not the finite layer-stack decoding.
+The Section 7 layer now also composes this with the canonical Robinson
+free-site bridge:
+`l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner` and
+`l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner` turn canonical
+free-site active/corner recognition into finite checked stacks.  The matching
+`*_CanonicalFreeSiteCanonicalCheckedCompatibleFig16*` constructors combine
+that geometry with the audited Figure 16 compatibility data to produce the
+checked-stack/valid-translated-box and checked-stack/layer-patch packages.
+Thus the scaffold-side finite decoding is connected below the canonical
+Robinson recognition target.
 
 The current public final surface follows the proof-facing board/free-line
 route: `FinalReductionInputs` asks for
