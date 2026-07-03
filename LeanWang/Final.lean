@@ -4444,6 +4444,140 @@ theorem domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteSourceP
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from canonical free-site recognition, finite
+Figure 16 compatible level checks, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, finite Figure
+16 compatible level checks, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition, finite
+Figure 16 compatible level checks, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, finite Figure
+16 compatible level checks, and the primitive recursive generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition, finite
+Figure 16 compatible level checks, and the global position-code label-index
+source target.
+-/
+theorem encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, finite Figure
+16 compatible level checks, and the global position-code label-index source
+target.
+-/
+theorem domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition, finite
+Figure 16 compatible level checks, and the source-specialized position-code
+label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, finite Figure
+16 compatible level checks, and the source-specialized position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      compatibleMacroSquares := compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from direct board/free-line active-corner
 recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
 generated interior position-code rows.

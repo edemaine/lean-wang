@@ -77,20 +77,19 @@ lake build LeanWang.TM0FoldedPositionReduction
 ```
 
 The main theorem surface in `LeanWang.Final` is currently conditional on the
-scaffold construction plus a source construction interface.  The preferred
-split-obligation source-facing package is
-`FinalSourcePositionCodeConstructionObligations`, whose fields are:
+scaffold construction plus a source construction interface.  The current
+lowest-level endpoint is `FinalReductionInputs`, whose fields are:
 
-- `TM0FoldedReduction.L2C1OriginZeroWindows`: the geometric origin-zero
-  active/corner window invariant for the first audited L2 candidate.
-- `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`:
-  the row-major checked Figure 16 level data that supplies the finite
-  active-corner layer patches.
-- `SourcePositionCodeLabelIndexFromPrimrec`: primitive recursiveness of the
-  position-code label-index decoder after specializing to translated
-  `Nat.Partrec.Code` inputs.  This source-specialized target implies the
-  generated position-code accumulator step
-  `TM0FoldedReduction.sourcePositionCodeDecoderStep`.
+- `TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData`: the
+  proof-facing Section 7 scaffold package for the first audited L2 candidate.
+- `TM0FoldedReduction.PositionSourceObligations`: the generated-position
+  source reduction obligations.
+
+The proof-facing scaffold route closest to the current concrete transcription
+is exposed by
+`FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
+Its fields are canonical Robinson free-site active/corner recognition, finite
+compatible Figure 16 checks, and `SourcePositionCodeLabelIndexFromPrimrec`.
 
 For the finite checked-stack/layer-patch route, the same source target is
 exposed as
@@ -159,33 +158,19 @@ checked-stack/valid-translated-box data.
 The second audited L2 candidate has matching decoder-step, global-label, and
 source-label packages for both checked-stack/layer-patch data and
 checked-stack/valid-translated-box data.
-The more finite Figure 16 route is exposed as
-`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
-and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`;
-there the Figure 16 compatibility certificate supplies the layer patches.
-The corresponding packaged-source aliases
-`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
-and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataPackage`
-use `TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup` as
-the source-side input.  The same final surface is also exposed through the
-lower-level decoder-step aliases
-`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`
+The more finite Figure 16 route is exposed through compatible macro-square
+and compatible level-check surfaces.  The canonical-free-site aliases
+`encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
 and
-`domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataDecoderStep`,
-whose source-side input is primitive recursiveness of the global generated
-position-code accumulator step
-`TM0FoldedReduction.sourcePositionCodeDecoderStep`.  The preferred
-global-label-index aliases are
-`encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
-and
-`domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`.
-The corresponding
-origin-zero-window aliases
-`encoded_domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
-and
-`domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
-combine the same global label-index source target with the cleaner geometric
-origin-zero scaffold hypothesis.
+`domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
+take canonical Robinson free-site active/corner recognition, finite compatible
+Figure 16 level checks, and generated interior source rows.  Decoder-step,
+global-label, and source-label variants are exposed under the same
+`canonicalFreeSiteAndCompatibleFig16LevelChecks*` naming.  The row-major
+`TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
+surface is diagnostic and refuted by
+`not_figure18CanonicalCheckedRecognizedCompatibleLevelData`; final routes
+should use `Figure18CanonicalCheckedRecognizedCompatibleLevelChecks` instead.
 For the Figure 18 scaffold-plane route, `LeanWang.Final` now also exposes
 checked-stack variants
 `FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations` and the

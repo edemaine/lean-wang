@@ -1012,6 +1012,18 @@ The public final layer now exposes this first-candidate finite target as
 compatible Figure 16 macro-squares, and generated interior source rows imply
 the final domino-undecidability endpoints via the preferred Section 7
 translated-box route.
+The canonical Robinson free-site variant is now exposed as
+`FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations` and the
+decoder-step/global-label/source-label variants.  The top-level aliases
+`encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
+and
+`domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
+use the live finite-check spelling
+`Figure18CanonicalCheckedRecognizedCompatibleLevelChecks`, which is
+definitionally the compatible macro-square target.  Do not target the row-major
+`Figure18CanonicalCheckedRecognizedCompatibleLevelData` surface for final use:
+it is intentionally refuted by
+`not_figure18CanonicalCheckedRecognizedCompatibleLevelData`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero
