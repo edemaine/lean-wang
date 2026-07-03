@@ -178,17 +178,43 @@ TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom :
       TM0Route.partrecStartedTM0Input).Dom
 ```
 
-The remaining blocker for the source-level folded route is computability of
-`TM0FoldedCompiler.programData ∘ NatPartrecToToPartrec.translate`. The
-support-list and numeric state-code path is now executable; the next step is to
-remove or localize the file-wide noncomputable section around the folded
-program construction and prove the resulting source program-data map
-computable.
+The older normalized-program route has been superseded by the generated
+position-code route.  The live source-side target is now computability of
+`TM0FoldedCompiler.positionProgramData ∘ NatPartrecToToPartrec.translate`, not
+the broader normalized `programData` map.  The normalized route remains useful
+as a diagnostic comparison path, but the final proof should not spend effort
+proving row equality with the canonical folded rows when the generated
+position-coded program has its own semantic lookup theorem.
 `TM0FoldedCompiler.programData` is a normalized form of `program` where the
 constant initial rows are exposed definitionally, with
 `TM0FoldedCompiler.programData_eq_program` relating it back to the semantic
-`program`. The TM0 count wrappers now have direct primitive-recursive proofs
-through weighted support mirrors, including
+`program`.  The generated-position route instead uses
+`TM0FoldedCompiler.positionProgramData` and the semantic theorem
+`TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom`.
+
+The remaining machine-side blocker is the primitive-recursive construction of
+the source-uniform generated descriptor rows.  The current weakest public
+source target is:
+
+```lean
+TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec
+```
+
+and it is implied by any of the row-level targets:
+
+```lean
+TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+```
+
+These targets avoid the dependent statement lookup type by exposing ordinary
+`List TM0FoldedCompiler.SimStepData` rows over translated
+`Nat.Partrec.Code` inputs.
+
+The support-list and numeric state-code path is executable.  The TM0 count
+wrappers now have direct primitive-recursive proofs through weighted support
+mirrors, including
 `partrecStartedTM0StatementCount_primrec`,
 `partrecStartedTM0LabelCount_primrec`, and
 `partrecStartedTM0StateCount_primrec`. The current obstacle is no longer the
@@ -251,7 +277,8 @@ The semantic half follows from the already-proved folded correctness theorem in
 correctness chain. Keeping it as an explicit source-level obligation avoids
 forcing the lightweight reduction file to import the very large folded semantic
 proof.  The remaining computational target can therefore be narrowed to
-computability of `TM0FoldedCompiler.program ∘ NatPartrecToToPartrec.translate`,
+computability of
+`TM0FoldedCompiler.positionProgramData ∘ NatPartrecToToPartrec.translate`,
 rather than computability on arbitrary `Turing.ToPartrec.Code`.
 
 The lightweight generated-position source route now also has exact-shape
@@ -1336,6 +1363,30 @@ For finite local verification, avoid hand-proving hundreds of color matches. Ins
 - keep a small number of human-readable lemmas explaining what the verified checks imply.
 
 The goal is to make the large finite verification auditable without turning the proof into manual casework.
+
+### Current Frontier
+
+As of the current Lean surface, the final proof is still conditional, but the
+conditions have been narrowed to two proof-facing fronts:
+
+1. **Source reduction.**  Prove one generated position-code row target, ideally
+   `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec` or the weaker
+   `TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec`.  The semantic
+   part of `TM0FoldedReduction.PositionSourceObligations` is already discharged
+   in `TM0FoldedPositionReduction.SourceObligations` by importing the folded
+   compiler correctness theorem.  The remaining source work is the
+   primitive-recursive, source-uniform descriptor-row construction.
+2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
+   7 scaffold package on the live route.  The preferred concrete surface is
+   `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`,
+   or equivalently its scaffold field together with the source label-index
+   proof.  This asks for origin-zero active/corner recognition and translated
+   positive active-corner boxes for the human-audited L2C2 Figure 13 data.
+
+Do not spend more effort on the diagnostic raw-boundary routes.  The shifted
+raw-boundary board-level interfaces and the raw Figure 13 plane/box routes are
+formally refuted in Lean, and `LeanWang.Final` no longer exposes the refuted
+board-row package endpoints as live final theorem routes.
 
 ### 7. Final Undecidability Theorem
 
