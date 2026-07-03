@@ -804,6 +804,26 @@ structure FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructi
       FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical-product-routing/layer-patch
+scaffold route.
+
+This is one routing step below the compatible-level/layer-patch surface:
+Robinson's canonical product-witness routing implies the compatible routed
+free-grid obligation, while the finite layer patches supply the realization
+side of the Section 7 compatible-level package.
+-/
+structure FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalProductRouting :
+    OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table
+  layerPatches :
+    HasActiveCornerLayerBoxPatches
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -3691,6 +3711,51 @@ theorem domino_problem_undecidable
 
 end FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
 
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert canonical product-witness routing plus finite layer patches to the
+compatible-level/layer-patch final route.
+-/
+def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations where
+  compatibleRoutedFreeGrids :=
+    (NatSiteRobinsonCompatibleLevelObligations.ofL2C2CanonicalProductRoutingLayerPatches
+      h.canonicalProductRouting h.layerPatches).levelCompatibleRoutedFreeGrids
+  layerPatches := h.layerPatches
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13
+canonical-product-routing/layer-patch scaffold package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13
+canonical-product-routing/layer-patch scaffold package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -5937,6 +6002,30 @@ position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical-product-routing/layer-patch scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical-product-routing/layer-patch scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

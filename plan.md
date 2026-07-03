@@ -1080,6 +1080,12 @@ The finite-patch sibling
 is now exposed as well; it asks for compatible routed Robinson free grids plus
 `HasActiveCornerLayerBoxPatches` for the same concrete scaffold data, avoiding
 the need to state the full realization certificate at this final surface.
+The next lower routing surface is also exposed:
+`FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations`.
+It asks for canonical product-witness routing and finite active-corner layer
+patches for the concrete L2C2 scaffold, then derives the compatible routed
+free-grid field through
+`NatSiteRobinsonCompatibleLevelObligations.ofL2C2CanonicalProductRoutingLayerPatches`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

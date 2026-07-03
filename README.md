@@ -203,6 +203,10 @@ The finite-patch sibling
 `FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations`
 replaces realization by `HasActiveCornerLayerBoxPatches` for the same concrete
 scaffold data.
+The still lower routing sibling
+`FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations`
+uses canonical product-witness routing plus those finite layer patches, deriving
+the compatible routed free-grid premise internally.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
