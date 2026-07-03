@@ -1004,6 +1004,42 @@ structure FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeCons
       l2Component2BlankCandidateSanity.cornerIndex_valid
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/isolated-box route with
+generated interior position-code rows.
+
+This is the current scaffold-facing Section 7 reduction surface: prove the
+decoded origin-zero active/corner windows and the positive translated isolated
+active boxes for the human-audited L2C2 Figure 13 data, then combine them with
+the finite generated pair-compatibility check.
+-/
+structure FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  isolatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/isolated-box route with the
+source-specialized position-code label-index target.
+
+This is the narrow source-facing form of
+`FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations`.
+-/
+structure FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  isolatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
@@ -1038,6 +1074,106 @@ theorem domino_problem_undecidable
       h.labelIndex)
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/isolated-box package to the existing
+origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+        h.combinedActiveCornerWindows)
+      l2Component2BlankCandidatePairCompatibilityBool
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the source-specialized position-code
+label-index target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/isolated-box package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  isolatedBoxes := h.isolatedBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/isolated-box package to the existing
+origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
 set_option linter.style.longLine true
 
 /--
@@ -7690,6 +7826,52 @@ source-specialized position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, positive translated isolated active boxes, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+positive translated isolated active boxes, and generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, positive translated isolated active boxes, and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+positive translated isolated active boxes, and the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

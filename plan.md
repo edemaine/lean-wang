@@ -1381,10 +1381,14 @@ conditions have been narrowed to two proof-facing fronts:
    primitive-recursive, source-uniform descriptor-row construction.
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
-   `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`,
-   or equivalently its scaffold field together with the source label-index
-   proof.  This asks for origin-zero active/corner recognition and translated
-   positive active-corner boxes for the human-audited L2C2 Figure 13 data.
+   now
+   `FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations`
+   (or its row-source variant).  This asks for decoded origin-zero
+   active/corner windows and positive translated isolated active-corner boxes
+   for the human-audited L2C2 Figure 13 data; the projection to
+   `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+   then supplies the finite generated pair-compatibility check and existing
+   translated-positive-box endpoint.
 
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
