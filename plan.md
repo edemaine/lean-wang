@@ -525,20 +525,23 @@ Next implementation targets:
    scaffold-facing theorem surface.  Its finite scaffold inputs are exactly
    `L2C1OriginZeroCheckedStacks` and `L2C1ActiveCornerLayerPatches`, plus the
    source-side `SourcePositionCodeInteriorRowsPrimrec`.
-7. Prefer the Figure 16 finite-data bridge when working on the concrete
-   scaffold proof:
+7. Replace the current Figure 16 finite-data bridge before using it for the
+   concrete scaffold proof:
    `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
    / `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`.
-   It replaces the abstract layer-patch input by
+   These wrappers currently replace the abstract layer-patch input by
    `Figure18CanonicalCheckedRecognizedCompatibleLevelData`, while retaining
-   the checked origin-zero stack and source-side obligation.
-   Current warning: the first attempted direct instantiation exposed that this
-   interface is still too strong as stated.  The checked source-stack
+   the checked origin-zero stack and source-side obligation.  The direct
+   finite-data interface is too strong as stated: the checked source-stack
    compatibility is phrased in terms of adjacent Figure 16 substitution-block
    boundaries; the audited Figure 13 black layer has no horizontally or
    vertically matching adjacent `phi_L3` block boundaries at all, formalized by
    `blackBlockAtSite_no_hBoundary` and `blackBlockAtSite_no_vBoundary` in
-   `LeanWang.OllingerRobinsonFigure13Obstructions`.
+   `LeanWang.OllingerRobinsonFigure13Obstructions`.  The all-level assumption
+   is now formally refuted by
+   `not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData`, using the
+   level-0 contradiction
+   `not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`.
    Therefore the next scaffold step should replace or weaken this finite-data
    bridge so recognized macro-square compatibility is routed through the
    Section 7 free-line geometry, not through adjacent black-layer source-stack

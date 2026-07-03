@@ -67,6 +67,49 @@ theorem blackBlockAtSite_no_vBoundary
   simpa [blackBlockAtSite] using
     blackBlockAtIndex_no_vBoundary lower.index upper.index
 
+/--
+The current canonical checked Figure 16 recognized-compatible level-data
+interface is inconsistent already at Robinson level 0.
+
+The contradiction uses only the source-stack compatibility field: the black
+layer compatibility certificate would force a horizontal `phi_L3` block-boundary
+match between the two lower-row source sites, but `blackBlockAtSite_no_hBoundary`
+rules out every such concrete Figure 13 black-layer boundary.
+-/
+theorem not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero :
+    CanonicalCheckedFigure16RecognizedCompatibleLevelData 0 → False := by
+  intro data
+  let R := data.sourceSites.toSiteRectangle
+  let S := checkedLayerStackOfSiteRectangle R data.stackCompatible
+  let i0 : Fin (RobinsonSquare.freeGridSide 0) := ⟨0, by decide⟩
+  let j0 : Fin (RobinsonSquare.freeGridSide 0) := ⟨0, by decide⟩
+  have hi0 : i0.val + 1 < RobinsonSquare.freeGridSide 0 := by decide
+  have hboundary := S.blackCompatible.hBoundary i0 j0 hi0
+  change ((S.blockGrid .black i0 j0).hBoundaryMatches
+      (S.blockGrid .black ⟨i0.val + 1, hi0⟩ j0)) at hboundary
+  rw [checkedLayerStackOfSiteRectangle_black_blockGrid R data.stackCompatible i0 j0]
+    at hboundary
+  rw [checkedLayerStackOfSiteRectangle_black_blockGrid R data.stackCompatible
+      ⟨i0.val + 1, hi0⟩ j0] at hboundary
+  have hfalse : decide ((blackBlockAtSite (R i0 j0)).hBoundaryMatches
+      (blackBlockAtSite (R ⟨i0.val + 1, hi0⟩ j0))) = true :=
+    decide_eq_true hboundary
+  rw [blackBlockAtSite_no_hBoundary] at hfalse
+  contradiction
+
+/--
+All-level form of `not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`.
+
+This confirms that theorem surfaces requiring
+`HasCanonicalCheckedFigure16RecognizedCompatibleLevelData` cannot be used as the
+final scaffold route without changing the interface.
+-/
+theorem not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData :
+    ¬ HasCanonicalCheckedFigure16RecognizedCompatibleLevelData := by
+  intro hlevel
+  rcases hlevel 0 with ⟨data⟩
+  exact not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero data
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
