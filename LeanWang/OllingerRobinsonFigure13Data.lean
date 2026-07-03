@@ -11217,6 +11217,31 @@ structure NatSiteRobinsonScaffoldCertificate where
         cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
 
 /--
+Patch-preserving version of `NatSiteRobinsonScaffoldCertificate`.
+
+This keeps the finite Figure 13/Figure 16 layer patches visible through the
+checked-stack Robinson route, instead of immediately compactifying them to a
+plain active-corner realization certificate.
+-/
+structure NatSiteRobinsonLayerPatchScaffoldCertificate where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  robinsonStacks :
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonBoardRoutedFreeGridCheckedStacks
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table
+  patches :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold
+
+/--
 The same Robinson scaffold package, but with the backward scaffold construction
 stated as active-indexed finite boxes instead of the already-forgotten
 realization theorem.
@@ -15433,6 +15458,191 @@ theorem indexedRoutedInstance_isScaffold
   C.indexedRoutedInstance.isScaffold
 
 end NatSiteRobinsonScaffoldCertificate
+
+namespace NatSiteRobinsonLayerPatchScaffoldCertificate
+
+def scaffoldData (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    LayeredFigure18ScaffoldData :=
+  scaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def figure18ScaffoldData (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    Figure18ScaffoldData :=
+  figure18ScaffoldDataOfNatSites C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+
+def toScaffoldCertificate (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    NatSiteRobinsonScaffoldCertificate where
+  activeSiteSpecs := C.activeSiteSpecs
+  activeSiteSpecs_valid := C.activeSiteSpecs_valid
+  cornerIndex := C.cornerIndex
+  cornerQuadrant := C.cornerQuadrant
+  cornerIndex_valid := C.cornerIndex_valid
+  robinsonStacks := C.robinsonStacks
+  realizes :=
+    realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+      (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches C.patches)
+
+def indexedRoutedCertificate
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    C.scaffoldData.IndexedRoutedCertificate :=
+  scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedFreeGridStacksLayerPatches
+    C.activeSiteSpecs C.activeSiteSpecs_valid
+    C.cornerIndex C.cornerQuadrant C.cornerIndex_valid
+    C.robinsonStacks C.patches
+
+def indexedRoutedInstance (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    Figure18IndexedRoutedInstance :=
+  C.indexedRoutedCertificate.toFigure18IndexedRoutedInstance
+
+def flexibleInstance (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    Figure18FlexibleInstance :=
+  C.indexedRoutedCertificate.toFigure18FlexibleInstance
+
+theorem isScaffold (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    IsScaffold C.scaffoldData.scaffold :=
+  C.indexedRoutedCertificate.isScaffold
+
+theorem indexedRoutedInstance_isScaffold
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate) :
+    IsScaffold C.indexedRoutedInstance.presentation.toScaffold :=
+  C.indexedRoutedInstance.isScaffold
+
+def ofLevelCompatibleFreeGridsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (levelCompatibleRoutedFreeGrids :
+      HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonLayerPatchScaffoldCertificate where
+  activeSiteSpecs := activeSiteSpecs
+  activeSiteSpecs_valid := activeSiteSpecs_valid
+  cornerIndex := cornerIndex
+  cornerQuadrant := cornerQuadrant
+  cornerIndex_valid := cornerIndex_valid
+  robinsonStacks :=
+    sparseRawDataOfSites_hasRobinsonBoardRoutedFreeGridCheckedStacks_of_levelCompatible
+      (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+      (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid)
+      hcheck levelCompatibleRoutedFreeGrids
+  patches := patches
+
+def ofLevelSignalLocalTowerFreeGridsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (signalLocalTower :
+      HasFigure18RobinsonBoardLevelSignalLocalTowerForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonLayerPatchScaffoldCertificate :=
+  ofLevelCompatibleFreeGridsLayerPatches activeSiteSpecs activeSiteSpecs_valid
+    cornerIndex cornerQuadrant cornerIndex_valid
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      signalLocalTower)
+    hcheck patches
+
+def ofSection7BoardFreeLineLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid))
+    (hcheck :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonLayerPatchScaffoldCertificate :=
+  ofLevelSignalLocalTowerFreeGridsLayerPatches activeSiteSpecs
+    activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+    (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofBoardFreeLineActiveCorner
+      boardFreeLine)
+    hcheck patches
+
+def ofL2C1Section7BoardFreeLineLayerPatches
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonLayerPatchScaffoldCertificate :=
+  ofSection7BoardFreeLineLayerPatches
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+    patches
+
+def ofL2C2Section7BoardFreeLineLayerPatches
+    (boardFreeLine :
+      Figure18ScaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonLayerPatchScaffoldCertificate :=
+  ofSection7BoardFreeLineLayerPatches
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    boardFreeLine
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+    patches
+
+end NatSiteRobinsonLayerPatchScaffoldCertificate
 
 def HasNatSiteSignalLocalTower
     (activeSiteSpecs : List (Nat × Quadrant))

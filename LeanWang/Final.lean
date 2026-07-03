@@ -1214,6 +1214,18 @@ structure FinalFigure13RobinsonIndexedBoxConstructionObligations where
 
 set_option linter.style.longLine false in
 /--
+Concrete Robinson checked-stack/layer-patch scaffold route.
+
+This parallels `FinalFigure13RobinsonIndexedBoxConstructionObligations`, but
+keeps the finite Figure 13/Figure 16 layer patches as the realization witness
+until the layered indexed-routed certificate is constructed.
+-/
+structure FinalFigure13RobinsonLayerPatchConstructionObligations where
+  scaffold : NatSiteRobinsonLayerPatchScaffoldCertificate
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete Robinson tower/indexed-box scaffold route.
 
 This is one step below `FinalFigure13RobinsonIndexedBoxConstructionObligations`:
@@ -11973,6 +11985,34 @@ theorem domino_problem_undecidable
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure13RobinsonIndexedBoxConstructionObligations
+
+namespace FinalFigure13RobinsonLayerPatchConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the patch-preserving Robinson scaffold certificate and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13RobinsonLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
+    h.scaffold.flexibleInstance h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the patch-preserving Robinson scaffold certificate and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13RobinsonLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
+    h.scaffold.flexibleInstance h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure13RobinsonLayerPatchConstructionObligations
 
 namespace FinalFigure13RobinsonTowerIndexedBoxConstructionObligations
 
