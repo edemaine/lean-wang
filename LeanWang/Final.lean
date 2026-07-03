@@ -1611,11 +1611,27 @@ def toCheckedStackLayerPatchConstructionObligations
       h.scaffold
   sourceRows := h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero
+translated-box row-source package.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
 /-- Convert the checked-stack/valid-translated-box row-source package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
     FinalReductionInputs :=
-  h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBox
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    h.sourceRows
 
 end FinalCheckedStackValidTranslatedBoxConstructionObligations
 
@@ -1647,12 +1663,25 @@ def toCheckedStackLayerPatchDecoderStepConstructionObligations
       h.scaffold
   decoderStep := h.decoderStep
 
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero
+translated-box decoder-step package.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
 /-- Convert the checked-stack/valid-translated-box decoder-step package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+  FinalReductionInputs.ofOriginZeroTranslatedBoxDecoderStep
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
       h.scaffold)
     h.decoderStep
 
@@ -1689,12 +1718,25 @@ def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
       h.scaffold
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero
+translated-box global-label package.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
 /-- Convert the checked-stack/valid-translated-box global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
-    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+  FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
       h.scaffold)
     h.labelIndex
 

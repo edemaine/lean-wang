@@ -149,11 +149,12 @@ source-label final packages:
 `FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
 and
 `FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
-The source-label package projects to
-`FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations` via
+These packages now project to the matching
+`FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers via
 `TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData`,
-so the first-candidate exported endpoint now uses the origin-zero
-translated-positive-box reduction surface directly.
+so the first-candidate exported endpoints use the origin-zero
+translated-positive-box reduction surface before falling back to older
+layer-patch compatibility helpers.
 The checked-stack plus compatible Figure 16 macro-square route has matching
 decoder-step, global-label, and source-label packages that project through this
 valid-translated-box target.
