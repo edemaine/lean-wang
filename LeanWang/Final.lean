@@ -182,6 +182,47 @@ structure FinalFigure13RobinsonIndexedBoxConstructionObligations where
   scaffold : NatSiteRobinsonIndexedBoxScaffoldCertificate
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete Robinson tower/indexed-box scaffold route.
+
+This is one step below `FinalFigure13RobinsonIndexedBoxConstructionObligations`:
+the scaffold side supplies the Section 7 local signal tower, generated pair
+compatibility, and active-corner indexed boxes.  The existing constructor then
+packages those fields as a `NatSiteRobinsonIndexedBoxScaffoldCertificate`.
+-/
+structure FinalFigure13RobinsonTowerIndexedBoxConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  scaffold :
+    NatSiteRobinsonTowerIndexedBoxObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete Robinson signal-tower/translated-positive-box scaffold route.
+
+This is the current Section 7 proof-facing surface: a coherent obstruction
+signal tower plus arbitrarily large translated active-corner boxes.  It converts
+through tower/indexed-box obligations before reaching the final theorem.
+-/
+structure FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  scaffold :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations activeSiteSpecs
+      activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -894,6 +935,80 @@ theorem domino_problem_undecidable
 
 end FinalFigure13RobinsonIndexedBoxConstructionObligations
 
+namespace FinalFigure13RobinsonTowerIndexedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Package tower/indexed-box obligations into the Robinson indexed-box final route.
+-/
+def toRobinsonIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonTowerIndexedBoxConstructionObligations) :
+    FinalFigure13RobinsonIndexedBoxConstructionObligations where
+  scaffold := h.scaffold.toIndexedBoxScaffoldCertificate
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the Robinson tower/indexed-box scaffold package and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13RobinsonTowerIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toRobinsonIndexedBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the Robinson tower/indexed-box scaffold package and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13RobinsonTowerIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toRobinsonIndexedBoxConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13RobinsonTowerIndexedBoxConstructionObligations
+
+namespace FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Package signal-tower/translated-positive-box obligations into the
+tower/indexed-box final route.
+-/
+def toRobinsonTowerIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13RobinsonTowerIndexedBoxConstructionObligations where
+  activeSiteSpecs := h.activeSiteSpecs
+  activeSiteSpecs_valid := h.activeSiteSpecs_valid
+  cornerIndex := h.cornerIndex
+  cornerQuadrant := h.cornerQuadrant
+  cornerIndex_valid := h.cornerIndex_valid
+  scaffold := h.scaffold.toTowerIndexedBoxObligations
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Robinson signal towers, translated positive boxes, and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toRobinsonTowerIndexedBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Robinson signal towers, translated positive boxes, and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toRobinsonTowerIndexedBoxConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1356,6 +1471,46 @@ certificate and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13RobinsonIndexedBoxConstructionObligations
     (h : FinalFigure13RobinsonIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Robinson tower/indexed-box scaffold
+obligations and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonTowerIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Robinson tower/indexed-box scaffold obligations
+and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonTowerIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Robinson signal towers, translated
+positive boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Robinson signal towers, translated positive
+boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

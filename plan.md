@@ -927,6 +927,13 @@ Figure 18 flexible instance endpoint with generated interior position-code
 rows.  This is the cleaner final API for the current scaffold work because it
 matches the certificate produced by the Figure 13/Figure 16 transcription
 rather than restating its lower-level indexed-window and realization fields.
+The same final route is now exposed one and two levels lower via
+`FinalFigure13RobinsonTowerIndexedBoxConstructionObligations` and
+`FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations`.
+Thus the current Section 7 target can be stated directly as a local Robinson
+signal tower plus translated positive active-corner boxes; the existing
+constructors package those facts into tower/indexed-box obligations, then into
+the Robinson indexed-box scaffold certificate.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
