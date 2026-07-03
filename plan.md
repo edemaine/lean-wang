@@ -941,6 +941,12 @@ specialized `FinalL2C1SignalTowerTranslatedPositiveBoxData` and
 specialized signal-tower route, so origin-zero data, signal-tower data, and the
 generic Robinson indexed-box final route are connected without restating the
 active-site list and corner-site parameters.
+The proof-facing Section 7 package
+`TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData` now also feeds this final
+surface directly via
+`FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations`, avoiding a
+manual reconstruction of the Nat-site signal-tower obligation fields in the
+final module.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

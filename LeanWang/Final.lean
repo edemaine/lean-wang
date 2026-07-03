@@ -302,6 +302,17 @@ def finalL2C1SignalTowerTranslatedPositiveBoxDataOfOriginZeroTranslatedBoxData
     FinalL2C1SignalTowerTranslatedPositiveBoxData :=
   data.toL2C1SignalTowerTranslatedPositiveBoxObligations
 
+set_option linter.style.longLine false in
+/--
+The proof-facing Section 7 translated-box package instantiates the
+L2-specialized signal-tower/translated-positive-box target.
+-/
+def finalL2C1SignalTowerTranslatedPositiveBoxDataOfSignalTowerTranslatedBoxData
+    (data : TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxData :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1Figure18ScaffoldDataPositiveTranslatedBoxes
+    data.signalLocalTower data.translatedBoxes
+
 /--
 Diagnostic origin-zero Figure 13 finite-box scaffold target for the first
 audited L2 candidate.
@@ -409,6 +420,14 @@ generated interior-row source target.
 -/
 structure FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations : Prop where
   scaffold : FinalL2C1SignalTowerTranslatedPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Section 7 translated-box construction route with generated interior-row source
+target.
+-/
+structure FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1SignalTowerTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
@@ -1179,6 +1198,45 @@ theorem domino_problem_undecidable
 
 end FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
 
+namespace FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Section 7 translated-box data package to the L2-specialized final
+signal-tower route.
+-/
+def toL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations where
+  scaffold :=
+    finalL2C1SignalTowerTranslatedPositiveBoxDataOfSignalTowerTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the proof-facing Section 7 translated-box package and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the proof-facing Section 7 translated-box package and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations
+
 namespace FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1600,6 +1658,48 @@ boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
     (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the first L2 candidate's
+signal-tower/translated-box scaffold package and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Section 7
+translated-box package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Section 7 translated-box
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerTranslatedBoxDataConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
