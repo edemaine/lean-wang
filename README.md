@@ -165,6 +165,9 @@ Those Figure 16 compatible wrappers now also project to the matching
 `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers, and the
 source-label endpoint routes through the checked-stack/valid-box source
 endpoint.
+The origin-zero-window Figure 16 wrappers expose the same projections by first
+recovering checked stacks from the origin-zero active/corner windows and then
+using that checked-stack/valid-box bridge.
 The generated-position integration layer also exposes the corresponding
 semantic-correctness-discharged wrappers for Section 7 translated boxes and
 checked-stack/valid-translated-box data.

@@ -2103,6 +2103,17 @@ def toFigure16CompatibleConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the origin-zero-window Figure 16 package to the origin-zero
+translated-box row-source package.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations :=
+  h.toFigure16CompatibleConstructionObligations
+    |>.toOriginZeroTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Project the origin-zero-window Figure 16 package to the proof-facing Section 7
 translated-box package.
 -/
@@ -2149,6 +2160,31 @@ theorem domino_problem_undecidable
 end FinalFigure16CompatibleOriginZeroConstructionObligations
 
 namespace FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 decoder-step package to the
+checked-stack Figure 16 decoder-step route.
+-/
+def toFigure16CompatibleDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations) :
+    FinalFigure16CompatibleDecoderStepConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 decoder-step package to the
+origin-zero translated-box decoder-step package.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations :=
+  h.toFigure16CompatibleDecoderStepConstructionObligations
+    |>.toOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -2222,6 +2258,31 @@ def toSourcePositionCodeConstructionObligations
   compatibleMacroSquares := h.compatibleMacroSquares
   labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 global-label package to the
+checked-stack Figure 16 global-label route.
+-/
+def toFigure16CompatibleGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalFigure16CompatibleGlobalPositionCodeConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 global-label package to the
+origin-zero translated-box global-label package.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations :=
+  h.toFigure16CompatibleGlobalPositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+
 /-- Convert the global-label-index package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
@@ -2255,6 +2316,31 @@ def toDecoderStepConstructionObligations
   compatibleMacroSquares := h.compatibleMacroSquares
   decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 source-label package to the
+checked-stack Figure 16 source-label route.
+-/
+def toFigure16CompatibleSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalFigure16CompatibleSourcePositionCodeConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 source-label package to the
+origin-zero translated-box source-label package.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure16CompatibleSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+
 /-- Convert the source-specialized label-index package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
@@ -2266,18 +2352,14 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    h.labelIndex
+  h.toFigure16CompatibleSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the origin-zero Figure 16 source-label-index package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    h.labelIndex
+  h.toFigure16CompatibleSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
 
