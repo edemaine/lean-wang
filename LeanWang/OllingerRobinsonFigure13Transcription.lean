@@ -8693,6 +8693,32 @@ def HasFigure18IndexedActiveCornerOriginZeroWindows
       activeSites cornerSite).toRoleTable
 
 /--
+Origin-zero indexed active/corner windows are a stronger form of the ordinary
+translation-invariant indexed active/corner window hypothesis.
+-/
+theorem hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+    {table : Figure18RoleTable}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable table) :
+    HasFigure18IndexedActiveCornerWindows table := by
+  intro T seed x hx n hn
+  rcases hwindows x hx n hn with ⟨window, _horigin⟩
+  exact ⟨window⟩
+
+/--
+Origin-zero indexed active/corner windows are a stronger form of the ordinary
+translation-invariant indexed active/corner window hypothesis.
+-/
+theorem hasFigure18IndexedActiveCornerWindows_of_originZeroWindows
+    {activeSites : List Figure18Site} {cornerSite : Figure18Site}
+    (hwindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindows activeSites cornerSite) :
+    HasFigure18IndexedActiveCornerWindows
+      (Figure18RoleTable.FlatRoleTable.ofActiveSites
+        activeSites cornerSite).toRoleTable :=
+  hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable hwindows
+
+/--
 Origin-zero indexed active/corner windows recognize the canonical free
 crossings.  The window's pointwise product witnesses identify each combined
 base tile with the indexed Figure 18 site at the same canonical coordinate.
@@ -11825,6 +11851,14 @@ def HasLocalFreeSquareWindowInvariant.ofIndexedActive
     D.HasLocalFreeSquareWindowInvariant :=
   hasFigure18ListedActiveSiteFixedCornerSquareWindows_of_indexedActive
     hindexed
+
+def HasLocalFreeSquareWindowInvariant.ofOriginZeroWindows
+    {D : Figure18ScaffoldData}
+    (hwindows : D.HasIndexedActiveCornerOriginZeroWindowInvariant) :
+    D.HasLocalFreeSquareWindowInvariant :=
+  HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    (hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      hwindows)
 
 def HasLocalFreeSquareWindowInvariant.ofRobinsonBoardAdjacentFreeGrid
     {D : Figure18ScaffoldData}

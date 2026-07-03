@@ -1006,6 +1006,48 @@ abbrev L2C2IndexedActiveWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table.toRoleTable
 
 /--
+The origin-zero window target for the first audited L2-blank candidate is a
+stronger version of its translation-invariant indexed-active target.
+-/
+def l2c1IndexedActiveWindowsOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1IndexedActiveWindows := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C1OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C1IndexedActiveWindows, figure18ScaffoldDataOfNatSites_table]
+  exact
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      hwindows
+
+/--
+The origin-zero window target for the second audited L2-blank candidate is a
+stronger version of its translation-invariant indexed-active target.
+-/
+def l2c2IndexedActiveWindowsOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2IndexedActiveWindows := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C2OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C2IndexedActiveWindows, figure18ScaffoldDataOfNatSites_table]
+  exact
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      hwindows
+
+/--
 Indexed active/corner windows supply the local free-square window invariant for
 the first audited L2-blank candidate.
 
@@ -1025,6 +1067,21 @@ def l2c1LocalFreeSquareWindowOfIndexedActiveWindows
     indexedActiveWindows
 
 /--
+The stronger origin-zero window target also supplies the local free-square
+window invariant for the first audited L2-blank candidate.
+-/
+def l2c1LocalFreeSquareWindowOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  l2c1LocalFreeSquareWindowOfIndexedActiveWindows
+    (l2c1IndexedActiveWindowsOfOriginZeroWindows originZeroWindows)
+
+/--
 Indexed active/corner windows supply the local free-square window invariant for
 the second audited L2-blank candidate.
 
@@ -1042,6 +1099,21 @@ def l2c2LocalFreeSquareWindowOfIndexedActiveWindows
         |>.HasLocalFreeSquareWindowInvariant :=
   Figure18ScaffoldData.HasLocalFreeSquareWindowInvariant.ofIndexedActive
     indexedActiveWindows
+
+/--
+The stronger origin-zero window target also supplies the local free-square
+window invariant for the second audited L2-blank candidate.
+-/
+def l2c2LocalFreeSquareWindowOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  l2c2LocalFreeSquareWindowOfIndexedActiveWindows
+    (l2c2IndexedActiveWindowsOfOriginZeroWindows originZeroWindows)
 
 /--
 Canonical free-site-rectangle routing hypothesis for the first audited

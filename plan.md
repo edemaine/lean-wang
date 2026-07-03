@@ -1021,6 +1021,13 @@ canonical board/free-line step is to upgrade local indexed-active recognition
 plus Robinson's board geometry to the canonical free-site active/corner
 invariant, or otherwise show that the indexed-active windows can be chosen on
 Robinson's canonical free crossings.
+The origin-zero target is now explicitly connected back to the indexed-active
+route: generic origin-zero Figure 18 windows imply ordinary indexed-active
+windows, and the two audited L2 candidates have named wrappers from
+`L2C1OriginZeroWindows`/`L2C2OriginZeroWindows` to both indexed-active windows
+and local free-square windows. Thus the current strong scaffold obligation
+simultaneously feeds the canonical board/free-line surface and the local
+recognizability surface.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
