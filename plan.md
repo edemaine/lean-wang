@@ -471,29 +471,29 @@ Next implementation targets:
    positive translated active-corner boxes, and the wrappers
    `*_signal_tower_translated_box_data_position_source` and
    `*_signal_tower_translated_box_data_interiorRows` route this package through
-   the direct pair-free signal-tower certificate.  The older
-   `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData` package still exists
-   as a bridge through row-major checked board levels, but should not be the
-   main target.  The bundled checked-stack/plane and checked-stack/box packages
-   now feed this preferred package through
+   the direct pair-free signal-tower certificate.  This translated-box surface
+   is now a compatibility bridge, not the preferred final scaffold target.  The
+   older `L2C1SignalTowerBoardData` / `L2C2SignalTowerBoardData` package still
+   exists as a bridge through row-major checked board levels, but should not be
+   the main target.  The bundled checked-stack/plane and checked-stack/box
+   packages still feed the translated-box package through
    `l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData`,
    `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData`,
    `l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`, and
-   `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`; the corresponding
-   theorem wrappers route through `*_signal_tower_translated_box_data_*`
-   instead of the lower-level direct-obligation constructors.  The same is now
-   true one level earlier for origin-zero windows via
+   `l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData`, but the raw Figure
+   13 plane/box premises in these packages are now formally refuted by
+   `not_tilesPlane_fig13Tiles`, `not_tileableBoxes_fig13Tiles`, and the
+   package-level `not_l2c*Fig13*Data` theorems.  The same diagnostic bridge
+   exists one level earlier for origin-zero windows via
    `l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane`,
    `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane`,
    `l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, and
-   `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`, so the
-   remaining scaffold statement can be read as origin-zero recognizability plus
-   raw Robinson plane/box tilability.  That paired assumption is also now named
-   directly by `L2C1OriginZeroFig13BoxData` and
-   `L2C2OriginZeroFig13BoxData`, with theorem wrappers
-   `*_origin_zero_fig13_box_data_position_source` and
-   `*_origin_zero_fig13_box_data_interiorRows`; these are the cleanest current
-   scaffold-facing theorem surfaces.  The adjacent
+   `l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes`; these are
+   diagnostics only.  The remaining scaffold statement should instead be read
+   as checked origin-zero stacks plus active-corner layer patches, surfaced by
+   `L2C1CheckedStackLayerPatchData`,
+   `L2C1OriginZeroCheckedStacks`, and `L2C1ActiveCornerLayerPatches`.  The
+   adjacent
    source raw-boundary board target exposed as
    `Figure18CanonicalRawBoundaryBoardLevelChecks` should
    now be treated as a diagnostic, not as the next finite target: finite

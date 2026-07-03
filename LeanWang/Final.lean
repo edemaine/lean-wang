@@ -170,7 +170,7 @@ audited L2 candidate.
 This is one step closer to the human transcription data than
 `FinalOriginZeroTranslatedBoxData`, but the finite raw Figure 13 box field is
 now known to be impossible for the current macro-tile transcription.  The live
-proof-facing target is `FinalCheckedStackLayerPatchData`.
+proof-facing target is `FinalCheckedStackLayerPatchConstructionObligations`.
 -/
 abbrev FinalOriginZeroFig13BoxData : Prop :=
   TM0FoldedReduction.L2C1OriginZeroFig13BoxData
@@ -192,8 +192,7 @@ The origin-zero Figure 13 finite-box final package is diagnostic only: its raw
 Figure 13 box field is refuted by the finite Figure 13 obstruction.
 -/
 theorem not_finalOriginZeroFig13BoxData : ¬ FinalOriginZeroFig13BoxData := by
-  intro data
-  exact TM0FoldedReduction.not_tileableBoxes_fig13Tiles data.fig13Boxes
+  exact TM0FoldedReduction.not_l2c1OriginZeroFig13BoxData
 
 /--
 The checked-stack Figure 13 finite-box final package is also diagnostic only:
@@ -201,8 +200,7 @@ it contains the same impossible raw Figure 13 box field.
 -/
 theorem not_finalCheckedSignalTowerFig13BoxData :
     ¬ FinalCheckedSignalTowerFig13BoxData := by
-  intro data
-  exact TM0FoldedReduction.not_tileableBoxes_fig13Tiles data.fig13Boxes
+  exact TM0FoldedReduction.not_l2c1CheckedSignalTowerFig13BoxData
 
 set_option linter.style.longLine false in
 /--

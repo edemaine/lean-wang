@@ -476,6 +476,14 @@ theorem not_cofinalTileableSquares_fig13Tiles : ¬ Figure13CofinalTileableSquare
     (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles hsquares)
 
 /--
+The current raw Figure 13 macro-tile transcription does not tile the plane.
+-/
+theorem not_tilesPlane_fig13Tiles : ¬ TilesPlane fig13Tiles := by
+  intro hplane
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
 The exact board-level raw Figure 13 square-tiling surface is equivalent to the
 positive-board raw-data surface.
 -/
@@ -1546,39 +1554,39 @@ def l2c2ActiveCornerOfOriginZeroCheckedStacks
     (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked)
 
 /--
-Checked signal-tower data for the first audited L2-blank candidate, with the
-raw Figure 13 plane hypothesis stated directly.
+Diagnostic checked signal-tower data for the first audited L2-blank candidate,
+with the refuted raw Figure 13 plane hypothesis stated directly.
 -/
 structure L2C1CheckedSignalTowerFig13PlaneData : Prop where
   checkedStacks : L2C1OriginZeroCheckedStacks
   fig13Plane : TilesPlane fig13Tiles
 
 /--
-Checked signal-tower data for the second audited L2-blank candidate, with the
-raw Figure 13 plane hypothesis stated directly.
+Diagnostic checked signal-tower data for the second audited L2-blank candidate,
+with the refuted raw Figure 13 plane hypothesis stated directly.
 -/
 structure L2C2CheckedSignalTowerFig13PlaneData : Prop where
   checkedStacks : L2C2OriginZeroCheckedStacks
   fig13Plane : TilesPlane fig13Tiles
 
 /--
-Finite-box version of the checked signal-tower/`fig13Tiles` package for the
-first audited L2-blank candidate.
+Diagnostic finite-box version of the checked signal-tower/`fig13Tiles` package
+for the first audited L2-blank candidate.
 -/
 structure L2C1CheckedSignalTowerFig13BoxData : Prop where
   checkedStacks : L2C1OriginZeroCheckedStacks
   fig13Boxes : Figure13TileableBoxes
 
 /--
-Finite-box version of the checked signal-tower/`fig13Tiles` package for the
-second audited L2-blank candidate.
+Diagnostic finite-box version of the checked signal-tower/`fig13Tiles` package
+for the second audited L2-blank candidate.
 -/
 structure L2C2CheckedSignalTowerFig13BoxData : Prop where
   checkedStacks : L2C2OriginZeroCheckedStacks
   fig13Boxes : Figure13TileableBoxes
 
 /--
-Preferred origin-zero scaffold package for the first audited L2-blank
+Diagnostic origin-zero scaffold package for the first audited L2-blank
 candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
 -/
 structure L2C1OriginZeroFig13BoxData : Prop where
@@ -1586,12 +1594,46 @@ structure L2C1OriginZeroFig13BoxData : Prop where
   fig13Boxes : Figure13TileableBoxes
 
 /--
-Preferred origin-zero scaffold package for the second audited L2-blank
+Diagnostic origin-zero scaffold package for the second audited L2-blank
 candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
 -/
 structure L2C2OriginZeroFig13BoxData : Prop where
   originZeroWindows : L2C2OriginZeroWindows
   fig13Boxes : Figure13TileableBoxes
+
+/-- The first checked-stack/Figure 13 plane package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1CheckedSignalTowerFig13PlaneData :
+    ¬ L2C1CheckedSignalTowerFig13PlaneData := by
+  intro data
+  exact not_tilesPlane_fig13Tiles data.fig13Plane
+
+/-- The second checked-stack/Figure 13 plane package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2CheckedSignalTowerFig13PlaneData :
+    ¬ L2C2CheckedSignalTowerFig13PlaneData := by
+  intro data
+  exact not_tilesPlane_fig13Tiles data.fig13Plane
+
+/-- The first checked-stack/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1CheckedSignalTowerFig13BoxData :
+    ¬ L2C1CheckedSignalTowerFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The second checked-stack/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2CheckedSignalTowerFig13BoxData :
+    ¬ L2C2CheckedSignalTowerFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The first origin-zero/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1OriginZeroFig13BoxData : ¬ L2C1OriginZeroFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The second origin-zero/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2OriginZeroFig13BoxData : ¬ L2C2OriginZeroFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
 
 /-- Finite `fig13Tiles` boxes give the plane form for the first L2 candidate. -/
 def l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
