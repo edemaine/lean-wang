@@ -3967,6 +3967,38 @@ def
     (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
       O)
 
+set_option linter.style.longLine false in
+/--
+The first origin-zero/translated-box obligation surface also instantiates the
+checked-stack/layer-patch finite scaffold package used by the preferred final
+route.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := l2c1OriginZeroCheckedStacksOfOriginZeroWindows O.originZeroWindows
+  patches := O.toActiveCornerLayerBoxPatches
+
+set_option linter.style.longLine false in
+/--
+The second origin-zero/translated-box obligation surface also instantiates the
+checked-stack/layer-patch finite scaffold package used by the preferred final
+route.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := l2c2OriginZeroCheckedStacksOfOriginZeroWindows O.originZeroWindows
+  patches := O.toActiveCornerLayerBoxPatches
+
 /--
 Board/free-line active-corner recognition and positive board-level aligned
 macro-squares instantiate the first proof-facing Section 7 package.
