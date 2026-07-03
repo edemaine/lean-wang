@@ -654,6 +654,26 @@ theorem sourcePositionCodeOneRowsAtIndex_eq_boundedInterior
         sourcePositionCodeBoundedInteriorRowsAtIndex, hv,
         sourcePositionCodeOneRowsIndexVar_eq_boundedInterior]
 
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_eq_oneRowsAtIndex_succ
+    (c : Code) (j i : Nat) :
+    sourcePositionCodeBoundedInteriorRowsAtIndex c j i =
+      sourcePositionCodeOneRowsAtIndex c (j + 1) i := by
+  rw [sourcePositionCodeOneRowsAtIndex_eq_boundedInterior]
+  simp
+
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_oneRowsAtIndex
+    (hrows : Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeBoundedInteriorRowsAtIndex p.1 p.2.1 p.2.2) := by
+  have hsucc : Primrec (fun p : Code × Nat × Nat => p.2.1 + 1) :=
+    Primrec.succ.comp (Primrec.fst.comp Primrec.snd)
+  exact (hrows.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair hsucc (Primrec.snd.comp Primrec.snd)))).of_eq fun p =>
+    (sourcePositionCodeBoundedInteriorRowsAtIndex_eq_oneRowsAtIndex_succ
+      p.1 p.2.1 p.2.2).symm
+
 theorem sourcePositionCodeOneRowsAtIndex_primrec_of_boundedInteriorAtIndex
     (hinterior : Primrec (fun p : Code × Nat × Nat =>
       sourcePositionCodeBoundedInteriorRowsAtIndex p.1 p.2.1 p.2.2)) :

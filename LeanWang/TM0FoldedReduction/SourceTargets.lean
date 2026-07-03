@@ -261,6 +261,16 @@ theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_boundedInteriorAtIndex
 
 set_option linter.style.longLine false in
 /--
+The exact one-row-at-index target also gives bounded-interior at-index rows,
+because bounded row `j` is the one-row decoder at row `j + 1`.
+-/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_oneRowsAtIndex hrows
+
+set_option linter.style.longLine false in
+/--
 Bounded-interior at-index rows imply the generated accumulator-step target.
 -/
 theorem sourcePositionCodeDecoderStepPrimrec_of_boundedInteriorAtIndex
@@ -300,6 +310,17 @@ theorem sourcePositionCodeOneRowsAtIndexPrimrec_iff_decoderStepPrimrec :
     SourcePositionCodeOneRowsAtIndexPrimrec ↔ SourcePositionCodeDecoderStepPrimrec :=
   ⟨sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex,
     sourcePositionCodeOneRowsAtIndexPrimrec_of_decoderStep⟩
+
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, one-row and
+bounded-interior decoding are equivalent.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec :
+    SourcePositionCodeOneRowsAtIndexPrimrec ↔
+      SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  ⟨sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex,
+    sourcePositionCodeOneRowsAtIndexPrimrec_of_boundedInteriorAtIndex⟩
 
 set_option linter.style.longLine false in
 /--
