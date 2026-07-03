@@ -9358,7 +9358,8 @@ generated position-code decoder step.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -9368,7 +9369,8 @@ generated position-code decoder step.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_decoderStepCorrect
+    h.scaffold h.decoderStep
 
 end FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
 
@@ -9425,7 +9427,8 @@ global position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -9435,7 +9438,8 @@ global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
@@ -9484,7 +9488,8 @@ source-specialized position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -9494,7 +9499,8 @@ source-specialized position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    h.scaffold h.labelIndex
 
 end FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
 
@@ -12913,6 +12919,28 @@ def toFinalReductionInputs
   FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
     h.scaffold h.decoderStep
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and the
+generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_decoderStepCorrect
+    h.scaffold h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and the
+generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_decoderStepCorrect
+    h.scaffold h.decoderStep
+
 end FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 namespace FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
@@ -12929,6 +12957,14 @@ def toSourcePositionCodeConstructionObligations
   labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
 
 set_option linter.style.longLine false in
+/-- Convert the global-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
 /--
 Convert the concrete checked-stack/layer-patch global-label-index package into
 the endpoint.
@@ -12939,9 +12975,39 @@ def toFinalReductionInputs
   FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
     h.scaffold h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and the
+global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and the
+global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
+
 end FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
 namespace FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -12952,6 +13018,28 @@ def toFinalReductionInputs
     (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
   FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    h.scaffold h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and the
+source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
+    h.scaffold h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and the
+source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
     h.scaffold h.labelIndex
 
 end FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
