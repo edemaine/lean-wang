@@ -9161,6 +9161,34 @@ def scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
     (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
       hboxes_pos)
 
+/--
+View concrete Nat-site layer patches as the layered Figure 13 realization
+invariant.
+-/
+def scaffoldDataOfNatSitesLayerPatchRealizationInvariant
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant
+          cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasLayerPatchRealizationInvariant := by
+  simpa [LayeredFigure18ScaffoldData.HasLayerPatchRealizationInvariant,
+    Figure18ScaffoldData.HasLayerPatchRealizationInvariant,
+    LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation,
+    LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable,
+    Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation,
+    Figure18ScaffoldData.table,
+    Figure18ScaffoldData.activeSites] using patches
+
 def scaffoldDataOfNatSitesCertificateOfCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -9183,6 +9211,33 @@ def scaffoldDataOfNatSitesCertificateOfCheckedStacks
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
+
+def scaffoldDataOfNatSitesCertificateOfCheckedStacksLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasIndexedActiveWindowCheckedStacks
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant
+          cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).Certificate :=
+  CheckedSparseRawData.certificateOfCheckedIndexedActiveStacksLayerPatches
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    hchecked
+    (scaffoldDataOfNatSitesLayerPatchRealizationInvariant
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid patches)
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -9207,6 +9262,33 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedStacks
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
 
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedStacksLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasIndexedRoutedFixedCornerSquareCheckedStacks
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant
+          cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  CheckedSparseRawData.indexedRoutedCertificateOfCheckedStacksLayerPatches
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    hchecked
+    (scaffoldDataOfNatSitesLayerPatchRealizationInvariant
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid patches)
+
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
     (activeSiteSpecs : List (Nat × Quadrant))
     (activeSiteSpecs_valid :
@@ -9229,6 +9311,34 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridC
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     hchecked realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfCheckedFreeGridStacksLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hchecked :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasRobinsonBoardRoutedFreeGridCheckedStacks
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant
+          cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  let data :=
+    sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid
+  data.indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacksLayerPatches
+    hchecked
+    (scaffoldDataOfNatSitesLayerPatchRealizationInvariant
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid patches)
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfIndexedBoxes
     (activeSiteSpecs : List (Nat × Quadrant))
@@ -9281,6 +9391,37 @@ def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
     (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
       cornerIndex cornerQuadrant cornerIndex_valid)
     hgrids hstacks realizes
+
+def scaffoldDataOfNatSitesIndexedRoutedCertificateOfRobinsonBoardRoutedFreeGridsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (hstacks :
+      (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant
+        cornerIndex_valid).HasCheckedStacksForRobinsonBoardRoutedFreeGrids
+          (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+            cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant
+          cornerIndex_valid).table.presentation.toScaffold) :
+    (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).IndexedRoutedCertificate :=
+  CheckedSparseRawData.indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridsLayerPatches
+    (sparseRawDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid)
+    hgrids hstacks
+    (scaffoldDataOfNatSitesLayerPatchRealizationInvariant
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid patches)
 
 def scaffoldDataOfNatSitesIndexedRoutedCertificateOfAllowedRobinsonBoardRoutedFreeGrids
     (activeSiteSpecs : List (Nat × Quadrant))

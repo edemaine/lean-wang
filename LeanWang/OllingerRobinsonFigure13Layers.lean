@@ -6063,6 +6063,22 @@ def certificateOfCheckedIndexedActiveStacks
   }
 
 /--
+Build the direct layered certificate from finite checked stack witnesses and
+finite scaffold/payload layer patches.
+-/
+def certificateOfCheckedIndexedActiveStacksLayerPatches
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasIndexedActiveWindowCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (patches :
+      data.toLayeredFigure18ScaffoldData.HasLayerPatchRealizationInvariant) :
+    data.Certificate :=
+  LayeredFigure18ScaffoldData.Certificate.ofLayerPatches
+    (hasIndexedActiveCornerWindowsWithLayerStack_of_checkedStacks hchecked)
+    patches
+
+/--
 Build the preferred indexed-routed layered certificate from finite checked stack
 witnesses and the realization invariant.
 -/
@@ -6080,6 +6096,22 @@ def indexedRoutedCertificateOfCheckedStacks
       hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked
     realizes := realizes
   }
+
+/--
+Build the preferred indexed-routed layered certificate from finite checked
+stack witnesses and finite scaffold/payload layer patches.
+-/
+def indexedRoutedCertificateOfCheckedStacksLayerPatches
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasIndexedRoutedFixedCornerSquareCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (patches :
+      data.toLayeredFigure18ScaffoldData.HasLayerPatchRealizationInvariant) :
+    data.IndexedRoutedCertificate :=
+  LayeredFigure18ScaffoldData.IndexedRoutedCertificate.ofLayerPatches
+    (hasIndexedRoutedFixedCornerSquaresWithLayerStack_of_checkedStacks hchecked)
+    patches
 
 /--
 Build the Robinson routed scaffold certificate from canonical origin-zero
@@ -6121,6 +6153,24 @@ def indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacks
     realizes
 
 /--
+Build the preferred indexed-routed layered certificate from Robinson
+board/free-grid witnesses carrying finite checked layer stacks and finite
+scaffold/payload layer patches.
+-/
+def indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacksLayerPatches
+    (data : CheckedSparseRawData)
+    (hchecked :
+      data.HasRobinsonBoardRoutedFreeGridCheckedStacks
+        data.toLayeredFigure18ScaffoldData.table)
+    (patches :
+      data.toLayeredFigure18ScaffoldData.HasLayerPatchRealizationInvariant) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfCheckedStacksLayerPatches
+    (hasIndexedRoutedFixedCornerSquareCheckedStacks_of_robinsonBoardRoutedFreeGrid
+      hchecked)
+    patches
+
+/--
 Build the preferred indexed-routed layered certificate from separate Robinson
 board/free-grid geometry and finite checked layer-stack attachment.
 -/
@@ -6140,6 +6190,27 @@ def indexedRoutedCertificateOfRobinsonBoardRoutedFreeGrids
     (hasRobinsonBoardRoutedFreeGridCheckedStacks_of_freeGrids
       hgrids hstacks)
     realizes
+
+/--
+Build the preferred indexed-routed layered certificate from separate Robinson
+board/free-grid geometry, finite checked layer-stack attachment, and finite
+scaffold/payload layer patches.
+-/
+def indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridsLayerPatches
+    (data : CheckedSparseRawData)
+    (hgrids :
+      HasFigure18RobinsonBoardRoutedFreeGridsForTable
+        data.toLayeredFigure18ScaffoldData.table)
+    (hstacks :
+      data.HasCheckedStacksForRobinsonBoardRoutedFreeGrids
+        data.toLayeredFigure18ScaffoldData.table)
+    (patches :
+      data.toLayeredFigure18ScaffoldData.HasLayerPatchRealizationInvariant) :
+    data.IndexedRoutedCertificate :=
+  data.indexedRoutedCertificateOfRobinsonBoardRoutedFreeGridCheckedStacksLayerPatches
+    (hasRobinsonBoardRoutedFreeGridCheckedStacks_of_freeGrids
+      hgrids hstacks)
+    patches
 
 /--
 Build the preferred indexed-routed layered certificate from adjacent
