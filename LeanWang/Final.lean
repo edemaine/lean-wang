@@ -640,6 +640,28 @@ structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObliga
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical-free-site scaffold-plane route with the generated
+position-code decoder step.
+-/
+structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical-free-site scaffold-plane route with the global
+position-code label-index target.
+-/
+structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate canonical-free-site scaffold-plane route with the
 source-specialized position-code label-index source target.
 -/
@@ -5387,6 +5409,58 @@ theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFre
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane decoder-step final package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_position_source
+    h.canonicalActiveCorner h.scaffoldPlane
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane decoder-step final package.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_position_source
+    h.canonicalActiveCorner h.scaffoldPlane
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane global-label final package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := h.canonicalActiveCorner
+      scaffoldPlane := h.scaffoldPlane
+      decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane global-label final package.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := h.canonicalActiveCorner
+      scaffoldPlane := h.scaffoldPlane
+      decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second-candidate canonical
 free-site/scaffold-plane source-label final package.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
@@ -5437,6 +5511,70 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTi
     { canonicalActiveCorner := canonicalActiveCorner
       scaffoldPlane := scaffoldPlane
       sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the global position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the global position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      labelIndex := labelIndex }
 
 set_option linter.style.longLine false in
 /--

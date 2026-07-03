@@ -1046,8 +1046,18 @@ source-specialized label-index decoder.
 The same L2C2 canonical-free-site route is now exposed with a direct
 `TilesPlane figure18ScaffoldTiles` input as
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`
-and the source-label variant
+and the decoder-step/global-label/source-label variants
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations`,
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations`,
+and
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
+The direct aliases ending in
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep`,
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom`,
+and
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom`
+now expose the existing source bridge without going through the arbitrary-slot
+interior-row target.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

@@ -178,8 +178,16 @@ top-level aliases ending in
 The same second-candidate canonical-free-site route is also exposed with a
 direct scaffold-plane input as
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`
+and the decoder-step/global-label/source-label variants
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations`,
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations`,
 and
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
+The corresponding direct-input aliases end in
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep`,
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom`,
+and
+`l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom`.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
