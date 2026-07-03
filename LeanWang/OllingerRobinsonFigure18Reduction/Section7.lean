@@ -1064,6 +1064,68 @@ def l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
         Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
         hboxes r hr)
 
+set_option linter.style.longLine false in
+/--
+Positive isolated active boxes instantiate the finite layer patches for the
+first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      hboxes)
+
+set_option linter.style.longLine false in
+/--
+Positive isolated active boxes instantiate the finite layer patches for the
+second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the finite layer patches for the first
+audited L2-blank candidate, using the finite no-neighbor active-site checks.
+-/
+def l2c1ActiveCornerLayerPatchesOfValidTranslatedBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the finite layer patches for the second
+audited L2-blank candidate, using the finite no-neighbor active-site checks.
+-/
+def l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
 /--
 Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
@@ -3626,6 +3688,190 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
   checkedStacks :=
     l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
   patches := patches
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive translated active-corner boxes produce the first
+checked finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive translated active-corner boxes produce the second
+checked finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus isolated translated active boxes produce the first checked
+finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus isolated translated active boxes produce the second checked
+finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated boxes produce the first checked finite
+scaffold package, using the audited no-neighbor active-site checks.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfValidTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated boxes produce the second checked finite
+scaffold package, using the audited no-neighbor active-site checks.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus positive translated active-corner boxes produce the
+first checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus positive translated active-corner boxes produce the
+second checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus isolated translated active boxes produce the first
+checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedIsolatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus isolated translated active boxes produce the second
+checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedIsolatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus valid translated boxes produce the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsValidTranslatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus valid translated boxes produce the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsValidTranslatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
 
 /--
 The first origin-zero/translated-box obligation surface is a specialization of
