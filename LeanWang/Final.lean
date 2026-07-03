@@ -909,6 +909,26 @@ structure FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePosit
       l2Component2BlankCandidateSanity.cornerIndex_valid
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 origin-zero/translated-positive-box
+scaffold route.
+
+This is the L2C2 analogue of `FinalOriginZeroTranslatedBoxData`, but kept under
+the Figure 13/L2C2 final surface.  Origin-zero active/corner windows imply the
+free-site-rectangle routing, and the translated positive boxes provide the
+backward scaffold realization.
+-/
+structure FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -4011,6 +4031,42 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 set_option linter.style.longLine true
 
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    h.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    h.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -6377,6 +6433,30 @@ source-specialized position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

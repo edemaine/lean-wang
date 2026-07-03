@@ -1113,6 +1113,11 @@ is now exposed too.  It uses
 routing field is the selected free/free site rectangle; this should be the
 natural public target for the obstruction/free-line scaffold argument before
 forgetting back to ordinary canonical routing.
+The L2C2 origin-zero sibling
+`FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+is now exposed as the lower finite-check-facing route: origin-zero active/corner
+windows imply the free-site-rectangle routing, and the translated positive boxes
+carry the backward scaffold realization.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

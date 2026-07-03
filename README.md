@@ -228,6 +228,11 @@ uses
 `NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations`, where
 the routing field is the selected free/free site rectangle rather than the
 generic canonical routing package.
+The L2C2 origin-zero sibling
+`FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+is lower still: origin-zero active/corner windows imply that free-site
+rectangle routing, while the translated positive boxes supply the backward
+scaffold realization.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
