@@ -4999,6 +4999,13 @@ theorem partrecStartedTM1LabelCountData_eq_weightData (tc : Turing.ToPartrec.Cod
   rw [← PartrecToTM2SupportList.labelList_length]
   rw [PartrecToTM2SupportList.labelList_weight]
 
+theorem partrecStartedTM1LabelCountData_primrec :
+    Primrec partrecStartedTM1LabelCountData :=
+  (partrecStartedTM1LabelCountWeightData_primrec
+    PartrecToTM2SupportList.labelCount_primrec
+    partrecTM2SupportLength_labelWeight_primrec).of_eq fun tc => by
+      rw [partrecStartedTM1LabelCountData_eq_weightData]
+
 theorem partrecStartedTM1LabelCount_primrec_of_labelWeight
     (hcount : Primrec PartrecToTM2SupportList.labelCount)
     (hweight : Primrec (PartrecToTM2SupportList.labelWeight partrecTM2SupportLength)) :
@@ -5008,9 +5015,8 @@ theorem partrecStartedTM1LabelCount_primrec_of_labelWeight
 
 theorem partrecStartedTM1LabelCount_primrec :
     Primrec partrecStartedTM1LabelCount :=
-  partrecStartedTM1LabelCount_primrec_of_labelWeight
-    PartrecToTM2SupportList.labelCount_primrec
-    partrecTM2SupportLength_labelWeight_primrec
+  partrecStartedTM1LabelCountData_primrec.of_eq fun tc => by
+    rw [partrecStartedTM1LabelCount_eq_data]
 
 theorem partrecStartedTM1LabelCount_primrec_of_supportMirrors
     (hcount : Primrec₂ PartrecToTM2SupportList.codeSuppLength)
