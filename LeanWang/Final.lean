@@ -1036,6 +1036,24 @@ structure FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeCons
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 origin-zero/translated-positive-box
+scaffold route with generated interior position-code rows.
+
+This is the row-source analogue of
+`FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`.
+-/
+structure FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/isolated-box route with
 generated interior position-code rows.
 
@@ -1284,6 +1302,61 @@ theorem domino_problem_undecidable
       h.labelIndex)
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source origin-zero/translated-positive-box package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source origin-zero/translated-positive-box package to the
+row-source Section 7 board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations where
+  boardFreeLineActiveCorner := h.scaffold.toBoardFreeLineActiveCorner
+  layerPatches := h.scaffold.toActiveCornerLayerBoxPatches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the row-source concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the row-source concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -8856,6 +8929,30 @@ source-specialized position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+origin-zero/translated-positive-box scaffold package and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
