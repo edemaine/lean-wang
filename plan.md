@@ -1075,6 +1075,11 @@ realization for `FinalFigure13L2C2CompatibleLevelScaffoldData`, the human-audite
 L2C2 Nat-site scaffold.  Thus future scaffold work can target the concrete
 Figure 13 compatible-level obligations directly, while the source side only
 needs the source-specialized position-code label-index decoder.
+The finite-patch sibling
+`FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations`
+is now exposed as well; it asks for compatible routed Robinson free grids plus
+`HasActiveCornerLayerBoxPatches` for the same concrete scaffold data, avoiding
+the need to state the full realization certificate at this final surface.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

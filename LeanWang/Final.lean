@@ -784,6 +784,26 @@ structure FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligati
       FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 compatible-level/layer-patch scaffold
+route.
+
+This is the finite-patch version of
+`FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations`:
+instead of a full realization certificate, it asks for the active-corner layer
+box patches used by the Section 7 realization bridge.
+-/
+structure FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :
+    Prop where
+  compatibleRoutedFreeGrids :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table
+  layerPatches :
+    HasActiveCornerLayerBoxPatches
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -3637,6 +3657,40 @@ theorem domino_problem_undecidable
 
 end FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
 
+namespace FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13
+compatible-level/layer-patch scaffold package and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_l2c2_compatible_layer_patches_position_source
+    h.compatibleRoutedFreeGrids h.layerPatches
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13
+compatible-level/layer-patch scaffold package and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_l2c2_compatible_level_layer_patches_position_source
+    h.compatibleRoutedFreeGrids h.layerPatches
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+end FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -5859,6 +5913,30 @@ label-index source target.
 -/
 theorem domino_problem_undecidable_of_figure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
     (h : FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+compatible-level/layer-patch scaffold package and the source-specialized
+position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+compatible-level/layer-patch scaffold package and the source-specialized
+position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

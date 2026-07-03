@@ -199,6 +199,10 @@ For the concrete Figure 13 scaffold route, `LeanWang.Final` also exposes
 This is the current lower-level second-candidate surface: it asks directly for
 compatible routed Robinson free grids and realization for the human-audited
 L2C2 Figure 13 scaffold data, plus `SourcePositionCodeLabelIndexFromPrimrec`.
+The finite-patch sibling
+`FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations`
+replaces realization by `HasActiveCornerLayerBoxPatches` for the same concrete
+scaffold data.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
