@@ -346,6 +346,24 @@ structure FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeCons
   scaffoldPlane : TilesPlane figure18ScaffoldTiles
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Canonical free-site route with the scaffold-tiling obligation stated as
+cofinal finite square tilings of the concrete Figure 18 scaffold tiles.
+
+This is the scaffold-facing source-specialized target: a concrete Figure 18
+proof can provide arbitrarily large compatible finite squares, and compactness
+turns those squares into the `TilesPlane figure18ScaffoldTiles` input needed by
+the Section 7 route.
+-/
+structure FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner :
+    TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  scaffoldSquares :
+    ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare figure18ScaffoldTiles m
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Second-candidate version of the finite checked-stack/layer-patch construction
 route.
@@ -2013,6 +2031,46 @@ theorem domino_problem_undecidable
 
 end FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
 
+namespace FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert cofinal finite Figure 18 scaffold squares to the canonical-free-site
+source-label package by compactness.
+-/
+def toTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  scaffoldPlane := tilesPlane_of_cofinal_tileableSquares h.scaffoldSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the cofinal-square scaffold package into the endpoint. -/
+def toFinalReductionInputs
+    (h :
+      FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from canonical free-site recognition and cofinal Figure 18 scaffold squares. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from canonical free-site recognition and cofinal Figure 18 scaffold squares. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations
+
 namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
@@ -3297,6 +3355,29 @@ source-specialized position-code label-index source target.
 -/
 theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
     (h : FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical Robinson free-site
+active/corner recognition, cofinal finite square tilings of the concrete
+Figure 18 scaffold tiles, and the source-specialized position-code label-index
+source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations
+    (h : FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical Robinson free-site active/corner
+recognition, cofinal finite square tilings of the concrete Figure 18 scaffold
+tiles, and the source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations
+    (h : FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

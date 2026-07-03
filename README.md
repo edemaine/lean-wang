@@ -159,6 +159,12 @@ and
 `domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
 combine the same global label-index source target with the cleaner geometric
 origin-zero scaffold hypothesis.
+The canonical free-site source-label route now also has a cofinal finite-square
+surface,
+`FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations`.
+It replaces the `TilesPlane figure18ScaffoldTiles` field by
+`∀ n, ∃ m ≥ n, TileableSquare figure18ScaffoldTiles m`, then uses compactness
+to recover the plane-tiling input.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

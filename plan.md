@@ -1065,6 +1065,13 @@ figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBo
 ordinary `Figure18ScaffoldData.Certificate`s/`IsScaffold`, and both encoded and
 unencoded position-source undecidability endpoints for the two audited L2
 candidates.
+For the source-specialized canonical final route, the scaffold-plane field can
+now be replaced by the finite/cofinal target
+`∀ n, ∃ m ≥ n, TileableSquare figure18ScaffoldTiles m`, packaged as
+`FinalFigure18ScaffoldCofinalCanonicalFreeSiteSourceCodeConstructionObligations`.
+This is closer to the intended concrete scaffold instantiation: prove
+arbitrarily large compatible finite Figure 18 scaffold squares, then use the
+existing compactness theorem to obtain `TilesPlane figure18ScaffoldTiles`.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
