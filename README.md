@@ -211,6 +211,10 @@ The positive-box sibling
 `FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations`
 replaces layer patches by positive-radius `ActiveCornerIndexedBox` witnesses;
 the radius-zero patch is supplied by the scaffold corner.
+The translated-positive-box sibling
+`FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+allows those positive-radius indexed boxes to be built around arbitrary
+origins, then derives the same layer-patch route by recentering.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

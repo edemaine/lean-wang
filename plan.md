@@ -1092,6 +1092,12 @@ is now exposed too.  It asks for canonical product-witness routing and
 positive-radius `ActiveCornerIndexedBox` witnesses for the same concrete L2C2
 scaffold, then derives finite layer patches via
 `scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes`.
+The translated-positive-box variant
+`FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+is exposed as the more geometry-facing sibling: the positive-radius
+active-corner indexed boxes may be centered at arbitrary origins and are
+recentered to finite layer patches by
+`scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

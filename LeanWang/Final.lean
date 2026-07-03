@@ -846,6 +846,29 @@ structure FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeC
         FinalFigure13L2C2CompatibleLevelScaffoldData.scaffold r)
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical-product-routing/translated
+positive-box scaffold route.
+
+This is the translated-origin version of
+`FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations`:
+the finite scaffold target can construct active-corner indexed boxes around any
+origin convenient for the local Section 7 geometry, and the existing layer-patch
+bridge recenters them.
+-/
+structure FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalProductRouting :
+    OllingerRobinson.HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table
+  positiveTranslatedIndexedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          FinalFigure13L2C2CompatibleLevelScaffoldData.scaffold r origin)
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -3827,6 +3850,55 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations
 set_option linter.style.longLine true
 
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert canonical product-witness routing plus translated positive-radius
+active-corner indexed boxes to the layer-patch final route.
+-/
+def toCanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations where
+  canonicalProductRouting := h.canonicalProductRouting
+  layerPatches :=
+    scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      h.positiveTranslatedIndexedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13
+canonical-product-routing/translated-positive-box scaffold package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13
+canonical-product-routing/translated-positive-box scaffold package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -6121,6 +6193,30 @@ source-specialized position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalProductRoutingPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical-product-routing/translated-positive-box scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical-product-routing/translated-positive-box scaffold package and the
+source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
