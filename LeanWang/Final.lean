@@ -155,6 +155,69 @@ structure FinalCheckedStackLayerPatchBoundedRowsConstructionObligations : Prop w
 
 set_option linter.style.longLine false in
 /--
+Finite-scaffold-facing checked-stack/positive-box route for the first audited
+L2 candidate.
+
+This is one step below the checked-stack/layer-patch route: positive
+active-corner boxes supply the finite layer patches by taking the radius-zero
+corner patches.
+-/
+structure FinalCheckedStackPositiveBoxConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/positive-box route with generated one-row position-code
+rows.
+-/
+structure FinalCheckedStackPositiveBoxOneRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/positive-box route with generated bounded-interior
+position-code rows.
+-/
+structure FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/positive-box route with the generated position-code
+decoder-step source target.
+-/
+structure FinalCheckedStackPositiveBoxDecoderStepConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/positive-box route with the global position-code
+label-index source target.
+-/
+structure FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/positive-box route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite-scaffold construction route one step below layer patches.
 
 The scaffold field asks for checked origin-zero stacks plus valid translated
@@ -5822,6 +5885,273 @@ def toFinalReductionInputs
       h.sourceRows)
 
 end FinalCheckedStackLayerPatchBoundedRowsConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchConstructionObligations
+    (h : FinalCheckedStackPositiveBoxConstructionObligations) :
+    FinalCheckedStackLayerPatchConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from first checked stacks and positive active-corner boxes. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from first checked stacks and positive active-corner boxes. -/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box one-row data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackLayerPatchOneRowsConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxOneRowsConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box bounded-row data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackLayerPatchBoundedRowsConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box decoder-step data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold)
+    h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxDecoderStepConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box global-label data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold)
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+the global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+the global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box source-label data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box source-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold)
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+the source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+the source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+
+end FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations
 
 namespace FinalCheckedStackValidTranslatedBoxConstructionObligations
 
