@@ -468,6 +468,17 @@ structure FinalSection7PositiveBoxConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+Paper-facing Section 7 board/free-line translated-box final obligations.
+
+This is one step below the centered positive-box route: the scaffold side gives
+board/free-line active/corner recognition and translated active-corner boxes,
+which the Section 7 layer converts to centered positive boxes.
+-/
+structure FinalSection7TranslatedBoxConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
 Paper-facing Section 7 board/free-line obligations with the narrower
 decoder-step source target.
 -/
@@ -1481,6 +1492,50 @@ theorem domino_problem_undecidable
 
 end FinalSection7PositiveBoxConstructionObligations
 
+namespace FinalSection7TranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the board/free-line translated-box package to the centered positive-box
+package.
+-/
+def toPositiveBoxConstructionObligations
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
+    FinalSection7PositiveBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+      h.section7
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the board/free-line translated-box row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
+    FinalReductionInputs :=
+  h.toPositiveBoxConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the paper-facing Section 7 board/free-line translated-box
+package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toPositiveBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the paper-facing Section 7 board/free-line
+translated-box package.
+-/
+theorem domino_problem_undecidable
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toPositiveBoxConstructionObligations.domino_problem_undecidable
+
+end FinalSection7TranslatedBoxConstructionObligations
+
 set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
@@ -1658,6 +1713,27 @@ boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
     (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line translated-box package and generated interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_section7TranslatedBoxConstructionObligations
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+translated-box package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_section7TranslatedBoxConstructionObligations
+    (h : FinalSection7TranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

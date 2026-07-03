@@ -947,6 +947,13 @@ surface directly via
 `FinalL2C1SignalTowerTranslatedBoxDataConstructionObligations`, avoiding a
 manual reconstruction of the Nat-site signal-tower obligation fields in the
 final module.
+The board/free-line translated-box package
+`TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` now
+also has a direct final route through
+`FinalSection7TranslatedBoxConstructionObligations`.  This is the cleaner
+non-diagnostic upstream Section 7 surface: it asks for board/free-line
+active/corner recognition and translated active-corner boxes, then converts to
+the centered positive-box final route.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
