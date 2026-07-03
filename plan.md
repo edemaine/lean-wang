@@ -1000,6 +1000,13 @@ reduction endpoints directly for row-source, decoder-step, global-label, and
 source-label variants. The older centered positive-box projections are still
 available as compatibility conversions, but the theorem surface no longer
 detours through them.
+There is also a more direct scaffold-facing final route:
+`FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations` and its
+decoder-step/global-label/source-label variants. These replace the compatible
+Figure 16 macro-square field by the core assumption
+`TilesPlane figure18ScaffoldTiles`; origin-zero active/corner windows still
+supply the Section 7 board/free-line recognition, while the plane tiling
+supplies translated active-corner boxes.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

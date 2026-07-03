@@ -3743,6 +3743,44 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
     l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
   translatedBoxes := translatedBoxes
 
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the first board/free-line translated-box Section
+7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    originZeroWindows
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+            hplane))
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the second board/free-line translated-box Section
+7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    originZeroWindows
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+            hplane))
+
 /--
 Origin-zero active/corner windows and finite active-corner layer patches
 instantiate the first board/free-line Section 7 layer-patch package directly.

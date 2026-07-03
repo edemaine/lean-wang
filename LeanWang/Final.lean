@@ -187,6 +187,52 @@ structure FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligat
     TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from origin-zero active/corner windows.
+
+This exposes the core scaffold target directly: a plane tiling of the compatible
+Figure 18 scaffold tiles supplies the translated active-corner boxes, while the
+origin-zero window certificate supplies board/free-line recognition.
+-/
+structure FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from origin-zero active/corner windows, using
+the primitive recursive generated position-code decoder step.
+-/
+structure FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from origin-zero active/corner windows, using
+the global position-code label-index source target.
+-/
+structure FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from origin-zero active/corner windows, using
+the source-specialized position-code label-index source target.
+-/
+structure FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Second-candidate version of the finite checked-stack/layer-patch construction
 route.
@@ -1235,6 +1281,210 @@ theorem domino_problem_undecidable
 
 end FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
 
+namespace FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling package to the proof-facing Section 7
+translated-box row-source package.
+-/
+def toSection7TranslatedBoxConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    FinalSection7TranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the Figure 18 scaffold-tiling row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.toSection7TranslatedBoxConstructionObligations.section7)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero active/corner windows, a plane tiling of the
+compatible Figure 18 scaffold tiles, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero active/corner windows, a plane tiling of the
+compatible Figure 18 scaffold tiles, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling decoder-step package to the proof-facing
+Section 7 translated-box decoder-step package.
+-/
+def toSection7TranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    FinalSection7TranslatedBoxDecoderStepConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Convert the Figure 18 scaffold-tiling decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7)
+    h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero active/corner windows, a plane tiling of the
+compatible Figure 18 scaffold tiles, and the generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero active/corner windows, a plane tiling of the
+compatible Figure 18 scaffold tiles, and the generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+end FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the Figure 18 scaffold-tiling decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  scaffoldPlane := h.scaffoldPlane
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+/-- Convert the global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
+
+end FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the Figure 18 scaffold-tiling decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling source-label package to the proof-facing
+Section 7 translated-box source-label package.
+-/
+def toSection7TranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  labelIndex := h.labelIndex
+
+/-- Convert the source-specialized label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the Figure 18 scaffold-tiling source-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toSection7TranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the Figure 18 scaffold-tiling source-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toSection7TranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
+
+end FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
+
 namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
@@ -2255,6 +2505,94 @@ source target.
 -/
 theorem domino_problem_undecidable_of_figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows, a
+plane tiling of the compatible Figure 18 scaffold tiles, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, a plane
+tiling of the compatible Figure 18 scaffold tiles, and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the primitive
+recursive generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the primitive recursive
+generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the global
+position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the global position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the source-specialized
+position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
