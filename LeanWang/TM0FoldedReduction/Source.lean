@@ -2085,6 +2085,71 @@ def sourcePositionCodeInteriorRowsByTailIndex
       (n / TM0Route.partrecVarList.length - 1)
       (n % TM0Route.partrecVarList.length)
 
+def sourcePositionCodeInteriorRowsByTailIndexRange
+    (c : Code) : List TM0FoldedCompiler.SimStepData :=
+  (List.range (sourceLabelCount c - TM0Route.partrecVarList.length)).flatMap
+    fun n =>
+      let i := TM0Route.partrecVarList.length + n
+      sourcePositionCodeInteriorRowsAtIndex c
+        (i / TM0Route.partrecVarList.length - 1)
+        (i % TM0Route.partrecVarList.length)
+
+theorem sourcePositionCodeInteriorRowsByTailIndex_eq_range
+    (c : Code) :
+    sourcePositionCodeInteriorRowsByTailIndex c =
+      sourcePositionCodeInteriorRowsByTailIndexRange c := by
+  unfold sourcePositionCodeInteriorRowsByTailIndex
+    sourcePositionCodeInteriorRowsByTailIndexRange
+  have hbound :
+      TM0Route.partrecVarList.length ≤ sourceLabelCount c := by
+    rw [sourceLabelCount_eq_statementCount_mul]
+    nth_rewrite 1 [← Nat.one_mul TM0Route.partrecVarList.length]
+    exact Nat.mul_le_mul_right _ (Nat.succ_le_of_lt (sourceStatementCount_pos c))
+  have hIco :
+      List.Ico TM0Route.partrecVarList.length (sourceLabelCount c) =
+        (List.range (sourceLabelCount c - TM0Route.partrecVarList.length)).map
+          (fun n => TM0Route.partrecVarList.length + n) := by
+    have hmap := List.Ico.map_add 0
+      (sourceLabelCount c - TM0Route.partrecVarList.length)
+      TM0Route.partrecVarList.length
+    rw [List.Ico.zero_bot] at hmap
+    simpa [Nat.add_comm, Nat.sub_add_cancel hbound] using hmap.symm
+  rw [hIco]
+  simp [List.flatMap_map]
+
+theorem sourcePositionCodeInteriorRowsByTailIndexRange_primrec_of_interior
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec sourcePositionCodeInteriorRowsByTailIndexRange := by
+  unfold sourcePositionCodeInteriorRowsByTailIndexRange
+  refine Primrec.list_flatMap
+    (Primrec.list_range.comp
+      (Primrec.nat_sub.comp sourceLabelCount_primrec
+        (Primrec.const TM0Route.partrecVarList.length))) ?_
+  apply Primrec₂.mk
+  have hidx : Primrec (fun p : Code × Nat =>
+      TM0Route.partrecVarList.length + p.2) :=
+    Primrec.nat_add.comp (Primrec.const TM0Route.partrecVarList.length) Primrec.snd
+  have hblock : Primrec (fun p : Code × Nat =>
+      (TM0Route.partrecVarList.length + p.2) /
+          TM0Route.partrecVarList.length - 1) :=
+    Primrec.nat_sub.comp
+      (Primrec.nat_div.comp hidx (Primrec.const TM0Route.partrecVarList.length))
+      (Primrec.const 1)
+  have hslot : Primrec (fun p : Code × Nat =>
+      (TM0Route.partrecVarList.length + p.2) %
+          TM0Route.partrecVarList.length) :=
+    Primrec.nat_mod.comp hidx (Primrec.const TM0Route.partrecVarList.length)
+  exact (sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior hinterior).comp
+    (Primrec.pair Primrec.fst (Primrec.pair hblock hslot))
+
+theorem sourcePositionCodeInteriorRowsByTailIndex_primrec_of_interior
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec sourcePositionCodeInteriorRowsByTailIndex :=
+  (sourcePositionCodeInteriorRowsByTailIndexRange_primrec_of_interior hinterior).of_eq
+    fun c => (sourcePositionCodeInteriorRowsByTailIndex_eq_range c).symm
+
 def sourcePositionCodeBoundedInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=

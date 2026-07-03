@@ -1044,8 +1044,9 @@ def positionSourceObligationsOfPositionCodeInteriorRows
           (TM0Route.partrecStartedTM0Machine tc)
           TM0Route.partrecStartedTM0Input).Dom) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeBoundedInteriorRows
-    (sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior hinterior)
+  positionSourceObligationsOfProgramData
+    ((sourcePositionProgramData_computable_of_source_positionCodeInteriorRows
+      hinterior).of_eq fun _ => rfl)
     hcorrect
 
 /--

@@ -663,6 +663,12 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_start
   apply Primrec₂.mk
   exact hindex
 
+theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    Primrec sourceSimStepDataByLabelIndexWithPositionCode :=
+  (sourcePositionCodeInteriorRowsByTailIndex_primrec_of_interior hinterior).of_eq
+    fun c => (sourceSimStepDataByLabelIndexWithPositionCode_eq_interiorRowsByTailIndex c).symm
+
 /--
 Primitive recursiveness of the source-level numeric-state offset decoder is
 enough for primitive recursiveness of the source-level numeric-state indexed
@@ -1469,6 +1475,12 @@ theorem sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWi
       sourceSimStepDataByLabelIndexWithPositionCode
       TM0FoldedCompiler.positionProgramData
     rfl).to_comp
+
+theorem sourcePositionProgramData_computable_of_source_positionCodeInteriorRows
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
+    (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows hinterior)
 
 theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositionCode
     (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
