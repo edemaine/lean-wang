@@ -173,6 +173,9 @@ using that checked-stack/valid-box bridge.
 The generated-position integration layer also exposes the corresponding
 semantic-correctness-discharged wrappers for Section 7 translated boxes and
 checked-stack/valid-translated-box data.
+The Section 7 translated-box `toFinalReductionInputs` conversions now use the
+translated-box layer-patch constructor directly, keeping the centered
+positive-box projection as a compatibility route rather than the default path.
 The second audited L2 candidate has matching decoder-step, global-label, and
 source-label packages for both checked-stack/layer-patch data and
 checked-stack/valid-translated-box data.

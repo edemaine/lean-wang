@@ -4965,7 +4965,10 @@ def toPositiveBoxDecoderStepConstructionObligations
 def toFinalReductionInputs
     (h : FinalSection7TranslatedBoxDecoderStepConstructionObligations) :
     FinalReductionInputs :=
-  h.toPositiveBoxDecoderStepConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.section7)
+    h.decoderStep
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 translated-box decoder-step package. -/
@@ -5073,7 +5076,10 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toPositiveBoxSourcePositionCodeConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.section7)
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 translated-box source-label package. -/
@@ -5113,7 +5119,10 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalSection7TranslatedBoxConstructionObligations) :
     FinalReductionInputs :=
-  h.toPositiveBoxConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.section7)
+    h.sourceRows
 
 set_option linter.style.longLine false in
 /--

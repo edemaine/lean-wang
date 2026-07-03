@@ -1179,6 +1179,9 @@ reduction endpoints directly for row-source, decoder-step, global-label, and
 source-label variants. The older centered positive-box projections are still
 available as compatibility conversions, but the theorem surface no longer
 detours through them.
+Their `toFinalReductionInputs` conversions now also use
+`l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData` directly,
+so the default final-input route matches the translated-box endpoint route.
 Global-label final-input constructors for the checked-stack/layer-patch,
 origin-zero translated-box, and Section 7 positive/translated-box routes now
 lower through the source-specialized label-index target, keeping these wrappers
