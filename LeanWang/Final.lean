@@ -1255,18 +1255,6 @@ def ofScaffoldAndSource
   scaffold := scaffold
   source := source
 
-/--
-Build the final inputs directly from the scaffold package and generated
-interior position-code rows.
--/
-def ofScaffoldAndSourceRows
-    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
-    FinalReductionInputs :=
-  ofScaffoldAndSource scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
-      sourceRows)
-
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from the scaffold package and the primitive
@@ -1312,6 +1300,46 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
       hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and generated
+one-row position-code rows, using the source-specialized label-index bridge.
+-/
+def ofScaffoldAndSourceOneRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and generated
+bounded-interior position-code rows, using the source-specialized label-index
+bridge.
+-/
+def ofScaffoldAndSourceBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and generated
+interior position-code rows, using the source-specialized label-index bridge.
+-/
+def ofScaffoldAndSourceRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -7449,6 +7477,80 @@ theorem domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFro
   domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
       scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceOneRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceOneRows scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceOneRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceOneRows scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceBoundedRows scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceBoundedRows scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceRows scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceRows
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceRows scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--

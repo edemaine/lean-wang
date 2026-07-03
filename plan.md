@@ -288,6 +288,14 @@ surface: `positionSourceObligationsOfLabelIndexFromWithPositionCode` combines
 the decoder primitive-recursive proof with `positionProgramData` correctness,
 and the `*_position_source_positionCode` theorem family instantiates the final
 encoded and unencoded undecidability statements from those two facts.
+At the public final endpoint, `FinalReductionInputs` now also exposes
+one-row, bounded-interior, and interior-row source constructors:
+`ofScaffoldAndSourceOneRows`, `ofScaffoldAndSourceBoundedRows`, and
+`ofScaffoldAndSourceRows`.  All three route through
+`sourcePositionCodeLabelIndexFromPrimrec_of_*` and then the
+source-specialized label-index constructor, so the final theorem surface shares
+one weakest source-obligation path rather than packaging each row target
+separately.
 
 The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`

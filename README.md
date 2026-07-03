@@ -122,9 +122,18 @@ route whenever they only need translated `Nat.Partrec.Code` inputs.
 `LeanWang.Final` also exposes raw-scaffold aliases
 `encoded_domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom`,
 `domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom`,
+`encoded_domino_problem_undecidable_of_scaffoldAndSourceOneRows`,
+`domino_problem_undecidable_of_scaffoldAndSourceOneRows`,
+`encoded_domino_problem_undecidable_of_scaffoldAndSourceBoundedRows`,
+`domino_problem_undecidable_of_scaffoldAndSourceBoundedRows`,
+`encoded_domino_problem_undecidable_of_scaffoldAndSourceRows`,
+`domino_problem_undecidable_of_scaffoldAndSourceRows`,
 `encoded_domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`
 and
 `domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexFrom`.
+The one-row, bounded-interior, and interior-row variants all route through the
+source-specialized label-index bridge before constructing
+`PositionSourceObligations`.
 
 `LeanWang.Final` also exposes
 `encoded_domino_problem_undecidable_of_checkedStackLayerPatchData` and
