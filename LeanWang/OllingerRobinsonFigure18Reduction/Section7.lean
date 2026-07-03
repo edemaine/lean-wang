@@ -1012,6 +1012,58 @@ abbrev L2C2ActiveCornerLayerPatches : Prop :=
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
 
+set_option linter.style.longLine false in
+/--
+Positive translated active-corner boxes instantiate the finite layer patches
+for the first audited L2-blank candidate.
+
+This is the direct bridge from the geometric box construction to the current
+checked-stack/layer-patch proof target; it avoids routing through the refuted
+row-major checked Figure 16 level-data surface.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        hboxes r hr)
+
+set_option linter.style.longLine false in
+/--
+Positive translated active-corner boxes instantiate the finite layer patches
+for the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        hboxes r hr)
+
 /--
 Origin-zero active/corner windows give the layered Robinson Section 7
 obstruction-routing hypothesis for the first audited L2-blank candidate.
@@ -7735,19 +7787,8 @@ patches needed by the first audited L2-blank candidate.
 def l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
     L2C1ActiveCornerLayerPatches :=
-  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
-    l2Component1BlankCandidateActiveSiteSpecs
-    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-    0 Quadrant.southwest
-    l2Component1BlankCandidateSanity.cornerIndex_valid
-    (by
-      intro r hr
-      simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-        l2c1CheckedCompatibleFig16ActiveCornerBoxes hlevel r hr)
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (l2c1CheckedCompatibleFig16ActiveCornerBoxes hlevel)
 
 /--
 Canonical checked compatible Figure 16 macro-squares supply the finite layer
@@ -7756,19 +7797,8 @@ patches needed by the second audited L2-blank candidate.
 def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
     L2C2ActiveCornerLayerPatches :=
-  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
-    l2Component2BlankCandidateActiveSiteSpecs
-    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-    0 Quadrant.northeast
-    l2Component2BlankCandidateSanity.cornerIndex_valid
-    (by
-      intro r hr
-      simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
-        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
-        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
-        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
-        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
-        l2c2CheckedCompatibleFig16ActiveCornerBoxes hlevel r hr)
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (l2c2CheckedCompatibleFig16ActiveCornerBoxes hlevel)
 
 /--
 Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
