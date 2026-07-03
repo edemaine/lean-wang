@@ -719,6 +719,33 @@ structure FinalL2C2Figure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeCons
 
 set_option linter.style.longLine false in
 /--
+First-candidate checked-stack/raw-boundary-board route with the packaged
+generated interior position-code decoder.
+
+This is the proof-facing variant of the checked-board-row Section 7 route: the
+source package carries statement-list uniqueness and the semantic correctness
+theorem is supplied by the generated `positionProgramData` bridge.
+-/
+structure FinalL2C1CheckedBoardRowsPackageConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/raw-boundary-board route with the packaged
+generated interior position-code decoder.
+
+This is the L2C2 analogue of
+`FinalL2C1CheckedBoardRowsPackageConstructionObligations`.
+-/
+structure FinalL2C2CheckedBoardRowsPackageConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
+  boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete nat-site indexed-window scaffold route.
 
 This is the public final surface closest to the human-audited Figure 13 layer
@@ -6923,6 +6950,123 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndFigure18ScaffoldTilesP
     { checkedStacks := checkedStacks
       scaffoldPlane := scaffoldPlane
       labelIndex := labelIndex }
+
+namespace FinalL2C1CheckedBoardRowsPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first-candidate checked stacks, shifted row-major
+raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1CheckedBoardRowsPackageConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    h.checkedStacks h.boardLevels h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first-candidate checked stacks, shifted row-major
+raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C1CheckedBoardRowsPackageConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    h.checkedStacks h.boardLevels h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalL2C1CheckedBoardRowsPackageConstructionObligations
+
+namespace FinalL2C2CheckedBoardRowsPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, shifted row-major
+raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedBoardRowsPackageConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    h.checkedStacks h.boardLevels h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, shifted row-major
+raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedBoardRowsPackageConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    h.checkedStacks h.boardLevels h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalL2C2CheckedBoardRowsPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from first-candidate checked stacks, shifted
+row-major raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1CheckedStacksAndRawBoundaryCheckedBoardRowsPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C1CheckedBoardRowsPackageConstructionObligations.encoded_domino_problem_undecidable
+    { checkedStacks := checkedStacks
+      boardLevels := boardLevels
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from first-candidate checked stacks, shifted
+row-major raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem domino_problem_undecidable_of_l2c1CheckedStacksAndRawBoundaryCheckedBoardRowsPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C1CheckedBoardRowsPackageConstructionObligations.domino_problem_undecidable
+    { checkedStacks := checkedStacks
+      boardLevels := boardLevels
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+shifted row-major raw-boundary checked board levels, and the packaged source
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndRawBoundaryCheckedBoardRowsPackage
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedBoardRowsPackageConstructionObligations.encoded_domino_problem_undecidable
+    { checkedStacks := checkedStacks
+      boardLevels := boardLevels
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, shifted
+row-major raw-boundary checked board levels, and the packaged source decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndRawBoundaryCheckedBoardRowsPackage
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (boardLevels : TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedBoardRowsPackageConstructionObligations.domino_problem_undecidable
+    { checkedStacks := checkedStacks
+      boardLevels := boardLevels
+      sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
