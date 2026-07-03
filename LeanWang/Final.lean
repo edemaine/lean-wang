@@ -1608,6 +1608,30 @@ structure FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with
+generated one-row position-code rows.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with
+generated bounded-interior position-code rows.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with the
 source-specialized position-code label-index target.
 -/
@@ -2437,6 +2461,200 @@ theorem domino_problem_undecidable
   h.toCombinedWindowIsolatedBoxConstructionObligations.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the one-row
+decoded-window/isolated-box package.
+-/
+def toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxOneRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
+      h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the one-row
+origin-zero/translated-positive-box route.
+-/
+def toOriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the one-row Section 7
+board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    |>.toBoardFreeLineLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the bounded-row
+decoded-window/isolated-box package.
+-/
+def toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxBoundedRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
+      h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the bounded-row
+origin-zero/translated-positive-box route.
+-/
+def toOriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the bounded-row
+Section 7 board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    |>.toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -12320,6 +12538,47 @@ target.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, valid translated boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+valid translated boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, valid translated boxes, and generated bounded-interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+valid translated boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
