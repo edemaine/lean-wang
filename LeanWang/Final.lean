@@ -20964,9 +20964,8 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatches
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatches
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorRowsCorrect
+    originZeroWindows patches sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -20978,9 +20977,8 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatches
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatches
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorRowsCorrect
+    originZeroWindows patches sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -20992,9 +20990,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesOn
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesOneRows
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -21006,9 +21005,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesOneRows
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesOneRows
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -21020,9 +21020,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBo
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesBoundedRows
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -21034,9 +21035,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBoundedRow
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesBoundedRows
-      originZeroWindows patches sourceRows)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+      sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -21048,9 +21050,8 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSo
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (source : TM0FoldedReduction.PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesSource
-      originZeroWindows patches source)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches source
 
 set_option linter.style.longLine false in
 /--
@@ -21062,9 +21063,8 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSource
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (source : TM0FoldedReduction.PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesSource
-      originZeroWindows patches source)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches source
 
 set_option linter.style.longLine false in
 /--
@@ -21076,9 +21076,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesDe
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesDecoderStep
-      originZeroWindows patches hstep)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
 
 set_option linter.style.longLine false in
 /--
@@ -21090,9 +21091,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesDecoderSte
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesDecoderStep
-      originZeroWindows patches hstep)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
 
 set_option linter.style.longLine false in
 /--
@@ -21104,9 +21106,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesGl
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesGlobalPositionCodeLabelIndexFrom
-      originZeroWindows patches hindex)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -21118,9 +21121,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesGlobalPosi
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesGlobalPositionCodeLabelIndexFrom
-      originZeroWindows patches hindex)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -21132,9 +21136,10 @@ theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSo
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesSourcePositionCodeLabelIndexFrom
-      originZeroWindows patches hindex)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -21146,9 +21151,10 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSourcePosi
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroWindowsAndLayerPatchesSourcePositionCodeLabelIndexFrom
-      originZeroWindows patches hindex)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
