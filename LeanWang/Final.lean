@@ -339,6 +339,24 @@ def finalOriginZeroFig13BoxDataOfCheckedSignalTowerFig13BoxData
   TM0FoldedReduction.l2c1OriginZeroFig13BoxDataOfCheckedStacks
     data.checkedStacks data.fig13Boxes
 
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus canonical checked Figure 13 macro-square
+recognition instantiate the checked-stack Figure 13 finite-box scaffold target.
+
+This is the direct paper-facing route from the checked Figure 16-recognized
+Robinson-board macro-square invariant to the finite Figure 13 boxes used by
+the final reduction.
+-/
+def finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares) :
+    FinalCheckedSignalTowerFig13BoxData where
+  checkedStacks := checkedStacks
+  fig13Boxes :=
+    TM0FoldedReduction.tileableBoxes_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
+      fig13
+
 /--
 Origin-zero translated-box construction route with the generated interior-row
 source target.
@@ -433,6 +451,44 @@ source-specialized position-code label-index source target.
 -/
 structure FinalCheckedSignalTowerFig13BoxSourcePositionCodeConstructionObligations : Prop where
   scaffold : FinalCheckedSignalTowerFig13BoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
+Checked-stack Figure 13 recognized macro-square construction route with the
+generated interior-row source target.
+-/
+structure FinalCheckedSignalTowerRecognizedFig13ConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Checked-stack Figure 13 recognized macro-square construction route with the
+generated decoder-step source target.
+-/
+structure FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Checked-stack Figure 13 recognized macro-square construction route with the
+global position-code label-index source target.
+-/
+structure FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+/--
+Checked-stack Figure 13 recognized macro-square construction route with the
+source-specialized position-code label-index source target.
+-/
+structure FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
@@ -1140,6 +1196,84 @@ def ofCheckedSignalTowerFig13BoxDataSourcePositionCodeLabelIndexFrom
     FinalReductionInputs :=
   ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
     (finalOriginZeroFig13BoxDataOfCheckedSignalTowerFig13BoxData scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and generated-position source obligations.
+-/
+def ofCheckedStacksAndRecognizedFig13Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalReductionInputs :=
+  ofCheckedSignalTowerFig13BoxDataSource
+    (finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      checkedStacks fig13)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and generated interior position-code rows.
+-/
+def ofCheckedStacksAndRecognizedFig13
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStacksAndRecognizedFig13Source
+    checkedStacks fig13
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the primitive recursive generated
+position-code accumulator step.
+-/
+def ofCheckedStacksAndRecognizedFig13DecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedSignalTowerFig13BoxDataDecoderStep
+    (finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      checkedStacks fig13)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the global primitive recursive
+position-code label-index decoder.
+-/
+def ofCheckedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedSignalTowerFig13BoxDataGlobalPositionCodeLabelIndexFrom
+    (finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      checkedStacks fig13)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+def ofCheckedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedSignalTowerFig13BoxDataSourcePositionCodeLabelIndexFrom
+    (finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      checkedStacks fig13)
     hindex
 
 /--
@@ -2375,6 +2509,130 @@ def toFinalReductionInputs
 
 end FinalCheckedSignalTowerFig13BoxSourcePositionCodeConstructionObligations
 
+namespace FinalCheckedSignalTowerRecognizedFig13ConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack Figure 13 macro-square recognition to the finite-box
+package used by the current final route.
+-/
+def toCheckedSignalTowerFig13BoxConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13ConstructionObligations) :
+    FinalCheckedSignalTowerFig13BoxConstructionObligations where
+  scaffold :=
+    finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      h.checkedStacks h.fig13
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack Figure 13 macro-square row-source package into the
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedSignalTowerRecognizedFig13ConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndRecognizedFig13
+    h.checkedStacks h.fig13 h.sourceRows
+
+end FinalCheckedSignalTowerRecognizedFig13ConstructionObligations
+
+namespace FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack Figure 13 macro-square recognition to the finite-box
+decoder-step package used by the current final route.
+-/
+def toCheckedSignalTowerFig13BoxDecoderStepConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations) :
+    FinalCheckedSignalTowerFig13BoxDecoderStepConstructionObligations where
+  scaffold :=
+    finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      h.checkedStacks h.fig13
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack Figure 13 macro-square decoder-step package into the
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndRecognizedFig13DecoderStep
+    h.checkedStacks h.fig13 h.decoderStep
+
+end FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations
+
+namespace FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the current final route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations) :
+    FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig13 := h.fig13
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack Figure 13 macro-square recognition to the finite-box
+global-label-index package used by the current final route.
+-/
+def toCheckedSignalTowerFig13BoxGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations) :
+    FinalCheckedSignalTowerFig13BoxGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      h.checkedStacks h.fig13
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack Figure 13 macro-square global-label-index package
+into the endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+    h.checkedStacks h.fig13 h.labelIndex
+
+end FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations
+
+namespace FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack Figure 13 macro-square recognition to the finite-box
+source-label-index package used by the current final route.
+-/
+def toCheckedSignalTowerFig13BoxSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations) :
+    FinalCheckedSignalTowerFig13BoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    finalCheckedSignalTowerFig13BoxDataOfCheckedStacksRecognizedFig13
+      h.checkedStacks h.fig13
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack Figure 13 macro-square source-label-index package
+into the endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+    h.checkedStacks h.fig13 h.labelIndex
+
+end FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations
+
 namespace FinalCheckedConstructionObligations
 
 /--
@@ -3589,6 +3847,93 @@ theorem domino_problem_undecidable_of_checkedSignalTowerFig13BoxSourcePositionCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13ConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13ConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13ConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13ConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the primitive recursive
+generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13DecoderStepConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13DecoderStepConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13DecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13GlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the source-specialized
+primitive recursive position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations
+    (h : FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
@@ -4297,6 +4642,154 @@ theorem domino_problem_undecidable_of_checkedSignalTowerFig13BoxDataSourcePositi
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedSignalTowerFig13BoxDataSourcePositionCodeLabelIndexFrom
       scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and generated-position source
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndRecognizedFig13Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13Source
+      checkedStacks fig13 source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndRecognizedFig13Source
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13Source
+      checkedStacks fig13 source)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndRecognizedFig13
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13
+      checkedStacks fig13 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndRecognizedFig13
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13
+      checkedStacks fig13 sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the generated position-code
+decoder-step target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndRecognizedFig13DecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13DecoderStep
+      checkedStacks fig13 hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the generated position-code
+decoder-step target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndRecognizedFig13DecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13DecoderStep
+      checkedStacks fig13 hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the global position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+      checkedStacks fig13 hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the global position-code label-index
+target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13GlobalPositionCodeLabelIndexFrom
+      checkedStacks fig13 hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, canonical
+checked Figure 13 macro-square recognition, and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+      checkedStacks fig13 hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, canonical checked
+Figure 13 macro-square recognition, and the source-specialized position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig13 : TM0FoldedReduction.Figure13CanonicalCheckedRecognizedMacroSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndRecognizedFig13SourcePositionCodeLabelIndexFrom
+      checkedStacks fig13 hindex)
 
 set_option linter.style.longLine false in
 /--
