@@ -1057,6 +1057,11 @@ top-level aliases under
 `*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`;
 this route uses the existing source-side bridge from interior rows to the
 source-specialized label-index decoder.
+Both L2C2 canonical-free-site Figure 16 row-source and source-label packages
+now project to
+`FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+through the checked-stack/valid-translated-box bridge, so this upstream route
+also exposes the origin-zero translated-positive-box scaffold surface.
 The same L2C2 canonical-free-site route is now exposed with a direct
 `TilesPlane figure18ScaffoldTiles` input as
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`

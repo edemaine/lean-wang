@@ -190,6 +190,10 @@ The row-source L2C2 analogue is
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations`, with
 top-level aliases ending in
 `l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`.
+Both L2C2 canonical-free-site Figure 16 row-source and source-label packages
+now project to
+`FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+through the checked-stack/valid-translated-box bridge.
 The same L2C2 compatible-Figure-16 surface now also exposes decoder-step and
 global-label aliases ending in
 `l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep` and
