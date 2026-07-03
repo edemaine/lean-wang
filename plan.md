@@ -945,6 +945,12 @@ and checked-stack/valid-translated-box routes via
 The second candidate also has decoder-step, global-label, and source-label
 variants for both layer patches and valid translated boxes, so both audited
 scaffold candidates can be driven from the current generated-source targets.
+The L2C2 checked-stack/valid-translated-box source-label route now also
+projects to the origin-zero translated-positive-box final surface through
+`l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData`.
+This makes the preferred final theorem surface depend on checked origin-zero
+stacks plus valid translated boxes directly, not only on the layer patches
+derived from them.
 The final module also exposes a concrete nat-site indexed-window route via
 `FinalFigure13NatSitesIndexedWindowConstructionObligations`.  This is the
 public endpoint closest to the human-audited Figure 13 layer table: it asks for

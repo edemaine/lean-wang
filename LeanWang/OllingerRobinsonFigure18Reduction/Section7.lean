@@ -4661,6 +4661,46 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTransla
 
 set_option linter.style.longLine false in
 /--
+Checked origin-zero stacks plus valid translated boxes provide the first
+origin-zero/translated-positive-box obligation surface.
+-/
+def l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes
+          data.validTranslatedBoxes)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the second
+origin-zero/translated-positive-box obligation surface.
+-/
+def l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
+          data.validTranslatedBoxes)
+
+set_option linter.style.longLine false in
+/--
 Origin-zero windows plus positive translated active-corner boxes produce the
 first checked finite scaffold package.
 -/
