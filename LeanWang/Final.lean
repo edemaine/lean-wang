@@ -3036,6 +3036,31 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
 set_option linter.style.longLine false in
 /--
 Build the second-candidate final inputs directly from the scaffold package and
+the generated position-code decoder step.
+-/
+def ofScaffoldAndSourceDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
+the global position-code label-index decoder target.
+-/
+def ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
+    (sourceLabelIndexPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
 generated interior position-code rows.
 -/
 def ofScaffoldAndSourceRows
@@ -5170,15 +5195,26 @@ def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch data to the compact
+board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourceRows
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch finite scaffold
 package and generated interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
-    h.scaffold h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -5188,9 +5224,7 @@ package and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
-    h.scaffold h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchConstructionObligations
 
@@ -5214,16 +5248,26 @@ def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch decoder-step data to the
+compact board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch package and the
 generated position-code decoder step.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
-    h.scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
-      h.decoderStep)
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -5233,10 +5277,7 @@ generated position-code decoder step.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
-    h.scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
-      h.decoderStep)
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
 
@@ -5274,14 +5315,26 @@ def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch global-label data to the
+compact board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch package and the
 global position-code label-index decoder.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
-    h.scaffold h.labelIndex
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -5291,8 +5344,7 @@ global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
-    h.scaffold h.labelIndex
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
@@ -5322,14 +5374,26 @@ def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch source-label data to the
+compact board/free-line final reduction input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      h.scaffold)
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch package and the
 source-specialized position-code label-index decoder.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
-    h.scaffold h.labelIndex
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -5339,8 +5403,7 @@ source-specialized position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
-    h.scaffold h.labelIndex
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
 
