@@ -1028,6 +1028,12 @@ windows, and the two audited L2 candidates have named wrappers from
 and local free-square windows. Thus the current strong scaffold obligation
 simultaneously feeds the canonical board/free-line surface and the local
 recognizability surface.
+The same origin-zero/scaffold-plane assumptions now also produce ordinary
+`Figure18ScaffoldData.Certificate`s, hence `IsScaffold`, for both audited L2
+candidates. This ties the last local-free-square window route to the existing
+translated-box realization route: origin-zero windows supply recognizability,
+while `TilesPlane figure18ScaffoldTiles` supplies the positive translated
+active-corner boxes.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

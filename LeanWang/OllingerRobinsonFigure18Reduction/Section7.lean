@@ -3947,6 +3947,78 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure1
     (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
     hplane
 
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+first audited L2 candidate.
+
+This packages the two independent scaffold directions: origin-zero windows give
+local free-square recognizability, and the plane tiling gives translated active
+boxes for realization.
+-/
+def l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component1Figure18ScaffoldData.Certificate := by
+  have realizes :
+      Figure18ScaffoldData.HasRealizationInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane))
+  exact
+    Figure18ScaffoldData.Certificate.ofWindowInvariant
+      (l2c1LocalFreeSquareWindowOfOriginZeroWindows originZeroWindows)
+      realizes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+second audited L2 candidate.
+-/
+def l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component2Figure18ScaffoldData.Certificate := by
+  have realizes :
+      Figure18ScaffoldData.HasRealizationInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane))
+  exact
+    Figure18ScaffoldData.Certificate.ofWindowInvariant
+      (l2c2LocalFreeSquareWindowOfOriginZeroWindows originZeroWindows)
+      realizes
+
+set_option linter.style.longLine false in
+/--
+The first audited L2 Figure 18 scaffold is a valid scaffold under the current
+origin-zero/scaffold-plane assumptions.
+-/
+theorem l2c1IsScaffoldOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    originZeroWindows hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second audited L2 Figure 18 scaffold is a valid scaffold under the current
+origin-zero/scaffold-plane assumptions.
+-/
+theorem l2c2IsScaffoldOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    originZeroWindows hplane).isScaffold
+
 /--
 Origin-zero active/corner windows and finite active-corner layer patches
 instantiate the first board/free-line Section 7 layer-patch package directly.
