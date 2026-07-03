@@ -2465,6 +2465,15 @@ theorem not_figure18CanonicalCheckedRecognizedCompatibleLevelData :
     not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData
 
 /--
+The canonical Figure 16 compatible macro-square surface is inconsistent: the
+checked source-stack compatibility condition already fails at level 0.
+-/
+theorem not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares :
+    ¬ TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares := by
+  simpa [TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares] using
+    not_hasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
+
+/--
 The proof-facing canonical Figure 16 level-check surface is inconsistent too:
 the checked source-stack compatibility condition already fails at level 0.
 -/
@@ -2492,6 +2501,93 @@ theorem not_figure18CanonicalRawBoundaryCheckedBoardLevels :
     ¬ TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels := by
   simpa [TM0FoldedReduction.Figure18CanonicalRawBoundaryCheckedBoardLevels] using
     not_hasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+
+/-!
+The following lemmas make the dead Figure 16 compatible final routes explicit.
+They remain as diagnostics, but they are no longer plausible final proof
+frontiers because each includes a formally refuted Figure 16 compatibility
+field.
+-/
+
+theorem not_finalFigure16CompatibleConstructionObligations :
+    ¬ FinalFigure16CompatibleConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleDecoderStepConstructionObligations :
+    ¬ FinalFigure16CompatibleDecoderStepConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleGlobalPositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleGlobalPositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleSourcePositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleSourcePositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleOriginZeroConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleOriginZeroDecoderStepConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations :
+    ¬ FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
+
+theorem not_finalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations :
+    ¬ FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
+
+theorem not_finalL2C2Figure16CompatibleOriginZeroConstructionObligations :
+    ¬ FinalL2C2Figure16CompatibleOriginZeroConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
+
+theorem not_finalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations :
+    ¬ FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
 
 namespace FinalReductionInputs
 

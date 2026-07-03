@@ -1419,6 +1419,13 @@ conditions have been narrowed to two proof-facing fronts:
    finite checked-stack target no longer has to detour through valid translated
    boxes to reach the preferred scaffold-facing endpoint.
 
+   The remaining first-candidate and L2C2 Figure 16 compatible final-package
+   structures are now explicitly proved uninhabited in `LeanWang.Final`, via
+   the refutations of `Figure18CanonicalCheckedRecognizedCompatibleMacroSquares`
+   and `Figure18CanonicalCheckedRecognizedCompatibleLevelChecks`.  They remain
+   useful historical diagnostics, but they should not be treated as live final
+   theorem frontiers.
+
    The same L2C2 checked-stack/layer-patch public endpoint now also exposes
    generated one-row and bounded-interior source-row wrappers, matching the
    weaker source targets already available for the first L2 route.
