@@ -4803,6 +4803,36 @@ namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch data to the Figure 13
+board/free-line/layer-patch final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch data to the Figure 13
+board/free-line/layer-patch source-label final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch finite scaffold
 package and generated interior position-code rows.
 -/
@@ -4828,6 +4858,22 @@ theorem domino_problem_undecidable
 end FinalL2C2CheckedStackLayerPatchConstructionObligations
 
 namespace FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch decoder-step data to the
+Figure 13 board/free-line/layer-patch source-label final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+      h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -4877,6 +4923,20 @@ def toDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/layer-patch global-label data to the
+Figure 13 board/free-line/layer-patch source-label final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the second checked-stack/layer-patch package and the
 global position-code label-index decoder.
 -/
@@ -4908,6 +4968,20 @@ def toDecoderStepConstructionObligations
     FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations where
   scaffold := h.scaffold
   decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch source-label data to the
+Figure 13 board/free-line/layer-patch source-label final surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
 /--

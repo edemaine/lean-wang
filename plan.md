@@ -1404,6 +1404,12 @@ conditions have been narrowed to two proof-facing fronts:
    keeps the finite tileable-box diagnostic path connected to the same
    Section 7 layer-patch endpoint as the decoded-window/valid-box path.
 
+   The L2C2 checked-stack/layer-patch packages now project directly to this
+   same Figure 13 board/free-line/layer-patch surface, again for row-source,
+   decoder-step, global-label, and source-label wrappers.  Thus the current
+   finite checked-stack target no longer has to detour through valid translated
+   boxes to reach the preferred scaffold-facing endpoint.
+
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
 the raw Figure 13 plane/box routes, and
