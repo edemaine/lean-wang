@@ -2302,21 +2302,29 @@ def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the origin-zero Figure 16 global-label-index package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the origin-zero Figure 16 global-label-index package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 end FinalFigure16CompatibleOriginZeroGlobalPositionCodeConstructionObligations
 
@@ -3067,9 +3075,9 @@ def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
     h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
-    h.labelIndex
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
@@ -3078,8 +3086,8 @@ theorem encoded_domino_problem_undecidable
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
     h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
@@ -3088,8 +3096,8 @@ theorem domino_problem_undecidable
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
     h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
-      h.labelIndex)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex))
 
 end FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
 
