@@ -217,6 +217,28 @@ structure FinalFigure16CompatibleConstructionObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Finite Figure 16 compatible macro-square route with generated one-row
+position-code rows.
+-/
+structure FinalFigure16CompatibleOneRowsConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite Figure 16 compatible macro-square route with generated bounded-interior
+position-code rows.
+-/
+structure FinalFigure16CompatibleBoundedRowsConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite Figure 16 compatible macro-square route with the narrower generated
 decoder-step source target.
 -/
@@ -262,6 +284,30 @@ structure FinalFigure16CompatibleOriginZeroConstructionObligations : Prop where
   compatibleMacroSquares :
     TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Origin-zero Figure 16 compatible route with generated one-row position-code
+rows.
+-/
+structure FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Origin-zero Figure 16 compatible route with generated bounded-interior
+position-code rows.
+-/
+structure FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -311,6 +357,30 @@ structure FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations :
   compatibleMacroSquares :
     TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Canonical-free-site Figure 16 compatible route with generated one-row
+position-code rows.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Canonical-free-site Figure 16 compatible route with generated bounded-interior
+position-code rows.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -4229,6 +4299,16 @@ theorem not_finalFigure16CompatibleConstructionObligations :
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
     h.compatibleMacroSquares
 
+theorem not_finalFigure16CompatibleOneRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleOneRowsConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleBoundedRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleBoundedRowsConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
 theorem not_finalFigure16CompatibleDecoderStepConstructionObligations :
     ¬ FinalFigure16CompatibleDecoderStepConstructionObligations :=
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
@@ -4249,6 +4329,16 @@ theorem not_finalFigure16CompatibleOriginZeroConstructionObligations :
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
     h.compatibleMacroSquares
 
+theorem not_finalFigure16CompatibleOriginZeroOneRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
 theorem not_finalFigure16CompatibleOriginZeroDecoderStepConstructionObligations :
     ¬ FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations :=
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
@@ -4266,6 +4356,16 @@ theorem not_finalFigure16CompatibleOriginZeroSourcePositionCodeConstructionOblig
 
 theorem not_finalFigure16CompatibleCanonicalFreeSiteConstructionObligations :
     ¬ FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+    h.compatibleMacroSquares
+
+theorem not_finalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations :
+    ¬ FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations :=
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleMacroSquares
     h.compatibleMacroSquares
 
@@ -5375,6 +5475,166 @@ theorem domino_problem_undecidable
 
 end FinalFigure16CompatibleConstructionObligations
 
+namespace FinalFigure16CompatibleOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the finite Figure 16 compatible one-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalFigure16CompatibleConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the finite Figure 16 compatible one-row package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalFigure16CompatibleSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible one-row package to the
+checked-stack/valid-translated-box one-row package.
+-/
+def toCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible one-row package to the proof-facing
+Section 7 translated-box one-row package.
+-/
+def toSection7TranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalSection7TranslatedBoxOneRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible one-row package to the origin-zero
+translated-box one-row package.
+-/
+def toOriginZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxOneRowsConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxOneRowsConstructionObligations
+
+/-- Convert the finite Figure 16 compatible one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxOneRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleOneRowsConstructionObligations
+
+namespace FinalFigure16CompatibleBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the finite Figure 16 compatible bounded-row package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleOneRowsConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the finite Figure 16 compatible bounded-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the finite Figure 16 compatible bounded-row package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible bounded-row package to the
+checked-stack/valid-translated-box bounded-row package.
+-/
+def toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible bounded-row package to the proof-facing
+Section 7 translated-box bounded-row package.
+-/
+def toSection7TranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalSection7TranslatedBoxBoundedRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible bounded-row package to the origin-zero
+translated-box bounded-row package.
+-/
+def toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+
+/-- Convert the finite Figure 16 compatible bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleBoundedRowsConstructionObligations
+
 namespace FinalFigure16CompatibleDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -5658,6 +5918,168 @@ theorem domino_problem_undecidable
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure16CompatibleOriginZeroConstructionObligations
+
+namespace FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 one-row package to the checked-stack
+Figure 16 one-row route.
+-/
+def toFigure16CompatibleOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalFigure16CompatibleOneRowsConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero-window Figure 16 one-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalFigure16CompatibleOriginZeroConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 one-row package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 one-row package to the proof-facing
+Section 7 translated-box one-row package.
+-/
+def toSection7TranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalSection7TranslatedBoxOneRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 one-row package to the origin-zero
+translated-box one-row package.
+-/
+def toOriginZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxOneRowsConstructionObligations :=
+  h.toFigure16CompatibleOneRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxOneRowsConstructionObligations
+
+/-- Convert the origin-zero-window Figure 16 one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toFigure16CompatibleOneRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations
+
+namespace FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero-window Figure 16 bounded-row package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleOriginZeroOneRowsConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 bounded-row package to the
+checked-stack Figure 16 bounded-row route.
+-/
+def toFigure16CompatibleBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleBoundedRowsConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero-window Figure 16 bounded-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleOriginZeroConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 bounded-row package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 bounded-row package to the proof-facing
+Section 7 translated-box bounded-row package.
+-/
+def toSection7TranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalSection7TranslatedBoxBoundedRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 bounded-row package to the origin-zero
+translated-box bounded-row package.
+-/
+def toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations :=
+  h.toFigure16CompatibleBoundedRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+
+/-- Convert the origin-zero-window Figure 16 bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toFigure16CompatibleBoundedRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleOriginZeroBoundedRowsConstructionObligations
 
 namespace FinalFigure16CompatibleOriginZeroDecoderStepConstructionObligations
 
@@ -5946,6 +6368,168 @@ theorem domino_problem_undecidable
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 one-row package to the checked-stack
+Figure 16 one-row route.
+-/
+def toFigure16CompatibleOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalFigure16CompatibleOneRowsConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 one-row package to checked-stack
+valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the canonical-free-site Figure 16 one-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 one-row package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 one-row package to the origin-zero
+translated-box one-row package.
+-/
+def toOriginZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxOneRowsConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxOneRowsConstructionObligations
+
+/-- Convert the canonical-free-site Figure 16 one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxOneRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the canonical-free-site Figure 16 bounded-row package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteOneRowsConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 bounded-row package to the
+checked-stack Figure 16 bounded-row route.
+-/
+def toFigure16CompatibleBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleBoundedRowsConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 bounded-row package to checked-stack
+valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the canonical-free-site Figure 16 bounded-row package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 bounded-row package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 bounded-row package to the origin-zero
+translated-box bounded-row package.
+-/
+def toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    |>.toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+
+/-- Convert the canonical-free-site Figure 16 bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations.toFinalReductionInputs
+
+end FinalFigure16CompatibleCanonicalFreeSiteBoundedRowsConstructionObligations
 
 namespace FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
 
