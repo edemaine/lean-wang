@@ -2112,18 +2112,16 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    h.labelIndex
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    h.canonicalActiveCorner h.compatibleMacroSquares h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the canonical-free-site Figure 16 source-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    h.labelIndex
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    h.canonicalActiveCorner h.compatibleMacroSquares h.labelIndex
 
 end FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
 

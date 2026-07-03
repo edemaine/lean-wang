@@ -1756,6 +1756,82 @@ theorem
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the first canonical free-site
+active/corner recognition package, finite compatible Figure 16 level checks,
+and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_box_data_sourceCodeCorrect
+      (l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        canonicalActiveCorner compatibleLevelChecks)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first canonical free-site
+active/corner recognition package, finite compatible Figure 16 level checks,
+and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_valid_translated_box_data_sourceCodeCorrect
+      (l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        canonicalActiveCorner compatibleLevelChecks)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second canonical free-site
+active/corner recognition package, finite compatible Figure 16 level checks,
+and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_sourceCodeCorrect
+      (l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        canonicalActiveCorner compatibleLevelChecks)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second canonical free-site
+active/corner recognition package, finite compatible Figure 16 level checks,
+and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_free_site_compatible_fig16_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_sourceCodeCorrect
+      (l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        canonicalActiveCorner compatibleLevelChecks)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first canonical free-site
 active/corner recognition package, a plane tiling of the compatible Figure 18
 scaffold tiles, and the source-specialized position-code label-index decoder,
 with `positionProgramData` semantic correctness discharged.

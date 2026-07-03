@@ -1024,6 +1024,14 @@ definitionally the compatible macro-square target.  Do not target the row-major
 `Figure18CanonicalCheckedRecognizedCompatibleLevelData` surface for final use:
 it is intentionally refuted by
 `not_figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+The generated-position integration layer now exposes the same canonical
+free-site/compatible-Figure-16 source-label route directly, for both audited
+L2 candidates, through
+`encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect`
+and its L2C2/unencoded analogues.  These theorems take exactly the three live
+assumptions for this route: canonical free-site active/corner recognition,
+finite compatible Figure 16 level checks, and
+`SourcePositionCodeLabelIndexFromPrimrec`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

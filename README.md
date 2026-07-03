@@ -166,7 +166,10 @@ and
 take canonical Robinson free-site active/corner recognition, finite compatible
 Figure 16 level checks, and generated interior source rows.  Decoder-step,
 global-label, and source-label variants are exposed under the same
-`canonicalFreeSiteAndCompatibleFig16LevelChecks*` naming.  The row-major
+`canonicalFreeSiteAndCompatibleFig16LevelChecks*` naming.  The reduction layer
+also exposes the exact source-label endpoints
+`encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect`
+and the L2C2/unencoded analogues.  The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
 `not_figure18CanonicalCheckedRecognizedCompatibleLevelData`; final routes
