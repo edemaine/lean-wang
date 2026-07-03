@@ -1520,6 +1520,49 @@ the raw Figure 13 plane/box routes, and
 in Lean.  The live scaffold work should stay on the Section 7 translated
 positive-box/layer-patch interfaces.
 
+### Current Frontier Checkpoint
+
+As of the current Lean tree, `lake build LeanWang.TM0FoldedPositionReduction`
+builds successfully and the generated-position semantic correctness theorem is
+available through
+`TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom`.
+The machine-side proof is therefore not blocked on semantic TM0 correctness or
+on the old canonical-row-equality route.  The remaining machine-side blocker is
+the source-uniform primitive-recursion proof for the generated position-code
+rows, currently exposed most cleanly as:
+
+```lean
+TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec
+```
+
+The row-level variants
+`SourcePositionCodeOneRowsPrimrec`,
+`SourcePositionCodeInteriorRowsPrimrec`, and
+`SourcePositionCodeBoundedInteriorRowsPrimrec` are equivalent enough for the
+final route and all feed the same source-label endpoint.  The existing
+`*_primrec_fixed` lemmas prove the corresponding facts for each fixed source
+code, but they do not yet solve the uniform proof over `Nat.Partrec.Code`; that
+is where the dependent `SourceStmt tc` family is still visible.
+
+On the scaffold side, the live endpoint is the L2C2 Section 7
+board/free-line/layer-patch route:
+
+```lean
+NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+FinalFigure13RobinsonLayerPatchConstructionObligations
+```
+
+The human-audited finite inputs are now checked in as
+`figures/fig13-human.tsv` and `figures/fig16-human.txt`, with visual aids in
+`figures/figure13-indexed.png` and
+`figures/figure16-layer-components.png`.  The Lean transcription in
+`LeanWang.OllingerRobinsonFigure13Data` points back to the Figure 13 TSV and
+keeps the Figure 13/Figure 16 layer patches visible through
+`NatSiteRobinsonLayerPatchScaffoldCertificate`.  Future scaffold work should
+turn this concrete transcription into `HasActiveCornerLayerBoxPatches` plus the
+Section 7 board/free-line active-corner invariant, rather than reviving the
+refuted checked Figure 16 level-data or raw Figure 13 box routes.
+
 ### 7. Final Undecidability Theorem
 
 Compose:
