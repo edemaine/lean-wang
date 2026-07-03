@@ -4139,6 +4139,32 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure1
 
 set_option linter.style.longLine false in
 /--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the first board/free-line translated-box Section
+7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the second board/free-line translated-box Section
+7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
 Origin-zero active/corner windows plus a plane tiling of the compatible Figure
 18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
 first audited L2 candidate.
@@ -4262,6 +4288,56 @@ theorem l2c2IsScaffoldOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
     IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
   (l2c2Figure18CertificateOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
     canonicalActiveCorner hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+first audited L2 candidate.
+-/
+def l2c1Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component1Figure18ScaffoldData.Certificate :=
+  l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+second audited L2 candidate.
+-/
+def l2c2Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component2Figure18ScaffoldData.Certificate :=
+  l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+The first audited L2 Figure 18 scaffold is a valid scaffold under finite
+origin-zero checked stacks and the scaffold-plane tiling assumption.
+-/
+theorem l2c1IsScaffoldOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (l2c1Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    hchecked hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second audited L2 Figure 18 scaffold is a valid scaffold under finite
+origin-zero checked stacks and the scaffold-plane tiling assumption.
+-/
+theorem l2c2IsScaffoldOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (l2c2Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    hchecked hplane).isScaffold
 
 /--
 Origin-zero active/corner windows and finite active-corner layer patches
@@ -14611,6 +14687,78 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
       (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
         canonicalActiveCorner hplane)
+      h
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and source-position
+obligations for the first audited L2 candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stacks_figure18_scaffold_tiles_plane_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+        hchecked hplane)
+      h
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and source-position
+obligations for the first audited L2 candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stacks_figure18_scaffold_tiles_plane_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+      (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+        hchecked hplane)
+      h
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and source-position
+obligations for the second audited L2 candidate.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stacks_figure18_scaffold_tiles_plane_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+        hchecked hplane)
+      h
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and source-position
+obligations for the second audited L2 candidate.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stacks_figure18_scaffold_tiles_plane_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+        hchecked hplane)
       h
 
 /--

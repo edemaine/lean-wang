@@ -1089,6 +1089,12 @@ active/corner recognition via
 the existing origin-zero scaffold-plane wrappers.  This removes the need for
 callers who already have checked stacks to restate the canonical recognition
 obligation separately.
+The same route is now named below `Final` as well: Section 7 has direct
+checked-stack/scaffold-plane translated-box constructors, ordinary Figure 18
+certificates, `IsScaffold` wrappers, and position-source undecidability
+endpoints for both audited L2 candidates.  The generated-position wrapper layer
+also exposes the source-specialized label-index versions with folded semantic
+correctness already discharged.
 The direct cofinal-square replacement for `TilesPlane figure18ScaffoldTiles`
 has been removed from the public final surface because the standalone Figure 18
 site-square problem is a diagnostic target, not the scaffold instantiation

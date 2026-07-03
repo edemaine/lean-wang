@@ -4249,6 +4249,94 @@ theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneOriginZeroSource
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from finite origin-zero checked stacks, a
+plane tiling of the compatible Figure 18 scaffold tiles, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from finite origin-zero checked stacks, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the primitive
+recursive generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the primitive recursive
+generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from finite origin-zero checked stacks, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the global
+position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the global position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from finite origin-zero checked stacks, a
+plane tiling of the compatible Figure 18 scaffold tiles, and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from finite origin-zero checked stacks, a plane
+tiling of the compatible Figure 18 scaffold tiles, and the source-specialized
+position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from canonical Robinson free-site
 active/corner recognition, a plane tiling of the compatible Figure 18 scaffold
 tiles, and generated interior position-code rows.

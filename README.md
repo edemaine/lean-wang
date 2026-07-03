@@ -182,6 +182,11 @@ decoder-step/global-label/source-label analogues.  These use
 projection from finite origin-zero checked stacks to canonical Robinson
 free-site active/corner recognition, while their endpoints reuse the existing
 origin-zero scaffold-plane route.
+The Section 7 and generated-position wrapper layers expose the same checked
+stack plus scaffold-plane route directly through
+`l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane`,
+`encoded_domino_problem_undecidable_l2c1_checked_stacks_figure18_scaffold_tiles_plane_position_source`,
+and the corresponding source-label semantic-correctness-discharged endpoints.
 The standalone `TileableSquare figure18ScaffoldTiles` cofinal target is not a
 final route: the direct Figure 18 site-square problem is a diagnostic surface,
 while the proof-facing scaffold target is the Section 7 checked-stack plus
