@@ -270,6 +270,60 @@ theorem sourcePositionCodeOneRowsIndexVar_one
         (sourceStatementOne c) v := by
   exact sourcePositionCodeOneRowsIndexVar_stmt_some (sourceStatementAt_one c)
 
+set_option linter.style.longLine false in
+/--
+For each fixed source code, generated position-code one-row descriptors are
+primitive recursive in the row, variable-position, and variable fields.
+
+The final source reduction needs the stronger uniform version over `c`; this
+fixed-code lemma isolates the part already supplied by the translated TM0
+machine encodings.
+-/
+theorem sourcePositionCodeOneRowsIndexVar_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar c p.1 p.2.1 p.2.2) := by
+  let tc := NatPartrecToToPartrec.translate c
+  have hlookup : Primrec (fun p : Nat × Nat × TM0Route.PartrecVar =>
+      TM0Route.partrecStartedTM0StatementAt? tc p.1) :=
+    (TM0Route.partrecStartedTM0StatementAt?_primrec_fixed tc).comp Primrec.fst
+  have hnone : Primrec (fun _p : Nat × Nat × TM0Route.PartrecVar =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hlabel :=
+    TM0FoldedCompiler.simStepDataForStmtLabelWithCode_primrec_fixed tc
+  have hcode := TM0FoldedCompiler.labelPositionCode_primrec_fixed tc
+  have hsome : Primrec₂
+      (fun p : Nat × Nat × TM0Route.PartrecVar =>
+        fun stmt : Option (TM0FoldedCompiler.SourceStmt tc) =>
+          TM0FoldedCompiler.simStepDataForStmtLabelWithCode tc
+            (TM0FoldedCompiler.labelPositionCode p.1 p.2.1 stmt p.2.2)
+            stmt p.2.2) := by
+    apply Primrec₂.mk
+    have hk : Primrec (fun q : (Nat × Nat × TM0Route.PartrecVar) ×
+        Option (TM0FoldedCompiler.SourceStmt tc) => q.1.1) :=
+      Primrec.fst.comp Primrec.fst
+    have hi : Primrec (fun q : (Nat × Nat × TM0Route.PartrecVar) ×
+        Option (TM0FoldedCompiler.SourceStmt tc) => q.1.2.1) :=
+      Primrec.fst.comp (Primrec.snd.comp Primrec.fst)
+    have hv : Primrec (fun q : (Nat × Nat × TM0Route.PartrecVar) ×
+        Option (TM0FoldedCompiler.SourceStmt tc) => q.1.2.2) :=
+      Primrec.snd.comp (Primrec.snd.comp Primrec.fst)
+    have hstmt : Primrec (fun q : (Nat × Nat × TM0Route.PartrecVar) ×
+        Option (TM0FoldedCompiler.SourceStmt tc) => q.2) :=
+      Primrec.snd
+    have hqCode : Primrec
+        (fun q : (Nat × Nat × TM0Route.PartrecVar) ×
+          Option (TM0FoldedCompiler.SourceStmt tc) =>
+          TM0FoldedCompiler.labelPositionCode q.1.1 q.1.2.1 q.2 q.1.2.2) :=
+      hcode.comp
+        (Primrec.pair hk
+          (Primrec.pair hi (Primrec.pair hstmt hv)))
+    exact hlabel.comp
+      (Primrec.pair hqCode (Primrec.pair hstmt hv))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc p.1 <;>
+      simp [sourcePositionCodeOneRowsIndexVar, tc, hstmt]
+
 def sourcePositionCodeInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
@@ -317,6 +371,16 @@ theorem sourcePositionCodeInteriorRowsIndexVar_primrec_of_oneRows
         (Primrec.pair
           (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
           (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+
+set_option linter.style.longLine false in
+/-- Fixed-code primitive-recursiveness of generated position-code interior rows. -/
+theorem sourcePositionCodeInteriorRowsIndexVar_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar c p.1 p.2.1 p.2.2) := by
+  have hrows := sourcePositionCodeOneRowsIndexVar_primrec_fixed c
+  have hj : Primrec (fun p : Nat × Nat × TM0Route.PartrecVar => p.1 + 1) :=
+    Primrec.succ.comp Primrec.fst
+  exact hrows.comp (Primrec.pair hj Primrec.snd)
 
 theorem sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
@@ -447,6 +511,22 @@ theorem sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_of_interior
       (Primrec.nat_add.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 1))
       (sourceStatementCount_primrec.comp Primrec.fst)
   have hnil : Primrec (fun _p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  exact (Primrec.ite hbound hinterior hnil).of_eq fun p => by
+    rfl
+
+set_option linter.style.longLine false in
+/-- Fixed-code primitive-recursiveness of bounded generated position-code interior rows. -/
+theorem sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar c p.1 p.2.1 p.2.2) := by
+  have hinterior := sourcePositionCodeInteriorRowsIndexVar_primrec_fixed c
+  have hbound : PrimrecPred (fun p : Nat × Nat × TM0Route.PartrecVar =>
+      p.1 + 1 < sourceStatementCount c) :=
+    Primrec.nat_lt.comp (Primrec.nat_add.comp Primrec.fst (Primrec.const 1))
+      (Primrec.const (sourceStatementCount c))
+  have hnil : Primrec (fun _p : Nat × Nat × TM0Route.PartrecVar =>
       ([] : List TM0FoldedCompiler.SimStepData)) :=
     Primrec.const []
   exact (Primrec.ite hbound hinterior hnil).of_eq fun p => by
