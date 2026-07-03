@@ -874,6 +874,13 @@ and
 `l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData`.
 Thus the finite layer-patch package is not just a compatible-level shortcut:
 it also feeds the concrete routed Figure 18 certificate route directly.
+The same routed-certificate bridge is now exposed at the checked finite target
+via `l2c1Figure18RoutedCertificateOfCheckedStackLayerPatchData`,
+`l2c2Figure18RoutedCertificateOfCheckedStackLayerPatchData`, and split-field
+checked-stack/layer-patch variants.  This keeps the proof frontier aligned with
+the concrete transcription target: prove checked origin-zero stacks plus active
+corner layer patches, and both the final reduction route and the concrete
+Figure 18 certificate route are available.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

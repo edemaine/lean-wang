@@ -4729,6 +4729,70 @@ def l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
     Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
     certificate.toRoutedCertificate
 
+/--
+Finite origin-zero checked stacks and active-corner layer patches provide the
+first routed Figure 18 certificate.
+-/
+def l2c1Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      hchecked patches)
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches provide the
+second routed Figure 18 certificate.
+-/
+def l2c2Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      hchecked patches)
+
+/--
+The first concrete checked-stack/layer-patch finite package provides the routed
+Figure 18 certificate.
+-/
+def l2c1Figure18RoutedCertificateOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c1Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    data.checkedStacks data.patches
+
+/--
+The second concrete checked-stack/layer-patch finite package provides the
+routed Figure 18 certificate.
+-/
+def l2c2Figure18RoutedCertificateOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c2Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    data.checkedStacks data.patches
+
 /-- Board-level checks give the first field-based signal-tower board package. -/
 def l2c1SignalTowerBoardDataOfBoardLevelChecks
     (signalLocalTower :
