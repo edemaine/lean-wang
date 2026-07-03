@@ -415,6 +415,58 @@ theorem domino_problem_undecidable_of_presented_flexible_position_source_positio
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the generated position-code accumulator step,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_presented_flexible_position_source_decoderStepCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the generated position-code accumulator step,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_presented_flexible_position_source_decoderStepCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the global position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_presented_flexible_position_source_globalCodeCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a flexibly certified presented
+Ollinger/Robinson scaffold and the global position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_presented_flexible_position_source_globalCodeCorrect
+    (I : OllingerRobinson.PresentedFlexibleInstance)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source
+    I (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a flexibly certified presented
 Ollinger/Robinson scaffold and the source-specialized position-code
 label-index decoder, with `positionProgramData` semantic correctness
 discharged.
@@ -467,6 +519,58 @@ theorem domino_problem_undecidable_of_checked_transcription_position_source_inte
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRowsCorrect
     D.toPresentedFlexibleInstance hinterior
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a checked flexible finite scaffold
+transcription and the generated position-code accumulator step, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_checked_transcription_position_source_decoderStepCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source_decoderStepCorrect
+    D.toPresentedFlexibleInstance hstep
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a checked flexible finite scaffold
+transcription and the generated position-code accumulator step, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_checked_transcription_position_source_decoderStepCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source_decoderStepCorrect
+    D.toPresentedFlexibleInstance hstep
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a checked flexible finite scaffold
+transcription and the global position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_checked_transcription_position_source_globalCodeCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_presented_flexible_position_source_globalCodeCorrect
+    D.toPresentedFlexibleInstance hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a checked flexible finite scaffold
+transcription and the global position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_checked_transcription_position_source_globalCodeCorrect
+    (D : OllingerRobinson.CheckedFlexibleTranscription)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_presented_flexible_position_source_globalCodeCorrect
+    D.toPresentedFlexibleInstance hindex
 
 set_option linter.style.longLine false in
 /--
