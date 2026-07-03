@@ -1443,6 +1443,15 @@ conditions have been narrowed to two proof-facing fronts:
    finite checked-stack target no longer has to detour through valid translated
    boxes to reach the preferred scaffold-facing endpoint.
 
+   The same direct final surface is now exposed one step lower, from
+   origin-zero active/corner windows plus active-corner layer patches, for both
+   audited L2 candidates.  These wrappers use the live Section 7
+   board/free-line layer-patch constructors directly and expose source-label,
+   one-row, bounded-row, decoder-step, global-label, source-obligation, and
+   packaged-row variants.  A finite decoded-window proof can therefore bypass
+   the intermediate checked-stack package while still landing on the preferred
+   layer-patch endpoint.
+
    The remaining first-candidate and L2C2 Figure 16 compatible final-package
    structures are now explicitly proved uninhabited in `LeanWang.Final`, via
    the refutations of `Figure18CanonicalCheckedRecognizedCompatibleMacroSquares`
