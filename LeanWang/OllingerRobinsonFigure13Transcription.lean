@@ -12624,6 +12624,20 @@ def RoutedCertificate.ofRobinsonSection7BoardFreeLineActiveCornerInvariant
       boardFreeLineActiveCorner
   realizes := realizes
 
+/--
+Robinson Section 7 board/free-line geometry plus finite layer patches gives the
+routed scaffold certificate directly.
+-/
+def RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+    (D : Figure18ScaffoldData)
+    (boardFreeLineActiveCorner :
+      D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.RoutedCertificate :=
+  RoutedCertificate.ofRobinsonSection7BoardFreeLineActiveCornerInvariant D
+    boardFreeLineActiveCorner
+    (HasRealizationInvariant.ofLayerPatches patches)
+
 def RoutedCertificate.ofRobinsonBoardRoutedFreeGridLayerPatches
     (D : Figure18ScaffoldData)
     (boardFreeGrids : D.HasRobinsonBoardRoutedFreeGridInvariant)

@@ -866,6 +866,14 @@ positive-board Figure 13 checks and the direct
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
 kept only as lower-level diagnostic surfaces; `LeanWang.Final` no longer
 exports them as final theorem routes.
+The generic concrete Figure 18 scaffold layer now also has
+`RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches`, and the two
+L2 candidates expose
+`l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData`
+and
+`l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData`.
+Thus the finite layer-patch package is not just a compatible-level shortcut:
+it also feeds the concrete routed Figure 18 certificate route directly.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
