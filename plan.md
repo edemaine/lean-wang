@@ -906,6 +906,10 @@ and
 The checked-stack plus compatible Figure 16 macro-square route now has matching
 decoder-step, global-label, and source-label packages that project through this
 valid-translated-box target.
+The generated-position integration layer now mirrors this newer target with
+semantic-correctness-discharged wrappers for Section 7 translated boxes and
+checked-stack/valid-translated-box data, so callers can use the current
+scaffold surfaces without manually rebuilding `PositionSourceObligations`.
 This gives the concrete scaffold work a
 lower-level target than `L2C1ActiveCornerLayerPatches` without falling back to
 the refuted raw Figure 13 box assumptions.  The compatible Figure 16 route now

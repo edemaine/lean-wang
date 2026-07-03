@@ -141,6 +141,9 @@ and
 The checked-stack plus compatible Figure 16 macro-square route has matching
 decoder-step, global-label, and source-label packages that project through this
 valid-translated-box target.
+The generated-position integration layer also exposes the corresponding
+semantic-correctness-discharged wrappers for Section 7 translated boxes and
+checked-stack/valid-translated-box data.
 The second audited L2 candidate has matching decoder-step, global-label, and
 source-label packages for both checked-stack/layer-patch data and
 checked-stack/valid-translated-box data.
