@@ -14672,6 +14672,281 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchSourcePositionCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and the primitive recursive generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and the global primitive recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxData
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxConstructionObligations.mk
+    scaffold sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxData
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxConstructionObligations.mk
+    scaffold sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataOneRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations.mk
+    scaffold sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataOneRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations.mk
+    scaffold sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and generated bounded-interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations.mk
+    scaffold sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations.mk
+    scaffold sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations.mk
+    scaffold hstep).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and the primitive recursive generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations.mk
+    scaffold hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and the global primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations.mk
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and the global primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations.mk
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations.mk
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations.mk
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the second checked-stack/layer-patch
 scaffold package and generated one-row position-code rows.
 -/
