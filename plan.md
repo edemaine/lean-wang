@@ -958,6 +958,13 @@ The origin-zero translated-box obligations project to this Section 7 route via
 `FinalOriginZeroTranslatedBoxConstructionObligations.toSection7TranslatedBoxConstructionObligations`,
 using the existing Section 7 conversion from origin-zero windows and translated
 boxes to board/free-line translated-box data.
+The same translated-box route is now exposed at the narrower generated-source
+levels through
+`FinalSection7TranslatedBoxDecoderStepConstructionObligations`,
+`FinalSection7TranslatedBoxGlobalPositionCodeConstructionObligations`, and
+`FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations`, with
+origin-zero decoder/global/source wrappers projecting to those proof-facing
+Section 7 surfaces.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
