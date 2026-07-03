@@ -6074,6 +6074,28 @@ def toFinalReductionInputs
   FinalReductionInputs.ofCheckedStackLayerPatchData
     h.scaffold h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch finite scaffold
+package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch finite scaffold
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsCorrect
+    h.scaffold h.sourceRows
+
 end FinalCheckedStackLayerPatchConstructionObligations
 
 namespace FinalCheckedStackLayerPatchOneRowsConstructionObligations
@@ -6194,14 +6216,16 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  FinalReductionInputs.encoded_domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from first checked stacks and positive active-corner boxes. -/
 theorem domino_problem_undecidable
     (h : FinalCheckedStackPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  FinalReductionInputs.domino_problem_undecidable h.toFinalReductionInputs
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalCheckedStackPositiveBoxConstructionObligations
 
@@ -9115,7 +9139,8 @@ package and generated interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -9125,7 +9150,8 @@ package and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalL2C2CheckedStackLayerPatchConstructionObligations
 
@@ -9714,7 +9740,8 @@ active-corner boxes, and generated interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -9724,7 +9751,8 @@ active-corner boxes, and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_interiorRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalL2C2CheckedStackPositiveBoxConstructionObligations
 
