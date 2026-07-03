@@ -5344,6 +5344,24 @@ theorem tm1StmtSupportLength_relabel {Γ Λ Λ' σ : Type}
   | halt =>
       simp [relabelTM1Stmt, tm1StmtSupportLength]
 
+theorem tm1StmtSupportList_relabel {Γ Λ Λ' σ : Type}
+    (f : Λ → Λ') (stmt : Turing.TM1.Stmt Γ Λ σ) :
+    tm1StmtSupportList (relabelTM1Stmt f stmt) =
+      (tm1StmtSupportList stmt).map (relabelTM1Stmt f) := by
+  induction stmt with
+  | move d stmt IH =>
+      simp [relabelTM1Stmt, tm1StmtSupportList, IH]
+  | write g stmt IH =>
+      simp [relabelTM1Stmt, tm1StmtSupportList, IH]
+  | load g stmt IH =>
+      simp [relabelTM1Stmt, tm1StmtSupportList, IH]
+  | branch p stmt₁ stmt₂ IH₁ IH₂ =>
+      simp [relabelTM1Stmt, tm1StmtSupportList, IH₁, IH₂]
+  | goto g =>
+      simp [relabelTM1Stmt, tm1StmtSupportList]
+  | halt =>
+      simp [relabelTM1Stmt, tm1StmtSupportList]
+
 theorem tm2to1TrNormalStmtSupportLength_relabel {Λ Λ' : Type}
     (f : Λ → Λ') (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
     tm1StmtSupportLength (Turing.TM2to1.trNormal (relabelTM2Stmt f stmt)) =
@@ -5364,6 +5382,35 @@ theorem tm2to1TrNormalStmtSupportLength_relabel {Λ Λ' : Type}
       simp [relabelTM2Stmt, Turing.TM2to1.trNormal, tm1StmtSupportLength]
   | halt =>
       simp [relabelTM2Stmt, Turing.TM2to1.trNormal, tm1StmtSupportLength]
+
+set_option linter.flexible false in
+theorem tm2to1TrNormal_relabel {Λ Λ' : Type}
+    (f : Λ → Λ') (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
+    Turing.TM2to1.trNormal (relabelTM2Stmt f stmt) =
+      relabelTM1Stmt (relabelTM2to1Label f)
+        (Turing.TM2to1.trNormal (K := PartrecStack) (Γ := PartrecStackSymbol) stmt) := by
+  induction stmt with
+  | push k g stmt IH =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt]
+      funext a s
+      rfl
+  | peek k g stmt IH =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt]
+      funext a s
+      rfl
+  | pop k g stmt IH =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt]
+      funext a s
+      rfl
+  | load g stmt IH =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt, IH]
+  | branch g stmt₁ stmt₂ IH₁ IH₂ =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt, IH₁, IH₂]
+  | goto g =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt,
+        relabelTM2to1Label]
+  | halt =>
+      simp [relabelTM2Stmt, Turing.TM2to1.trNormal, relabelTM1Stmt]
 
 theorem partrecStartedTM1Machine_supportLength_relabel
     (tc : Turing.ToPartrec.Code)
@@ -5386,6 +5433,36 @@ theorem partrecStartedTM1Machine_supportLength_relabel
       simp [partrecStartedTM1Machine, partrecTM1Machine, Turing.TM2to1.tr,
         relabelTM2to1Label, tm1StmtSupportLength,
         tm2to1TrNormalStmtSupportLength_relabel]
+
+theorem partrecStartedTM1Machine_relabel
+    (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar) :
+    partrecStartedTM1Machine tc (relabelTM2to1Label (StartedLabel.wrap tc) q) =
+      relabelTM1Stmt (relabelTM2to1Label (StartedLabel.wrap tc))
+        (partrecTM1Machine q) := by
+  cases q with
+  | normal q =>
+      simpa [partrecStartedTM1Machine, partrecTM1Machine, Turing.TM2to1.tr,
+        partrecStartedTM2, relabelTM2to1Label] using
+        tm2to1TrNormal_relabel (StartedLabel.wrap tc) (partrecTM2 q)
+  | go k s q =>
+      cases s <;>
+        rfl
+  | ret q =>
+      simp [partrecStartedTM1Machine, partrecTM1Machine, Turing.TM2to1.tr,
+        relabelTM2to1Label, relabelTM1Stmt, tm2to1TrNormal_relabel]
+
+theorem partrecStartedTM1Machine_supportList_relabel
+    (tc : Turing.ToPartrec.Code)
+    (q : Turing.TM2to1.Λ' PartrecStack PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar) :
+    tm1StmtSupportList
+        (partrecStartedTM1Machine tc
+          (relabelTM2to1Label (StartedLabel.wrap tc) q)) =
+      (tm1StmtSupportList (partrecTM1Machine q)).map
+        (relabelTM1Stmt (relabelTM2to1Label (StartedLabel.wrap tc))) := by
+  rw [partrecStartedTM1Machine_relabel]
+  exact tm1StmtSupportList_relabel
+    (relabelTM2to1Label (StartedLabel.wrap tc)) (partrecTM1Machine q)
 
 theorem mem_tm1StmtSupportList_iff {Γ Λ σ : Type}
     {stmt q : Turing.TM1.Stmt Γ Λ σ} :
