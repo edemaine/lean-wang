@@ -1438,6 +1438,34 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the row-source decoded-window/isolated-box package to the row-source
+origin-zero/translated-positive-box endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations where
+  scaffold :=
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+        h.combinedActiveCornerWindows)
+      l2Component2BlankCandidatePairCompatibilityBool
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/isolated-box package to the row-source
+Section 7 board/free-line/layer-patch endpoint.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  h.toOriginZeroTranslatedPositiveBoxConstructionObligations
+    |>.toBoardFreeLineLayerPatchConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from decoded origin-zero active/corner windows, positive
 translated isolated active boxes, and generated interior position-code rows.
 -/
@@ -1556,6 +1584,28 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
   h.toCombinedWindowIsolatedBoxConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/valid-box package to the row-source
+origin-zero/translated-positive-box endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/valid-box package to the row-source
+Section 7 board/free-line/layer-patch endpoint.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  h.toOriginZeroTranslatedPositiveBoxConstructionObligations
+    |>.toBoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
