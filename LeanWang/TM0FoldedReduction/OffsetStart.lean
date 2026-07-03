@@ -312,6 +312,71 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
       (c := c) (block := 1) (i := i) (v := v)
       (sourceStatementCount_one_lt c) hv (sourceStatementAt_one c)
 
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_var_get?
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hj : j + 1 < sourceStatementCount c)
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c
+        (TM0Route.partrecVarList.length * (j + 1) + i) =
+      sourcePositionCodeInteriorRowsIndexVar c j i v := by
+  rcases sourceStatementAt?_exists_of_lt (c := c) (i := j + 1) hj with
+    ⟨stmt, hstmt⟩
+  rw [sourceSimStepDataForLabelIndexStartWithPositionCode_of_block_var_get?
+    (c := c) (block := j + 1) (i := i) (v := v) hj hv hstmt]
+  rw [sourcePositionCodeInteriorRowsIndexVar,
+    sourcePositionCodeOneRowsIndexVar_stmt_some hstmt]
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_index_lt
+    {c : Code} {j i : Nat}
+    (hj : j + 1 < sourceStatementCount c)
+    (hi : i < TM0Route.partrecVarList.length) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c
+        (TM0Route.partrecVarList.length * (j + 1) + i) =
+      sourcePositionCodeInteriorRowsIndexVar c j i (TM0Route.partrecVarList[i]) := by
+  exact sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_var_get?
+    (c := c) (j := j) (i := i) (v := TM0Route.partrecVarList[i]) hj
+    (List.getElem?_eq_getElem hi)
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_range_eq
+    (c : Code) (j n : Nat)
+    (hj : j + 1 < sourceStatementCount c)
+    (hn : n ≤ TM0Route.partrecVarList.length) :
+    (List.range n).flatMap
+        (fun i => sourceSimStepDataForLabelIndexStartWithPositionCode c
+          (TM0Route.partrecVarList.length * (j + 1) + i)) =
+      (List.range n).flatMap
+        (sourcePositionCodeInteriorRowsAtIndex c j) := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      rw [List.range_succ, List.flatMap_append]
+      have hprefix : n ≤ TM0Route.partrecVarList.length := Nat.le_of_succ_le hn
+      have hlast : n < TM0Route.partrecVarList.length := hn
+      have hslot :
+          sourceSimStepDataForLabelIndexStartWithPositionCode c
+              (TM0Route.partrecVarList.length * (j + 1) + n) =
+            sourcePositionCodeInteriorRowsAtIndex c j n := by
+        rw [sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_index_lt
+          (c := c) (j := j) (i := n) hj hlast]
+        rw [sourcePositionCodeInteriorRowsAtIndex_of_var_get?
+          (c := c) (j := j) (i := n) (v := TM0Route.partrecVarList[n])
+          (List.getElem?_eq_getElem hlast)]
+  -- `simp` uses the induction hypothesis for the prefix and `hslot` for the
+  -- newly appended slot.
+      simp [ih hprefix, hslot]
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_eq
+    (c : Code) (j : Nat)
+    (hj : j + 1 < sourceStatementCount c) :
+    (List.range TM0Route.partrecVarList.length).flatMap
+        (fun i => sourceSimStepDataForLabelIndexStartWithPositionCode c
+          (TM0Route.partrecVarList.length * (j + 1) + i)) =
+      (List.range TM0Route.partrecVarList.length).flatMap
+        (sourcePositionCodeInteriorRowsAtIndex c j) :=
+  sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_range_eq
+    c j TM0Route.partrecVarList.length hj (le_refl _)
+
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
