@@ -980,6 +980,11 @@ The public final layer now exposes this first-candidate finite target as
 compatible Figure 16 macro-squares, and generated interior source rows imply
 the final domino-undecidability endpoints via the preferred Section 7
 translated-box route.
+It also exposes
+`FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
+field is the origin-zero active/corner window certificate; checked origin-zero
+stacks are derived by
+`l2c1OriginZeroCheckedStacksOfOriginZeroWindows`.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

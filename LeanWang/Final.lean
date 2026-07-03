@@ -139,6 +139,21 @@ structure FinalFigure16CompatibleConstructionObligations : Prop where
     TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Finite Figure 16 compatible macro-square route from origin-zero active/corner
+windows for the first audited L2 candidate.
+
+This is one step closer to the concrete scaffold transcription than
+`FinalFigure16CompatibleConstructionObligations`: the checked origin-zero
+stacks are derived from the origin-zero window certificate.
+-/
+structure FinalFigure16CompatibleOriginZeroConstructionObligations : Prop where
+  originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Second-candidate version of the finite checked-stack/layer-patch construction
 route.
@@ -990,6 +1005,69 @@ theorem domino_problem_undecidable
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure16CompatibleConstructionObligations
+
+namespace FinalFigure16CompatibleOriginZeroConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 package to the checked-stack Figure 16
+final route.
+-/
+def toFigure16CompatibleConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    FinalFigure16CompatibleConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+      h.originZeroWindows
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window Figure 16 package to the proof-facing Section 7
+translated-box package.
+-/
+def toSection7TranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    FinalSection7TranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+/-- Convert the origin-zero-window Figure 16 package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    FinalReductionInputs :=
+  h.toFigure16CompatibleConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero active/corner windows, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero active/corner windows, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure16CompatibleOriginZeroConstructionObligations
 
 namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
@@ -1909,6 +1987,26 @@ Wang domino undecidability from checked origin-zero stacks, compatible Figure
 -/
 theorem domino_problem_undecidable_of_figure16CompatibleConstructionObligations
     (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+compatible Figure 16 macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleOriginZeroConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, compatible
+Figure 16 macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleOriginZeroConstructionObligations
+    (h : FinalFigure16CompatibleOriginZeroConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
