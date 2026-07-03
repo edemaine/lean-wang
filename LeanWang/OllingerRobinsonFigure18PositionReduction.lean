@@ -3046,6 +3046,174 @@ theorem domino_problem_undecidable_l2c2_board_free_line_fig13_boxes_interiorRows
       (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
         hinterior)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the generated position-code decoder step, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the generated position-code decoder step, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the global position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the global position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the concrete human-audited Figure 13 layer
+table, raw checked active Figure 18 site specs, indexed active-corner windows,
+realization, and the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (indexedActiveWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+        (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable)
+    (realizes :
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_position_source
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid indexedActiveWindows realizes
+      (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
 end TM0FoldedReduction
 
 end LeanWang
