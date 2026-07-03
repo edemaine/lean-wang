@@ -1098,6 +1098,14 @@ is exposed as the more geometry-facing sibling: the positive-radius
 active-corner indexed boxes may be centered at arbitrary origins and are
 recentered to finite layer patches by
 `scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes`.
+The currently preferred L2C2 Figure 13 route is now the ordinary-canonical
+surface
+`FinalFigure13L2C2CanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations`.
+It uses the existing
+`NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations` package directly,
+so the scaffold side needs canonical Robinson-board routing and translated
+positive-radius active-corner indexed boxes, not the stronger product-witness
+routing field.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

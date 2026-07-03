@@ -215,6 +215,13 @@ The translated-positive-box sibling
 `FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
 allows those positive-radius indexed boxes to be built around arbitrary
 origins, then derives the same layer-patch route by recentering.
+The preferred ordinary-canonical sibling
+`FinalFigure13L2C2CanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+uses the existing
+`NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations` interface, so the
+scaffold side only has to supply canonical Robinson-board routing and
+translated positive-radius active-corner indexed boxes for the concrete L2C2
+Nat-site data.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
