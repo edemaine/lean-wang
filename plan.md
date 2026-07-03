@@ -921,6 +921,11 @@ source-label variants
 `FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
 and
 `FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
+The first-candidate source-label wrapper now projects to
+`FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations` through
+`l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData`, and
+its exported endpoint theorem uses the origin-zero translated-positive-box
+reduction surface directly.
 The checked-stack plus compatible Figure 16 macro-square route now has matching
 decoder-step, global-label, and source-label packages that project through this
 valid-translated-box target.

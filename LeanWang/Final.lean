@@ -1723,6 +1723,19 @@ def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
       h.scaffold
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero
+translated-positive-box final surface.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
 /-- Convert the checked-stack/valid-translated-box source-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
@@ -1731,6 +1744,34 @@ def toFinalReductionInputs
     (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
       h.scaffold)
     h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, valid translated scaffold
+boxes, and the source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, valid translated scaffold
+boxes, and the source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 end FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
@@ -4861,7 +4902,7 @@ position-code label-index decoder.
 theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
     (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable h.toFinalReductionInputs
+  h.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -4872,7 +4913,7 @@ label-index decoder.
 theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
     (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable h.toFinalReductionInputs
+  h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
