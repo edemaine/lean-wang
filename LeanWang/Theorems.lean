@@ -1942,6 +1942,12 @@ theorem realizesActiveCornerSquares_of_realizesActiveCornerBoxes
   intro T seed hsquares
   exact tilesPlane_of_all_tileableBoxes (hboxes T seed hsquares)
 
+theorem realizesActiveCornerSquares_of_activeCornerLayerBoxPatches
+    {S : Scaffold} (hpatches : HasActiveCornerLayerBoxPatches S) :
+    RealizesActiveCornerSquares S :=
+  realizesActiveCornerSquares_of_realizesActiveCornerBoxes
+    (realizesActiveCornerBoxes_of_activeCornerLayerBoxPatches hpatches)
+
 /--
 Forward half of the scaffold reduction, stated directly at the payload-square
 level.
@@ -2041,6 +2047,23 @@ theorem isScaffold_of_realizesActiveCornerBoxes_of_forcesActiveCornerSquares
     IsScaffold S := by
   exact isScaffold_of_realizesActiveCornerBoxes_of_forcesFixedCornerSquares
     hrealizes (forcesFixedCornerSquares_of_forcesActiveCornerSquares hforces)
+
+theorem isScaffold_of_activeCornerLayerBoxPatches_of_forcesFixedCornerSquares
+    {S : Scaffold}
+    (hpatches : HasActiveCornerLayerBoxPatches S)
+    (hforces : ForcesFixedCornerSquares S) :
+    IsScaffold S :=
+  isScaffold_of_realizesActiveCornerSquares_of_forcesFixedCornerSquares
+    (realizesActiveCornerSquares_of_activeCornerLayerBoxPatches hpatches)
+    hforces
+
+theorem isScaffold_of_activeCornerLayerBoxPatches_of_forcesActiveCornerSquares
+    {S : Scaffold}
+    (hpatches : HasActiveCornerLayerBoxPatches S)
+    (hforces : ForcesActiveCornerSquares S) :
+    IsScaffold S :=
+  isScaffold_of_activeCornerLayerBoxPatches_of_forcesFixedCornerSquares
+    hpatches (forcesFixedCornerSquares_of_forcesActiveCornerSquares hforces)
 
 /-- The empty scaffold example; useful only as a minimal data sanity check. -/
 def emptyScaffoldExample : Scaffold where
