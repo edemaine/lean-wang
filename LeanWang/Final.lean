@@ -2247,7 +2247,11 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    { boardFreeLineActiveCorner := h.scaffold.toBoardFreeLineActiveCorner
+      patches := h.scaffold.toActiveCornerLayerBoxPatches }
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -2258,7 +2262,11 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    { boardFreeLineActiveCorner := h.scaffold.toBoardFreeLineActiveCorner
+      patches := h.scaffold.toActiveCornerLayerBoxPatches }
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      h.sourceRows)
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
 set_option linter.style.longLine true
