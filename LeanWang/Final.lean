@@ -746,6 +746,27 @@ structure FinalL2C2CheckedBoardRowsPackageConstructionObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+First-candidate paper-shaped Section 7 scaffold route with the packaged
+generated interior position-code decoder.
+
+The scaffold package asks directly for the local signal tower and shifted
+raw-boundary checked board levels, avoiding the checked-stack diagnostic layer.
+-/
+structure FinalL2C1SignalTowerBoardPackageConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1SignalTowerBoardData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-shaped Section 7 scaffold route with the packaged
+generated interior position-code decoder.
+-/
+structure FinalL2C2SignalTowerBoardPackageConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C2SignalTowerBoardData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete nat-site indexed-window scaffold route.
 
 This is the public final surface closest to the human-audited Figure 13 layer
@@ -7066,6 +7087,114 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndRawBoundaryCheckedBoar
   FinalL2C2CheckedBoardRowsPackageConstructionObligations.domino_problem_undecidable
     { checkedStacks := checkedStacks
       boardLevels := boardLevels
+      sourceRows := sourceRows }
+
+namespace FinalL2C1SignalTowerBoardPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first paper-shaped signal-tower board package and
+the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerBoardPackageConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_interiorPackage
+    h.scaffold h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first paper-shaped signal-tower board package and
+the packaged source decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerBoardPackageConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_signal_tower_board_data_interiorPackage
+    h.scaffold h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalL2C1SignalTowerBoardPackageConstructionObligations
+
+namespace FinalL2C2SignalTowerBoardPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second paper-shaped signal-tower board package and
+the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2SignalTowerBoardPackageConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_interiorPackage
+    h.scaffold h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second paper-shaped signal-tower board package and
+the packaged source decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2SignalTowerBoardPackageConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_signal_tower_board_data_interiorPackage
+    h.scaffold h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalL2C2SignalTowerBoardPackageConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the first paper-shaped signal-tower
+board scaffold package and the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c1SignalTowerBoardDataPackage
+    (scaffold : TM0FoldedReduction.L2C1SignalTowerBoardData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C1SignalTowerBoardPackageConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the first paper-shaped signal-tower board
+scaffold package and the packaged source decoder.
+-/
+theorem domino_problem_undecidable_of_l2c1SignalTowerBoardDataPackage
+    (scaffold : TM0FoldedReduction.L2C1SignalTowerBoardData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C1SignalTowerBoardPackageConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second paper-shaped signal-tower
+board scaffold package and the packaged source decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2SignalTowerBoardDataPackage
+    (scaffold : TM0FoldedReduction.L2C2SignalTowerBoardData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2SignalTowerBoardPackageConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second paper-shaped signal-tower board
+scaffold package and the packaged source decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2SignalTowerBoardDataPackage
+    (scaffold : TM0FoldedReduction.L2C2SignalTowerBoardData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2SignalTowerBoardPackageConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold
       sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
