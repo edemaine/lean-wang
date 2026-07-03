@@ -1735,6 +1735,34 @@ structure FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructi
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 decoded-window/isolated-box route with the
+generated position-code decoder step.
+-/
+structure FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  isolatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/isolated-box route with the
+global position-code label-index target.
+-/
+structure FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  isolatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete valid translated L2C2 box data.
 
 This is the mechanical finite-check form of the positive-box side of the
@@ -1810,6 +1838,30 @@ structure FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionO
     TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
   validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with the
+generated position-code decoder step.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with the
+global position-code label-index target.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -1982,6 +2034,48 @@ def finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
       l2Component2Figure18ScaffoldData := by
   simpa [l2Component2Figure18ScaffoldData] using
     l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes validBoxes
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows for the audited L2C2 table supply
+the translation-invariant indexed-window hypothesis used by the generic
+Nat-site indexed-window route.
+-/
+def finalFigure13L2C2IndexedWindowsOfCombinedWindows
+    (combinedActiveCornerWindows :
+      TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows) :
+    OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+      (figure18ScaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table.toRoleTable :=
+  OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+      combinedActiveCornerWindows)
+
+set_option linter.style.longLine false in
+/--
+Positive translated isolated active boxes for the audited L2C2 table supply the
+realization invariant used by the generic Nat-site indexed-window route.
+-/
+def finalFigure13L2C2RealizationOfIsolatedBoxes
+    (isolatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).HasRealizationInvariant := by
+  have hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (D := l2Component2Figure18ScaffoldData) isolatedBoxes
+  simpa [l2Component2Figure18ScaffoldData] using
+    Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      (D := l2Component2Figure18ScaffoldData) hboxes
 
 set_option linter.style.longLine false in
 /--
@@ -2276,18 +2370,9 @@ def toNatSitesIndexedWindowSourcePositionCodeConstructionObligations
   cornerQuadrant := Quadrant.northeast
   cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
   indexedActiveWindows :=
-    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
-      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
-        h.combinedActiveCornerWindows)
-  realizes := by
-    have hboxes :
-        Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
-          l2Component2Figure18ScaffoldData :=
-      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
-        (D := l2Component2Figure18ScaffoldData) h.isolatedBoxes
-    simpa [l2Component2Figure18ScaffoldData] using
-      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
-        (D := l2Component2Figure18ScaffoldData) hboxes
+    finalFigure13L2C2IndexedWindowsOfCombinedWindows
+      h.combinedActiveCornerWindows
+  realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -2343,6 +2428,120 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/isolated-box decoder-step package to the generic
+Nat-site indexed-window decoder-step endpoint.
+-/
+def toNatSitesIndexedWindowDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations where
+  activeSiteSpecs := l2Component2BlankCandidateActiveSiteSpecs
+  activeSiteSpecs_valid :=
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+  cornerIndex := 0
+  cornerQuadrant := Quadrant.northeast
+  cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
+  indexedActiveWindows :=
+    finalFigure13L2C2IndexedWindowsOfCombinedWindows
+      h.combinedActiveCornerWindows
+  realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  let hindexed := h.toNatSitesIndexedWindowDecoderStepConstructionObligations
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  let hindexed := h.toNatSitesIndexedWindowDecoderStepConstructionObligations
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.decoderStep
+
+end FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/isolated-box global-label package to the generic
+Nat-site indexed-window global-label endpoint.
+-/
+def toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations where
+  activeSiteSpecs := l2Component2BlankCandidateActiveSiteSpecs
+  activeSiteSpecs_valid :=
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+  cornerIndex := 0
+  cornerQuadrant := Quadrant.northeast
+  cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
+  indexedActiveWindows :=
+    finalFigure13L2C2IndexedWindowsOfCombinedWindows
+      h.combinedActiveCornerWindows
+  realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the global position-code label-index
+target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  let hindexed := h.toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, positive
+translated isolated active boxes, and the global position-code label-index
+target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  let hindexed := h.toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    hindexed.activeSiteSpecs hindexed.activeSiteSpecs_valid hindexed.cornerIndex
+    hindexed.cornerQuadrant hindexed.cornerIndex_valid
+    hindexed.indexedActiveWindows hindexed.realizes hindexed.labelIndex
+
+end FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowIsolatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -2374,18 +2573,9 @@ def toNatSitesIndexedWindowConstructionObligations
   cornerQuadrant := Quadrant.northeast
   cornerIndex_valid := l2Component2BlankCandidateSanity.cornerIndex_valid
   indexedActiveWindows :=
-    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
-      (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
-        h.combinedActiveCornerWindows)
-  realizes := by
-    have hboxes :
-        Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
-          l2Component2Figure18ScaffoldData :=
-      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
-        (D := l2Component2Figure18ScaffoldData) h.isolatedBoxes
-    simpa [l2Component2Figure18ScaffoldData] using
-      Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
-        (D := l2Component2Figure18ScaffoldData) hboxes
+    finalFigure13L2C2IndexedWindowsOfCombinedWindows
+      h.combinedActiveCornerWindows
+  realizes := finalFigure13L2C2RealizationOfIsolatedBoxes h.isolatedBoxes
   sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
@@ -2695,6 +2885,118 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box decoder-step package to the corresponding
+decoded-window/isolated-box package.
+-/
+def toCombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
+      h.validTranslatedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box decoder-step package to the generic
+Nat-site indexed-window decoder-step endpoint.
+-/
+def toNatSitesIndexedWindowDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    |>.toNatSitesIndexedWindowDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box global-label package to the corresponding
+decoded-window/isolated-box package.
+-/
+def toCombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  isolatedBoxes :=
+    finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
+      h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box global-label package to the generic
+Nat-site indexed-window global-label endpoint.
+-/
+def toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations :=
+  h.toCombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    |>.toNatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations
@@ -14876,6 +15178,54 @@ theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxSourc
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, positive translated isolated active boxes, and the generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+positive translated isolated active boxes, and the generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, positive translated isolated active boxes, and the global
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+positive translated isolated active boxes, and the global position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
 windows, positive translated isolated active boxes, and generated one-row
 position-code rows.
 -/
@@ -14962,6 +15312,51 @@ target.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, valid translated boxes, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+valid translated boxes, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, valid translated boxes, and the global position-code label-index
+target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+valid translated boxes, and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
