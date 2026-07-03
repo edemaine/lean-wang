@@ -2103,6 +2103,20 @@ end FinalLevelChecksConstructionObligations
 
 namespace FinalCheckedDecoderStepConstructionObligations
 
+set_option linter.style.longLine false in
+/--
+Project the legacy row-major checked Figure 16 level-data package to the live
+checked-stack level-check decoder-step package.
+-/
+def toCheckedLevelChecksDecoderStepConstructionObligations
+    (h : FinalCheckedDecoderStepConstructionObligations) :
+    FinalCheckedLevelChecksDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 :=
+    TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16
+  decoderStep := h.decoderStep
+
 /--
 Convert the finite-check-facing decoder-step package into the window-based
 decoder-step obligation package.
@@ -2119,12 +2133,29 @@ def toDecoderStepConstructionObligations
 def toFinalReductionInputs
     (h : FinalCheckedDecoderStepConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataDecoderStep
-    h.checkedStacks h.fig16 h.decoderStep
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16DecoderStep
+    h.checkedStacks
+    (TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16)
+    h.decoderStep
 
 end FinalCheckedDecoderStepConstructionObligations
 
 namespace FinalCheckedGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the legacy row-major checked Figure 16 level-data package to the live
+checked-stack level-check global-label-index package.
+-/
+def toCheckedLevelChecksGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    FinalCheckedLevelChecksGlobalPositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 :=
+    TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16
+  labelIndex := h.labelIndex
 
 /--
 Convert the finite-check-facing global-label-index package into the
@@ -2166,12 +2197,29 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
-    h.checkedStacks h.fig16 h.labelIndex
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16GlobalPositionCodeLabelIndexFrom
+    h.checkedStacks
+    (TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16)
+    h.labelIndex
 
 end FinalCheckedGlobalPositionCodeConstructionObligations
 
 namespace FinalCheckedSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the legacy row-major checked Figure 16 level-data package to the live
+checked-stack level-check source-label-index package.
+-/
+def toCheckedLevelChecksSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    FinalCheckedLevelChecksSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 :=
+    TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16
+  labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -2204,8 +2252,11 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalCheckedSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
-    h.checkedStacks h.fig16 h.labelIndex
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16SourcePositionCodeLabelIndexFrom
+    h.checkedStacks
+    (TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16)
+    h.labelIndex
 
 end FinalCheckedSourcePositionCodeConstructionObligations
 
@@ -2835,6 +2886,20 @@ end FinalCheckedSignalTowerRecognizedFig13SourcePositionCodeConstructionObligati
 
 namespace FinalCheckedConstructionObligations
 
+set_option linter.style.longLine false in
+/--
+Project the legacy row-major checked Figure 16 level-data package to the live
+checked-stack level-check row-source package.
+-/
+def toCheckedLevelChecksConstructionObligations
+    (h : FinalCheckedConstructionObligations) :
+    FinalCheckedLevelChecksConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 :=
+    TM0FoldedReduction.canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+      h.fig16
+  sourceRows := h.sourceRows
+
 /--
 Convert the finite-check-facing obligation package into the window-based
 preferred final obligation package.
@@ -2861,8 +2926,7 @@ def toSourcePositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalCheckedConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelData
-    h.checkedStacks h.fig16 h.sourceRows
+  h.toCheckedLevelChecksConstructionObligations.toFinalReductionInputs
 
 end FinalCheckedConstructionObligations
 
