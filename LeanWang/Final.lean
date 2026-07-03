@@ -5090,41 +5090,40 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from the scaffold package and generated
-one-row position-code rows, using the source-specialized label-index bridge.
+one-row position-code rows.
 -/
 def ofScaffoldAndSourceOneRows
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     FinalReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from the scaffold package and generated
-bounded-interior position-code rows, using the source-specialized label-index
-bridge.
+bounded-interior position-code rows.
 -/
 def ofScaffoldAndSourceBoundedRows
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from the scaffold package and generated
-interior position-code rows, using the source-specialized label-index bridge.
+interior position-code rows.
 -/
 def ofScaffoldAndSourceRows
     (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
@@ -5472,8 +5471,8 @@ def ofScaffoldAndSourceOneRows
     (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     FinalL2C2ReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
@@ -5485,8 +5484,8 @@ def ofScaffoldAndSourceBoundedRows
     (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     FinalL2C2ReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
@@ -5498,8 +5497,8 @@ def ofScaffoldAndSourceRows
     (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalL2C2ReductionInputs :=
-  ofScaffoldAndSourcePositionCodeLabelIndexFrom scaffold
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
