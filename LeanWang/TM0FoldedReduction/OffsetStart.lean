@@ -377,6 +377,57 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_eq
   sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_range_eq
     c j TM0Route.partrecVarList.length hj (le_refl _)
 
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_tail_index_eq
+    {c : Code} {n : Nat}
+    (hlo : TM0Route.partrecVarList.length ≤ n)
+    (hhi : n < sourceLabelCount c) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c n =
+      sourcePositionCodeInteriorRowsAtIndex c
+        (n / TM0Route.partrecVarList.length - 1)
+        (n % TM0Route.partrecVarList.length) := by
+  have hmod :
+      n % TM0Route.partrecVarList.length < TM0Route.partrecVarList.length :=
+    Nat.mod_lt n sourcePartrecVarList_length_pos
+  let v : TM0Route.PartrecVar :=
+    TM0Route.partrecVarList[n % TM0Route.partrecVarList.length]'hmod
+  have hv :
+      TM0Route.partrecVarList[n % TM0Route.partrecVarList.length]? = some v := by
+    simp [v, List.getElem?_eq_getElem (l := TM0Route.partrecVarList) hmod]
+  have hblock_pos : 0 < n / TM0Route.partrecVarList.length :=
+    Nat.div_pos hlo sourcePartrecVarList_length_pos
+  have hblock_lt :
+      n / TM0Route.partrecVarList.length < sourceStatementCount c :=
+    sourceLabelIndexStartSplit?_block_lt_of_lt_labelCount hhi
+  have hj :
+      n / TM0Route.partrecVarList.length - 1 + 1 < sourceStatementCount c := by
+    rwa [Nat.sub_one_add_one (Nat.ne_of_gt hblock_pos)]
+  have hidx :
+      TM0Route.partrecVarList.length *
+          (n / TM0Route.partrecVarList.length - 1 + 1) +
+        n % TM0Route.partrecVarList.length = n := by
+    rw [Nat.sub_one_add_one (Nat.ne_of_gt hblock_pos)]
+    simpa [Nat.mul_comm] using Nat.div_add_mod n TM0Route.partrecVarList.length
+  calc
+    sourceSimStepDataForLabelIndexStartWithPositionCode c n =
+        sourceSimStepDataForLabelIndexStartWithPositionCode c
+          (TM0Route.partrecVarList.length *
+              (n / TM0Route.partrecVarList.length - 1 + 1) +
+            n % TM0Route.partrecVarList.length) := by
+          exact (congrArg (sourceSimStepDataForLabelIndexStartWithPositionCode c)
+            hidx).symm
+    _ = sourcePositionCodeInteriorRowsIndexVar c
+          (n / TM0Route.partrecVarList.length - 1)
+          (n % TM0Route.partrecVarList.length) v := by
+          rw [sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_var_get?
+            (c := c) (j := n / TM0Route.partrecVarList.length - 1)
+            (i := n % TM0Route.partrecVarList.length) (v := v) hj hv]
+    _ = sourcePositionCodeInteriorRowsAtIndex c
+          (n / TM0Route.partrecVarList.length - 1)
+          (n % TM0Route.partrecVarList.length) := by
+          exact (sourcePositionCodeInteriorRowsAtIndex_of_var_get?
+            (c := c) (j := n / TM0Route.partrecVarList.length - 1)
+            (i := n % TM0Route.partrecVarList.length) (v := v) hv).symm
+
 /-- Source-code version of the semantic label-index descriptor decoder. -/
 def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
@@ -416,6 +467,21 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_eq_tail_after_firstBlock
     (sourceSimStepDataForLabelIndexStartWithPositionCode c)
     (sourcePartrecVarList_length_le_sourceLabelCount c)]
   simp [sourceSimStepDataForLabelIndexStartWithPositionCode_firstBlock_eq_nil c]
+
+theorem sourceSimStepDataByLabelIndexWithPositionCode_eq_interiorRowsByTailIndex
+    (c : Code) :
+    sourceSimStepDataByLabelIndexWithPositionCode c =
+      sourcePositionCodeInteriorRowsByTailIndex c := by
+  rw [sourceSimStepDataByLabelIndexWithPositionCode_eq_tail_after_firstBlock]
+  unfold sourcePositionCodeInteriorRowsByTailIndex
+  apply flatMap_congr_of_mem
+  intro n hn
+  have hbounds :
+      TM0Route.partrecVarList.length ≤ n ∧ n < sourceLabelCount c := by
+    simpa using (List.Ico.mem (n := TM0Route.partrecVarList.length)
+      (m := sourceLabelCount c) (l := n)).1 hn
+  exact sourceSimStepDataForLabelIndexStartWithPositionCode_tail_index_eq
+    (c := c) (n := n) hbounds.1 hbounds.2
 
 theorem sourceSimStepDataForLabelIndexStart_eq (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexStart c i =

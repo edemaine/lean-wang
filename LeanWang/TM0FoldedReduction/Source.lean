@@ -1886,6 +1886,15 @@ theorem flatMap_range_dropPrefix {α : Type} (f : Nat → List α) {n count : Na
   rw [hsplit]
   simp [List.flatMap_append]
 
+theorem flatMap_congr_of_mem {α β : Type} {xs : List α} {f g : α → List β}
+    (h : ∀ x, x ∈ xs → f x = g x) :
+    xs.flatMap f = xs.flatMap g := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      simp [h x (by simp), ih (fun y hy => h y (by simp [hy]))]
+
 theorem sourcePartrecVarList_length_le_partrecVarList_length_mul_succ
     (fuel : Nat) :
     TM0Route.partrecVarList.length ≤
@@ -2068,6 +2077,13 @@ theorem sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior
   exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
     cases h : TM0Route.partrecVarList[p.2.2]? <;>
       simp [sourcePositionCodeInteriorRowsAtIndex, h]
+
+def sourcePositionCodeInteriorRowsByTailIndex
+    (c : Code) : List TM0FoldedCompiler.SimStepData :=
+  (List.Ico TM0Route.partrecVarList.length (sourceLabelCount c)).flatMap
+    fun n => sourcePositionCodeInteriorRowsAtIndex c
+      (n / TM0Route.partrecVarList.length - 1)
+      (n % TM0Route.partrecVarList.length)
 
 def sourcePositionCodeBoundedInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
