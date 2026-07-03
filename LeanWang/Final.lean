@@ -390,12 +390,72 @@ structure FinalL2C2CheckedStackLayerPatchConstructionObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Second-candidate checked-stack/layer-patch route with the narrower generated
+decoder-step source target.
+-/
+structure FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/layer-patch route with the global position-code
+label-index source target.
+-/
+structure FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/layer-patch route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate finite-scaffold construction route one step below layer
 patches.
 -/
 structure FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with the narrower generated
+decoder-step source target.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with the global position-code
+label-index source target.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -2186,6 +2246,112 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchConstructionObligations
 
+namespace FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch package and the
+generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    h.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch package and the
+generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    h.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+end FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations
+
+namespace FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch package and the
+global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch package and the
+global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_globalCodeCorrect
+    h.scaffold h.labelIndex
+
+end FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+
+namespace FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch package and the
+source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    h.scaffold h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch package and the
+source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    h.scaffold h.labelIndex
+
+end FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
+
 namespace FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -2222,6 +2388,143 @@ theorem domino_problem_undecidable
   h.toCheckedStackLayerPatchConstructionObligations.domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box data to the
+checked-stack/layer-patch decoder-step package.
+-/
+def toCheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the valid-translated-box decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box data to the
+checked-stack/layer-patch global-label package.
+-/
+def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the valid-translated-box decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box data to the
+checked-stack/layer-patch source-label package.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the source-specialized position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the source-specialized position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
 namespace FinalFigure13NatSitesIndexedWindowConstructionObligations
 
@@ -3549,6 +3852,136 @@ valid translated scaffold boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and the primitive recursive generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and the global primitive recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the global primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

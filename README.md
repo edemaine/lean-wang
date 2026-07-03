@@ -138,6 +138,9 @@ source-label final packages:
 `FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
 and
 `FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
+The second audited L2 candidate has matching decoder-step, global-label, and
+source-label packages for both checked-stack/layer-patch data and
+checked-stack/valid-translated-box data.
 The more finite Figure 16 route is exposed as
 `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
 and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`;

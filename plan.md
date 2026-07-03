@@ -916,9 +916,10 @@ final module now also exposes the corresponding second-candidate checked-stack
 and checked-stack/valid-translated-box routes via
 `FinalL2C2CheckedStackLayerPatchConstructionObligations` and
 `FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations`; the default
-`FinalReductionInputs` route remains the first-candidate theorem surface, but
-both audited scaffold candidates can now be driven from the same generated
-interior-row source target.
+`FinalReductionInputs` route remains the first-candidate theorem surface.
+The second candidate also has decoder-step, global-label, and source-label
+variants for both layer patches and valid translated boxes, so both audited
+scaffold candidates can be driven from the current generated-source targets.
 The final module also exposes a concrete nat-site indexed-window route via
 `FinalFigure13NatSitesIndexedWindowConstructionObligations`.  This is the
 public endpoint closest to the human-audited Figure 13 layer table: it asks for
