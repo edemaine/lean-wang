@@ -1929,14 +1929,20 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toPositiveBoxDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 translated-box decoder-step package. -/
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toPositiveBoxDecoderStepConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
 
 end FinalSection7TranslatedBoxDecoderStepConstructionObligations
 
@@ -1976,14 +1982,18 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toPositiveBoxGlobalPositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 translated-box global-label-index package. -/
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toPositiveBoxGlobalPositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 end FinalSection7TranslatedBoxGlobalPositionCodeConstructionObligations
 
@@ -2024,14 +2034,16 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toPositiveBoxSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.section7 h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 translated-box source-label package. -/
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toPositiveBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.section7 h.labelIndex
 
 end FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations
 
@@ -2065,7 +2077,9 @@ package.
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toPositiveBoxConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.section7 h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
@@ -2075,7 +2089,9 @@ translated-box package.
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toPositiveBoxConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.section7 h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalSection7TranslatedBoxConstructionObligations
 

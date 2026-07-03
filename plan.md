@@ -995,6 +995,11 @@ The reduction layer now also has direct source-specialized label-index
 endpoints for Section 7 translated-box data:
 `encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect`
 and the L2C2/unencoded analogues.
+The public Section 7 translated-box wrappers now use the translated-box
+reduction endpoints directly for row-source, decoder-step, global-label, and
+source-label variants. The older centered positive-box projections are still
+available as compatibility conversions, but the theorem surface no longer
+detours through them.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
