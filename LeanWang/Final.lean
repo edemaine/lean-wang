@@ -261,7 +261,7 @@ This is the currently preferred scaffold surface: the Robinson board/free-line
 geometry supplies active/corner recognition, and centered positive active-corner
 boxes supply the finite layer patches needed by the backward construction.  It
 avoids the false raw Figure 13 macro-square diagnostic route and the over-strong
-source-stack raw-boundary diagnostic interfaces below.
+source-stack raw-boundary diagnostic route.
 -/
 structure FinalSection7PositiveBoxConstructionObligations : Prop where
   section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData

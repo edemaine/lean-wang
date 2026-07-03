@@ -836,7 +836,8 @@ with active-corner layer patches and constructs the Section 7 input.  The raw
 positive-board Figure 13 checks and the direct
 `Figure18CanonicalRawBoundaryCheckedLevelData` /
 `Figure18CanonicalRawBoundaryBoardLevelChecks` source/raw-boundary targets are
-kept only as diagnostic surfaces.
+kept only as lower-level diagnostic surfaces; `LeanWang.Final` no longer
+exports them as final theorem routes.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
