@@ -1053,6 +1053,12 @@ requested window size.  Section 7 exposes this as
 and wrappers to both decoded-site and indexed origin-zero windows.  This keeps
 the concrete scaffold proof focused on canonical Robinson crossings while
 preserving the existing origin-zero reduction route.
+The public final layer now exposes this canonical surface directly via
+`FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations` and
+the decoder-step/global-label/source-label variants.  These project through the
+origin-zero scaffold-plane route, so the final theorem statement can now assume
+canonical Robinson free-site active/corner recognition instead of the stronger
+origin-zero window certificate.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
