@@ -285,6 +285,8 @@ The origin-zero scaffold-plane route itself now projects directly to the
 `TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`,
 so this scaffold-facing surface no longer has to detour through derived
 Section 7 layer-patch inputs.
+The L2C1 canonical-free-site scaffold-plane global-label and source-label
+wrappers now reuse that origin-zero source-label route as well.
 The Section 7 and generated-position wrapper layers expose the same checked
 stack plus scaffold-plane route directly through
 `l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane`,

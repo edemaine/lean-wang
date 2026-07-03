@@ -1243,6 +1243,9 @@ from origin-zero active/corner windows plus
 `TilesPlane figure18ScaffoldTiles`, and the final row/decoder/global/source
 wrappers route their endpoints through the origin-zero translated-obligation
 surface.
+The L2C1 canonical-free-site scaffold-plane global-label and source-label
+wrappers now reuse the origin-zero source-label route instead of detouring
+through the decoder-step or direct canonical-free-site source-code endpoints.
 The Section 7 reduction layer now has the same direct route:
 canonical free-site active/corner recognition plus `TilesPlane
 figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBoxData`,
