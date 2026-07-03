@@ -238,18 +238,26 @@ dependency on encoded TM1 statements for this part of the count proof.
 `partrecStartedTM1LabelCount_eq_data` rewrites the started-TM1 label count to
 this statement-free form. The label-level summand is now proved primitive
 recursive by a small code-level classifier,
-`TM0Route.partrecTM2SupportLength_primrec`. The next count step is to prove the
-executable evaluator label list primitive recursive. Conditional bridges are
-now in place:
+`TM0Route.partrecTM2SupportLength_primrec`.  The count route is now closed
+without proving the full executable evaluator label list primitive recursive:
+`PartrecToTM2SupportList.labelCount_primrec` and the weighted support mirrors
+feed the direct wrappers
+`partrecStartedTM1LabelCountData_primrec`,
+`partrecStartedTM1LabelCount_primrec`,
+`partrecStartedTM0StatementCount_primrec`, and
+`partrecStartedTM0LabelCount_primrec`.
+The conditional list-count bridges
 `partrecStartedTM2LabelCount_primrec_of_labelList`,
 `partrecStartedTM1LabelCountData_primrec_of_labelList`, and
-`partrecStartedTM1LabelCount_primrec_of_labelList` reduce the started-TM1 label
-count to that single remaining list-computability fact.
+`partrecStartedTM1LabelCount_primrec_of_labelList` remain useful if the full
+list-valued mirror is later needed for descriptor decoding, but they are no
+longer the next count blocker.
 `PartrecToTM2SupportList` now imports the concrete evaluator encodings and has
 top-level bridges `codeSuppList_primrec_of_parts` and
-`labelList_primrec_of_codeSuppList`; the remaining support-list work is the
-mutual primitive-recursion proof for `codeSuppList'` and `contSuppList`.
-It also has weighted numeric mirrors
+`labelList_primrec_of_codeSuppList`; list-valued primitive recursion for
+`codeSuppList'` and `contSuppList` is still useful future support work, but the
+live theorem route should focus first on the nondependent source descriptor
+decoder.  It also has weighted numeric mirrors
 `trStmtsWeight`, `codeSuppWeight'`, `contSuppWeight`, `codeSuppWeight`, and
 `labelWeight`, each proved equal to summing a weight over the corresponding
 executable support list. `TM0Route.partrecStartedTM1LabelCountWeightData` now
