@@ -1528,6 +1528,19 @@ theorem sourcePositionProgramData_computable_of_source_positionCodeBoundedInteri
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of interior generated position-code rows at concrete
+numeric label slots is enough for computability of the source-specialized
+generated position-coded folded program.
+-/
+theorem sourcePositionProgramData_computable_of_source_positionCodeInteriorRowsAtIndex
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_positionCodeBoundedInteriorRowsAtIndex
+    (sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+      hinterior)
+
+set_option linter.style.longLine false in
+/--
 The source-specialized position-code label-index decoder gives computability
 of the source-specialized generated position-coded folded program.
 -/

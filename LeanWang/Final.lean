@@ -6285,6 +6285,19 @@ def ofScaffoldAndSourceOneRowsAtIndex
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from the scaffold package and generated
+interior position-code rows at the numeric label slots used by the accumulator.
+-/
+def ofScaffoldAndSourceInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and generated
 bounded-interior position-code rows.
 -/
 def ofScaffoldAndSourceBoundedRows
@@ -20895,6 +20908,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourceOneRowsAtIndex
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourceOneRowsAtIndex scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated interior position-code rows
+at the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceInteriorRowsAtIndex
+      scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and generated interior position-code rows
+at the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourceInteriorRowsAtIndex
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--

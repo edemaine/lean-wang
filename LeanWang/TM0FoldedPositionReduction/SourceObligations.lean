@@ -94,6 +94,18 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of interior generated position-code rows at concrete
+numeric label slots gives the full generated-position source obligations once
+the semantic folded proof is imported.
+-/
+def positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfPositionCodeInteriorRowsAtIndex hinterior
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of the global position-code label-index decoder gives
 the full generated-position source obligations once the semantic folded proof
 is imported.
