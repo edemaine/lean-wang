@@ -1766,6 +1766,32 @@ structure FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations :
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
+route with generated one-row position-code rows.
+-/
+structure FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  tileableBoxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
+route with generated bounded-interior position-code rows.
+-/
+structure FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  tileableBoxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
 route with the source-specialized position-code label-index target.
 -/
 structure FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations :
@@ -3501,6 +3527,186 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line-active-corner/tileable-box package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line-active-corner/tileable-box package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line-active-corner/tileable-box package to the
+one-row canonical-active-corner/tileable-box package.
+-/
+def toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerTileableBoxOneRowsConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.activeCorner_of_section7BoardFreeLineActiveCorner
+      h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line-active-corner/tileable-box package to the
+one-row board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :=
+  h.toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+    |>.toCanonicalActiveCornerValidBoxOneRowsConstructionObligations
+    |>.toCombinedWindowValidBoxOneRowsConstructionObligations
+    |>.toCombinedWindowIsolatedBoxOneRowsConstructionObligations
+    |>.toBoardFreeLineLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line-active-corner/tileable-box package to
+the corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line-active-corner/tileable-box package to
+the one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line-active-corner/tileable-box package to
+the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line-active-corner/tileable-box package to
+the bounded-row canonical-active-corner/tileable-box package.
+-/
+def toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.activeCorner_of_section7BoardFreeLineActiveCorner
+      h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line-active-corner/tileable-box package to
+the bounded-row board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations :=
+  h.toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+    |>.toCanonicalActiveCornerValidBoxBoundedRowsConstructionObligations
+    |>.toCombinedWindowValidBoxBoundedRowsConstructionObligations
+    |>.toCombinedWindowIsolatedBoxBoundedRowsConstructionObligations
+    |>.toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations
 set_option linter.style.longLine true
 
 /--
@@ -13194,6 +13400,50 @@ position-code label-index target.
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board/free-line
+active/corner recognition, tileable Figure 18 scaffold boxes, and generated
+one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board/free-line active/corner
+recognition, tileable Figure 18 scaffold boxes, and generated one-row
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board/free-line
+active/corner recognition, tileable Figure 18 scaffold boxes, and generated
+bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board/free-line active/corner
+recognition, tileable Figure 18 scaffold boxes, and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
