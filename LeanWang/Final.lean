@@ -1186,6 +1186,73 @@ structure FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxGlobalPos
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 canonical combined-site
+corridor-routing/translated-positive-box scaffold route.
+
+The combined-site corridor-routing premise is stronger than the product-witness
+routing needed by the current product-routing route, and is closer to the
+finite Section 7 geometry.
+-/
+structure FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical combined-site
+corridor-routing/translated-positive-box scaffold route with generated interior
+position-code rows.
+-/
+structure FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical combined-site
+corridor-routing/translated-positive-box scaffold route with the generated
+position-code decoder-step source target.
+-/
+structure FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical combined-site
+corridor-routing/translated-positive-box scaffold route with the global
+position-code label-index source target.
+-/
+structure FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 canonical-routing/translated-positive-box
 scaffold route.
 
@@ -7628,6 +7695,244 @@ end FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxGlobalPositionC
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical combined-site corridor routing to the product-witness routing
+route used by the current L2C2 translated-positive-box endpoint.
+-/
+def toCanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  canonicalProductRouting :=
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations.productRoutingOfCombinedSiteRouting
+      h.scaffold.canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := h.scaffold.positiveTranslatedIndexedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Forget the product-routing strength to the ordinary canonical translated-box
+route.
+-/
+def toCanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold.toCanonicalTranslatedPositiveBoxObligations
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical combined-site corridor routing and generated interior rows to
+the product-witness routing translated-positive-box row route.
+-/
+def toCanonicalProductRoutingTranslatedPositiveBoxConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxConstructionObligations where
+  canonicalProductRouting :=
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations.productRoutingOfCombinedSiteRouting
+      h.scaffold.canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := h.scaffold.positiveTranslatedIndexedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source combined-site package to the source-label combined-site
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the row-source concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the row-source concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box package.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical combined-site corridor routing and the generated decoder step
+to the product-witness routing translated-positive-box decoder route.
+-/
+def toCanonicalProductRoutingTranslatedPositiveBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxDecoderStepConstructionObligations where
+  canonicalProductRouting :=
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations.productRoutingOfCombinedSiteRouting
+      h.scaffold.canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := h.scaffold.positiveTranslatedIndexedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the decoder-step combined-site package to the source-label combined-site
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+      h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the
+generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxDecoderStepConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the
+generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxDecoderStepConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical combined-site corridor routing and the global label-index
+decoder to the product-witness routing translated-positive-box global route.
+-/
+def toCanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations where
+  canonicalProductRouting :=
+    NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations.productRoutingOfCombinedSiteRouting
+      h.scaffold.canonicalCombinedSiteRouting
+  positiveTranslatedIndexedBoxes := h.scaffold.positiveTranslatedIndexedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the source-label combined-site route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the global
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13 canonical
+combined-site corridor-routing/translated-positive-box package and the global
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2CanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -10267,6 +10572,102 @@ global position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2CanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalProductRoutingTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the global position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+canonical combined-site corridor-routing/translated-positive-box scaffold
+package and the global position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

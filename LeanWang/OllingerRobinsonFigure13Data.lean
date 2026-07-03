@@ -17184,6 +17184,23 @@ end NatSiteRobinsonCanonicalTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonCanonicalCombinedSiteTranslatedPositiveBoxObligations
 
+def productRoutingOfCombinedSiteRouting
+    {activeSiteSpecs : List (Nat × Quadrant)}
+    {activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true}
+    {cornerIndex : Nat} {cornerQuadrant : Quadrant}
+    {cornerIndex_valid : decide (cornerIndex < 92) = true}
+    (canonicalCombinedSiteRouting :
+      HasFigure18RobinsonBoardCanonicalCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    HasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable
+      (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
+    (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_combinedSites
+      canonicalCombinedSiteRouting)
+
 def canonicalRoutingOfCombinedSiteRouting
     {activeSiteSpecs : List (Nat × Quadrant)}
     {activeSiteSpecs_valid :
@@ -17198,9 +17215,7 @@ def canonicalRoutingOfCombinedSiteRouting
       (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
         cornerIndex cornerQuadrant cornerIndex_valid).table :=
   hasFigure18RobinsonBoardRoutingForGeometryTowerForTable_of_productWitnessRouting
-    (hasFigure18RobinsonBoardCanonicalProductWitnessRoutingForTable_of_corridor
-      (hasFigure18RobinsonBoardCanonicalCorridorProductWitnessRoutingForTable_of_combinedSites
-        canonicalCombinedSiteRouting))
+    (productRoutingOfCombinedSiteRouting canonicalCombinedSiteRouting)
 
 def toCanonicalTranslatedPositiveBoxObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
