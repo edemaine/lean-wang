@@ -912,6 +912,32 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstruction
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the generated one-row position-code source target.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the generated bounded-interior position-code source target.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
 with the primitive recursive generated position-code decoder step.
 -/
 structure FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations :
@@ -6233,6 +6259,124 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line/layer-patch package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row board/free-line/layer-patch package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  sourceRows := TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line/layer-patch package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line/layer-patch package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  sourceRows := TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row board/free-line/layer-patch package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -8803,6 +8947,50 @@ position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and generated one-row
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and generated one-row
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

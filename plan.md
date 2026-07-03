@@ -1424,10 +1424,10 @@ conditions have been narrowed to two proof-facing fronts:
    Section 7 layer-patch endpoint as the decoded-window/valid-box path.
 
    The preferred board/free-line/layer-patch frontier now also has direct
-   decoder-step and global-label source wrappers, both projecting through the
-   source-label package.  Thus either live source-side target can feed the
-   paper-facing Section 7 scaffold surface without detouring through
-   checked-stack-specific packages.
+   one-row, bounded-interior, decoder-step, and global-label source wrappers,
+   all projecting through the source-label package.  Thus any live source-side
+   target can feed the paper-facing Section 7 scaffold surface without
+   detouring through checked-stack-specific packages.
 
    The L2C2 checked-stack/layer-patch packages now project directly to this
    same Figure 13 board/free-line/layer-patch surface, again for row-source,
