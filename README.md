@@ -138,6 +138,9 @@ source-label final packages:
 `FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
 and
 `FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
+The checked-stack plus compatible Figure 16 macro-square route has matching
+decoder-step, global-label, and source-label packages that project through this
+valid-translated-box target.
 The second audited L2 candidate has matching decoder-step, global-label, and
 source-label packages for both checked-stack/layer-patch data and
 checked-stack/valid-translated-box data.

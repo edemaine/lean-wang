@@ -903,6 +903,9 @@ source-label variants
 `FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
 and
 `FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
+The checked-stack plus compatible Figure 16 macro-square route now has matching
+decoder-step, global-label, and source-label packages that project through this
+valid-translated-box target.
 This gives the concrete scaffold work a
 lower-level target than `L2C1ActiveCornerLayerPatches` without falling back to
 the refuted raw Figure 13 box assumptions.  The compatible Figure 16 route now

@@ -171,6 +171,39 @@ structure FinalFigure16CompatibleConstructionObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Finite Figure 16 compatible macro-square route with the narrower generated
+decoder-step source target.
+-/
+structure FinalFigure16CompatibleDecoderStepConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite Figure 16 compatible macro-square route with the global position-code
+label-index source target.
+-/
+structure FinalFigure16CompatibleGlobalPositionCodeConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite Figure 16 compatible macro-square route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalFigure16CompatibleSourcePositionCodeConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite Figure 16 compatible macro-square route from origin-zero active/corner
 windows for the first audited L2 candidate.
 
@@ -1402,6 +1435,168 @@ theorem domino_problem_undecidable
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 end FinalFigure16CompatibleConstructionObligations
+
+namespace FinalFigure16CompatibleDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+checked-stack/valid-translated-box decoder-step package.
+-/
+def toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  decoderStep := h.decoderStep
+
+/-- Convert the finite Figure 16 compatible decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+end FinalFigure16CompatibleDecoderStepConstructionObligations
+
+namespace FinalFigure16CompatibleGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    FinalFigure16CompatibleSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    FinalFigure16CompatibleDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+checked-stack/valid-translated-box global-label package.
+-/
+def toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the finite Figure 16 compatible global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalFigure16CompatibleGlobalPositionCodeConstructionObligations
+
+namespace FinalFigure16CompatibleSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    FinalFigure16CompatibleDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+checked-stack/valid-translated-box source-label package.
+-/
+def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the finite Figure 16 compatible source-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and the source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalFigure16CompatibleSourcePositionCodeConstructionObligations
 
 namespace FinalFigure16CompatibleOriginZeroConstructionObligations
 
@@ -3461,6 +3656,72 @@ Wang domino undecidability from checked origin-zero stacks, compatible Figure
 -/
 theorem domino_problem_undecidable_of_figure16CompatibleConstructionObligations
     (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, compatible
+Figure 16 macro-squares, and the primitive recursive generated position-code
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, compatible Figure
+16 macro-squares, and the primitive recursive generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, compatible
+Figure 16 macro-squares, and the global primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, compatible Figure
+16 macro-squares, and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, compatible
+Figure 16 macro-squares, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, compatible Figure
+16 macro-squares, and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
