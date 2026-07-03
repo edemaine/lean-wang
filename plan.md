@@ -525,6 +525,13 @@ Next implementation targets:
    scaffold-facing theorem surface.  Its finite scaffold inputs are exactly
    `L2C1OriginZeroCheckedStacks` and `L2C1ActiveCornerLayerPatches`, plus the
    source-side `SourcePositionCodeInteriorRowsPrimrec`.
+   For package-style final assumptions, prefer
+   `FinalCheckedStackLayerPatchConstructionObligations`,
+   `FinalCheckedStackLayerPatchDecoderStepConstructionObligations`,
+   `FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations`, or
+   `FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations`.
+   These all route through `L2C1CheckedStackLayerPatchData` and avoid the
+   refuted Figure 16 level-data interface.
 7. Replace the current Figure 16 finite-data bridge before using it for the
    concrete scaffold proof:
    `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`

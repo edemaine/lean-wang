@@ -98,12 +98,11 @@ structure FinalReductionInputs : Prop where
   source : TM0FoldedReduction.PositionSourceObligations
 
 /--
-Preferred remaining proof obligations for the current construction route.
+Legacy over-strong proof obligations for the checked Figure 16 level-data route.
 
-These are the three proof-facing facts still to be supplied by the scaffold
-and source-code construction:
+These were previously used as the preferred construction route:
 * the Section 7 origin-zero active/corner window invariant for the first
-  audited L2 blank candidate;
+   audited L2 blank candidate;
 * row-major checked compatible Figure 16 level data, which supplies the finite
   active-corner layer patches;
 * the source-uniform generated-position interior row decoder.
@@ -114,7 +113,7 @@ structure FinalConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
-Preferred source-facing variant of the remaining proof obligations.
+Legacy source-facing variant of the checked Figure 16 level-data route.
 
 Compared with `FinalConstructionObligations`, this asks for primitive
 recursiveness of the generated position-code decoder step directly, instead of
@@ -126,10 +125,9 @@ structure FinalDecoderStepConstructionObligations : Prop where
   decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 /--
-Preferred source-facing variant using the global position-code label-index
-decoder.  This is slightly closer to the generated folded-program construction
-than `FinalDecoderStepConstructionObligations`; the decoder step is derived
-uniformly from this label-index decoder.
+Legacy source-facing checked Figure 16 level-data variant using the global
+position-code label-index decoder.  The decoder step is derived uniformly from
+this label-index decoder.
 -/
 structure FinalGlobalPositionCodeConstructionObligations : Prop where
   originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows
@@ -137,8 +135,8 @@ structure FinalGlobalPositionCodeConstructionObligations : Prop where
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
-Preferred source-facing variant using the source-specialized position-code
-label-index decoder.
+Legacy source-facing checked Figure 16 level-data variant using the
+source-specialized position-code label-index decoder.
 
 Compared with `FinalGlobalPositionCodeConstructionObligations`, this is weaker
 on the source side: the decoder only has to be primitive recursive after
@@ -231,12 +229,36 @@ structure FinalCheckedSourcePositionCodeConstructionObligations : Prop where
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
-Lowest finite-scaffold-facing variant of the current proof frontier.
+Finite-scaffold-facing checked-stack/layer-patch construction route.
 
 The scaffold field is the concrete checked-stack/layer-patch package for the
-first audited L2 candidate.  Thus the remaining assumptions are exactly the
-finite Section 7 scaffold certificate and the source-uniform global
-position-code label-index decoder.
+first audited L2 candidate; the source field is the generated interior-row
+primitive-recursion proof.  This route bypasses the refuted checked Figure 16
+level-data interface.
+-/
+structure FinalCheckedStackLayerPatchConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+Finite-scaffold-facing checked-stack/layer-patch route with the narrower
+decoder-step source target.
+
+This is the source-facing version closest to the current generated decoder-step
+work while still avoiding the checked Figure 16 level-data interface.
+-/
+structure FinalCheckedStackLayerPatchDecoderStepConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+/--
+Finite-scaffold-facing checked-stack/layer-patch route with the global
+position-code label-index source target.
+
+The scaffold field is the concrete checked-stack/layer-patch package for the
+first audited L2 candidate.  Thus the remaining assumptions are the finite
+Section 7 scaffold certificate and the source-uniform global position-code
+label-index decoder.
 -/
 structure FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
@@ -1459,6 +1481,36 @@ def toFinalReductionInputs
 
 end FinalCheckedSourcePositionCodeConstructionObligations
 
+namespace FinalCheckedStackLayerPatchConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the concrete checked-stack/layer-patch interior-row package into the
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchData
+    h.scaffold h.sourceRows
+
+end FinalCheckedStackLayerPatchConstructionObligations
+
+namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the concrete checked-stack/layer-patch decoder-step package into the
+endpoint.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
+    h.scaffold h.decoderStep
+
+end FinalCheckedStackLayerPatchDecoderStepConstructionObligations
+
 namespace FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -2373,6 +2425,47 @@ final obligations.
 -/
 theorem domino_problem_undecidable_of_checkedSourcePositionCodeConstructionObligations
     (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchConstructionObligations
+    (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchConstructionObligations
+    (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalCheckedStackLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and the primitive recursive generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalCheckedStackLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
