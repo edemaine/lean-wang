@@ -2758,6 +2758,36 @@ def ofCheckedStacksAndLayerPatches
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from the two split finite scaffold obligations and
+generated one-row position-code rows.
+-/
+def ofCheckedStacksAndLayerPatchesOneRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceOneRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the two split finite scaffold obligations and
+generated bounded-interior position-code rows.
+-/
+def ofCheckedStacksAndLayerPatchesBoundedRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceBoundedRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from the two split finite scaffold obligations and the
 packaged generated interior position-code decoder.
 -/
@@ -10250,6 +10280,62 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatches
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStacksAndLayerPatches
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesOneRows
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesOneRows
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesBoundedRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesBoundedRows
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesBoundedRows
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesBoundedRows
       checkedStacks patches sourceRows)
 
 set_option linter.style.longLine false in

@@ -1462,6 +1462,12 @@ conditions have been narrowed to two proof-facing fronts:
    Section 7 board/free-line layer-patch one-row and bounded-row correctness
    wrappers, so the L2C1 and L2C2 finite-check-facing scaffold routes expose
    the same source-row frontier.
+   The first-candidate public final split checked-stack/layer-patch endpoint
+   now exposes matching one-row and bounded-row aliases too:
+   `encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRows`,
+   `domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRows`,
+   `encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesBoundedRows`,
+   and `domino_problem_undecidable_of_checkedStacksAndLayerPatchesBoundedRows`.
    The lower `TM0FoldedPositionReduction.Theorems` layer now exposes the
    matching L2C2 decoder-step, one-row, and bounded-interior checked-stack
    wrappers with `positionProgramData` correctness discharged; the older
