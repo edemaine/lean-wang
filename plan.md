@@ -913,6 +913,12 @@ and checked-stack/valid-translated-box routes via
 `FinalReductionInputs` route remains the first-candidate theorem surface, but
 both audited scaffold candidates can now be driven from the same generated
 interior-row source target.
+The final module also exposes a concrete nat-site indexed-window route via
+`FinalFigure13NatSitesIndexedWindowConstructionObligations`.  This is the
+public endpoint closest to the human-audited Figure 13 layer table: it asks for
+raw checked active-site specs, a checked corner, indexed active/corner windows,
+and a realization certificate, then applies the existing concrete Figure 13
+scaffold theorem with the generated interior-row source target.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

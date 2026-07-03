@@ -144,6 +144,31 @@ structure FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations : Prop 
   scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete nat-site indexed-window scaffold route.
+
+This is the public final surface closest to the human-audited Figure 13 layer
+transcription: it supplies raw checked active Figure 18 site specs, a checked
+corner site, indexed active/corner windows, and a realization certificate for
+the resulting concrete scaffold instance.
+-/
+structure FinalFigure13NatSitesIndexedWindowConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  indexedActiveWindows :
+    OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  realizes :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -798,6 +823,36 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
+namespace FinalFigure13NatSitesIndexedWindowConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete nat-site indexed-window scaffold package and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_interiorRows
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete nat-site indexed-window scaffold package
+and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_interiorRows
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure13NatSitesIndexedWindowConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1218,6 +1273,28 @@ valid translated scaffold boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete human-audited Figure 13
+layer table, indexed active/corner windows, realization, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13NatSitesIndexedWindowConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete human-audited Figure 13 layer
+table, indexed active/corner windows, realization, and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
