@@ -10084,6 +10084,38 @@ theorem figure18ScaffoldDataOfNatSitesSection7ObstructionRoutingOfOriginZeroWind
       originZeroWindows
 
 /--
+Origin-zero active/corner windows supply the stronger board/free-line
+active-corner invariant for the concrete Nat-indexed Figure 18 scaffold data.
+
+The pure Robinson board geometry is the canonical tower; the origin-zero
+windows discharge the finite active/corner recognition at the canonical free
+crossings.
+-/
+theorem figure18ScaffoldDataOfNatSitesBoardFreeLineActiveCornerOfOriginZeroWindows
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table) :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant
+      cornerIndex_valid).HasRobinsonSection7BoardFreeLineActiveCornerInvariant := by
+  refine ⟨hasRobinsonBoardSignalGeometryTower, ?_⟩
+  change
+    HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  rw [figure18ScaffoldDataOfNatSites_table,
+    ← scaffoldDataOfNatSites_table]
+  exact
+    hasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable_of_originZeroWindows
+      originZeroWindows
+
+/--
 Finite origin-zero checked layer stacks supply Robinson Section 7 obstruction
 routing for the concrete Nat-indexed layered Figure 18 scaffold data.
 
@@ -19562,6 +19594,101 @@ def toFigure18FlexibleCertificate
 end NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
 
 namespace NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+
+def ofOriginZeroWindowsLayerPatches
+    (activeSiteSpecs : List (Nat × Quadrant))
+    (activeSiteSpecs_valid :
+      Figure18Site.natSpecsValidBool activeSiteSpecs = true)
+    (cornerIndex : Nat) (cornerQuadrant : Quadrant)
+    (cornerIndex_valid : decide (cornerIndex < 92) = true)
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table)
+    (pairCompatibility :
+      generatedStackAllowedSitePairCompatibilityBool
+        (activeSiteDataOfSpecs activeSiteSpecs activeSiteSpecs_valid)
+        (cornerSiteOfNat cornerIndex cornerQuadrant cornerIndex_valid) =
+          true)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+          cornerIndex cornerQuadrant cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid where
+  boardFreeLineActiveCorner :=
+    figure18ScaffoldDataOfNatSitesBoardFreeLineActiveCornerOfOriginZeroWindows
+      activeSiteSpecs activeSiteSpecs_valid cornerIndex cornerQuadrant
+      cornerIndex_valid originZeroWindows
+  pairCompatibility := pairCompatibility
+  patches := patches
+
+def ofL2C1OriginZeroWindowsLayerPatches
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofOriginZeroWindowsLayerPatches
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    originZeroWindows
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+    patches
+
+def ofL2C2OriginZeroWindowsLayerPatches
+    (originZeroWindows :
+      HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (patches :
+      HasActiveCornerLayerBoxPatches
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofOriginZeroWindowsLayerPatches
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    originZeroWindows
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite, NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+    patches
 
 def toCompatibleLevelObligations
     {activeSiteSpecs : List (Nat × Quadrant)}
