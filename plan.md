@@ -354,6 +354,7 @@ instead:
 
 ```lean
 TM0FoldedReduction.SourcePositionCodeOneRowsAtIndexPrimrec
+TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
 TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
 TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
@@ -365,9 +366,12 @@ The at-index target is the weakest exact boundary for the generated
 position-code accumulator: it first decodes the variable from
 `partrecVarList[i]?`, so it is equivalent to
 `SourcePositionCodeDecoderStepPrimrec` and the source-specialized label-index
-decoder.  The stronger `SourcePositionCodeOneRowsPrimrec` target keeps the
-numeric position slot independent of the variable argument, and should only be
-used when that extra arbitrary-slot strength is genuinely needed.
+decoder.  It now factors through
+`SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec`, which removes the
+constant zero row and post-support empty rows from the remaining proof.  The
+stronger `SourcePositionCodeOneRowsPrimrec` target keeps the numeric position
+slot independent of the variable argument, and should only be used when that
+extra arbitrary-slot strength is genuinely needed.
 The next bridge should therefore construct the source-level statement/support
 lookup directly over encoded source codes, prove an extensional correctness
 theorem for the generated descriptor rows, and discharge one of these row-level
@@ -461,16 +465,17 @@ Next implementation targets:
 
 1. Prove the weakest source-level generated position-code decoder target first,
    preferably
-   `TM0FoldedReduction.SourcePositionCodeOneRowsAtIndexPrimrec` (equivalently
-   `TM0FoldedReduction.SourcePositionCodeDecoderStepPrimrec` or
-   `TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec`).  This should
-   be done by constructing a source-uniform executable statement/support
-   decoder whose output is compared extensionally to the existing dependent
-   fixed-`tc` decoder, then generating the folded TM0 descriptor rows. Upgrade
-   to `SourcePositionCodeInteriorRowsPrimrec` or
-   `SourcePositionCodeOneRowsPrimrec` only if a later theorem surface genuinely
-   needs arbitrary variable slots rather than the accumulator's decoded
-   variable slot.
+   `TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec`,
+   which implies `SourcePositionCodeOneRowsAtIndexPrimrec` and hence
+   `SourcePositionCodeDecoderStepPrimrec` /
+   `SourcePositionCodeLabelIndexFromPrimrec`.  This should be done by
+   constructing a source-uniform executable statement/support decoder whose
+   output is compared extensionally to the existing dependent fixed-`tc`
+   decoder, then generating the folded TM0 descriptor rows for genuine bounded
+   interior statement positions. Upgrade to `SourcePositionCodeInteriorRowsPrimrec`
+   or `SourcePositionCodeOneRowsPrimrec` only if a later theorem surface
+   genuinely needs arbitrary variable slots rather than the accumulator's
+   decoded variable slot.
 2. Use that row target to prove source-level computability of the generated
    position-coded folded finite-TM0 reduction:
 

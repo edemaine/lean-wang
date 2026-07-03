@@ -594,6 +594,87 @@ theorem sourcePositionCodeOneRowsIndexVar_primrec_of_boundedInterior
     exact (sourcePositionCodeOneRowsIndexVar_eq_boundedInterior
       p.1 p.2.1 p.2.2.1 p.2.2.2).symm
 
+noncomputable def sourcePositionCodeBoundedInteriorRowsAtIndex
+    (c : Code) (j i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  match TM0Route.partrecVarList[i]? with
+  | none => []
+  | some v => sourcePositionCodeBoundedInteriorRowsIndexVar c j i v
+
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_of_var_get?
+    {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourcePositionCodeBoundedInteriorRowsAtIndex c j i =
+      sourcePositionCodeBoundedInteriorRowsIndexVar c j i v := by
+  simp [sourcePositionCodeBoundedInteriorRowsAtIndex, hv]
+
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_eq_nil_of_var_none
+    {c : Code} {j i : Nat}
+    (hv : TM0Route.partrecVarList[i]? = none) :
+    sourcePositionCodeBoundedInteriorRowsAtIndex c j i = [] := by
+  simp [sourcePositionCodeBoundedInteriorRowsAtIndex, hv]
+
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_boundedInterior
+    (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeBoundedInteriorRowsAtIndex p.1 p.2.1 p.2.2) := by
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun _p : Code × Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar p.1 p.2.1 p.2.2 v) := by
+    apply Primrec₂.mk
+    exact hinterior.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+          (Primrec.pair
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+            Primrec.snd)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2.2]? <;>
+      simp [sourcePositionCodeBoundedInteriorRowsAtIndex, h]
+
+theorem sourcePositionCodeOneRowsAtIndex_eq_boundedInterior
+    (c : Code) (k i : Nat) :
+    sourcePositionCodeOneRowsAtIndex c k i =
+      if k = 0 then
+        []
+      else
+        sourcePositionCodeBoundedInteriorRowsAtIndex c (k - 1) i := by
+  cases hv : TM0Route.partrecVarList[i]? with
+  | none =>
+      simp [sourcePositionCodeOneRowsAtIndex,
+        sourcePositionCodeBoundedInteriorRowsAtIndex, hv]
+  | some v =>
+      simp [sourcePositionCodeOneRowsAtIndex,
+        sourcePositionCodeBoundedInteriorRowsAtIndex, hv,
+        sourcePositionCodeOneRowsIndexVar_eq_boundedInterior]
+
+theorem sourcePositionCodeOneRowsAtIndex_primrec_of_boundedInteriorAtIndex
+    (hinterior : Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeBoundedInteriorRowsAtIndex p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2) := by
+  have hzero : PrimrecPred (fun p : Code × Nat × Nat => p.2.1 = 0) :=
+    Primrec.eq.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 0)
+  have hnil : Primrec (fun _p : Code × Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hkPred : Primrec (fun p : Code × Nat × Nat => p.2.1 - 1) :=
+    Primrec.nat_sub.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 1)
+  have helse : Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeBoundedInteriorRowsAtIndex p.1 (p.2.1 - 1) p.2.2) :=
+    hinterior.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair hkPred (Primrec.snd.comp Primrec.snd)))
+  exact (Primrec.ite hzero hnil helse).of_eq fun p => by
+    exact (sourcePositionCodeOneRowsAtIndex_eq_boundedInterior
+      p.1 p.2.1 p.2.2).symm
+
 theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows
     (c : Code) (k i : Nat) :
     sourceSimStepDataForLabelIndexFromWithPositionCode c 1 k i =

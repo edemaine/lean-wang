@@ -178,6 +178,14 @@ abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat =>
     sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)
 
+/--
+Primitive-recursion target for bounded interior generated position-code rows
+at a concrete numeric label slot.
+-/
+abbrev SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat =>
+    sourcePositionCodeBoundedInteriorRowsAtIndex p.1 p.2.1 p.2.2)
+
 /-- Primitive-recursion target for the generated position-code accumulator step. -/
 abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
   Primrec (fun p : Code × SourceSearchCodeDecoderState =>
@@ -240,6 +248,26 @@ theorem sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex
     (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
     SourcePositionCodeDecoderStepPrimrec :=
   sourcePositionCodeDecoderStep_primrec_of_oneRowsAtIndex hrows
+
+set_option linter.style.longLine false in
+/--
+Bounded-interior at-index rows recover one-row-at-index rows by handling the
+zero row and post-support rows as empty rows.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_boundedInteriorAtIndex
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndex_primrec_of_boundedInteriorAtIndex hbounded
+
+set_option linter.style.longLine false in
+/--
+Bounded-interior at-index rows imply the generated accumulator-step target.
+-/
+theorem sourcePositionCodeDecoderStepPrimrec_of_boundedInteriorAtIndex
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex
+    (sourcePositionCodeOneRowsAtIndexPrimrec_of_boundedInteriorAtIndex hbounded)
 
 set_option linter.style.longLine false in
 /--
@@ -313,6 +341,16 @@ theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_positionCodeOneRows
     (hrows : SourcePositionCodeOneRowsPrimrec) :
     SourcePositionCodeOneRowsAtIndexPrimrec :=
   sourcePositionCodeOneRowsAtIndex_primrec_of_indexVarRows hrows
+
+set_option linter.style.longLine false in
+/--
+The arbitrary-variable bounded-interior target implies the exact
+bounded-interior at-index target.
+-/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_positionCodeBoundedInteriorRows
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_boundedInterior hbounded
 
 set_option linter.style.longLine false in
 /--
