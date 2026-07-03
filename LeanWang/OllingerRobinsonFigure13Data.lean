@@ -780,6 +780,10 @@ theorem separateLayerRows_layerData_rows :
     separateLayerRows.layerData.rows = componentRows := by
   decide
 
+theorem separateLayerRows_layerData :
+    separateLayerRows.layerData = layerData :=
+  transcription_eq_of_rows_eq separateLayerRows_layerData_rows
+
 theorem sparseLayerRows_layerData_rows :
     sparseLayerRows.layerData.rows = componentRows := by
   decide
@@ -1479,6 +1483,7 @@ structure Figure13LayerTranscriptionCertificate : Prop where
   blackCoversIndices : blackEntries.map Prod.fst = List.range 92
   componentRowsLength : componentRows.length = 92
   separateRowsLayerData : separateLayerRows.layerData.rows = componentRows
+  separateLayerData : separateLayerRows.layerData = layerData
   sparseRowsLayerData : sparseLayerRows.layerData.rows = componentRows
   sparseLayerData : sparseLayerRows.layerData = layerData
   sparseRowsMatchStackRectangles :
@@ -1505,8 +1510,9 @@ theorem figure13LayerTranscriptionCertificate :
   blackCoversIndices := blackEntries_indices
   componentRowsLength := componentRows_length
   separateRowsLayerData := separateLayerRows_layerData_rows
+  separateLayerData := separateLayerRows_layerData
   sparseRowsLayerData := sparseLayerRows_layerData_rows
-  sparseLayerData := transcription_eq_of_rows_eq sparseLayerRows_layerData_rows
+  sparseLayerData := sparseLayerRows_layerData
   sparseRowsMatchStackRectangles := sparseLayerRows_layerStackRectangleMatchesBool
   sparseRawDataMatchStackRectangles :=
     sparseRawDataOfSites_layerStackRectangleMatchesBool
