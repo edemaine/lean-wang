@@ -222,6 +222,15 @@ structure FinalCheckedGlobalPositionCodeConstructionObligations : Prop where
   labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
 
 /--
+Finite-check-facing variant with the weakest source-specialized position-code
+label-index source target.
+-/
+structure FinalCheckedSourcePositionCodeConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
 Lowest finite-scaffold-facing variant of the current proof frontier.
 
 The scaffold field is the concrete checked-stack/layer-patch package for the
@@ -859,6 +868,22 @@ def ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
   ofCheckedStacksAndCompatibleFig16LevelDataSource
     checkedStacks fig16
     (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+def ofCheckedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStacksAndCompatibleFig16LevelDataSource
+    checkedStacks fig16
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
       hindex)
 
 set_option linter.style.longLine false in
@@ -1509,6 +1534,18 @@ def toCheckedDecoderStepConstructionObligations
   decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
 
 set_option linter.style.longLine false in
+/--
+Forget the global decoder target to the source-specialized decoder target used
+by the current final route.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
+    FinalCheckedSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  fig16 := h.fig16
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
 /-- Convert the finite-check-facing global-label-index package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalCheckedGlobalPositionCodeConstructionObligations) :
@@ -1517,6 +1554,44 @@ def toFinalReductionInputs
     h.checkedStacks h.fig16 h.labelIndex
 
 end FinalCheckedGlobalPositionCodeConstructionObligations
+
+namespace FinalCheckedSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the finite-check-facing source-label-index package into the
+window-based source-label-index obligation package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    FinalSourcePositionCodeConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  fig16 := h.fig16
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Convert the finite-check-facing source-label-index package into the concrete
+checked-stack/layer-patch source-label-index package.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+      h.checkedStacks h.fig16
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the finite-check-facing source-label-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
+    h.checkedStacks h.fig16 h.labelIndex
+
+end FinalCheckedSourcePositionCodeConstructionObligations
 
 namespace FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 
@@ -2527,6 +2602,26 @@ theorem domino_problem_undecidable_of_checkedGlobalPositionCodeConstructionOblig
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the finite-check-facing
+source-label-index final obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the finite-check-facing source-label-index
+final obligations.
+-/
+theorem domino_problem_undecidable_of_checkedSourcePositionCodeConstructionObligations
+    (h : FinalCheckedSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
 scaffold package and the global primitive recursive position-code label-index
 decoder.
@@ -3283,6 +3378,36 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGl
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
+      checkedStacks fig16 hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, row-major
+checked compatible Figure 16 level data, and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
+      checkedStacks fig16 hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, row-major checked
+compatible Figure 16 level data, and the source-specialized primitive
+recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataSourcePositionCodeLabelIndexFrom
       checkedStacks fig16 hindex)
 
 set_option linter.style.longLine false in
