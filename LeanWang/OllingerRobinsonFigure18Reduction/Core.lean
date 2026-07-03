@@ -18,8 +18,6 @@ unchanged while exposing theorem surfaces that take the eventual direct
 `Figure18FlexibleInstance` directly.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction

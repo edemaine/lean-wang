@@ -14,8 +14,6 @@ This module contains the scaffold-instantiation suffix split out from
 Section 7 route do not force rebuilding the earlier generic reduction layers.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
