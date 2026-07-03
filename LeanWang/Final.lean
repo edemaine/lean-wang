@@ -2890,6 +2890,90 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchSourcePositionCodeCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and the primitive recursive generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and the global primitive recursive position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
