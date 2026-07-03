@@ -911,6 +911,32 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstruction
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the primitive recursive generated position-code decoder step.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the global position-code label-index source target.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 canonical-product-routing/layer-patch
 scaffold route.
 
@@ -6111,6 +6137,120 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoder-step board/free-line/layer-patch package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+      h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the decoder-step board/free-line/layer-patch package to the compatible
+level/layer-patch final route.
+-/
+def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the global-label board/free-line/layer-patch package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the global-label board/free-line/layer-patch package to the
+decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the global-label board/free-line/layer-patch package to the compatible
+level/layer-patch final route.
+-/
+def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
@@ -9259,6 +9399,54 @@ position-code label-index source target.
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the generated position-code
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the global position-code
+label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the global position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
