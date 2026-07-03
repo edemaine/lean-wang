@@ -11,8 +11,6 @@ cache the machine-side reduction layers separately while preserving the old
 public import path.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
@@ -95,7 +93,7 @@ theorem sourceProgramData_computable_of_global_labelIndexFromWithSearchCode'
 Fixed-domino instance produced directly from the generated position-coded
 folded program for a source partial-recursive code.
 -/
-def sourcePositionFixedDominoReduction
+noncomputable def sourcePositionFixedDominoReduction
     (_h : PositionSourceObligations) (c : Code) : TileSet × WangTile :=
   tableProgramFixedDominoData
     (PostProgram.toTableProgram
@@ -127,7 +125,7 @@ theorem sourcePositionFixedDominoReduction_correct
 Final scaffolded tileset produced from the generated position-coded folded
 program for a source partial-recursive code.
 -/
-def sourcePositionDominoReduction
+noncomputable def sourcePositionDominoReduction
     (S : Scaffold) (h : PositionSourceObligations) (c : Code) : TileSet :=
   combineWithScaffold S (sourcePositionFixedDominoReduction h c).1
     (sourcePositionFixedDominoReduction h c).2
@@ -152,7 +150,7 @@ theorem sourcePositionDominoReduction_correct
           (sourcePositionFixedDominoReduction_correct h c))
 
 /-- Encoded version of the generated position-coded source folded reduction. -/
-def sourcePositionDominoReductionCode
+noncomputable def sourcePositionDominoReductionCode
     (S : Scaffold) (h : PositionSourceObligations) (c : Code) : Nat :=
   encodeTileSet (sourcePositionDominoReduction S h c)
 
@@ -535,5 +533,3 @@ theorem domino_problem_undecidable_of_presented_flexible_position_source_positio
 end TM0FoldedReduction
 
 end LeanWang
-
-end
