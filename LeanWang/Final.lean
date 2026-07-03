@@ -5294,6 +5294,34 @@ def ofCheckedStackLayerPatchData
 set_option linter.style.longLine false in
 /--
 Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and generated one-row position-code rows.
+-/
+def ofCheckedStackLayerPatchDataOneRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceOneRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and generated bounded-interior position-code rows.
+-/
+def ofCheckedStackLayerPatchDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceBoundedRows
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
 certificate and the primitive recursive generated position-code accumulator
 step.
 -/
@@ -5360,6 +5388,34 @@ def ofOriginZeroTranslatedBox
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
   ofCheckedStackLayerPatchData
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and generated one-row position-code rows.
+-/
+def ofOriginZeroTranslatedBoxOneRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataOneRows
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and generated bounded-interior position-code rows.
+-/
+def ofOriginZeroTranslatedBoxBoundedRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataBoundedRows
     (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
       scaffold)
     sourceRows
@@ -16931,10 +16987,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
-        sourceRows))
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataOneRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -16946,10 +17000,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
-        sourceRows))
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataOneRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -16961,10 +17013,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedR
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-        sourceRows))
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataBoundedRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -16976,10 +17026,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-        sourceRows))
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataBoundedRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -17119,10 +17167,8 @@ theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxOneRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
-        sourceRows))
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxOneRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -17134,10 +17180,8 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxOneRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
-        sourceRows))
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxOneRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -17149,10 +17193,8 @@ theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-        sourceRows))
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxBoundedRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -17164,10 +17206,8 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
-    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
-      scaffold
-      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-        sourceRows))
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxBoundedRows
+      scaffold sourceRows)
 
 set_option linter.style.longLine false in
 /--
