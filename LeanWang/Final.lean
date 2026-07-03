@@ -199,6 +199,17 @@ def finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData
 
 set_option linter.style.longLine false in
 /--
+Origin-zero recognizability plus finite Figure 13 boxes instantiate the
+checked-stack/layer-patch finite scaffold target.
+-/
+def finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    (data : FinalOriginZeroFig13BoxData) :
+    TM0FoldedReduction.L2C1CheckedStackLayerPatchData :=
+  TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    data
+
+set_option linter.style.longLine false in
+/--
 Checked origin-zero stacks plus finite Figure 13 boxes instantiate the
 origin-zero Figure 13 finite-box scaffold target.
 -/
@@ -740,8 +751,8 @@ def ofOriginZeroFig13BoxDataSource
     (scaffold : FinalOriginZeroFig13BoxData)
     (source : TM0FoldedReduction.PositionSourceObligations) :
     FinalReductionInputs :=
-  ofOriginZeroTranslatedBoxSource
-    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+  ofCheckedStackLayerPatchDataSource
+    (finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData scaffold)
     source
 
 set_option linter.style.longLine false in
@@ -753,8 +764,8 @@ def ofOriginZeroFig13BoxData
     (scaffold : FinalOriginZeroFig13BoxData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     FinalReductionInputs :=
-  ofOriginZeroTranslatedBox
-    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+  ofCheckedStackLayerPatchData
+    (finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData scaffold)
     sourceRows
 
 set_option linter.style.longLine false in
@@ -766,8 +777,8 @@ def ofOriginZeroFig13BoxDataDecoderStep
     (scaffold : FinalOriginZeroFig13BoxData)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     FinalReductionInputs :=
-  ofOriginZeroTranslatedBoxDecoderStep
-    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+  ofCheckedStackLayerPatchDataDecoderStep
+    (finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData scaffold)
     hstep
 
 set_option linter.style.longLine false in
@@ -779,8 +790,8 @@ def ofOriginZeroFig13BoxDataGlobalPositionCodeLabelIndexFrom
     (scaffold : FinalOriginZeroFig13BoxData)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
-  ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
-    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+  ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData scaffold)
     hindex
 
 set_option linter.style.longLine false in
@@ -793,8 +804,8 @@ def ofOriginZeroFig13BoxDataSourcePositionCodeLabelIndexFrom
     (scaffold : FinalOriginZeroFig13BoxData)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
-  ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
-    (finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData scaffold)
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData scaffold)
     hindex
 
 set_option linter.style.longLine false in

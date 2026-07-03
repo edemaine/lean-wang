@@ -826,6 +826,13 @@ directly into this target via
 `l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData`.  Thus finite Figure 13
 box data is already enough to supply the layer-patch field; the remaining
 concrete scaffold work can focus on proving the checked-stack/box package.
+The preferred origin-zero Figure 13 box package now feeds the same concrete
+target directly via
+`l2c1CheckedStackLayerPatchDataOfOriginZeroFig13BoxData` and
+`l2c2CheckedStackLayerPatchDataOfOriginZeroFig13BoxData`, and `LeanWang.Final`
+uses this checked-stack/layer-patch bridge for its
+`FinalOriginZeroFig13BoxData` wrappers instead of detouring through the
+translated-box package.
 The checked signal-tower board packages now also feed this route directly via
 `l2c1CheckedStackLayerPatchDataOfCheckedBoardData`,
 `l2c2CheckedStackLayerPatchDataOfCheckedBoardData`, and origin-zero

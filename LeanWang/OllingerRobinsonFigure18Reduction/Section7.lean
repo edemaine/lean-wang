@@ -4824,6 +4824,29 @@ def l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
     (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
 
 /--
+Origin-zero recognizability plus finite Figure 13 boxes provide the first
+checked-stack/layer-patch finite scaffold package.
+
+This names the direct route from the preferred origin-zero Figure 13 finite
+target to the concrete Section 7 layer-patch target.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData data)
+
+/--
+Origin-zero recognizability plus finite Figure 13 boxes provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData data)
+
+/--
 The first checked signal-tower board package supplies the preferred
 checked-stack/layer-patch finite scaffold package.
 -/
