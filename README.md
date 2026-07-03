@@ -132,6 +132,12 @@ For the same route with the scaffold obligations split, it exposes
 `domino_problem_undecidable_of_checkedStacksAndLayerPatches`, whose scaffold
 arguments are exactly `TM0FoldedReduction.L2C1OriginZeroCheckedStacks` and
 `TM0FoldedReduction.L2C1ActiveCornerLayerPatches`.
+The finite rectangle-stack decoding part of the checked-stack target is already
+proved for both audited L2 candidates as
+`TM0FoldedReduction.l2c1CheckedStacksForListedActiveSiteRectangles` and
+`TM0FoldedReduction.l2c2CheckedStacksForListedActiveSiteRectangles`; the
+remaining checked-stack bridge is the Robinson geometry that supplies
+origin-zero active/corner windows.
 The lower valid-translated-box target also has decoder-step, global-label, and
 source-label final packages:
 `FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations`,

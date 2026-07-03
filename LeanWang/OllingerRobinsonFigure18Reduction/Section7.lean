@@ -1616,6 +1616,71 @@ abbrev L2C2OriginZeroCheckedStacks : Prop :=
           l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Rectangle-level checked stack certificates for the first audited L2-blank
+candidate.
+
+This is the purely finite Figure 13/Figure 16 decoding part of
+`L2C1OriginZeroCheckedStacks`: every locally compatible rectangle made from
+the listed active sites and the corner site has a matching compatible checked
+layer stack.
+-/
+def l2c1CheckedStacksForListedActiveSiteRectangles :
+    (sparseRawDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasCheckedStacksForListedActiveSiteRectangles
+          (flatRoleTableOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).activeSites
+          (flatRoleTableOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).cornerSite :=
+  sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    l2Component1BlankCandidatePairCompatibilityBool
+
+/--
+Rectangle-level checked stack certificates for the second audited L2-blank
+candidate.
+
+This is the same finite layer-stack decoding fact as
+`l2c1CheckedStacksForListedActiveSiteRectangles`, specialized to the second
+audited L2 component.
+-/
+def l2c2CheckedStacksForListedActiveSiteRectangles :
+    (sparseRawDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasCheckedStacksForListedActiveSiteRectangles
+          (flatRoleTableOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).activeSites
+          (flatRoleTableOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).cornerSite :=
+  sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    l2Component2BlankCandidatePairCompatibilityBool
+
+/--
 Origin-zero active/corner windows plus the audited finite compatibility table
 produce the concrete checked layer-stack hypothesis for the first L2 candidate.
 -/

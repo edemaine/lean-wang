@@ -855,6 +855,14 @@ the source raw-boundary diagnostic as a final target.
 This is the clean target for the concrete Figure 13/Figure 16 transcription:
 prove checked origin-zero stacks plus active-corner layer patches, then feed
 that single package to the final Section 7 reduction.
+The purely finite rectangle-stack half of the checked-stack target is now
+proved and named for both audited candidates:
+`l2c1CheckedStacksForListedActiveSiteRectangles` and
+`l2c2CheckedStacksForListedActiveSiteRectangles`.  These package the reflected
+Figure 13/Figure 16 generated pair-compatibility checks for every locally
+compatible listed active-site rectangle.  Thus the remaining bridge to
+`L2C*OriginZeroCheckedStacks` is the Robinson geometry selecting origin-zero
+active/corner windows, not the finite layer-stack decoding.
 
 The current public final surface follows the proof-facing board/free-line
 route: `FinalReductionInputs` asks for
