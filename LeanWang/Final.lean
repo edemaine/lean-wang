@@ -252,6 +252,58 @@ structure FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligat
 
 set_option linter.style.longLine false in
 /--
+Finite Figure 16 compatible macro-square route from canonical free-site
+recognition for the first audited L2 candidate.
+
+This is the clean scaffold-facing surface: Section 7 derives the checked
+origin-zero stacks and valid translated boxes from canonical free-site
+active-corner recognition.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Canonical-free-site Figure 16 compatible route with the narrower generated
+decoder-step source target.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Canonical-free-site Figure 16 compatible route with the global position-code
+label-index source target.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Canonical-free-site Figure 16 compatible route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C1CanonicalFreeSiteRectActiveCorner
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Figure 18 scaffold-tiling route from direct Section 7 board/free-line
 active-corner recognition.
 
@@ -1841,6 +1893,239 @@ theorem domino_problem_undecidable
     h.labelIndex
 
 end FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 package to the checked-stack Figure
+16 final route.
+-/
+def toFigure16CompatibleConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalFigure16CompatibleConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 package to checked-stack valid
+translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+/-- Convert the canonical-free-site Figure 16 package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site recognition, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toCheckedStackValidTranslatedBoxConstructionObligations.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site recognition, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toCheckedStackValidTranslatedBoxConstructionObligations.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 decoder-step package to the checked
+stack Figure 16 decoder-step route.
+-/
+def toFigure16CompatibleDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    FinalFigure16CompatibleDecoderStepConstructionObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 decoder-step package to
+checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  decoderStep := h.decoderStep
+
+/-- Convert the canonical-free-site Figure 16 decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site recognition, compatible Figure 16
+macro-squares, and the primitive recursive generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site recognition, compatible Figure 16
+macro-squares, and the primitive recursive generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
+    h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      h.decoderStep)
+
+end FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the global-label-index package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 global-label package to
+checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the canonical-free-site Figure 16 global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the canonical-free-site Figure 16 global-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the canonical-free-site Figure 16 global-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+
+namespace FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-specialized label-index package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  compatibleMacroSquares := h.compatibleMacroSquares
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site Figure 16 source-label package to
+checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleMacroSquares
+  labelIndex := h.labelIndex
+
+/-- Convert the canonical-free-site Figure 16 source-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the canonical-free-site Figure 16 source-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the canonical-free-site Figure 16 source-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toDecoderStepConstructionObligations.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+    h.labelIndex
+
+end FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
 
 namespace FinalFigure18ScaffoldTilesPlaneBoardFreeLineConstructionObligations
 
@@ -4068,6 +4353,92 @@ source target.
 -/
 theorem domino_problem_undecidable_of_figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
     (h : FinalFigure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition,
+compatible Figure 16 macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, compatible
+Figure 16 macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition,
+compatible Figure 16 macro-squares, and the primitive recursive generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, compatible
+Figure 16 macro-squares, and the primitive recursive generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition,
+compatible Figure 16 macro-squares, and the global position-code label-index
+source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, compatible
+Figure 16 macro-squares, and the global position-code label-index source
+target.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site recognition,
+compatible Figure 16 macro-squares, and the source-specialized position-code
+label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site recognition, compatible
+Figure 16 macro-squares, and the source-specialized position-code label-index
+source target.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
