@@ -175,6 +175,11 @@ The row-source L2C2 analogue is
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations`, with
 top-level aliases ending in
 `l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`.
+The same second-candidate canonical-free-site route is also exposed with a
+direct scaffold-plane input as
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`
+and
+`FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

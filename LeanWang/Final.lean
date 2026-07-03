@@ -624,6 +624,33 @@ structure FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstruc
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical-free-site scaffold-plane route with generated
+interior position-code rows.
+
+This is the L2C2 analogue of
+`FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`,
+using a direct tiling of the compatible Figure 18 scaffold tiles instead of the
+Figure 16 macro-square certificate.
+-/
+structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical-free-site scaffold-plane route with the
+source-specialized position-code label-index source target.
+-/
+structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete nat-site indexed-window scaffold route.
 
 This is the public final surface closest to the human-audited Figure 13 layer
@@ -5330,6 +5357,118 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16Lev
     { canonicalActiveCorner := canonicalActiveCorner
       compatibleLevelChecks := compatibleLevelChecks
       sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane row-source final package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane row-source final package.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane source-label final package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second-candidate canonical
+free-site/scaffold-plane source-label final package.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeInteriorRows
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeInteriorRows
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      sourceRows := sourceRows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, a plane tiling of the compatible Figure 18 scaffold tiles, and
+the source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    { canonicalActiveCorner := canonicalActiveCorner
+      scaffoldPlane := scaffoldPlane
+      labelIndex := labelIndex }
 
 set_option linter.style.longLine false in
 /--
