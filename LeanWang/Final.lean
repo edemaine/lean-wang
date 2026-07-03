@@ -881,6 +881,19 @@ namespace FinalCheckedStackValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project checked-stack/valid-translated-box data to the proof-facing Section 7
+translated-box package.
+-/
+def toSection7TranslatedBoxConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalSection7TranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
 package used by the current final route.
 -/

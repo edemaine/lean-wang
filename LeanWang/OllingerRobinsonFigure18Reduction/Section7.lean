@@ -3509,6 +3509,50 @@ def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
 
 set_option linter.style.longLine false in
 /--
+Valid translated boxes instantiate the first board/free-line translated-box
+Section 7 package, using the finite no-neighbor active-site checks.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the second board/free-line translated-box
+Section 7 package, using the finite no-neighbor active-site checks.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
 Canonical free-site-rectangle routing plus positive translated boxes supplies
 the first centered positive-box board/free-line Section 7 package.
 -/
@@ -3905,6 +3949,32 @@ def l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
     L2C2CheckedStackLayerPatchData :=
   l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
     data.checkedStacks data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the first
+board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      data.checkedStacks)
+    data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the second
+board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      data.checkedStacks)
+    data.validTranslatedBoxes
 
 set_option linter.style.longLine false in
 /--

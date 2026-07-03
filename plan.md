@@ -965,6 +965,11 @@ levels through
 `FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations`, with
 origin-zero decoder/global/source wrappers projecting to those proof-facing
 Section 7 surfaces.
+On the scaffold side,
+`l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData`
+now converts checked origin-zero stacks plus valid translated finite boxes
+directly into the preferred board/free-line translated-box package; the final
+checked-stack/valid-translated-box wrapper exposes this projection.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
