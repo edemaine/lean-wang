@@ -1106,6 +1106,13 @@ It uses the existing
 so the scaffold side needs canonical Robinson-board routing and translated
 positive-radius active-corner indexed boxes, not the stronger product-witness
 routing field.
+The still more Section-7-shaped sibling
+`FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+is now exposed too.  It uses
+`NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations`, whose
+routing field is the selected free/free site rectangle; this should be the
+natural public target for the obstruction/free-line scaffold argument before
+forgetting back to ordinary canonical routing.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

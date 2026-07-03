@@ -222,6 +222,12 @@ uses the existing
 scaffold side only has to supply canonical Robinson-board routing and
 translated positive-radius active-corner indexed boxes for the concrete L2C2
 Nat-site data.
+The more Section-7-shaped sibling
+`FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
+uses
+`NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations`, where
+the routing field is the selected free/free site rectangle rather than the
+generic canonical routing package.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
