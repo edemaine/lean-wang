@@ -539,32 +539,29 @@ Next implementation targets:
    `FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations`.
    These all route through `L2C1CheckedStackLayerPatchData` and avoid the
    refuted Figure 16 level-data interface.
-7. Replace the current Figure 16 finite-data bridge before using it for the
-   concrete scaffold proof:
-   `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
-   / `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`.
-   These wrappers currently replace the abstract layer-patch input by
-   `Figure18CanonicalCheckedRecognizedCompatibleLevelData`, while retaining
-   the checked origin-zero stack and source-side obligation.  The direct
-   finite-data interface is too strong as stated: the checked source-stack
-   compatibility is phrased in terms of adjacent Figure 16 substitution-block
-   boundaries; the audited Figure 13 black layer has no horizontally or
-   vertically matching adjacent `phi_L3` block boundaries at all, formalized by
-   `blackBlockAtSite_no_hBoundary` and `blackBlockAtSite_no_vBoundary` in
+7. Do not use the old Figure 16 compatible-level bridge as a final theorem
+   route.  The direct finite-data interface is too strong as stated: the
+   checked source-stack compatibility is phrased in terms of adjacent Figure 16
+   substitution-block boundaries; the audited Figure 13 black layer has no
+   horizontally or vertically matching adjacent `phi_L3` block boundaries at
+   all, formalized by `blackBlockAtSite_no_hBoundary` and
+   `blackBlockAtSite_no_vBoundary` in
    `LeanWang.OllingerRobinsonFigure13Obstructions`.  The all-level assumption
    is now formally refuted by
    `not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData`, using the
    level-0 contradiction
    `not_canonicalCheckedFigure16RecognizedCompatibleLevelData_zero`.
-   Therefore the next scaffold step should replace or weaken this finite-data
-   bridge so recognized macro-square compatibility is routed through the
-   Section 7 free-line geometry, not through adjacent black-layer source-stack
-   block boundaries.
-   The corresponding decoder-step construction packages
-   `FinalDecoderStepConstructionObligations`,
-   `FinalCheckedDecoderStepConstructionObligations`, and
-   `FinalSection7PositiveBoxDecoderStepConstructionObligations` expose the
-   intermediate source-facing theorem surface: their source obligation is
+   `LeanWang.Final` no longer exports theorem wrappers whose scaffold input is
+   a compatible Figure 16 macro-square or level-check assumption; the final
+   theorem surfaces route through `L2C1RobinsonSection7BoardFreeLineLayerPatchData`
+   or the concrete `L2C1CheckedStackLayerPatchData` package instead.  Lower-level
+   compatible-level definitions may remain as diagnostics, but the concrete
+   scaffold proof should route recognized macro-square compatibility through
+   Section 7 free-line geometry and active-corner layer patches, not through
+   adjacent black-layer source-stack block boundaries.
+   The corresponding decoder-step construction package
+   `FinalSection7PositiveBoxDecoderStepConstructionObligations` exposes the
+   intermediate source-facing theorem surface: its source obligation is
    `SourcePositionCodeDecoderStepPrimrec`, primitive recursiveness of
    `sourcePositionCodeDecoderStep`, rather than the stronger
    `SourcePositionCodeInteriorRowsPrimrec`.
