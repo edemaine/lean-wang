@@ -120,6 +120,22 @@ structure FinalCheckedStackLayerPatchConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+/--
+Finite-scaffold-facing checked-stack/layer-patch route with generated one-row
+position-code rows.
+-/
+structure FinalCheckedStackLayerPatchOneRowsConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+/--
+Finite-scaffold-facing checked-stack/layer-patch route with generated
+bounded-interior position-code rows.
+-/
+structure FinalCheckedStackLayerPatchBoundedRowsConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
 set_option linter.style.longLine false in
 /--
 Finite-scaffold construction route one step below layer patches.
@@ -132,6 +148,26 @@ candidate.
 structure FinalCheckedStackValidTranslatedBoxConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/valid-translated-box route with generated one-row
+position-code rows.
+-/
+structure FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/valid-translated-box route with generated bounded-interior
+position-code rows.
+-/
+structure FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -4798,6 +4834,96 @@ def toFinalReductionInputs
 
 end FinalCheckedStackLayerPatchConstructionObligations
 
+namespace FinalCheckedStackLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/layer-patch one-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/layer-patch one-row package to the source-specialized
+label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/layer-patch one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    h.scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows)
+
+end FinalCheckedStackLayerPatchOneRowsConstructionObligations
+
+namespace FinalCheckedStackLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/layer-patch bounded-row package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/layer-patch bounded-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/layer-patch bounded-row package to the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/layer-patch bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    h.scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows)
+
+end FinalCheckedStackLayerPatchBoundedRowsConstructionObligations
+
 namespace FinalCheckedStackValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -4849,6 +4975,150 @@ def toFinalReductionInputs
     h.sourceRows
 
 end FinalCheckedStackValidTranslatedBoxConstructionObligations
+
+namespace FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/valid-translated-box one-row package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the proof-facing Section 7
+translated-box one-row package.
+-/
+def toSection7TranslatedBoxOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalSection7TranslatedBoxOneRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+one-row package used by the current final route.
+-/
+def toCheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero translated-box
+one-row package.
+-/
+def toOriginZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/valid-translated-box one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows)
+
+end FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations
+
+namespace FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/valid-translated-box bounded-row package to the
+one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the checked-stack/valid-translated-box bounded-row package to the
+interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the proof-facing Section 7
+translated-box bounded-row package.
+-/
+def toSection7TranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalSection7TranslatedBoxBoundedRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+bounded-row package used by the current final route.
+-/
+def toCheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalCheckedStackLayerPatchBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the origin-zero translated-box
+bounded-row package.
+-/
+def toOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/valid-translated-box bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows)
+
+end FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
 
 namespace FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
 
@@ -11289,6 +11559,46 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchConstructionObligati
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from checked origin-zero stacks, valid
 translated scaffold boxes, and generated interior position-code rows.
 -/
@@ -11305,6 +11615,46 @@ scaffold boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxConstructionObligations
     (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 
@@ -14838,6 +15188,66 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchData
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+        sourceRows))
 
 set_option linter.style.longLine false in
 /--
