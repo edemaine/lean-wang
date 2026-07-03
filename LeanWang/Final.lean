@@ -891,6 +891,69 @@ structure FinalFigure13NatSitesIndexedWindowConstructionObligations where
 
 set_option linter.style.longLine false in
 /--
+Concrete nat-site indexed-window scaffold route with the generated
+position-code decoder step as the source-side primitive-recursion target.
+-/
+structure FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  indexedActiveWindows :
+    OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  realizes :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete nat-site indexed-window scaffold route with the global position-code
+label-index source target.
+-/
+structure FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  indexedActiveWindows :
+    OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  realizes :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete nat-site indexed-window scaffold route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations where
+  activeSiteSpecs : List (Nat × Quadrant)
+  activeSiteSpecs_valid :
+    OllingerRobinson.Figure18Site.natSpecsValidBool activeSiteSpecs = true
+  cornerIndex : Nat
+  cornerQuadrant : Quadrant
+  cornerIndex_valid : decide (cornerIndex < 92) = true
+  indexedActiveWindows :
+    OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+      (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+        cornerIndex cornerQuadrant cornerIndex_valid).table.toRoleTable
+  realizes :
+    (figure18ScaffoldDataOfNatSites activeSiteSpecs activeSiteSpecs_valid
+      cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete Robinson indexed-box scaffold route.
 
 This packages the current Figure 13/Figure 16 scaffold target directly: the
@@ -8754,6 +8817,90 @@ theorem domino_problem_undecidable
 
 end FinalFigure13NatSitesIndexedWindowConstructionObligations
 
+namespace FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete nat-site indexed-window scaffold package and
+the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete nat-site indexed-window scaffold package
+and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_decoderStepCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.decoderStep
+
+end FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations
+
+namespace FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete nat-site indexed-window scaffold package and
+the global position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete nat-site indexed-window scaffold package
+and the global position-code label-index source target.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_globalCodeCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.labelIndex
+
+end FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+
+namespace FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete nat-site indexed-window scaffold package and
+the source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete nat-site indexed-window scaffold package
+and the source-specialized position-code label-index source target.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_nat_sites_indexed_windows_sourceCodeCorrect
+    h.activeSiteSpecs h.activeSiteSpecs_valid h.cornerIndex h.cornerQuadrant
+    h.cornerIndex_valid h.indexedActiveWindows h.realizes h.labelIndex
+
+end FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations
+
 namespace FinalFigure13RobinsonIndexedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -13548,6 +13695,72 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowConstructionObligations
     (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete human-audited Figure 13
+layer table, indexed active/corner windows, realization, and the generated
+position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13NatSitesIndexedWindowDecoderStepConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete human-audited Figure 13 layer
+table, indexed active/corner windows, realization, and the generated
+position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowDecoderStepConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete human-audited Figure 13
+layer table, indexed active/corner windows, realization, and the global
+position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete human-audited Figure 13 layer
+table, indexed active/corner windows, realization, and the global position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete human-audited Figure 13
+layer table, indexed active/corner windows, realization, and the
+source-specialized position-code label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete human-audited Figure 13 layer
+table, indexed active/corner windows, realization, and the source-specialized
+position-code label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations
+    (h : FinalFigure13NatSitesIndexedWindowSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
