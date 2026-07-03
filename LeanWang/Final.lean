@@ -5610,6 +5610,90 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTi
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and the generated
+position-code decoder step.
+
+The compatible Figure 16 checks generate the compatible Figure 18 scaffold
+tiling used by the lower-level scaffold-plane route.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep
+    canonicalActiveCorner
+    (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+      compatibleLevelChecks)
+    decoderStep
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and the generated
+position-code decoder step.
+
+The compatible Figure 16 checks generate the compatible Figure 18 scaffold
+tiling used by the lower-level scaffold-plane route.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneDecoderStep
+    canonicalActiveCorner
+    (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+      compatibleLevelChecks)
+    decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and the global
+position-code label-index source target.
+
+The compatible Figure 16 checks generate the compatible Figure 18 scaffold
+tiling used by the lower-level scaffold-plane route.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom
+    canonicalActiveCorner
+    (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+      compatibleLevelChecks)
+    labelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate canonical free-site
+recognition, finite Figure 16 compatible level checks, and the global
+position-code label-index source target.
+
+The compatible Figure 16 checks generate the compatible Figure 18 scaffold
+tiling used by the lower-level scaffold-plane route.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom
+    canonicalActiveCorner
+    (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+      compatibleLevelChecks)
+    labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the concrete human-audited Figure 13
 layer table, indexed active/corner windows, realization, and generated interior
 position-code rows.

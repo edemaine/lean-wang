@@ -1058,6 +1058,15 @@ and
 `l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom`
 now expose the existing source bridge without going through the arbitrary-slot
 interior-row target.
+The L2C2 compatible-Figure-16 final surface also has direct decoder-step and
+global-label aliases,
+`*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep` and
+`*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom`.
+They use
+`tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible`
+to derive the scaffold-plane assumption from the finite compatible Figure 16
+checks, so the public theorem surface no longer morally depends on providing a
+raw plane tiling for those generated source routes.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

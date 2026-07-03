@@ -175,6 +175,12 @@ The row-source L2C2 analogue is
 `FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations`, with
 top-level aliases ending in
 `l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows`.
+The same L2C2 compatible-Figure-16 surface now also exposes decoder-step and
+global-label aliases ending in
+`l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksDecoderStep` and
+`l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksGlobalPositionCodeLabelIndexFrom`;
+these derive the required `TilesPlane figure18ScaffoldTiles` internally from
+the compatible Figure 16 checks.
 The same second-candidate canonical-free-site route is also exposed with a
 direct scaffold-plane input as
 `FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations`
