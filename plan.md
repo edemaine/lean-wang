@@ -905,7 +905,14 @@ also exposes this intermediate target directly:
 `l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16` derive valid
 translated scaffold boxes from compatible checked macro-squares, and the
 checked-stack/origin-zero-window constructors package those boxes before
-passing through the existing finite no-neighbor active-site checks.
+passing through the existing finite no-neighbor active-site checks.  The public
+final module now also exposes the corresponding second-candidate checked-stack
+and checked-stack/valid-translated-box routes via
+`FinalL2C2CheckedStackLayerPatchConstructionObligations` and
+`FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations`; the default
+`FinalReductionInputs` route remains the first-candidate theorem surface, but
+both audited scaffold candidates can now be driven from the same generated
+interior-row source target.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
