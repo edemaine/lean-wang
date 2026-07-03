@@ -262,6 +262,11 @@ The L2C2 origin-zero sibling
 is lower still: origin-zero active/corner windows imply that free-site
 rectangle routing, while the translated positive boxes supply the backward
 scaffold realization.
+The L2C2 canonical-free-site scaffold-plane route now projects to this
+origin-zero translated-positive-box surface using
+`TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`;
+its row-source, decoder-step, global-label, and source-label endpoints use the
+origin-zero translated-obligation reduction route directly.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

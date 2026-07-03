@@ -6274,15 +6274,78 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteAndCompatibleFig16Lev
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical free-site recognition plus a plane tiling of the
+compatible Figure 18 scaffold tiles instantiate the origin-zero
+translated-positive-box scaffold surface.
+-/
+def finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (scaffoldPlane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    scaffoldPlane
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate scaffold-plane row-source final package to the
+origin-zero translated-positive-box source-label surface.
+-/
+def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteRows
+    (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate scaffold-plane global-label final package to the
+origin-zero translated-positive-box source-label surface.
+-/
+def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteGlobal
+    (h :
+      FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate scaffold-plane source-label final package to the
+origin-zero translated-positive-box source-label surface.
+-/
+def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteSource
+    (h :
+      FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the second-candidate canonical
 free-site/scaffold-plane row-source final package.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
-    h.canonicalActiveCorner h.scaffoldPlane
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       h.sourceRows)
 
 set_option linter.style.longLine false in
@@ -6293,9 +6356,10 @@ free-site/scaffold-plane row-source final package.
 theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
-    h.canonicalActiveCorner h.scaffoldPlane
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
       h.sourceRows)
 
 set_option linter.style.longLine false in
@@ -6306,8 +6370,9 @@ free-site/scaffold-plane decoder-step final package.
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_position_source
-    h.canonicalActiveCorner h.scaffoldPlane
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
@@ -6319,8 +6384,9 @@ free-site/scaffold-plane decoder-step final package.
 theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_position_source
-    h.canonicalActiveCorner h.scaffoldPlane
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
@@ -6332,10 +6398,11 @@ free-site/scaffold-plane global-label final package.
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
-    { canonicalActiveCorner := h.canonicalActiveCorner
-      scaffoldPlane := h.scaffoldPlane
-      decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex }
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
@@ -6345,10 +6412,11 @@ free-site/scaffold-plane global-label final package.
 theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
-    { canonicalActiveCorner := h.canonicalActiveCorner
-      scaffoldPlane := h.scaffoldPlane
-      decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex }
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
@@ -6358,8 +6426,11 @@ free-site/scaffold-plane source-label final package.
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
-    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
@@ -6369,8 +6440,11 @@ free-site/scaffold-plane source-label final package.
 theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
-    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
+    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane)
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
