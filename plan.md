@@ -1032,6 +1032,11 @@ and its L2C2/unencoded analogues.  These theorems take exactly the three live
 assumptions for this route: canonical free-site active/corner recognition,
 finite compatible Figure 16 level checks, and
 `SourcePositionCodeLabelIndexFromPrimrec`.
+`LeanWang.Final` now exposes the same preferred source-label package for the
+second audited candidate as
+`FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`,
+with top-level aliases under
+`*_l2c2CanonicalFreeSiteAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom`.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

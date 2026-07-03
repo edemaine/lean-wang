@@ -169,7 +169,9 @@ global-label, and source-label variants are exposed under the same
 `canonicalFreeSiteAndCompatibleFig16LevelChecks*` naming.  The reduction layer
 also exposes the exact source-label endpoints
 `encoded_domino_problem_undecidable_l2c1_canonical_free_site_compatible_fig16_sourceCodeCorrect`
-and the L2C2/unencoded analogues.  The row-major
+and the L2C2/unencoded analogues; the L2C2 source-label final surface is
+`FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations`.
+The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
 `not_figure18CanonicalCheckedRecognizedCompatibleLevelData`; final routes
