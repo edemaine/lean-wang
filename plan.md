@@ -1452,6 +1452,16 @@ conditions have been narrowed to two proof-facing fronts:
    the intermediate checked-stack package while still landing on the preferred
    layer-patch endpoint.
 
+   The L2C2 decoded-window/layer-patch endpoint is now exposed as its own
+   public Figure 13 obligation family:
+   `FinalFigure13L2C2CombinedWindowLayerPatch*ConstructionObligations`.
+   These packages take the decoded combined active/corner windows and finite
+   active-corner layer patches directly, then project to the origin-zero
+   window/layer-patch final inputs.  This keeps the scaffold-facing theorem
+   surface aligned with the current finite Figure 16 work without requiring
+   valid translated boxes or positive isolated boxes as intermediate public
+   hypotheses.
+
    The remaining first-candidate and L2C2 Figure 16 compatible final-package
    structures are now explicitly proved uninhabited in `LeanWang.Final`, via
    the refutations of `Figure18CanonicalCheckedRecognizedCompatibleMacroSquares`

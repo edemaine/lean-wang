@@ -2010,6 +2010,83 @@ structure FinalFigure13L2C2CombinedWindowIsolatedBoxGlobalPositionCodeConstructi
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with
+generated interior position-code rows.
+
+This is the finite-patch scaffold surface closest to the current Figure 16
+target: decoded origin-zero active/corner windows supply the indexed origin-zero
+windows, while the finite active-corner layer patches supply the Section 7
+realization side directly.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with
+generated one-row position-code rows.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with
+generated bounded-interior position-code rows.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with the
+source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with the
+generated position-code decoder step.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with the
+global position-code label-index target.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete valid translated L2C2 box data.
 
 This is the mechanical finite-check form of the positive-box side of the
@@ -2632,6 +2709,406 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+/--
+Build the second-candidate Section 7 layer-patch scaffold data from decoded
+combined origin-zero active/corner windows and finite active-corner layer
+patches.
+-/
+def finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    (windows : TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+      windows)
+    patches
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/layer-patch source-label package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the source-label target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the source-specialized position-code
+label-index target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/layer-patch decoder-step package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the decoder-step target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+    h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/layer-patch global-label package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the global-label target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/layer-patch package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/layer-patch package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the interior-row target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/layer-patch package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/layer-patch package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/layer-patch package to the second candidate
+Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the one-row target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/layer-patch package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/layer-patch package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/layer-patch package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/layer-patch package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -17777,6 +18254,146 @@ bounded-interior position-code rows.
 theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and the source-specialized position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and the generated position-code
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and the generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and the global position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and the global position-code label-index
+target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and generated one-row
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
