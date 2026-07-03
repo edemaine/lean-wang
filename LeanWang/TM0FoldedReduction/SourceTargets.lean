@@ -333,6 +333,30 @@ theorem sourcePositionCodeDecoderStepPrimrec_iff_sourcePositionCodeLabelIndexFro
   ⟨sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep,
     sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFrom⟩
 
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, primitive
+recursiveness of one-row-at-index decoding and of the source-specialized
+label-index decoder are equivalent.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec :
+    SourcePositionCodeOneRowsAtIndexPrimrec ↔
+      SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeOneRowsAtIndexPrimrec_iff_decoderStepPrimrec.trans
+    sourcePositionCodeDecoderStepPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, primitive
+recursiveness of bounded-interior at-index decoding and of the
+source-specialized label-index decoder are equivalent.
+-/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec ↔
+      SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.symm.trans
+    sourcePositionCodeOneRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec
+
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
