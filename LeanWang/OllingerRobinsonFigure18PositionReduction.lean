@@ -2529,6 +2529,82 @@ theorem
       data
       (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from checked origin-zero stacks, checked
+compatible Figure 16 level data for the first audited L2-blank candidate, and
+the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_stacks_compatible_fig16_level_data_sourceCodeCorrect
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
+      (l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+        hchecked hlevel)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from checked origin-zero stacks, checked
+compatible Figure 16 level data for the first audited L2-blank candidate, and
+the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_stacks_compatible_fig16_level_data_sourceCodeCorrect
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect
+      (l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+        hchecked hlevel)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from checked origin-zero stacks, checked
+compatible Figure 16 level data for the second audited L2-blank candidate, and
+the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stacks_compatible_fig16_level_data_sourceCodeCorrect
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+      (l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+        hchecked hlevel)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from checked origin-zero stacks, checked
+compatible Figure 16 level data for the second audited L2-blank candidate, and
+the source-specialized position-code label-index decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stacks_compatible_fig16_level_data_sourceCodeCorrect
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+      (l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+        hchecked hlevel)
+      hindex
+
 /--
 Encoded domino undecidability from the first finite-check-facing Section 7
 board/free-line layer-patch package and the packaged generated interior
