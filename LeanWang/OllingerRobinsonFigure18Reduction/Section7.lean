@@ -6007,6 +6007,126 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
     (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
       originZeroWindows boardLevelChecks)
 
+/--
+The first checked-stack/layer-patch finite scaffold package supplies the
+Nat-site Section 7 layer-patch obligation surface directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData data)
+
+/--
+The second checked-stack/layer-patch finite scaffold package supplies the
+Nat-site Section 7 layer-patch obligation surface directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData data)
+
+/--
+The first checked signal-tower board package is enough to instantiate the
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfCheckedBoardData data)
+
+/--
+The second checked signal-tower board package is enough to instantiate the
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfCheckedBoardData data)
+
+/--
+Origin-zero windows plus row-major checked board levels instantiate the first
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus row-major checked board levels instantiate the second
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus checked board-level finite checks instantiate the first
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+/--
+Origin-zero windows plus checked board-level finite checks instantiate the second
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
 open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
 
 /--
