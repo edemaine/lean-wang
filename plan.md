@@ -1382,21 +1382,18 @@ conditions have been narrowed to two proof-facing fronts:
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now
-   `FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations`
+   `FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations`
    (or its row-source variant).  This asks for Robinson Section 7
-   board/free-line active/corner recognition and tileable boxes of the shared
-   Figure 18 scaffold tiles.  Board/free-line active/corner recognition implies
-   canonical free-site active/corner recognition, which then implies the
-   decoded origin-zero active/corner windows used by
-   `FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations`.
-   Tileable Figure 18 scaffold boxes imply valid translated boxes for the
-   audited L2C2 Figure 13 data; valid translated boxes imply the positive
-   translated isolated active-corner box invariant used by
-   `FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations`;
-   the subsequent projection to
-   `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
-   then supplies the finite generated pair-compatibility check and existing
-   translated-positive-box endpoint.  The older
+   board/free-line active/corner recognition and finite active-corner layer
+   patches for the audited L2C2 Figure 13 scaffold.  The board/free-line
+   hypothesis supplies compatible routed free grids, while the layer patches
+   supply the active-corner realization; together they project to
+   `FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations`.
+   The neighboring tileable-box route remains available as
+   `FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations`:
+   tileable Figure 18 scaffold boxes imply valid translated boxes for L2C2,
+   and board/free-line active/corner recognition implies the canonical
+   active/corner recognition used by the valid-box endpoint.  The older
    `FinalL2C2CheckedStackValidTranslatedBox*` wrappers now pass through this
    canonical-active-corner/valid-box surface: checked stacks provide canonical
    active/corner recognition directly, while their existing valid-box field is
