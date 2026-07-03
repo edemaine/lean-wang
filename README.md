@@ -140,6 +140,14 @@ source-specialized label-index bridge before constructing
 `domino_problem_undecidable_of_checkedStackLayerPatchData`, which build the
 Section 7 scaffold input from the concrete finite transcription target
 `TM0FoldedReduction.L2C1CheckedStackLayerPatchData`.
+The generated-position theorem layer also exposes the matching direct
+source-specialized checked-stack/layer-patch aliases
+`TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect`
+and
+`TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCorrect`,
+so this route no longer needs to detour through the global-label or
+decoder-step theorem names when the available source proof is already
+`SourcePositionCodeLabelIndexFromPrimrec`.
 For the same route with the scaffold obligations split, it exposes
 `encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches` and
 `domino_problem_undecidable_of_checkedStacksAndLayerPatches`, whose scaffold
