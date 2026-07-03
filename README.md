@@ -132,6 +132,12 @@ For the same route with the scaffold obligations split, it exposes
 `domino_problem_undecidable_of_checkedStacksAndLayerPatches`, whose scaffold
 arguments are exactly `TM0FoldedReduction.L2C1OriginZeroCheckedStacks` and
 `TM0FoldedReduction.L2C1ActiveCornerLayerPatches`.
+The lower valid-translated-box target also has decoder-step, global-label, and
+source-label final packages:
+`FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations`,
+`FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
+and
+`FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
 The more finite Figure 16 route is exposed as
 `encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`
 and `domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelData`;

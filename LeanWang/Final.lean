@@ -125,6 +125,36 @@ structure FinalCheckedStackValidTranslatedBoxConstructionObligations : Prop wher
 
 set_option linter.style.longLine false in
 /--
+Finite checked-stack/valid-translated-box route with the narrower generated
+decoder-step source target.
+-/
+structure FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/valid-translated-box route with the global position-code
+label-index source target.
+-/
+structure FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Finite checked-stack/valid-translated-box route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite Figure 16 compatible macro-square route for the first audited L2
 candidate.
 
@@ -1187,6 +1217,121 @@ def toFinalReductionInputs
   h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
 
 end FinalCheckedStackValidTranslatedBoxConstructionObligations
+
+namespace FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the proof-facing Section 7
+translated-box decoder-step package.
+-/
+def toSection7TranslatedBoxDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalSection7TranslatedBoxDecoderStepConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+decoder-step package.
+-/
+def toCheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
+/-- Convert the checked-stack/valid-translated-box decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    h.decoderStep
+
+end FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+
+namespace FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the valid-translated-box decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+global-label package.
+-/
+def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+/-- Convert the checked-stack/valid-translated-box global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    h.labelIndex
+
+end FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the valid-translated-box decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+source-label package.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+/-- Convert the checked-stack/valid-translated-box source-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold)
+    h.labelIndex
+
+end FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
 namespace FinalFigure16CompatibleConstructionObligations
 
@@ -3092,6 +3237,72 @@ scaffold boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxConstructionObligations
     (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and the primitive recursive generated position-code
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and the primitive recursive generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and the global primitive recursive position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and the global primitive recursive position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and the source-specialized primitive recursive
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and the source-specialized primitive recursive position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 

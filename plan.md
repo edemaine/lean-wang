@@ -897,7 +897,13 @@ checks turn those valid translated boxes into active-corner layer patches via
 `l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData`.  The final
 module exposes the first-candidate route as
 `FinalCheckedStackValidTranslatedBoxConstructionObligations`, with encoded and
-unencoded endpoint theorems.  This gives the concrete scaffold work a
+unencoded endpoint theorems, and now also has decoder-step, global-label, and
+source-label variants
+`FinalCheckedStackValidTranslatedBoxDecoderStepConstructionObligations`,
+`FinalCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations`,
+and
+`FinalCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations`.
+This gives the concrete scaffold work a
 lower-level target than `L2C1ActiveCornerLayerPatches` without falling back to
 the refuted raw Figure 13 box assumptions.  The compatible Figure 16 route now
 also exposes this intermediate target directly:
