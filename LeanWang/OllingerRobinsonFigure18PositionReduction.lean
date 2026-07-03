@@ -1325,6 +1325,40 @@ theorem
       data
       (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first finite-check-facing Section 7
+board/free-line layer-patch package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
 /--
 Encoded domino undecidability from the second finite-check-facing Section 7
 board/free-line layer-patch package and the source-specialized position-code
@@ -1421,6 +1455,40 @@ theorem
       data
       (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second finite-check-facing Section 7
+board/free-line layer-patch package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
 /--
 Encoded domino undecidability from the first paper-facing Section 7
 board/free-line positive-box package and the source-specialized position-code
@@ -1453,6 +1521,40 @@ theorem
       data
       (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first paper-facing Section 7
+board/free-line positive-box package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
 /--
 Encoded domino undecidability from the second paper-facing Section 7
 board/free-line positive-box package and the source-specialized position-code
@@ -1484,6 +1586,40 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_positive_box_data_position_source
       data
       (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second paper-facing Section 7
+board/free-line positive-box package and bounded-interior generated
+position-code rows at concrete numeric label slots, with `positionProgramData`
+semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_positive_box_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
 
 set_option linter.style.longLine false in
 /--
