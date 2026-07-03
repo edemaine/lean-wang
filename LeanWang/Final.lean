@@ -1085,27 +1085,31 @@ structure FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionO
 
 set_option linter.style.longLine false in
 /--
-Checked origin-zero stacks provide the decoded origin-zero active/corner
-windows used by the current L2C2 scaffold surface.
+Concrete second-candidate Figure 13 canonical-active-corner/valid-box route
+with generated interior position-code rows.
+
+This is one geometric step below the decoded-window surface: the Section 7
+argument supplies canonical free-site active/corner recognition, which then
+gives decoded origin-zero active/corner windows.
 -/
-def finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
-    (hchecked : TM0FoldedReduction.L2C2OriginZeroCheckedStacks) :
-    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows :=
-  TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
-    (TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks hchecked)
+structure FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations :
+    Prop where
+  canonicalActiveCorner :
+    TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 set_option linter.style.longLine false in
 /--
-Valid translated L2C2 boxes provide the isolated-box invariant used by the
-current scaffold surface.
+Concrete second-candidate Figure 13 canonical-active-corner/valid-box route
+with the source-specialized position-code label-index target.
 -/
-def finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfCheckedStackValidTranslatedBoxData
-    (data : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData) :
-    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
-      l2Component2Figure18ScaffoldData := by
-  simpa [l2Component2Figure18ScaffoldData] using
-    l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
-      data.validTranslatedBoxes
+structure FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner :
+    TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -1374,6 +1378,139 @@ theorem domino_problem_undecidable
   h.toCombinedWindowIsolatedBoxConstructionObligations.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/valid-box package to the decoded-window
+valid-box package.
+-/
+def toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows :=
+    TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/valid-box package to the decoded-window
+isolated-box package.
+-/
+def toCombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations :=
+  h.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    |>.toCombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/valid-box package to the existing
+origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site active/corner recognition, valid
+translated boxes, and the source-specialized position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site active/corner recognition, valid
+translated boxes, and the source-specialized position-code label-index target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/valid-box package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/valid-box package to the
+decoded-window valid-box package.
+-/
+def toCombinedWindowValidBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations where
+  combinedActiveCornerWindows :=
+    TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      h.canonicalActiveCorner
+  validTranslatedBoxes := h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/valid-box package to the
+existing origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toCombinedWindowValidBoxConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site active/corner recognition, valid
+translated boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowValidBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site active/corner recognition, valid
+translated boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowValidBoxConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
 set_option linter.style.longLine true
 
 /--
@@ -4243,16 +4380,28 @@ def toCheckedStackLayerPatchConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box row-source data to
-the decoded-window/valid-box final surface.
+the canonical-active-corner/valid-box final surface.
 -/
-def toFigure13L2C2CombinedWindowValidBoxConstructionObligations
+def toFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
-    FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations where
-  combinedActiveCornerWindows :=
-    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
       h.scaffold.checkedStacks
   validTranslatedBoxes := h.scaffold.validTranslatedBoxes
   sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box row-source data to
+the decoded-window/valid-box final surface through canonical active/corner
+recognition.
+-/
+def toFigure13L2C2CombinedWindowValidBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations :=
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
+    |>.toCombinedWindowValidBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4269,12 +4418,12 @@ set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box row-source data to
 the origin-zero/translated-positive-box source-label final surface through the
-decoded-window/valid-box route.
+canonical-active-corner/valid-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
-  h.toFigure13L2C2CombinedWindowValidBoxConstructionObligations
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -4319,18 +4468,30 @@ def toCheckedStackLayerPatchDecoderStepConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box decoder-step data
-to the decoded-window/valid-box source-label final surface.
+to the canonical-active-corner/valid-box source-label final surface.
 -/
-def toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
-    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
-  combinedActiveCornerWindows :=
-    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
       h.scaffold.checkedStacks
   validTranslatedBoxes := h.scaffold.validTranslatedBoxes
   labelIndex :=
     TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
       h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box decoder-step data
+to the decoded-window/valid-box source-label final surface through canonical
+active/corner recognition.
+-/
+def toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4348,12 +4509,12 @@ set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box decoder-step data
 to the origin-zero/translated-positive-box source-label final surface through
-the decoded-window/valid-box route.
+the canonical-active-corner/valid-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
-  h.toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -4414,17 +4575,30 @@ def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box global-label data
-to the decoded-window/valid-box source-label final surface.
+to the canonical-active-corner/valid-box source-label final surface.
+-/
+def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes := h.scaffold.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-label data
+to the decoded-window/valid-box source-label final surface through canonical
+active/corner recognition.
 -/
 def toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
-    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
-  combinedActiveCornerWindows :=
-    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
-      h.scaffold.checkedStacks
-  validTranslatedBoxes := h.scaffold.validTranslatedBoxes
-  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4443,12 +4617,12 @@ set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box global-label data
 to the origin-zero/translated-positive-box source-label final surface through
-the decoded-window/valid-box route.
+the canonical-active-corner/valid-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
-  h.toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -4501,17 +4675,30 @@ def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box data to the
-decoded-window/valid-box source-label final surface.
+canonical-active-corner/valid-box source-label final surface.
+-/
+def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes := h.scaffold.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box data to the
+decoded-window/valid-box source-label final surface through canonical
+active/corner recognition.
 -/
 def toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
-    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
-  combinedActiveCornerWindows :=
-    finalFigure13L2C2CombinedActiveCornerWindowsOfCheckedStacks
-      h.scaffold.checkedStacks
-  validTranslatedBoxes := h.scaffold.validTranslatedBoxes
-  labelIndex := h.labelIndex
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations :=
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -4529,12 +4716,12 @@ set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box data to the
 origin-zero/translated-positive-box final surface through the
-decoded-window/valid-box route.
+canonical-active-corner/valid-box route.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
-  h.toFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+  h.toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -8216,6 +8403,50 @@ target.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, valid translated boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+valid translated boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, valid translated boxes, and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+valid translated boxes, and the source-specialized position-code label-index
+target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
