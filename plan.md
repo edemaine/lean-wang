@@ -1399,6 +1399,11 @@ conditions have been narrowed to two proof-facing fronts:
    active/corner recognition directly, while their existing valid-box field is
    already above the tileable-box target.
 
+   The tileable-box route now also projects back to the board/free-line
+   layer-patch frontier, for both source-label and row-source wrappers.  This
+   keeps the finite tileable-box diagnostic path connected to the same
+   Section 7 layer-patch endpoint as the decoded-window/valid-box path.
+
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
 the raw Figure 13 plane/box routes, and

@@ -1807,6 +1807,19 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the canonical-active-corner/tileable-box package to the
+board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations :=
+  h.toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    |>.toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from canonical free-site active/corner recognition, tileable
 Figure 18 scaffold boxes, and the source-specialized position-code label-index
 target.
@@ -1877,6 +1890,19 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the row-source canonical-active-corner/tileable-box package to the
+row-source board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  h.toCanonicalActiveCornerValidBoxConstructionObligations
+    |>.toCombinedWindowValidBoxConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxConstructionObligations
+    |>.toBoardFreeLineLayerPatchConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from canonical free-site active/corner recognition, tileable
 Figure 18 scaffold boxes, and generated interior position-code rows.
 -/
@@ -1939,6 +1965,18 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
   h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the board/free-line-active-corner/tileable-box package to the
+board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations :=
+  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    |>.toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -2009,6 +2047,17 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
   h.toCanonicalActiveCornerTileableBoxConstructionObligations
     |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source board/free-line-active-corner/tileable-box package to
+the row-source board/free-line/layer-patch package.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  h.toCanonicalActiveCornerTileableBoxConstructionObligations
+    |>.toBoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
