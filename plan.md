@@ -1391,10 +1391,15 @@ conditions have been narrowed to two proof-facing fronts:
    `TM0Route` now also exposes relabeling equalities for TM1 support lists:
    `tm1StmtSupportList_relabel`, `tm2to1TrNormal_relabel`,
    `partrecStartedTM1Machine_relabel`, and
-   `partrecStartedTM1Machine_supportList_relabel`.  These isolate the next
-   source-side bridge: prove injectivity/disjointness for the raw
-   `partrecTM1LabelList` support lists, then transport it through the
-   code-specific started-label wrapper.
+   `partrecStartedTM1Machine_supportList_relabel`.  The wrapper transport is
+   now exposed through `SourceTM1StatementSupportNodup`,
+   `SourceTM1StatementSupportPairwiseDisjoint`,
+   `sourceStartedTM1StatementSupportNodup_of_raw`,
+   `sourceStartedTM1StatementSupportPairwiseDisjoint_of_raw`, and
+   `sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint`.
+   The remaining source-side list gap is therefore the raw
+   `partrecTM1LabelList` duplicate-free local support and pairwise-disjoint
+   support proof.
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now

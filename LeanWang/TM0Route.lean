@@ -89,6 +89,27 @@ theorem relabelTM2Stmt_comp {K : Type u} {Γ : K → Type v}
   | Turing.TM2.Stmt.halt => by
       simp [relabelTM2Stmt]
 
+theorem relabelTM2Stmt_leftInverse {K : Type u} {Γ : K → Type v}
+    {Λ : Type w} {Λ' : Type x} {σ : Type y}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.LeftInverse
+      (relabelTM2Stmt (K := K) (Γ := Γ) (σ := σ) g)
+      (relabelTM2Stmt f) := by
+  intro stmt
+  rw [relabelTM2Stmt_comp]
+  have hcomp : g ∘ f = id := by
+    funext q
+    exact hgf q
+  rw [hcomp]
+  exact relabelTM2Stmt_id stmt
+
+theorem relabelTM2Stmt_injective {K : Type u} {Γ : K → Type v}
+    {Λ : Type w} {Λ' : Type x} {σ : Type y}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.Injective
+      (relabelTM2Stmt (K := K) (Γ := Γ) (σ := σ) f) :=
+  (relabelTM2Stmt_leftInverse (K := K) (Γ := Γ) (σ := σ) hgf).injective
+
 /-- Relabel a TM2 configuration. -/
 def relabelTM2Cfg {K : Type u} {Γ : K → Type v} {Λ : Type w} {Λ' : Type x}
     {σ : Type y} (f : Λ → Λ') :
@@ -4445,6 +4466,29 @@ def relabelTM2to1Label {Λ Λ' : Type}
   | Turing.TM2to1.Λ'.ret q =>
       Turing.TM2to1.Λ'.ret (relabelTM2Stmt f q)
 
+theorem relabelTM2to1Label_leftInverse {Λ Λ' : Type}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.LeftInverse
+      (relabelTM2to1Label g)
+      (relabelTM2to1Label f) := by
+  intro q
+  cases q with
+  | normal q =>
+      exact congrArg Turing.TM2to1.Λ'.normal (hgf q)
+  | go k s q =>
+      exact congrArg (fun q' => Turing.TM2to1.Λ'.go k s q')
+        (relabelTM2Stmt_leftInverse
+          (K := PartrecStack) (Γ := PartrecStackSymbol) (σ := PartrecVar) hgf q)
+  | ret q =>
+      exact congrArg Turing.TM2to1.Λ'.ret
+        (relabelTM2Stmt_leftInverse
+          (K := PartrecStack) (Γ := PartrecStackSymbol) (σ := PartrecVar) hgf q)
+
+theorem relabelTM2to1Label_injective {Λ Λ' : Type}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.Injective (relabelTM2to1Label f) :=
+  (relabelTM2to1Label_leftInverse hgf).injective
+
 def relabelTM1Stmt {Γ Λ Λ' σ : Type}
     (f : Λ → Λ') : Turing.TM1.Stmt Γ Λ σ → Turing.TM1.Stmt Γ Λ' σ
   | Turing.TM1.Stmt.move d q => Turing.TM1.Stmt.move d (relabelTM1Stmt f q)
@@ -4454,6 +4498,73 @@ def relabelTM1Stmt {Γ Λ Λ' σ : Type}
       Turing.TM1.Stmt.branch p (relabelTM1Stmt f q₁) (relabelTM1Stmt f q₂)
   | Turing.TM1.Stmt.goto g => Turing.TM1.Stmt.goto fun a s => f (g a s)
   | Turing.TM1.Stmt.halt => Turing.TM1.Stmt.halt
+
+theorem relabelTM1Stmt_id {Γ Λ σ : Type} :
+    ∀ stmt : Turing.TM1.Stmt Γ Λ σ, relabelTM1Stmt id stmt = stmt
+  | Turing.TM1.Stmt.move d q => by simp [relabelTM1Stmt, relabelTM1Stmt_id q]
+  | Turing.TM1.Stmt.write g q => by simp [relabelTM1Stmt, relabelTM1Stmt_id q]
+  | Turing.TM1.Stmt.load g q => by simp [relabelTM1Stmt, relabelTM1Stmt_id q]
+  | Turing.TM1.Stmt.branch g q₁ q₂ => by
+      simp [relabelTM1Stmt, relabelTM1Stmt_id q₁, relabelTM1Stmt_id q₂]
+  | Turing.TM1.Stmt.goto g => by
+      simp [relabelTM1Stmt]
+  | Turing.TM1.Stmt.halt => by
+      simp [relabelTM1Stmt]
+
+theorem relabelTM1Stmt_comp {Γ Λ Λ' Λ'' σ : Type}
+    (f : Λ → Λ') (g : Λ' → Λ'') :
+    ∀ stmt : Turing.TM1.Stmt Γ Λ σ,
+      relabelTM1Stmt g (relabelTM1Stmt f stmt) = relabelTM1Stmt (g ∘ f) stmt
+  | Turing.TM1.Stmt.move d q => by simp [relabelTM1Stmt, relabelTM1Stmt_comp f g q]
+  | Turing.TM1.Stmt.write h q => by simp [relabelTM1Stmt, relabelTM1Stmt_comp f g q]
+  | Turing.TM1.Stmt.load h q => by simp [relabelTM1Stmt, relabelTM1Stmt_comp f g q]
+  | Turing.TM1.Stmt.branch h q₁ q₂ => by
+      simp [relabelTM1Stmt, relabelTM1Stmt_comp f g q₁, relabelTM1Stmt_comp f g q₂]
+  | Turing.TM1.Stmt.goto h => by
+      simp [relabelTM1Stmt]
+  | Turing.TM1.Stmt.halt => by
+      simp [relabelTM1Stmt]
+
+theorem relabelTM1Stmt_leftInverse {Γ Λ Λ' σ : Type}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.LeftInverse
+      (relabelTM1Stmt (Γ := Γ) (σ := σ) g)
+      (relabelTM1Stmt f) := by
+  intro stmt
+  rw [relabelTM1Stmt_comp]
+  have hcomp : g ∘ f = id := by
+    funext q
+    exact hgf q
+  rw [hcomp]
+  exact relabelTM1Stmt_id stmt
+
+theorem relabelTM1Stmt_injective {Γ Λ Λ' σ : Type}
+    {f : Λ → Λ'} {g : Λ' → Λ} (hgf : Function.LeftInverse g f) :
+    Function.Injective (relabelTM1Stmt (Γ := Γ) (σ := σ) f) :=
+  (relabelTM1Stmt_leftInverse (Γ := Γ) (σ := σ) hgf).injective
+
+theorem relabelTM2to1Label_wrap_leftInverse (tc : Turing.ToPartrec.Code) :
+    Function.LeftInverse
+      (relabelTM2to1Label (fun q : StartedLabel tc => q.val))
+      (relabelTM2to1Label (StartedLabel.wrap tc)) :=
+  relabelTM2to1Label_leftInverse
+    (f := StartedLabel.wrap tc) (g := fun q : StartedLabel tc => q.val)
+    (by intro q; rfl)
+
+theorem relabelTM2to1Label_wrap_injective (tc : Turing.ToPartrec.Code) :
+    Function.Injective (relabelTM2to1Label (StartedLabel.wrap tc)) :=
+  (relabelTM2to1Label_wrap_leftInverse tc).injective
+
+theorem relabelTM1Stmt_TM2to1Label_wrap_injective (tc : Turing.ToPartrec.Code) :
+    Function.Injective
+      (relabelTM1Stmt
+        (Γ := Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+        (σ := PartrecVar)
+        (relabelTM2to1Label (StartedLabel.wrap tc))) :=
+  relabelTM1Stmt_injective
+    (Γ := Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol)
+    (σ := PartrecVar)
+    (relabelTM2to1Label_wrap_leftInverse tc)
 
 instance instDecidableEqPartrecStartedTM0Label (tc : Turing.ToPartrec.Code) :
     DecidableEq (Turing.TM1to0.Λ' (partrecStartedTM1Machine tc)) := by
