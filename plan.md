@@ -1379,6 +1379,9 @@ conditions have been narrowed to two proof-facing fronts:
    in `TM0FoldedPositionReduction.SourceObligations` by importing the folded
    compiler correctness theorem.  The remaining source work is the
    primitive-recursive, source-uniform descriptor-row construction.
+   The source-specialized label-index target is now also exposed as equivalent
+   to the generated position-code accumulator-step target, so either proof can
+   feed the decoder-step theorem surfaces without an extra ad hoc bridge.
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now

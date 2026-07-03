@@ -2695,6 +2695,27 @@ theorem sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
   sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step
     hstep
 
+set_option linter.style.longLine false in
+/--
+The source-specialized position-code label-index decoder also gives the
+generated position-code accumulator step.
+-/
+theorem sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeDecoderStep_primrec_of_labelIndexFromWithPositionCode hindex
+
+set_option linter.style.longLine false in
+/--
+For the source-specialized generated position-code route, primitive
+recursiveness of the label-index decoder and of the accumulator step are
+equivalent.
+-/
+theorem sourcePositionCodeDecoderStepPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec :
+    SourcePositionCodeDecoderStepPrimrec ↔ SourcePositionCodeLabelIndexFromPrimrec :=
+  ⟨sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep,
+    sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFrom⟩
+
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
