@@ -5173,6 +5173,20 @@ theorem tm2to1GoStmtSupportLength_eq {Λ : Type} {k : PartrecStack}
     simp [Turing.TM2to1.tr, Turing.TM2to1.trStAct,
       tm1StmtSupportLength, tm2to1GoStmtSupportLength]
 
+/--
+The raw TM1 substatement list for a TM2-to-TM1 `go pop` state contains the
+same return continuation on both branches.  Thus local `Nodup` is not a viable
+source obligation for the current raw support-list enumeration.
+-/
+theorem tm2to1GoPopStmtSupportList_not_nodup {Λ : Type} {k : PartrecStack}
+    (M : Λ → Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar)
+    (f : PartrecVar → Option (PartrecStackSymbol k) → PartrecVar)
+    (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) :
+    ¬ (tm1StmtSupportList
+        (Turing.TM2to1.tr M
+          (Turing.TM2to1.Λ'.go k (Turing.TM2to1.StAct.pop f) stmt))).Nodup := by
+  simp [Turing.TM2to1.tr, Turing.TM2to1.trStAct, tm1StmtSupportList]
+
 /-- Statement-support length of a TM2-to-TM1 `ret` label. -/
 def tm2to1RetStmtSupportLength {Λ : Type}
     (stmt : Turing.TM2.Stmt PartrecStackSymbol Λ PartrecVar) : Nat :=

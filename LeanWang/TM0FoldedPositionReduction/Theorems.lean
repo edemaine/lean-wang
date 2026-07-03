@@ -290,34 +290,6 @@ theorem domino_problem_undecidable_of_scaffold_position_source_oneRowsPackageCor
     (positionSourceObligationsOfPositionCodeOneRowsWithStatementNodupCorrect
       hrows)
 
-set_option linter.style.longLine false in
-/--
-Encoded domino undecidability from a scaffold and the raw-TM1-support one-row
-position-code package, with `positionProgramData` semantic correctness
-discharged.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold_position_source_oneRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeOneRowsWithRawTM1StatementSupportCorrect
-      hrows)
-
-set_option linter.style.longLine false in
-/--
-Unencoded domino undecidability from a scaffold and the raw-TM1-support one-row
-position-code package, with `positionProgramData` semantic correctness
-discharged.
--/
-theorem domino_problem_undecidable_of_scaffold_position_source_oneRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeOneRowsWithRawTM1StatementSupportCorrect
-      hrows)
-
 /--
 Encoded domino undecidability from a scaffold and the generated
 bounded-interior position-code rows, with `positionProgramData` semantic
@@ -372,34 +344,6 @@ theorem domino_problem_undecidable_of_scaffold_position_source_boundedRowsPackag
     (positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodupCorrect
       hbounded)
 
-set_option linter.style.longLine false in
-/--
-Encoded domino undecidability from a scaffold and the raw-TM1-support
-bounded-interior position-code package, with `positionProgramData` semantic
-correctness discharged.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold_position_source_boundedRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithRawTM1StatementSupportCorrect
-      hbounded)
-
-set_option linter.style.longLine false in
-/--
-Unencoded domino undecidability from a scaffold and the raw-TM1-support
-bounded-interior position-code package, with `positionProgramData` semantic
-correctness discharged.
--/
-theorem domino_problem_undecidable_of_scaffold_position_source_boundedRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithRawTM1StatementSupportCorrect
-      hbounded)
-
 /--
 Unencoded domino undecidability from a scaffold and the generated interior
 position-code rows, with `positionProgramData` semantic correctness discharged.
@@ -438,34 +382,6 @@ theorem domino_problem_undecidable_of_scaffold_position_source_interiorRowsPacka
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
-      hinterior)
-
-set_option linter.style.longLine false in
-/--
-Encoded domino undecidability from a scaffold and the raw-TM1-support interior
-position-code package, with `positionProgramData` semantic correctness
-discharged.
--/
-theorem encoded_domino_problem_undecidable_of_scaffold_position_source_interiorRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeInteriorRowsWithRawTM1StatementSupportCorrect
-      hinterior)
-
-set_option linter.style.longLine false in
-/--
-Unencoded domino undecidability from a scaffold and the raw-TM1-support
-interior position-code package, with `positionProgramData` semantic correctness
-discharged.
--/
-theorem domino_problem_undecidable_of_scaffold_position_source_interiorRowsRawTM1SupportPackageCorrect
-    (S : Scaffold) (hS : IsScaffold S)
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_scaffold_position_source S hS
-    (positionSourceObligationsOfPositionCodeInteriorRowsWithRawTM1StatementSupportCorrect
       hinterior)
 
 set_option linter.style.longLine false in

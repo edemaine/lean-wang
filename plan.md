@@ -1391,19 +1391,13 @@ conditions have been narrowed to two proof-facing fronts:
    `TM0Route` now also exposes relabeling equalities for TM1 support lists:
    `tm1StmtSupportList_relabel`, `tm2to1TrNormal_relabel`,
    `partrecStartedTM1Machine_relabel`, and
-   `partrecStartedTM1Machine_supportList_relabel`.  The wrapper transport is
-   now exposed through `SourceTM1StatementSupportNodup`,
-   `SourceTM1StatementSupportPairwiseDisjoint`,
-   `sourceStartedTM1StatementSupportNodup_of_raw`,
-   `sourceStartedTM1StatementSupportPairwiseDisjoint_of_raw`, and
-   `sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint`.
-   The remaining source-side list gap is therefore the raw
-   `partrecTM1LabelList` duplicate-free local support and pairwise-disjoint
-   support proof.  The row-source packages now also have raw-TM1-support
-   variants (`SourcePositionCode*RowsWithRawTM1StatementSupport`) and direct
-   `PositionSourceObligations`/domino-undecidability wrappers, so proving the
-   raw support facts plus any generated row target can feed the final theorem
-   stack without an intermediate started-label conversion step.
+   `partrecStartedTM1Machine_supportList_relabel`.  However the direct local
+   raw-support `Nodup` route is not viable for the current enumeration:
+   `TM0Route.tm2to1GoPopStmtSupportList_not_nodup` shows that the TM2-to-TM1
+   `go pop` support list duplicates its return continuation.  The active
+   generated-position source route should therefore avoid the older
+   statement-list uniqueness package and target the row/label-index primrec
+   surfaces directly.
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now

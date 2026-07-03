@@ -2794,60 +2794,6 @@ abbrev SourceStartedTM1StatementSupportPairwiseDisjoint : Prop :=
               (NatPartrecToToPartrec.translate c) q₂))
 
 /--
-Source-uniform local statement-support uniqueness for the raw TM1 labels before
-wrapping Mathlib's evaluator labels in the code-specific `StartedLabel` type.
--/
-abbrev SourceTM1StatementSupportNodup : Prop :=
-  ∀ c : Code, ∀ q ∈
-      TM0Route.partrecTM1LabelList (NatPartrecToToPartrec.translate c),
-    (TM0Route.tm1StmtSupportList (TM0Route.partrecTM1Machine q)).Nodup
-
-/--
-Source-uniform disjointness between raw TM1 statement-support lists before
-wrapping Mathlib's evaluator labels in the code-specific `StartedLabel` type.
--/
-abbrev SourceTM1StatementSupportPairwiseDisjoint : Prop :=
-  ∀ c : Code,
-    (TM0Route.partrecTM1LabelList
-      (NatPartrecToToPartrec.translate c)).Pairwise fun q₁ q₂ =>
-        List.Disjoint
-          (TM0Route.tm1StmtSupportList (TM0Route.partrecTM1Machine q₁))
-          (TM0Route.tm1StmtSupportList (TM0Route.partrecTM1Machine q₂))
-
-/--
-Raw TM1 local statement-support uniqueness transports through the
-code-specific started-label relabeling.
--/
-theorem sourceStartedTM1StatementSupportNodup_of_raw
-    (hraw : SourceTM1StatementSupportNodup) :
-    SourceStartedTM1StatementSupportNodup := by
-  intro c q hq
-  let tc := NatPartrecToToPartrec.translate c
-  rw [TM0Route.partrecStartedTM1LabelList_eq_map tc] at hq
-  rcases List.mem_map.1 hq with ⟨q', hq', rfl⟩
-  rw [TM0Route.partrecStartedTM1Machine_supportList_relabel]
-  exact List.Nodup.map (TM0Route.relabelTM1Stmt_TM2to1Label_wrap_injective tc)
-    (hraw c q' hq')
-
-/--
-Raw TM1 support-list disjointness transports through the code-specific
-started-label relabeling.
--/
-theorem sourceStartedTM1StatementSupportPairwiseDisjoint_of_raw
-    (hraw : SourceTM1StatementSupportPairwiseDisjoint) :
-    SourceStartedTM1StatementSupportPairwiseDisjoint := by
-  intro c
-  let tc := NatPartrecToToPartrec.translate c
-  rw [TM0Route.partrecStartedTM1LabelList_eq_map tc]
-  exact List.Pairwise.map (TM0Route.relabelTM2to1Label (TM0Route.StartedLabel.wrap tc))
-    (fun q₁ q₂ hdisj => by
-      rw [TM0Route.partrecStartedTM1Machine_supportList_relabel,
-        TM0Route.partrecStartedTM1Machine_supportList_relabel]
-      exact List.Disjoint.map
-        (TM0Route.relabelTM1Stmt_TM2to1Label_wrap_injective tc) hdisj)
-    (hraw c)
-
-/--
 The opaque source statement-list uniqueness obligation follows from
 duplicate-free local TM1 statement supports and pairwise disjointness between
 the supports for different started TM1 labels.
@@ -2859,18 +2805,6 @@ theorem sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
   intro c
   exact TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint
     (NatPartrecToToPartrec.translate c) (hstmt c) (hdisj c)
-
-/--
-The source statement-list uniqueness obligation follows from raw TM1
-duplicate-free local supports and raw pairwise support disjointness.
--/
-theorem sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
-    (hstmt : SourceTM1StatementSupportNodup)
-    (hdisj : SourceTM1StatementSupportPairwiseDisjoint) :
-    SourceStatementListNodup :=
-  sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
-    (sourceStartedTM1StatementSupportNodup_of_raw hstmt)
-    (sourceStartedTM1StatementSupportPairwiseDisjoint_of_raw hdisj)
 
 /-- Source-uniform one-row position-code decoder plus statement uniqueness. -/
 structure SourcePositionCodeOneRowsWithStatementNodup : Prop where
@@ -2886,35 +2820,6 @@ structure SourcePositionCodeBoundedInteriorRowsWithStatementNodup : Prop where
 structure SourcePositionCodeInteriorRowsWithStatementNodup : Prop where
   rows : SourcePositionCodeInteriorRowsPrimrec
   statementList_nodup : SourceStatementListNodup
-
-/--
-Source-uniform one-row position-code decoder plus raw TM1 support uniqueness
-and disjointness.  This is the same source-side endpoint as
-`SourcePositionCodeOneRowsWithStatementNodup`, but with the remaining machine
-list facts stated before the code-specific `StartedLabel` relabeling.
--/
-structure SourcePositionCodeOneRowsWithRawTM1StatementSupport : Prop where
-  rows : SourcePositionCodeOneRowsPrimrec
-  statementSupport_nodup : SourceTM1StatementSupportNodup
-  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
-
-/--
-Source-uniform bounded-interior position-code decoder plus raw TM1 support
-uniqueness and disjointness.
--/
-structure SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport : Prop where
-  rows : SourcePositionCodeBoundedInteriorRowsPrimrec
-  statementSupport_nodup : SourceTM1StatementSupportNodup
-  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
-
-/--
-Source-uniform interior position-code decoder plus raw TM1 support uniqueness
-and disjointness.
--/
-structure SourcePositionCodeInteriorRowsWithRawTM1StatementSupport : Prop where
-  rows : SourcePositionCodeInteriorRowsPrimrec
-  statementSupport_nodup : SourceTM1StatementSupportNodup
-  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
 
 /-- One-row generated position-code rows give the interior-row target. -/
 theorem sourcePositionCodeInteriorRowsPrimrec_of_oneRows
@@ -2968,65 +2873,6 @@ def sourcePositionCodeOneRowsWithStatementNodup_of_interior
     SourcePositionCodeOneRowsWithStatementNodup :=
   sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior
     (sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
-      hinterior)
-
-/-- Raw TM1 support facts provide the statement-uniqueness field for one-row rows. -/
-def sourcePositionCodeOneRowsWithStatementNodup_of_rawTM1StatementSupport
-    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeOneRowsWithStatementNodup where
-  rows := hrows.rows
-  statementList_nodup :=
-    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
-      hrows.statementSupport_nodup hrows.statementSupport_pairwise_disjoint
-
-/-- Raw TM1 support facts provide the statement-uniqueness field for bounded rows. -/
-def sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeBoundedInteriorRowsWithStatementNodup where
-  rows := hbounded.rows
-  statementList_nodup :=
-    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
-      hbounded.statementSupport_nodup hbounded.statementSupport_pairwise_disjoint
-
-/-- Raw TM1 support facts provide the statement-uniqueness field for interior rows. -/
-def sourcePositionCodeInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeInteriorRowsWithStatementNodup where
-  rows := hinterior.rows
-  statementList_nodup :=
-    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
-      hinterior.statementSupport_nodup hinterior.statementSupport_pairwise_disjoint
-
-/-- A raw one-row package also supplies the raw interior package. -/
-def sourcePositionCodeInteriorRowsWithRawTM1StatementSupport_of_oneRows
-    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeInteriorRowsWithRawTM1StatementSupport where
-  rows := sourcePositionCodeInteriorRowsPrimrec_of_oneRows hrows.rows
-  statementSupport_nodup := hrows.statementSupport_nodup
-  statementSupport_pairwise_disjoint := hrows.statementSupport_pairwise_disjoint
-
-/-- A raw interior package also supplies the raw bounded-interior package. -/
-def sourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport_of_interior
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport where
-  rows := sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior.rows
-  statementSupport_nodup := hinterior.statementSupport_nodup
-  statementSupport_pairwise_disjoint := hinterior.statementSupport_pairwise_disjoint
-
-/-- A raw bounded-interior package also supplies the raw one-row package. -/
-def sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_boundedInterior
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeOneRowsWithRawTM1StatementSupport where
-  rows := sourcePositionCodeOneRowsPrimrec_of_boundedInterior hbounded.rows
-  statementSupport_nodup := hbounded.statementSupport_nodup
-  statementSupport_pairwise_disjoint := hbounded.statementSupport_pairwise_disjoint
-
-/-- A raw interior package also supplies the raw one-row package. -/
-def sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_interior
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    SourcePositionCodeOneRowsWithRawTM1StatementSupport :=
-  sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_boundedInterior
-    (sourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport_of_interior
       hinterior)
 
 end TM0FoldedReduction

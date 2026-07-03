@@ -106,18 +106,6 @@ def positionSourceObligationsOfPositionCodeOneRowsWithStatementNodupCorrect
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeOneRowsCorrect hrows.rows
 
-set_option linter.style.longLine false in
-/--
-The raw-TM1-support one-row package gives the full generated-position source
-obligations once the semantic folded proof is imported.
--/
-def positionSourceObligationsOfPositionCodeOneRowsWithRawTM1StatementSupportCorrect
-    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
-    PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeOneRowsWithStatementNodupCorrect
-    (sourcePositionCodeOneRowsWithStatementNodup_of_rawTM1StatementSupport
-      hrows)
-
 /--
 Primitive recursiveness of the generated bounded-interior position-code rows
 gives the full generated-position source obligations once the semantic folded
@@ -143,18 +131,6 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded.rows
 
-set_option linter.style.longLine false in
-/--
-The raw-TM1-support bounded-interior package gives the full generated-position
-source obligations once the semantic folded proof is imported.
--/
-def positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithRawTM1StatementSupportCorrect
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
-    PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodupCorrect
-    (sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
-      hbounded)
-
 /--
 Primitive recursiveness of the generated interior position-code rows gives the
 full generated-position source obligations once the semantic folded proof is
@@ -179,18 +155,6 @@ def positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
     (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
     PositionSourceObligations :=
   positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior.rows
-
-set_option linter.style.longLine false in
-/--
-The raw-TM1-support interior package gives the full generated-position source
-obligations once the semantic folded proof is imported.
--/
-def positionSourceObligationsOfPositionCodeInteriorRowsWithRawTM1StatementSupportCorrect
-    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
-    PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodupCorrect
-    (sourcePositionCodeInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
-      hinterior)
 
 end TM0FoldedReduction
 
