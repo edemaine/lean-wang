@@ -1239,6 +1239,22 @@ namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeCons
 
 set_option linter.style.longLine false in
 /--
+Project the origin-zero/translated-positive-box package to the Section 7
+board/free-line/layer-patch package.
+
+Origin-zero windows give board/free-line active/corner recognition, and the
+translated positive boxes give the finite active-corner layer patches.
+-/
+def toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.scaffold.toBoardFreeLineActiveCorner
+  layerPatches := h.scaffold.toActiveCornerLayerBoxPatches
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the concrete second-candidate Figure 13
 origin-zero/translated-positive-box scaffold package and the source-specialized
 generated position-code label-index decoder.
