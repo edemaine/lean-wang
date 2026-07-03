@@ -1007,6 +1007,12 @@ Figure 16 macro-square field by the core assumption
 `TilesPlane figure18ScaffoldTiles`; origin-zero active/corner windows still
 supply the Section 7 board/free-line recognition, while the plane tiling
 supplies translated active-corner boxes.
+This has been split one step further:
+`FinalFigure18ScaffoldTilesPlaneBoardFreeLineConstructionObligations` and its
+source variants expose the actual Section 7 recognition premise directly,
+namely `Section7BoardFreeLineActiveCornerInvariant` for the first audited L2
+candidate. The origin-zero-window route is now just a specialization of this
+board/free-line surface.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
