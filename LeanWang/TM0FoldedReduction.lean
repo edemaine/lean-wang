@@ -1824,6 +1824,15 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_var_get?
           v)
         v)
 
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_eq_nil_of_lt
+    {c : Code} {fuel i : Nat}
+    (hi : i < TM0Route.partrecVarList.length) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c (fuel + 1) 0 i = [] := by
+  have hv :
+      TM0Route.partrecVarList[i]? = some (TM0Route.partrecVarList[i]) :=
+    List.getElem?_eq_getElem hi
+  exact sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_var_get? hv
+
 def sourcePositionCodeOneRowsIndexVar
     (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
@@ -2848,6 +2857,15 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get?_eq_nil
         TM0Route.PartrecVar))
       v)
     v
+
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq_nil_of_lt
+    {c : Code} {i : Nat}
+    (hi : i < TM0Route.partrecVarList.length) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i = [] := by
+  have hv :
+      TM0Route.partrecVarList[i]? = some (TM0Route.partrecVarList[i]) :=
+    List.getElem?_eq_getElem hi
+  exact sourceSimStepDataForLabelIndexStartWithPositionCode_of_var_get?_eq_nil hv
 
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
     {c : Code} {i : Nat} {v : TM0Route.PartrecVar}
