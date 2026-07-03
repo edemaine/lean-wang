@@ -954,6 +954,10 @@ also has a direct final route through
 non-diagnostic upstream Section 7 surface: it asks for board/free-line
 active/corner recognition and translated active-corner boxes, then converts to
 the centered positive-box final route.
+The origin-zero translated-box obligations project to this Section 7 route via
+`FinalOriginZeroTranslatedBoxConstructionObligations.toSection7TranslatedBoxConstructionObligations`,
+using the existing Section 7 conversion from origin-zero windows and translated
+boxes to board/free-line translated-box data.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

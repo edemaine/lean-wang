@@ -1146,6 +1146,19 @@ def toL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the origin-zero translated-box package to the proof-facing Section 7
+board/free-line translated-box package.
+-/
+def toSection7TranslatedBoxConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    FinalSection7TranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the origin-zero translated-box package to the checked-stack/layer-patch
 package used by the older final route.
 -/
