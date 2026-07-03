@@ -1423,6 +1423,82 @@ theorem
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the first canonical free-site
+active/corner recognition package, a plane tiling of the compatible Figure 18
+scaffold tiles, and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+      (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+        canonicalActiveCorner hplane)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first canonical free-site
+active/corner recognition package, a plane tiling of the compatible Figure 18
+scaffold tiles, and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
+      (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+        canonicalActiveCorner hplane)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second canonical free-site
+active/corner recognition package, a plane tiling of the compatible Figure 18
+scaffold tiles, and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+        canonicalActiveCorner hplane)
+      hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second canonical free-site
+active/corner recognition package, a plane tiling of the compatible Figure 18
+scaffold tiles, and the source-specialized position-code label-index decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+        canonicalActiveCorner hplane)
+      hindex
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the first origin-zero Section 7 layer-patch
 obligation surface, with `positionProgramData` semantic correctness
 discharged.

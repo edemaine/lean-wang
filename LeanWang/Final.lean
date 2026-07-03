@@ -2000,14 +2000,16 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toOriginZeroSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the canonical-free-site scaffold-tiling source-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toOriginZeroSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_canonical_free_site_figure18_scaffold_tiles_plane_sourceCodeCorrect
+    h.canonicalActiveCorner h.scaffoldPlane h.labelIndex
 
 end FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations
 
