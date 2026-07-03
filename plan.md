@@ -1382,6 +1382,12 @@ conditions have been narrowed to two proof-facing fronts:
    The source-specialized label-index target is now also exposed as equivalent
    to the generated position-code accumulator-step target, so either proof can
    feed the decoder-step theorem surfaces without an extra ad hoc bridge.
+   The auxiliary `SourceStatementListNodup` gap is no longer a completely
+   opaque list fact: `TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint`
+   and
+   `TM0FoldedReduction.sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint`
+   reduce it to duplicate-free local TM1 statement supports plus pairwise
+   disjointness of the support lists for distinct started TM1 labels.
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now

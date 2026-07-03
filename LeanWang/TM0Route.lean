@@ -5865,6 +5865,24 @@ def partrecStartedTM0StatementAt? (tc : Turing.ToPartrec.Code) (i : Nat) :
   tm1StatementSupportAt? (partrecStartedTM1LabelList tc)
     (partrecStartedTM1Machine tc) i
 
+/--
+The started TM0 statement-support list is duplicate-free once each translated
+TM1 label has duplicate-free local statement support and different labels have
+disjoint local statement support.
+-/
+theorem partrecStartedTM0StatementList_nodup_of_pairwise_disjoint
+    (tc : Turing.ToPartrec.Code)
+    (hstmt : ∀ q ∈ partrecStartedTM1LabelList tc,
+      (tm1StmtSupportList (partrecStartedTM1Machine tc q)).Nodup)
+    (hdisj : (partrecStartedTM1LabelList tc).Pairwise fun q₁ q₂ =>
+      List.Disjoint
+        (tm1StmtSupportList (partrecStartedTM1Machine tc q₁))
+        (tm1StmtSupportList (partrecStartedTM1Machine tc q₂))) :
+    (partrecStartedTM0StatementList tc).Nodup := by
+  unfold partrecStartedTM0StatementList
+  exact tm1StatementSupportList_nodup_of_pairwise_disjoint
+    (partrecStartedTM1LabelList tc) (partrecStartedTM1Machine tc) hstmt hdisj
+
 @[simp]
 theorem partrecStartedTM0StatementAt?_zero (tc : Turing.ToPartrec.Code) :
     partrecStartedTM0StatementAt? tc 0 = some none := by

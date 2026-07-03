@@ -2767,6 +2767,45 @@ abbrev SourceStatementListNodup : Prop :=
     (TM0Route.partrecStartedTM0StatementList
       (NatPartrecToToPartrec.translate c)).Nodup
 
+/--
+Source-uniform local statement-support uniqueness for each started TM1 label
+appearing in the translated source machines.
+-/
+abbrev SourceStartedTM1StatementSupportNodup : Prop :=
+  ∀ c : Code, ∀ q ∈
+      TM0Route.partrecStartedTM1LabelList (NatPartrecToToPartrec.translate c),
+    (TM0Route.tm1StmtSupportList
+      (TM0Route.partrecStartedTM1Machine (NatPartrecToToPartrec.translate c) q)).Nodup
+
+/--
+Source-uniform disjointness between local statement-support lists for distinct
+started TM1 labels.
+-/
+abbrev SourceStartedTM1StatementSupportPairwiseDisjoint : Prop :=
+  ∀ c : Code,
+    (TM0Route.partrecStartedTM1LabelList
+      (NatPartrecToToPartrec.translate c)).Pairwise fun q₁ q₂ =>
+        List.Disjoint
+          (TM0Route.tm1StmtSupportList
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c) q₁))
+          (TM0Route.tm1StmtSupportList
+            (TM0Route.partrecStartedTM1Machine
+              (NatPartrecToToPartrec.translate c) q₂))
+
+/--
+The opaque source statement-list uniqueness obligation follows from
+duplicate-free local TM1 statement supports and pairwise disjointness between
+the supports for different started TM1 labels.
+-/
+theorem sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    SourceStatementListNodup := by
+  intro c
+  exact TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint
+    (NatPartrecToToPartrec.translate c) (hstmt c) (hdisj c)
+
 /-- Source-uniform one-row position-code decoder plus statement uniqueness. -/
 structure SourcePositionCodeOneRowsWithStatementNodup : Prop where
   rows : SourcePositionCodeOneRowsPrimrec
