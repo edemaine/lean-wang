@@ -5465,6 +5465,24 @@ def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
       scaffold)
     hindex
 
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the final construction inputs. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalReductionInputs) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the final construction inputs. -/
+theorem domino_problem_undecidable
+    (h : FinalReductionInputs) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
+      h.scaffold h.source
+
 end FinalReductionInputs
 
 namespace FinalL2C2ReductionInputs
@@ -12599,18 +12617,14 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
-    h.section7 h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 board/free-line obligations. -/
 theorem domino_problem_undecidable
     (h : FinalSection7PositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_positive_box_data_interiorRows
-    h.section7 h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7PositiveBoxConstructionObligations
 
@@ -12660,14 +12674,14 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 positive-box one-row package. -/
 theorem domino_problem_undecidable
     (h : FinalSection7PositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7PositiveBoxOneRowsConstructionObligations
 
@@ -12727,14 +12741,14 @@ set_option linter.style.longLine false in
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the paper-facing Section 7 positive-box bounded-row package. -/
 theorem domino_problem_undecidable
     (h : FinalSection7PositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7PositiveBoxBoundedRowsConstructionObligations
 
@@ -12924,9 +12938,7 @@ package.
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
-    h.section7 h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -12936,9 +12948,7 @@ translated-box package.
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
-    h.section7 h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7TranslatedBoxConstructionObligations
 
@@ -12990,7 +13000,7 @@ package and generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -13000,7 +13010,7 @@ translated-box package and generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7TranslatedBoxOneRowsConstructionObligations
 
@@ -13062,7 +13072,7 @@ package and generated bounded-interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalSection7TranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -13072,7 +13082,7 @@ translated-box package and generated bounded-interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalSection7TranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toFinalReductionInputs.domino_problem_undecidable
 
 end FinalSection7TranslatedBoxBoundedRowsConstructionObligations
 
@@ -13080,17 +13090,13 @@ set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the final construction inputs. -/
 theorem encoded_domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  exact
-    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      h.scaffold h.source
+  exact h.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /-- Wang domino undecidability from the final construction inputs. -/
 theorem domino_problem_undecidable (h : FinalReductionInputs) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  exact
-    TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
-      h.scaffold h.source
+  exact h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
