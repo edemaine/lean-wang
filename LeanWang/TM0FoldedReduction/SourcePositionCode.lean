@@ -13,8 +13,6 @@ module contains the generated position-coded row decoder that is the current
 machine-side proof frontier.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
@@ -25,7 +23,7 @@ open Nat.Partrec (Code)
 Source-code version of the offset descriptor decoder whose current-state code
 is the explicit statement/variable position.
 -/
-def sourceSimStepDataForLabelIndexFromWithPositionCode
+noncomputable def sourceSimStepDataForLabelIndexFromWithPositionCode
     (c : Code) (fuel k i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
     (NatPartrecToToPartrec.translate c) fuel k i
@@ -179,7 +177,7 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_tail_after_zero_bl
     (sourcePartrecVarList_length_le_partrecVarList_length_mul_succ fuel)]
   simp [sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_full_range_eq_nil c fuel]
 
-def sourcePositionCodeOneRowsIndexVar
+noncomputable def sourcePositionCodeOneRowsIndexVar
     (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   match TM0Route.partrecStartedTM0StatementAt?
@@ -324,12 +322,12 @@ theorem sourcePositionCodeOneRowsIndexVar_primrec_fixed (c : Code) :
     cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc p.1 <;>
       simp [sourcePositionCodeOneRowsIndexVar, tc, hstmt]
 
-def sourcePositionCodeInteriorRowsIndexVar
+noncomputable def sourcePositionCodeInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   sourcePositionCodeOneRowsIndexVar c (j + 1) i v
 
-def sourcePositionCodeInteriorRowsAtIndex
+noncomputable def sourcePositionCodeInteriorRowsAtIndex
     (c : Code) (j i : Nat) : List TM0FoldedCompiler.SimStepData :=
   match TM0Route.partrecVarList[i]? with
   | none => []
@@ -407,14 +405,14 @@ theorem sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior
     cases h : TM0Route.partrecVarList[p.2.2]? <;>
       simp [sourcePositionCodeInteriorRowsAtIndex, h]
 
-def sourcePositionCodeInteriorRowsByTailIndex
+noncomputable def sourcePositionCodeInteriorRowsByTailIndex
     (c : Code) : List TM0FoldedCompiler.SimStepData :=
   (List.Ico TM0Route.partrecVarList.length (sourceLabelCount c)).flatMap
     fun n => sourcePositionCodeInteriorRowsAtIndex c
       (n / TM0Route.partrecVarList.length - 1)
       (n % TM0Route.partrecVarList.length)
 
-def sourcePositionCodeInteriorRowsByTailIndexRange
+noncomputable def sourcePositionCodeInteriorRowsByTailIndexRange
     (c : Code) : List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c - TM0Route.partrecVarList.length)).flatMap
     fun n =>
@@ -479,7 +477,7 @@ theorem sourcePositionCodeInteriorRowsByTailIndex_primrec_of_interior
   (sourcePositionCodeInteriorRowsByTailIndexRange_primrec_of_interior hinterior).of_eq
     fun c => (sourcePositionCodeInteriorRowsByTailIndex_eq_range c).symm
 
-def sourcePositionCodeBoundedInteriorRowsIndexVar
+noncomputable def sourcePositionCodeBoundedInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   if j + 1 < sourceStatementCount c then
@@ -634,13 +632,13 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_primrec_of_indexV
     rw [sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows]
     cases TM0Route.partrecVarList[p.2.2]? <;> rfl
 
-def sourcePositionCodeDecoderStepNone (c : Code) (k i : Nat) :
+noncomputable def sourcePositionCodeDecoderStepNone (c : Code) (k i : Nat) :
     SourceSearchCodeDecoderState :=
   match TM0Route.partrecVarList[i]? with
   | none => (k + 1, i - TM0Route.partrecVarList.length, none)
   | some v => (k, i, some (sourcePositionCodeOneRowsIndexVar c k i v))
 
-def sourcePositionCodeDecoderStep (c : Code)
+noncomputable def sourcePositionCodeDecoderStep (c : Code)
     (s : SourceSearchCodeDecoderState) : SourceSearchCodeDecoderState :=
   match s.2.2 with
   | some rows => (s.1, s.2.1, some rows)
@@ -871,7 +869,7 @@ theorem sourcePositionCodeDecoderStep_primrec_of_labelIndexFromWithPositionCode
         simp [sourcePositionCodeDecoderStepNone, h,
           sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows]
 
-def sourcePositionCodeDecoderStateFrom
+noncomputable def sourcePositionCodeDecoderStateFrom
     (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
     SourceSearchCodeDecoderState :=
   fuel.rec s (fun _ s => sourcePositionCodeDecoderStep c s)
@@ -988,11 +986,11 @@ theorem sourcePositionCodeDecoderRows_stateFrom_none_eq
                 sourceSimStepDataForLabelIndexFromWithPositionCode_succ_of_stmt_some
                   hv hstmt]
 
-def sourcePositionCodeDecoderState (c : Code) (fuel k i : Nat) :
+noncomputable def sourcePositionCodeDecoderState (c : Code) (fuel k i : Nat) :
     SourceSearchCodeDecoderState :=
   sourcePositionCodeDecoderStateFrom c fuel (sourceSearchCodeDecoderInit k i)
 
-def sourcePositionCodeDecoder (c : Code) (fuel k i : Nat) :
+noncomputable def sourcePositionCodeDecoder (c : Code) (fuel k i : Nat) :
     List TM0FoldedCompiler.SimStepData :=
   sourceSearchCodeDecoderRows (sourcePositionCodeDecoderState c fuel k i)
 
@@ -1089,5 +1087,3 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRo
 end TM0FoldedReduction
 
 end LeanWang
-
-end
