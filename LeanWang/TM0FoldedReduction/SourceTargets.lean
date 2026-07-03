@@ -13,8 +13,6 @@ The decoder construction lives in `SourcePositionCode`; this module keeps the
 theorem surface cheap to edit and rebuild.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
@@ -318,5 +316,3 @@ theorem sourcePositionCodeInteriorRowsWithStatementNodup_iff_boundedInteriorRows
 end TM0FoldedReduction
 
 end LeanWang
-
-end
