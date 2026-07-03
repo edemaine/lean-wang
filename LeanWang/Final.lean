@@ -4101,7 +4101,8 @@ step.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -4112,7 +4113,8 @@ step.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations
 set_option linter.style.longLine true
@@ -4168,7 +4170,8 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -4180,7 +4183,8 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations
 set_option linter.style.longLine true
@@ -10345,7 +10349,8 @@ position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -10356,7 +10361,8 @@ position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchConstructionObligations
 
@@ -10399,7 +10405,8 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -10411,7 +10418,8 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchDecoderStepConstructionObligations
 
@@ -10454,7 +10462,8 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -10466,7 +10475,8 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  h.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalProductRoutingLayerPatchGlobalPositionCodeConstructionObligations
 set_option linter.style.longLine true
