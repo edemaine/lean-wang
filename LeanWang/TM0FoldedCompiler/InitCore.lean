@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedProgram
 Core folded initialization facts and shared `find?` helpers.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

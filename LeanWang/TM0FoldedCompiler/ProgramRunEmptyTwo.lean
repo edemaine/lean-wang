@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramRunEmptyOne
 Second empty-run state for the folded program.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

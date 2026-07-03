@@ -16,7 +16,6 @@ obligation constructors so edits to final theorem surfaces do not require
 rechecking the constructor module.
 -/
 
-noncomputable section
 
 namespace LeanWang
 

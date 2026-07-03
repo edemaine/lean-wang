@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.InitMembershipRows
 Local folded-move statement lemmas.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

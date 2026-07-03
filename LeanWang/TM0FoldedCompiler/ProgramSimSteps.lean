@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramInitSteps
 Full-program transition and step lemmas for simulated TM0 states.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

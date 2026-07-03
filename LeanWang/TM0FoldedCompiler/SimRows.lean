@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.Init
 Lookup and support lemmas for folded simulation rows.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

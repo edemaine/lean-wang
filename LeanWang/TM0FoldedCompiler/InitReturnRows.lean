@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.InitMoveRows
 Lookup lemmas for return initialization rows and initialization-row misses.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

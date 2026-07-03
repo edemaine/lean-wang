@@ -1168,6 +1168,12 @@ transcription file for the same reason: changing this theorem surface should
 rebuild only the small bridge module and downstream Section 7 wrappers, not the
 audited raw Figure 13 data.
 
+The split folded-compiler correctness modules and the split
+`TM0FoldedPositionReduction` source/theorem wrapper modules are now free of
+broad `noncomputable section` markers.  They rebuild successfully without those
+markers, so future edits should keep these files executable/theorem-only unless
+a specific declaration genuinely requires noncomputable data.
+
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
 - encode the finite tileset as Lean data,

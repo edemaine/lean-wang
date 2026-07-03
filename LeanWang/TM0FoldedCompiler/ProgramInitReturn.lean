@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramInitVacuous
 Full-program return initialization transition and step lemmas.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

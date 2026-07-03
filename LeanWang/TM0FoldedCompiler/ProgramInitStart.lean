@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramHeaderSteps
 Full-program start transition and first step.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

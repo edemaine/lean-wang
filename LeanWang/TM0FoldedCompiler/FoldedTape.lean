@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramSteps
 Folded tape/configuration relation and one-step simulation lemmas.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

@@ -15,7 +15,6 @@ module imports the folded semantic proof and packages that theorem into the
 source-obligation surfaces used by the final theorem wrappers.
 -/
 
-noncomputable section
 
 namespace LeanWang
 

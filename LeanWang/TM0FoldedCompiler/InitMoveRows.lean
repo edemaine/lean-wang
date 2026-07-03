@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.InitCore
 Lookup lemmas for the right-moving initialization rows.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

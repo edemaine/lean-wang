@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramHeaderStartMove
 Header-program write-right initialization steps.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

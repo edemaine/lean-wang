@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.InitReturnRows
 Membership and state-support lemmas for origin/move/write initialization rows.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

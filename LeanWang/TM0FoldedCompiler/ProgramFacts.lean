@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.SimRows
 Basic field and support facts for the folded program and header program.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

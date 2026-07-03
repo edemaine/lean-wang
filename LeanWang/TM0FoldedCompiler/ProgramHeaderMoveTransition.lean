@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramHeaderStart
 Header-program move-right transition lookup.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

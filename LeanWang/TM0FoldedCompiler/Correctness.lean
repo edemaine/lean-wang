@@ -10,7 +10,6 @@ import LeanWang.TM0FoldedCompiler.ProgramRunEmptyTwo
 Semantic correctness for the folded finite one-sided TM0 program.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

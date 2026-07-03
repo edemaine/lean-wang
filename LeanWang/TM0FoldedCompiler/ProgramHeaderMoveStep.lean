@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramHeaderMoveTransition
 Header-program move-right step lemma.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler

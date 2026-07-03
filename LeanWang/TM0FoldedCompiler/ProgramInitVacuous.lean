@@ -9,7 +9,6 @@ import LeanWang.TM0FoldedCompiler.ProgramInitStart
 Vacuous full-program move/write initialization paths for the one-symbol input.
 -/
 
-noncomputable section
 namespace LeanWang
 
 namespace TM0FoldedCompiler
