@@ -1152,6 +1152,9 @@ positive boxes via
 `l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`,
 and the public row/decoder/global/source endpoints use the origin-zero
 translated-obligation reduction route directly.
+The L2C2 row-source, global-label, and source-label endpoint proofs now share
+the named origin-zero translated source-label projection instead of rebuilding
+the same position-source obligations inline.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

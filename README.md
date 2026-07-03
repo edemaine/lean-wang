@@ -267,6 +267,9 @@ origin-zero translated-positive-box surface using
 `TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`;
 its row-source, decoder-step, global-label, and source-label endpoints use the
 origin-zero translated-obligation reduction route directly.
+The row-source, global-label, and source-label theorem bodies now share the
+named origin-zero translated source-label projection, matching the cleaner
+first-candidate wrapper style.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by
