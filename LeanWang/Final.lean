@@ -66,6 +66,14 @@ abbrev SourcePositionCodeBoundedInteriorRowsPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
 
 /--
+Source-side primitive-recursion target for generated bounded-interior
+position-code rows at the concrete numeric label slots decoded by the final
+position-code accumulator.
+-/
+abbrev SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+/--
 Source-side primitive-recursion target for the global position-code label-index
 decoder.  This is the current cleanest source-facing target: it implies the
 generated position-code accumulator step by specializing to `fuel = 1`.
@@ -18347,6 +18355,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsB
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (O.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
     hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and bounded-interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsBoundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_section7_layer_patch_obligations_boundedRowsAtIndex
+    O hrows TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and bounded-interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsBoundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_section7_layer_patch_obligations_boundedRowsAtIndex
+    O hrows TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
 set_option linter.style.longLine false in
 /--
