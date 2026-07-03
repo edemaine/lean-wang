@@ -165,6 +165,10 @@ surface,
 It replaces the `TilesPlane figure18ScaffoldTiles` field by
 `∀ n, ∃ m ≥ n, TileableSquare figure18ScaffoldTiles m`, then uses compactness
 to recover the plane-tiling input.
+The still more Robinson-facing variant is
+`FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations`,
+which assumes canonical free-site-rectangle routing and extracts the
+active/corner recognition required by Section 7.
 
 The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
 surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles

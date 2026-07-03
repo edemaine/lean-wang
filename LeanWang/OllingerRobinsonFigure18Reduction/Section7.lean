@@ -1275,6 +1275,50 @@ def l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
   hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
     originZeroWindows
 
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+package for the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectActiveCornerOfRouting
+    (hrouting : L2C1CanonicalFreeSiteRectRouting) :
+    L2C1CanonicalFreeSiteRectActiveCorner := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+package for the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectActiveCornerOfRouting
+    (hrouting : L2C2CanonicalFreeSiteRectRouting) :
+    L2C2CanonicalFreeSiteRectActiveCorner := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
 /--
 Finite active-corner layer patches for the first audited L2-blank candidate.
 -/

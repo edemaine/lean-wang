@@ -1072,6 +1072,12 @@ now be replaced by the finite/cofinal target
 This is closer to the intended concrete scaffold instantiation: prove
 arbitrarily large compatible finite Figure 18 scaffold squares, then use the
 existing compactness theorem to obtain `TilesPlane figure18ScaffoldTiles`.
+There is also a more Robinson-facing version,
+`FinalFigure18ScaffoldCofinalCanonicalRoutingSourceCodeConstructionObligations`,
+whose geometric field is `L2C1CanonicalFreeSiteRectRouting`.  Section 7 now
+extracts `L2C1CanonicalFreeSiteRectActiveCorner` from this routing package, so
+future scaffold work can target the full board/free-line routing invariant
+without separately proving an active/corner-only theorem.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
