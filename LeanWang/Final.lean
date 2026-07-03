@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonFigure18PositionReduction
+import LeanWang.OllingerRobinsonFigure13Obstructions
 
 /-!
 Final theorem surface for the Wang-tile undecidability proof.
@@ -394,6 +395,88 @@ structure FinalFreeSiteRectSourcePositionCodeConstructionObligations : Prop wher
   routing : TM0FoldedReduction.L2C1CanonicalFreeSiteRectRouting
   fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
+The row-major checked Figure 16 level-data surface is inconsistent.  Keep this
+fact close to the final theorem surfaces so the legacy obligation packages
+below remain visibly diagnostic rather than proof targets.
+-/
+theorem not_figure18CanonicalCheckedRecognizedCompatibleLevelData :
+    ¬ TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData := by
+  simpa [TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData] using
+    not_hasCanonicalCheckedFigure16RecognizedCompatibleLevelData
+
+/-- The legacy row-source construction package is diagnostic only. -/
+theorem not_finalConstructionObligations :
+    ¬ FinalConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy decoder-step construction package is diagnostic only. -/
+theorem not_finalDecoderStepConstructionObligations :
+    ¬ FinalDecoderStepConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy global-label-index construction package is diagnostic only. -/
+theorem not_finalGlobalPositionCodeConstructionObligations :
+    ¬ FinalGlobalPositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy source-label-index construction package is diagnostic only. -/
+theorem not_finalSourcePositionCodeConstructionObligations :
+    ¬ FinalSourcePositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy checked row-source construction package is diagnostic only. -/
+theorem not_finalCheckedConstructionObligations :
+    ¬ FinalCheckedConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy checked decoder-step construction package is diagnostic only. -/
+theorem not_finalCheckedDecoderStepConstructionObligations :
+    ¬ FinalCheckedDecoderStepConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy checked global-label-index construction package is diagnostic only. -/
+theorem not_finalCheckedGlobalPositionCodeConstructionObligations :
+    ¬ FinalCheckedGlobalPositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy checked source-label-index construction package is diagnostic only. -/
+theorem not_finalCheckedSourcePositionCodeConstructionObligations :
+    ¬ FinalCheckedSourcePositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy free-site row-source construction package is diagnostic only. -/
+theorem not_finalFreeSiteRectConstructionObligations :
+    ¬ FinalFreeSiteRectConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy free-site decoder-step construction package is diagnostic only. -/
+theorem not_finalFreeSiteRectDecoderStepConstructionObligations :
+    ¬ FinalFreeSiteRectDecoderStepConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy free-site global-label-index construction package is diagnostic only. -/
+theorem not_finalFreeSiteRectGlobalPositionCodeConstructionObligations :
+    ¬ FinalFreeSiteRectGlobalPositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
+
+/-- The legacy free-site source-label-index construction package is diagnostic only. -/
+theorem not_finalFreeSiteRectSourcePositionCodeConstructionObligations :
+    ¬ FinalFreeSiteRectSourcePositionCodeConstructionObligations := by
+  intro h
+  exact not_figure18CanonicalCheckedRecognizedCompatibleLevelData h.fig16
 
 set_option linter.style.longLine false in
 /--
