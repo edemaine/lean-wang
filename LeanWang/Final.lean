@@ -355,6 +355,54 @@ structure FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructio
 
 set_option linter.style.longLine false in
 /--
+Figure 18 scaffold-tiling route from finite origin-zero checked layer stacks.
+
+The checked stacks already imply canonical Robinson free-site active/corner
+recognition for the first audited L2 candidate, so this package exposes the
+current finite scaffold target without requiring callers to restate the
+canonical recognition field separately.
+-/
+structure FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from finite origin-zero checked layer stacks,
+using the primitive recursive generated position-code decoder step.
+-/
+structure FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from finite origin-zero checked layer stacks,
+using the global position-code label-index source target.
+-/
+structure FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Figure 18 scaffold-tiling route from finite origin-zero checked layer stacks,
+using the source-specialized position-code label-index source target.
+-/
+structure FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  scaffoldPlane : TilesPlane figure18ScaffoldTiles
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Figure 18 scaffold-tiling route from canonical Robinson free-site
 active/corner recognition.
 
@@ -2227,6 +2275,218 @@ theorem domino_problem_undecidable
     h.labelIndex
 
 end FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack scaffold-tiling package to the canonical-free-site
+row-source package.
+-/
+def toCanonicalFreeSiteConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c1ActiveCornerOfOriginZeroCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  sourceRows := h.sourceRows
+
+/--
+Project the checked-stack scaffold-tiling package to the origin-zero
+row-source package.
+-/
+def toOriginZeroConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  sourceRows := h.sourceRows
+
+/-- Convert the checked-stack scaffold-tiling row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    FinalReductionInputs :=
+  h.toOriginZeroConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, a plane tiling of the
+compatible Figure 18 scaffold tiles, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOriginZeroConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, a plane tiling of the
+compatible Figure 18 scaffold tiles, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOriginZeroConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack scaffold-tiling decoder-step package to the
+canonical-free-site decoder-step package.
+-/
+def toCanonicalFreeSiteDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c1ActiveCornerOfOriginZeroCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := h.decoderStep
+
+/--
+Project the checked-stack scaffold-tiling decoder-step package to the
+origin-zero decoder-step package.
+-/
+def toOriginZeroDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := h.decoderStep
+
+/-- Convert the checked-stack scaffold-tiling decoder-step package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    FinalReductionInputs :=
+  h.toOriginZeroDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, a plane tiling of the
+compatible Figure 18 scaffold tiles, and the generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOriginZeroDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, a plane tiling of the
+compatible Figure 18 scaffold tiles, and the generated position-code decoder
+step.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOriginZeroDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the global-label package to the checked-stack decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := sourceDecoderStepPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Forget the global label-index target to the source-specialized target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations where
+  checkedStacks := h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+/-- Convert the checked-stack scaffold-tiling global-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the checked-stack scaffold-tiling global-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the checked-stack scaffold-tiling global-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldTilesPlaneCheckedStacksGlobalPositionCodeConstructionObligations
+
+namespace FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the source-label package to the checked-stack decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCheckedStacksDecoderStepConstructionObligations where
+  checkedStacks := h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  decoderStep := sourceDecoderStepPrimrec_of_sourceLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack scaffold-tiling source-label package to the
+canonical-free-site source-label package.
+-/
+def toCanonicalFreeSiteSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner :=
+    TM0FoldedReduction.l2c1ActiveCornerOfOriginZeroCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  labelIndex := h.labelIndex
+
+/--
+Project the checked-stack scaffold-tiling source-label package to the
+origin-zero source-label package.
+-/
+def toOriginZeroSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c1OriginZeroWindowsOfCheckedStacks h.checkedStacks
+  scaffoldPlane := h.scaffoldPlane
+  labelIndex := h.labelIndex
+
+/-- Convert the checked-stack scaffold-tiling source-label package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    FinalReductionInputs :=
+  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the checked-stack scaffold-tiling source-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOriginZeroSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the checked-stack scaffold-tiling source-label package. -/
+theorem domino_problem_undecidable
+    (h : FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOriginZeroSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure18ScaffoldTilesPlaneCheckedStacksSourcePositionCodeConstructionObligations
 
 namespace FinalFigure18ScaffoldTilesPlaneCanonicalFreeSiteConstructionObligations
 

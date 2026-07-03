@@ -1079,6 +1079,16 @@ figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBo
 ordinary `Figure18ScaffoldData.Certificate`s/`IsScaffold`, and both encoded and
 unencoded position-source undecidability endpoints for the two audited L2
 candidates.
+The public final layer now also exposes checked-stack versions of the Figure 18
+scaffold-plane route:
+`FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations` and the
+decoder-step/global-label/source-label variants.  These packages take finite
+`L2C1OriginZeroCheckedStacks` directly, derive canonical free-site
+active/corner recognition via
+`l2c1ActiveCornerOfOriginZeroCheckedStacks`, and route the endpoints through
+the existing origin-zero scaffold-plane wrappers.  This removes the need for
+callers who already have checked stacks to restate the canonical recognition
+obligation separately.
 The direct cofinal-square replacement for `TilesPlane figure18ScaffoldTiles`
 has been removed from the public final surface because the standalone Figure 18
 site-square problem is a diagnostic target, not the scaffold instantiation

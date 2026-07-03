@@ -174,6 +174,14 @@ and
 `domino_problem_undecidable_of_originZeroWindowsAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom`
 combine the same global label-index source target with the cleaner geometric
 origin-zero scaffold hypothesis.
+For the Figure 18 scaffold-plane route, `LeanWang.Final` now also exposes
+checked-stack variants
+`FinalFigure18ScaffoldTilesPlaneCheckedStacksConstructionObligations` and the
+decoder-step/global-label/source-label analogues.  These use
+`TM0FoldedReduction.l2c1ActiveCornerOfOriginZeroCheckedStacks` as the named
+projection from finite origin-zero checked stacks to canonical Robinson
+free-site active/corner recognition, while their endpoints reuse the existing
+origin-zero scaffold-plane route.
 The standalone `TileableSquare figure18ScaffoldTiles` cofinal target is not a
 final route: the direct Figure 18 site-square problem is a diagnostic surface,
 while the proof-facing scaffold target is the Section 7 checked-stack plus
