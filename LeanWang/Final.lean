@@ -1058,6 +1058,17 @@ abbrev FinalFigure13L2C2ValidTranslatedBoxes : Prop :=
 
 set_option linter.style.longLine false in
 /--
+Concrete tileable-box target for the shared Figure 18 scaffold tiles.
+
+This is one step below `FinalFigure13L2C2ValidTranslatedBoxes`: a tileable box
+for `figure18ScaffoldTiles` can be translated to any concrete
+`Figure18ScaffoldData` presentation, including the audited L2C2 data.
+-/
+abbrev FinalFigure13L2C2Figure18ScaffoldTileableBoxes : Prop :=
+  ∀ r : Nat, 0 < r → TileableBox figure18ScaffoldTiles r
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with
 generated interior position-code rows.
 
@@ -1113,6 +1124,34 @@ structure FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstr
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 canonical-active-corner/tileable-box route
+with generated interior position-code rows.
+
+This is the finite box-form of the current scaffold target: tileable boxes of
+the concrete Figure 18 scaffold tiles imply the valid translated boxes used
+above.
+-/
+structure FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations :
+    Prop where
+  canonicalActiveCorner :
+    TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  tileableBoxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 canonical-active-corner/tileable-box route
+with the source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  canonicalActiveCorner :
+    TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  tileableBoxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Valid translated L2C2 boxes provide the isolated-box invariant used by the
 current scaffold surface.
 -/
@@ -1122,6 +1161,18 @@ def finalFigure13L2C2PositiveTranslatedIsolatedBoxesOfValidTranslatedBoxes
       l2Component2Figure18ScaffoldData := by
   simpa [l2Component2Figure18ScaffoldData] using
     l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes validBoxes
+
+set_option linter.style.longLine false in
+/--
+Tileable boxes of the shared Figure 18 scaffold tiles provide valid translated
+boxes for the L2C2 scaffold data.
+-/
+def finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+    (hboxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes) :
+    FinalFigure13L2C2ValidTranslatedBoxes := by
+  simpa [FinalFigure13L2C2ValidTranslatedBoxes] using
+    Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+      l2Component2Figure18ScaffoldData hboxes
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
@@ -1511,6 +1562,141 @@ theorem domino_problem_undecidable
   h.toCombinedWindowValidBoxConstructionObligations.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/tileable-box package to the
+canonical-active-corner/valid-box package.
+-/
+def toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+      h.tileableBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/tileable-box package to the decoded-window
+valid-box package.
+-/
+def toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations :=
+  h.toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toCombinedWindowValidBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-active-corner/tileable-box package to the existing
+origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site active/corner recognition, tileable
+Figure 18 scaffold boxes, and the source-specialized position-code label-index
+target.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site active/corner recognition, tileable
+Figure 18 scaffold boxes, and the source-specialized position-code label-index
+target.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/tileable-box package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  tileableBoxes := h.tileableBoxes
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/tileable-box package to the
+canonical-active-corner/valid-box package.
+-/
+def toCanonicalActiveCornerValidBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    FinalFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations where
+  canonicalActiveCorner := h.canonicalActiveCorner
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+      h.tileableBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source canonical-active-corner/tileable-box package to the
+existing origin-zero/translated-positive-box source-label endpoint.
+-/
+def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations :=
+  h.toCanonicalActiveCornerValidBoxConstructionObligations
+    |>.toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical free-site active/corner recognition, tileable
+Figure 18 scaffold boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCanonicalActiveCornerValidBoxConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical free-site active/corner recognition, tileable
+Figure 18 scaffold boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCanonicalActiveCornerValidBoxConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations
 set_option linter.style.longLine true
 
 /--
@@ -8447,6 +8633,51 @@ target.
 theorem domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, tileable Figure 18 scaffold boxes, and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+tileable Figure 18 scaffold boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations
+    (h : FinalFigure13L2C2CanonicalActiveCornerTileableBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, tileable Figure 18 scaffold boxes, and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+tileable Figure 18 scaffold boxes, and the source-specialized position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

@@ -1382,14 +1382,15 @@ conditions have been narrowed to two proof-facing fronts:
 2. **Scaffold instantiation.**  Prove the concrete Figure 13/Figure 16 Section
    7 scaffold package on the live route.  The preferred concrete surface is
    now
-   `FinalFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations`
+   `FinalFigure13L2C2CanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations`
    (or its row-source variant).  This asks for canonical free-site
-   active/corner recognition and valid translated boxes for the human-audited
-   L2C2 Figure 13 data.  Canonical free-site active/corner recognition implies
-   the decoded origin-zero active/corner windows used by
+   active/corner recognition and tileable boxes of the shared Figure 18
+   scaffold tiles.  Canonical free-site active/corner recognition implies the
+   decoded origin-zero active/corner windows used by
    `FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations`.
-   Valid translated boxes imply the positive translated isolated active-corner
-   box invariant used by
+   Tileable Figure 18 scaffold boxes imply valid translated boxes for the
+   audited L2C2 Figure 13 data; valid translated boxes imply the positive
+   translated isolated active-corner box invariant used by
    `FinalFigure13L2C2CombinedWindowIsolatedBoxSourcePositionCodeConstructionObligations`;
    the subsequent projection to
    `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
@@ -1397,7 +1398,8 @@ conditions have been narrowed to two proof-facing fronts:
    translated-positive-box endpoint.  The older
    `FinalL2C2CheckedStackValidTranslatedBox*` wrappers now pass through this
    canonical-active-corner/valid-box surface: checked stacks provide canonical
-   active/corner recognition directly.
+   active/corner recognition directly, while their existing valid-box field is
+   already above the tileable-box target.
 
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
