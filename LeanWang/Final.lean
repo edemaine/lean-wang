@@ -2316,7 +2316,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -2328,7 +2328,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
@@ -2398,7 +2398,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -2410,7 +2410,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
@@ -2784,7 +2784,7 @@ translated isolated active boxes, and generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -2795,7 +2795,7 @@ translated isolated active boxes, and generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowIsolatedBoxOneRowsConstructionObligations
@@ -2879,7 +2879,7 @@ rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -2891,7 +2891,7 @@ rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2CombinedWindowIsolatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowIsolatedBoxBoundedRowsConstructionObligations
@@ -4330,7 +4330,7 @@ tileable Figure 18 scaffold boxes, and generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -4341,7 +4341,7 @@ tileable Figure 18 scaffold boxes, and generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalActiveCornerTileableBoxOneRowsConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxOneRowsConstructionObligations
@@ -4425,7 +4425,7 @@ position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+  h.toConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -4437,7 +4437,7 @@ position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalActiveCornerTileableBoxBoundedRowsConstructionObligations
+  h.toConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxBoundedRowsConstructionObligations
@@ -9975,7 +9975,10 @@ finite layer patches, and generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesRows
+    h.boardFreeLineActiveCorner h.layerPatches
+    (TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows)
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -9986,7 +9989,10 @@ finite layer patches, and generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesRows
+    h.boardFreeLineActiveCorner h.layerPatches
+    (TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows)
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
@@ -10039,7 +10045,11 @@ finite layer patches, and generated bounded-interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesRows
+    h.boardFreeLineActiveCorner h.layerPatches
+    (TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      (TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+        h.sourceRows))
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -10050,7 +10060,11 @@ finite layer patches, and generated bounded-interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesRows
+    h.boardFreeLineActiveCorner h.layerPatches
+    (TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      (TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+        h.sourceRows))
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
