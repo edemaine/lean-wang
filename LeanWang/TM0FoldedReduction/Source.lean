@@ -2887,6 +2887,35 @@ structure SourcePositionCodeInteriorRowsWithStatementNodup : Prop where
   rows : SourcePositionCodeInteriorRowsPrimrec
   statementList_nodup : SourceStatementListNodup
 
+/--
+Source-uniform one-row position-code decoder plus raw TM1 support uniqueness
+and disjointness.  This is the same source-side endpoint as
+`SourcePositionCodeOneRowsWithStatementNodup`, but with the remaining machine
+list facts stated before the code-specific `StartedLabel` relabeling.
+-/
+structure SourcePositionCodeOneRowsWithRawTM1StatementSupport : Prop where
+  rows : SourcePositionCodeOneRowsPrimrec
+  statementSupport_nodup : SourceTM1StatementSupportNodup
+  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
+
+/--
+Source-uniform bounded-interior position-code decoder plus raw TM1 support
+uniqueness and disjointness.
+-/
+structure SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport : Prop where
+  rows : SourcePositionCodeBoundedInteriorRowsPrimrec
+  statementSupport_nodup : SourceTM1StatementSupportNodup
+  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
+
+/--
+Source-uniform interior position-code decoder plus raw TM1 support uniqueness
+and disjointness.
+-/
+structure SourcePositionCodeInteriorRowsWithRawTM1StatementSupport : Prop where
+  rows : SourcePositionCodeInteriorRowsPrimrec
+  statementSupport_nodup : SourceTM1StatementSupportNodup
+  statementSupport_pairwise_disjoint : SourceTM1StatementSupportPairwiseDisjoint
+
 /-- One-row generated position-code rows give the interior-row target. -/
 theorem sourcePositionCodeInteriorRowsPrimrec_of_oneRows
     (hrows : SourcePositionCodeOneRowsPrimrec) :
@@ -2939,6 +2968,65 @@ def sourcePositionCodeOneRowsWithStatementNodup_of_interior
     SourcePositionCodeOneRowsWithStatementNodup :=
   sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior
     (sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
+      hinterior)
+
+/-- Raw TM1 support facts provide the statement-uniqueness field for one-row rows. -/
+def sourcePositionCodeOneRowsWithStatementNodup_of_rawTM1StatementSupport
+    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeOneRowsWithStatementNodup where
+  rows := hrows.rows
+  statementList_nodup :=
+    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
+      hrows.statementSupport_nodup hrows.statementSupport_pairwise_disjoint
+
+/-- Raw TM1 support facts provide the statement-uniqueness field for bounded rows. -/
+def sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeBoundedInteriorRowsWithStatementNodup where
+  rows := hbounded.rows
+  statementList_nodup :=
+    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
+      hbounded.statementSupport_nodup hbounded.statementSupport_pairwise_disjoint
+
+/-- Raw TM1 support facts provide the statement-uniqueness field for interior rows. -/
+def sourcePositionCodeInteriorRowsWithStatementNodup_of_rawTM1StatementSupport
+    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeInteriorRowsWithStatementNodup where
+  rows := hinterior.rows
+  statementList_nodup :=
+    sourceStatementListNodup_of_rawTM1StatementSupportPairwiseDisjoint
+      hinterior.statementSupport_nodup hinterior.statementSupport_pairwise_disjoint
+
+/-- A raw one-row package also supplies the raw interior package. -/
+def sourcePositionCodeInteriorRowsWithRawTM1StatementSupport_of_oneRows
+    (hrows : SourcePositionCodeOneRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeInteriorRowsWithRawTM1StatementSupport where
+  rows := sourcePositionCodeInteriorRowsPrimrec_of_oneRows hrows.rows
+  statementSupport_nodup := hrows.statementSupport_nodup
+  statementSupport_pairwise_disjoint := hrows.statementSupport_pairwise_disjoint
+
+/-- A raw interior package also supplies the raw bounded-interior package. -/
+def sourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport where
+  rows := sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior.rows
+  statementSupport_nodup := hinterior.statementSupport_nodup
+  statementSupport_pairwise_disjoint := hinterior.statementSupport_pairwise_disjoint
+
+/-- A raw bounded-interior package also supplies the raw one-row package. -/
+def sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_boundedInterior
+    (hbounded : SourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeOneRowsWithRawTM1StatementSupport where
+  rows := sourcePositionCodeOneRowsPrimrec_of_boundedInterior hbounded.rows
+  statementSupport_nodup := hbounded.statementSupport_nodup
+  statementSupport_pairwise_disjoint := hbounded.statementSupport_pairwise_disjoint
+
+/-- A raw interior package also supplies the raw one-row package. -/
+def sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_interior
+    (hinterior : SourcePositionCodeInteriorRowsWithRawTM1StatementSupport) :
+    SourcePositionCodeOneRowsWithRawTM1StatementSupport :=
+  sourcePositionCodeOneRowsWithRawTM1StatementSupport_of_boundedInterior
+    (sourcePositionCodeBoundedInteriorRowsWithRawTM1StatementSupport_of_interior
       hinterior)
 
 end TM0FoldedReduction
