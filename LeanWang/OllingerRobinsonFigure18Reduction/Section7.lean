@@ -2937,6 +2937,39 @@ set_option linter.style.longLine false in
 Finite scaffold data for the first audited L2-blank candidate, one step below
 `L2C1CheckedStackLayerPatchData`.
 
+The checked stacks supply the origin-zero Section 7 recognition.  The positive
+centered active-corner boxes are the concrete finite patch obligation.
+-/
+structure L2C1CheckedStackPositiveBoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the second audited L2-blank candidate, one step below
+`L2C2CheckedStackLayerPatchData`.
+-/
+structure L2C2CheckedStackPositiveBoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the first audited L2-blank candidate, one step below
+`L2C1CheckedStackLayerPatchData`.
+
 The checked stacks supply the origin-zero Section 7 recognition.  The translated
 box field is the concrete finite patch obligation; the existing no-neighbor
 active-site checks convert it into active-corner layer patches.
@@ -4624,6 +4657,28 @@ def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
     L2C2CheckedStackLayerPatchData where
   checkedStacks := hchecked
   patches := l2c2ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered scaffold boxes provide the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+    (data : L2C1CheckedStackPositiveBoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    data.checkedStacks data.positiveBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered scaffold boxes provide the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+    (data : L2C2CheckedStackPositiveBoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    data.checkedStacks data.positiveBoxes
 
 set_option linter.style.longLine false in
 /--

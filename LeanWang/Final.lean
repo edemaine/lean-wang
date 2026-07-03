@@ -707,6 +707,66 @@ structure FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligatio
 set_option linter.style.longLine false in
 /--
 Second-candidate finite-scaffold construction route one step below layer
+patches, with positive centered active-corner indexed boxes as the finite
+realization target.
+-/
+structure FinalL2C2CheckedStackPositiveBoxConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with generated one-row
+position-code rows.
+-/
+structure FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with generated
+bounded-interior position-code rows.
+-/
+structure FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with the narrower generated
+decoder-step source target.
+-/
+structure FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with the global position-code
+label-index source target.
+-/
+structure FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with the source-specialized
+position-code label-index source target.
+-/
+structure FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate finite-scaffold construction route one step below layer
 patches.
 -/
 structure FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations : Prop where
@@ -9012,6 +9072,108 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesPackage
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatches
     checkedStacks patches sourceRows.rows
+
+namespace FinalL2C2CheckedStackPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+end FinalL2C2CheckedStackPositiveBoxConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box one-row data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+end FinalL2C2CheckedStackPositiveBoxOneRowsConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box bounded-row data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+end FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box decoder-step data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  decoderStep := h.decoderStep
+
+end FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box global-label data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+end FinalL2C2CheckedStackPositiveBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/positive-box source-label data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  labelIndex := h.labelIndex
+
+end FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations
 
 namespace FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
