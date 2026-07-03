@@ -1413,6 +1413,11 @@ conditions have been narrowed to two proof-facing fronts:
    The same L2C2 checked-stack/layer-patch public endpoint now also exposes
    generated one-row and bounded-interior source-row wrappers, matching the
    weaker source targets already available for the first L2 route.
+   The lower `TM0FoldedPositionReduction.Theorems` layer now exposes the
+   matching L2C2 decoder-step, one-row, and bounded-interior checked-stack
+   wrappers with `positionProgramData` correctness discharged; the older
+   Figure 18 position module continues to own the global/source/interior
+   wrappers.
 
 Do not spend more effort on the diagnostic raw-boundary or canonical checked
 Figure 16 level-check routes.  The shifted raw-boundary board-level interfaces,
