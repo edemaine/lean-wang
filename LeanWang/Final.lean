@@ -5252,6 +5252,124 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesPackage
   domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatches
     checkedStacks patches sourceRows.rows
 
+set_option linter.style.longLine false in
+/--
+Second-candidate checked origin-zero stacks plus finite Figure 16 compatible
+level checks instantiate the checked-stack/layer-patch scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksCompatibleFig16LevelChecks
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    TM0FoldedReduction.L2C2CheckedStackLayerPatchData :=
+  TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    checkedStacks compatibleLevelChecks
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, finite
+Figure 16 compatible level checks, and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold :=
+        l2c2CheckedStackLayerPatchDataOfCheckedStacksCompatibleFig16LevelChecks
+          checkedStacks compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+finite Figure 16 compatible level checks, and the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (labelIndex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+    { scaffold :=
+        l2c2CheckedStackLayerPatchDataOfCheckedStacksCompatibleFig16LevelChecks
+          checkedStacks compatibleLevelChecks
+      labelIndex := labelIndex }
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, finite
+Figure 16 compatible level checks, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    checkedStacks compatibleLevelChecks
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+finite Figure 16 compatible level checks, and generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeInteriorRows
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksSourcePositionCodeLabelIndexFrom
+    checkedStacks compatibleLevelChecks
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, finite
+Figure 16 compatible level checks, and the generated position-code decoder
+step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold :=
+        l2c2CheckedStackLayerPatchDataOfCheckedStacksCompatibleFig16LevelChecks
+          checkedStacks compatibleLevelChecks
+      decoderStep := decoderStep }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+finite Figure 16 compatible level checks, and the generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndCompatibleFig16LevelChecksDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (compatibleLevelChecks :
+      TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks)
+    (decoderStep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchDecoderStepConstructionObligations.domino_problem_undecidable
+    { scaffold :=
+        l2c2CheckedStackLayerPatchDataOfCheckedStacksCompatibleFig16LevelChecks
+          checkedStacks compatibleLevelChecks
+      decoderStep := decoderStep }
+
 namespace FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
