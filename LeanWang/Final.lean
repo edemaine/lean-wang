@@ -11332,6 +11332,113 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false
+namespace OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+source-label board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndex := hindex
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+interior-row board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+one-row board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+bounded-interior board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+decoder-step board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  decoderStep := hstep
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+global-position board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndex := hindex
+
+end OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData.NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2CanonicalProductRoutingLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
@@ -16307,6 +16414,210 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchGlobalP
       FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsSourcePositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsSourcePositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsInteriorRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsInteriorRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated one-row
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsOneRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated one-row
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsOneRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsBoundedRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsBoundedRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the generated position-code
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsDecoderStep
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+    hstep).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the generated position-code
+decoder step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsDecoderStep
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+    hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the global position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsGlobalPositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the global position-code
+label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsGlobalPositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    hindex).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
