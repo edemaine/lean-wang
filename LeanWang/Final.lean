@@ -6136,6 +6136,28 @@ def toFinalReductionInputs
     (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
       h.sourceRows)
 
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and generated
+one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and
+generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsCorrect
+    h.scaffold h.sourceRows
+
 end FinalCheckedStackLayerPatchOneRowsConstructionObligations
 
 namespace FinalCheckedStackLayerPatchBoundedRowsConstructionObligations
@@ -6185,6 +6207,28 @@ def toFinalReductionInputs
     h.scaffold
     (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
       h.sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and generated
+bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and
+generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsCorrect
+    h.scaffold h.sourceRows
 
 end FinalCheckedStackLayerPatchBoundedRowsConstructionObligations
 
@@ -18368,8 +18412,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchData
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+  FinalCheckedStackLayerPatchConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18380,8 +18424,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchData
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchData scaffold sourceRows)
+  FinalCheckedStackLayerPatchConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18392,9 +18436,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataOneRows
-      scaffold sourceRows)
+  FinalCheckedStackLayerPatchOneRowsConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18405,9 +18448,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataOneRows
-      scaffold sourceRows)
+  FinalCheckedStackLayerPatchOneRowsConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18418,9 +18460,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedR
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataBoundedRows
-      scaffold sourceRows)
+  FinalCheckedStackLayerPatchBoundedRowsConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18431,9 +18472,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataBoundedRows
-      scaffold sourceRows)
+  FinalCheckedStackLayerPatchBoundedRowsConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, sourceRows := sourceRows }
 
 set_option linter.style.longLine false in
 /--
@@ -18444,9 +18484,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderS
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
-      scaffold hstep)
+  FinalCheckedStackLayerPatchDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, decoderStep := hstep }
 
 set_option linter.style.longLine false in
 /--
@@ -18457,9 +18496,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderStep
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataDecoderStep
-      scaffold hstep)
+  FinalCheckedStackLayerPatchDecoderStepConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, decoderStep := hstep }
 
 set_option linter.style.longLine false in
 /--
@@ -18471,9 +18509,8 @@ theorem
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
-      scaffold hindex)
+  FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, labelIndex := hindex }
 
 set_option linter.style.longLine false in
 /--
@@ -18484,9 +18521,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCo
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
-      scaffold hindex)
+  FinalCheckedStackLayerPatchGlobalPositionCodeConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, labelIndex := hindex }
 
 set_option linter.style.longLine false in
 /--
@@ -18498,9 +18534,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePo
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold hindex)
+  FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, labelIndex := hindex }
 
 set_option linter.style.longLine false in
 /--
@@ -18511,9 +18546,8 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCo
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
-      scaffold hindex)
+  FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, labelIndex := hindex }
 
 set_option linter.style.longLine false in
 /--
@@ -18702,9 +18736,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatches
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatches
-      checkedStacks patches sourceRows)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchData
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18716,9 +18749,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatches
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatches
-      checkedStacks patches sourceRows)
+  domino_problem_undecidable_of_checkedStackLayerPatchData
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18730,9 +18762,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRow
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesOneRows
-      checkedStacks patches sourceRows)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18744,9 +18775,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesOneRows
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesOneRows
-      checkedStacks patches sourceRows)
+  domino_problem_undecidable_of_checkedStackLayerPatchDataOneRows
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18758,9 +18788,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesBounde
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesBoundedRows
-      checkedStacks patches sourceRows)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18772,9 +18801,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesBoundedRows
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesBoundedRows
-      checkedStacks patches sourceRows)
+  domino_problem_undecidable_of_checkedStackLayerPatchDataBoundedRows
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -18815,9 +18843,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesPackag
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesPackage
-      checkedStacks patches sourceRows)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchData
+    { checkedStacks := checkedStacks, patches := patches } sourceRows.rows
 
 set_option linter.style.longLine false in
 /--
@@ -18829,9 +18856,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesPackage
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesPackage
-      checkedStacks patches sourceRows)
+  domino_problem_undecidable_of_checkedStackLayerPatchData
+    { checkedStacks := checkedStacks, patches := patches } sourceRows.rows
 
 set_option linter.style.longLine false in
 /--
@@ -18844,9 +18870,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesDecode
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesDecoderStep
-      checkedStacks patches hstep)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderStep
+    { checkedStacks := checkedStacks, patches := patches } hstep
 
 set_option linter.style.longLine false in
 /--
@@ -18858,9 +18883,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesDecoderStep
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hstep : SourcePositionCodeDecoderStepPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesDecoderStep
-      checkedStacks patches hstep)
+  domino_problem_undecidable_of_checkedStackLayerPatchDataDecoderStep
+    { checkedStacks := checkedStacks, patches := patches } hstep
 
 set_option linter.style.longLine false in
 /--
@@ -18872,9 +18896,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobal
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
-      checkedStacks patches hindex)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    { checkedStacks := checkedStacks, patches := patches } hindex
 
 set_option linter.style.longLine false in
 /--
@@ -18886,9 +18909,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobalPosition
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
-      checkedStacks patches hindex)
+  domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+    { checkedStacks := checkedStacks, patches := patches } hindex
 
 set_option linter.style.longLine false in
 /--
@@ -18901,9 +18923,8 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesSource
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
-      checkedStacks patches hindex)
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    { checkedStacks := checkedStacks, patches := patches } hindex
 
 set_option linter.style.longLine false in
 /--
@@ -18916,9 +18937,8 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesSourcePosition
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
-      checkedStacks patches hindex)
+  domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
+    { checkedStacks := checkedStacks, patches := patches } hindex
 
 
 end LeanWang
