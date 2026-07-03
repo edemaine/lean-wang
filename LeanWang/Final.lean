@@ -169,6 +169,19 @@ structure FinalFigure13NatSitesIndexedWindowConstructionObligations where
       cornerIndex cornerQuadrant cornerIndex_valid).HasRealizationInvariant
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete Robinson indexed-box scaffold route.
+
+This packages the current Figure 13/Figure 16 scaffold target directly: the
+finite Nat-site certificate carries the checked Robinson routed free-grid stacks
+and active-corner indexed boxes, while `sourceRows` carries the generated
+interior position-code source reduction.
+-/
+structure FinalFigure13RobinsonIndexedBoxConstructionObligations where
+  scaffold : NatSiteRobinsonIndexedBoxScaffoldCertificate
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -853,6 +866,34 @@ theorem domino_problem_undecidable
 
 end FinalFigure13NatSitesIndexedWindowConstructionObligations
 
+namespace FinalFigure13RobinsonIndexedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete Robinson indexed-box scaffold certificate
+and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13RobinsonIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
+    h.scaffold.flexibleInstance h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete Robinson indexed-box scaffold certificate
+and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13RobinsonIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure18_flexible_position_source_interiorRows
+    h.scaffold.flexibleInstance h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure13RobinsonIndexedBoxConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1295,6 +1336,26 @@ position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13NatSitesIndexedWindowConstructionObligations
     (h : FinalFigure13NatSitesIndexedWindowConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete Robinson indexed-box
+scaffold certificate and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonIndexedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete Robinson indexed-box scaffold
+certificate and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonIndexedBoxConstructionObligations
+    (h : FinalFigure13RobinsonIndexedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

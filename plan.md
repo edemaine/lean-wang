@@ -919,6 +919,14 @@ public endpoint closest to the human-audited Figure 13 layer table: it asks for
 raw checked active-site specs, a checked corner, indexed active/corner windows,
 and a realization certificate, then applies the existing concrete Figure 13
 scaffold theorem with the generated interior-row source target.
+It also now exposes the more proof-facing Robinson indexed-box route via
+`FinalFigure13RobinsonIndexedBoxConstructionObligations`: a concrete
+`NatSiteRobinsonIndexedBoxScaffoldCertificate` bundles the checked routed
+free-grid stacks and active-corner indexed boxes, then forgets to the existing
+Figure 18 flexible instance endpoint with generated interior position-code
+rows.  This is the cleaner final API for the current scaffold work because it
+matches the certificate produced by the Figure 13/Figure 16 transcription
+rather than restating its lower-level indexed-window and realization fields.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
