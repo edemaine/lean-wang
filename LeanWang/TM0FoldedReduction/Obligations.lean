@@ -18,43 +18,37 @@ namespace TM0FoldedReduction
 open Nat.Partrec (Code)
 
 theorem sourceProgramData_computable_of_source_searchCodeDecoderStep
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourceSearchCodeDecoderStep p.1 p.2)) :
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
     (sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step hstep)
 
 theorem sourceProgramData_computable_of_source_searchCodeDecoderStep'
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourceSearchCodeDecoderStep p.1 p.2)) :
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeDecoderStep hstep).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_searchCodeOneRows
-    (hrows : Primrec (fun p : Code × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 p.2.1 p.2.2)) :
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
     (sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneRows hrows)
 
 theorem sourceProgramData_computable_of_source_searchCodeOneRows'
-    (hrows : Primrec (fun p : Code × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 p.2.1 p.2.2)) :
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeOneRows hrows).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_searchCodeOneVarRows
-    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    (hvarRows : SourceSearchCodeOneVarRowsPrimrec) :
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_labelIndexFromWithSearchCode
     (sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneVarRows hvarRows)
 
 theorem sourceProgramData_computable_of_source_searchCodeOneVarRows'
-    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)) :
+    (hvarRows : SourceSearchCodeOneVarRowsPrimrec) :
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_searchCodeOneVarRows hvarRows).of_eq fun _ => rfl
@@ -114,15 +108,13 @@ theorem sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup'
     hrows).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_boundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    (hinterior : SourceSearchCodeBoundedInteriorRowsPrimrec) :
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_searchCodeOneVarRows
     (sourceSearchCodeOneRowsVar_primrec_of_boundedInterior hinterior)
 
 theorem sourceProgramData_computable_of_source_boundedInteriorRows'
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    (hinterior : SourceSearchCodeBoundedInteriorRowsPrimrec) :
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_boundedInteriorRows hinterior).of_eq fun _ => rfl
@@ -165,15 +157,13 @@ theorem sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithState
     hbounded).of_eq fun _ => rfl
 
 theorem sourceProgramData_computable_of_source_interiorRows
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
     Computable sourceProgramData :=
   sourceProgramData_computable_of_source_boundedInteriorRows
     (sourceSearchCodeBoundedInteriorRowsVar_primrec_of_interior hinterior)
 
 theorem sourceProgramData_computable_of_source_interiorRows'
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2)) :
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
     Computable (fun c : Code =>
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_interiorRows hinterior).of_eq fun _ => rfl
@@ -221,8 +211,7 @@ folded program-data semantic correctness, gives the exact source obligations
 needed by the final reduction.
 -/
 def sourceObligationsOfLabelIndexFromWithSearchCode
-    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -239,8 +228,7 @@ descriptor decoder, together with normalized folded program-data semantic
 correctness, gives the exact source obligations needed by the final reduction.
 -/
 def sourceObligationsOfSearchCodeDecoderStep
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourceSearchCodeDecoderStep p.1 p.2))
+    (hstep : SourceSearchCodeDecoderStepPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -257,8 +245,7 @@ with normalized folded program-data semantic correctness, gives the exact
 source obligations needed by the final reduction.
 -/
 def sourceObligationsOfSearchCodeOneRows
-    (hrows : Primrec (fun p : Code × Nat × Nat =>
-      sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 p.2.1 p.2.2))
+    (hrows : SourceSearchCodeOneRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -275,8 +262,7 @@ decoder, together with normalized folded program-data semantic correctness,
 gives the exact source obligations needed by the final reduction.
 -/
 def sourceObligationsOfSearchCodeOneVarRows
-    (hvarRows : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2))
+    (hvarRows : SourceSearchCodeOneVarRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -376,8 +362,7 @@ normalized folded program-data semantic correctness, gives the exact source
 obligations needed by the final reduction.
 -/
 def sourceObligationsOfSearchCodeBoundedInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2))
+    (hinterior : SourceSearchCodeBoundedInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -394,8 +379,7 @@ normalized folded program-data semantic correctness, gives the exact source
 obligations needed by the final reduction.
 -/
 def sourceObligationsOfSearchCodeInteriorRows
-    (hinterior : Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
-      sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2))
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
         (Turing.TM0.eval
