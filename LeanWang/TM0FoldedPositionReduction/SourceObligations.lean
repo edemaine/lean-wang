@@ -66,8 +66,8 @@ def positionSourceObligationsOfPositionCodeDecoderStepCorrect
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
       sourcePositionCodeDecoderStep p.1 p.2)) :
     PositionSourceObligations :=
-  positionSourceObligationsOfPositionCodeDecoderStep hstep
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+    (sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep hstep)
 
 set_option linter.style.longLine false in
 /--

@@ -2437,6 +2437,17 @@ abbrev SourcePositionCodeLabelIndexFromPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × Nat =>
     sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)
 
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the generated position-code accumulator step implies
+the source-specialized position-code label-index decoder target.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step
+    hstep
+
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>

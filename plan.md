@@ -298,10 +298,13 @@ one weakest source-obligation path rather than packaging each row target
 separately.
 The semantic generated-position packaging in
 `TM0FoldedPositionReduction.SourceObligations` follows the same route:
-global-label, one-row, bounded-interior, interior-row, and packaged row
-constructors now delegate through
+decoder-step, global-label, one-row, bounded-interior, interior-row, and
+packaged row constructors now delegate through
 `positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect` whenever
-possible.
+possible.  The named bridge
+`sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep` records that the
+accumulator-step proof already yields the full source-specialized
+label-index decoder by iteration.
 
 The next computability proof still needs an explicitly source-indexed decoder.
 The available statement and label encoders in `TM0Route` prove many fixed-`tc`
