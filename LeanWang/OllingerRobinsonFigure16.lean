@@ -210,6 +210,34 @@ instance (component : Thick) : Decidable component.hasLineSum := by
   unfold hasLineSum
   infer_instance
 
+/--
+The thick components that are genuine sums of two line atoms.
+
+The four corner components `L2a`-`L2d` are excluded; the human transcription
+uses exactly `L2e`-`L2t` for two-line sums, including the reflected components
+`L2q`-`L2t`.
+-/
+def lineSumComponents : List Thick := [
+  .e, .f, .g, .h,
+  .i, .j, .k, .l,
+  .m, .n, .o, .p,
+  .q, .r, .s, .t
+]
+
+theorem lineSumComponents_nodup : lineSumComponents.Nodup := by
+  decide
+
+theorem lineSumComponents_length : lineSumComponents.length = 16 := by
+  rfl
+
+theorem mem_lineSumComponents_iff_hasLineSum (component : Thick) :
+    component ∈ lineSumComponents ↔ component.hasLineSum := by
+  cases component <;> decide
+
+theorem all_filter_hasLineSum :
+    Thick.all.filter Thick.hasLineSum = lineSumComponents := by
+  decide
+
 end Thick
 
 namespace Symbol
@@ -1598,6 +1626,12 @@ structure HumanTranscriptionCertificate : Prop where
     phiL3 .d = .mkRows .L3d .L3a .L3d .L3c
   phiL3_e :
     phiL3 .e = .mkRows .L3e .L3a .L3e .L3c
+  thickLineSumComponents :
+    Thick.all.filter Thick.hasLineSum = Thick.lineSumComponents
+  thickLineSumComponentsNodup :
+    Thick.lineSumComponents.Nodup
+  thickLineSumComponentsLength :
+    Thick.lineSumComponents.length = 16
   sourceTableComplete :
     substitutionRuleSources = RuleSource.all
   sourceTableNodup :
@@ -1643,6 +1677,9 @@ theorem humanTranscriptionCertificate :
   phiL3_c := HumanTranscription.phiL3_c
   phiL3_d := HumanTranscription.phiL3_d
   phiL3_e := HumanTranscription.phiL3_e
+  thickLineSumComponents := Thick.all_filter_hasLineSum
+  thickLineSumComponentsNodup := Thick.lineSumComponents_nodup
+  thickLineSumComponentsLength := Thick.lineSumComponents_length
   sourceTableComplete := substitutionRuleSources_eq_all
   sourceTableNodup := substitutionRuleSources_nodup
   allBlocksCompatible := allSubstitutionBlocksCompatibleBool_eq_true
