@@ -6,11 +6,11 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.TM0FoldedReduction.SourcePositionCode
 
 /-!
-Public primitive-recursion targets and equivalences for the source-level
-position-coded folded reduction.
+Public primitive-recursion targets and equivalences for the source-level folded
+reduction.
 
-The decoder construction lives in `SourcePositionCode`; this module keeps the
-theorem surface cheap to edit and rebuild.
+The decoder constructions live in `SourceCore` and `SourcePositionCode`; this
+module keeps the theorem surface cheap to edit and rebuild.
 -/
 
 namespace LeanWang
@@ -18,6 +18,108 @@ namespace LeanWang
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
+
+/--
+The source-uniform primitive-recursion target for one bounded-support-search
+row on a concrete translated Partrec-variable branch.
+-/
+abbrev SourceSearchCodeOneVarRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+    sourceSearchCodeOneRowsVar p.1 p.2.1 p.2.2)
+
+/-- Primitive-recursion target for interior bounded-support-search rows. -/
+abbrev SourceSearchCodeInteriorRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+    sourceSearchCodeInteriorRowsVar p.1 p.2.1 p.2.2)
+
+/-- Primitive-recursion target for bounded interior bounded-support-search rows. -/
+abbrev SourceSearchCodeBoundedInteriorRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × TM0Route.PartrecVar =>
+    sourceSearchCodeBoundedInteriorRowsVar p.1 p.2.1 p.2.2)
+
+/--
+The source-uniform primitive-recursion target for the one-fuel bounded-search
+label-index decoder.
+-/
+abbrev SourceSearchCodeOneRowsPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat =>
+    sourceSimStepDataForLabelIndexFromWithSearchCode p.1 1 p.2.1 p.2.2)
+
+/-- Primitive-recursion target for the bounded-support-search accumulator step. -/
+abbrev SourceSearchCodeDecoderStepPrimrec : Prop :=
+  Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+    sourceSearchCodeDecoderStep p.1 p.2)
+
+set_option linter.style.longLine false in
+/-- Primitive-recursion target for the source-specialized bounded-search label-index decoder. -/
+abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat × Nat =>
+    sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/-- One-row bounded-search rows generate the interior-row bounded-search target. -/
+theorem sourceSearchCodeInteriorRowsPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeInteriorRowsPrimrec :=
+  sourceSearchCodeInteriorRowsVar_primrec_of_oneRows hrows
+
+/-- Interior bounded-search rows generate the bounded-interior target. -/
+theorem sourceSearchCodeBoundedInteriorRowsPrimrec_of_interiorRows
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
+    SourceSearchCodeBoundedInteriorRowsPrimrec :=
+  sourceSearchCodeBoundedInteriorRowsVar_primrec_of_interior hinterior
+
+/-- Bounded-interior bounded-search rows generate the one-row target. -/
+theorem sourceSearchCodeOneVarRowsPrimrec_of_boundedInteriorRows
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    SourceSearchCodeOneVarRowsPrimrec :=
+  sourceSearchCodeOneRowsVar_primrec_of_boundedInterior hbounded
+
+/-- Variable-branch one-row bounded-search rows generate one-fuel label-index rows. -/
+theorem sourceSearchCodeOneRowsPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeOneRowsPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_one_primrec_of_varRows hrows
+
+/-- Variable-branch one-row bounded-search rows generate the decoder-step target. -/
+theorem sourceSearchCodeDecoderStepPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeDecoderStepPrimrec :=
+  sourceSearchCodeDecoderStep_primrec_of_oneVarRows hrows
+
+/-- One-fuel bounded-search label-index rows generate the decoder-step target. -/
+theorem sourceSearchCodeDecoderStepPrimrec_of_oneRows
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    SourceSearchCodeDecoderStepPrimrec :=
+  sourceSearchCodeDecoderStep_primrec_of_oneRows hrows
+
+/-- The bounded-search decoder step generates the full label-index decoder target. -/
+theorem sourceSearchCodeLabelIndexFromPrimrec_of_decoderStep
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    SourceSearchCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step hstep
+
+/-- One-fuel bounded-search rows generate the full label-index decoder target. -/
+theorem sourceSearchCodeLabelIndexFromPrimrec_of_oneRows
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    SourceSearchCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneRows hrows
+
+/-- Variable-branch one-row bounded-search rows generate the full label-index decoder target. -/
+theorem sourceSearchCodeLabelIndexFromPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeLabelIndexFromPrimrec :=
+  sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_oneVarRows hrows
+
+/--
+The one-row and interior bounded-search row targets are equivalent through the
+existing bounded-interior bridge.
+-/
+theorem sourceSearchCodeOneVarRowsPrimrec_iff_interiorRowsPrimrec :
+    SourceSearchCodeOneVarRowsPrimrec ↔ SourceSearchCodeInteriorRowsPrimrec :=
+  ⟨sourceSearchCodeInteriorRowsPrimrec_of_oneVarRows,
+    fun hinterior =>
+      sourceSearchCodeOneVarRowsPrimrec_of_boundedInteriorRows
+        (sourceSearchCodeBoundedInteriorRowsPrimrec_of_interiorRows hinterior)⟩
 
 /--
 The source-uniform primitive-recursion target for one generated position-code
