@@ -525,6 +525,13 @@ Next implementation targets:
    scaffold-facing theorem surface.  Its finite scaffold inputs are exactly
    `L2C1OriginZeroCheckedStacks` and `L2C1ActiveCornerLayerPatches`, plus the
    source-side `SourcePositionCodeInteriorRowsPrimrec`.
+   This split route now has matching final wrappers for each source-obligation
+   granularity: direct `PositionSourceObligations`, packaged
+   `SourcePositionCodeInteriorRowsWithStatementNodup`, decoder-step primrec,
+   global label-index primrec, and source-specialized label-index primrec.
+   Prefer the weakest wrapper whose machine-side obligation has already been
+   proved, while keeping the scaffold obligations split until bundling them is
+   useful.
    For package-style final assumptions, prefer
    `FinalCheckedStackLayerPatchConstructionObligations`,
    `FinalCheckedStackLayerPatchDecoderStepConstructionObligations`,

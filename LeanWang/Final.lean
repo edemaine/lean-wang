@@ -562,6 +562,66 @@ def ofCheckedStacksAndLayerPatches
       checkedStacks patches)
     sourceRows
 
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the two split finite scaffold obligations and the
+packaged generated interior position-code decoder.
+-/
+def ofCheckedStacksAndLayerPatchesPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePackage
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the two split finite scaffold obligations and the
+primitive recursive generated position-code accumulator step.
+-/
+def ofCheckedStacksAndLayerPatchesDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceDecoderStep
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    hstep
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the two split finite scaffold obligations and the
+global primitive recursive position-code label-index decoder.
+-/
+def ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the two split finite scaffold obligations and the
+source-specialized primitive recursive position-code label-index decoder.
+-/
+def ofCheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      checkedStacks patches)
+    hindex
+
 /--
 Build the final inputs from the concrete checked-stack/layer-patch finite
 certificate.  This is the current finite transcription target for the scaffold
@@ -2875,6 +2935,150 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatches
   domino_problem_undecidable
     (FinalReductionInputs.ofCheckedStacksAndLayerPatches
       checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and generated-position source obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesSource
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSource
+      checkedStacks patches source)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesSource
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSource
+      checkedStacks patches source)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the packaged generated interior position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesPackage
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the packaged generated interior position-code decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesPackage
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsWithStatementNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesPackage
+      checkedStacks patches sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the generated position-code decoder-step
+target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesDecoderStep
+      checkedStacks patches hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the generated position-code decoder-step target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesDecoderStep
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesDecoderStep
+      checkedStacks patches hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the global position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+      checkedStacks patches hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the global position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
+      checkedStacks patches hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+      checkedStacks patches hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the source-specialized position-code label-index
+target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofCheckedStacksAndLayerPatchesSourcePositionCodeLabelIndexFrom
+      checkedStacks patches hindex)
 
 set_option linter.style.longLine false in
 /--
