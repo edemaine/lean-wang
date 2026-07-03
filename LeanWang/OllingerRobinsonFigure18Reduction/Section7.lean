@@ -982,6 +982,68 @@ abbrev L2C2OriginZeroWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Translation-invariant indexed active/corner window hypothesis for the first
+audited L2-blank candidate.
+-/
+abbrev L2C1IndexedActiveWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table.toRoleTable
+
+/--
+Translation-invariant indexed active/corner window hypothesis for the second
+audited L2-blank candidate.
+-/
+abbrev L2C2IndexedActiveWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table.toRoleTable
+
+/--
+Indexed active/corner windows supply the local free-square window invariant for
+the first audited L2-blank candidate.
+
+This is the local-recognizability part of the scaffold proof; the stronger
+origin-zero window hypothesis is still what currently supplies canonical
+board/free-line active/corner recognition.
+-/
+def l2c1LocalFreeSquareWindowOfIndexedActiveWindows
+    (indexedActiveWindows : L2C1IndexedActiveWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  Figure18ScaffoldData.HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    indexedActiveWindows
+
+/--
+Indexed active/corner windows supply the local free-square window invariant for
+the second audited L2-blank candidate.
+
+This is the local-recognizability part of the scaffold proof; the stronger
+origin-zero window hypothesis is still what currently supplies canonical
+board/free-line active/corner recognition.
+-/
+def l2c2LocalFreeSquareWindowOfIndexedActiveWindows
+    (indexedActiveWindows : L2C2IndexedActiveWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  Figure18ScaffoldData.HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    indexedActiveWindows
+
+/--
 Canonical free-site-rectangle routing hypothesis for the first audited
 L2-blank candidate.
 -/

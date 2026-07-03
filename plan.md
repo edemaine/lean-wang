@@ -1013,6 +1013,14 @@ source variants expose the actual Section 7 recognition premise directly,
 namely `Section7BoardFreeLineActiveCornerInvariant` for the first audited L2
 candidate. The origin-zero-window route is now just a specialization of this
 board/free-line surface.
+The indexed-active scaffold route has now been partially connected to this
+interface: `L2C1IndexedActiveWindows` and `L2C2IndexedActiveWindows` imply the
+corresponding local free-square window invariants. This proves the local
+recognizability/free-square part of the Figure 18 scaffold route. The remaining
+canonical board/free-line step is to upgrade local indexed-active recognition
+plus Robinson's board geometry to the canonical free-site active/corner
+invariant, or otherwise show that the indexed-active windows can be chosen on
+Robinson's canonical free crossings.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
