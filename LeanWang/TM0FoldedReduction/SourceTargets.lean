@@ -166,6 +166,18 @@ abbrev SourcePositionCodeOneRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
     sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)
 
+/--
+The source-uniform primitive-recursion target for the generated position-code
+row at a concrete numeric label slot.
+
+This is weaker than `SourcePositionCodeOneRowsPrimrec`: the variable is first
+decoded from the fixed `partrecVarList`, matching the branch actually used by
+the generated position-code accumulator.
+-/
+abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat × Nat =>
+    sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)
+
 /-- Primitive-recursion target for the generated position-code accumulator step. -/
 abbrev SourcePositionCodeDecoderStepPrimrec : Prop :=
   Primrec (fun p : Code × SourceSearchCodeDecoderState =>
@@ -212,6 +224,46 @@ theorem sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFrom
 
 set_option linter.style.longLine false in
 /--
+The source-specialized position-code label-index decoder gives the exact
+one-row-at-index target by fixing the fuel to `1`.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_sourcePositionCodeLabelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndex_primrec_of_labelIndexFrom hindex
+
+set_option linter.style.longLine false in
+/--
+The generated one-row-at-index target gives the accumulator-step target.
+-/
+theorem sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeDecoderStep_primrec_of_oneRowsAtIndex hrows
+
+set_option linter.style.longLine false in
+/--
+The generated accumulator-step target gives the one-row-at-index target.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_decoderStep
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndexPrimrec_of_sourcePositionCodeLabelIndexFrom
+    (sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep hstep)
+
+set_option linter.style.longLine false in
+/--
+For the source-specialized generated position-code route, primitive
+recursiveness of one-row-at-index decoding and of the accumulator step are
+equivalent.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_iff_decoderStepPrimrec :
+    SourcePositionCodeOneRowsAtIndexPrimrec ↔ SourcePositionCodeDecoderStepPrimrec :=
+  ⟨sourcePositionCodeDecoderStepPrimrec_of_oneRowsAtIndex,
+    sourcePositionCodeOneRowsAtIndexPrimrec_of_decoderStep⟩
+
+set_option linter.style.longLine false in
+/--
 For the source-specialized generated position-code route, primitive
 recursiveness of the label-index decoder and of the accumulator step are
 equivalent.
@@ -240,6 +292,16 @@ theorem sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
     SourcePositionCodeLabelIndexFromPrimrec :=
   sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRows
     hrows
+
+set_option linter.style.longLine false in
+/--
+The arbitrary-variable one-row target implies the exact one-row-at-index target
+used by the accumulator.
+-/
+theorem sourcePositionCodeOneRowsAtIndexPrimrec_of_positionCodeOneRows
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndex_primrec_of_indexVarRows hrows
 
 set_option linter.style.longLine false in
 /--

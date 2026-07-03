@@ -189,6 +189,25 @@ noncomputable def sourcePositionCodeOneRowsIndexVar
         (TM0FoldedCompiler.labelPositionCode k i stmt v)
         stmt v
 
+noncomputable def sourcePositionCodeOneRowsAtIndex
+    (c : Code) (k i : Nat) : List TM0FoldedCompiler.SimStepData :=
+  match TM0Route.partrecVarList[i]? with
+  | none => []
+  | some v => sourcePositionCodeOneRowsIndexVar c k i v
+
+theorem sourcePositionCodeOneRowsAtIndex_of_var_get?
+    {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
+    (hv : TM0Route.partrecVarList[i]? = some v) :
+    sourcePositionCodeOneRowsAtIndex c k i =
+      sourcePositionCodeOneRowsIndexVar c k i v := by
+  simp [sourcePositionCodeOneRowsAtIndex, hv]
+
+theorem sourcePositionCodeOneRowsAtIndex_eq_nil_of_var_none
+    {c : Code} {k i : Nat}
+    (hv : TM0Route.partrecVarList[i]? = none) :
+    sourcePositionCodeOneRowsAtIndex c k i = [] := by
+  simp [sourcePositionCodeOneRowsAtIndex, hv]
+
 theorem sourcePositionCodeOneRowsIndexVar_stmt_none
     {c : Code} {k i : Nat} {v : TM0Route.PartrecVar}
     (hstmt : TM0Route.partrecStartedTM0StatementAt?
@@ -606,6 +625,50 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows
             sourceSimStepDataForLabelIndexFromWithPositionCode_of_block_var_get?
               (c := c) (fuel := 1) (k := k) (block := 0)
               (i := i) (v := v) (stmt := stmt) (by omega) hv (by simpa using hstmt)
+
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_oneRowsAtIndex
+    (c : Code) (k i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c 1 k i =
+      sourcePositionCodeOneRowsAtIndex c k i := by
+  rw [sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_indexVarRows]
+  cases h : TM0Route.partrecVarList[i]? <;>
+    simp [sourcePositionCodeOneRowsAtIndex, h]
+
+theorem sourcePositionCodeOneRowsAtIndex_primrec_of_indexVarRows
+    (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2) := by
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun _p : Code × Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar p.1 p.2.1 p.2.2 v) := by
+    apply Primrec₂.mk
+    exact hvarRows.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+          (Primrec.pair
+            (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+            Primrec.snd)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2.2]? <;>
+      simp [sourcePositionCodeOneRowsAtIndex, h]
+
+theorem sourcePositionCodeOneRowsAtIndex_primrec_of_labelIndexFrom
+    (hindex : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1 p.2.1 p.2.2.1 p.2.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2) :=
+  (hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.const 1) Primrec.snd))).of_eq fun p =>
+    sourceSimStepDataForLabelIndexFromWithPositionCode_one_eq_oneRowsAtIndex
+      p.1 p.2.1 p.2.2
 
 theorem sourceSimStepDataForLabelIndexFromWithPositionCode_one_primrec_of_indexVarRows
     (hvarRows : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>

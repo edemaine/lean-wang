@@ -146,6 +146,46 @@ theorem sourcePositionCodeDecoderStep_primrec_of_indexVarRows
   sourcePositionCodeDecoderStep_primrec_of_stepNone
     (sourcePositionCodeDecoderStepNone_primrec_of_indexVarRows hvarRows)
 
+theorem sourcePositionCodeDecoderStepNone_primrec_of_oneRowsAtIndex
+    (hrows : Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeDecoderStepNone p.1 p.2.1 p.2.2) := by
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnone : Primrec (fun p : Code × Nat × Nat =>
+      (p.2.1 + 1, p.2.2 - TM0Route.partrecVarList.length,
+        (none : Option (List TM0FoldedCompiler.SimStepData)))) := by
+    exact Primrec.pair
+      (Primrec.succ.comp (Primrec.fst.comp Primrec.snd))
+      (Primrec.pair
+        (Primrec.nat_sub.comp (Primrec.snd.comp Primrec.snd)
+          (Primrec.const TM0Route.partrecVarList.length))
+        (Primrec.const (none : Option (List TM0FoldedCompiler.SimStepData))))
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun _v : TM0Route.PartrecVar =>
+      (p.2.1, p.2.2, some (sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2))) := by
+    apply Primrec₂.mk
+    exact Primrec.pair
+      (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+      (Primrec.pair
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.option_some.comp (hrows.comp Primrec.fst)))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2.2]? with
+    | none =>
+        simp [sourcePositionCodeDecoderStepNone, h]
+    | some v =>
+        simp [sourcePositionCodeDecoderStepNone, sourcePositionCodeOneRowsAtIndex, h]
+
+theorem sourcePositionCodeDecoderStep_primrec_of_oneRowsAtIndex
+    (hrows : Primrec (fun p : Code × Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 p.2.1 p.2.2)) :
+    Primrec (fun p : Code × SourceSearchCodeDecoderState =>
+      sourcePositionCodeDecoderStep p.1 p.2) :=
+  sourcePositionCodeDecoderStep_primrec_of_stepNone
+    (sourcePositionCodeDecoderStepNone_primrec_of_oneRowsAtIndex hrows)
+
 set_option linter.style.longLine false in
 /-- Fixed-code primitive-recursiveness of the generated position-code unresolved accumulator step. -/
 theorem sourcePositionCodeDecoderStepNone_primrec_fixed (c : Code) :
