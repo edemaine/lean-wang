@@ -11,8 +11,6 @@ cache the machine-side reduction layers separately while preserving the old
 public import path.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
@@ -1279,5 +1277,3 @@ def sourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
 end TM0FoldedReduction
 
 end LeanWang
-
-end
