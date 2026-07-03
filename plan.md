@@ -1425,6 +1425,9 @@ conditions have been narrowed to two proof-facing fronts:
    and `Figure18CanonicalCheckedRecognizedCompatibleLevelChecks`.  They remain
    useful historical diagnostics, but they should not be treated as live final
    theorem frontiers.
+   Their positive public `domino_problem_undecidable` aliases have been
+   removed, leaving only the explicit `not_*` diagnostics for these refuted
+   routes.
 
    The same L2C2 checked-stack/layer-patch public endpoint now also exposes
    generated one-row and bounded-interior source-row wrappers, matching the
