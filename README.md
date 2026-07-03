@@ -161,6 +161,10 @@ layer-patch compatibility helpers.
 The checked-stack plus compatible Figure 16 macro-square route has matching
 decoder-step, global-label, and source-label packages that project through this
 valid-translated-box target.
+Those Figure 16 compatible wrappers now also project to the matching
+`FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers, and the
+source-label endpoint routes through the checked-stack/valid-box source
+endpoint.
 The generated-position integration layer also exposes the corresponding
 semantic-correctness-discharged wrappers for Section 7 translated boxes and
 checked-stack/valid-translated-box data.

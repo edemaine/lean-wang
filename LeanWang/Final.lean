@@ -1845,6 +1845,17 @@ def toCheckedStackValidTranslatedBoxConstructionObligations
       h.checkedStacks h.compatibleMacroSquares
   sourceRows := h.sourceRows
 
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+origin-zero translated-box row-source package.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations
+    |>.toOriginZeroTranslatedBoxConstructionObligations
+
 /-- Convert the finite Figure 16 compatible macro-square package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleConstructionObligations) :
@@ -1893,6 +1904,17 @@ def toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
     TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
       h.checkedStacks h.compatibleMacroSquares
   decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+origin-zero translated-box decoder-step package.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure16CompatibleDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxDecoderStepConstructionObligations
+    |>.toOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
 /-- Convert the finite Figure 16 compatible decoder-step package into the endpoint. -/
 def toFinalReductionInputs
@@ -1961,6 +1983,17 @@ def toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
       h.checkedStacks h.compatibleMacroSquares
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+origin-zero translated-box global-label package.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+
 /-- Convert the finite Figure 16 compatible global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleGlobalPositionCodeConstructionObligations) :
@@ -2013,6 +2046,17 @@ def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
       h.checkedStacks h.compatibleMacroSquares
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+origin-zero translated-box source-label package.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations :=
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+    |>.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+
 /-- Convert the finite Figure 16 compatible source-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
@@ -2027,7 +2071,7 @@ macro-squares, and the source-specialized position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toDecoderStepConstructionObligations.encoded_domino_problem_undecidable
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -2037,7 +2081,7 @@ macro-squares, and the source-specialized position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalFigure16CompatibleSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toDecoderStepConstructionObligations.domino_problem_undecidable
+  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalFigure16CompatibleSourcePositionCodeConstructionObligations
 
