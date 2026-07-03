@@ -4591,6 +4591,42 @@ def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
 
 set_option linter.style.longLine false in
 /--
+Checked stacks plus positive centered active-corner boxes produce the first
+checked finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered active-corner boxes produce the second
+checked finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
+
+set_option linter.style.longLine false in
+/--
 Checked stacks plus isolated translated active boxes produce the first checked
 finite scaffold package directly.
 -/
