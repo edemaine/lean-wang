@@ -123,6 +123,22 @@ structure FinalCheckedStackValidTranslatedBoxConstructionObligations : Prop wher
   scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Finite Figure 16 compatible macro-square route for the first audited L2
+candidate.
+
+This keeps the final scaffold obligation close to the human-audited finite
+data: checked origin-zero stacks supply the Section 7 board/free-line
+recognition, while compatible Figure 16 macro-squares supply the valid
+translated boxes.
+-/
+structure FinalFigure16CompatibleConstructionObligations : Prop where
+  checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks
+  compatibleMacroSquares :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Second-candidate version of the finite checked-stack/layer-patch construction
 route.
@@ -912,6 +928,68 @@ def toFinalReductionInputs
   h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
 
 end FinalCheckedStackValidTranslatedBoxConstructionObligations
+
+namespace FinalFigure16CompatibleConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+proof-facing Section 7 translated-box package.
+-/
+def toSection7TranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    FinalSection7TranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the finite Figure 16 compatible macro-square package to the
+checked-stack/valid-translated-box package.
+-/
+def toCheckedStackValidTranslatedBoxConstructionObligations
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    FinalCheckedStackValidTranslatedBoxConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      h.checkedStacks h.compatibleMacroSquares
+  sourceRows := h.sourceRows
+
+/-- Convert the finite Figure 16 compatible macro-square package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackValidTranslatedBoxConstructionObligations.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked origin-zero stacks, compatible Figure 16
+macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
+    h.toSection7TranslatedBoxConstructionObligations.section7
+    h.sourceRows
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+end FinalFigure16CompatibleConstructionObligations
 
 namespace FinalL2C2CheckedStackLayerPatchConstructionObligations
 
@@ -1813,6 +1891,26 @@ theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxConstruction
     (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, compatible
+Figure 16 macro-squares, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure16CompatibleConstructionObligations
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, compatible Figure
+16 macro-squares, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure16CompatibleConstructionObligations
+    (h : FinalFigure16CompatibleConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--

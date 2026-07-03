@@ -975,6 +975,11 @@ also feed that preferred package directly through
 `l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16`
 and the corresponding origin-zero-window/level-data variants, instead of
 detouring through the older layer-patch surface.
+The public final layer now exposes this first-candidate finite target as
+`FinalFigure16CompatibleConstructionObligations`: checked origin-zero stacks,
+compatible Figure 16 macro-squares, and generated interior source rows imply
+the final domino-undecidability endpoints via the preferred Section 7
+translated-box route.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
