@@ -1067,6 +1067,14 @@ They use
 to derive the scaffold-plane assumption from the finite compatible Figure 16
 checks, so the public theorem surface no longer morally depends on providing a
 raw plane tiling for those generated source routes.
+The concrete second-candidate Figure 13 route is now exposed in
+`LeanWang.Final` as
+`FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations`.
+Its scaffold assumptions are exactly compatible routed Robinson free grids and
+realization for `FinalFigure13L2C2CompatibleLevelScaffoldData`, the human-audited
+L2C2 Nat-site scaffold.  Thus future scaffold work can target the concrete
+Figure 13 compatible-level obligations directly, while the source side only
+needs the source-specialized position-code label-index decoder.
 It also exposes
 `FinalFigure16CompatibleOriginZeroConstructionObligations`, where the first
 field is the origin-zero active/corner window certificate; checked origin-zero

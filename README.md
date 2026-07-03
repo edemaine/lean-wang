@@ -194,6 +194,11 @@ The corresponding direct-input aliases end in
 `l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneGlobalPositionCodeLabelIndexFrom`,
 and
 `l2c2CanonicalFreeSiteAndFigure18ScaffoldTilesPlaneSourcePositionCodeLabelIndexFrom`.
+For the concrete Figure 13 scaffold route, `LeanWang.Final` also exposes
+`FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations`.
+This is the current lower-level second-candidate surface: it asks directly for
+compatible routed Robinson free grids and realization for the human-audited
+L2C2 Figure 13 scaffold data, plus `SourcePositionCodeLabelIndexFromPrimrec`.
 The row-major
 `TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData`
 surface is diagnostic and refuted by

@@ -750,6 +750,40 @@ structure FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionOblig
       activeSiteSpecs_valid cornerIndex cornerQuadrant cornerIndex_valid
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+The concrete Figure 13 scaffold data for the second audited L2-blank
+candidate.
+
+This abbreviation keeps the final compatible-level surface focused on the two
+remaining Robinson scaffold facts: compatible routed free grids and realization.
+-/
+abbrev FinalFigure13L2C2CompatibleLevelScaffoldData :=
+  scaffoldDataOfNatSites
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 compatible-level scaffold route.
+
+This is a lower-level scaffold-facing surface than the canonical-free-site
+Figure 16 wrappers: it asks directly for compatible routed Robinson free grids
+and a realization certificate for the concrete human-audited L2C2 Figure 13
+scaffold, plus the source-specialized generated position-code decoder.
+-/
+structure FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations :
+    Prop where
+  compatibleRoutedFreeGrids :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table
+  realizes :
+    RealizesActiveCornerSquares
+      FinalFigure13L2C2CompatibleLevelScaffoldData.table.presentation.toScaffold
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -3571,6 +3605,38 @@ theorem domino_problem_undecidable
 
 end FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
 
+namespace FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the concrete second-candidate Figure 13 compatible-level
+scaffold package and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_figure13_l2c2_compatible_level_position_source
+    h.compatibleRoutedFreeGrids h.realizes
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the concrete second-candidate Figure 13
+compatible-level scaffold package and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_figure13_l2c2_compatible_level_position_source
+    h.compatibleRoutedFreeGrids h.realizes
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
+
+end FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -5771,6 +5837,28 @@ boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_figure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
     (h : FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+compatible-level scaffold package and the source-specialized position-code
+label-index source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+compatible-level scaffold package and the source-specialized position-code
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2CompatibleLevelSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
