@@ -2509,6 +2509,40 @@ structure L2C2CheckedStackLayerPatchData : Prop where
   checkedStacks : L2C2OriginZeroCheckedStacks
   patches : L2C2ActiveCornerLayerPatches
 
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the first audited L2-blank candidate, one step below
+`L2C1CheckedStackLayerPatchData`.
+
+The checked stacks supply the origin-zero Section 7 recognition.  The translated
+box field is the concrete finite patch obligation; the existing no-neighbor
+active-site checks convert it into active-corner layer patches.
+-/
+structure L2C1CheckedStackValidTranslatedBoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  validTranslatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the second audited L2-blank candidate, one step below
+`L2C2CheckedStackLayerPatchData`.
+-/
+structure L2C2CheckedStackValidTranslatedBoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  validTranslatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base
+
 /--
 Field-based Section 7 package for the first audited L2-blank candidate.
 
@@ -3849,6 +3883,28 @@ def l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
     L2C2CheckedStackLayerPatchData where
   checkedStacks := hchecked
   patches := l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated scaffold boxes provide the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    data.checkedStacks data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated scaffold boxes provide the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    data.checkedStacks data.validTranslatedBoxes
 
 set_option linter.style.longLine false in
 /--

@@ -110,6 +110,19 @@ structure FinalCheckedStackLayerPatchConstructionObligations : Prop where
   scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Finite-scaffold construction route one step below layer patches.
+
+The scaffold field asks for checked origin-zero stacks plus valid translated
+Figure 18 scaffold boxes.  The Section 7 layer-patch package follows from the
+finite no-neighbor active-site checks already proved for the audited first L2
+candidate.
+-/
+structure FinalCheckedStackValidTranslatedBoxConstructionObligations : Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackValidTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch route with the narrower
 decoder-step source target.
@@ -676,6 +689,29 @@ def toFinalReductionInputs
 
 end FinalCheckedStackLayerPatchConstructionObligations
 
+namespace FinalCheckedStackValidTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box data to the checked-stack/layer-patch
+package used by the current final route.
+-/
+def toCheckedStackLayerPatchConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalCheckedStackLayerPatchConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+/-- Convert the checked-stack/valid-translated-box row-source package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalReductionInputs :=
+  h.toCheckedStackLayerPatchConstructionObligations.toFinalReductionInputs
+
+end FinalCheckedStackValidTranslatedBoxConstructionObligations
+
 namespace FinalCheckedStackLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -1034,6 +1070,27 @@ package and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_checkedStackLayerPatchConstructionObligations
     (h : FinalCheckedStackLayerPatchConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked origin-zero stacks, valid
+translated scaffold boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackValidTranslatedBoxConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked origin-zero stacks, valid translated
+scaffold boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_checkedStackValidTranslatedBoxConstructionObligations
+    (h : FinalCheckedStackValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable h.toFinalReductionInputs
 

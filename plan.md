@@ -888,6 +888,18 @@ checked-stack/layer-patch variants.  This keeps the proof frontier aligned with
 the concrete transcription target: prove checked origin-zero stacks plus active
 corner layer patches, and both the final reduction route and the concrete
 Figure 18 certificate route are available.
+The current layer-patch target now has one more concrete finite-check surface:
+`L2C1CheckedStackValidTranslatedBoxData` /
+`L2C2CheckedStackValidTranslatedBoxData` package checked origin-zero stacks with
+valid translated scaffold boxes.  The existing finite no-neighbor active-site
+checks turn those valid translated boxes into active-corner layer patches via
+`l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData` and
+`l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData`.  The final
+module exposes the first-candidate route as
+`FinalCheckedStackValidTranslatedBoxConstructionObligations`, with encoded and
+unencoded endpoint theorems.  This gives the concrete scaffold work a
+lower-level target than `L2C1ActiveCornerLayerPatches` without falling back to
+the refuted raw Figure 13 box assumptions.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
