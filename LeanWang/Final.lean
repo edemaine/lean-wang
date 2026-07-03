@@ -3057,10 +3057,10 @@ theorem encoded_domino_problem_undecidable_of_checkedStacksAndCompatibleFig16Lev
     (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
-      checkedStacks fig16 hindex)
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stacks_compatible_fig16_level_data_globalCodeCorrect
+      checkedStacks fig16 hindex
 
 set_option linter.style.longLine false in
 /--
@@ -3072,10 +3072,10 @@ theorem domino_problem_undecidable_of_checkedStacksAndCompatibleFig16LevelDataGl
     (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
     (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
     (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofCheckedStacksAndCompatibleFig16LevelDataGlobalPositionCodeLabelIndexFrom
-      checkedStacks fig16 hindex)
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stacks_compatible_fig16_level_data_globalCodeCorrect
+      checkedStacks fig16 hindex
 
 set_option linter.style.longLine false in
 /--
