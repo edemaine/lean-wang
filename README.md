@@ -164,13 +164,15 @@ checked-stack/valid-translated-box data.
 The second audited L2 candidate has matching decoder-step, global-label, and
 source-label packages for both checked-stack/layer-patch data and
 checked-stack/valid-translated-box data.
-The L2C2 checked-stack/valid-translated-box source-label endpoint now projects
-directly to
+The L2C2 checked-stack/valid-translated-box row-source, global-label, and
+source-label endpoints now project directly to
 `FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations`
 via
 `TM0FoldedReduction.l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData`,
-so this final route exposes the origin-zero translated-positive-box scaffold
-surface rather than only the derived layer-patch package.
+so these final routes expose the origin-zero translated-positive-box scaffold
+surface rather than only the derived layer-patch package.  The decoder-step
+variant remains on the layer-patch path because it does not include enough
+source-label information for the origin-zero source endpoint.
 The more finite Figure 16 route is exposed through compatible macro-square
 and compatible level-check surfaces.  The canonical-free-site aliases
 `encoded_domino_problem_undecidable_of_canonicalFreeSiteAndCompatibleFig16LevelChecks`
