@@ -449,6 +449,33 @@ theorem positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
     (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
 
 /--
+The raw Figure 13 positive-board square-tiling surface is false for the current
+Figure 13 macro-tile transcription.
+-/
+theorem not_positiveBoardLevelTileableSquares_fig13Tiles :
+    ¬ Figure13PositiveBoardLevelTileableSquares :=
+  not_hasFigure13PositiveBoardLevelTileableSquares
+
+/--
+Finite raw Figure 13 boxes are an impossible standalone scaffold hypothesis:
+they would compactly give a raw Figure 13 plane tiling, hence positive-board
+raw macro-square tilings, contradicting the finite `2 x 2` obstruction.
+-/
+theorem not_tileableBoxes_fig13Tiles : ¬ Figure13TileableBoxes := by
+  intro hboxes
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Cofinal raw Figure 13 squares are likewise only a diagnostic surface for the
+current transcription.
+-/
+theorem not_cofinalTileableSquares_fig13Tiles : ¬ Figure13CofinalTileableSquares := by
+  intro hsquares
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles hsquares)
+
+/--
 The exact board-level raw Figure 13 square-tiling surface is equivalent to the
 positive-board raw-data surface.
 -/

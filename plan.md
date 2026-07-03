@@ -818,21 +818,19 @@ constructors from origin-zero windows and theorem wrappers for both direct
 `PositionSourceObligations` and the packaged source-uniform interior decoder.
 It also has wrappers for the lighter generated `SourcePositionCodeInteriorRowsPrimrec`
 route.
-The existing checked signal-tower Figure 13 plane/box packages now convert
-directly into this target via
+The existing checked signal-tower Figure 13 plane/box packages still convert
+into this target via
 `l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData`,
 `l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData`,
 `l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData`, and
-`l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData`.  Thus finite Figure 13
-box data is already enough to supply the layer-patch field; the remaining
-concrete scaffold work can focus on proving the checked-stack/box package.
-The preferred origin-zero Figure 13 box package now feeds the same concrete
-target directly via
-`l2c1CheckedStackLayerPatchDataOfOriginZeroFig13BoxData` and
-`l2c2CheckedStackLayerPatchDataOfOriginZeroFig13BoxData`, and `LeanWang.Final`
-uses this checked-stack/layer-patch bridge for its
-`FinalOriginZeroFig13BoxData` wrappers instead of detouring through the
-translated-box package.
+`l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData`, but these are now
+diagnostic compatibility bridges rather than proof-facing obligations.  The
+finite raw Figure 13 box hypothesis is itself refuted in Lean by
+`not_tileableBoxes_fig13Tiles`, reducing it to the already known positive-board
+raw Figure 13 obstruction.  Accordingly, the origin-zero Figure 13 box package
+and `LeanWang.Final`'s `FinalOriginZeroFig13BoxData` wrappers are diagnostic
+surfaces only; future concrete scaffold work should not try to prove a
+checked-stack/box package containing `Figure13TileableBoxes`.
 The checked signal-tower board packages now also feed this route directly via
 `l2c1CheckedStackLayerPatchDataOfCheckedBoardData`,
 `l2c2CheckedStackLayerPatchDataOfCheckedBoardData`, and origin-zero

@@ -164,32 +164,51 @@ abbrev FinalOriginZeroTranslatedBoxData : Prop :=
     l2Component1BlankCandidateSanity.cornerIndex_valid
 
 /--
-Concrete origin-zero Figure 13 finite-box scaffold target for the first audited
-L2 candidate.
+Diagnostic origin-zero Figure 13 finite-box scaffold target for the first
+audited L2 candidate.
 
 This is one step closer to the human transcription data than
-`FinalOriginZeroTranslatedBoxData`: origin-zero recognizability plus finite raw
-Figure 13 boxes build the translated active-corner boxes by the existing
-Robinson compactness/positive-box route.
+`FinalOriginZeroTranslatedBoxData`, but the finite raw Figure 13 box field is
+now known to be impossible for the current macro-tile transcription.  The live
+proof-facing target is `FinalCheckedStackLayerPatchData`.
 -/
 abbrev FinalOriginZeroFig13BoxData : Prop :=
   TM0FoldedReduction.L2C1OriginZeroFig13BoxData
 
 /--
-Concrete checked-stack Figure 13 finite-box scaffold target for the first
+Diagnostic checked-stack Figure 13 finite-box scaffold target for the first
 audited L2 candidate.
 
 Compared with `FinalOriginZeroFig13BoxData`, this asks for the finite checked
 origin-zero stack certificate rather than the semantic origin-zero window
-invariant directly.
+invariant directly, but it still includes the impossible raw Figure 13 finite
+box field.
 -/
 abbrev FinalCheckedSignalTowerFig13BoxData : Prop :=
   TM0FoldedReduction.L2C1CheckedSignalTowerFig13BoxData
 
+/--
+The origin-zero Figure 13 finite-box final package is diagnostic only: its raw
+Figure 13 box field is refuted by the finite Figure 13 obstruction.
+-/
+theorem not_finalOriginZeroFig13BoxData : ¬ FinalOriginZeroFig13BoxData := by
+  intro data
+  exact TM0FoldedReduction.not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/--
+The checked-stack Figure 13 finite-box final package is also diagnostic only:
+it contains the same impossible raw Figure 13 box field.
+-/
+theorem not_finalCheckedSignalTowerFig13BoxData :
+    ¬ FinalCheckedSignalTowerFig13BoxData := by
+  intro data
+  exact TM0FoldedReduction.not_tileableBoxes_fig13Tiles data.fig13Boxes
+
 set_option linter.style.longLine false in
 /--
-Origin-zero recognizability plus finite Figure 13 boxes instantiate the
-origin-zero translated-box scaffold target.
+Diagnostic bridge: origin-zero recognizability plus finite Figure 13 boxes
+would instantiate the origin-zero translated-box scaffold target, but the
+premise is refuted by `not_finalOriginZeroFig13BoxData`.
 -/
 def finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData
     (data : FinalOriginZeroFig13BoxData) :
@@ -199,8 +218,9 @@ def finalOriginZeroTranslatedBoxDataOfOriginZeroFig13BoxData
 
 set_option linter.style.longLine false in
 /--
-Origin-zero recognizability plus finite Figure 13 boxes instantiate the
-checked-stack/layer-patch finite scaffold target.
+Diagnostic bridge: origin-zero recognizability plus finite Figure 13 boxes
+would instantiate the checked-stack/layer-patch finite scaffold target, but the
+premise is refuted by `not_finalOriginZeroFig13BoxData`.
 -/
 def finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData
     (data : FinalOriginZeroFig13BoxData) :
@@ -210,8 +230,9 @@ def finalCheckedStackLayerPatchDataOfOriginZeroFig13BoxData
 
 set_option linter.style.longLine false in
 /--
-Checked origin-zero stacks plus finite Figure 13 boxes instantiate the
-origin-zero Figure 13 finite-box scaffold target.
+Diagnostic bridge: checked origin-zero stacks plus finite Figure 13 boxes would
+instantiate the origin-zero Figure 13 finite-box scaffold target, but the
+premise is refuted by `not_finalCheckedSignalTowerFig13BoxData`.
 -/
 def finalOriginZeroFig13BoxDataOfCheckedSignalTowerFig13BoxData
     (data : FinalCheckedSignalTowerFig13BoxData) :
