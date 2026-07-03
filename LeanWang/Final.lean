@@ -12936,6 +12936,22 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the
+patch-preserving Robinson scaffold final route.
+-/
+def toFinalFigure13RobinsonLayerPatchConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalFigure13RobinsonLayerPatchConstructionObligations where
+  scaffold := O.toL2C2LayerPatchScaffoldCertificate
+  sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
 Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
 one-row board/free-line/layer-patch surface.
 -/
@@ -18209,6 +18225,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsI
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (O.toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
     hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateInteriorRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13RobinsonLayerPatchConstructionObligations hrows)
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateInteriorRows
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13RobinsonLayerPatchConstructionObligations hrows)
+    |>.domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
