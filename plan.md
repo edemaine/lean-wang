@@ -1179,6 +1179,11 @@ reduction endpoints directly for row-source, decoder-step, global-label, and
 source-label variants. The older centered positive-box projections are still
 available as compatibility conversions, but the theorem surface no longer
 detours through them.
+Global-label final-input constructors for the checked-stack/layer-patch,
+origin-zero translated-box, and Section 7 positive/translated-box routes now
+lower through the source-specialized label-index target, keeping these wrappers
+on the weakest generated-source assumption once the global primitive-recursive
+proof is supplied.
 There is also a more direct scaffold-facing final route:
 `FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations` and its
 decoder-step/global-label/source-label variants. These replace the compatible

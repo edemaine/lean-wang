@@ -1399,10 +1399,10 @@ def ofCheckedStacksAndLayerPatchesGlobalPositionCodeLabelIndexFrom
     (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
-  ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
       checkedStacks patches)
-    hindex
+    (sourceLabelIndexPrimrec_of_globalLabelIndex hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -1473,10 +1473,10 @@ def ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
     (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
-  ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+  ofScaffoldAndSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
       scaffold)
-    hindex
+    (sourceLabelIndexPrimrec_of_globalLabelIndex hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -1546,10 +1546,10 @@ def ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
     (scaffold : FinalOriginZeroTranslatedBoxData)
     (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
     FinalReductionInputs :=
-  ofCheckedStackLayerPatchDataGlobalPositionCodeLabelIndexFrom
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
       scaffold)
-    hindex
+    (sourceLabelIndexPrimrec_of_globalLabelIndex hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -4745,8 +4745,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
-    h.scaffold h.labelIndex
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.scaffold (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 end FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
 
@@ -4847,10 +4847,10 @@ def toSourcePositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalSection7PositiveBoxGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
+  FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
       h.section7)
-    h.labelIndex
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 global-label-index package. -/
@@ -5018,7 +5018,10 @@ def toSourcePositionCodeConstructionObligations
 def toFinalReductionInputs
     (h : FinalSection7TranslatedBoxGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toPositiveBoxGlobalPositionCodeConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      h.section7)
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the paper-facing Section 7 translated-box global-label-index package. -/

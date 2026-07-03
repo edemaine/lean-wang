@@ -117,6 +117,8 @@ The older row-based, decoder-step, and global-label-index wrappers remain availa
 `TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec`, and
 `FinalDecoderStepConstructionObligations`, but the source-specialized
 label-index route is the narrower source target for final use.
+Global-label final-input wrappers now lower through that source-specialized
+route whenever they only need translated `Nat.Partrec.Code` inputs.
 `LeanWang.Final` also exposes raw-scaffold aliases
 `encoded_domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom`,
 `domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFrom`,
