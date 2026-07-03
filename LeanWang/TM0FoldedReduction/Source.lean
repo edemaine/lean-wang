@@ -2846,6 +2846,42 @@ theorem sourcePositionCodeOneRowsPrimrec_of_interior
   sourcePositionCodeOneRowsPrimrec_of_boundedInterior
     (sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior)
 
+set_option linter.style.longLine false in
+/--
+The one-row and interior-row source primitive-recursion targets are equivalent.
+
+The final reduction can therefore target whichever spelling is more convenient:
+one-row primitive recursiveness gives all interior rows by shifting the row
+index, while interior rows include the bounded rows and hence recover the
+zero/padding cases of the one-row decoder.
+-/
+theorem sourcePositionCodeOneRowsPrimrec_iff_interiorRowsPrimrec :
+    SourcePositionCodeOneRowsPrimrec ↔ SourcePositionCodeInteriorRowsPrimrec :=
+  ⟨sourcePositionCodeInteriorRowsPrimrec_of_oneRows,
+    sourcePositionCodeOneRowsPrimrec_of_interior⟩
+
+set_option linter.style.longLine false in
+/--
+The one-row and bounded-interior source primitive-recursion targets are
+equivalent.
+-/
+theorem sourcePositionCodeOneRowsPrimrec_iff_boundedInteriorRowsPrimrec :
+    SourcePositionCodeOneRowsPrimrec ↔ SourcePositionCodeBoundedInteriorRowsPrimrec :=
+  ⟨fun hrows =>
+      sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior
+        (sourcePositionCodeInteriorRowsPrimrec_of_oneRows hrows),
+    sourcePositionCodeOneRowsPrimrec_of_boundedInterior⟩
+
+set_option linter.style.longLine false in
+/--
+The interior-row and bounded-interior source primitive-recursion targets are
+equivalent.
+-/
+theorem sourcePositionCodeInteriorRowsPrimrec_iff_boundedInteriorRowsPrimrec :
+    SourcePositionCodeInteriorRowsPrimrec ↔ SourcePositionCodeBoundedInteriorRowsPrimrec :=
+  sourcePositionCodeOneRowsPrimrec_iff_interiorRowsPrimrec.symm.trans
+    sourcePositionCodeOneRowsPrimrec_iff_boundedInteriorRowsPrimrec
+
 /-- A one-row package also supplies the interior package. -/
 def sourcePositionCodeInteriorRowsWithStatementNodup_of_oneRows
     (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
@@ -2874,6 +2910,41 @@ def sourcePositionCodeOneRowsWithStatementNodup_of_interior
   sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior
     (sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
       hinterior)
+
+set_option linter.style.longLine false in
+/--
+The one-row and interior-row packaged source targets are equivalent when they
+also carry statement-list uniqueness.
+-/
+theorem sourcePositionCodeOneRowsWithStatementNodup_iff_interiorRowsWithStatementNodup :
+    SourcePositionCodeOneRowsWithStatementNodup ↔
+      SourcePositionCodeInteriorRowsWithStatementNodup :=
+  ⟨sourcePositionCodeInteriorRowsWithStatementNodup_of_oneRows,
+    sourcePositionCodeOneRowsWithStatementNodup_of_interior⟩
+
+set_option linter.style.longLine false in
+/--
+The one-row and bounded-interior packaged source targets are equivalent when
+they also carry statement-list uniqueness.
+-/
+theorem sourcePositionCodeOneRowsWithStatementNodup_iff_boundedInteriorRowsWithStatementNodup :
+    SourcePositionCodeOneRowsWithStatementNodup ↔
+      SourcePositionCodeBoundedInteriorRowsWithStatementNodup :=
+  ⟨fun hrows =>
+      sourcePositionCodeBoundedInteriorRowsWithStatementNodup_of_interior
+        (sourcePositionCodeInteriorRowsWithStatementNodup_of_oneRows hrows),
+    sourcePositionCodeOneRowsWithStatementNodup_of_boundedInterior⟩
+
+set_option linter.style.longLine false in
+/--
+The interior-row and bounded-interior packaged source targets are equivalent
+when they also carry statement-list uniqueness.
+-/
+theorem sourcePositionCodeInteriorRowsWithStatementNodup_iff_boundedInteriorRowsWithStatementNodup :
+    SourcePositionCodeInteriorRowsWithStatementNodup ↔
+      SourcePositionCodeBoundedInteriorRowsWithStatementNodup :=
+  sourcePositionCodeOneRowsWithStatementNodup_iff_interiorRowsWithStatementNodup.symm.trans
+    sourcePositionCodeOneRowsWithStatementNodup_iff_boundedInteriorRowsWithStatementNodup
 
 end TM0FoldedReduction
 
