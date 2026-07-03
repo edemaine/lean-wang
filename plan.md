@@ -934,6 +934,13 @@ Thus the current Section 7 target can be stated directly as a local Robinson
 signal tower plus translated positive active-corner boxes; the existing
 constructors package those facts into tower/indexed-box obligations, then into
 the Robinson indexed-box scaffold certificate.
+For the first audited L2 candidate, the final module now also exposes the
+specialized `FinalL2C1SignalTowerTranslatedPositiveBoxData` and
+`FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations` surfaces.
+`FinalOriginZeroTranslatedBoxConstructionObligations` projects to this
+specialized signal-tower route, so origin-zero data, signal-tower data, and the
+generic Robinson indexed-box final route are connected without restating the
+active-site list and corner-site parameters.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`

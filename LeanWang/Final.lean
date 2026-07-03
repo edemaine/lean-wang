@@ -276,6 +276,32 @@ abbrev FinalOriginZeroTranslatedBoxData : Prop :=
     0 Quadrant.southwest
     l2Component1BlankCandidateSanity.cornerIndex_valid
 
+set_option linter.style.longLine false in
+/--
+Concrete signal-tower/translated-positive-box scaffold target for the first
+audited L2 candidate.
+
+This is the L2-specialized version of the current Section 7 proof-facing
+surface: origin-zero or checked-stack data can feed it, and it in turn packages
+into the Robinson indexed-box final route.
+-/
+abbrev FinalL2C1SignalTowerTranslatedPositiveBoxData : Prop :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+
+set_option linter.style.longLine false in
+/--
+Origin-zero translated-box data instantiates the L2-specialized
+signal-tower/translated-positive-box target.
+-/
+def finalL2C1SignalTowerTranslatedPositiveBoxDataOfOriginZeroTranslatedBoxData
+    (data : FinalOriginZeroTranslatedBoxData) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxData :=
+  data.toL2C1SignalTowerTranslatedPositiveBoxObligations
+
 /--
 Diagnostic origin-zero Figure 13 finite-box scaffold target for the first
 audited L2 candidate.
@@ -375,6 +401,14 @@ source target.
 -/
 structure FinalOriginZeroTranslatedBoxConstructionObligations : Prop where
   scaffold : FinalOriginZeroTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+/--
+L2-specialized signal-tower/translated-positive-box construction route with
+generated interior-row source target.
+-/
+structure FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations : Prop where
+  scaffold : FinalL2C1SignalTowerTranslatedPositiveBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
@@ -1069,6 +1103,19 @@ namespace FinalOriginZeroTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the origin-zero translated-box package to the L2-specialized
+signal-tower/translated-positive-box package.
+-/
+def toL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxConstructionObligations) :
+    FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations where
+  scaffold :=
+    finalL2C1SignalTowerTranslatedPositiveBoxDataOfOriginZeroTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the origin-zero translated-box package to the checked-stack/layer-patch
 package used by the older final route.
 -/
@@ -1089,6 +1136,48 @@ def toFinalReductionInputs
     h.scaffold h.sourceRows
 
 end FinalOriginZeroTranslatedBoxConstructionObligations
+
+namespace FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the L2-specialized signal-tower/translated-positive-box package to the
+generic signal-tower final route.
+-/
+def toFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations where
+  activeSiteSpecs := l2Component1BlankCandidateActiveSiteSpecs
+  activeSiteSpecs_valid := l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+  cornerIndex := 0
+  cornerQuadrant := Quadrant.southwest
+  cornerIndex_valid := l2Component1BlankCandidateSanity.cornerIndex_valid
+  scaffold := h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first L2 candidate's signal-tower/translated-box
+scaffold package and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first L2 candidate's signal-tower/translated-box
+scaffold package and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFigure13RobinsonSignalTowerTranslatedPositiveBoxConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
 
 namespace FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations
 
