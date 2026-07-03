@@ -275,6 +275,11 @@ decoder-step/global-label/source-label analogues.  These use
 projection from finite origin-zero checked stacks to canonical Robinson
 free-site active/corner recognition, while their endpoints reuse the existing
 origin-zero scaffold-plane route.
+The origin-zero scaffold-plane route itself now projects directly to the
+`FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers via
+`TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`,
+so this scaffold-facing surface no longer has to detour through derived
+Section 7 layer-patch inputs.
 The Section 7 and generated-position wrapper layers expose the same checked
 stack plus scaffold-plane route directly through
 `l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane`,

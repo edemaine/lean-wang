@@ -4701,6 +4701,50 @@ def l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
 
 set_option linter.style.longLine false in
 /--
+Origin-zero windows plus a plane tiling of the compatible Figure 18 scaffold
+tiles provide the first origin-zero/translated-positive-box obligation
+surface.
+-/
+def l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows
+    l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus a plane tiling of the compatible Figure 18 scaffold
+tiles provide the second origin-zero/translated-positive-box obligation
+surface.
+-/
+def l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows
+    l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane)
+
+set_option linter.style.longLine false in
+/--
 Origin-zero windows plus positive translated active-corner boxes produce the
 first checked finite scaffold package.
 -/

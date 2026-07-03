@@ -2870,6 +2870,19 @@ namespace FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the Figure 18 scaffold-tiling row-source package to the origin-zero
+translated-box row-source package.
+-/
+def toOriginZeroTranslatedBoxConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the Figure 18 scaffold-tiling package to the proof-facing Section 7
 translated-box row-source package.
 -/
@@ -2886,9 +2899,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofScaffoldAndSourceRows
-    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
-      h.toSection7TranslatedBoxConstructionObligations.section7)
+  FinalReductionInputs.ofOriginZeroTranslatedBox
+    h.toOriginZeroTranslatedBoxConstructionObligations.scaffold
     h.sourceRows
 
 set_option linter.style.longLine false in
@@ -2899,10 +2911,10 @@ compatible Figure 18 scaffold tiles, and generated interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
-    h.toSection7TranslatedBoxConstructionObligations.section7
-    h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -2912,14 +2924,27 @@ compatible Figure 18 scaffold tiles, and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_interiorRows
-    h.toSection7TranslatedBoxConstructionObligations.section7
-    h.sourceRows
-    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      h.sourceRows)
 
 end FinalFigure18ScaffoldTilesPlaneOriginZeroConstructionObligations
 
 namespace FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling decoder-step package to the origin-zero
+translated-box decoder-step package.
+-/
+def toOriginZeroTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  decoderStep := h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -2939,9 +2964,8 @@ set_option linter.style.longLine false in
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
     FinalReductionInputs :=
-  FinalReductionInputs.ofScaffoldAndSourceDecoderStep
-    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
-      h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7)
+  FinalReductionInputs.ofOriginZeroTranslatedBoxDecoderStep
+    h.toOriginZeroTranslatedBoxDecoderStepConstructionObligations.scaffold
     h.decoderStep
 
 set_option linter.style.longLine false in
@@ -2953,8 +2977,8 @@ step.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
-    h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxDecoderStepConstructionObligations.scaffold
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
@@ -2967,8 +2991,8 @@ step.
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_position_source
-    h.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxDecoderStepConstructionObligations.scaffold
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
       h.decoderStep)
 
@@ -2994,29 +3018,46 @@ def toSourcePositionCodeConstructionObligations
   scaffoldPlane := h.scaffoldPlane
   labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling global-label package to the origin-zero
+translated-box global-label package.
+-/
+def toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  labelIndex := h.labelIndex
+
 /-- Convert the global-label package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxGlobalPositionCodeLabelIndexFrom
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the Figure 18 scaffold-tiling global-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toDecoderStepConstructionObligations.toSection7TranslatedBoxDecoderStepConstructionObligations.section7
-    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxGlobalPositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 end FinalFigure18ScaffoldTilesPlaneOriginZeroGlobalPositionCodeConstructionObligations
 
@@ -3044,29 +3085,46 @@ def toSection7TranslatedBoxSourcePositionCodeConstructionObligations
       h.originZeroWindows h.scaffoldPlane
   labelIndex := h.labelIndex
 
+set_option linter.style.longLine false in
+/--
+Project the Figure 18 scaffold-tiling source-label package to the origin-zero
+translated-box source-label package.
+-/
+def toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+      h.originZeroWindows h.scaffoldPlane
+  labelIndex := h.labelIndex
+
 /-- Convert the source-specialized label-index package into the endpoint. -/
 def toFinalReductionInputs
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
     FinalReductionInputs :=
-  h.toDecoderStepConstructionObligations.toFinalReductionInputs
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations.scaffold
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the Figure 18 scaffold-tiling source-label package. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toSection7TranslatedBoxSourcePositionCodeConstructionObligations.section7
-    h.labelIndex
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the Figure 18 scaffold-tiling source-label package. -/
 theorem domino_problem_undecidable
     (h : FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c1_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toSection7TranslatedBoxSourcePositionCodeConstructionObligations.section7
-    h.labelIndex
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_translated_obligations_position_source
+    h.toOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations.scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      h.labelIndex)
 
 end FinalFigure18ScaffoldTilesPlaneOriginZeroSourcePositionCodeConstructionObligations
 

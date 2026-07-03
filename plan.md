@@ -1228,6 +1228,14 @@ the decoder-step/global-label/source-label variants.  These project through the
 origin-zero scaffold-plane route, so the final theorem statement can now assume
 canonical Robinson free-site active/corner recognition instead of the stronger
 origin-zero window certificate.
+The origin-zero scaffold-plane route now also projects directly to the
+corresponding `FinalOriginZeroTranslatedBox*ConstructionObligations` wrappers:
+Section 7 constructs
+`l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane`
+from origin-zero active/corner windows plus
+`TilesPlane figure18ScaffoldTiles`, and the final row/decoder/global/source
+wrappers route their endpoints through the origin-zero translated-obligation
+surface.
 The Section 7 reduction layer now has the same direct route:
 canonical free-site active/corner recognition plus `TilesPlane
 figure18ScaffoldTiles` constructs `L2C*RobinsonSection7BoardFreeLineTranslatedBoxData`,
