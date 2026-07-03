@@ -24,8 +24,6 @@ boxes.  The lower-level layer-patch and checked-Figure-16 surfaces are retained
 as finite-transcription routes.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 open Nat.Partrec (Code)
@@ -7979,5 +7977,3 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesSourcePosition
 
 
 end LeanWang
-
-end
