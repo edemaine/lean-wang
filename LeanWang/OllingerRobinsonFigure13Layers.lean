@@ -3129,6 +3129,33 @@ def HasRobinsonSection7BoardFreeLineActiveCornerInvariant
   D.scaffoldData.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
 
 /--
+Layer-patch realization target for layered Figure 13 data.
+
+The finite Figure 13/Figure 16 transcription lives in `layerData`; the
+realization predicate itself is the existing Figure 18 scaffold-data predicate.
+-/
+def HasLayerPatchRealizationInvariant
+    (D : LayeredFigure18ScaffoldData) : Prop :=
+  D.scaffoldData.HasLayerPatchRealizationInvariant
+
+/--
+Plain active-corner realization target for layered Figure 13 data.
+
+This is the realization field expected by the existing layered certificate
+structures after the finite layer-patch data has been checked.
+-/
+def HasRealizationInvariant (D : LayeredFigure18ScaffoldData) : Prop :=
+  D.scaffoldData.HasRealizationInvariant
+
+/-- Layer-patch realization implies ordinary active-corner realization. -/
+theorem HasRealizationInvariant.ofLayerPatches
+    {D : LayeredFigure18ScaffoldData}
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.HasRealizationInvariant :=
+  Figure18ScaffoldData.HasRealizationInvariant.ofLayerPatches
+    (D := D.scaffoldData) patches
+
+/--
 For layered Figure 13 data, the proof-facing Section 7 board/free-line target
 is equivalent to active/corner recognition for the underlying Figure 18
 scaffold data: the obstruction-geometry tower is canonical.
@@ -4832,6 +4859,29 @@ structure Certificate (D : LayeredFigure18ScaffoldData) : Prop where
 
 namespace Certificate
 
+def ofLayerPatches
+    {D : LayeredFigure18ScaffoldData}
+    (indexedRecognizable :
+      HasFigure18IndexedActiveCornerWindowsWithLayerStack D.layerData D.table)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.Certificate where
+  certificate := {
+    indexedRecognizable := indexedRecognizable
+    realizes := by
+      simpa [LayeredFigure18ScaffoldData.HasRealizationInvariant,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.HasRealizationInvariant,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table,
+        Figure18ScaffoldData.activeSites] using
+        LayeredFigure18ScaffoldData.HasRealizationInvariant.ofLayerPatches
+          patches
+  }
+
 def toLayeredFigure18Instance
     {D : LayeredFigure18ScaffoldData} (certificate : D.Certificate) :
     LayeredFigure18Instance where
@@ -4860,6 +4910,30 @@ structure IndexedRoutedCertificate (D : LayeredFigure18ScaffoldData) : Prop wher
   certificate : LayeredFigure18IndexedRoutedCertificate D.layerData D.table
 
 namespace IndexedRoutedCertificate
+
+def ofLayerPatches
+    {D : LayeredFigure18ScaffoldData}
+    (indexedRoutedForces :
+      HasFigure18IndexedRoutedFixedCornerSquaresWithLayerStack D.layerData
+        D.table)
+    (patches : D.HasLayerPatchRealizationInvariant) :
+    D.IndexedRoutedCertificate where
+  certificate := {
+    indexedRoutedForces := indexedRoutedForces
+    realizes := by
+      simpa [LayeredFigure18ScaffoldData.HasRealizationInvariant,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.HasRealizationInvariant,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table,
+        Figure18ScaffoldData.activeSites] using
+        LayeredFigure18ScaffoldData.HasRealizationInvariant.ofLayerPatches
+          patches
+  }
 
 def toLayeredFigure18IndexedRoutedInstance
     {D : LayeredFigure18ScaffoldData}
