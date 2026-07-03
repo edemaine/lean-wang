@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonFigure18Reduction.Core
+import LeanWang.OllingerRobinsonCanonicalOriginZero
 
 /-!
 Section 7 scaffold packages and final Figure 18 reduction wrappers.
@@ -1011,6 +1012,30 @@ abbrev L2C2OriginZeroCombinedActiveCornerWindows : Prop :=
       l2Component2BlankCandidateSanity.cornerIndex_valid).table
 
 /--
+Canonical free-site active/corner hypothesis for the first audited L2-blank
+candidate, phrased on the same role table as `L2C1OriginZeroWindows`.
+-/
+abbrev L2C1CanonicalFreeSiteRectActiveCorner : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Canonical free-site active/corner hypothesis for the second audited L2-blank
+candidate, phrased on the same role table as `L2C2OriginZeroWindows`.
+-/
+abbrev L2C2CanonicalFreeSiteRectActiveCorner : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
 The leaner decoded-site origin-zero target supplies the existing indexed
 origin-zero window target for the first audited L2-blank candidate.
 -/
@@ -1029,6 +1054,48 @@ def l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
     L2C2OriginZeroWindows :=
   OllingerRobinson.hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
     hwindows
+
+/--
+Canonical free-site active/corner recognition supplies decoded-site origin-zero
+windows for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroCombinedActiveCornerWindows :=
+  OllingerRobinson.hasFigure18OriginZeroCombinedActiveCornerWindowsForTable_of_canonicalFreeSiteRectActiveCorner
+    hactiveCorner
+
+/--
+Canonical free-site active/corner recognition supplies decoded-site origin-zero
+windows for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroCombinedActiveCornerWindows :=
+  OllingerRobinson.hasFigure18OriginZeroCombinedActiveCornerWindowsForTable_of_canonicalFreeSiteRectActiveCorner
+    hactiveCorner
+
+/--
+Canonical free-site active/corner recognition supplies indexed origin-zero
+windows for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroWindows :=
+  l2c1OriginZeroWindowsOfCombinedActiveCornerWindows
+    (l2c1OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+
+/--
+Canonical free-site active/corner recognition supplies indexed origin-zero
+windows for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroWindows :=
+  l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+    (l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
 
 /--
 Translation-invariant indexed active/corner window hypothesis for the first

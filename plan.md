@@ -1043,6 +1043,16 @@ origin-zero square and that the lower-left decoded site is the corner. The
 generic bridge reconstructs the indexed Figure 13 coordinates and payload
 product witnesses automatically, yielding the existing `L2C*OriginZeroWindows`
 interfaces.
+The canonical Robinson-free-site target is now connected back to this same
+origin-zero surface in the small module
+`LeanWang.OllingerRobinsonCanonicalOriginZero`: canonical free-site
+active/corner recognition implies decoded-site origin-zero active/corner
+windows by choosing a Robinson level whose free-grid side is at least the
+requested window size.  Section 7 exposes this as
+`L2C1CanonicalFreeSiteRectActiveCorner`/`L2C2CanonicalFreeSiteRectActiveCorner`
+and wrappers to both decoded-site and indexed origin-zero windows.  This keeps
+the concrete scaffold proof focused on canonical Robinson crossings while
+preserving the existing origin-zero reduction route.
 
 For build locality, the concrete Figure 18 reduction implementation is now
 split at the Section 7 boundary: `LeanWang.OllingerRobinsonFigure18Reduction`
@@ -1052,6 +1062,10 @@ contains the generic Figure 18/folded-reduction adapters, and
 packages and proof-facing Section 7 routes.  Future concrete scaffold work
 should prefer editing the Section 7 module so the earlier generic wrapper layer
 stays cached.
+The canonical/origin-zero bridge is also kept out of the giant Figure 13
+transcription file for the same reason: changing this theorem surface should
+rebuild only the small bridge module and downstream Section 7 wrappers, not the
+audited raw Figure 13 data.
 
 For finite local verification, avoid hand-proving hundreds of color matches. Instead:
 
