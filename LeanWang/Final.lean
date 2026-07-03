@@ -6503,6 +6503,22 @@ def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonic
 
 set_option linter.style.longLine false in
 /--
+Project the second-candidate scaffold-plane decoder-step final package to the
+origin-zero translated-positive-box source-label surface.
+-/
+def finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteDecoder
+    (h :
+      FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
+    FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold :=
+    finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+      h.canonicalActiveCorner h.scaffoldPlane
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep
+      h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the second-candidate canonical
 free-site/scaffold-plane row-source final package.
 -/
@@ -6531,11 +6547,8 @@ free-site/scaffold-plane decoder-step final package.
 theorem encoded_domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
-    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
-      h.canonicalActiveCorner h.scaffoldPlane)
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
-      h.decoderStep)
+  (finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteDecoder
+    h).encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -6545,11 +6558,8 @@ free-site/scaffold-plane decoder-step final package.
 theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations
     (h : FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_translated_obligations_position_source
-    (finalL2C2OriginZeroTranslatedObligationsOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
-      h.canonicalActiveCorner h.scaffoldPlane)
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
-      h.decoderStep)
+  (finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteDecoder
+    h).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
