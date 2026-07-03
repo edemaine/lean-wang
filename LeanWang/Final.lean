@@ -3939,6 +3939,22 @@ structure FinalOriginZeroTranslatedBoxConstructionObligations : Prop where
   sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
 
 /--
+Origin-zero translated-box construction route with generated one-row
+position-code rows.
+-/
+structure FinalOriginZeroTranslatedBoxOneRowsConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+/--
+Origin-zero translated-box construction route with generated bounded-interior
+position-code rows.
+-/
+structure FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations : Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+/--
 L2-specialized signal-tower/translated-positive-box construction route with
 generated interior-row source target.
 -/
@@ -10113,6 +10129,96 @@ def toFinalReductionInputs
 
 end FinalOriginZeroTranslatedBoxConstructionObligations
 
+namespace FinalOriginZeroTranslatedBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero translated-box one-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero translated-box one-row package to the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxOneRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box one-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxOneRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows)
+
+end FinalOriginZeroTranslatedBoxOneRowsConstructionObligations
+
+namespace FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero translated-box bounded-row package to the one-row
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero translated-box bounded-row package to the interior-row
+package.
+-/
+def toConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the origin-zero translated-box bounded-row package to the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box bounded-row package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+    h.scaffold
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows)
+
+end FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations
+
 namespace FinalL2C1SignalTowerTranslatedPositiveBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -13994,6 +14100,46 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxConstructionObligat
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxOneRowsConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
 scaffold package and the primitive recursive generated position-code decoder
 step.
 -/
@@ -14530,6 +14676,66 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBox
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroTranslatedBox scaffold sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxOneRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxOneRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+        sourceRows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxBoundedRows
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
+      scaffold
+      (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+        sourceRows))
 
 set_option linter.style.longLine false in
 /--
