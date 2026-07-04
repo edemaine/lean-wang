@@ -74,6 +74,13 @@ abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeOneRowsAtIndexPrimrec
 
 /--
+Source-side primitive-recursion target for the first nonempty generated
+position-code row at concrete numeric label slots.
+-/
+abbrev SourcePositionCodeFirstInteriorRowsAtIndexPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeFirstInteriorRowsAtIndexPrimrec
+
+/--
 Source-side primitive-recursion target for generated interior position-code
 rows at the concrete numeric label slots decoded by the final position-code
 accumulator.
@@ -183,6 +190,16 @@ theorem sourceOneRowsAtIndexPrimrec_of_labelIndexStart
     (h : SourcePositionCodeLabelIndexStartPrimrec) :
     SourcePositionCodeOneRowsAtIndexPrimrec :=
   TM0FoldedReduction.sourcePositionCodeOneRowsAtIndexPrimrec_of_labelIndexStart h
+
+set_option linter.style.longLine false in
+/--
+The position-coded start decoder gives primitive recursiveness of the first
+nonempty generated statement row at numeric label slots.
+-/
+theorem sourceFirstInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (h : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_labelIndexStart h
 
 set_option linter.style.longLine false in
 /--

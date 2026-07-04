@@ -337,6 +337,52 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
       (c := c) (block := 1) (i := i) (v := v)
       (sourceStatementCount_one_lt c) hv (sourceStatementAt_one c)
 
+theorem sourcePositionCodeOneRowsAtIndex_one_eq_startWithPositionCode_of_lt
+    {c : Code} {i : Nat} (hi : i < TM0Route.partrecVarList.length) :
+    sourcePositionCodeOneRowsAtIndex c 1 i =
+      sourceSimStepDataForLabelIndexStartWithPositionCode c
+        (TM0Route.partrecVarList.length + i) := by
+  have hv :
+      TM0Route.partrecVarList[i]? = some (TM0Route.partrecVarList[i]) :=
+    List.getElem?_eq_getElem hi
+  rw [sourcePositionCodeOneRowsAtIndex_of_var_get? hv]
+  rw [sourcePositionCodeOneRowsIndexVar_one]
+  exact (sourceSimStepDataForLabelIndexStartWithPositionCode_of_one_add_var_get?
+    (c := c) (i := i) (v := TM0Route.partrecVarList[i]) hv).symm
+
+theorem sourcePositionCodeOneRowsAtIndex_one_eq_nil_of_length_le
+    {c : Code} {i : Nat} (hi : TM0Route.partrecVarList.length ≤ i) :
+    sourcePositionCodeOneRowsAtIndex c 1 i = [] := by
+  have hv : TM0Route.partrecVarList[i]? = none :=
+    List.getElem?_eq_none_iff.2 hi
+  exact sourcePositionCodeOneRowsAtIndex_eq_nil_of_var_none hv
+
+theorem sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec := by
+  have hinRange : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexStartWithPositionCode p.1
+        (TM0Route.partrecVarList.length + p.2)) :=
+    hstart.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.nat_add.comp
+          (Primrec.const TM0Route.partrecVarList.length) Primrec.snd))
+  have houtRange : Primrec (fun _p : Code × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hlt : PrimrecPred (fun p : Code × Nat =>
+      p.2 < TM0Route.partrecVarList.length) :=
+    Primrec.nat_lt.comp Primrec.snd
+      (Primrec.const TM0Route.partrecVarList.length)
+  exact (Primrec.ite hlt hinRange houtRange).of_eq fun p => by
+    by_cases hi : p.2 < TM0Route.partrecVarList.length
+    · simp [hi,
+        sourcePositionCodeOneRowsAtIndex_one_eq_startWithPositionCode_of_lt
+          (c := p.1) (i := p.2) hi]
+    · have hle : TM0Route.partrecVarList.length ≤ p.2 := Nat.le_of_not_gt hi
+      simp [hi, sourcePositionCodeOneRowsAtIndex_one_eq_nil_of_length_le
+        (c := p.1) (i := p.2) hle]
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_var_get?
     {c : Code} {j i : Nat} {v : TM0Route.PartrecVar}
     (hj : j + 1 < sourceStatementCount c)

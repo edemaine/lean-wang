@@ -197,6 +197,18 @@ abbrev SourcePositionCodeZeroRowsAtIndexPrimrec : Prop :=
     sourcePositionCodeOneRowsAtIndex p.1 0 p.2)
 
 /--
+Primitive-recursion target for the first nonempty statement row of generated
+position-code rows at numeric label slots.
+
+This isolates the row for the translated source program's start statement.  It
+is still weaker than the full exact one-row-at-index target, but stronger than
+the already-closed zero-row target.
+-/
+abbrev SourcePositionCodeFirstInteriorRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat =>
+    sourcePositionCodeOneRowsAtIndex p.1 1 p.2)
+
+/--
 Primitive-recursion target for generated position-code interior rows at a
 concrete numeric label slot.  This is the natural source-side target for the
 descriptor payload: it excludes the known empty row zero and the known empty
