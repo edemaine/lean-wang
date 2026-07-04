@@ -871,6 +871,42 @@ theorem sourceLabelAtByStatementStartWithPositionCode?_of_split
   simpa using
     sourceLabelAtByStatementFromWithPositionCode?_of_split hsplit hstmt
 
+theorem sourceLabelAtByStatementFrom?_eq_none_of_start_labelCount_le
+    {c : Code} {i : Nat} (hi : sourceLabelCount c ≤ i) :
+    TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i =
+      none := by
+  change TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+      (NatPartrecToToPartrec.translate c)
+      (TM0Route.partrecStartedTM0StatementCount
+        (NatPartrecToToPartrec.translate c)) 0 i = none
+  rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero_eq]
+  rw [TM0Route.partrecStartedTM0LabelAtByStatement?_eq_labelAt]
+  rw [TM0Route.partrecStartedTM0LabelAt?_eq_getElem?]
+  rw [List.getElem?_eq_none_iff]
+  simpa [sourceLabelCount, TM0Route.partrecStartedTM0LabelList_length] using hi
+
+theorem sourceLabelAtByStatementStartWithPositionCode?_eq_none_of_labelCount_le
+    {c : Code} {i : Nat} (hi : sourceLabelCount c ≤ i) :
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i =
+      none := by
+  cases hdecode :
+      TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i with
+  | none =>
+      rfl
+  | some q =>
+      have hfst :
+          TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+              (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i =
+            some q.1 := by
+        simpa [hdecode] using
+          (TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_fst_eq
+            (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i).symm
+      rw [sourceLabelAtByStatementFrom?_eq_none_of_start_labelCount_le hi] at hfst
+      cases hfst
+
 /--
 Source-code version of the fully offset descriptor decoder.
 

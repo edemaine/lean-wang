@@ -303,6 +303,20 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_firstBlock_eq_nil
   sourceSimStepDataForLabelIndexStartWithPositionCode_range_eq_nil
     c TM0Route.partrecVarList.length (le_refl _)
 
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq_nil_of_labelCount_le
+    {c : Code} {i : Nat} (hi : sourceLabelCount c ≤ i) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i = [] := by
+  unfold sourceSimStepDataForLabelIndexStartWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+  change (TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+      (NatPartrecToToPartrec.translate c) (sourceStatementCount c) 0 i).elim []
+      (fun q => TM0FoldedCompiler.simStepDataForStmtLabelWithCode
+        (NatPartrecToToPartrec.translate c) q.2 q.1.1 q.1.2) = []
+  rw [sourceLabelAtByStatementStartWithPositionCode?_eq_none_of_labelCount_le
+    (c := c) (i := i) hi]
+  rfl
+
 theorem sourcePartrecVarList_length_le_sourceLabelCount (c : Code) :
     TM0Route.partrecVarList.length ≤ sourceLabelCount c := by
   rw [sourceLabelCount_eq_statementCount_mul]
