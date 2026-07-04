@@ -296,6 +296,21 @@ theorem sourcePositionCodeOneRowsIndexVar_zero_primrec :
   exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
     (sourcePositionCodeOneRowsIndexVar_zero p.1 p.2.1 p.2.2).symm
 
+theorem sourcePositionCodeOneRowsAtIndex_zero (c : Code) (i : Nat) :
+    sourcePositionCodeOneRowsAtIndex c 0 i = [] := by
+  cases hv : TM0Route.partrecVarList[i]? with
+  | none =>
+      simp [sourcePositionCodeOneRowsAtIndex, hv]
+  | some v =>
+      simp [sourcePositionCodeOneRowsAtIndex, hv,
+        sourcePositionCodeOneRowsIndexVar_zero c i v]
+
+theorem sourcePositionCodeOneRowsAtIndex_zero_primrec :
+    Primrec (fun p : Code × Nat =>
+      sourcePositionCodeOneRowsAtIndex p.1 0 p.2) := by
+  exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
+    (sourcePositionCodeOneRowsAtIndex_zero p.1 p.2).symm
+
 theorem sourcePositionCodeOneRowsIndexVar_one
     (c : Code) (i : Nat) (v : TM0Route.PartrecVar) :
     sourcePositionCodeOneRowsIndexVar c 1 i v =

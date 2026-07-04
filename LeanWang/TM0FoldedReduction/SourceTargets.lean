@@ -189,6 +189,14 @@ abbrev SourcePositionCodePostStatementRowsAtIndexPrimrec : Prop :=
       (sourceStatementCount p.1 + p.2.1) p.2.2)
 
 /--
+Primitive-recursion target for the known empty zero row of generated
+position-code rows at numeric label slots.
+-/
+abbrev SourcePositionCodeZeroRowsAtIndexPrimrec : Prop :=
+  Primrec (fun p : Code × Nat =>
+    sourcePositionCodeOneRowsAtIndex p.1 0 p.2)
+
+/--
 Primitive-recursion target for generated position-code interior rows at a
 concrete numeric label slot.  This is the natural source-side target for the
 descriptor payload: it excludes the known empty row zero and the known empty
@@ -268,6 +276,14 @@ statement support are primitive recursive at numeric label slots.
 theorem sourcePositionCodePostStatementRowsAtIndexPrimrec :
     SourcePositionCodePostStatementRowsAtIndexPrimrec :=
   sourcePositionCodeOneRowsAtIndex_statementCount_add_primrec
+
+/--
+The generated position-code zero row is uniformly empty, hence primitive
+recursive at numeric label slots.
+-/
+theorem sourcePositionCodeZeroRowsAtIndexPrimrec :
+    SourcePositionCodeZeroRowsAtIndexPrimrec :=
+  sourcePositionCodeOneRowsAtIndex_zero_primrec
 
 set_option linter.style.longLine false in
 /--
