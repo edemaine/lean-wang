@@ -150,6 +150,32 @@ theorem domino_problem_undecidable_l2c1_checked_stack_layer_patches_sourceCodeCo
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the first checked-stack/layer-patch Section
+7 certificate and the source-specialized position-code start decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_startCodeCorrect
+    (data : L2C1CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/layer-patch
+Section 7 certificate and the source-specialized position-code start decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_layer_patches_startCodeCorrect
+    (data : L2C1CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the first checked-stack/layer-patch Section 7
 certificate and the generated one-row position-code decoder, with
 `positionProgramData` semantic correctness discharged.
@@ -567,6 +593,32 @@ theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
     data (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch Section
+7 certificate and the source-specialized position-code start decoder, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_startCodeCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch
+Section 7 certificate and the source-specialized position-code start decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_startCodeCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
 
 set_option linter.style.longLine false in
 /--
