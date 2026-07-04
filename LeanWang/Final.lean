@@ -152,6 +152,17 @@ theorem sourceLabelIndexStartPrimrec_of_sourceLabelIndex
     SourcePositionCodeLabelIndexStartPrimrec :=
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom h
 
+set_option linter.style.longLine false in
+/--
+The position-coded start decoder recovers the interior-at-index row target.
+This makes the start decoder a clean source-side assumption for the generated
+position-code route without separately assuming the row decoder.
+-/
+theorem sourceInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (h : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart h
+
 /--
 The final source-side decoder-step and source-specialized label-index targets
 are equivalent.  The decoder-step spelling is the narrower preferred final

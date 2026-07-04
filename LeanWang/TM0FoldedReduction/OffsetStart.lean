@@ -402,6 +402,88 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_eq
   sourceSimStepDataForLabelIndexStartWithPositionCode_interior_block_range_eq
     c j TM0Route.partrecVarList.length hj (le_refl _)
 
+set_option linter.style.longLine false in
+/--
+The source-level position-code start decoder recovers the pointwise
+interior-row target.  The proof branches on whether the requested numeric slot
+is a genuine `partrecVarList` entry; for genuine slots it reads the flat
+started decoder at row `j + 1`, and for out-of-range slots it returns the known
+empty row directly.
+-/
+theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec := by
+  let width : Nat := TM0Route.partrecVarList.length
+  let flatIndex : Code × Nat × Nat → Nat :=
+    fun p => width * (p.2.1 + 1) + p.2.2
+  have hlookup : Primrec (fun p : Code × Nat × Nat =>
+      TM0Route.partrecVarList[p.2.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp (Primrec.snd.comp Primrec.snd)
+  have hnil : Primrec (fun _p : Code × Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hflatIndex : Primrec flatIndex := by
+    exact Primrec.nat_add.comp
+      (Primrec.nat_mul.comp (Primrec.const width)
+        (Primrec.succ.comp (Primrec.fst.comp Primrec.snd)))
+      (Primrec.snd.comp Primrec.snd)
+  have hstartAt : Primrec (fun p : Code × Nat × Nat =>
+      sourceSimStepDataForLabelIndexStartWithPositionCode p.1 (flatIndex p)) :=
+    hstart.comp (Primrec.pair Primrec.fst hflatIndex)
+  have hbound : PrimrecPred (fun p : Code × Nat × Nat =>
+      p.2.1 + 1 < sourceStatementCount p.1) :=
+    Primrec.nat_lt.comp
+      (Primrec.nat_add.comp (Primrec.fst.comp Primrec.snd) (Primrec.const 1))
+      (sourceStatementCount_primrec.comp Primrec.fst)
+  have hsome : Primrec₂ (fun p : Code × Nat × Nat => fun _v : TM0Route.PartrecVar =>
+      if p.2.1 + 1 < sourceStatementCount p.1 then
+        sourceSimStepDataForLabelIndexStartWithPositionCode p.1 (flatIndex p)
+      else
+        []) := by
+    apply Primrec₂.mk
+    exact Primrec.ite (hbound.comp Primrec.fst)
+      (hstartAt.comp Primrec.fst)
+      (Primrec.const ([] : List TM0FoldedCompiler.SimStepData))
+  exact (Primrec.option_casesOn hlookup hnil hsome).of_eq fun p => by
+    cases hv : TM0Route.partrecVarList[p.2.2]? with
+    | none =>
+        simp [sourcePositionCodeInteriorRowsAtIndex, hv]
+    | some v =>
+        by_cases hb : p.2.1 + 1 < sourceStatementCount p.1
+        · have hslot :
+            sourceSimStepDataForLabelIndexStartWithPositionCode p.1
+                (TM0Route.partrecVarList.length * (p.2.1 + 1) + p.2.2) =
+              sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2 v :=
+            sourceSimStepDataForLabelIndexStartWithPositionCode_of_interior_var_get?
+              (c := p.1) (j := p.2.1) (i := p.2.2) (v := v) hb hv
+          simp [sourcePositionCodeInteriorRowsAtIndex, hv, hb, flatIndex, width, hslot]
+        · have hbLe : sourceStatementCount p.1 ≤ p.2.1 + 1 :=
+            Nat.le_of_not_gt hb
+          have hlabelLe :
+              sourceLabelCount p.1 ≤
+                TM0Route.partrecVarList.length * (p.2.1 + 1) + p.2.2 := by
+            rw [sourceLabelCount_eq_statementCount_mul]
+            calc
+              sourceStatementCount p.1 * TM0Route.partrecVarList.length ≤
+                  (p.2.1 + 1) * TM0Route.partrecVarList.length :=
+                Nat.mul_le_mul_right TM0Route.partrecVarList.length hbLe
+              _ = TM0Route.partrecVarList.length * (p.2.1 + 1) := by
+                rw [Nat.mul_comm]
+              _ ≤ TM0Route.partrecVarList.length * (p.2.1 + 1) + p.2.2 :=
+                Nat.le_add_right _ _
+          have hstartNil :
+              sourceSimStepDataForLabelIndexStartWithPositionCode p.1
+                  (TM0Route.partrecVarList.length * (p.2.1 + 1) + p.2.2) = [] :=
+            sourceSimStepDataForLabelIndexStartWithPositionCode_eq_nil_of_labelCount_le
+              (c := p.1)
+              (i := TM0Route.partrecVarList.length * (p.2.1 + 1) + p.2.2)
+              hlabelLe
+          have hinteriorNil :
+              sourcePositionCodeInteriorRowsIndexVar p.1 p.2.1 p.2.2 v = [] := by
+            unfold sourcePositionCodeInteriorRowsIndexVar
+            exact sourcePositionCodeOneRowsIndexVar_eq_nil_of_statementCount_le v hbLe
+          simp [sourcePositionCodeInteriorRowsAtIndex, hv, hb, hinteriorNil]
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_tail_index_eq
     {c : Code} {n : Nat}
     (hlo : TM0Route.partrecVarList.length ≤ n)
