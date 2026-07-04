@@ -374,6 +374,28 @@ theorem sourcePositionCodeOneRowsIndexVar_primrec_fixed (c : Code) :
     cases hstmt : TM0Route.partrecStartedTM0StatementAt? tc p.1 <;>
       simp [sourcePositionCodeOneRowsIndexVar, tc, hstmt]
 
+set_option linter.style.longLine false in
+/-- Fixed-code primitive-recursiveness of generated position-code rows at numeric label slots. -/
+theorem sourcePositionCodeOneRowsAtIndex_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat =>
+      sourcePositionCodeOneRowsAtIndex c p.1 p.2) := by
+  have hlookup : Primrec (fun p : Nat × Nat =>
+      TM0Route.partrecVarList[p.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp Primrec.snd
+  have hnone : Primrec (fun _p : Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hrows := sourcePositionCodeOneRowsIndexVar_primrec_fixed c
+  have hsome : Primrec₂ (fun p : Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourcePositionCodeOneRowsIndexVar c p.1 p.2 v) := by
+    apply Primrec₂.mk
+    exact hrows.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2]? <;>
+      simp [sourcePositionCodeOneRowsAtIndex, h]
+
 noncomputable def sourcePositionCodeInteriorRowsIndexVar
     (c : Code) (j i : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
@@ -431,6 +453,28 @@ theorem sourcePositionCodeInteriorRowsIndexVar_primrec_fixed (c : Code) :
   have hj : Primrec (fun p : Nat × Nat × TM0Route.PartrecVar => p.1 + 1) :=
     Primrec.succ.comp Primrec.fst
   exact hrows.comp (Primrec.pair hj Primrec.snd)
+
+set_option linter.style.longLine false in
+/-- Fixed-code primitive-recursiveness of generated position-code interior rows at numeric label slots. -/
+theorem sourcePositionCodeInteriorRowsAtIndex_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat =>
+      sourcePositionCodeInteriorRowsAtIndex c p.1 p.2) := by
+  have hlookup : Primrec (fun p : Nat × Nat =>
+      TM0Route.partrecVarList[p.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp Primrec.snd
+  have hnone : Primrec (fun _p : Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hinterior := sourcePositionCodeInteriorRowsIndexVar_primrec_fixed c
+  have hsome : Primrec₂ (fun p : Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourcePositionCodeInteriorRowsIndexVar c p.1 p.2 v) := by
+    apply Primrec₂.mk
+    exact hinterior.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2]? <;>
+      simp [sourcePositionCodeInteriorRowsAtIndex, h]
 
 theorem sourcePositionCodeInteriorRowsAtIndex_primrec_of_interior
     (hinterior : Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>
@@ -694,6 +738,28 @@ theorem sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_boundedInterior
             Primrec.snd)))
   exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
     cases h : TM0Route.partrecVarList[p.2.2]? <;>
+      simp [sourcePositionCodeBoundedInteriorRowsAtIndex, h]
+
+set_option linter.style.longLine false in
+/-- Fixed-code primitive-recursiveness of bounded generated position-code interior rows at numeric label slots. -/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × Nat =>
+      sourcePositionCodeBoundedInteriorRowsAtIndex c p.1 p.2) := by
+  have hlookup : Primrec (fun p : Nat × Nat =>
+      TM0Route.partrecVarList[p.2]?) :=
+    (Primrec.list_getElem?₁ TM0Route.partrecVarList).comp Primrec.snd
+  have hnone : Primrec (fun _p : Nat × Nat =>
+      ([] : List TM0FoldedCompiler.SimStepData)) :=
+    Primrec.const []
+  have hbounded := sourcePositionCodeBoundedInteriorRowsIndexVar_primrec_fixed c
+  have hsome : Primrec₂ (fun p : Nat × Nat => fun v : TM0Route.PartrecVar =>
+      sourcePositionCodeBoundedInteriorRowsIndexVar c p.1 p.2 v) := by
+    apply Primrec₂.mk
+    exact hbounded.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+  exact (Primrec.option_casesOn hlookup hnone hsome).of_eq fun p => by
+    cases h : TM0Route.partrecVarList[p.2]? <;>
       simp [sourcePositionCodeBoundedInteriorRowsAtIndex, h]
 
 theorem sourcePositionCodeBoundedInteriorRowsAtIndex_primrec_of_interiorAtIndex
