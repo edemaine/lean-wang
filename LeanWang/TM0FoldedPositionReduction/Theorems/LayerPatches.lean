@@ -387,6 +387,32 @@ theorem domino_problem_undecidable_l2c1_checked_stack_positive_boxes_sourceCodeC
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from first checked stacks and positive centered
+active-corner boxes, using the source-specialized position-code start decoder
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_startCodeCorrect
+    (data : L2C1CheckedStackPositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_startCodeCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData data) hstart
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from first checked stacks and positive centered
+active-corner boxes, using the source-specialized position-code start decoder
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_positive_boxes_startCodeCorrect
+    (data : L2C1CheckedStackPositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_startCodeCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData data) hstart
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from first checked stacks and positive centered
 active-corner boxes, using generated one-row position-code data with
 `positionProgramData` semantic correctness discharged.
 -/
@@ -829,6 +855,32 @@ theorem domino_problem_undecidable_l2c2_checked_stack_positive_boxes_sourceCodeC
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
     (l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData data) hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from second checked stacks and positive centered
+active-corner boxes, using the source-specialized position-code start decoder
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_startCodeCorrect
+    (data : L2C2CheckedStackPositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_startCodeCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData data) hstart
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from second checked stacks and positive
+centered active-corner boxes, using the source-specialized position-code start
+decoder with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_positive_boxes_startCodeCorrect
+    (data : L2C2CheckedStackPositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_startCodeCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData data) hstart
 
 set_option linter.style.longLine false in
 /--
