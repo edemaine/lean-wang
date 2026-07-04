@@ -175,6 +175,27 @@ theorem sourceInteriorRowsAtIndexPrimrec_of_labelIndexStart
 
 set_option linter.style.longLine false in
 /--
+The position-coded start decoder recovers the exact one-row-at-index target.
+This names the concrete nondependent generated-row frontier under the final
+source-code assumptions.
+-/
+theorem sourceOneRowsAtIndexPrimrec_of_labelIndexStart
+    (h : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeOneRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeOneRowsAtIndexPrimrec_of_labelIndexStart h
+
+set_option linter.style.longLine false in
+/--
+The exact one-row-at-index target recovers the final position-coded start
+decoder target.
+-/
+theorem sourceLabelIndexStartPrimrec_of_oneRowsAtIndex
+    (h : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_oneRowsAtIndex h
+
+set_option linter.style.longLine false in
+/--
 The final source-specialized start decoder and full offset decoder targets are
 equivalent for the generated position-code route.
 -/
@@ -182,6 +203,17 @@ theorem sourceLabelIndexStartPrimrec_iff_sourceLabelIndexPrimrec :
     SourcePositionCodeLabelIndexStartPrimrec ↔
       SourcePositionCodeLabelIndexFromPrimrec :=
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_labelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+The final source-specialized start decoder target is equivalent to primitive
+recursiveness of the exact one-row-at-index decoder used by the generated
+position-code accumulator.
+-/
+theorem sourceLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeOneRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec
 
 /--
 The final source-side decoder-step and source-specialized label-index targets
