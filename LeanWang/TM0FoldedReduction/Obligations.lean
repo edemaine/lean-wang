@@ -969,6 +969,24 @@ def positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndex
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of the source-level position-coded start decoder gives
+the generated-position source obligations.
+-/
+def positionSourceObligationsOfPositionCodeLabelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfProgramData
+    ((sourcePositionProgramData_computable_of_source_positionCodeLabelIndexStart
+      hstart).of_eq fun _ => rfl)
+    hcorrect
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of interior generated position-code rows at concrete
 numeric label slots gives the generated-position source obligations.
 -/

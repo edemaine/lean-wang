@@ -158,6 +158,17 @@ def sourceSimStepDataForLabelIndexStartWithPositionCode
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
     (NatPartrecToToPartrec.translate c) i
 
+set_option linter.style.longLine false in
+/--
+Primitive-recursion target for the source-level position-coded start decoder.
+This is weaker than the full offset decoder target: the fuel is fixed to the
+translated source statement count and the statement offset is fixed to zero,
+which is exactly the decoder used to build `positionProgramData`.
+-/
+abbrev SourcePositionCodeLabelIndexStartPrimrec : Prop :=
+  Primrec (fun p : Code × Nat =>
+    sourceSimStepDataForLabelIndexStartWithPositionCode p.1 p.2)
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_split
     {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
@@ -662,6 +673,29 @@ theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_start
     (Primrec.list_range.comp sourceLabelCount_primrec) ?_
   apply Primrec₂.mk
   exact hindex
+
+set_option linter.style.longLine false in
+/--
+The full source-specialized position-code offset decoder gives the start
+decoder target by fixing the fuel to `sourceStatementCount c` and the offset to
+zero.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec := by
+  have hstart : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode p.1
+        (sourceStatementCount p.1) 0 p.2) :=
+    hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair
+          (sourceStatementCount_primrec.comp Primrec.fst)
+          (Primrec.pair (Primrec.const 0) Primrec.snd)))
+  exact hstart.of_eq fun p => by
+    unfold sourceSimStepDataForLabelIndexStartWithPositionCode
+      sourceSimStepDataForLabelIndexFromWithPositionCode
+      TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
+    rfl
 
 theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows
     (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
@@ -1501,6 +1535,18 @@ theorem sourcePositionProgramData_computable_of_source_labelIndexFromWithPositio
     Computable sourcePositionProgramData :=
   sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
     (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_from hindex)
+
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the source-level position-coded start decoder is
+enough for computability of the source-specialized generated position-coded
+folded program.
+-/
+theorem sourcePositionProgramData_computable_of_source_positionCodeLabelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    Computable sourcePositionProgramData :=
+  sourcePositionProgramData_computable_of_source_simStepDataByLabelIndexWithPositionCode
+    (sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_start hstart)
 
 set_option linter.style.longLine false in
 /--

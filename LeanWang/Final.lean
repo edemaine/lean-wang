@@ -106,6 +106,13 @@ needs codes of the form `NatPartrecToToPartrec.translate c`.
 abbrev SourcePositionCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeLabelIndexFromPrimrec
 
+/--
+Source-side primitive-recursion target for the position-coded start decoder
+used directly by `positionProgramData`.
+-/
+abbrev SourcePositionCodeLabelIndexStartPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeLabelIndexStartPrimrec
+
 /-- The global position-code label-index target implies the decoder-step target. -/
 theorem sourceDecoderStepPrimrec_of_globalLabelIndex
     (h : GlobalPositionCodeLabelIndexFromPrimrec) :
@@ -133,6 +140,17 @@ theorem sourceLabelIndexPrimrec_of_decoderStep
     (h : SourcePositionCodeDecoderStepPrimrec) :
     SourcePositionCodeLabelIndexFromPrimrec :=
   TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_decoderStep h
+
+set_option linter.style.longLine false in
+/--
+The source-specialized full offset decoder gives the position-coded start
+decoder target by fixing the fuel to the translated statement count and the
+statement offset to zero.
+-/
+theorem sourceLabelIndexStartPrimrec_of_sourceLabelIndex
+    (h : SourcePositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom h
 
 /--
 The final source-side decoder-step and source-specialized label-index targets
@@ -6255,6 +6273,19 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
       hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from the scaffold package and the source-level
+position-coded start decoder target.
+-/
+def ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : TM0FoldedReduction.SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
 
 set_option linter.style.longLine false in
 /--
@@ -20858,6 +20889,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFro
   domino_problem_undecidable
     (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
       scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the source-level position-coded start
+decoder target.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : TM0FoldedReduction.SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+      scaffold hstart)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the source-level position-coded start
+decoder target.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : TM0FoldedReduction.SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+      scaffold hstart)
 
 set_option linter.style.longLine false in
 /--

@@ -1426,6 +1426,15 @@ conditions have been narrowed to two proof-facing fronts:
    `positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect`,
    `FinalReductionInputs.ofScaffoldAndSourceInteriorRowsAtIndex`, and
    `domino_problem_undecidable_of_scaffoldAndSourceInteriorRowsAtIndex`.
+   A still weaker generated-program computability target is now exposed as
+   `SourcePositionCodeLabelIndexStartPrimrec`, the source-level position-coded
+   start decoder with fuel fixed to `sourceStatementCount c` and offset fixed
+   to `0`.  It is enough for `positionProgramData` computability via
+   `positionSourceObligationsOfPositionCodeLabelIndexStartCorrect` and has
+   final endpoints
+   `domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexStart`.
+   The full offset target `SourcePositionCodeLabelIndexFromPrimrec` implies it,
+   but the start target avoids proving unused fuel/offset uniformity.
    The auxiliary `SourceStatementListNodup` gap is no longer a completely
    opaque list fact: `TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint`
    and
