@@ -484,6 +484,18 @@ theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart
             exact sourcePositionCodeOneRowsIndexVar_eq_nil_of_statementCount_le v hbLe
           simp [sourcePositionCodeInteriorRowsAtIndex, hv, hb, hinteriorNil]
 
+set_option linter.style.longLine false in
+/--
+The position-code start decoder is already strong enough to recover the full
+source-specialized offset decoder target: first recover pointwise interior rows,
+then use the existing bounded-interior accumulator route.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_labelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+    (sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart hstart)
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_tail_index_eq
     {c : Code} {n : Nat}
     (hlo : TM0Route.partrecVarList.length ≤ n)
@@ -792,6 +804,17 @@ theorem sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
       sourceSimStepDataForLabelIndexFromWithPositionCode
       TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
     rfl
+
+set_option linter.style.longLine false in
+/--
+For the source-specialized position-code route, the fixed-start decoder target
+and the full offset decoder target are equivalent.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_iff_labelIndexFromPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeLabelIndexFromPrimrec :=
+  ⟨sourcePositionCodeLabelIndexFromPrimrec_of_labelIndexStart,
+    sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom⟩
 
 theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows
     (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
