@@ -2629,6 +2629,19 @@ structure FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObliga
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with
+generated bounded-interior position-code rows at the numeric label slots used
+by the accumulator.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/layer-patch route with the
 source-specialized position-code label-index target.
 -/
@@ -3908,6 +3921,76 @@ theorem domino_problem_undecidable
     h.toScaffold h.toPositionSourceObligations
 
 end FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index decoded-window/layer-patch package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index decoded-window/layer-patch package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated bounded-interior position-code rows
+at the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated bounded-interior position-code rows
+at the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -7371,6 +7454,22 @@ def ofOriginZeroWindowsAndLayerPatchesBoundedRows
 set_option linter.style.longLine false in
 /--
 Build the final inputs directly from origin-zero active/corner windows and
+finite active-corner layer patches, with generated bounded-interior rows at
+the numeric label slots used by the accumulator.
+-/
+def ofOriginZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+      originZeroWindows patches)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from origin-zero active/corner windows and
 finite active-corner layer patches, with the generated decoder-step target.
 -/
 def ofOriginZeroWindowsAndLayerPatchesDecoderStep
@@ -8101,6 +8200,22 @@ def ofOriginZeroWindowsAndLayerPatchesBoundedRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     FinalL2C2ReductionInputs :=
   ofScaffoldAndSourceBoundedRows
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+      originZeroWindows patches)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from origin-zero active/corner
+windows and finite active-corner layer patches, with bounded-interior rows at
+the numeric label slots used by the accumulator.
+-/
+def ofOriginZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourceBoundedRowsAtIndex
     (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
       originZeroWindows patches)
     sourceRows
@@ -12356,6 +12471,34 @@ theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsAndLayerPatchesBounde
     originZeroWindows patches
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
       sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate origin-zero active/corner windows and
+finite active-corner layer patches, with generated bounded-interior rows at
+the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2OriginZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_boundedRowsAtIndexCorrect
+    originZeroWindows patches sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate origin-zero active/corner windows and
+finite active-corner layer patches, with generated bounded-interior rows at
+the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_origin_zero_layer_patches_boundedRowsAtIndexCorrect
+    originZeroWindows patches sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -21751,6 +21894,30 @@ theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBounde
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and generated bounded-interior
+position-code rows at the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and generated bounded-interior
+position-code rows at the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
 windows, positive translated isolated active boxes, and generated interior
 position-code rows.
 -/
@@ -23819,6 +23986,38 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBoundedRow
   TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
     originZeroWindows patches
     (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+finite active-corner layer patches, and bounded-interior position-code rows at
+the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and bounded-interior position-code rows at the
+numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
       sourceRows)
 
 set_option linter.style.longLine false in
