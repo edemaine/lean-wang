@@ -8537,8 +8537,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -8560,8 +8560,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_checked_board_checks_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -8583,8 +8583,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -8606,8 +8606,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_checked_board_checks_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -8629,8 +8629,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -8652,8 +8652,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_checked_board_rows_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -8675,8 +8675,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -8698,8 +8698,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_checked_board_rows_position_source
       hchecked hlevel
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -19965,8 +19965,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first preferred field-based Section 7
@@ -19986,8 +19986,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second preferred field-based Section 7
@@ -20007,8 +20007,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second preferred field-based Section 7
@@ -20028,8 +20028,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first finite-check-facing Section 7
@@ -20049,8 +20049,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first finite-check-facing Section 7
@@ -20070,8 +20070,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second finite-check-facing Section 7
@@ -20091,8 +20091,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second finite-check-facing Section 7
@@ -20112,8 +20112,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first proof-facing Robinson Section 7
@@ -20133,8 +20133,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing Robinson Section 7
@@ -20154,8 +20154,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing Robinson Section 7
@@ -20175,8 +20175,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing Robinson Section 7
@@ -20196,8 +20196,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from origin-zero active/corner windows, finite
@@ -20218,8 +20218,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
       originZeroWindows patches
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from origin-zero active/corner windows, finite
@@ -20240,8 +20240,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
       originZeroWindows patches
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from origin-zero active/corner windows, finite
@@ -20262,8 +20262,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from origin-zero active/corner windows, finite
@@ -20284,8 +20284,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first checked-stack/layer-patch finite
@@ -20305,8 +20305,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first checked-stack/layer-patch finite
@@ -20326,8 +20326,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second checked-stack/layer-patch finite
@@ -20347,8 +20347,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second checked-stack/layer-patch finite
@@ -20368,8 +20368,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate using
@@ -20577,8 +20577,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
       O
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first origin-zero Section 7
@@ -20602,8 +20602,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
       O
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second origin-zero Section 7
@@ -20627,8 +20627,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
       O
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second origin-zero Section 7
@@ -20652,8 +20652,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
       O
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first Robinson Section 7 scaffold
@@ -20753,8 +20753,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first paper-facing Robinson Section 7
@@ -20774,8 +20774,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second paper-facing Robinson Section 7
@@ -20795,8 +20795,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second paper-facing Robinson Section 7
@@ -20816,8 +20816,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
@@ -22040,8 +22040,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing board/free-line
@@ -22064,8 +22064,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing board/free-line
@@ -22088,8 +22088,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing board/free-line
@@ -22112,8 +22112,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first proof-facing board/free-line
@@ -22656,8 +22656,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing board/free-line
@@ -22680,8 +22680,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing board/free-line
@@ -22704,8 +22704,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing board/free-line
@@ -22728,8 +22728,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability,
@@ -22837,8 +22837,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first preferred origin-zero/finite
@@ -22858,8 +22858,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second preferred origin-zero/finite
@@ -22879,8 +22879,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second preferred origin-zero/finite
@@ -22900,8 +22900,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
       data
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via the
@@ -24259,8 +24259,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -24288,8 +24288,8 @@ theorem
   exact
     domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -24317,8 +24317,8 @@ theorem
   exact
     encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -24346,8 +24346,8 @@ theorem
   exact
     domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
-      (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-        hinterior hcorrect)
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior.rows hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
