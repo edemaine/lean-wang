@@ -7399,6 +7399,22 @@ def ofOriginZeroWindowsAndLayerPatchesSourcePositionCodeLabelIndexFrom
       originZeroWindows patches)
     hindex
 
+set_option linter.style.longLine false in
+/--
+Build the final inputs directly from origin-zero active/corner windows and
+finite active-corner layer patches, with the fixed-start source-level
+position-code decoder.
+-/
+def ofOriginZeroWindowsAndLayerPatchesSourcePositionCodeLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+      originZeroWindows patches)
+    hstart
+
 /--
 Build the final inputs from the concrete checked-stack/layer-patch finite
 certificate.  This is the current finite transcription target for the scaffold
@@ -23797,6 +23813,38 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSourcePosi
     originZeroWindows patches
     (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
       hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+finite active-corner layer patches, and the fixed-start source-level
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the fixed-start source-level position-code
+decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
 
 set_option linter.style.longLine false in
 /--
