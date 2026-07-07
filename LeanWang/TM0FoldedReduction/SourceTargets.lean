@@ -482,6 +482,21 @@ theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_iff_sourcePositionCo
   sourcePositionCodeOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.symm.trans
     sourcePositionCodeOneRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, primitive
+recursiveness of interior at-index decoding and of the source-specialized
+label-index decoder are equivalent.
+-/
+theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec ↔
+      SourcePositionCodeLabelIndexFromPrimrec :=
+  ⟨sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex,
+    fun hindex =>
+      sourcePositionCodeInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+        (sourcePositionCodeOneRowsAtIndexPrimrec_of_sourcePositionCodeLabelIndexFrom
+          hindex)⟩
+
 /-- Primitive-recursion target for interior generated position-code rows. -/
 abbrev SourcePositionCodeInteriorRowsPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × TM0Route.PartrecVar =>

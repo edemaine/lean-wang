@@ -1426,6 +1426,9 @@ conditions have been narrowed to two proof-facing fronts:
    `positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect`,
    `FinalReductionInputs.ofScaffoldAndSourceInteriorRowsAtIndex`, and
    `domino_problem_undecidable_of_scaffoldAndSourceInteriorRowsAtIndex`.
+   This at-index interior target is now also named equivalent to the
+   source-specialized label-index target, so closing either one closes the
+   generated-position source frontier exposed by the final wrappers.
    The concrete L2C2 board/free-line/layer-patch final surface also now has a
    direct bounded-at-index package,
    `FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations`,

@@ -510,6 +510,16 @@ theorem sourceBoundedInteriorRowsAtIndexPrimrec_iff_sourceLabelIndexPrimrec :
   TM0FoldedReduction.sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
+/--
+The final interior-at-index and source-specialized label-index targets are
+equivalent for the generated position-code accumulator route.
+-/
+theorem sourceInteriorRowsAtIndexPrimrec_iff_sourceLabelIndexPrimrec :
+    SourcePositionCodeInteriorRowsAtIndexPrimrec ↔
+      SourcePositionCodeLabelIndexFromPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeInteriorRowsAtIndexPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
 /-- One-row generated position-code rows imply the source-specialized label-index target. -/
 theorem sourceLabelIndexPrimrec_of_oneRows
     (h : SourcePositionCodeOneRowsPrimrec) :
