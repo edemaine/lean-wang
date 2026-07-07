@@ -649,6 +649,16 @@ structure FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations 
 
 set_option linter.style.longLine false in
 /--
+Finite checked-stack/positive-box route with the fixed-start source-level
+position-code label-index target.
+-/
+structure FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite-scaffold construction route one step below layer patches.
 
 The scaffold field asks for checked origin-zero stacks plus valid translated
@@ -6277,6 +6287,15 @@ structure FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations 
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
+Origin-zero translated-box construction route with the fixed-start source-level
+position-code label-index target.
+-/
+structure FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : FinalOriginZeroTranslatedBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+/--
 Paper-facing Section 7 board/free-line final obligations.
 
 This is the currently preferred scaffold surface: the Robinson board/free-line
@@ -6357,6 +6376,15 @@ structure FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations : 
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 /--
+Paper-facing Section 7 board/free-line translated-box obligations with the
+fixed-start source-level position-code label-index target.
+-/
+structure FinalSection7TranslatedBoxLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineTranslatedBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+/--
 Paper-facing Section 7 board/free-line obligations with the narrower
 decoder-step source target.
 -/
@@ -6382,6 +6410,15 @@ recursiveness after specializing to translated `Nat.Partrec.Code` inputs.
 structure FinalSection7PositiveBoxSourcePositionCodeConstructionObligations : Prop where
   section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
   labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
+Paper-facing Section 7 board/free-line positive-box obligations with the
+fixed-start source-level position-code label-index target.
+-/
+structure FinalSection7PositiveBoxLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
 
 /--
 The row-major checked Figure 16 level-data surface is inconsistent.  Keep this
@@ -7122,6 +7159,21 @@ def ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
 
 set_option linter.style.longLine false in
 /--
+Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and the fixed-start source-level position-code label-index
+decoder.
+-/
+def ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      scaffold)
+    hstart
+
+set_option linter.style.longLine false in
+/--
 Build the final inputs from the origin-zero translated-box finite scaffold
 certificate and generated-position source obligations.
 -/
@@ -7220,6 +7272,51 @@ def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
       scaffold)
     hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the origin-zero translated-box finite scaffold
+certificate and the fixed-start source-level primitive recursive position-code
+label-index decoder.
+-/
+def ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      scaffold)
+    hstart
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the paper-facing Section 7 positive-box scaffold
+certificate and the fixed-start source-level primitive recursive position-code
+label-index decoder.
+-/
+def ofSection7PositiveBoxSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      section7)
+    hstart
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the paper-facing Section 7 translated-box scaffold
+certificate and the fixed-start source-level primitive recursive position-code
+label-index decoder.
+-/
+def ofSection7TranslatedBoxSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      section7)
+    hstart
 
 set_option linter.style.longLine false in
 /-- Encoded endpoint from the final construction inputs. -/
@@ -8107,6 +8204,61 @@ theorem domino_problem_undecidable
     h.scaffold h.labelIndex
 
 end FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project first-candidate checked-stack/positive-box fixed-start data to the
+checked-stack/layer-patch package.
+-/
+def toCheckedStackLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the source-specialized label-index package. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    FinalCheckedStackPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    FinalCheckedStackPositiveBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box fixed-start package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from first checked stacks, positive active-corner boxes, and the fixed-start source target. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from first checked stacks, positive active-corner boxes, and the fixed-start source target. -/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalReductionInputs.domino_problem_undecidable
+
+end FinalCheckedStackPositiveBoxLabelIndexStartConstructionObligations
 
 namespace FinalCheckedStackValidTranslatedBoxConstructionObligations
 
@@ -16233,6 +16385,74 @@ def toFinalReductionInputs
 
 end FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations
 
+namespace FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the proof-facing Section 7
+translated-box fixed-start package.
+-/
+def toSection7TranslatedBoxLabelIndexStartConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalSection7TranslatedBoxLabelIndexStartConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero translated-box package to the checked-stack/layer-patch
+fixed-start package used by the current final route.
+-/
+def toCheckedStackLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the source-specialized label-index package. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalOriginZeroTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalOriginZeroTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the origin-zero translated-box fixed-start package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the origin-zero translated-box fixed-start package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the origin-zero translated-box fixed-start package. -/
+theorem domino_problem_undecidable
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalReductionInputs.domino_problem_undecidable
+
+end FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations
+
 namespace FinalSection7PositiveBoxDecoderStepConstructionObligations
 
 /-- Convert the paper-facing Section 7 decoder-step package into the endpoint. -/
@@ -16358,6 +16578,52 @@ theorem domino_problem_undecidable
       h.section7 h.labelIndex
 
 end FinalSection7PositiveBoxSourcePositionCodeConstructionObligations
+
+namespace FinalSection7PositiveBoxLabelIndexStartConstructionObligations
+
+/--
+Convert the paper-facing Section 7 fixed-start package to the
+source-specialized label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    FinalSection7PositiveBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+/--
+Convert the paper-facing Section 7 fixed-start package to the decoder-step
+package.
+-/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    FinalSection7PositiveBoxDecoderStepConstructionObligations where
+  section7 := h.section7
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the paper-facing Section 7 fixed-start package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7PositiveBoxSourcePositionCodeLabelIndexStart
+    h.section7 h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the paper-facing Section 7 fixed-start positive-box package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the paper-facing Section 7 fixed-start positive-box package. -/
+theorem domino_problem_undecidable
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalReductionInputs.domino_problem_undecidable
+
+end FinalSection7PositiveBoxLabelIndexStartConstructionObligations
 
 namespace FinalSection7PositiveBoxConstructionObligations
 
@@ -16663,6 +16929,62 @@ theorem domino_problem_undecidable
     h.section7 h.labelIndex
 
 end FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations
+
+namespace FinalSection7TranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the translated-box fixed-start package to the centered positive-box
+fixed-start package.
+-/
+def toPositiveBoxLabelIndexStartConstructionObligations
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalSection7PositiveBoxLabelIndexStartConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+      h.section7
+  labelIndexStart := h.labelIndexStart
+
+/--
+Convert the translated-box fixed-start package to the source-specialized
+label-index package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalSection7TranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+/-- Convert the translated-box fixed-start package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalSection7TranslatedBoxDecoderStepConstructionObligations where
+  section7 := h.section7
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the translated-box fixed-start package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofSection7TranslatedBoxSourcePositionCodeLabelIndexStart
+    h.section7 h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the paper-facing Section 7 fixed-start translated-box package. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the paper-facing Section 7 fixed-start translated-box package. -/
+theorem domino_problem_undecidable
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalReductionInputs.domino_problem_undecidable
+
+end FinalSection7TranslatedBoxLabelIndexStartConstructionObligations
 
 namespace FinalSection7TranslatedBoxConstructionObligations
 
@@ -21192,6 +21514,27 @@ theorem domino_problem_undecidable_of_section7TranslatedBoxSourcePositionCodeCon
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line translated-box package and the fixed-start source-level
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_section7TranslatedBoxLabelIndexStartConstructionObligations
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+translated-box package and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_section7TranslatedBoxLabelIndexStartConstructionObligations
+    (h : FinalSection7TranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the first L2 candidate's
 signal-tower/translated-box scaffold package and generated interior
 position-code rows.
@@ -21526,6 +21869,26 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeC
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold package and the fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxLabelIndexStartConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+package and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxLabelIndexStartConstructionObligations
+    (h : FinalOriginZeroTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the paper-facing Section 7
 board/free-line construction obligations.
 -/
@@ -21641,6 +22004,27 @@ source-specialized label-index construction obligations.
 -/
 theorem domino_problem_undecidable_of_section7PositiveBoxSourcePositionCodeConstructionObligations
     (h : FinalSection7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing Section 7
+board/free-line positive-box package and the fixed-start source-level
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_section7PositiveBoxLabelIndexStartConstructionObligations
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing Section 7 board/free-line
+positive-box package and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_section7PositiveBoxLabelIndexStartConstructionObligations
+    (h : FinalSection7PositiveBoxLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
