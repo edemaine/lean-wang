@@ -2810,6 +2810,20 @@ structure FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionOb
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 board/free-line-active-corner route from a
+plane tiling of the actual transcribed Figure 13 tiles, with the fixed-start
+source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  fig13Plane : TilesPlane fig13Tiles
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
 route with the generated position-code decoder step.
 
@@ -2903,6 +2917,27 @@ def finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
   simpa [FinalFigure13L2C2ValidTranslatedBoxes] using
     Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
       l2Component2Figure18ScaffoldData hboxes
+
+set_option linter.style.longLine false in
+/--
+A plane tiling of the compatible Figure 18 scaffold tiles gives all centered
+boxes used by the L2C2 tileable-box scaffold surface.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfTilesPlane
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes :=
+  fun r _hr => tileableBox_of_tilesPlane hplane r
+
+set_option linter.style.longLine false in
+/--
+A plane tiling of the transcribed Figure 13 tiles gives all centered boxes of
+the compatible Figure 18 scaffold tiles.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfFig13TilesPlane
+    (hplane : TilesPlane fig13Tiles) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes :=
+  finalFigure13L2C2Figure18ScaffoldTileableBoxesOfTilesPlane
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
@@ -5518,6 +5553,66 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 13 plane package to the fixed-start board/free-line
+tileable-box package.  The Figure 13 plane tiling is first subdivided to a
+compatible Figure 18 scaffold tiling and then restricted to all centered boxes.
+-/
+def toBoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes :=
+    finalFigure13L2C2Figure18ScaffoldTileableBoxesOfFig13TilesPlane
+      h.fig13Plane
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the Figure 13 plane package to the fixed-start board/free-line
+layer-patch package.
+-/
+def toBoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations :=
+  h.toBoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    |>.toBoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition, a
+plane tiling of the transcribed Figure 13 tiles, and the fixed-start generated
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toBoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition, a
+plane tiling of the transcribed Figure 13 tiles, and the fixed-start generated
+position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toBoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -20485,6 +20580,30 @@ source-specialized position-code decoder.
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board/free-line
+active/corner recognition, a plane tiling of the transcribed Figure 13 tiles,
+and the fixed-start source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board/free-line active/corner
+recognition, a plane tiling of the transcribed Figure 13 tiles, and the
+fixed-start source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineFig13PlaneLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
