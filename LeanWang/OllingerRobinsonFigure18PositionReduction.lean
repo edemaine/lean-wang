@@ -2620,6 +2620,74 @@ theorem
       (positionSourceObligationsOfPositionCodeInteriorRowsCorrect
         hinterior)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and bounded-interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and bounded-interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_boundedRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and bounded-interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and bounded-interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_boundedRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
 /--
 Encoded domino undecidability from the first proof-facing board/free-line
 invariant and exact positive board-level raw Figure 13 square tilings, with
