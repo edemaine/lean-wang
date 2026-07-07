@@ -17569,6 +17569,86 @@ theorem
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid O h
 
+/--
+Encoded domino undecidability from the first audited L2-blank candidate through
+canonical free-site-rectangle routing and positive translated boxes, routed via
+the direct Section 7 board/free-line layer-patch package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_section7_layer_patches_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_layer_patch_obligations_position_source
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate
+through canonical free-site-rectangle routing and positive translated boxes,
+routed via the direct Section 7 board/free-line layer-patch package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_free_site_rect_section7_layer_patches_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_layer_patch_obligations_position_source
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate through
+canonical free-site-rectangle routing and positive translated boxes, routed via
+the direct Section 7 board/free-line layer-patch package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_section7_layer_patches_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_layer_patch_obligations_position_source
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+through canonical free-site-rectangle routing and positive translated boxes,
+routed via the direct Section 7 board/free-line layer-patch package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_free_site_rect_section7_layer_patches_position_source
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_layer_patch_obligations_position_source
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      h
+
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the first audited L2-blank candidate through
@@ -24023,6 +24103,110 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid O
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate through
+canonical free-site-rectangle routing, positive translated boxes, and generated
+interior position-code rows, routed via the direct Section 7 layer-patch
+package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_free_site_rect_section7_layer_patches_interiorRows
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_layer_patch_obligations_interiorRows
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate
+through canonical free-site-rectangle routing, positive translated boxes, and
+generated interior position-code rows, routed via the direct Section 7
+layer-patch package.
+-/
+theorem
+    domino_problem_undecidable_l2c1_free_site_rect_section7_layer_patches_interiorRows
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_layer_patch_obligations_interiorRows
+      (l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate through
+canonical free-site-rectangle routing, positive translated boxes, and generated
+interior position-code rows, routed via the direct Section 7 layer-patch
+package.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_free_site_rect_section7_layer_patches_interiorRows
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_layer_patch_obligations_interiorRows
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+through canonical free-site-rectangle routing, positive translated boxes, and
+generated interior position-code rows, routed via the direct Section 7
+layer-patch package.
+-/
+theorem
+    domino_problem_undecidable_l2c2_free_site_rect_section7_layer_patches_interiorRows
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_layer_patch_obligations_interiorRows
+      (l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+        O)
       hinterior hcorrect
 
 /--
