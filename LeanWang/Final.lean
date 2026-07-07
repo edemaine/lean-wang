@@ -16549,6 +16549,20 @@ def toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the row-source free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations
+        h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the row-source concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box package.
 -/
@@ -16556,7 +16570,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+  h.toBoardFreeLineLayerPatchConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16568,7 +16582,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxConstructionObligations
+  h.toBoardFreeLineLayerPatchConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxConstructionObligations
@@ -16617,6 +16631,20 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the one-row free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchOneRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
+        h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the one-row concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box package.
 -/
@@ -16624,7 +16652,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxOneRowsConstructionObligations
+  h.toBoardFreeLineLayerPatchOneRowsConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16636,7 +16664,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxOneRowsConstructionObligations
+  h.toBoardFreeLineLayerPatchOneRowsConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxOneRowsConstructionObligations
@@ -16695,6 +16723,20 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the bounded-row free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsConstructionObligations
+        h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the bounded-row concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box package.
 -/
@@ -16702,7 +16744,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxBoundedRowsConstructionObligations
+  h.toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16714,7 +16756,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxBoundedRowsConstructionObligations
+  h.toBoardFreeLineLayerPatchBoundedRowsConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations
@@ -16750,6 +16792,20 @@ def toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoder-step free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
+        h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box package and the generated
 position-code decoder step.
@@ -16758,7 +16814,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+  h.toBoardFreeLineLayerPatchDecoderStepConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16771,7 +16827,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxDecoderStepConstructionObligations
+  h.toBoardFreeLineLayerPatchDecoderStepConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations
@@ -16806,6 +16862,20 @@ def toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the global-label free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
+        h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box package and the global
 position-code label-index decoder.
@@ -16814,7 +16884,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+  h.toBoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16827,7 +16897,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
+  h.toBoardFreeLineLayerPatchGlobalPositionCodeConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxGlobalPositionCodeConstructionObligations
