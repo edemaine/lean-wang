@@ -90,23 +90,6 @@ theorem sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionC
   (sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeDecoderStep
     hstep hnodup).of_eq fun _ => rfl
 
-/--
-Packaged one-row generated position-code rows give source-level computability
-of the normalized folded finite-TM0 program data.
--/
-theorem sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup
-    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
-    Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_searchCodeOneVarRows_of_positionCodeOneRows
-    hrows.rows hrows.statementList_nodup
-
-theorem sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup'
-    (hrows : SourcePositionCodeOneRowsWithStatementNodup) :
-    Computable (fun c : Code =>
-      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
-  (sourceProgramData_computable_of_positionCodeOneRowsWithStatementNodup
-    hrows).of_eq fun _ => rfl
-
 theorem sourceProgramData_computable_of_source_boundedInteriorRows
     (hinterior : SourceSearchCodeBoundedInteriorRowsPrimrec) :
     Computable sourceProgramData :=
@@ -139,23 +122,6 @@ theorem sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBo
   (sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows
     hinterior hnodup).of_eq fun _ => rfl
 
-/--
-Packaged bounded-interior generated position-code rows give source-level
-computability of the normalized folded finite-TM0 program data.
--/
-theorem sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
-    Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_boundedInteriorRows_of_positionBoundedRows
-    hbounded.rows hbounded.statementList_nodup
-
-theorem sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup'
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup) :
-    Computable (fun c : Code =>
-      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
-  (sourceProgramData_computable_of_positionCodeBoundedInteriorRowsWithStatementNodup
-    hbounded).of_eq fun _ => rfl
-
 theorem sourceProgramData_computable_of_source_interiorRows
     (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
     Computable sourceProgramData :=
@@ -187,23 +153,6 @@ theorem sourceProgramData_computable_of_source_interiorRows_of_positionCodeInter
       TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
   (sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows
     hinterior hnodup).of_eq fun _ => rfl
-
-/--
-Packaged interior generated position-code rows give source-level computability
-of the normalized folded finite-TM0 program data.
--/
-theorem sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
-    Computable sourceProgramData :=
-  sourceProgramData_computable_of_source_interiorRows_of_positionCodeInteriorRows
-    hinterior.rows hinterior.statementList_nodup
-
-theorem sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup'
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup) :
-    Computable (fun c : Code =>
-      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c)) :=
-  (sourceProgramData_computable_of_positionCodeInteriorRowsWithStatementNodup
-    hinterior).of_eq fun _ => rfl
 
 /--
 The remaining bounded-search descriptor decoder proof, together with normalized
@@ -1194,140 +1143,6 @@ def sourceObligationsOfPositionCodeOneRowsMinimal
     (sourceProgramData_computable_of_source_positionCodeOneRows_minimal'
       hvarRows hmin)
     hcorrect
-
-/--
-Primitive recursiveness of the one-row position-code decoder and absence of
-duplicates in the translated TM0 statement-support list are enough to produce
-the source obligations needed by the final reduction.
--/
-def sourceObligationsOfPositionCodeOneRowsStatementListNodup
-    (hvarRows : SourcePositionCodeOneRowsPrimrec)
-    (hnodup : ∀ c : Code,
-      (TM0Route.partrecStartedTM0StatementList
-        (NatPartrecToToPartrec.translate c)).Nodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfProgramData
-    (sourceProgramData_computable_of_source_positionCodeOneRows_statementListNodup'
-      hvarRows hnodup)
-    hcorrect
-
-/--
-Packaged one-row position-code decoder and translated statement-list
-uniqueness are enough to produce the source obligations needed by the final
-reduction.
--/
-def sourceObligationsOfPositionCodeOneRowsWithStatementNodup
-    (hrows : SourcePositionCodeOneRowsWithStatementNodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfPositionCodeOneRowsStatementListNodup
-    hrows.rows hrows.statementList_nodup hcorrect
-
-/--
-Primitive recursiveness of the accumulator step for the source-level
-position-coded descriptor decoder and absence of duplicates in the translated
-TM0 statement-support list are enough to produce the source obligations needed
-by the final reduction.
--/
-def sourceObligationsOfPositionCodeDecoderStepStatementListNodup
-    (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
-      sourcePositionCodeDecoderStep p.1 p.2))
-    (hnodup : ∀ c : Code,
-      (TM0Route.partrecStartedTM0StatementList
-        (NatPartrecToToPartrec.translate c)).Nodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfProgramData
-    (sourceProgramData_computable_of_source_positionCodeDecoderStep_statementListNodup'
-      hstep hnodup)
-    hcorrect
-
-/--
-Primitive recursiveness of the bounded interior one-row position-code decoder
-and absence of duplicates in the translated TM0 statement-support list are
-enough to produce the source obligations needed by the final reduction.
--/
-def sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
-    (hinterior : SourcePositionCodeBoundedInteriorRowsPrimrec)
-    (hnodup : ∀ c : Code,
-      (TM0Route.partrecStartedTM0StatementList
-        (NatPartrecToToPartrec.translate c)).Nodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfProgramData
-    (sourceProgramData_computable_of_source_positionCodeBoundedInteriorRows_statementListNodup'
-      hinterior hnodup)
-    hcorrect
-
-/--
-Packaged bounded-interior position-code decoder and translated statement-list
-uniqueness are enough to produce the source obligations needed by the final
-reduction.
--/
-def sourceObligationsOfPositionCodeBoundedInteriorRowsWithStatementNodup
-    (hbounded : SourcePositionCodeBoundedInteriorRowsWithStatementNodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfPositionCodeBoundedInteriorRowsStatementListNodup
-    hbounded.rows hbounded.statementList_nodup hcorrect
-
-/--
-Primitive recursiveness of the interior one-row position-code decoder and
-absence of duplicates in the translated TM0 statement-support list are enough
-to produce the source obligations needed by the final reduction.
--/
-def sourceObligationsOfPositionCodeInteriorRowsStatementListNodup
-    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
-    (hnodup : ∀ c : Code,
-      (TM0Route.partrecStartedTM0StatementList
-        (NatPartrecToToPartrec.translate c)).Nodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfProgramData
-    (sourceProgramData_computable_of_source_positionCodeInteriorRows_statementListNodup'
-      hinterior hnodup)
-    hcorrect
-
-/--
-Packaged interior position-code decoder and translated statement-list
-uniqueness are enough to produce the source obligations needed by the final
-reduction.
--/
-def sourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    SourceObligations :=
-  sourceObligationsOfPositionCodeInteriorRowsStatementListNodup
-    hinterior.rows hinterior.statementList_nodup hcorrect
 
 end TM0FoldedReduction
 
