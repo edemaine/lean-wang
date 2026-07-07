@@ -5982,6 +5982,21 @@ structure FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations :
 
 set_option linter.style.longLine false in
 /--
+Finite-scaffold-facing checked-stack/layer-patch route with the fixed-start
+source-level position-code label-index target.
+
+This is the same first audited L2 candidate surface as
+`FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations`, but it
+uses the cleaner direct source obligation whose row decoder starts at the
+canonical initial program position.
+-/
+structure FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete origin-zero translated-box finite scaffold target for the first
 audited L2 candidate.
 
@@ -6990,6 +7005,21 @@ def ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
       scaffold)
     hindex
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from the concrete checked-stack/layer-patch finite
+certificate and the fixed-start source-level primitive recursive position-code
+label-index decoder.
+-/
+def ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hstart
 
 set_option linter.style.longLine false in
 /--
@@ -15631,6 +15661,57 @@ theorem domino_problem_undecidable
 
 end FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations
 
+namespace FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the source-specialized label-index package. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    FinalCheckedStackLayerPatchDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Convert the concrete checked-stack/layer-patch fixed-start package into the
+endpoint inputs.
+-/
+def toFinalReductionInputs
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the first checked-stack/layer-patch package and the
+fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the first checked-stack/layer-patch package and the
+fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalReductionInputs.domino_problem_undecidable
+
+end FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations
+
 namespace FinalOriginZeroTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -21301,6 +21382,26 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchSourcePositionCodeCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete checked-stack/layer-patch
+scaffold package and the fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete checked-stack/layer-patch scaffold
+package and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable h.toFinalReductionInputs
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the origin-zero translated-box finite
 scaffold package and generated interior position-code rows.
 -/
@@ -21978,6 +22079,31 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   FinalCheckedStackLayerPatchSourcePositionCodeConstructionObligations.domino_problem_undecidable
     { scaffold := scaffold, labelIndex := hindex }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and the fixed-start source-level position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := scaffold, labelIndexStart := hstart }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and the fixed-start source-level position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalCheckedStackLayerPatchLabelIndexStartConstructionObligations.domino_problem_undecidable
+    { scaffold := scaffold, labelIndexStart := hstart }
 
 set_option linter.style.longLine false in
 /--
