@@ -2623,6 +2623,70 @@ theorem
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and the source-specialized position-code label-index
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_sourceCode
+      data hindex
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and the source-specialized position-code label-index
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_sourceCodeCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_sourceCode
+      data hindex
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and the source-specialized position-code label-index
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCode
+      data hindex
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and the source-specialized position-code label-index
+decoder, with `positionProgramData` semantic correctness discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCodeCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCode
+      data hindex
+      TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
 board/free-line package and bounded-interior generated position-code rows at
 concrete numeric label slots, with `positionProgramData` semantic correctness
 discharged.
