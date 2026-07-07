@@ -76,42 +76,6 @@ theorem domino_problem_undecidable_of_checked_transcription_position_source_inte
   domino_problem_undecidable_of_presented_flexible_position_source_positionCodeInteriorRows
     D.toPresentedFlexibleInstance hinterior hcorrect
 
-/--
-Encoded domino undecidability from a checked flexible finite scaffold
-transcription and the packaged generated interior position-code source route.
--/
-theorem encoded_domino_problem_undecidable_of_checked_transcription_position_source_interiorPackage
-    (D : OllingerRobinson.CheckedFlexibleTranscription)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_checked_flexible_transcription_position_source
-    D
-    (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-      hinterior hcorrect)
-
-/--
-Unencoded domino undecidability from a checked flexible finite scaffold
-transcription and the packaged generated interior position-code source route.
--/
-theorem domino_problem_undecidable_of_checked_transcription_position_source_interiorPackage
-    (D : OllingerRobinson.CheckedFlexibleTranscription)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
-    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
-      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
-        (Turing.TM0.eval
-          (TM0Route.partrecStartedTM0Machine tc)
-          TM0Route.partrecStartedTM0Input).Dom) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_checked_flexible_transcription_position_source
-    D
-    (positionSourceObligationsOfPositionCodeInteriorRowsWithStatementNodup
-      hinterior hcorrect)
-
 end TM0FoldedReduction
 
 end LeanWang
