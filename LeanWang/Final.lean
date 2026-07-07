@@ -2728,6 +2728,18 @@ structure FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionO
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with the
+fixed-start source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with the
 generated position-code decoder step.
 -/
 structure FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations :
@@ -4471,6 +4483,75 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box fixed-start package to the corresponding
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box fixed-start package to the corresponding
+decoder-step package.
+-/
+def toDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes := h.validTranslatedBoxes
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box fixed-start package to the finite
+decoded-window/layer-patch endpoint.
+-/
+def toCombinedWindowLayerPatchLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchLabelIndexStartConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowLayerPatchLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, valid
+translated boxes, and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowLayerPatchLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
@@ -21475,6 +21556,29 @@ target.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, valid translated boxes, and the fixed-start source-level position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+valid translated boxes, and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
