@@ -7,12 +7,13 @@ import LeanWang.TM0FoldedPositionReduction.Theorems.LayerPatches.L2C1LayerPatche
 import LeanWang.TM0FoldedPositionReduction.Theorems.LayerPatches.L2C1PositiveBoxes
 import LeanWang.TM0FoldedPositionReduction.Theorems.LayerPatches.L2C2LayerPatches
 import LeanWang.TM0FoldedPositionReduction.Theorems.LayerPatches.L2C2PositiveBoxes
+import LeanWang.TM0FoldedPositionReduction.Theorems.LayerPatches.ValidTranslatedBoxes
 
 /-!
 Layer-patch final theorem wrappers for the generated position-coded folded
 reduction.
 
 This module is an import wrapper; the L2C1/L2C2 layer-patch and positive-box
-theorem families live in submodules so edits to one family do not force Lean to
-recheck the full wrapper file.
+theorem families live in submodules so edits to one scaffold package do not
+force Lean to recheck the full wrapper file.
 -/
