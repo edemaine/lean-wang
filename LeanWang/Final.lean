@@ -12744,6 +12744,34 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesLabelIndex
 set_option linter.style.longLine false in
 /--
 Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with interior generated position-code rows at
+the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with interior generated position-code
+rows at the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    { checkedStacks := checkedStacks, patches := patches } sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
 finite scaffold obligations, with generated one-row position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesOneRows

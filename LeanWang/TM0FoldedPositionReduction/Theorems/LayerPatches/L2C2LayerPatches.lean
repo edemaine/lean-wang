@@ -97,6 +97,33 @@ theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsA
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the second checked-stack/layer-patch Section
+7 certificate and interior generated position-code rows at concrete numeric
+label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch
+Section 7 certificate and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    data (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch Section
 7 certificate and the global position-code label-index decoder, with
 `positionProgramData` semantic correctness discharged.
 -/
