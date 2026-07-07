@@ -2798,6 +2798,19 @@ structure FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructio
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
+route with the fixed-start source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  tileableBoxes : FinalFigure13L2C2Figure18ScaffoldTileableBoxes
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line-active-corner/tileable-box
 route with the generated position-code decoder step.
 
 This is the clean source-facing form of the paper-level scaffold target:
@@ -5444,6 +5457,68 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start board/free-line-active-corner/tileable-box package to
+the source-label board/free-line/tileable-box package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  tileableBoxes := h.tileableBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start board/free-line/tileable-box package to the fixed-start
+board/free-line/layer-patch package.  The finite layer patches are obtained
+from the tileable Figure 18 scaffold boxes via the valid-translated-box route.
+-/
+def toBoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches :=
+    finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes
+      (finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+        h.tileableBoxes)
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and the fixed-start generated position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+tileable Figure 18 scaffold boxes, and the fixed-start generated position-code
+decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+set_option linter.style.longLine true
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations
@@ -20386,6 +20461,30 @@ position-code label-index target.
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from Section 7 board/free-line
+active/corner recognition, tileable Figure 18 scaffold boxes, and the
+fixed-start source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from Section 7 board/free-line active/corner
+recognition, tileable Figure 18 scaffold boxes, and the fixed-start
+source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTileableBoxLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
