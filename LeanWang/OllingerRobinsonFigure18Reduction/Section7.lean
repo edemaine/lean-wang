@@ -4108,6 +4108,76 @@ def
     }
 
 /--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first finite layer-patch board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second finite layer-patch board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first bundled Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second bundled Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+      O)
+
+/--
 The existing first translated-box package also supplies the finite layer-patch
 package.
 -/

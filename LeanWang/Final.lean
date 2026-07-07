@@ -16478,6 +16478,20 @@ def toCanonicalTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+        h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box scaffold package and the
 source-specialized generated position-code label-index decoder.
@@ -16486,7 +16500,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+  h.toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -16499,7 +16513,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalCombinedSiteTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+  h.toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations
