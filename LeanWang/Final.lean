@@ -203,6 +203,26 @@ theorem sourceFirstInteriorRowsAtIndexPrimrec_of_labelIndexStart
 
 set_option linter.style.longLine false in
 /--
+The exact one-row-at-index target gives primitive recursiveness of the first
+nonempty generated statement row at numeric label slots.
+-/
+theorem sourceFirstInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    (h : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex h
+
+set_option linter.style.longLine false in
+/--
+The interior-at-index target gives primitive recursiveness of the first
+nonempty generated statement row at numeric label slots.
+-/
+theorem sourceFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+    (h : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex h
+
+set_option linter.style.longLine false in
+/--
 The exact one-row-at-index target recovers the final position-coded start
 decoder target.
 -/

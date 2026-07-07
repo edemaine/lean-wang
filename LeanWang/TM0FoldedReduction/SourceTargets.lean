@@ -299,6 +299,18 @@ theorem sourcePositionCodeZeroRowsAtIndexPrimrec :
 
 set_option linter.style.longLine false in
 /--
+The exact one-row-at-index target gives the first nonempty generated
+position-code row by fixing the statement-row index to `1`.
+-/
+theorem sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  hrows.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.const 1) Primrec.snd))
+
+set_option linter.style.longLine false in
+/--
 The exact one-row-at-index target gives interior rows by shifting the row index
 by one.
 -/
@@ -306,6 +318,18 @@ theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_oneRowsAtIndex
     (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
     SourcePositionCodeInteriorRowsAtIndexPrimrec :=
   sourcePositionCodeInteriorRowsAtIndex_primrec_of_oneRowsAtIndex hrows
+
+set_option linter.style.longLine false in
+/--
+The interior-at-index target gives the first nonempty generated position-code
+row by fixing the interior-row index to `0`.
+-/
+theorem sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  hinterior.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.const 0) Primrec.snd))
 
 set_option linter.style.longLine false in
 /--
