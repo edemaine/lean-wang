@@ -1426,6 +1426,12 @@ conditions have been narrowed to two proof-facing fronts:
    `positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect`,
    `FinalReductionInputs.ofScaffoldAndSourceInteriorRowsAtIndex`, and
    `domino_problem_undecidable_of_scaffoldAndSourceInteriorRowsAtIndex`.
+   The concrete L2C2 board/free-line/layer-patch final surface also now has a
+   direct bounded-at-index package,
+   `FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations`,
+   so the preferred scaffold endpoint no longer needs to detour through the
+   lower Section 7 theorem when the generated numeric label slots are the
+   available source target.
    A still weaker generated-program computability target is now exposed as
    `SourcePositionCodeLabelIndexStartPrimrec`, the source-level position-coded
    start decoder with fuel fixed to `sourceStatementCount c` and offset fixed
