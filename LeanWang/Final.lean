@@ -1749,6 +1749,19 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstruction
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the fixed-start source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
 with the generated one-row position-code source target.
 -/
 structure FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :
@@ -12856,6 +12869,56 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start board/free-line/layer-patch package to the source-label
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start board/free-line/layer-patch package to the compatible
+level/layer-patch final route.
+-/
+def toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2CompatibleLevelLayerPatchSourcePositionCodeConstructionObligations :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.toCompatibleLevelLayerPatchSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the fixed-start generated position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the fixed-start generated position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
 
 set_option linter.style.longLine false in
@@ -13253,6 +13316,23 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObli
   boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
   layerPatches := O.patches
   labelIndex := hindex
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+fixed-start board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndexStart := hstart
 
 set_option linter.style.longLine false in
 /--
@@ -18406,6 +18486,30 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchSourceP
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the fixed-start
+source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and the fixed-start
+source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
 board/free-line layer-patch scaffold package and generated one-row
 position-code rows.
 -/
@@ -18528,6 +18632,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsS
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (O.toFinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the fixed-start
+source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and the fixed-start
+source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
+    hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
