@@ -8527,7 +8527,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8538,7 +8538,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -8550,7 +8550,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8561,7 +8561,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_checks_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -8573,7 +8573,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8584,7 +8584,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -8596,7 +8596,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8607,7 +8607,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_checks_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -8619,7 +8619,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8630,7 +8630,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate via
@@ -8642,7 +8642,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8653,7 +8653,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_board_rows_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate via
@@ -8665,7 +8665,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8676,7 +8676,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate via
@@ -8688,7 +8688,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -8699,7 +8699,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_board_rows_position_source
       hchecked hlevel
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via
@@ -19955,7 +19955,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorPackage
     (data : L2C1SignalTowerTranslatedBoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19966,7 +19966,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first preferred field-based Section 7
@@ -19976,7 +19976,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c1_signal_tower_translated_box_data_interiorPackage
     (data : L2C1SignalTowerTranslatedBoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -19987,7 +19987,7 @@ theorem
     domino_problem_undecidable_l2c1_signal_tower_translated_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second preferred field-based Section 7
@@ -19997,7 +19997,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorPackage
     (data : L2C2SignalTowerTranslatedBoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20008,7 +20008,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second preferred field-based Section 7
@@ -20018,7 +20018,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_interiorPackage
     (data : L2C2SignalTowerTranslatedBoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20029,7 +20029,7 @@ theorem
     domino_problem_undecidable_l2c2_signal_tower_translated_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first finite-check-facing Section 7
@@ -20039,7 +20039,7 @@ interior position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorPackage
     (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20050,7 +20050,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first finite-check-facing Section 7
@@ -20060,7 +20060,7 @@ interior position-code decoder.
 theorem
     domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_interiorPackage
     (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20071,7 +20071,7 @@ theorem
     domino_problem_undecidable_l2c1_board_free_line_layer_patch_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second finite-check-facing Section 7
@@ -20081,7 +20081,7 @@ interior position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorPackage
     (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20092,7 +20092,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second finite-check-facing Section 7
@@ -20102,7 +20102,7 @@ interior position-code decoder.
 theorem
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorPackage
     (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20113,7 +20113,7 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first proof-facing Robinson Section 7
@@ -20123,7 +20123,7 @@ position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorPackage
     (data : L2C1RobinsonSection7BoardFreeLineData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20134,7 +20134,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing Robinson Section 7
@@ -20144,7 +20144,7 @@ position-code decoder.
 theorem
     domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorPackage
     (data : L2C1RobinsonSection7BoardFreeLineData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20155,7 +20155,7 @@ theorem
     domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing Robinson Section 7
@@ -20165,7 +20165,7 @@ position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorPackage
     (data : L2C2RobinsonSection7BoardFreeLineData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20176,7 +20176,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing Robinson Section 7
@@ -20186,7 +20186,7 @@ position-code decoder.
 theorem
     domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorPackage
     (data : L2C2RobinsonSection7BoardFreeLineData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20197,7 +20197,7 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from origin-zero active/corner windows, finite
@@ -20208,7 +20208,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (patches : L2C1ActiveCornerLayerPatches)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20219,7 +20219,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
       originZeroWindows patches
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from origin-zero active/corner windows, finite
@@ -20230,7 +20230,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (patches : L2C1ActiveCornerLayerPatches)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20241,7 +20241,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
       originZeroWindows patches
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from origin-zero active/corner windows, finite
@@ -20252,7 +20252,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (patches : L2C2ActiveCornerLayerPatches)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20263,7 +20263,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from origin-zero active/corner windows, finite
@@ -20274,7 +20274,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (patches : L2C2ActiveCornerLayerPatches)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20285,7 +20285,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first checked-stack/layer-patch finite
@@ -20295,7 +20295,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
     (data : L2C1CheckedStackLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20306,7 +20306,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first checked-stack/layer-patch finite
@@ -20316,7 +20316,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorPackage
     (data : L2C1CheckedStackLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20327,7 +20327,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_stack_layer_patches_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second checked-stack/layer-patch finite
@@ -20337,7 +20337,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
     (data : L2C2CheckedStackLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20348,7 +20348,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second checked-stack/layer-patch finite
@@ -20358,7 +20358,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorPackage
     (data : L2C2CheckedStackLayerPatchData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20369,7 +20369,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate using
@@ -20381,7 +20381,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20404,7 +20404,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20427,7 +20427,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20450,7 +20450,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20472,7 +20472,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20495,7 +20495,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_compatible_fig16_level_data_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20518,7 +20518,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_level_data_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20541,7 +20541,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_compatible_fig16_level_data_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20567,7 +20567,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20578,7 +20578,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
       O
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first origin-zero Section 7
@@ -20592,7 +20592,7 @@ theorem
       l2Component1BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20603,7 +20603,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
       O
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second origin-zero Section 7
@@ -20617,7 +20617,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20628,7 +20628,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
       O
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second origin-zero Section 7
@@ -20642,7 +20642,7 @@ theorem
       l2Component2BlankCandidateSanity.activeSiteSpecs_valid
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20653,7 +20653,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
       O
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first Robinson Section 7 scaffold
@@ -20663,7 +20663,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
     (data : L2C1RobinsonSection7Data)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20683,7 +20683,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c1_robinson_section7_data_interiorPackage
     (data : L2C1RobinsonSection7Data)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20703,7 +20703,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
     (data : L2C2RobinsonSection7Data)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20723,7 +20723,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c2_robinson_section7_data_interiorPackage
     (data : L2C2RobinsonSection7Data)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20743,7 +20743,7 @@ position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
     (data : L2C1RobinsonSection7ObstructionData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20754,7 +20754,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first paper-facing Robinson Section 7
@@ -20764,7 +20764,7 @@ position-code decoder.
 theorem
     domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_interiorPackage
     (data : L2C1RobinsonSection7ObstructionData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20775,7 +20775,7 @@ theorem
     domino_problem_undecidable_l2c1_robinson_section7_obstruction_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second paper-facing Robinson Section 7
@@ -20785,7 +20785,7 @@ position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
     (data : L2C2RobinsonSection7ObstructionData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20796,7 +20796,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second paper-facing Robinson Section 7
@@ -20806,7 +20806,7 @@ position-code decoder.
 theorem
     domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_interiorPackage
     (data : L2C2RobinsonSection7ObstructionData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -20817,7 +20817,7 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_obstruction_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first preferred field-based Section 7
@@ -21672,7 +21672,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_board_aligned_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21694,7 +21694,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_board_aligned_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21716,7 +21716,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_board_aligned_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21738,7 +21738,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_board_aligned_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21760,7 +21760,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21782,7 +21782,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_positive_board_aligned_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21804,7 +21804,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21826,7 +21826,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_positive_board_aligned_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21848,7 +21848,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21871,7 +21871,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_checked_pos_board_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21894,7 +21894,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21917,7 +21917,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_checked_pos_board_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21940,7 +21940,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_pos_board_squares_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21962,7 +21962,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_pos_board_squares_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -21984,7 +21984,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_pos_board_squares_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22006,7 +22006,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_pos_board_squares_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22030,7 +22030,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22041,7 +22041,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing board/free-line
@@ -22054,7 +22054,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22065,7 +22065,7 @@ theorem
     domino_problem_undecidable_l2c1_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing board/free-line
@@ -22078,7 +22078,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22089,7 +22089,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing board/free-line
@@ -22102,7 +22102,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22113,7 +22113,7 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_pos_board_squares_position_source
       boardFreeLineActiveCorner hsquares
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first proof-facing board/free-line
@@ -22126,7 +22126,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22150,7 +22150,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22174,7 +22174,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22198,7 +22198,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hplane : TilesPlane fig13Tiles)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22223,7 +22223,7 @@ theorem
       Section7CanonicalFreeSiteRectActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22247,7 +22247,7 @@ theorem
       Section7CanonicalFreeSiteRectActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22271,7 +22271,7 @@ theorem
       Section7CanonicalFreeSiteRectActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22295,7 +22295,7 @@ theorem
       Section7CanonicalFreeSiteRectActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22316,7 +22316,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_active_corner_pos_board_squares_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22337,7 +22337,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_active_corner_pos_board_squares_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22358,7 +22358,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_active_corner_pos_board_squares_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22379,7 +22379,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_active_corner_pos_board_squares_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hsquares : Figure13PositiveBoardLevelTileableSquares)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22400,7 +22400,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_active_corner_checked_pos_board_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22421,7 +22421,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_active_corner_checked_pos_board_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22442,7 +22442,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_active_corner_checked_pos_board_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22463,7 +22463,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_active_corner_checked_pos_board_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure13PositiveBoardLevelChecked)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22484,7 +22484,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22505,7 +22505,7 @@ theorem
     domino_problem_undecidable_l2c1_checked_active_corner_raw_boards_interiorPackage
     (hchecked : L2C1OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22526,7 +22526,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22547,7 +22547,7 @@ theorem
     domino_problem_undecidable_l2c2_checked_active_corner_raw_boards_interiorPackage
     (hchecked : L2C2OriginZeroCheckedStacks)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22567,7 +22567,7 @@ generated interior position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_checked_board_data_active_corner_interiorPackage
     (data : L2C1CheckedSignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22586,7 +22586,7 @@ generated interior position-code decoder.
 theorem
     domino_problem_undecidable_l2c1_checked_board_data_active_corner_interiorPackage
     (data : L2C1CheckedSignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22605,7 +22605,7 @@ generated interior position-code decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_checked_board_data_active_corner_interiorPackage
     (data : L2C2CheckedSignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22624,7 +22624,7 @@ generated interior position-code decoder.
 theorem
     domino_problem_undecidable_l2c2_checked_board_data_active_corner_interiorPackage
     (data : L2C2CheckedSignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22646,7 +22646,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22657,7 +22657,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first proof-facing board/free-line
@@ -22670,7 +22670,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22681,7 +22681,7 @@ theorem
     domino_problem_undecidable_l2c1_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second proof-facing board/free-line
@@ -22694,7 +22694,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22705,7 +22705,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second proof-facing board/free-line
@@ -22718,7 +22718,7 @@ theorem
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22729,7 +22729,7 @@ theorem
     domino_problem_undecidable_l2c2_board_free_line_fig13_boxes_position_source
       boardFreeLineActiveCorner hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from first-component origin-zero recognizability,
@@ -22740,7 +22740,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_checked_board_levels_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22762,7 +22762,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_checked_board_levels_interiorPackage
     (originZeroWindows : L2C1OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22784,7 +22784,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_checked_board_levels_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22806,7 +22806,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_checked_board_levels_interiorPackage
     (originZeroWindows : L2C2OriginZeroWindows)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22827,7 +22827,7 @@ route.
 theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorPackage
     (data : L2C1OriginZeroFig13BoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22838,7 +22838,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first preferred origin-zero/finite
@@ -22848,7 +22848,7 @@ route.
 theorem
     domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_interiorPackage
     (data : L2C1OriginZeroFig13BoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22859,7 +22859,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_fig13_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second preferred origin-zero/finite
@@ -22869,7 +22869,7 @@ route.
 theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorPackage
     (data : L2C2OriginZeroFig13BoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22880,7 +22880,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second preferred origin-zero/finite
@@ -22890,7 +22890,7 @@ route.
 theorem
     domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_interiorPackage
     (data : L2C2OriginZeroFig13BoxData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -22901,7 +22901,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_fig13_box_data_position_source
       data
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate via the
@@ -24249,7 +24249,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -24260,7 +24260,7 @@ theorem
     encoded_domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the first audited L2-blank candidate,
@@ -24278,7 +24278,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -24289,7 +24289,7 @@ theorem
     domino_problem_undecidable_l2c1_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the second audited L2-blank candidate, using
@@ -24307,7 +24307,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -24318,7 +24318,7 @@ theorem
     encoded_domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Unencoded domino undecidability from the second audited L2-blank candidate,
@@ -24336,7 +24336,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hboxes : Figure13TileableBoxes)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -24347,7 +24347,7 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_signal_tower_fig13_boxes_position_source
       originZeroWindows hboxes
       (positionSourceObligationsOfPositionCodeInteriorRows
-        hinterior.rows hcorrect)
+        hinterior hcorrect)
 
 /--
 Encoded domino undecidability from the first audited L2-blank candidate, using
@@ -25033,7 +25033,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c1_signal_tower_board_data_interiorPackage
     (data : L2C1SignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25053,7 +25053,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c1_signal_tower_board_data_interiorPackage
     (data : L2C1SignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25073,7 +25073,7 @@ decoder.
 theorem
     encoded_domino_problem_undecidable_l2c2_signal_tower_board_data_interiorPackage
     (data : L2C2SignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25093,7 +25093,7 @@ decoder.
 theorem
     domino_problem_undecidable_l2c2_signal_tower_board_data_interiorPackage
     (data : L2C2SignalTowerBoardData)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25223,7 +25223,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid)
     (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25250,7 +25250,7 @@ theorem
         0 Quadrant.southwest
         l2Component1BlankCandidateSanity.cornerIndex_valid)
     (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25277,7 +25277,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid)
     (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25304,7 +25304,7 @@ theorem
         0 Quadrant.northeast
         l2Component2BlankCandidateSanity.cornerIndex_valid)
     (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25564,7 +25564,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25594,7 +25594,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25623,7 +25623,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25653,7 +25653,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25683,7 +25683,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25713,7 +25713,7 @@ theorem
           0 Quadrant.southwest
           l2Component1BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25743,7 +25743,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
@@ -25773,7 +25773,7 @@ theorem
           0 Quadrant.northeast
           l2Component2BlankCandidateSanity.cornerIndex_valid).table)
     (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
-    (hinterior : SourcePositionCodeInteriorRowsWithStatementNodup)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
     (hcorrect : ∀ tc : Turing.ToPartrec.Code,
       (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
         (Turing.TM0.eval
