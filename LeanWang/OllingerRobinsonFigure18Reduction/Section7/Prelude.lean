@@ -1,0 +1,10040 @@
+/-
+Copyright (c) 2026 lean-wang contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Erik Demaine, Stefan Langerman, GPT 5.5
+-/
+import LeanWang.OllingerRobinsonFigure18Reduction.Core
+import LeanWang.OllingerRobinsonCanonicalOriginZero
+
+/-!
+Section 7 scaffold packages and final Figure 18 reduction wrappers.
+
+This module contains the scaffold-instantiation suffix split out from
+`LeanWang.OllingerRobinsonFigure18Reduction`, so changes to the concrete
+Section 7 route do not force rebuilding the earlier generic reduction layers.
+-/
+
+namespace LeanWang
+
+namespace TM0FoldedReduction
+
+set_option linter.style.longLine false
+
+open Nat.Partrec (Code)
+open OllingerRobinson
+open OllingerRobinson.Figure18ScaffoldData
+open OllingerRobinson.Figure13Layers
+open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
+
+/-- Short local name for the layered Robinson Section 7 obstruction route. -/
+abbrev LayeredSection7ObstructionRoutingInvariant
+    (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData) :
+    Prop :=
+  D.HasRobinsonSection7ObstructionRoutingInvariant
+
+/--
+Short local name for the proof-facing Robinson Section 7 board/free-line
+target: pure obstruction geometry plus active/corner recognition at canonical
+free crossings.
+-/
+abbrev LayeredSection7BoardFreeLineActiveCornerInvariant
+    (D : OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData) :
+    Prop :=
+  D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+
+/-- Short local name for the bare Figure 18 board/free-line target. -/
+abbrev Section7BoardFreeLineActiveCornerInvariant
+    (D : OllingerRobinson.Figure18ScaffoldData) : Prop :=
+  D.HasRobinsonSection7BoardFreeLineActiveCornerInvariant
+
+/--
+Short local name for the concrete active/corner recognition obligation at
+Robinson's canonical free crossings.  The pure obstruction geometry part of
+the board/free-line target is canonical, so this is equivalent to
+`Section7BoardFreeLineActiveCornerInvariant`.
+-/
+abbrev Section7CanonicalFreeSiteRectActiveCornerInvariant
+    (D : OllingerRobinson.Figure18ScaffoldData) : Prop :=
+  D.HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant
+
+theorem section7BoardFreeLineActiveCorner_of_activeCorner
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hactive :
+      Section7CanonicalFreeSiteRectActiveCornerInvariant D) :
+    Section7BoardFreeLineActiveCornerInvariant D :=
+  HasRobinsonSection7BoardFreeLineActiveCornerInvariant.ofActiveCorner
+    hactive
+
+theorem activeCorner_of_section7BoardFreeLineActiveCorner
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hboard : Section7BoardFreeLineActiveCornerInvariant D) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant D :=
+  HasRobinsonBoardCanonicalFreeSiteRectActiveCornerInvariant.ofBoardFreeLineActiveCorner
+    hboard
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+part used by the board/free-line Section 7 package.
+-/
+theorem activeCorner_of_canonicalFreeSiteRectRouting
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant D := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing supplies the board/free-line
+active/corner recognition package.
+-/
+theorem section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+    {D : OllingerRobinson.Figure18ScaffoldData}
+    (hrouting : D.HasRobinsonBoardCanonicalFreeSiteRectRoutingInvariant) :
+    Section7BoardFreeLineActiveCornerInvariant D :=
+  section7BoardFreeLineActiveCorner_of_activeCorner
+    (activeCorner_of_canonicalFreeSiteRectRouting hrouting)
+
+theorem section7BoardFreeLineActiveCorner_iff_activeCorner
+    (D : OllingerRobinson.Figure18ScaffoldData) :
+    Section7BoardFreeLineActiveCornerInvariant D ↔
+      Section7CanonicalFreeSiteRectActiveCornerInvariant D :=
+  hasRobinsonSection7BoardFreeLineActiveCornerInvariant_iff_activeCorner D
+
+/-- Finite-box form of the raw Figure 13 scaffold hypothesis. -/
+abbrev Figure13TileableBoxes : Prop :=
+  ∀ r : Nat, TileableBox fig13Tiles r
+
+/-- Cofinal-square form of the raw Figure 13 scaffold hypothesis. -/
+abbrev Figure13CofinalTileableSquares : Prop :=
+  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
+
+/--
+Exact positive Robinson board-level raw Figure 13 square-tiling hypothesis.
+
+This is the ordinary Wang-rectangle form of Robinson's Section 7 board/free-row
+construction: at board level `level + 1`, the free-row/free-column grid has
+side `RobinsonSquare.freeGridSide (level + 1)`.
+-/
+abbrev Figure13PositiveBoardLevelTileableSquares : Prop :=
+  HasFigure13PositiveBoardLevelTileableSquares
+
+/-- Finite checked Figure 16-recognized Robinson board macro-square hypothesis. -/
+abbrev Figure13CheckedRecognizedMacroSquares : Prop :=
+  HasCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+
+/--
+Canonical finite checked Figure 16-recognized Robinson board macro-square
+hypothesis.
+-/
+abbrev Figure13CanonicalCheckedRecognizedMacroSquares : Prop :=
+  HasCanonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+
+/--
+Finite checked Figure 16-recognized Robinson board macro-square hypothesis for
+the corrected Figure 18 site-compatible target.
+-/
+abbrev Figure18CheckedRecognizedCompatibleMacroSquares : Prop :=
+  HasCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
+
+/--
+Canonical finite checked Figure 16-recognized Robinson board macro-square
+hypothesis for the corrected Figure 18 site-compatible target.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleMacroSquares : Prop :=
+  HasCanonicalCheckedFigure16RecognizedCompatibleRobinsonBoardLevelMacroSquares
+
+/--
+Row-major checked-data form of
+`Figure18CanonicalCheckedRecognizedCompatibleMacroSquares`.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleLevelData : Prop :=
+  HasCanonicalCheckedFigure16RecognizedCompatibleLevelData
+
+/--
+Proof-facing finite-check form of
+`Figure18CanonicalCheckedRecognizedCompatibleLevelData`.
+
+This is definitionally the compatible canonical macro-square target: for each
+level, provide source and target site rectangles together with the checked
+layer-stack compatibility, Figure 16 recognition, and target Figure 18
+site-compatibility Boolean checks.
+-/
+abbrev Figure18CanonicalCheckedRecognizedCompatibleLevelChecks : Prop :=
+  Figure18CanonicalCheckedRecognizedCompatibleMacroSquares
+
+/--
+Canonical Figure 16 macro-square hypothesis using only checked source layer
+stacks and raw Figure 13 boundary compatibility.
+-/
+abbrev Figure18CanonicalRawBoundaryMacroSquares : Prop :=
+  HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquares
+
+/-- Finite-check form of `Figure18CanonicalRawBoundaryMacroSquares`. -/
+abbrev Figure18CanonicalRawBoundaryMacroSquaresBool : Prop :=
+  HasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool
+
+/--
+Level-certificate form of `Figure18CanonicalRawBoundaryMacroSquaresBool`.
+
+This is the clean Robinson Section 7 obligation: one source/free-grid
+certificate for each board level.
+-/
+abbrev Figure18CanonicalRawBoundaryLevelCertificates : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryLevelCertificates
+
+/-- Explicit finite-check form of `Figure18CanonicalRawBoundaryLevelCertificates`. -/
+abbrev Figure18CanonicalRawBoundaryLevelChecks : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryLevelChecks
+
+/-- Row-major checked-list form of `Figure18CanonicalRawBoundaryLevelChecks`. -/
+abbrev Figure18CanonicalRawBoundaryCheckedLevelData : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryCheckedLevelData
+
+/--
+Shifted Robinson board-level source/free-grid checks, using
+`freeGridSide (level + 1)` to skip the degenerate level-0 board.
+-/
+abbrev Figure18CanonicalRawBoundaryBoardLevelChecks : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryBoardLevelChecks
+
+/-- Row-major checked-list form of `Figure18CanonicalRawBoundaryBoardLevelChecks`. -/
+abbrev Figure18CanonicalRawBoundaryCheckedBoardLevels : Prop :=
+  HasCanonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+
+/--
+Row-major checked-list form of the exact positive Robinson board-level raw
+Figure 13 macro-square target, without the over-strong Figure 16 source-stack
+diagnostic.
+-/
+abbrev Figure13PositiveBoardLevelChecked : Prop :=
+  HasFigure13PositiveBoardLevelCheckedData
+
+/--
+Propositional raw-boundary form of the exact positive Robinson board-level raw
+Figure 13 macro-square target.
+-/
+abbrev Figure13PositiveBoardLevelRaw : Prop :=
+  HasFigure13PositiveBoardLevelRawData
+
+theorem canonicalRawBoundaryMacroSquares_of_bool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalCheckedFigure16SourceRawBoundary_of_bool hlevel
+
+theorem canonicalRawBoundaryLevelChecks_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryLevelChecks :=
+  canonicalFigure16SourceRawBoundaryLevelChecks_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryLevelCertificates_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryLevelCertificates :=
+  canonicalFigure16SourceRawBoundaryLevelCertificates_of_levelChecks hlevel
+
+theorem canonicalRawBoundaryLevelChecks_of_checkedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    Figure18CanonicalRawBoundaryLevelChecks :=
+  canonicalFigure16SourceRawBoundaryLevelChecks_of_checkedLevelData hlevel
+
+theorem canonicalRawBoundaryCheckedLevelData_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryCheckedLevelData :=
+  canonicalFigure16SourceRawBoundaryCheckedLevelData_of_levelChecks hlevel
+
+theorem canonicalRawBoundaryMacroSquaresBool_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryMacroSquaresBool :=
+  canonicalCheckedFigure16SourceRawBoundaryBool_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryMacroSquaresBool_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryMacroSquaresBool :=
+  canonicalCheckedFigure16SourceRawBoundaryBool_of_levelChecks hlevel
+
+theorem canonicalRawBoundaryMacroSquaresBool_of_checkedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    Figure18CanonicalRawBoundaryMacroSquaresBool :=
+  canonicalRawBoundaryMacroSquaresBool_of_levelChecks
+    (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
+
+theorem canonicalRawBoundaryMacroSquares_of_levelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalCheckedFigure16SourceRawBoundary_of_levelCertificates hlevel
+
+theorem canonicalRawBoundaryMacroSquares_of_levelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalRawBoundaryMacroSquares_of_levelCertificates
+    (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel)
+
+theorem canonicalRawBoundaryMacroSquares_of_checkedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    Figure18CanonicalRawBoundaryMacroSquares :=
+  canonicalRawBoundaryMacroSquares_of_levelChecks
+    (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
+
+/-- Row-major compatible Figure 16 checked data forgets to level checks. -/
+theorem canonicalCheckedRecognizedCompatibleLevelChecks_of_checkedLevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleLevelChecks :=
+  canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
+
+theorem canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    Figure18CanonicalRawBoundaryBoardLevelChecks :=
+  canonicalFigure16SourceRawBoundaryBoardLevelChecks_of_checkedBoardLevelData
+    hlevel
+
+theorem canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    Figure18CanonicalRawBoundaryCheckedBoardLevels :=
+  canonicalFigure16SourceRawBoundaryCheckedBoardLevelData_of_boardLevelChecks
+    hlevel
+
+/--
+Exact positive board-level checked data is equivalent to the positive
+Robinson-board aligned macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevelData
+    hlevel
+
+/--
+The over-strong row-major Figure 16 source raw-boundary board data forgets to
+the exact positive raw Figure 13 board-level checked data.
+-/
+theorem checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryCheckedBoardLevelData
+    hlevel
+
+/--
+The over-strong Figure 16 source raw-boundary board checks forget to the exact
+positive raw Figure 13 board-level checked data.
+-/
+theorem checkedPositiveBoardLevels_of_rawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevelData_of_canonicalRawBoundaryBoardLevelChecks
+    hlevel
+
+/--
+Propositional positive-board raw data supplies the exact checked positive-board
+target used by the generated-source theorem surfaces.
+-/
+theorem checkedPositiveBoardLevels_of_rawPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevelData_of_rawPositiveBoardLevelData hlevel
+
+/--
+Propositional positive-board raw data supplies the positive Robinson-board
+aligned macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+    (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
+
+/--
+Board-level raw Figure 13 square tilings supply propositional positive-board
+raw data.
+-/
+theorem rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13PositiveBoardLevelRaw :=
+  rawPositiveBoardLevelData_of_positiveBoardLevelTileableSquares hsquares
+
+/--
+Board-level raw Figure 13 square tilings supply checked positive-board data.
+-/
+theorem checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Board-level raw Figure 13 square tilings supply the positive Robinson-board
+aligned macro-square interface.
+-/
+theorem
+    robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Propositional positive-board raw data supplies exact board-level raw Figure 13
+square tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    Figure13PositiveBoardLevelTileableSquares := by
+  intro level
+  rcases hlevel level with ⟨data⟩
+  exact data.sites.toSiteRectangle.tileableRawSquare_of_rawBoundaryCompatible
+    data.rawBoundary
+
+/--
+Checked positive-board data supplies exact board-level raw Figure 13 square
+tilings.
+-/
+theorem positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevels
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels
+    (rawPositiveBoardLevelData_of_checkedPositiveBoardLevelData hlevel)
+
+/--
+Positive Robinson-board aligned macro-squares are equivalent to exact
+board-level raw Figure 13 square tilings at the same shifted board sizes.
+-/
+theorem positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    Figure13PositiveBoardLevelTileableSquares := by
+  intro level
+  rcases hlevel level with ⟨R, hcompat⟩
+  exact R.tileableRawSquare_of_rawBoundaryCompatible hcompat
+
+/--
+A raw Figure 13 plane tiling supplies the exact positive Robinson board-level
+raw Figure 13 squares, by restriction.
+-/
+theorem positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
+    (hplane : TilesPlane fig13Tiles) :
+    Figure13PositiveBoardLevelTileableSquares := by
+  intro level
+  exact tileableSquare_of_tilesPlane hplane
+    (RobinsonSquare.freeGridSide (level + 1))
+
+/--
+Finite raw Figure 13 boxes supply the exact positive Robinson board-level raw
+Figure 13 squares.
+-/
+theorem positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles
+    (hboxes : Figure13TileableBoxes) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+Cofinal raw Figure 13 square tilings supply the exact positive Robinson
+board-level raw Figure 13 squares.
+-/
+theorem positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
+    (hsquares : Figure13CofinalTileableSquares) :
+    Figure13PositiveBoardLevelTileableSquares :=
+  positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles
+    (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)
+
+/--
+The raw Figure 13 positive-board square-tiling surface is false for the current
+Figure 13 macro-tile transcription.
+-/
+theorem not_positiveBoardLevelTileableSquares_fig13Tiles :
+    ¬ Figure13PositiveBoardLevelTileableSquares :=
+  not_hasFigure13PositiveBoardLevelTileableSquares
+
+/--
+Finite raw Figure 13 boxes are an impossible standalone scaffold hypothesis:
+they would compactly give a raw Figure 13 plane tiling, hence positive-board
+raw macro-square tilings, contradicting the finite `2 x 2` obstruction.
+-/
+theorem not_tileableBoxes_fig13Tiles : ¬ Figure13TileableBoxes := by
+  intro hboxes
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Cofinal raw Figure 13 squares are likewise only a diagnostic surface for the
+current transcription.
+-/
+theorem not_cofinalTileableSquares_fig13Tiles : ¬ Figure13CofinalTileableSquares := by
+  intro hsquares
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles hsquares)
+
+/--
+The current raw Figure 13 macro-tile transcription does not tile the plane.
+-/
+theorem not_tilesPlane_fig13Tiles : ¬ TilesPlane fig13Tiles := by
+  intro hplane
+  exact not_positiveBoardLevelTileableSquares_fig13Tiles
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+The exact board-level raw Figure 13 square-tiling surface is equivalent to the
+positive-board raw-data surface.
+-/
+theorem positiveBoardLevelTileableSquares_iff_rawPositiveBoardLevels :
+    Figure13PositiveBoardLevelTileableSquares ↔ Figure13PositiveBoardLevelRaw :=
+  ⟨rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_rawPositiveBoardLevels⟩
+
+/--
+The exact board-level raw Figure 13 square-tiling surface is equivalent to the
+positive Robinson-board aligned macro-square surface.
+-/
+theorem positiveBoardLevelTileableSquares_iff_robinsonPositiveBoardLevelAlignedMacroSquares :
+    Figure13PositiveBoardLevelTileableSquares ↔
+      HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  ⟨robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares⟩
+
+/--
+Exact positive board-level raw Figure 13 square tilings are cofinal among all
+finite square sizes.
+-/
+theorem cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13CofinalTileableSquares := by
+  intro n
+  refine ⟨RobinsonSquare.freeGridSide (n + 1), ?_, hsquares n⟩
+  exact Nat.le_trans (Nat.le_succ n)
+    (RobinsonSquare.self_le_freeGridSide (n + 1))
+
+/--
+Exact positive board-level raw Figure 13 square tilings supply every centered
+finite raw Figure 13 box.
+-/
+theorem tileableBoxes_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_cofinal_tileableSquares
+    (cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Exact positive board-level raw Figure 13 square tilings compactly determine a
+raw Figure 13 plane tiling.
+-/
+theorem tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_cofinal_tileableSquares
+    (cofinalTileableSquares_fig13Tiles_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Positive Robinson board-level raw Figure 13 square tilings are exactly raw
+Figure 13 plane tileability: the board levels are cofinal, and a plane tiling
+restricts to every board-level square.
+-/
+theorem positiveBoardLevelTileableSquares_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelTileableSquares ↔ TilesPlane fig13Tiles :=
+  ⟨tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares,
+    positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles⟩
+
+/--
+The propositional positive-board raw-data surface is equivalent to raw Figure
+13 plane tileability.
+-/
+theorem rawPositiveBoardLevels_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelRaw ↔ TilesPlane fig13Tiles :=
+  positiveBoardLevelTileableSquares_iff_rawPositiveBoardLevels.symm.trans
+    positiveBoardLevelTileableSquares_iff_tilesPlane_fig13Tiles
+
+/--
+The checked positive-board data surface is equivalent to raw Figure 13 plane
+tileability.
+-/
+theorem checkedPositiveBoardLevels_iff_tilesPlane_fig13Tiles :
+    Figure13PositiveBoardLevelChecked ↔ TilesPlane fig13Tiles := by
+  constructor
+  · intro hchecked
+    exact tilesPlane_fig13Tiles_of_positiveBoardLevelTileableSquares
+      (positiveBoardLevelTileableSquares_of_checkedPositiveBoardLevels
+        hchecked)
+  · intro hplane
+    exact checkedPositiveBoardLevels_of_positiveBoardLevelTileableSquares
+      (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Positive Robinson-board aligned macro-squares are equivalent to raw Figure 13
+plane tileability.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_iff_tilesPlane_fig13Tiles :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares ↔
+      TilesPlane fig13Tiles := by
+  constructor
+  · intro hlevel
+    exact tilesPlane_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+  · intro hplane
+    exact
+      robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+        (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryBoardLevelChecks
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalFigure16SourceRawBoundaryCheckedBoardLevelData
+    hlevel
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedFigure16RecognizedCompatible_of_sourceRawBoundary hlevel
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundaryBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedRecognizedCompatibleMacroSquares_of_rawBoundary
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+theorem canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleMacroSquares :=
+  canonicalCheckedFigure16RecognizedCompatible_of_checkedLevelData hlevel
+
+theorem canonicalCheckedRecognizedCompatibleLevel_of_levelData
+    {level : Nat}
+    (data : CanonicalCheckedFigure16RecognizedCompatibleLevelData level) :
+    ∃ source : SiteRectangle
+      (RobinsonSquare.freeGridSide level) (RobinsonSquare.freeGridSide level),
+      ∃ hcompatible :
+        (checkedLayerStackRectangleOfSiteRectangle source).compatibleBool
+          layerData (checkedLayerStackRectangleOfSiteRectangle_lookupBool source) =
+            true,
+        ∃ target : SiteRectangle
+          (2 * RobinsonSquare.freeGridSide level)
+          (2 * RobinsonSquare.freeGridSide level),
+          Figure16ExpandedSiteRectangle.matchesBool
+            (checkedLayerStackOfSiteRectangle source hcompatible) target =
+              true ∧
+            figure18SiteCompatibleRectangleBool target = true :=
+  canonicalCheckedFigure16RecognizedCompatibleLevel_of_data data
+
+theorem canonicalCheckedRecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    Figure18CanonicalCheckedRecognizedCompatibleLevelData :=
+  canonicalCheckedFigure16RecognizedCompatibleLevelData_of_rawBoundaryCheckedLevelData
+    hlevel
+
+theorem tilesPlane_fig13Tiles_of_checkedRecognizedMacroSquares
+    (hlevel : Figure13CheckedRecognizedMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_checkedRecognizedMacroSquares
+    (hlevel : Figure13CheckedRecognizedMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_checkedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalCheckedRecognizedMacroSquares
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16RecognizedRobinsonBoardLevelMacroSquares
+    hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary hlevel
+
+theorem tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    TilesPlane fig13Tiles :=
+  tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalCheckedFigure16SourceRawBoundary
+    hlevel
+
+theorem tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquaresBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    Figure13TileableBoxes :=
+  tileableBoxes_fig13Tiles_of_canonicalRawBoundaryMacroSquares
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+/--
+Canonical source raw-boundary macro-squares supply the board-level aligned
+raw Figure 13 macro-square interface used by the signal-tower route.
+-/
+theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundary
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_canonicalCheckedFigure16SourceRawBoundary
+    hlevel
+
+/--
+Finite-checked canonical source raw-boundary macro-squares supply the
+board-level aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundaryBool
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundary
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+/--
+Canonical source raw-boundary level certificates supply the board-level aligned
+raw Figure 13 macro-square interface.
+-/
+theorem robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryLevelCertificates
+    (hlevel : Figure18CanonicalRawBoundaryLevelCertificates) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundary
+    (canonicalRawBoundaryMacroSquares_of_levelCertificates hlevel)
+
+/--
+Canonical source raw-boundary level checks supply the board-level aligned raw
+Figure 13 macro-square interface.
+-/
+theorem robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryLevelChecks) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryLevelCertificates
+    (canonicalRawBoundaryLevelCertificates_of_levelChecks hlevel)
+
+/--
+Row-major checked canonical source raw-boundary data supplies the board-level
+aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedLevelData
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    HasFigure13RobinsonBoardLevelAlignedMacroSquares :=
+  robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryLevelChecks
+    (canonicalRawBoundaryLevelChecks_of_checkedLevelData hlevel)
+
+/--
+Shifted canonical board-level raw-boundary checks supply the positive
+Robinson-board aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_canonicalBoardLevelChecks
+    hlevel
+
+/--
+Row-major shifted canonical board-level raw-boundary data supplies the positive
+Robinson-board aligned raw Figure 13 macro-square interface.
+-/
+theorem robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :=
+  robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+    (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+
+def l2c1GeomCombinedRawBoundaryFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares hlevel)
+
+def l2c2GeomCombinedRawBoundaryFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryMacroSquares hlevel)
+
+def l2c1GeomCombinedRawBoundaryFig16BoolObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedRawBoundaryFig16Obligations geomCombinedSiteRouting
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+def l2c2GeomCombinedRawBoundaryFig16BoolObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedRawBoundaryFig16Obligations geomCombinedSiteRouting
+    (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+
+def l2c1GeomCombinedRawBoundaryBoardRowsObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels hlevel)
+
+def l2c2GeomCombinedRawBoundaryBoardRowsObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels hlevel)
+
+def l2c1GeomCombinedRawBoundaryBoardChecksObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks hlevel)
+
+def l2c2GeomCombinedRawBoundaryBoardChecksObligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2GeomCombinedFig13Obligations geomCombinedSiteRouting
+    (tilesPlane_fig13Tiles_of_canonicalRawBoundaryBoardLevelChecks hlevel)
+
+def l2c1GeomCombinedSiteRoutingOfSection7
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid)) :
+    OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table := by
+  have hrouting :
+      Figure18ScaffoldData.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+    HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSection7ObstructionRouting
+      section7Routing
+  intro T seed x hx
+  rcases hrouting x hx with ⟨geometryTower, routing⟩
+  exact ⟨⟨geometryTower, routing⟩⟩
+
+def l2c2GeomCombinedSiteRoutingOfSection7
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid)) :
+    OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table := by
+  have hrouting :
+      Figure18ScaffoldData.HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant
+        (figure18ScaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+    HasRobinsonBoardGeometryTowerCombinedSiteRoutingInvariant.ofSection7ObstructionRouting
+      section7Routing
+  intro T seed x hx
+  rcases hrouting x hx with ⟨geometryTower, routing⟩
+  exact ⟨⟨geometryTower, routing⟩⟩
+
+/--
+Origin-zero active/corner window hypothesis for the first audited L2-blank
+candidate.
+-/
+abbrev L2C1OriginZeroWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Origin-zero active/corner window hypothesis for the second audited L2-blank
+candidate.
+-/
+abbrev L2C2OriginZeroWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Decoded-site origin-zero active/corner hypothesis for the first audited
+L2-blank candidate.
+
+This is the leaner geometric target below `L2C1OriginZeroWindows`: it only asks
+that the decoded Figure 18 site at each origin-zero coordinate is active and
+that the lower-left decoded site is the corner.  The indexed Figure 13 data and
+payload product witnesses are recovered automatically.
+-/
+abbrev L2C1OriginZeroCombinedActiveCornerWindows : Prop :=
+  OllingerRobinson.HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Decoded-site origin-zero active/corner hypothesis for the second audited
+L2-blank candidate.
+-/
+abbrev L2C2OriginZeroCombinedActiveCornerWindows : Prop :=
+  OllingerRobinson.HasFigure18OriginZeroCombinedActiveCornerWindowsForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Canonical free-site active/corner hypothesis for the first audited L2-blank
+candidate, phrased on the same role table as `L2C1OriginZeroWindows`.
+-/
+abbrev L2C1CanonicalFreeSiteRectActiveCorner : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Canonical free-site active/corner hypothesis for the second audited L2-blank
+candidate, phrased on the same role table as `L2C2OriginZeroWindows`.
+-/
+abbrev L2C2CanonicalFreeSiteRectActiveCorner : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectActiveCornerForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+The leaner decoded-site origin-zero target supplies the existing indexed
+origin-zero window target for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroWindowsOfCombinedActiveCornerWindows
+    (hwindows : L2C1OriginZeroCombinedActiveCornerWindows) :
+    L2C1OriginZeroWindows :=
+  OllingerRobinson.hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    hwindows
+
+/--
+The leaner decoded-site origin-zero target supplies the existing indexed
+origin-zero window target for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+    (hwindows : L2C2OriginZeroCombinedActiveCornerWindows) :
+    L2C2OriginZeroWindows :=
+  OllingerRobinson.hasFigure18IndexedActiveCornerOriginZeroWindowsForTable_of_combinedActiveCornerWindows
+    hwindows
+
+/--
+Canonical free-site active/corner recognition supplies decoded-site origin-zero
+windows for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroCombinedActiveCornerWindows :=
+  OllingerRobinson.hasFigure18OriginZeroCombinedActiveCornerWindowsForTable_of_canonicalFreeSiteRectActiveCorner
+    hactiveCorner
+
+/--
+Canonical free-site active/corner recognition supplies decoded-site origin-zero
+windows for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroCombinedActiveCornerWindows :=
+  OllingerRobinson.hasFigure18OriginZeroCombinedActiveCornerWindowsForTable_of_canonicalFreeSiteRectActiveCorner
+    hactiveCorner
+
+/--
+Canonical free-site active/corner recognition supplies indexed origin-zero
+windows for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroWindows :=
+  l2c1OriginZeroWindowsOfCombinedActiveCornerWindows
+    (l2c1OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+
+/--
+Canonical free-site active/corner recognition supplies indexed origin-zero
+windows for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroWindows :=
+  l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+    (l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+
+/--
+Translation-invariant indexed active/corner window hypothesis for the first
+audited L2-blank candidate.
+-/
+abbrev L2C1IndexedActiveWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table.toRoleTable
+
+/--
+Translation-invariant indexed active/corner window hypothesis for the second
+audited L2-blank candidate.
+-/
+abbrev L2C2IndexedActiveWindows : Prop :=
+  OllingerRobinson.HasFigure18IndexedActiveCornerWindows
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table.toRoleTable
+
+/--
+The origin-zero window target for the first audited L2-blank candidate is a
+stronger version of its translation-invariant indexed-active target.
+-/
+def l2c1IndexedActiveWindowsOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1IndexedActiveWindows := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C1OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C1IndexedActiveWindows, figure18ScaffoldDataOfNatSites_table]
+  exact
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      hwindows
+
+/--
+The origin-zero window target for the second audited L2-blank candidate is a
+stronger version of its translation-invariant indexed-active target.
+-/
+def l2c2IndexedActiveWindowsOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2IndexedActiveWindows := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C2OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C2IndexedActiveWindows, figure18ScaffoldDataOfNatSites_table]
+  exact
+    OllingerRobinson.hasFigure18IndexedActiveCornerWindows_of_originZeroWindowsForTable
+      hwindows
+
+/--
+Indexed active/corner windows supply the local free-square window invariant for
+the first audited L2-blank candidate.
+
+This is the local-recognizability part of the scaffold proof; the stronger
+origin-zero window hypothesis is still what currently supplies canonical
+board/free-line active/corner recognition.
+-/
+def l2c1LocalFreeSquareWindowOfIndexedActiveWindows
+    (indexedActiveWindows : L2C1IndexedActiveWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  Figure18ScaffoldData.HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    indexedActiveWindows
+
+/--
+The stronger origin-zero window target also supplies the local free-square
+window invariant for the first audited L2-blank candidate.
+-/
+def l2c1LocalFreeSquareWindowOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  l2c1LocalFreeSquareWindowOfIndexedActiveWindows
+    (l2c1IndexedActiveWindowsOfOriginZeroWindows originZeroWindows)
+
+/--
+Indexed active/corner windows supply the local free-square window invariant for
+the second audited L2-blank candidate.
+
+This is the local-recognizability part of the scaffold proof; the stronger
+origin-zero window hypothesis is still what currently supplies canonical
+board/free-line active/corner recognition.
+-/
+def l2c2LocalFreeSquareWindowOfIndexedActiveWindows
+    (indexedActiveWindows : L2C2IndexedActiveWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  Figure18ScaffoldData.HasLocalFreeSquareWindowInvariant.ofIndexedActive
+    indexedActiveWindows
+
+/--
+The stronger origin-zero window target also supplies the local free-square
+window invariant for the second audited L2-blank candidate.
+-/
+def l2c2LocalFreeSquareWindowOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    (figure18ScaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasLocalFreeSquareWindowInvariant :=
+  l2c2LocalFreeSquareWindowOfIndexedActiveWindows
+    (l2c2IndexedActiveWindowsOfOriginZeroWindows originZeroWindows)
+
+/--
+Canonical free-site-rectangle routing hypothesis for the first audited
+L2-blank candidate.
+-/
+abbrev L2C1CanonicalFreeSiteRectRouting : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Canonical free-site-rectangle routing hypothesis for the second audited
+L2-blank candidate.
+-/
+abbrev L2C2CanonicalFreeSiteRectRouting : Prop :=
+  OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Origin-zero active/corner windows give canonical free-site-rectangle routing
+for the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1CanonicalFreeSiteRectRouting :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give canonical free-site-rectangle routing
+for the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2CanonicalFreeSiteRectRouting :=
+  hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+    originZeroWindows
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+package for the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectActiveCornerOfRouting
+    (hrouting : L2C1CanonicalFreeSiteRectRouting) :
+    L2C1CanonicalFreeSiteRectActiveCorner := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing contains the active/corner recognition
+package for the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectActiveCornerOfRouting
+    (hrouting : L2C2CanonicalFreeSiteRectRouting) :
+    L2C2CanonicalFreeSiteRectActiveCorner := by
+  intro T seed x hx
+  rcases hrouting x hx with ⟨routing⟩
+  refine ⟨fun level => ?_⟩
+  constructor
+  · intro i j
+    rw [(routing level).site_eq i j]
+    exact (routing level).active i j
+  · let i0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    let j0 : Fin (RobinsonSquare.freeGridSide level) :=
+      ⟨0, RobinsonSquare.freeGridSide_pos level⟩
+    rw [(routing level).site_eq i0 j0]
+    exact (routing level).cornerSite
+
+/--
+Finite active-corner layer patches for the first audited L2-blank candidate.
+-/
+abbrev L2C1ActiveCornerLayerPatches : Prop :=
+  HasActiveCornerLayerBoxPatches
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+/--
+Finite active-corner layer patches for the second audited L2-blank candidate.
+-/
+abbrev L2C2ActiveCornerLayerPatches : Prop :=
+  HasActiveCornerLayerBoxPatches
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+set_option linter.style.longLine false in
+/--
+Positive centered active-corner indexed boxes instantiate the finite layer
+patches for the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveBoxes
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Positive centered active-corner indexed boxes instantiate the finite layer
+patches for the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Positive translated active-corner boxes instantiate the finite layer patches
+for the first audited L2-blank candidate.
+
+This is the direct bridge from the geometric box construction to the current
+checked-stack/layer-patch proof target; it avoids routing through the refuted
+row-major checked Figure 16 level-data surface.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        hboxes r hr)
+
+set_option linter.style.longLine false in
+/--
+Positive translated active-corner boxes instantiate the finite layer patches
+for the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2ActiveCornerLayerPatches :=
+  scaffoldDataOfNatSitesLayerPatchesOfPositiveTranslatedIndexedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    (by
+      intro r hr
+      simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+        scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+        hboxes r hr)
+
+set_option linter.style.longLine false in
+/--
+Positive isolated active boxes instantiate the finite layer patches for the
+first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      hboxes)
+
+set_option linter.style.longLine false in
+/--
+Positive isolated active boxes instantiate the finite layer patches for the
+second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the finite layer patches for the first
+audited L2-blank candidate, using the finite no-neighbor active-site checks.
+-/
+def l2c1ActiveCornerLayerPatchesOfValidTranslatedBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the finite layer patches for the second
+audited L2-blank candidate, using the finite no-neighbor active-site checks.
+-/
+def l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes
+    (l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+/--
+Origin-zero active/corner windows give the layered Robinson Section 7
+obstruction-routing hypothesis for the first audited L2-blank candidate.
+-/
+def l2c1Section7RoutingOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the proof-facing board/free-line
+Section 7 target for the first audited L2-blank candidate.
+-/
+def l2c1BoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    LayeredSection7BoardFreeLineActiveCornerInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    originZeroWindows
+
+/--
+The first layered board/free-line Section 7 target supplies the older layered
+obstruction-routing target.
+-/
+def l2c1Section7RoutingOfBoardFreeLineActiveCorner
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid)) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    boardFreeLine
+
+/--
+Origin-zero active/corner windows give the bare Figure 18 board/free-line
+target for the first audited L2-blank candidate.
+-/
+def l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  Figure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    (D := l2Component1Figure18ScaffoldData)
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the layered Robinson Section 7
+obstruction-routing hypothesis for the second audited L2-blank candidate.
+-/
+def l2c2Section7RoutingOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofOriginZeroWindows
+    originZeroWindows
+
+/--
+Origin-zero active/corner windows give the proof-facing board/free-line
+Section 7 target for the second audited L2-blank candidate.
+-/
+def l2c2BoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    LayeredSection7BoardFreeLineActiveCornerInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  LayeredFigure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    originZeroWindows
+
+/--
+The second layered board/free-line Section 7 target supplies the older layered
+obstruction-routing target.
+-/
+def l2c2Section7RoutingOfBoardFreeLineActiveCorner
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid)) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+    boardFreeLine
+
+/--
+Origin-zero active/corner windows give the bare Figure 18 board/free-line
+target for the second audited L2-blank candidate.
+-/
+def l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  Figure18ScaffoldData.boardFreeLineActiveCornerOfOriginZeroWindows
+    (D := l2Component2Figure18ScaffoldData)
+    originZeroWindows
+
+/--
+Finite checked-stack hypothesis for the first audited L2-blank candidate at the
+canonical origin-zero board coordinates.
+-/
+abbrev L2C1OriginZeroCheckedStacks : Prop :=
+  (sparseRawDataOfNatSites
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid)
+      |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Finite checked-stack hypothesis for the second audited L2-blank candidate at
+the canonical origin-zero board coordinates.
+-/
+abbrev L2C2OriginZeroCheckedStacks : Prop :=
+  (sparseRawDataOfNatSites
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid)
+      |>.HasIndexedActiveOriginZeroWindowCheckedStacks
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table
+
+/--
+Rectangle-level checked stack certificates for the first audited L2-blank
+candidate.
+
+This is the purely finite Figure 13/Figure 16 decoding part of
+`L2C1OriginZeroCheckedStacks`: every locally compatible rectangle made from
+the listed active sites and the corner site has a matching compatible checked
+layer stack.
+-/
+def l2c1CheckedStacksForListedActiveSiteRectangles :
+    (sparseRawDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+        |>.HasCheckedStacksForListedActiveSiteRectangles
+          (flatRoleTableOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).activeSites
+          (flatRoleTableOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).cornerSite :=
+  sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    l2Component1BlankCandidatePairCompatibilityBool
+
+/--
+Rectangle-level checked stack certificates for the second audited L2-blank
+candidate.
+
+This is the same finite layer-stack decoding fact as
+`l2c1CheckedStacksForListedActiveSiteRectangles`, specialized to the second
+audited L2 component.
+-/
+def l2c2CheckedStacksForListedActiveSiteRectangles :
+    (sparseRawDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+        |>.HasCheckedStacksForListedActiveSiteRectangles
+          (flatRoleTableOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).activeSites
+          (flatRoleTableOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).cornerSite :=
+  sparseRawDataOfNatSites_hasCheckedRectanglesForFlatRoleTable
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    l2Component2BlankCandidatePairCompatibilityBool
+
+/--
+Origin-zero active/corner windows plus the audited finite compatibility table
+produce the concrete checked layer-stack hypothesis for the first L2 candidate.
+-/
+def l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    L2C1OriginZeroCheckedStacks := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C1OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C1OriginZeroCheckedStacks, scaffoldDataOfNatSites_table]
+  exact
+    sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      hwindows
+      l2Component1BlankCandidatePairCompatibilityBool
+
+/--
+Origin-zero active/corner windows plus the audited finite compatibility table
+produce the concrete checked layer-stack hypothesis for the second L2 candidate.
+-/
+def l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    L2C2OriginZeroCheckedStacks := by
+  have hwindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (flatRoleTableOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).toRoleTable := by
+    rw [L2C2OriginZeroWindows, scaffoldDataOfNatSites_table] at originZeroWindows
+    exact originZeroWindows
+  rw [L2C2OriginZeroCheckedStacks, scaffoldDataOfNatSites_table]
+  exact
+    sparseRawDataOfNatSites_hasOriginZeroCheckedStacksForFlatRoleTable
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      hwindows
+      l2Component2BlankCandidatePairCompatibilityBool
+
+/--
+Canonical Robinson free-site active/corner recognition plus the audited finite
+rectangle-stack checks produce origin-zero checked stacks for the first L2
+candidate.
+-/
+def l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner) :
+    L2C1OriginZeroCheckedStacks :=
+  l2c1OriginZeroCheckedStacksOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner hactiveCorner)
+
+/--
+Canonical Robinson free-site active/corner recognition plus the audited finite
+rectangle-stack checks produce origin-zero checked stacks for the second L2
+candidate.
+-/
+def l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner) :
+    L2C2OriginZeroCheckedStacks :=
+  l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner hactiveCorner)
+
+/--
+Finite origin-zero checked layer stacks recover origin-zero active/corner
+windows for the first audited L2-blank candidate.
+-/
+def l2c1OriginZeroWindowsOfCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    L2C1OriginZeroWindows :=
+  open
+    OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData in
+  hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked
+
+/--
+Finite origin-zero checked layer stacks recover origin-zero active/corner
+windows for the second audited L2-blank candidate.
+-/
+def l2c2OriginZeroWindowsOfCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    L2C2OriginZeroWindows :=
+  open
+    OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.CheckedSparseRawData in
+  hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked
+
+/--
+Origin-zero active/corner windows supply the field-based Robinson Section 7
+signal tower for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/--
+Origin-zero active/corner windows supply the field-based Robinson Section 7
+signal tower for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows
+
+/--
+Finite origin-zero checked layer stacks supply the field-based Robinson
+Section 7 signal tower for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked layer stacks supply the field-based Robinson
+Section 7 signal tower for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Origin-zero active/corner windows supply compatible routed free grids for the
+first audited L2-blank candidate.
+-/
+def l2c1CompatibleRoutedFreeGridsOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+      (l2c1SignalTowerOfOriginZeroWindows originZeroWindows))
+
+/--
+Origin-zero active/corner windows supply compatible routed free grids for the
+second audited L2-blank candidate.
+-/
+def l2c2CompatibleRoutedFreeGridsOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows) :
+    OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+    (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower
+      (l2c2SignalTowerOfOriginZeroWindows originZeroWindows))
+
+/--
+Finite origin-zero checked layer stacks give the layered Robinson Section 7
+obstruction-routing hypothesis for the first audited L2-blank candidate.
+-/
+def l2c1Section7RoutingOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+  l2Component1Section7ObstructionRoutingOfOriginZeroCheckedStacks hchecked
+
+/--
+Finite origin-zero checked layer stacks give the layered Robinson Section 7
+obstruction-routing hypothesis for the second audited L2-blank candidate.
+-/
+def l2c2Section7RoutingOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    LayeredSection7ObstructionRoutingInvariant
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+  l2Component2Section7ObstructionRoutingOfOriginZeroCheckedStacks hchecked
+
+/--
+Finite origin-zero checked layer stacks give the bare Figure 18 board/free-line
+active/corner target for the first audited L2-blank candidate.
+-/
+def l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked layer stacks give the bare Figure 18 board/free-line
+active/corner target for the second audited L2-blank candidate.
+-/
+def l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked layer stacks prove the remaining concrete
+active/corner recognition obligation for the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  activeCorner_of_section7BoardFreeLineActiveCorner
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked layer stacks prove the remaining concrete
+active/corner recognition obligation for the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  activeCorner_of_section7BoardFreeLineActiveCorner
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked)
+
+/--
+Diagnostic checked signal-tower data for the first audited L2-blank candidate,
+with the refuted raw Figure 13 plane hypothesis stated directly.
+-/
+structure L2C1CheckedSignalTowerFig13PlaneData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  fig13Plane : TilesPlane fig13Tiles
+
+/--
+Diagnostic checked signal-tower data for the second audited L2-blank candidate,
+with the refuted raw Figure 13 plane hypothesis stated directly.
+-/
+structure L2C2CheckedSignalTowerFig13PlaneData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  fig13Plane : TilesPlane fig13Tiles
+
+/--
+Diagnostic finite-box version of the checked signal-tower/`fig13Tiles` package
+for the first audited L2-blank candidate.
+-/
+structure L2C1CheckedSignalTowerFig13BoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  fig13Boxes : Figure13TileableBoxes
+
+/--
+Diagnostic finite-box version of the checked signal-tower/`fig13Tiles` package
+for the second audited L2-blank candidate.
+-/
+structure L2C2CheckedSignalTowerFig13BoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  fig13Boxes : Figure13TileableBoxes
+
+/--
+Diagnostic origin-zero scaffold package for the first audited L2-blank
+candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
+-/
+structure L2C1OriginZeroFig13BoxData : Prop where
+  originZeroWindows : L2C1OriginZeroWindows
+  fig13Boxes : Figure13TileableBoxes
+
+/--
+Diagnostic origin-zero scaffold package for the second audited L2-blank
+candidate: origin-zero recognizability plus finite raw Figure 13 boxes.
+-/
+structure L2C2OriginZeroFig13BoxData : Prop where
+  originZeroWindows : L2C2OriginZeroWindows
+  fig13Boxes : Figure13TileableBoxes
+
+/-- The first checked-stack/Figure 13 plane package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1CheckedSignalTowerFig13PlaneData :
+    ¬ L2C1CheckedSignalTowerFig13PlaneData := by
+  intro data
+  exact not_tilesPlane_fig13Tiles data.fig13Plane
+
+/-- The second checked-stack/Figure 13 plane package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2CheckedSignalTowerFig13PlaneData :
+    ¬ L2C2CheckedSignalTowerFig13PlaneData := by
+  intro data
+  exact not_tilesPlane_fig13Tiles data.fig13Plane
+
+/-- The first checked-stack/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1CheckedSignalTowerFig13BoxData :
+    ¬ L2C1CheckedSignalTowerFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The second checked-stack/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2CheckedSignalTowerFig13BoxData :
+    ¬ L2C2CheckedSignalTowerFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The first origin-zero/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c1OriginZeroFig13BoxData : ¬ L2C1OriginZeroFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- The second origin-zero/Figure 13 box package is refuted by raw Figure 13 non-tileability. -/
+theorem not_l2c2OriginZeroFig13BoxData : ¬ L2C2OriginZeroFig13BoxData := by
+  intro data
+  exact not_tileableBoxes_fig13Tiles data.fig13Boxes
+
+/-- Finite `fig13Tiles` boxes give the plane form for the first L2 candidate. -/
+def l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1CheckedSignalTowerFig13PlaneData where
+  checkedStacks := data.checkedStacks
+  fig13Plane := tilesPlane_fig13Tiles_of_tileableBoxes data.fig13Boxes
+
+/-- Finite `fig13Tiles` boxes give the plane form for the second L2 candidate. -/
+def l2c2CheckedSignalTowerFig13PlaneDataOfBoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2CheckedSignalTowerFig13PlaneData where
+  checkedStacks := data.checkedStacks
+  fig13Plane := tilesPlane_fig13Tiles_of_tileableBoxes data.fig13Boxes
+
+/--
+Origin-zero windows, together with a raw Figure 13 plane tiling, give the first
+checked signal-tower/plane package.  The checked stacks are generated from the
+audited finite compatibility table.
+-/
+def l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1CheckedSignalTowerFig13PlaneData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Plane := hplane
+
+/--
+Origin-zero windows, together with a raw Figure 13 plane tiling, give the second
+checked signal-tower/plane package.
+-/
+def l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2CheckedSignalTowerFig13PlaneData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Plane := hplane
+
+/--
+Origin-zero windows and finite Figure 13 boxes give the first checked
+signal-tower/box package.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1CheckedSignalTowerFig13BoxData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+Origin-zero windows and finite Figure 13 boxes give the second checked
+signal-tower/box package.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2CheckedSignalTowerFig13BoxData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+The first preferred origin-zero box package generates the checked-stack/box
+package when the older checked-stack route is needed.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1CheckedSignalTowerFig13BoxData :=
+  l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The second preferred origin-zero box package generates the checked-stack/box
+package when the older checked-stack route is needed.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2CheckedSignalTowerFig13BoxData :=
+  l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+    data.originZeroWindows data.fig13Boxes
+
+/--
+Origin-zero windows and raw Figure 13 boxes give the first preferred
+origin-zero/finite-box package.
+-/
+def l2c1OriginZeroFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+Origin-zero windows and raw Figure 13 boxes give the second preferred
+origin-zero/finite-box package.
+-/
+def l2c2OriginZeroFig13BoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes := hboxes
+
+/--
+Finite origin-zero checked stacks and raw Figure 13 boxes give the first
+preferred origin-zero/finite-box package.
+-/
+def l2c1OriginZeroFig13BoxDataOfCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := l2c1OriginZeroWindowsOfCheckedStacks hchecked
+  fig13Boxes := hboxes
+
+/--
+Finite origin-zero checked stacks and raw Figure 13 boxes give the second
+preferred origin-zero/finite-box package.
+-/
+def l2c2OriginZeroFig13BoxDataOfCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := l2c2OriginZeroWindowsOfCheckedStacks hchecked
+  fig13Boxes := hboxes
+
+/--
+The first origin-zero box constructor has the expected plane-forgetting form.
+-/
+theorem l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows_boxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    l2c1CheckedSignalTowerFig13PlaneDataOfBoxData
+        (l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+          originZeroWindows hboxes) =
+      l2c1CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+        originZeroWindows
+        (tilesPlane_fig13Tiles_of_tileableBoxes hboxes) :=
+  rfl
+
+/--
+The second origin-zero box constructor has the expected plane-forgetting form.
+-/
+theorem l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows_boxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    l2c2CheckedSignalTowerFig13PlaneDataOfBoxData
+        (l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+          originZeroWindows hboxes) =
+      l2c2CheckedSignalTowerFig13PlaneDataOfOriginZeroWindows
+        originZeroWindows
+        (tilesPlane_fig13Tiles_of_tileableBoxes hboxes) :=
+  rfl
+
+/--
+The first checked signal-tower/plane package is exactly the Robinson Section 7
+signal-tower/translated-box obligation surface.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C1OriginZeroFig13TilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The second checked signal-tower/plane package is exactly the Robinson Section 7
+signal-tower/translated-box obligation surface.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations.ofL2C2OriginZeroFig13TilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The finite-box checked signal-tower package gives the Robinson Section 7
+obligation surface for the first audited L2-blank candidate.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+The finite-box checked signal-tower package gives the Robinson Section 7
+obligation surface for the second audited L2-blank candidate.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerTranslatedObligationsOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+The first checked signal-tower/plane package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1OriginZeroSignalTowerFig13DirectObligations
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The second checked signal-tower/plane package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2OriginZeroSignalTowerFig13DirectObligations
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Plane
+
+/--
+The first finite-box checked signal-tower package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1OriginZeroSignalTowerFig13BoxDirectObligations
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Boxes
+
+/--
+The second finite-box checked signal-tower package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2OriginZeroSignalTowerFig13BoxDirectObligations
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    data.fig13Boxes
+
+/--
+The first preferred origin-zero/finite-box package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1OriginZeroSignalTowerFig13BoxDirectObligations
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The second preferred origin-zero/finite-box package gives the direct Robinson
+Section 7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2OriginZeroSignalTowerFig13BoxDirectObligations
+    data.originZeroWindows data.fig13Boxes
+
+/--
+Finite checked scaffold package for the first audited L2-blank candidate.
+
+This is the current concrete target for the checked signal-tower route: prove
+the origin-zero Figure 13/Figure 16 layer stacks for the selected active/corner
+windows, and prove the shifted board-level raw-boundary data that supplies raw
+Figure 13 boxes.
+-/
+structure L2C1CheckedSignalTowerBoardData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/--
+Finite checked scaffold package for the second audited L2-blank candidate.
+
+This is the same checked signal-tower target as
+`L2C1CheckedSignalTowerBoardData`, but for the second L2-blank audit candidate.
+-/
+structure L2C2CheckedSignalTowerBoardData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/--
+Origin-zero windows plus row-major checked board levels give the first checked
+signal-tower board package.  The checked stacks are generated from the audited
+finite compatibility table.
+-/
+def l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1CheckedSignalTowerBoardData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows plus row-major checked board levels give the second checked
+signal-tower board package.
+-/
+def l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2CheckedSignalTowerBoardData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows plus board-level checks give the first checked signal-tower
+board package, using the row-major checked-data constructor for the board
+levels.
+-/
+def l2c1CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1CheckedSignalTowerBoardData :=
+  l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
+Origin-zero windows plus board-level checks give the second checked
+signal-tower board package.
+-/
+def l2c2CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2CheckedSignalTowerBoardData :=
+  l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
+The checked board-level diagnostic package gives the cleaner checked
+signal-tower/`fig13Tiles` finite-box package for the first L2 candidate.
+-/
+def l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    L2C1CheckedSignalTowerFig13BoxData where
+  checkedStacks := data.checkedStacks
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels
+
+/--
+The checked board-level diagnostic package gives the cleaner checked
+signal-tower/`fig13Tiles` finite-box package for the second L2 candidate.
+-/
+def l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    L2C2CheckedSignalTowerFig13BoxData where
+  checkedStacks := data.checkedStacks
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      data.boardLevels
+
+/--
+The first finite checked board package supplies the active/corner recognition
+field used by the proof-facing Section 7 route.
+-/
+def l2c1ActiveCornerOfCheckedSignalTowerBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1ActiveCornerOfOriginZeroCheckedStacks data.checkedStacks
+
+/--
+The second finite checked board package supplies the active/corner recognition
+field used by the proof-facing Section 7 route.
+-/
+def l2c2ActiveCornerOfCheckedSignalTowerBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    Section7CanonicalFreeSiteRectActiveCornerInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2ActiveCornerOfOriginZeroCheckedStacks data.checkedStacks
+
+/--
+The first finite checked board package supplies the checked positive
+board-level raw Figure 13 data needed by the active/corner route.
+-/
+def l2c1PositiveBoardLevelsOfCheckedSignalTowerBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels data.boardLevels
+
+/--
+The second finite checked board package supplies the checked positive
+board-level raw Figure 13 data needed by the active/corner route.
+-/
+def l2c2PositiveBoardLevelsOfCheckedSignalTowerBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    Figure13PositiveBoardLevelChecked :=
+  checkedPositiveBoardLevels_of_rawBoundaryCheckedBoardLevels data.boardLevels
+
+/--
+For the first L2 candidate, forgetting origin-zero board data to Figure 13 boxes
+agrees with the direct origin-zero box constructor.
+-/
+theorem l2c1CheckedSignalTowerFig13BoxDataOfBoardData_originZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) =
+      l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+        originZeroWindows
+        (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+          boardLevels) :=
+  rfl
+
+/--
+For the second L2 candidate, forgetting origin-zero board data to Figure 13
+boxes agrees with the direct origin-zero box constructor.
+-/
+theorem l2c2CheckedSignalTowerFig13BoxDataOfBoardData_originZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) =
+      l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroWindows
+        originZeroWindows
+        (tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+          boardLevels) :=
+  rfl
+
+/--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares give the preferred first finite-box scaffold package.
+-/
+def l2c1OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares give the preferred second finite-box scaffold package.
+-/
+def l2c2OriginZeroFig13BoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares give the preferred first finite-box scaffold package in the
+shifted Section 7 indexing.
+-/
+def l2c1OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares give the preferred second finite-box scaffold package in the
+shifted Section 7 indexing.
+-/
+def l2c2OriginZeroFig13BoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel
+
+/--
+Origin-zero windows and row-major checked board levels give the preferred
+first finite-box scaffold package.
+-/
+def l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      boardLevels
+
+/--
+Origin-zero windows and row-major checked board levels give the preferred
+second finite-box scaffold package.
+-/
+def l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2OriginZeroFig13BoxData where
+  originZeroWindows := originZeroWindows
+  fig13Boxes :=
+    tileableBoxes_fig13Tiles_of_canonicalRawBoundaryCheckedBoardLevels
+      boardLevels
+
+/--
+For the first L2 candidate, the preferred origin-zero board-level package
+forgets to the older checked-stack Figure 13 box package in the direct way.
+-/
+theorem l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData_checkedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+        (l2c1OriginZeroFig13BoxDataOfCheckedBoardLevels
+          originZeroWindows boardLevels) =
+      l2c1CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) :=
+  rfl
+
+/--
+For the second L2 candidate, the preferred origin-zero board-level package
+forgets to the older checked-stack Figure 13 box package in the direct way.
+-/
+theorem l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData_checkedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData
+        (l2c2OriginZeroFig13BoxDataOfCheckedBoardLevels
+          originZeroWindows boardLevels) =
+      l2c2CheckedSignalTowerFig13BoxDataOfBoardData
+        (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+          originZeroWindows boardLevels) :=
+  rfl
+
+/--
+The first checked signal-tower board package is exactly a Robinson Section 7
+signal-tower/translated-box obligation: checked stacks give the local signal
+tower, and the checked board levels give the raw Figure 13 plane tiling used to
+build translated active-corner boxes.
+-/
+def l2c1SignalTowerTranslatedObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The second checked signal-tower board package is exactly a Robinson Section 7
+signal-tower/translated-box obligation.
+-/
+def l2c2SignalTowerTranslatedObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerTranslatedObligationsOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The first checked signal-tower board package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The second checked signal-tower board package gives the direct Robinson Section
+7 signal-tower/indexed-box obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerDirectObligationsOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+Field-based Section 7 board package for the first audited L2-blank candidate.
+
+This is the preferred remaining scaffold target: prove the local signal tower
+and the checked board/free-line raw Figure 13 data independently, without
+routing through origin-zero checked stacks.
+-/
+structure L2C1SignalTowerBoardData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/--
+Field-based Section 7 board package for the second audited L2-blank candidate.
+-/
+structure L2C2SignalTowerBoardData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels
+
+/--
+Robinson Section 7 scaffold data for the first audited L2-blank candidate.
+
+This is the paper-shaped remaining scaffold target: the obstruction-signal
+argument supplies a coherent local tower of free rows and columns, and the
+same red-board construction supplies raw Figure 13 macro-squares aligned at
+each positive Robinson board level.
+-/
+structure L2C1RobinsonSection7Data : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 scaffold data for the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7Data : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Paper-facing Robinson Section 7 scaffold data for the first audited L2-blank
+candidate.
+
+This version records the obstruction/free-line routing invariant directly,
+matching Robinson's Section 7 argument.  The existing
+`L2C1RobinsonSection7Data` surface remains useful for callers that have
+already converted the obstruction geometry into a local signal tower.
+-/
+structure L2C1RobinsonSection7ObstructionData : Prop where
+  section7Routing :
+    l2Component1Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Paper-facing Robinson Section 7 scaffold data for the second audited L2-blank
+candidate.
+-/
+structure L2C2RobinsonSection7ObstructionData : Prop where
+  section7Routing :
+    l2Component2Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 board/free-line data for the first audited L2-blank
+candidate.
+
+This is closer to Robinson's Section 7 text than
+`L2C1RobinsonSection7ObstructionData`: it records the pure board/free-line
+geometry plus active/corner recognition before packaging the remaining
+free-site routing fields.
+-/
+structure L2C1RobinsonSection7BoardFreeLineData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 board/free-line data for the second audited L2-blank
+candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLineData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+
+/--
+Robinson Section 7 board/free-line data plus translated active-corner boxes for
+the first audited L2-blank candidate.
+
+Unlike `L2C1RobinsonSection7BoardFreeLineData`, this proof-facing package does
+not ask the raw Figure 13 tiles to form board-level macro-squares.  The board
+argument supplies active/corner recognition on the free-line grid, while the
+backward scaffold construction supplies translated positive boxes directly.
+-/
+structure L2C1RobinsonSection7BoardFreeLineTranslatedBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  translatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites
+            l2Component1BlankCandidateActiveSiteSpecs
+            l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.southwest
+            l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+          r origin)
+
+/--
+Robinson Section 7 board/free-line data plus translated active-corner boxes for
+the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLineTranslatedBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  translatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        Nonempty (TranslatedActiveCornerIndexedBox
+          (scaffoldDataOfNatSites
+            l2Component2BlankCandidateActiveSiteSpecs
+            l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+            0 Quadrant.northeast
+            l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+          r origin)
+
+/--
+Robinson Section 7 board/free-line data plus centered positive active-corner
+boxes for the first audited L2-blank candidate.
+
+This isolates the remaining backward-realization geometry: after the
+board/free-line proof identifies active/corner free-grid cells, it is enough to
+construct centered active-corner indexed boxes at every positive radius.
+-/
+structure L2C1RobinsonSection7BoardFreeLinePositiveBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+/--
+Robinson Section 7 board/free-line data plus centered positive active-corner
+boxes for the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLinePositiveBoxData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+/--
+Robinson Section 7 board/free-line data plus finite active-corner layer patches
+for the first audited L2-blank candidate.
+
+This is the finite-transcription-facing version of
+`L2C1RobinsonSection7BoardFreeLineTranslatedBoxData`: instead of asking for
+translated boxes at every positive radius, it asks directly for the layer box
+patches produced by the Figure 13/Figure 16 finite scaffold check.
+-/
+structure L2C1RobinsonSection7BoardFreeLineLayerPatchData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component1Figure18ScaffoldData
+  patches :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+/--
+Robinson Section 7 board/free-line data plus finite active-corner layer patches
+for the second audited L2-blank candidate.
+-/
+structure L2C2RobinsonSection7BoardFreeLineLayerPatchData : Prop where
+  boardFreeLineActiveCorner :
+    Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  patches :
+    HasActiveCornerLayerBoxPatches
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table.presentation.toScaffold
+
+/--
+Checked finite scaffold data for the first audited L2-blank candidate.  This is
+the direct finite-transcription target for the preferred Section 7 route:
+checked origin-zero layer stacks provide Robinson's board/free-line
+recognizability, and finite layer patches provide active-corner box
+realizability.
+-/
+structure L2C1CheckedStackLayerPatchData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  patches : L2C1ActiveCornerLayerPatches
+
+/--
+Checked finite scaffold data for the second audited L2-blank candidate.
+-/
+structure L2C2CheckedStackLayerPatchData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  patches : L2C2ActiveCornerLayerPatches
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the first audited L2-blank candidate, one step below
+`L2C1CheckedStackLayerPatchData`.
+
+The checked stacks supply the origin-zero Section 7 recognition.  The positive
+centered active-corner boxes are the concrete finite patch obligation.
+-/
+structure L2C1CheckedStackPositiveBoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the second audited L2-blank candidate, one step below
+`L2C2CheckedStackLayerPatchData`.
+-/
+structure L2C2CheckedStackPositiveBoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  positiveBoxes :
+    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the first audited L2-blank candidate, one step below
+`L2C1CheckedStackLayerPatchData`.
+
+The checked stacks supply the origin-zero Section 7 recognition.  The translated
+box field is the concrete finite patch obligation; the existing no-neighbor
+active-site checks convert it into active-corner layer patches.
+-/
+structure L2C1CheckedStackValidTranslatedBoxData : Prop where
+  checkedStacks : L2C1OriginZeroCheckedStacks
+  validTranslatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base
+
+set_option linter.style.longLine false in
+/--
+Finite scaffold data for the second audited L2-blank candidate, one step below
+`L2C2CheckedStackLayerPatchData`.
+-/
+structure L2C2CheckedStackValidTranslatedBoxData : Prop where
+  checkedStacks : L2C2OriginZeroCheckedStacks
+  validTranslatedBoxes :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base
+
+/--
+Field-based Section 7 package for the first audited L2-blank candidate.
+
+This is the preferred proof-facing target after the raw-boundary board
+diagnostic: Robinson's free rows/columns provide the local signal tower, and
+large boards provide positive-radius translated active-corner boxes.
+-/
+structure L2C1SignalTowerTranslatedBoxData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+  translatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+
+/--
+Field-based Section 7 package for the second audited L2-blank candidate.
+-/
+structure L2C2SignalTowerTranslatedBoxData : Prop where
+  signalLocalTower :
+    HasNatSiteSignalLocalTower
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  translatedBoxes :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      (figure18ScaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+
+/--
+The first translated-box package from a local signal tower and a raw Figure 13
+plane tiling.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+/--
+The second translated-box package from a local signal tower and a raw Figure 13
+plane tiling.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13TilesPlane hplane)
+
+/--
+The first translated-box package from a local signal tower and cofinal raw
+Figure 13 square tilings.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        hsquares)
+
+/--
+The second translated-box package from a local signal tower and cofinal raw
+Figure 13 square tilings.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2SignalTowerTranslatedBoxData where
+  signalLocalTower := signalLocalTower
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        hsquares)
+
+/--
+The first translated-box package from a local signal tower and Robinson
+board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+The second translated-box package from a local signal tower and Robinson
+board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+The first translated-box package from a local signal tower and positive
+Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+The second translated-box package from a local signal tower and positive
+Robinson board-level aligned raw Figure 13 macro-squares.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares signalLocalTower
+    (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+/-- The first Robinson Section 7 package feeds the preferred translated-box route. -/
+def l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data
+    (data : L2C1RobinsonSection7Data) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    data.signalLocalTower data.alignedMacroSquares
+
+/-- The second Robinson Section 7 package feeds the preferred translated-box route. -/
+def l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data
+    (data : L2C2RobinsonSection7Data) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    data.signalLocalTower data.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/--
+The first obstruction-routing Section 7 package also supplies the older
+signal-tower Section 7 package.
+
+Robinson's obstruction/free-line argument is the cleaner geometric premise;
+this bridge lets theorem surfaces that still use the field-based tower route
+consume that premise without restating origin-zero windows.
+-/
+def l2c1RobinsonSection7DataOfObstructionData
+    (data : L2C1RobinsonSection7ObstructionData) :
+    L2C1RobinsonSection7Data where
+  signalLocalTower := by
+    exact
+      hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+        (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+          data.section7Routing)
+  alignedMacroSquares := data.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/--
+The second obstruction-routing Section 7 package also supplies the older
+signal-tower Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfObstructionData
+    (data : L2C2RobinsonSection7ObstructionData) :
+    L2C2RobinsonSection7Data where
+  signalLocalTower := by
+    exact
+      hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_iff_tower.1
+        (Figure18ScaffoldData.HasRobinsonBoardLevelSignalLocalTowerInvariant.ofSection7ObstructionRouting
+          data.section7Routing)
+  alignedMacroSquares := data.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/-- The first obstruction-routing package feeds the compatible-level route. -/
+def l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (data : L2C1RobinsonSection7ObstructionData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofL2Component1Section7ObstructionRoutingPositiveTranslatedBoxes
+      data.section7Routing
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (by
+          simpa [l2Component1Figure18ScaffoldData,
+            figure18ScaffoldDataOfNatSites] using
+            l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+              (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+                data.alignedMacroSquares)))
+
+set_option linter.style.longLine false in
+/-- The second obstruction-routing package feeds the compatible-level route. -/
+def l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+    (data : L2C2RobinsonSection7ObstructionData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofL2Component2Section7ObstructionRoutingPositiveTranslatedBoxes
+      data.section7Routing
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (by
+          simpa [l2Component2Figure18ScaffoldData,
+            figure18ScaffoldDataOfNatSites] using
+            l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+              (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+                data.alignedMacroSquares)))
+
+/--
+Local signal-tower data and positive Robinson-board aligned macro-squares give
+the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data where
+  signalLocalTower := signalLocalTower
+  alignedMacroSquares := hlevel
+
+/--
+Local signal-tower data and positive Robinson-board aligned macro-squares give
+the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data where
+  signalLocalTower := signalLocalTower
+  alignedMacroSquares := hlevel
+
+/--
+Unshifted Robinson-board aligned macro-squares are a compatibility source for
+the first Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+Unshifted Robinson-board aligned macro-squares are a compatibility source for
+the second Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfRobinsonBoardLevelAlignedMacroSquares
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
+Shifted canonical board-level checks instantiate the first paper-shaped
+Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Shifted canonical board-level checks instantiate the second paper-shaped
+Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Row-major shifted canonical board-level data instantiates the first
+paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Row-major shifted canonical board-level data instantiates the second
+paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+The older first signal-tower board package is exactly a source for the
+paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfSignalTowerBoardData
+    (data : L2C1SignalTowerBoardData) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    data.signalLocalTower data.boardLevels
+
+/--
+The older second signal-tower board package is exactly a source for the
+paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfSignalTowerBoardData
+    (data : L2C2SignalTowerBoardData) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    data.signalLocalTower data.boardLevels
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned
+macro-squares instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned
+macro-squares instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and propositional positive board-level raw Figure
+13 data instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    originZeroWindows
+    (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
+
+/--
+Origin-zero recognizability and propositional positive board-level raw Figure
+13 data instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelRaw) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    originZeroWindows
+    (checkedPositiveBoardLevels_of_rawPositiveBoardLevels hlevel)
+
+/--
+Origin-zero recognizability and exact board-level raw Figure 13 square tilings
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    originZeroWindows
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Origin-zero recognizability and exact board-level raw Figure 13 square tilings
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfOriginZeroWindowsRawPositiveBoardLevels
+    originZeroWindows
+    (rawPositiveBoardLevels_of_positiveBoardLevelTileableSquares hsquares)
+
+/--
+Origin-zero recognizability and shifted canonical board-level checks
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfBoardLevelChecks
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and shifted canonical board-level checks
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfBoardLevelChecks
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (l2c1SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (l2c2SignalTowerOfOriginZeroWindows originZeroWindows) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfBoardLevelChecks
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfBoardLevelChecks
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels
+instantiate the first paper-shaped Section 7 package.
+-/
+def l2c1RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7Data :=
+  l2c1RobinsonSection7DataOfCheckedBoardLevels
+    (l2c1SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels
+instantiate the second paper-shaped Section 7 package.
+-/
+def l2c2RobinsonSection7DataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7Data :=
+  l2c2RobinsonSection7DataOfCheckedBoardLevels
+    (l2c2SignalTowerOfOriginZeroCheckedStacks hchecked) hlevel
+
+/--
+Robinson Section 7 obstruction routing and positive board-level aligned
+macro-squares instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    (section7Routing :
+      l2Component1Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7ObstructionData where
+  section7Routing := section7Routing
+  alignedMacroSquares := hlevel
+
+/--
+Robinson Section 7 obstruction routing and positive board-level aligned
+macro-squares instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    (section7Routing :
+      l2Component2Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7ObstructionData where
+  section7Routing := section7Routing
+  alignedMacroSquares := hlevel
+
+/--
+The first proof-facing board/free-line package supplies the existing
+obstruction-data package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    L2C1RobinsonSection7ObstructionData where
+  section7Routing :=
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      (D := l2Component1Figure18ScaffoldData)
+      data.boardFreeLineActiveCorner
+  alignedMacroSquares := data.alignedMacroSquares
+
+/--
+The second proof-facing board/free-line package supplies the existing
+obstruction-data package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    L2C2RobinsonSection7ObstructionData where
+  section7Routing :=
+    Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant.ofBoardFreeLineActiveCorner
+      (D := l2Component2Figure18ScaffoldData)
+      data.boardFreeLineActiveCorner
+  alignedMacroSquares := data.alignedMacroSquares
+
+/--
+The first board/free-line Section 7 package feeds the compatible-level route.
+-/
+def l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid := by
+  have translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner translatedBoxes)
+
+/--
+The second board/free-line Section 7 package feeds the compatible-level route.
+-/
+def l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid := by
+  have translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner translatedBoxes)
+
+/--
+The first translated board/free-line Section 7 package feeds the compatible-level
+route without passing through raw Figure 13 macro-square assumptions.
+-/
+def
+    l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component1Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner data.translatedBoxes)
+
+/--
+The second translated board/free-line Section 7 package feeds the compatible-level
+route without passing through raw Figure 13 macro-square assumptions.
+-/
+def
+    l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineTranslatedBoxData
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+    (open NatSiteRobinsonCompatibleLevelObligations in
+      ofL2Component2Section7BoardFreeLinePositiveTranslatedBoxes
+        data.boardFreeLineActiveCorner data.translatedBoxes)
+
+/--
+The first layer-patch board/free-line Section 7 package feeds the
+finite-check-facing Nat-site Section 7 obligation surface.
+-/
+def
+    l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  pairCompatibility := l2Component1BlankCandidatePairCompatibilityBool
+  patches := data.patches
+
+/--
+The second layer-patch board/free-line Section 7 package feeds the
+finite-check-facing Nat-site Section 7 obligation surface.
+-/
+def
+    l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  pairCompatibility := l2Component2BlankCandidatePairCompatibilityBool
+  patches := data.patches
+
+/--
+The first layer-patch board/free-line Section 7 package feeds the
+compatible-level route without translating finite layer patches into boxes.
+-/
+def
+    l2c1CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  (l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    data).toL2C1CompatibleLevelObligations
+
+/--
+The second layer-patch board/free-line Section 7 package feeds the
+compatible-level route without translating finite layer patches into boxes.
+-/
+def
+    l2c2CompatibleLevelObligationsOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+  NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  (l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    data).toL2C2CompatibleLevelObligations
+
+/--
+Positive active-corner indexed boxes instantiate the first finite layer-patch
+board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  patches :=
+    scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      hboxes_pos
+
+/--
+Positive active-corner indexed boxes instantiate the second finite layer-patch
+board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  patches :=
+    scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      hboxes_pos
+
+/--
+The first positive-box package supplies the finite layer-patch package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (data : L2C1RobinsonSection7BoardFreeLinePositiveBoxData) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    data.boardFreeLineActiveCorner data.positiveBoxes
+
+/--
+The second positive-box package supplies the finite layer-patch package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (data : L2C2RobinsonSection7BoardFreeLinePositiveBoxData) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    data.boardFreeLineActiveCorner data.positiveBoxes
+
+/--
+Positive translated active-corner indexed boxes instantiate the first finite
+layer-patch board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    boardFreeLineActiveCorner
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      hboxes_pos)
+
+/--
+Positive translated active-corner indexed boxes instantiate the second finite
+layer-patch board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
+    boardFreeLineActiveCorner
+    (TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      hboxes_pos)
+
+/--
+The existing first translated-box package also supplies the centered
+positive-box package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  positiveBoxes :=
+    TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      data.translatedBoxes
+
+/--
+The existing second translated-box package also supplies the centered
+positive-box package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData where
+  boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
+  positiveBoxes :=
+    TranslatedActiveCornerIndexedBox.nonempty_centered_pos_of_translated_pos
+      data.translatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the first board/free-line translated-box
+Section 7 package, using the finite no-neighbor active-site checks.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the second board/free-line translated-box
+Section 7 package, using the finite no-neighbor active-site checks.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes hboxes)
+
+set_option linter.style.longLine false in
+/--
+Board/free-line active-corner recognition plus a plane tiling of the compatible
+Figure 18 scaffold tiles instantiate the first board/free-line translated-box
+Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfFigure18ScaffoldTilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+            hplane)
+
+set_option linter.style.longLine false in
+/--
+Board/free-line active-corner recognition plus a plane tiling of the compatible
+Figure 18 scaffold tiles instantiate the second board/free-line translated-box
+Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfFigure18ScaffoldTilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  translatedBoxes :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+          scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+            hplane)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        by
+          have hboard :
+              Section7BoardFreeLineActiveCornerInvariant
+                (figure18ScaffoldDataOfNatSites
+                  l2Component1BlankCandidateActiveSiteSpecs
+                  l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+                  0 Quadrant.southwest
+                  l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+            section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+              O.canonicalFreeSiteRectRouting
+          simpa [l2Component1Figure18ScaffoldData] using hboard
+      translatedBoxes := O.positiveTranslatedIndexedBoxes
+    }
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    {
+      boardFreeLineActiveCorner :=
+        by
+          have hboard :
+              Section7BoardFreeLineActiveCornerInvariant
+                (figure18ScaffoldDataOfNatSites
+                  l2Component2BlankCandidateActiveSiteSpecs
+                  l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+                  0 Quadrant.northeast
+                  l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+            section7BoardFreeLineActiveCorner_of_canonicalFreeSiteRectRouting
+              O.canonicalFreeSiteRectRouting
+          simpa [l2Component2Figure18ScaffoldData] using hboard
+      translatedBoxes := O.positiveTranslatedIndexedBoxes
+    }
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first finite layer-patch board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second finite layer-patch board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the first bundled Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+      O)
+
+/--
+Canonical free-site-rectangle routing plus positive translated boxes supplies
+the second bundled Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    (O : NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfFreeSiteRectObligations
+      O)
+
+/--
+The existing first translated-box package also supplies the finite layer-patch
+package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+    (data : L2C1RobinsonSection7BoardFreeLineTranslatedBoxData) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData data)
+
+/--
+The existing second translated-box package also supplies the finite layer-patch
+package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData data)
+
+/--
+The first proof-facing board/free-line package supplies the finite layer-patch
+package through the raw Figure 13 aligned-board macro-square field.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component1Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      data.boardFreeLineActiveCorner translatedBoxes
+
+/--
+The second proof-facing board/free-line package supplies the finite layer-patch
+package through the raw Figure 13 aligned-board macro-square field.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (by
+        simpa [l2Component2Figure18ScaffoldData,
+          figure18ScaffoldDataOfNatSites] using
+          l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+            (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+              data.alignedMacroSquares))
+  exact
+    l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      data.boardFreeLineActiveCorner translatedBoxes
+
+/--
+The first proof-facing board/free-line package supplies the finite Nat-site
+Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+
+/--
+The second proof-facing board/free-line package supplies the finite Nat-site
+Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfBoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData data)
+
+/--
+Origin-zero active/corner windows and translated boxes instantiate the first
+board/free-line Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (translatedBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  translatedBoxes := translatedBoxes
+
+/--
+Origin-zero active/corner windows and translated boxes instantiate the second
+board/free-line Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (translatedBoxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          Nonempty (TranslatedActiveCornerIndexedBox
+            (scaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+            r origin)) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  translatedBoxes := translatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the first board/free-line translated-box Section
+7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfFigure18ScaffoldTilesPlane
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the second board/free-line translated-box Section
+7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfFigure18ScaffoldTilesPlane
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus a plane tiling of the
+compatible Figure 18 scaffold tiles instantiate the first board/free-line
+translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus a plane tiling of the
+compatible Figure 18 scaffold tiles instantiate the second board/free-line
+translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the first board/free-line translated-box Section
+7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles instantiate the second board/free-line translated-box Section
+7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+first audited L2 candidate.
+
+This packages the two independent scaffold directions: origin-zero windows give
+local free-square recognizability, and the plane tiling gives translated active
+boxes for realization.
+-/
+def l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component1Figure18ScaffoldData.Certificate := by
+  have realizes :
+      Figure18ScaffoldData.HasRealizationInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane))
+  exact
+    Figure18ScaffoldData.Certificate.ofWindowInvariant
+      (l2c1LocalFreeSquareWindowOfOriginZeroWindows originZeroWindows)
+      realizes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+second audited L2 candidate.
+-/
+def l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component2Figure18ScaffoldData.Certificate := by
+  have realizes :
+      Figure18ScaffoldData.HasRealizationInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasRealizationInvariant.ofPositiveTranslatedActiveCornerIndexedBoxes
+      (Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+        (l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane))
+  exact
+    Figure18ScaffoldData.Certificate.ofWindowInvariant
+      (l2c2LocalFreeSquareWindowOfOriginZeroWindows originZeroWindows)
+      realizes
+
+set_option linter.style.longLine false in
+/--
+The first audited L2 Figure 18 scaffold is a valid scaffold under the current
+origin-zero/scaffold-plane assumptions.
+-/
+theorem l2c1IsScaffoldOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    originZeroWindows hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second audited L2 Figure 18 scaffold is a valid scaffold under the current
+origin-zero/scaffold-plane assumptions.
+-/
+theorem l2c2IsScaffoldOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    originZeroWindows hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus a plane tiling of the
+compatible Figure 18 scaffold tiles produce the ordinary Figure 18 scaffold
+certificate for the first audited L2 candidate.
+-/
+def l2c1Figure18CertificateOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component1Figure18ScaffoldData.Certificate :=
+  l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus a plane tiling of the
+compatible Figure 18 scaffold tiles produce the ordinary Figure 18 scaffold
+certificate for the second audited L2 candidate.
+-/
+def l2c2Figure18CertificateOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component2Figure18ScaffoldData.Certificate :=
+  l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    hplane
+
+set_option linter.style.longLine false in
+/--
+The first audited L2 Figure 18 scaffold is a valid scaffold under canonical
+free-site active/corner recognition and the scaffold-plane tiling assumption.
+-/
+theorem l2c1IsScaffoldOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (l2c1Figure18CertificateOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    canonicalActiveCorner hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second audited L2 Figure 18 scaffold is a valid scaffold under canonical
+free-site active/corner recognition and the scaffold-plane tiling assumption.
+-/
+theorem l2c2IsScaffoldOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (l2c2Figure18CertificateOfCanonicalFreeSiteFigure18ScaffoldTilesPlane
+    canonicalActiveCorner hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+first audited L2 candidate.
+-/
+def l2c1Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component1Figure18ScaffoldData.Certificate :=
+  l2c1Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+Finite origin-zero checked stacks plus a plane tiling of the compatible Figure
+18 scaffold tiles produce the ordinary Figure 18 scaffold certificate for the
+second audited L2 candidate.
+-/
+def l2c2Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    l2Component2Figure18ScaffoldData.Certificate :=
+  l2c2Figure18CertificateOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hplane
+
+set_option linter.style.longLine false in
+/--
+The first audited L2 Figure 18 scaffold is a valid scaffold under finite
+origin-zero checked stacks and the scaffold-plane tiling assumption.
+-/
+theorem l2c1IsScaffoldOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (l2c1Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    hchecked hplane).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second audited L2 Figure 18 scaffold is a valid scaffold under finite
+origin-zero checked stacks and the scaffold-plane tiling assumption.
+-/
+theorem l2c2IsScaffoldOfCheckedStacksFigure18ScaffoldTilesPlane
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (l2c2Figure18CertificateOfCheckedStacksFigure18ScaffoldTilesPlane
+    hchecked hplane).isScaffold
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the first board/free-line Section 7 layer-patch package directly.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the second board/free-line Section 7 layer-patch package directly.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the first Nat-site Section 7 layer-patch obligation surface
+directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations.ofL2C1OriginZeroWindowsLayerPatches
+    originZeroWindows patches
+
+/--
+Origin-zero active/corner windows and finite active-corner layer patches
+instantiate the second Nat-site Section 7 layer-patch obligation surface
+directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations.ofL2C2OriginZeroWindowsLayerPatches
+    originZeroWindows patches
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches instantiate
+the first board/free-line Section 7 layer-patch package directly.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked
+  patches := patches
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches instantiate
+the second board/free-line Section 7 layer-patch package directly.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData where
+  boardFreeLineActiveCorner :=
+    l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks hchecked
+  patches := patches
+
+/--
+The first checked-stack/layer-patch package is exactly the checked finite
+scaffold data needed by the preferred Section 7 route.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    data.checkedStacks data.patches
+
+/--
+The second checked-stack/layer-patch package is exactly the checked finite
+scaffold data needed by the preferred Section 7 route.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+    data.checkedStacks data.patches
+
+/--
+Origin-zero windows and active-corner layer patches produce the first checked
+finite scaffold package by generating the checked stacks from the audited
+compatibility table.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks :=
+    l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+/--
+Origin-zero windows and active-corner layer patches produce the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks :=
+    l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
+  patches := patches
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive translated active-corner boxes produce the first
+checked finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive translated active-corner boxes produce the second
+checked finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered active-corner boxes produce the first
+checked finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered active-corner boxes produce the second
+checked finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes_pos :
+      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered scaffold boxes provide the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+    (data : L2C1CheckedStackPositiveBoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    data.checkedStacks data.positiveBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus positive centered scaffold boxes provide the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+    (data : L2C2CheckedStackPositiveBoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
+    data.checkedStacks data.positiveBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus isolated translated active boxes produce the first checked
+finite scaffold package directly.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus isolated translated active boxes produce the second checked
+finite scaffold package directly.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfPositiveTranslatedIsolatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated boxes produce the first checked finite
+scaffold package, using the audited no-neighbor active-site checks.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c1ActiveCornerLayerPatchesOfValidTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated boxes produce the second checked finite
+scaffold package, using the audited no-neighbor active-site checks.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches := l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes hboxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated scaffold boxes provide the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    data.checkedStacks data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked stacks plus valid translated scaffold boxes provide the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    data.checkedStacks data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the first
+board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      data.checkedStacks)
+    data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the second
+board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      data.checkedStacks)
+    data.validTranslatedBoxes
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the first
+origin-zero/translated-positive-box obligation surface.
+-/
+def l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+    (data : L2C1CheckedStackValidTranslatedBoxData) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes
+          data.validTranslatedBoxes)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus valid translated boxes provide the second
+origin-zero/translated-positive-box obligation surface.
+-/
+def l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
+    (data : L2C2CheckedStackValidTranslatedBoxData) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
+    l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
+          data.validTranslatedBoxes)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus a plane tiling of the compatible Figure 18 scaffold
+tiles provide the first origin-zero/translated-positive-box obligation
+surface.
+-/
+def l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows
+    l2Component1BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component1Figure18ScaffoldData] using
+        l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus a plane tiling of the compatible Figure 18 scaffold
+tiles provide the second origin-zero/translated-positive-box obligation
+surface.
+-/
+def l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane figure18ScaffoldTiles) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+    originZeroWindows
+    l2Component2BlankCandidatePairCompatibilityBool
+    (by
+      simpa [l2Component2Figure18ScaffoldData] using
+        l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
+          hplane)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus positive translated active-corner boxes produce the
+first checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus positive translated active-corner boxes produce the
+second checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus isolated translated active boxes produce the first
+checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedIsolatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component1Figure18ScaffoldData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus isolated translated active boxes produce the second
+checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsPositiveTranslatedIsolatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+        l2Component2Figure18ScaffoldData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveTranslatedIsolatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus valid translated boxes produce the first checked
+finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsValidTranslatedBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus valid translated boxes produce the second checked
+finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsValidTranslatedBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksValidTranslatedBoxes
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows) hboxes
+
+/--
+The first origin-zero/translated-box obligation surface is a specialization of
+the board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    O.originZeroWindows O.positiveTranslatedIndexedBoxes
+
+/--
+The second origin-zero/translated-box obligation surface is a specialization of
+the board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindows
+    O.originZeroWindows O.positiveTranslatedIndexedBoxes
+
+/--
+The first origin-zero/translated-box obligation surface also instantiates the
+centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+/--
+The second origin-zero/translated-box obligation surface also instantiates the
+centered positive-box board/free-line Section 7 package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+    (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+/--
+The first origin-zero/translated-box obligation surface also instantiates the
+finite layer-patch board/free-line package.
+-/
+def
+    l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+    (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+/--
+The second origin-zero/translated-box obligation surface also instantiates the
+finite layer-patch board/free-line package.
+-/
+def
+    l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+    (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroObligations
+      O)
+
+set_option linter.style.longLine false in
+/--
+The first origin-zero/translated-box obligation surface also instantiates the
+checked-stack/layer-patch finite scaffold package used by the preferred final
+route.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := l2c1OriginZeroCheckedStacksOfOriginZeroWindows O.originZeroWindows
+  patches := O.toActiveCornerLayerBoxPatches
+
+set_option linter.style.longLine false in
+/--
+The second origin-zero/translated-box obligation surface also instantiates the
+checked-stack/layer-patch finite scaffold package used by the preferred final
+route.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroObligations
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := l2c2OriginZeroCheckedStacksOfOriginZeroWindows O.originZeroWindows
+  patches := O.toActiveCornerLayerBoxPatches
+
+/--
+Board/free-line active-corner recognition and positive board-level aligned
+macro-squares instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  alignedMacroSquares := hlevel
+
+/--
+Board/free-line active-corner recognition and positive board-level aligned
+macro-squares instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  alignedMacroSquares := hlevel
+
+/--
+Robinson Section 7 obstruction routing and exact positive board-level raw
+Figure 13 square tilings instantiate the first paper-facing obstruction
+package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (section7Routing :
+      l2Component1Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    section7Routing
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Robinson Section 7 obstruction routing and exact positive board-level raw
+Figure 13 square tilings instantiate the second paper-facing obstruction
+package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelTileableSquares
+    (section7Routing :
+      l2Component2Figure18ScaffoldData.HasRobinsonSection7ObstructionRoutingInvariant)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    section7Routing
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and exact positive board-level raw
+Figure 13 square tilings instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    boardFreeLineActiveCorner
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and exact positive board-level raw
+Figure 13 square tilings instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    boardFreeLineActiveCorner
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_positiveBoardLevelTileableSquares
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and a raw Figure 13 plane tiling
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13TilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Board/free-line active-corner recognition and a raw Figure 13 plane tiling
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13TilesPlane
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tilesPlane_fig13Tiles hplane)
+
+/--
+Board/free-line active-corner recognition and finite raw Figure 13 boxes
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13TileableBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Board/free-line active-corner recognition and finite raw Figure 13 boxes
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13TileableBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_tileableBoxes_fig13Tiles hboxes)
+
+/--
+Board/free-line active-corner recognition and cofinal raw Figure 13 squares
+instantiate the first proof-facing Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
+      hsquares)
+
+/--
+Board/free-line active-corner recognition and cofinal raw Figure 13 squares
+instantiate the second proof-facing Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    boardFreeLineActiveCorner
+    (positiveBoardLevelTileableSquares_of_cofinalTileableSquares_fig13Tiles
+      hsquares)
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2Component1Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+      originZeroWindows)
+    hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2Component2Figure18ScaffoldDataSection7ObstructionRoutingOfOriginZeroWindows
+      originZeroWindows)
+    hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero recognizability and positive Robinson-board aligned macro-squares
+instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelAlignedMacroSquares
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13
+square tilings instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+      (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+      hsquares)
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13
+square tilings instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+      (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+      hsquares)
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13 square
+tilings instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (l2c1BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Origin-zero recognizability and exact positive board-level raw Figure 13 square
+tilings instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfPositiveBoardLevelTileableSquares
+    (l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hlevel
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and positive Robinson-board aligned
+macro-squares instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfOriginZeroWindowsPositiveBoardLevelTileableSquares
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked) hsquares
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+      hchecked hsquares)
+
+/--
+Finite origin-zero checked stacks and exact positive board-level raw Figure 13
+square tilings instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksPositiveBoardLevelTileableSquares
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hsquares : Figure13PositiveBoardLevelTileableSquares) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelTileableSquares
+      hchecked hsquares)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryBoardLevelChecks
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and shifted canonical board-level checks
+instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksBoardLevelChecks
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the first proof-facing board/free-line package.
+-/
+def l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7BoardFreeLineData :=
+  l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the second proof-facing board/free-line package.
+-/
+def l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7BoardFreeLineData :=
+  l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksPositiveBoardLevelAlignedMacroSquares
+    hchecked
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c1RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+      hchecked hlevel)
+
+/--
+Finite origin-zero checked stacks and row-major checked board levels instantiate
+the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfBoardFreeLineData
+    (l2c2RobinsonSection7BoardFreeLineDataOfCheckedStacksCheckedBoardLevels
+      hchecked hlevel)
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and exact checked positive board-level raw Figure
+13 data instantiate the second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsCheckedPositiveBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure13PositiveBoardLevelChecked) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_checkedPositiveBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+first paper-facing obstruction package.
+-/
+def l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1RobinsonSection7ObstructionData :=
+  l2c1RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+Origin-zero recognizability and row-major checked board levels instantiate the
+second paper-facing obstruction package.
+-/
+def l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2RobinsonSection7ObstructionData :=
+  l2c2RobinsonSection7ObstructionDataOfOriginZeroWindowsPositiveBoardLevelAlignedMacroSquares
+    originZeroWindows
+    (robinsonPositiveBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedBoardLevels
+      hlevel)
+
+/--
+The first translated-box package from a local signal tower and canonical
+Figure 16 source raw-boundary macro-squares.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfCanonicalRawBoundary
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundary hlevel)
+
+/--
+The second translated-box package from a local signal tower and canonical
+Figure 16 source raw-boundary macro-squares.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfCanonicalRawBoundary
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonBoardLevelAlignedMacroSquares_of_canonicalRawBoundary hlevel)
+
+/--
+The first translated-box package from a local signal tower and row-major
+checked canonical source raw-boundary level data.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfRawBoundaryCheckedLevelData
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedLevelData
+      hlevel)
+
+/--
+The second translated-box package from a local signal tower and row-major
+checked canonical source raw-boundary level data.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfRawBoundaryCheckedLevelData
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedLevelData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    signalLocalTower
+    (robinsonBoardLevelAlignedMacroSquares_of_rawBoundaryCheckedLevelData
+      hlevel)
+
+/--
+Origin-zero windows and a raw Figure 13 plane tiling feed the first preferred
+translated-box package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+/--
+Origin-zero windows and a raw Figure 13 plane tiling feed the second preferred
+translated-box package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hplane : TilesPlane fig13Tiles) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hplane
+
+/--
+Origin-zero windows and cofinal Figure 13 square tilings feed the first
+preferred translated-box package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13CofinalSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Origin-zero windows and cofinal Figure 13 square tilings feed the second
+preferred translated-box package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13CofinalSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hsquares : Figure13CofinalTileableSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13CofinalSquares
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hsquares
+
+/--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares feed the first preferred translated-box package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and Robinson board-level aligned raw Figure 13
+macro-squares feed the second preferred translated-box package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroRobinsonBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonBoardLevelAlignedMacroSquares
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares feed the first preferred translated-box package in the shifted
+Section 7 indexing.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and positive Robinson board-level aligned raw Figure 13
+macro-squares feed the second preferred translated-box package in the shifted
+Section 7 indexing.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows and finite Figure 13 boxes feed the first preferred
+translated-box package via compactness.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    originZeroWindows
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+Origin-zero windows and finite Figure 13 boxes feed the second preferred
+translated-box package via compactness.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hboxes : Figure13TileableBoxes) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TilesPlane
+    originZeroWindows
+    (tilesPlane_fig13Tiles_of_tileableBoxes hboxes)
+
+/--
+The first preferred origin-zero box package feeds the preferred translated-box
+package.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The second preferred origin-zero box package feeds the preferred translated-box
+package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfOriginZeroFig13TileableBoxes
+    data.originZeroWindows data.fig13Boxes
+
+/--
+The first checked-stack/plane package feeds the preferred translated-box
+package: checked stacks recover the local signal tower, and the Figure 13 plane
+tiling gives positive translated boxes.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component1SignalLocalTowerOfOriginZeroWindows
+      (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks))
+    data.fig13Plane
+
+/--
+The second checked-stack/plane package feeds the preferred translated-box
+package.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfFig13TilesPlane
+    (l2Component2SignalLocalTowerOfOriginZeroWindows
+      (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks))
+    data.fig13Plane
+
+/--
+Finite Figure 13 boxes feed the first translated-box package via compactness.
+-/
+def l2c1SignalTowerTranslatedBoxDataOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1SignalTowerTranslatedBoxData :=
+  l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Finite Figure 13 boxes feed the second translated-box package via compactness.
+-/
+def l2c2SignalTowerTranslatedBoxDataOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2SignalTowerTranslatedBoxData :=
+  l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Checked origin-zero stacks plus a raw Figure 13 plane tiling provide the first
+checked-stack/layer-patch finite scaffold package.  The checked stacks give
+Robinson's board/free-line recognizability; the Figure 13 plane tiling gives
+positive translated active-corner boxes, which are converted to finite layer
+patches.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (data : L2C1CheckedSignalTowerFig13PlaneData) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := data.checkedStacks
+  patches :=
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      (l2c1BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+        data.checkedStacks)
+      (l2c1SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+        data).translatedBoxes).patches
+
+/--
+Checked origin-zero stacks plus a raw Figure 13 plane tiling provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (data : L2C2CheckedSignalTowerFig13PlaneData) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := data.checkedStacks
+  patches :=
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveTranslatedBoxes
+      (l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+        data.checkedStacks)
+      (l2c2SignalTowerTranslatedBoxDataOfCheckedFig13PlaneData
+        data).translatedBoxes).patches
+
+/--
+Finite checked-stack/Figure 13 box data provide the first checked-stack/layer
+patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (data : L2C1CheckedSignalTowerFig13BoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (l2c1CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Finite checked-stack/Figure 13 box data provide the second checked-stack/layer
+patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (data : L2C2CheckedSignalTowerFig13BoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13PlaneData
+    (l2c2CheckedSignalTowerFig13PlaneDataOfBoxData data)
+
+/--
+Origin-zero recognizability plus finite Figure 13 boxes provide the first
+checked-stack/layer-patch finite scaffold package.
+
+This names the direct route from the preferred origin-zero Figure 13 finite
+target to the concrete Section 7 layer-patch target.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    (data : L2C1OriginZeroFig13BoxData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData data)
+
+/--
+Origin-zero recognizability plus finite Figure 13 boxes provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroFig13BoxData
+    (data : L2C2OriginZeroFig13BoxData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfOriginZeroFig13BoxData data)
+
+/--
+The first checked signal-tower board package supplies the preferred
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c1CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+The second checked signal-tower board package supplies the preferred
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedFig13BoxData
+    (l2c2CheckedSignalTowerFig13BoxDataOfBoardData data)
+
+/--
+Origin-zero windows plus row-major checked board levels supply the first
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindows
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus row-major checked board levels supply the second
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindows
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus checked board-level finite checks supply the first
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c1CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+/--
+Origin-zero windows plus checked board-level finite checks supply the second
+preferred checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedBoardData
+    (l2c2CheckedSignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+/--
+The first checked-stack/layer-patch finite scaffold package supplies the
+Nat-site Section 7 layer-patch obligation surface directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData data)
+
+/--
+The second checked-stack/layer-patch finite scaffold package supplies the
+Nat-site Section 7 layer-patch obligation surface directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData data)
+
+/--
+The first checked signal-tower board package is enough to instantiate the
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedBoardData
+    (data : L2C1CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfCheckedBoardData data)
+
+/--
+The second checked signal-tower board package is enough to instantiate the
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedBoardData
+    (data : L2C2CheckedSignalTowerBoardData) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfCheckedBoardData data)
+
+/--
+Origin-zero windows plus row-major checked board levels instantiate the first
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus row-major checked board levels instantiate the second
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsCheckedBoardLevels
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCheckedBoardLevels
+      originZeroWindows boardLevels)
+
+/--
+Origin-zero windows plus checked board-level finite checks instantiate the first
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+/--
+Origin-zero windows plus checked board-level finite checks instantiate the second
+preferred Nat-site Section 7 layer-patch obligation surface.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+    (l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsBoardLevelChecks
+      originZeroWindows boardLevelChecks)
+
+open NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+
+/--
+The first translated-box package is exactly the pair-free direct Section 7
+obligation surface.
+-/
+def l2c1SignalTowerDirectObligationsOfTranslatedBoxData
+    (data : L2C1SignalTowerTranslatedBoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveTranslatedBoxes
+    data.signalLocalTower data.translatedBoxes
+
+/--
+The second translated-box package is exactly the pair-free direct Section 7
+obligation surface.
+-/
+def l2c2SignalTowerDirectObligationsOfTranslatedBoxData
+    (data : L2C2SignalTowerTranslatedBoxData) :
+    NatSiteRobinsonSignalTowerDirectTranslatedBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveTranslatedBoxes
+    data.signalLocalTower data.translatedBoxes
+
+/-- The first Section 7 package provides the routed Figure 18 certificate. -/
+def l2c1Figure18RoutedCertificateOfRobinsonSection7Data
+    (data : L2C1RobinsonSection7Data) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  (l2c1SignalTowerDirectObligationsOfTranslatedBoxData
+    (l2c1SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)).toFigure18RoutedCertificate
+
+/-- The second Section 7 package provides the routed Figure 18 certificate. -/
+def l2c2Figure18RoutedCertificateOfRobinsonSection7Data
+    (data : L2C2RobinsonSection7Data) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  (l2c2SignalTowerDirectObligationsOfTranslatedBoxData
+    (l2c2SignalTowerTranslatedBoxDataOfRobinsonSection7Data data)).toFigure18RoutedCertificate
+
+/--
+The first board/free-line Section 7 package provides the routed Figure 18
+certificate without passing through the older signal-tower package.
+-/
+def l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineData
+    (data : L2C1RobinsonSection7BoardFreeLineData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component1Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component1PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+          data.alignedMacroSquares))
+  let certificate :
+      l2Component1Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLinePositiveTranslatedBoxes
+      l2Component1Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      translatedBoxes
+  simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
+/--
+The second board/free-line Section 7 package provides the routed Figure 18
+certificate without passing through the older signal-tower package.
+-/
+def l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineData
+    (data : L2C2RobinsonSection7BoardFreeLineData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table := by
+  have translatedBoxes :
+      Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+        l2Component2Figure18ScaffoldData :=
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+      (l2Component2PositiveTranslatedIsolatedBoxesOfFig13CofinalSquares
+        (cofinal_tileableSquares_fig13Tiles_of_robinsonPositiveBoardLevelAlignedMacroSquares
+          data.alignedMacroSquares))
+  let certificate :
+      l2Component2Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLinePositiveTranslatedBoxes
+      l2Component2Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      translatedBoxes
+  simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
+/--
+The first board/free-line layer-patch Section 7 package provides the routed
+Figure 18 certificate directly, using finite layer patches for realization.
+-/
+def l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table := by
+  let certificate :
+      l2Component1Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+      l2Component1Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      data.patches
+  simpa [l2Component1Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
+/--
+The second board/free-line layer-patch Section 7 package provides the routed
+Figure 18 certificate directly, using finite layer patches for realization.
+-/
+def l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table := by
+  let certificate :
+      l2Component2Figure18ScaffoldData.RoutedCertificate :=
+    Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+      l2Component2Figure18ScaffoldData
+      data.boardFreeLineActiveCorner
+      data.patches
+  simpa [l2Component2Figure18ScaffoldData, figure18ScaffoldDataOfNatSites,
+    scaffoldDataOfNatSites, LayeredFigure18ScaffoldData.scaffold,
+    LayeredFigure18ScaffoldData.presentation, LayeredFigure18ScaffoldData.table,
+    LayeredFigure18ScaffoldData.flatTable, Figure18ScaffoldData.scaffold,
+    Figure18ScaffoldData.presentation, Figure18ScaffoldData.table] using
+    certificate.toRoutedCertificate
+
+set_option linter.style.longLine false in
+/--
+The first board/free-line layer-patch Section 7 package closes the abstract
+scaffold interface for the corresponding Figure 18 scaffold.
+-/
+theorem l2c1IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C1RobinsonSection7BoardFreeLineLayerPatchData) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  (Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+    l2Component1Figure18ScaffoldData
+    data.boardFreeLineActiveCorner
+    data.patches).isScaffold
+
+set_option linter.style.longLine false in
+/--
+The second board/free-line layer-patch Section 7 package closes the abstract
+scaffold interface for the corresponding Figure 18 scaffold.
+-/
+theorem l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (data : L2C2RobinsonSection7BoardFreeLineLayerPatchData) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  (Figure18ScaffoldData.RoutedCertificate.ofRobinsonSection7BoardFreeLineLayerPatches
+    l2Component2Figure18ScaffoldData
+    data.boardFreeLineActiveCorner
+    data.patches).isScaffold
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches provide the
+first routed Figure 18 certificate.
+-/
+def l2c1Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c1Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      hchecked patches)
+
+/--
+Finite origin-zero checked stacks and active-corner layer patches provide the
+second routed Figure 18 certificate.
+-/
+def l2c2Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c2Figure18RoutedCertificateOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      hchecked patches)
+
+/--
+The first concrete checked-stack/layer-patch finite package provides the routed
+Figure 18 certificate.
+-/
+def l2c1Figure18RoutedCertificateOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c1Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    data.checkedStacks data.patches
+
+/--
+The second concrete checked-stack/layer-patch finite package provides the
+routed Figure 18 certificate.
+-/
+def l2c2Figure18RoutedCertificateOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    OllingerRobinson.Figure18RoutedCertificate
+      (scaffoldDataOfNatSites
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid).table :=
+  l2c2Figure18RoutedCertificateOfCheckedStacksLayerPatches
+    data.checkedStacks data.patches
+
+set_option linter.style.longLine false in
+/--
+The first concrete checked-stack/layer-patch package closes the abstract
+scaffold interface.
+-/
+theorem l2c1IsScaffoldOfCheckedStackLayerPatchData
+    (data : L2C1CheckedStackLayerPatchData) :
+    IsScaffold l2Component1Figure18ScaffoldData.scaffold :=
+  l2c1IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      data)
+
+set_option linter.style.longLine false in
+/--
+The second concrete checked-stack/layer-patch package closes the abstract
+scaffold interface.
+-/
+theorem l2c2IsScaffoldOfCheckedStackLayerPatchData
+    (data : L2C2CheckedStackLayerPatchData) :
+    IsScaffold l2Component2Figure18ScaffoldData.scaffold :=
+  l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+    (l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      data)
+
+/-- Board-level checks give the first field-based signal-tower board package. -/
+def l2c1SignalTowerBoardDataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1SignalTowerBoardData where
+  signalLocalTower := signalLocalTower
+  boardLevels :=
+    canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks
+
+/-- Board-level checks give the second field-based signal-tower board package. -/
+def l2c2SignalTowerBoardDataOfBoardLevelChecks
+    (signalLocalTower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2SignalTowerBoardData where
+  signalLocalTower := signalLocalTower
+  boardLevels :=
+    canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks
+
+/--
+Origin-zero windows can still feed the first field-based board package, but
+only through the local signal-tower field.
+-/
+def l2c1SignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C1SignalTowerBoardData where
+  signalLocalTower :=
+    l2Component1SignalLocalTowerOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/--
+Origin-zero windows can still feed the second field-based board package, but
+only through the local signal-tower field.
+-/
+def l2c2SignalTowerBoardDataOfOriginZeroWindows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevels : Figure18CanonicalRawBoundaryCheckedBoardLevels) :
+    L2C2SignalTowerBoardData where
+  signalLocalTower :=
+    l2Component2SignalLocalTowerOfOriginZeroWindows originZeroWindows
+  boardLevels := boardLevels
+
+/-- Origin-zero windows and board-level checks give the first field-based package. -/
+def l2c1SignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C1SignalTowerBoardData :=
+  l2c1SignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/-- Origin-zero windows and board-level checks give the second field-based package. -/
+def l2c2SignalTowerBoardDataOfOriginZeroWindowsBoardLevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (boardLevelChecks : Figure18CanonicalRawBoundaryBoardLevelChecks) :
+    L2C2SignalTowerBoardData :=
+  l2c2SignalTowerBoardDataOfOriginZeroWindows originZeroWindows
+    (canonicalRawBoundaryCheckedBoardLevels_of_boardLevelChecks
+      boardLevelChecks)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryFig16Obligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, and the Robinson Section 7 tower/indexed-box
+certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_bool_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, canonical raw-boundary Figure 16
+macro-squares, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquares)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_raw_boundary_fig16_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, finite-checked canonical raw-boundary
+Figure 16 macro-squares, the Robinson Section 7 tower/indexed-box certificate
+route, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_bool_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryMacroSquaresBool)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_tower_raw_boundary_fig16_interiorRows
+      geomCombinedSiteRouting
+      (canonicalRawBoundaryMacroSquares_of_bool hlevel)
+      hinterior hcorrect
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryBoardRowsObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryBoardRowsObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryBoardRowsObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryBoardRowsObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_rows_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_board_rows_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_tower_board_rows_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_rows_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted row-major checked source/free-grid
+board levels, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_board_rows_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_tower_board_rows_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryBoardChecksObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_combined_tower_obligations_position_source
+      (l2c1GeomCombinedRawBoundaryBoardChecksObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryBoardChecksObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, and the Robinson Section 7 compatible-level certificate route.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_combined_tower_obligations_position_source
+      (l2c2GeomCombinedRawBoundaryBoardChecksObligations
+        geomCombinedSiteRouting hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_checks_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_geom_tower_board_checks_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_checks_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+tiling-dependent Robinson geometry, shifted source/free-grid board-level
+checks, the Robinson Section 7 compatible-level certificate route, and
+generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_geom_tower_board_checks_interiorRows
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+      geomCombinedSiteRouting hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+      (l2c1GeomCombinedSiteRoutingOfSection7 section7Routing) hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_geom_tower_board_checks_position_source
+      (l2c1GeomCombinedSiteRoutingOfSection7 section7Routing) hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+      (l2c2GeomCombinedSiteRoutingOfSection7 section7Routing) hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_geom_tower_board_checks_position_source
+      (l2c2GeomCombinedSiteRoutingOfSection7 section7Routing) hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfBoardFreeLineActiveCorner boardFreeLine)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 board/free-line active-corner recognition, shifted
+source/free-grid board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_interiorRows
+    (boardFreeLine :
+      LayeredSection7BoardFreeLineActiveCornerInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_board_free_line_board_checks_position_source
+      boardFreeLine hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      section7Routing
+      (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      section7Routing
+      (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      section7Routing
+      (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      section7Routing
+      (canonicalRawBoundaryBoardLevelChecks_of_checkedBoardLevels hlevel)
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+    (originZeroWindows :
+      OllingerRobinson.HasFigure18IndexedActiveCornerOriginZeroWindowsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_checks_position_source
+      (l2c1Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_checks_position_source
+      (l2c2Section7RoutingOfOriginZeroWindows originZeroWindows)
+      hlevel h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted source/free-grid
+board-level checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_checks_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson origin-zero active/corner windows, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_interiorRows
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_geom_tower_board_rows_position_source
+      originZeroWindows hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_checks_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_checks_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksBoardLevelChecks
+          hchecked hlevel))
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_rows_position_source
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid
+      (l2c1CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c1RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated position-source obligations.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_rows_position_source
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (h : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_of_figure13_compatible_level_obligations_position_source
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+      (l2c2CompatibleLevelObligationsOfRobinsonSection7ObstructionData
+        (l2c2RobinsonSection7ObstructionDataOfCheckedStacksCheckedBoardLevels
+          hchecked hlevel))
+      h
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_checks_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_checks_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_rows_interiorRows
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_rows_interiorRows
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_checks_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted source/free-grid board-level
+checks, and the packaged source-uniform generated interior position-code
+decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_checks_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryBoardLevelChecks)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_checks_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c1_checked_board_rows_interiorPackage
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+finite origin-zero checked layer stacks, shifted row-major checked
+source/free-grid board levels, and the packaged source-uniform generated
+interior position-code decoder.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_board_rows_interiorPackage
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_checked_board_rows_position_source
+      hchecked hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the first audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_section7_geom_tower_board_rows_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Encoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate via
+Robinson Section 7 obstruction routing, shifted row-major checked
+source/free-grid board levels, and generated interior position-code rows.
+-/
+theorem
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_interiorRows
+    (section7Routing :
+      LayeredSection7ObstructionRoutingInvariant
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid))
+    (hlevel : Figure18CanonicalRawBoundaryCheckedBoardLevels)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_section7_geom_tower_board_rows_position_source
+      section7Routing hlevel
+      (positionSourceObligationsOfPositionCodeInteriorRows
+        hinterior hcorrect)
+
+theorem tilesPlane_figure18ScaffoldTiles_of_checkedRecognizedCompatibleMacroSquares
+    (hlevel : Figure18CheckedRecognizedCompatibleMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_checkedFigure16RecognizedCompatible
+    hlevel
+
+theorem
+    tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    TilesPlane figure18ScaffoldTiles :=
+  tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedFigure16RecognizedCompatible
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical checked compatible Figure 16 macro-squares supply valid translated
+Figure 18 scaffold boxes for the first audited L2-blank candidate.
+-/
+def l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base :=
+  Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+    l2Component1Figure18ScaffoldData
+    (fun r _hr =>
+      tileableBoxes_of_compatibleFigure18ScaffoldSquares
+        (compatibleFigure18ScaffoldSquares_of_tilesPlane
+          (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+            hlevel)) r)
+
+set_option linter.style.longLine false in
+/--
+Canonical checked compatible Figure 16 macro-squares supply valid translated
+Figure 18 scaffold boxes for the second audited L2-blank candidate.
+-/
+def l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base :=
+  Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+    l2Component2Figure18ScaffoldData
+    (fun r _hr =>
+      tileableBoxes_of_compatibleFigure18ScaffoldSquares
+        (compatibleFigure18ScaffoldSquares_of_tilesPlane
+          (tilesPlane_figure18ScaffoldTiles_of_canonicalCheckedRecognizedCompatibleMacroSquares
+            hlevel)) r)
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c1FreeSiteRectCanonicalCheckedFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c2FreeSiteRectCanonicalCheckedFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure13CanonicalCheckedRecognizedMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
+open NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations in
+def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16MacroSquares
+    canonicalFreeSiteRectRouting hlevel
+
+/--
+Checked compatible Figure 16 level data supplies the first bundled
+free-site-rectangle Section 7 obligation package.
+-/
+def l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations.ofL2C1Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    canonicalFreeSiteRectRouting hlevel
+
+/--
+Checked compatible Figure 16 level data supplies the second bundled
+free-site-rectangle Section 7 obligation package.
+-/
+def l2c2FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+    (canonicalFreeSiteRectRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations.ofL2C2Figure18ScaffoldDataPositiveCanonicalCheckedCompatibleFigure16LevelData
+    canonicalFreeSiteRectRouting hlevel
+
+def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofLevelCompatiblePositiveTranslatedBoxes
+    l2Component1BlankCandidateActiveSiteSpecs
+    l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.southwest
+    l2Component1BlankCandidateSanity.cornerIndex_valid
+    hgrids
+    (by
+      intro r hr
+      have hisolated :
+          Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+            (figure18ScaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+        l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+          hlevel
+      have hboxes :
+          Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+            (figure18ScaffoldDataOfNatSites
+              l2Component1BlankCandidateActiveSiteSpecs
+              l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.southwest
+              l2Component1BlankCandidateSanity.cornerIndex_valid) :=
+        (open Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant in
+          ofIsolatedActiveBoxes hisolated)
+      simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table] using hboxes r hr)
+    (by
+      simpa [l2Component1BlankCandidateActiveSiteData,
+        l2Component1BlankCandidateCornerSite,
+        NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component1BlankCandidatePairCompatibilityBool)
+
+def l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonCompatibleLevelObligations.ofLevelCompatiblePositiveTranslatedBoxes
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid
+    hgrids
+    (by
+      intro r hr
+      have hisolated :
+          Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+            (figure18ScaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+        l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+          hlevel
+      have hboxes :
+          Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+            (figure18ScaffoldDataOfNatSites
+              l2Component2BlankCandidateActiveSiteSpecs
+              l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+              0 Quadrant.northeast
+              l2Component2BlankCandidateSanity.cornerIndex_valid) :=
+        (open Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant in
+          ofIsolatedActiveBoxes hisolated)
+      simpa [figure18ScaffoldDataOfNatSites, scaffoldDataOfNatSites,
+        LayeredFigure18ScaffoldData.scaffold,
+        LayeredFigure18ScaffoldData.presentation,
+        LayeredFigure18ScaffoldData.table,
+        LayeredFigure18ScaffoldData.flatTable,
+        Figure18ScaffoldData.scaffold,
+        Figure18ScaffoldData.presentation,
+        Figure18ScaffoldData.table] using hboxes r hr)
+    (by
+      simpa [l2Component2BlankCandidateActiveSiteData,
+        l2Component2BlankCandidateCornerSite,
+        NatSiteSpecSanity.activeSiteData,
+        NatSiteSpecSanity.cornerSite] using
+        l2Component2BlankCandidatePairCompatibilityBool)
+
+def l2c1SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower htower))
+    hlevel
+
+def l2c2SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    (hasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable_of_localTower
+      (hasFigure18RobinsonBoardLevelSignalLocalTowerForTable_of_tower htower))
+    hlevel
+
+/--
+Checked compatible Figure 16 level data supplies the first compatible-level
+Robinson Section 7 obligation package.
+-/
+def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    hgrids
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies the second compatible-level
+Robinson Section 7 obligation package.
+-/
+def l2c2CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (hgrids :
+      OllingerRobinson.HasFigure18RobinsonBoardLevelCompatibleRoutedFreeGridsForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
+    hgrids
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data plus the first signal tower supplies
+the first compatible-level Robinson Section 7 obligation package.
+-/
+def l2c1SignalTowerCanonicalCheckedCompatibleFig16LevelDataObligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component1BlankCandidateActiveSiteSpecs
+        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.southwest
+        l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    htower
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data plus the second signal tower supplies
+the second compatible-level Robinson Section 7 obligation package.
+-/
+def l2c2SignalTowerCanonicalCheckedCompatibleFig16LevelDataObligations
+    (htower :
+      HasNatSiteSignalLocalTower
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2SignalTowerCanonicalCheckedCompatibleFig16Obligations
+    htower
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+supply the first compatible-level Robinson Section 7 obligation package.
+-/
+def l2c1OriginZeroCanonicalCheckedCompatibleFig16LevelDataObligations
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (l2c1CompatibleRoutedFreeGridsOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+supply the second compatible-level Robinson Section 7 obligation package.
+-/
+def l2c2OriginZeroCanonicalCheckedCompatibleFig16LevelDataObligations
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2CompatibleLevelCanonicalCheckedCompatibleFig16LevelDataObligations
+    (l2c2CompatibleRoutedFreeGridsOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+def l2c1CheckedCompatibleFig16IsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData := by
+  simpa [l2Component1Figure18ScaffoldData] using
+    l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+      hlevel
+
+def l2c2CheckedCompatibleFig16IsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData := by
+  simpa [l2Component2Figure18ScaffoldData] using
+    l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16MacroSquares
+      hlevel
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply positive
+active-corner boxes for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16ActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+    (l2c1CheckedCompatibleFig16IsolatedBoxes hlevel)
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply positive
+active-corner boxes for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16ActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant.ofIsolatedActiveBoxes
+    (l2c2CheckedCompatibleFig16IsolatedBoxes hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive isolated active
+boxes for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16LevelDataIsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2Component1PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    hlevel
+
+/--
+Checked compatible Figure 16 level data supplies positive isolated active
+boxes for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16LevelDataIsolatedBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedIsolatedActiveBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2Component2PositiveTranslatedIsolatedBoxesOfCanonicalCheckedCompatibleFigure16LevelData
+    hlevel
+
+/--
+Checked compatible Figure 16 level data supplies positive active-corner boxes
+for the first audited L2-blank candidate.
+-/
+def l2c1CheckedCompatibleFig16LevelDataActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component1Figure18ScaffoldData :=
+  l2c1CheckedCompatibleFig16ActiveCornerBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies positive active-corner boxes
+for the second audited L2-blank candidate.
+-/
+def l2c2CheckedCompatibleFig16LevelDataActiveCornerBoxes
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    Figure18ScaffoldData.HasPositiveTranslatedActiveCornerIndexedBoxInvariant
+      l2Component2Figure18ScaffoldData :=
+  l2c2CheckedCompatibleFig16ActiveCornerBoxes
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+produce the first paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+      (hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+        originZeroWindows)
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus checked compatible Figure 16 level data
+produce the second paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16LevelDataBundledObligations
+      (hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
+        originZeroWindows)
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus proof-facing compatible Figure 16
+level checks produce the first paper-facing Section 7 positive-box scaffold
+package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (canonicalFreeSiteRectRouting : L2C1CanonicalFreeSiteRectRouting)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c1FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+      canonicalFreeSiteRectRouting hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site-rectangle routing plus proof-facing compatible Figure 16
+level checks produce the second paper-facing Section 7 positive-box scaffold
+package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (canonicalFreeSiteRectRouting : L2C2CanonicalFreeSiteRectRouting)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectObligations
+    (l2c2FreeSiteRectCanonicalCheckedCompatibleFig16BundledObligations
+      canonicalFreeSiteRectRouting hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus proof-facing compatible Figure 16 level
+checks produce the first paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelChecks
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C1RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Origin-zero active/corner windows plus proof-facing compatible Figure 16 level
+checks produce the second paper-facing Section 7 positive-box scaffold package.
+-/
+def l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelChecks
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelChecks) :
+    L2C2RobinsonSection7BoardFreeLinePositiveBoxData :=
+  l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfFreeSiteRectRoutingCanonicalCheckedCompatibleFig16LevelChecks
+    (l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply the finite layer
+patches needed by the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (l2c1CheckedCompatibleFig16ActiveCornerBoxes hlevel)
+
+/--
+Canonical checked compatible Figure 16 macro-squares supply the finite layer
+patches needed by the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfPositiveTranslatedBoxes
+    (l2c2CheckedCompatibleFig16ActiveCornerBoxes hlevel)
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData where
+  checkedStacks := hchecked
+  validTranslatedBoxes :=
+    l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData where
+  checkedStacks := hchecked
+  validTranslatedBoxes :=
+    l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the first checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the second checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      hchecked hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+    (l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+      hchecked hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches :=
+    l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Checked origin-zero stacks plus compatible Figure 16 macro-squares provide the
+second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData where
+  checkedStacks := hchecked
+  patches :=
+    l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16 hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the first
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+/--
+Origin-zero windows plus compatible Figure 16 macro-squares provide the second
+checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the first checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c1OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus compatible Figure 16
+macro-squares provide the second checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    (l2c2OriginZeroCheckedStacksOfCanonicalFreeSiteRectActiveCorner
+      hactiveCorner)
+    hlevel
+
+/--
+Checked compatible Figure 16 level data supplies the finite layer patches
+needed by the first audited L2-blank candidate.
+-/
+def l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1ActiveCornerLayerPatches :=
+  l2c1ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked compatible Figure 16 level data supplies the finite layer patches
+needed by the second audited L2-blank candidate.
+-/
+def l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2ActiveCornerLayerPatches :=
+  l2c2ActiveCornerLayerPatchesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked compatible Figure 16 level data supplies valid translated Figure 18
+scaffold boxes for the first audited L2-blank candidate.
+-/
+def l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin base :=
+  l2c1ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked compatible Figure 16 level data supplies valid translated Figure 18
+scaffold boxes for the second audited L2-blank candidate.
+-/
+def l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16LevelData
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    ∀ r : Nat, 0 < r →
+      ∃ origin : Int × Int,
+        ∃ base : TranslatedBoxPattern
+          l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+          ValidTranslatedBoxTiling
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin base :=
+  l2c2ValidTranslatedBoxesOfCanonicalCheckedCompatibleFig16
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second checked-stack/valid-translated-box finite scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the first checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackValidTranslatedBoxData :=
+  l2c1CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the second checked-stack/valid-translated-box finite
+scaffold package.
+-/
+def l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackValidTranslatedBoxData :=
+  l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first board/free-line translated-box Section 7 package.
+-/
+def l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second board/free-line translated-box Section 7 package.
+-/
+def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2RobinsonSection7BoardFreeLineTranslatedBoxData :=
+  l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C1OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Checked origin-zero stacks plus checked compatible Figure 16 level data provide
+the second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16LevelData
+    (hchecked : L2C2OriginZeroCheckedStacks)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCheckedStacksCanonicalCheckedCompatibleFig16
+    hchecked
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+first checked-stack/layer-patch finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+/--
+Origin-zero windows plus checked compatible Figure 16 level data provide the
+second checked-stack/layer-patch finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16LevelData
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+    originZeroWindows
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the first checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition plus checked compatible Figure
+16 level data provide the second checked-stack/layer-patch finite scaffold
+package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+    (hactiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+    hactiveCorner
+    (canonicalCheckedRecognizedCompatibleMacroSquares_of_checkedLevelData
+      hlevel)
+
+def l2c1GeomCombinedCanonicalCheckedCompatibleFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component1BlankCandidateActiveSiteSpecs
+          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.southwest
+          l2Component1BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  (open NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations in
+    ofL2C1Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+      geomCombinedSiteRouting
+      (by
+        simpa [l2Component1Figure18ScaffoldData] using
+          l2c1CheckedCompatibleFig16IsolatedBoxes hlevel)).toL2C1CompatibleLevelObligations
+
+def l2c2GeomCombinedCanonicalCheckedCompatibleFig16Obligations
+    (geomCombinedSiteRouting :
+      OllingerRobinson.HasFigure18RobinsonBoardGeometryTowerCombinedSiteCorridorRoutingForTable
+        (scaffoldDataOfNatSites
+          l2Component2BlankCandidateActiveSiteSpecs
+          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+          0 Quadrant.northeast
+          l2Component2BlankCandidateSanity.cornerIndex_valid).table)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares) :
+    NatSiteRobinsonCompatibleLevelObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  (open NatSiteRobinsonGeomCombinedTranslatedPositiveBoxObligations in
+    ofL2C2Figure18ScaffoldDataPositiveTranslatedIsolatedBoxes
+      geomCombinedSiteRouting
+      (by
+        simpa [l2Component2Figure18ScaffoldData] using
+          l2c2CheckedCompatibleFig16IsolatedBoxes hlevel)).toL2C2CompatibleLevelObligations
+
+
+end TM0FoldedReduction
+
+end LeanWang
