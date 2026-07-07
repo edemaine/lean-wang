@@ -252,6 +252,17 @@ theorem sourceLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec :
       SourcePositionCodeOneRowsAtIndexPrimrec :=
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec
 
+set_option linter.style.longLine false in
+/--
+The final source-specialized start decoder target is equivalent to primitive
+recursiveness of the nondependent interior-row decoder used by the generated
+position-code accumulator.
+-/
+theorem sourceLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec
+
 /--
 The final source-side decoder-step and source-specialized label-index targets
 are equivalent.  The decoder-step spelling is the narrower preferred final

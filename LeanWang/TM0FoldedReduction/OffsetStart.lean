@@ -896,6 +896,23 @@ theorem sourcePositionCodeLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec :
   ⟨sourcePositionCodeOneRowsAtIndexPrimrec_of_labelIndexStart,
     sourcePositionCodeLabelIndexStartPrimrec_of_oneRowsAtIndex⟩
 
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, primitive
+recursiveness of the fixed-start position-code decoder is equivalent to
+primitive recursiveness of interior at-index decoding.
+
+This names the current narrow source frontier directly: closing either the
+fixed-start decoder or the nondependent interior-row decoder closes the other.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeInteriorRowsAtIndexPrimrec :=
+  ⟨sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart,
+    fun hinterior =>
+      sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
+        (sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex hinterior)⟩
+
 theorem sourceSimStepDataByLabelIndexWithPositionCode_primrec_of_interiorRows
     (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
     Primrec sourceSimStepDataByLabelIndexWithPositionCode :=
