@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.TM0FoldedPositionReduction.SourceObligations
+import LeanWang.TM0FoldedReduction.Theorems
 
 /-!
 Scaffold-generic final theorem wrappers for the generated position-coded
