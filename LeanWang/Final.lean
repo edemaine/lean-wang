@@ -7254,20 +7254,6 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
 
 set_option linter.style.longLine false in
 /--
-Build the final inputs directly from the scaffold package, the bounded-search
-label-index decoder, and duplicate-free source statement supports.
--/
-def ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    FinalReductionInputs :=
-  ofScaffoldAndSource scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodupCorrect
-      hsearch hnodup)
-
-set_option linter.style.longLine false in
-/--
 Build the final inputs directly from the scaffold package and the source-level
 position-coded start decoder target.
 -/
@@ -8037,21 +8023,6 @@ def ofScaffoldAndSourcePositionCodeLabelIndexFrom
   ofScaffoldAndSource scaffold
     (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
       hindex)
-
-set_option linter.style.longLine false in
-/--
-Build the second-candidate final inputs directly from the scaffold package, the
-bounded-search label-index decoder, and duplicate-free source statement
-supports.
--/
-def ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    FinalL2C2ReductionInputs :=
-  ofScaffoldAndSource scaffold
-    (TM0FoldedReduction.positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodupCorrect
-      hsearch hnodup)
 
 set_option linter.style.longLine false in
 /--
@@ -26950,36 +26921,6 @@ theorem domino_problem_undecidable_of_scaffoldAndSourcePositionCodeLabelIndexFro
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the proof-facing Robinson Section 7
-board/free-line layer-patch package, the bounded-search label-index decoder,
-and duplicate-free source statement supports.
--/
-theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable
-    (FinalReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-      scaffold hsearch hnodup)
-
-set_option linter.style.longLine false in
-/--
-Wang domino undecidability from the proof-facing Robinson Section 7
-board/free-line layer-patch package, the bounded-search label-index decoder,
-and duplicate-free source statement supports.
--/
-theorem domino_problem_undecidable_of_scaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable
-    (FinalReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-      scaffold hsearch hnodup)
-
-set_option linter.style.longLine false in
-/--
-Encoded Wang domino undecidability from the proof-facing Robinson Section 7
 board/free-line layer-patch package and the source-level position-coded start
 decoder target.
 -/
@@ -27264,34 +27205,6 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourcePositionCodeLabelInde
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2ReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexFrom
     scaffold hindex).domino_problem_undecidable
-
-set_option linter.style.longLine false in
-/--
-Encoded Wang domino undecidability from the proof-facing second L2 candidate
-Robinson Section 7 board/free-line layer-patch package, the bounded-search
-label-index decoder, and duplicate-free source statement supports.
--/
-theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  (FinalL2C2ReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    scaffold hsearch hnodup).encoded_domino_problem_undecidable
-
-set_option linter.style.longLine false in
-/--
-Wang domino undecidability from the proof-facing second L2 candidate Robinson
-Section 7 board/free-line layer-patch package, the bounded-search label-index
-decoder, and duplicate-free source statement supports.
--/
-theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  (FinalL2C2ReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFromWithStatementNodup
-    scaffold hsearch hnodup).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
