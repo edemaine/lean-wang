@@ -3334,6 +3334,18 @@ def toBoardFreeLineLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the row-source origin-zero/translated-positive-box package to the
+patch-preserving Robinson layer-patch scaffold package.
+-/
+def toFigure13RobinsonLayerPatchConstructionObligations
+    (h :
+      FinalFigure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations) :
+    FinalFigure13RobinsonLayerPatchConstructionObligations where
+  scaffold := h.scaffold.toL2C2LayerPatchScaffoldCertificate
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from the row-source concrete second-candidate Figure 13
 origin-zero/translated-positive-box scaffold package.
 -/
