@@ -59,6 +59,21 @@ structure FinalL2C2ReductionInputs : Prop where
   scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
   source : TM0FoldedReduction.PositionSourceObligations
 
+set_option linter.style.longLine false in
+/--
+Preferred second-candidate route with the ordinary source obligations for the
+normalized folded program.
+
+This is the proof-facing surface for the bounded-search source decoder.  Unlike
+`FinalL2C2ReductionInputs`, it does not pass through generated
+`positionProgramData`, so it does not need the duplicate-free statement-support
+bridge used to identify bounded-search state codes with generated position
+codes.
+-/
+structure FinalL2C2SourceReductionInputs : Prop where
+  scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  source : TM0FoldedReduction.SourceObligations
+
 /--
 Finite-scaffold-facing checked-stack/layer-patch construction route.
 
@@ -8285,6 +8300,103 @@ theorem domino_problem_undecidable
       h.scaffold h.source
 
 end FinalL2C2ReductionInputs
+
+namespace FinalL2C2SourceReductionInputs
+
+/-- Build the second-candidate final inputs directly from the scaffold package
+and ordinary source obligations. -/
+def ofScaffoldAndSource
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (source : TM0FoldedReduction.SourceObligations) :
+    FinalL2C2SourceReductionInputs where
+  scaffold := scaffold
+  source := source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the bounded-search label-index decoder.
+-/
+def ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the bounded-search accumulator step.
+-/
+def ofScaffoldAndSourceSearchCodeDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : TM0FoldedReduction.SourceSearchCodeDecoderStepPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the one-fuel bounded-search row decoder.
+-/
+def ofScaffoldAndSourceSearchCodeOneRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeOneRowsPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the bounded interior bounded-search rows.
+-/
+def ofScaffoldAndSourceSearchCodeBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeBoundedInteriorRowsCorrect
+      hbounded)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the full interior bounded-search rows.
+-/
+def ofScaffoldAndSourceSearchCodeRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeInteriorRowsPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeInteriorRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the second-candidate ordinary-source final inputs. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2SourceReductionInputs) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      h.scaffold)
+    h.source
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the second-candidate ordinary-source final inputs. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2SourceReductionInputs) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      h.scaffold)
+    h.source
+
+end FinalL2C2SourceReductionInputs
 
 namespace FinalCheckedStackLayerPatchConstructionObligations
 
@@ -24616,6 +24728,164 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceRows
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2ReductionInputs.ofScaffoldAndSourceRows
     scaffold sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and ordinary source
+obligations for the normalized folded program.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndOrdinarySource
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (source : TM0FoldedReduction.SourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSource
+    scaffold source).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and ordinary source obligations
+for the normalized folded program.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndOrdinarySource
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (source : TM0FoldedReduction.SourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSource
+    scaffold source).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the bounded-search
+label-index decoder, without the generated-position statement-uniqueness
+bridge.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the bounded-search
+label-index decoder, without the generated-position statement-uniqueness
+bridge.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the bounded-search
+decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : TM0FoldedReduction.SourceSearchCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeDecoderStep
+    scaffold hstep).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the bounded-search decoder
+step.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeDecoderStep
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : TM0FoldedReduction.SourceSearchCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeDecoderStep
+    scaffold hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the one-fuel
+bounded-search row decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeOneRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    scaffold hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the one-fuel bounded-search
+row decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeOneRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    scaffold hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and bounded-interior
+bounded-search rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    scaffold hbounded).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and bounded-interior
+bounded-search rows.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeBoundedRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hbounded : TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    scaffold hbounded).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and full interior
+bounded-search rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeRows
+    scaffold hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and full interior bounded-search
+rows.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeRows
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : TM0FoldedReduction.SourceSearchCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeRows
+    scaffold hrows).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
