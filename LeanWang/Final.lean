@@ -1447,6 +1447,19 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObl
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the bounded-search start decoder used by ordinary `programData`.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
 with the generated one-row position-code source target.
 -/
 structure FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations :
@@ -8400,6 +8413,40 @@ def ofScaffoldAndSourceSearchCodeRows
     (TM0FoldedReduction.sourceObligationsOfSearchCodeInteriorRowsCorrect hrows)
 
 set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from the split
+board/free-line active-corner recognition and finite layer patches.
+-/
+def ofBoardFreeLineLayerPatchesAndSource
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (source : TM0FoldedReduction.SourceObligations) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource
+    { boardFreeLineActiveCorner := boardFreeLineActiveCorner
+      patches := layerPatches }
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from split board/free-line
+layer-patch scaffold fields and the bounded-search start decoder.
+-/
+def ofBoardFreeLineLayerPatchesSearchCodeLabelIndexStart
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofBoardFreeLineLayerPatchesAndSource
+    boardFreeLineActiveCorner layerPatches
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeLabelIndexStartCorrect
+      hindex)
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the second-candidate ordinary-source final inputs. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2SourceReductionInputs) :
@@ -14697,6 +14744,46 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-search-start board/free-line/layer-patch package to the
+compact second-candidate ordinary-source final inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofBoardFreeLineLayerPatchesSearchCodeLabelIndexStart
+    h.boardFreeLineActiveCorner h.layerPatches h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the bounded-search start decoder used by ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the bounded-search start decoder used by ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchOneRowsConstructionObligations
 
 set_option linter.style.longLine false in
@@ -15314,6 +15401,23 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligat
       l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
     FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndexStart := hstart
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+ordinary-source bounded-search-start board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations where
   boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
   layerPatches := O.patches
   labelIndexStart := hstart
