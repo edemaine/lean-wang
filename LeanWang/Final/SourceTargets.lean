@@ -174,24 +174,4 @@ codes with generated position codes for translated source machines.
 abbrev SourceStatementListNodup : Prop :=
   TM0FoldedReduction.SourceStatementListNodup
 
-/--
-Source-side local statement-support uniqueness for each started TM1 label in
-the translated machines.
-
-This is one of the two concrete lower obligations whose conjunction implies
-`SourceStatementListNodup`.
--/
-abbrev SourceStartedTM1StatementSupportNodup : Prop :=
-  TM0FoldedReduction.SourceStartedTM1StatementSupportNodup
-
-/--
-Source-side disjointness between statement-support lists for distinct started
-TM1 labels in the translated machines.
-
-Together with `SourceStartedTM1StatementSupportNodup`, this implies
-`SourceStatementListNodup`.
--/
-abbrev SourceStartedTM1StatementSupportPairwiseDisjoint : Prop :=
-  TM0FoldedReduction.SourceStartedTM1StatementSupportPairwiseDisjoint
-
 end LeanWang
