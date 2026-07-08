@@ -38,6 +38,12 @@ def sourceSimStepDataForLabelIndexStartWithSearchCode
     (NatPartrecToToPartrec.translate c) i
 
 set_option linter.style.longLine false in
+/-- Primitive-recursion target for the source-specialized numeric-state start decoder. -/
+abbrev SourceCodeLabelIndexStartPrimrec : Prop :=
+  Primrec (fun p : Code × Nat =>
+    sourceSimStepDataForLabelIndexStartWithCode p.1 p.2)
+
+set_option linter.style.longLine false in
 /-- Primitive-recursion target for the source-specialized bounded-search start decoder. -/
 abbrev SourceSearchCodeLabelIndexStartPrimrec : Prop :=
   Primrec (fun p : Code × Nat =>
@@ -676,6 +682,22 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode
     sourceSimStepDataForLabelIndexStartWithCode
   exact TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode_eq_withCode
     (NatPartrecToToPartrec.translate c) i
+
+set_option linter.style.longLine false in
+/-- The numeric-state start decoder gives the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  hindex.of_eq fun p =>
+    (sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode p.1 p.2).symm
+
+set_option linter.style.longLine false in
+/-- The bounded-search start decoder recovers the numeric-state start-decoder target. -/
+theorem sourceCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    SourceCodeLabelIndexStartPrimrec :=
+  hindex.of_eq fun p =>
+    sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode p.1 p.2
 
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexStartWithPositionCode c i =

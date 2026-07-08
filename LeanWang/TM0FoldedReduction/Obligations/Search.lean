@@ -172,6 +172,24 @@ def sourceObligationsOfLabelIndexFromWithSearchCode
 
 set_option linter.style.longLine false in
 /--
+Primitive recursiveness of the source-level numeric-state start decoder,
+together with normalized folded program-data semantic correctness, gives the
+exact source obligations needed by the final reduction.
+-/
+def sourceObligationsOfCodeLabelIndexStart
+    (hindex : SourceCodeLabelIndexStartPrimrec)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    SourceObligations :=
+  sourceObligationsOfProgramData
+    (sourceProgramData_computable_of_source_labelIndexStartWithCode' hindex)
+    hcorrect
+
+set_option linter.style.longLine false in
+/--
 Primitive recursiveness of the source-level bounded-search start decoder,
 together with normalized folded program-data semantic correctness, gives the
 exact source obligations needed by the final reduction.

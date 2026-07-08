@@ -1447,6 +1447,19 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObl
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the numeric-state start decoder used by ordinary `programData`.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndexStart : SourceCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
 with the bounded-search start decoder used by ordinary `programData`.
 -/
 structure FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations :
@@ -8341,6 +8354,19 @@ def ofScaffoldAndSourceSearchCodeLabelIndexFrom
 set_option linter.style.longLine false in
 /--
 Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the numeric-state start decoder used by ordinary `programData`.
+-/
+def ofScaffoldAndSourceCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfCodeLabelIndexStartCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
 package and the bounded-search start decoder used by ordinary `programData`.
 -/
 def ofScaffoldAndSourceSearchCodeLabelIndexStart
@@ -8428,6 +8454,23 @@ def ofBoardFreeLineLayerPatchesAndSource
     { boardFreeLineActiveCorner := boardFreeLineActiveCorner
       patches := layerPatches }
     source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from split board/free-line
+layer-patch scaffold fields and the numeric-state start decoder.
+-/
+def ofBoardFreeLineLayerPatchesCodeLabelIndexStart
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofBoardFreeLineLayerPatchesAndSource
+    boardFreeLineActiveCorner layerPatches
+    (TM0FoldedReduction.sourceObligationsOfCodeLabelIndexStartCorrect
+      hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -14744,6 +14787,46 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the numeric-state-start board/free-line/layer-patch package to the
+compact second-candidate ordinary-source final inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofBoardFreeLineLayerPatchesCodeLabelIndexStart
+    h.boardFreeLineActiveCorner h.layerPatches h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the numeric-state start decoder used by ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the numeric-state start decoder used by ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false in
@@ -15401,6 +15484,23 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligat
       l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
     FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndexStart := hstart
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+ordinary-source numeric-state-start board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceCodeLabelIndexStartPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations where
   boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
   layerPatches := O.patches
   labelIndexStart := hstart
@@ -24910,6 +25010,32 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexF
     (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the numeric-state
+start decoder used by ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceCodeLabelIndexStart
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the numeric-state start
+decoder used by ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceCodeLabelIndexStart
     scaffold hindex).domino_problem_undecidable
 
 set_option linter.style.longLine false in

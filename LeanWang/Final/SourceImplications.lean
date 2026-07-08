@@ -84,6 +84,22 @@ theorem searchCodeLabelIndexStartPrimrec_of_labelIndex
     hindex
 
 set_option linter.style.longLine false in
+/-- The numeric-state start decoder gives the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart
+    hindex
+
+set_option linter.style.longLine false in
+/-- The bounded-search start decoder recovers the numeric-state start-decoder target. -/
+theorem codeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    SourceCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    hindex
+
+set_option linter.style.longLine false in
 /-- The bounded-search decoder-step target gives the bounded-search start-decoder target. -/
 theorem searchCodeLabelIndexStartPrimrec_of_decoderStep
     (hstep : SourceSearchCodeDecoderStepPrimrec) :

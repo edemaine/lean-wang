@@ -53,6 +53,16 @@ def sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
     programData_haltsEmpty_iff_tm0_eval_dom
 
 /--
+Primitive recursiveness of the numeric-state start decoder gives the ordinary
+source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfCodeLabelIndexStartCorrect
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfCodeLabelIndexStart hindex
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
 Primitive recursiveness of the bounded-search start decoder gives the ordinary
 source obligations once the semantic folded proof is imported.
 -/
