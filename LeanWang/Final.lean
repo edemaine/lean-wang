@@ -2815,6 +2815,21 @@ abbrev FinalFigure13L2C2Figure18ScaffoldTileableBoxes : Prop :=
 
 set_option linter.style.longLine false in
 /--
+Compatible Figure 18 site squares supply the positive finite-box target used by
+the L2C2 valid-translated-box route.
+
+This is the site-rectangle form of the scaffold tileability obligation: instead
+of asking directly for Wang-tile boxes, it asks for finite Figure 18 squares
+whose adjacent sites pass the transcribed compatibility checks.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfCompatibleSquares
+    (hsquares : HasCompatibleFigure18ScaffoldSquares) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes := by
+  intro r _hr
+  exact tileableBoxes_of_compatibleFigure18ScaffoldSquares hsquares r
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with
 generated interior position-code rows.
 
