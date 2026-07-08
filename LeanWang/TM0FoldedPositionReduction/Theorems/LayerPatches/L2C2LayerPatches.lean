@@ -108,6 +108,156 @@ theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_startCodeCorre
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+global generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_globalCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+global generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_globalCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfGlobalPositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_oneRowsCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_oneRowsCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_boundedRowsCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_boundedRowsCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated one-row position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_oneRowsAtIndexCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+generated one-row position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_oneRowsAtIndexCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+interior generated position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorRowsAtIndexCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and
+interior generated position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_interiorRowsAtIndexCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the second checked-stack/layer-patch Section
 7 certificate and the generated position-code accumulator step, with
 `positionProgramData` semantic correctness discharged.
