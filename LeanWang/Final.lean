@@ -1381,6 +1381,20 @@ structure FinalFigure13RobinsonLayerPatchConstructionObligations where
 
 set_option linter.style.longLine false in
 /--
+Concrete Robinson checked-stack/layer-patch scaffold route with the
+fixed-start source-specialized position-code decoder.
+
+This is the start-decoder analogue of
+`FinalFigure13RobinsonLayerPatchConstructionObligations`, keeping the same
+patch-preserving Robinson scaffold certificate while avoiding the stronger full
+interior-row source target.
+-/
+structure FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations where
+  scaffold : NatSiteRobinsonLayerPatchScaffoldCertificate
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete Robinson tower/indexed-box scaffold route.
 
 This is one step below `FinalFigure13RobinsonIndexedBoxConstructionObligations`:
@@ -15405,6 +15419,32 @@ theorem domino_problem_undecidable
 
 end FinalFigure13RobinsonLayerPatchConstructionObligations
 
+namespace FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the patch-preserving Robinson scaffold certificate and
+generated fixed-start source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_scaffold_position_source_labelIndexStartCorrect
+    h.scaffold.scaffoldData.scaffold h.scaffold.isScaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the patch-preserving Robinson scaffold certificate and
+generated fixed-start source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_scaffold_position_source_labelIndexStartCorrect
+    h.scaffold.scaffoldData.scaffold h.scaffold.isScaffold h.labelIndexStart
+
+end FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations
+
 namespace FinalFigure13RobinsonTowerIndexedBoxConstructionObligations
 
 set_option linter.style.longLine false in
@@ -17059,6 +17099,23 @@ def toFinalFigure13RobinsonLayerPatchConstructionObligations
     FinalFigure13RobinsonLayerPatchConstructionObligations where
   scaffold := O.toL2C2LayerPatchScaffoldCertificate
   sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the
+patch-preserving Robinson scaffold final route with the fixed-start
+source-specialized position-code decoder.
+-/
+def toFinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations where
+  scaffold := O.toL2C2LayerPatchScaffoldCertificate
+  labelIndexStart := hstart
 
 set_option linter.style.longLine false in
 /--
@@ -24068,6 +24125,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateI
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (O.toFinalFigure13RobinsonLayerPatchConstructionObligations hrows)
     |>.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and the fixed-start source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations
+    hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and the fixed-start source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13RobinsonLayerPatchLabelIndexStartConstructionObligations
+    hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
