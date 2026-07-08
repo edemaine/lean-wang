@@ -102,4 +102,20 @@ used directly by `positionProgramData`.
 abbrev SourcePositionCodeLabelIndexStartPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeLabelIndexStartPrimrec
 
+set_option linter.style.longLine false in
+/--
+Source-side primitive-recursion target for the bounded-search label-index
+decoder.  Together with `SourceStatementListNodup`, this identifies the
+canonical support-search state codes with the generated position codes.
+-/
+abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeLabelIndexFromPrimrec
+
+/--
+Source-side statement-list uniqueness needed to compare bounded-search state
+codes with generated position codes for translated source machines.
+-/
+abbrev SourceStatementListNodup : Prop :=
+  TM0FoldedReduction.SourceStatementListNodup
+
 end LeanWang

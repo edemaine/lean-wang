@@ -57,6 +57,20 @@ def positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
   positionSourceObligationsOfSourcePositionCodeLabelIndexFrom hindex
     TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
 
+set_option linter.style.longLine false in
+/--
+Primitive recursiveness of the bounded-search label-index decoder, together
+with duplicate-free source statement supports, gives the full generated-position
+source obligations once the semantic folded proof is imported.
+-/
+def positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodupCorrect
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
+    hsearch hnodup
+    TM0FoldedCompiler.positionProgramData_haltsEmpty_iff_tm0_eval_dom
+
 /--
 Primitive recursiveness of the generated position-code accumulator step gives
 the full generated-position source obligations once the semantic folded proof
