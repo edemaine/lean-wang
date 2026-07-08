@@ -24163,6 +24163,152 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateL
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and the source-specialized position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateSourcePositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and the source-specialized position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateSourcePositionCodeLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and one generated position-code row at the concrete numeric
+label slots decoded by the final accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateOneRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_oneRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and one generated position-code row at the concrete numeric
+label slots decoded by the final accumulator.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateOneRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_oneRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and bounded-interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateBoundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
+      (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and bounded-interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateBoundedRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
+      (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and interior generated position-code rows at concrete numeric
+label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateInteriorRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
+      (sourceLabelIndexPrimrec_of_interiorRowsAtIndex hrows))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route and interior generated position-code rows at concrete numeric
+label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateInteriorRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
+      (sourceLabelIndexPrimrec_of_interiorRowsAtIndex hrows))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
 board/free-line layer-patch scaffold package and generated one-row
 position-code rows.
 -/
