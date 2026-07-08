@@ -100,6 +100,58 @@ theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_sta
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and generated one-row position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_oneRowsCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and generated one-row position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_oneRowsCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and generated bounded-interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and generated bounded-interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first checked-stack/valid-translated-box
 Section 7 package and generated interior position-code rows, with
 `positionProgramData` semantic correctness discharged.
 -/
@@ -200,6 +252,58 @@ theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_sta
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_startCodeCorrect
     (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hstart
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and generated one-row position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_oneRowsCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and generated one-row position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_oneRowsCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and generated bounded-interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and generated bounded-interior position-code rows, with
+`positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
 
 set_option linter.style.longLine false in
 /--

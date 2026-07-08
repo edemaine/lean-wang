@@ -1368,6 +1368,26 @@ structure FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations : Prop 
 
 set_option linter.style.longLine false in
 /--
+Second-candidate valid-translated-box route with generated one-row
+position-code rows.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with generated bounded-interior
+position-code rows.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate valid-translated-box route with the narrower generated
 decoder-step source target.
 -/
@@ -13592,6 +13612,120 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
+namespace FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/valid-translated-box one-row package
+to the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box one-row data to
+the checked-stack/layer-patch one-row package.
+-/
+def toCheckedStackLayerPatchOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchOneRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
+    h.scaffold h.sourceRows
+
+end FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/valid-translated-box bounded-row
+package to the one-row package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations where
+  scaffold := h.scaffold
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/valid-translated-box bounded-row
+package to the interior-row package.
+-/
+def toConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations :=
+  h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-row data to
+the checked-stack/layer-patch bounded-row package.
+-/
+def toCheckedStackLayerPatchBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchBoundedRowsConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
+    h.scaffold h.sourceRows
+
+end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+
 namespace FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -19639,6 +19773,49 @@ valid translated scaffold boxes, and generated interior position-code rows.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and generated one-row position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and generated bounded-interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
