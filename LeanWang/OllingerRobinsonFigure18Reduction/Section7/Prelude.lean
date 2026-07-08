@@ -4637,6 +4637,60 @@ def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
     l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows originZeroWindows
   patches := patches
 
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches instantiate the first board/free-line Section 7 layer-patch package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCombinedActiveCornerWindows
+    (windows : L2C1OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches instantiate the second board/free-line Section 7 layer-patch package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCombinedActiveCornerWindows
+    (windows : L2C2OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches instantiate the first board/free-line Section 7 layer-patch package.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCanonicalFreeSiteRectActiveCorner
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches instantiate the second board/free-line Section 7 layer-patch package.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCanonicalFreeSiteRectActiveCorner
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
+
 /--
 Origin-zero active/corner windows and finite active-corner layer patches
 instantiate the first Nat-site Section 7 layer-patch obligation surface
@@ -4668,6 +4722,80 @@ def l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatche
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations.ofL2C2OriginZeroWindowsLayerPatches
     originZeroWindows patches
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches instantiate the first Nat-site Section 7 layer-patch obligation
+surface directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCombinedActiveCornerWindowsLayerPatches
+    (windows : L2C1OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (l2c1OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches instantiate the second Nat-site Section 7 layer-patch obligation
+surface directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCombinedActiveCornerWindowsLayerPatches
+    (windows : L2C2OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (l2c2OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches instantiate the first Nat-site Section 7 layer-patch obligation
+surface directly.
+-/
+def l2c1Section7BoardFreeLineLayerPatchObligationsOfCanonicalFreeSiteRectActiveCornerLayerPatches
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid :=
+  l2c1Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches instantiate the second Nat-site Section 7 layer-patch obligation
+surface directly.
+-/
+def l2c2Section7BoardFreeLineLayerPatchObligationsOfCanonicalFreeSiteRectActiveCornerLayerPatches
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  l2c2Section7BoardFreeLineLayerPatchObligationsOfOriginZeroWindowsLayerPatches
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
 
 /--
 Finite origin-zero checked stacks and active-corner layer patches instantiate
@@ -4737,6 +4865,60 @@ def l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
   checkedStacks :=
     l2c2OriginZeroCheckedStacksOfOriginZeroWindows originZeroWindows
   patches := patches
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches produce the first checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCombinedActiveCornerWindows
+    (windows : L2C1OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Decoded origin-zero active/corner windows and finite active-corner layer
+patches produce the second checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCombinedActiveCornerWindows
+    (windows : L2C2OriginZeroCombinedActiveCornerWindows)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCombinedActiveCornerWindows windows)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches produce the first checked finite scaffold package.
+-/
+def l2c1CheckedStackLayerPatchDataOfCanonicalFreeSiteRectActiveCorner
+    (canonicalActiveCorner : L2C1CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C1ActiveCornerLayerPatches) :
+    L2C1CheckedStackLayerPatchData :=
+  l2c1CheckedStackLayerPatchDataOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
+
+set_option linter.style.longLine false in
+/--
+Canonical free-site active/corner recognition and finite active-corner layer
+patches produce the second checked finite scaffold package.
+-/
+def l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteRectActiveCorner
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (patches : L2C2ActiveCornerLayerPatches) :
+    L2C2CheckedStackLayerPatchData :=
+  l2c2CheckedStackLayerPatchDataOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      canonicalActiveCorner)
+    patches
 
 set_option linter.style.longLine false in
 /--
