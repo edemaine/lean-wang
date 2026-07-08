@@ -44,6 +44,33 @@ theorem sourceLabelIndexPrimrec_of_searchCodeLabelIndex
     hsearch hnodup
 
 set_option linter.style.longLine false in
+/--
+Local statement-support uniqueness plus pairwise disjointness between distinct
+started TM1 labels gives the statement-list uniqueness needed by the
+support-search-code to position-code bridge.
+-/
+theorem sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    SourceStatementListNodup :=
+  TM0FoldedReduction.sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+    hstmt hdisj
+
+set_option linter.style.longLine false in
+/--
+The bounded-search label-index target implies the source-specialized
+position-code target from the two lower statement-support obligations.
+-/
+theorem sourceLabelIndexPrimrec_of_searchCodeLabelIndex_startedTM1Support
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
 /-- The bounded-search decoder-step target gives the bounded-search label-index target. -/
 theorem searchCodeLabelIndexPrimrec_of_decoderStep
     (hstep : SourceSearchCodeDecoderStepPrimrec) :
