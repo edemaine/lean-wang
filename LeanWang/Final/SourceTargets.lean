@@ -119,6 +119,15 @@ abbrev SourceCodeLabelIndexStartPrimrec : Prop :=
   TM0FoldedReduction.SourceCodeLabelIndexStartPrimrec
 
 /--
+Global primitive-recursion target for the numeric-state start decoder used
+directly by ordinary `programData`.  This is the non-source-specialized version
+of `SourceCodeLabelIndexStartPrimrec`; the final reduction uses it after
+precomposing with `NatPartrecToToPartrec.translate`.
+-/
+abbrev GlobalCodeLabelIndexStartPrimrec : Prop :=
+  TM0FoldedReduction.GlobalCodeLabelIndexStartPrimrec
+
+/--
 Source-side primitive-recursion target for the bounded-search start decoder
 used directly by ordinary `programData`.
 -/

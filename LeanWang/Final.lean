@@ -8367,6 +8367,19 @@ def ofScaffoldAndSourceCodeLabelIndexStart
 set_option linter.style.longLine false in
 /--
 Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the global numeric-state start decoder used by ordinary
+`programData`.
+-/
+def ofScaffoldAndSourceGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSourceCodeLabelIndexStart scaffold
+    (codeLabelIndexStartPrimrec_of_globalCodeLabelIndexStart hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
 package and the bounded-search start decoder used by ordinary `programData`.
 -/
 def ofScaffoldAndSourceSearchCodeLabelIndexStart
@@ -25036,6 +25049,32 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceCodeLabelIndexStart
     (hindex : SourceCodeLabelIndexStartPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceCodeLabelIndexStart
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the global
+numeric-state start decoder used by ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceGlobalCodeLabelIndexStart
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the global numeric-state
+start decoder used by ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceGlobalCodeLabelIndexStart
     scaffold hindex).domino_problem_undecidable
 
 set_option linter.style.longLine false in

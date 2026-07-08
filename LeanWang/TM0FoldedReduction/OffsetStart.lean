@@ -38,6 +38,12 @@ def sourceSimStepDataForLabelIndexStartWithSearchCode
     (NatPartrecToToPartrec.translate c) i
 
 set_option linter.style.longLine false in
+/-- Primitive-recursion target for the global numeric-state start decoder. -/
+abbrev GlobalCodeLabelIndexStartPrimrec : Prop :=
+  Primrec (fun p : Turing.ToPartrec.Code × Nat =>
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode p.1 p.2)
+
+set_option linter.style.longLine false in
 /-- Primitive-recursion target for the source-specialized numeric-state start decoder. -/
 abbrev SourceCodeLabelIndexStartPrimrec : Prop :=
   Primrec (fun p : Code × Nat =>
@@ -1131,6 +1137,33 @@ theorem sourceSimStepDataForLabelIndexFromWithCode_primrec_of_global
       Primrec.snd)).of_eq fun p => by
         unfold sourceSimStepDataForLabelIndexFromWithCode
         rfl
+
+set_option linter.style.longLine false in
+/--
+The global numeric-state start-decoder target implies the source-specialized
+start-decoder target by precomposing with the source-code translation.
+-/
+theorem sourceCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStartPrimrec
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    SourceCodeLabelIndexStartPrimrec := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexStartWithCode
+        rfl
+
+set_option linter.style.longLine false in
+/--
+The global numeric-state start-decoder target also gives the equivalent
+bounded-search start-decoder target for ordinary `programData`.
+-/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStartPrimrec
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart
+    (sourceCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStartPrimrec
+      hindex)
 
 /--
 The older global bounded-search offset-decoder target implies the

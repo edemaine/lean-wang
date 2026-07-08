@@ -92,6 +92,22 @@ theorem searchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart
     hindex
 
 set_option linter.style.longLine false in
+/-- The global numeric-state start decoder gives the source-specialized target. -/
+theorem codeLabelIndexStartPrimrec_of_globalCodeLabelIndexStart
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    SourceCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStartPrimrec
+    hindex
+
+set_option linter.style.longLine false in
+/-- The global numeric-state start decoder gives the bounded-search start target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStart
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_globalCodeLabelIndexStartPrimrec
+    hindex
+
+set_option linter.style.longLine false in
 /-- The bounded-search start decoder recovers the numeric-state start-decoder target. -/
 theorem codeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
     (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
