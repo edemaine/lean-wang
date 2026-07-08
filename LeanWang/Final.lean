@@ -986,6 +986,36 @@ structure FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionO
 
 set_option linter.style.longLine false in
 /--
+Second-candidate valid-translated-box route with the numeric-state start
+decoder used by ordinary `programData`.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndexStart : SourceCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with the global numeric-state start
+decoder used by ordinary `programData`.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndexStart : GlobalCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate valid-translated-box route with the bounded-search start
+decoder used by ordinary `programData`.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate canonical-free-site Figure 16 route with generated interior
 position-code rows.
 
@@ -8660,6 +8690,48 @@ def ofCheckedStackPositiveBoxDataSearchCodeLabelIndexStart
 
 set_option linter.style.longLine false in
 /--
+Build the second-candidate ordinary-source inputs from checked-stack/
+valid-translated-box scaffold data and the numeric-state start decoder.
+-/
+def ofCheckedStackValidTranslatedBoxDataCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hindex : SourceCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofCheckedStackLayerPatchDataCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from checked-stack/
+valid-translated-box scaffold data and the global numeric-state start decoder.
+-/
+def ofCheckedStackValidTranslatedBoxDataGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofCheckedStackLayerPatchDataGlobalCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from checked-stack/
+valid-translated-box scaffold data and the bounded-search start decoder.
+-/
+def ofCheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofCheckedStackLayerPatchDataSearchCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
 Build the second-candidate ordinary-source inputs from split board/free-line
 layer-patch scaffold fields and the bounded-search start decoder.
 -/
@@ -14348,6 +14420,156 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box ordinary-source
+start data to the checked-stack/layer-patch ordinary-source start package.
+-/
+def toCheckedStackLayerPatchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box ordinary-source
+start data to the compact ordinary-source final reduction input package.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofCheckedStackValidTranslatedBoxDataCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the numeric-state start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the numeric-state start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-start data
+to the checked-stack/layer-patch global-start package.
+-/
+def toCheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-start data
+to the compact ordinary-source final reduction input package.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofCheckedStackValidTranslatedBoxDataGlobalCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the global numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the global numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+
+namespace FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-search
+start data to the checked-stack/layer-patch bounded-search start package.
+-/
+def toCheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-search
+start data to the compact ordinary-source final reduction input package.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofCheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the bounded-search start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the bounded-search start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
 
 namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteConstructionObligations
 
@@ -20669,6 +20891,72 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxSearchCodeLabel
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the global numeric-state start
+decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the global numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the bounded-search start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the bounded-search start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from second-candidate checked stacks,
 positive active-corner boxes, and generated interior position-code rows.
 -/
@@ -20994,6 +21282,84 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchDataSearchCodeLa
     (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : SourceCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : SourceCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the global numeric-state start
+decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the global numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the bounded-search start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations.mk
+    scaffold hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked origin-zero stacks,
+valid translated scaffold boxes, and the bounded-search start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations.mk
     scaffold hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
