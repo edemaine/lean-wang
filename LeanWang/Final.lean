@@ -1596,6 +1596,20 @@ structure FinalFigure13L2C2BoardFreeLineDataSourcePositionCodeConstructionObliga
 set_option linter.style.longLine false in
 /--
 Paper-facing second-candidate Figure 13 board/free-line route with the
+fixed-start source-specialized position-code label-index target.
+
+The Section 7 data packages active/corner board/free-line recognition together
+with the aligned raw Robinson macro-square statement that supplies the finite
+layer patches.
+-/
+structure FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line route with the
 numeric-state start decoder used by ordinary `programData`.
 
 The Section 7 data packages active/corner board/free-line recognition together
@@ -8192,6 +8206,21 @@ def ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexFrom
     (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
       section7)
     hindex
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from the proof-facing Robinson Section
+7 board/free-line data and the fixed-start source-level position-code decoder
+target.
+-/
+def ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourcePositionCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      section7)
+    hstart
 
 set_option linter.style.longLine false in
 /--
@@ -15931,6 +15960,67 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineDataSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line package to the split
+board/free-line/layer-patch fixed-start final surface.
+-/
+def toLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := h.section7.boardFreeLineActiveCorner
+  layerPatches :=
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      h.section7).patches
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line fixed-start package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineDataSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line package to the compact
+second-candidate final input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    h.section7 h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the proof-facing Robinson Section 7 board/free-line data
+and the fixed-start source-specialized position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the proof-facing Robinson Section 7 board/free-line
+data and the fixed-start source-specialized position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineDataCodeLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false in
@@ -23320,6 +23410,54 @@ theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataSourc
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexFrom
     section7 hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and the fixed-start source-specialized position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and the fixed-start source-specialized position-code
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and the fixed-start source-specialized position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    section7 hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and the fixed-start source-specialized position-code
+decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataSourcePositionCodeLabelIndexStart
+    section7 hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
