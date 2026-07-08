@@ -22,6 +22,87 @@ namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
 
+theorem programData_haltsEmpty_iff_tm0_eval_dom
+    (tc : Turing.ToPartrec.Code) :
+    (TM0FoldedCompiler.programData tc).HaltsEmpty ↔
+      (Turing.TM0.eval
+        (TM0Route.partrecStartedTM0Machine tc)
+        TM0Route.partrecStartedTM0Input).Dom := by
+  rw [TM0FoldedCompiler.programData_eq_program]
+  exact TM0FoldedCompiler.program_haltsEmpty_iff_tm0_eval_dom tc
+
+/--
+Ordinary source obligations from only the normalized source-level computability
+proof, using the semantic correctness theorem for `programData`.
+-/
+def sourceObligationsOfProgramDataCorrect
+    (hprogram : Computable (fun c : Code =>
+      TM0FoldedCompiler.programData (NatPartrecToToPartrec.translate c))) :
+    SourceObligations :=
+  sourceObligationsOfProgramData hprogram
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the bounded-search label-index decoder gives the
+ordinary source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfLabelIndexFromWithSearchCode hindex
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the bounded-search accumulator step gives the
+ordinary source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfSearchCodeDecoderStepCorrect
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfSearchCodeDecoderStep hstep
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the one-fuel bounded-search row decoder gives the
+ordinary source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfSearchCodeOneRowsCorrect
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfSearchCodeOneRows hrows
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the variable-branch one-fuel bounded-search row
+decoder gives the ordinary source obligations once the semantic folded proof is
+imported.
+-/
+def sourceObligationsOfSearchCodeOneVarRowsCorrect
+    (hvarRows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfSearchCodeOneVarRows hvarRows
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the bounded interior bounded-search rows gives the
+ordinary source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfSearchCodeBoundedInteriorRowsCorrect
+    (hinterior : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfSearchCodeBoundedInteriorRows hinterior
+    programData_haltsEmpty_iff_tm0_eval_dom
+
+/--
+Primitive recursiveness of the full interior bounded-search rows gives the
+ordinary source obligations once the semantic folded proof is imported.
+-/
+def sourceObligationsOfSearchCodeInteriorRowsCorrect
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
+    SourceObligations :=
+  sourceObligationsOfSearchCodeInteriorRows hinterior
+    programData_haltsEmpty_iff_tm0_eval_dom
+
 /--
 Generated-position source obligations from only the source-level computability
 proof, using the semantic correctness theorem for `positionProgramData`.
