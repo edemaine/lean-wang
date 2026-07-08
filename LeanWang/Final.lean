@@ -16019,6 +16019,21 @@ def toLayerPatchLabelIndexStartConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project the paper-facing Section 7 board/free-line fixed-start package to the
+bounded-at-index layer-patch final surface.
+-/
+def toLayerPatchBoundedRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations where
+  boardFreeLineActiveCorner := h.section7.boardFreeLineActiveCorner
+  layerPatches :=
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      h.section7).patches
+  sourceRows := sourceBoundedInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line fixed-start package to the
 source-label package.
 -/
 def toSourcePositionCodeConstructionObligations
@@ -16227,6 +16242,19 @@ def toSourcePositionCodeConstructionObligations
   boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
   layerPatches := h.layerPatches
   labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start board/free-line/layer-patch package to the
+bounded-at-index source-row package used by the accumulator route.
+-/
+def toBoundedRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  sourceRows := sourceBoundedInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    h.labelIndexStart
 
 set_option linter.style.longLine false in
 /--
