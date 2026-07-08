@@ -629,6 +629,16 @@ structure FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations :
 
 set_option linter.style.longLine false in
 /--
+Finite checked-stack/positive-box route with generated interior position-code
+rows at concrete numeric label slots.
+-/
+structure FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Finite checked-stack/positive-box route with the generated position-code
 decoder-step source target.
 -/
@@ -1306,6 +1316,16 @@ structure FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations :
     Prop where
   scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
   sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate checked-stack/positive-box route with generated interior
+position-code rows at concrete numeric label slots.
+-/
+structure FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -7852,6 +7872,22 @@ def ofCheckedStackPositiveBoxDataBoundedRows
 set_option linter.style.longLine false in
 /--
 Build the final inputs from first-candidate checked stacks plus positive
+active-corner boxes and generated interior position-code rows at concrete
+numeric label slots.
+-/
+def ofCheckedStackPositiveBoxDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackPositiveBoxData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalReductionInputs :=
+  ofScaffoldAndSourceInteriorRowsAtIndex
+    (TM0FoldedReduction.l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      (TM0FoldedReduction.l2c1CheckedStackLayerPatchDataOfCheckedStackPositiveBoxData
+        scaffold))
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the final inputs from first-candidate checked stacks plus positive
 active-corner boxes and the generated position-code decoder step.
 -/
 def ofCheckedStackPositiveBoxDataDecoderStep
@@ -8547,6 +8583,20 @@ def ofCheckedStackPositiveBoxDataBoundedRows
 set_option linter.style.longLine false in
 /--
 Build the second-candidate final inputs from checked stacks plus positive
+active-corner boxes and generated interior position-code rows at concrete
+numeric label slots.
+-/
+def ofCheckedStackPositiveBoxDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofCheckedStackPositiveBoxDataSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from checked stacks plus positive
 active-corner boxes and the generated position-code decoder step.
 -/
 def ofCheckedStackPositiveBoxDataDecoderStep
@@ -8909,6 +8959,40 @@ theorem domino_problem_undecidable
     h.scaffold h.sourceRows
 
 end FinalCheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+namespace FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the checked-stack/positive-box interior-at-index package into the endpoint. -/
+def toFinalReductionInputs
+    (h : FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalReductionInputs :=
+  FinalReductionInputs.ofCheckedStackPositiveBoxDataInteriorRowsAtIndex
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from first checked stacks, positive active-corner boxes, and
+interior generated position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_checked_stack_positive_boxes_interiorRowsAtIndexCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from first checked stacks, positive active-corner boxes, and
+interior generated position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_checked_stack_positive_boxes_interiorRowsAtIndexCorrect
+    h.scaffold h.sourceRows
+
+end FinalCheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
 
 namespace FinalCheckedStackPositiveBoxDecoderStepConstructionObligations
 
@@ -13138,6 +13222,45 @@ theorem domino_problem_undecidable
     h.scaffold h.sourceRows
 
 end FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations
+
+namespace FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the second-candidate checked-stack/positive-box interior-at-index
+package directly into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofCheckedStackPositiveBoxDataInteriorRowsAtIndex
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_positive_boxes_interiorRowsAtIndexCorrect
+    h.scaffold h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked stacks, positive centered
+active-corner boxes, and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_positive_boxes_interiorRowsAtIndexCorrect
+    h.scaffold h.sourceRows
+
+end FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
 
 namespace FinalL2C2CheckedStackPositiveBoxDecoderStepConstructionObligations
 
@@ -19576,6 +19699,28 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxBoundedRowsCons
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the second checked-stack/positive-box
+scaffold package and generated interior position-code rows at concrete numeric
+label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/positive-box scaffold
+package and generated interior position-code rows at concrete numeric label
+slots.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations
+    (h : FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/positive-box
 scaffold package and the primitive recursive generated position-code decoder
 step.
 -/
@@ -19708,6 +19853,32 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataBoundedRows
     (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2CheckedStackPositiveBoxBoundedRowsConstructionObligations.mk
+    scaffold sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate checked stacks,
+positive active-corner boxes, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations.mk
+    scaffold sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate checked stacks, positive
+active-corner boxes, and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackPositiveBoxData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2CheckedStackPositiveBoxInteriorRowsAtIndexConstructionObligations.mk
     scaffold sourceRows).domino_problem_undecidable
 
 set_option linter.style.longLine false in
