@@ -797,6 +797,16 @@ structure FinalL2C2CheckedStackLayerPatchLabelIndexStartConstructionObligations 
 
 set_option linter.style.longLine false in
 /--
+Second-candidate checked-stack/layer-patch route with the global numeric-state
+start decoder used by ordinary `programData`.
+-/
+structure FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  labelIndexStart : GlobalCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate finite-scaffold construction route one step below layer
 patches, with positive centered active-corner indexed boxes as the finite
 realization target.
@@ -8516,6 +8526,20 @@ def ofBoardFreeLineLayerPatchesGlobalCodeLabelIndexStart
 
 set_option linter.style.longLine false in
 /--
+Build the second-candidate ordinary-source inputs from checked-stack/layer-patch
+scaffold data and the global numeric-state start decoder.
+-/
+def ofCheckedStackLayerPatchDataGlobalCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSourceGlobalCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
 Build the second-candidate ordinary-source inputs from split board/free-line
 layer-patch scaffold fields and the bounded-search start decoder.
 -/
@@ -12474,6 +12498,56 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchLabelIndexStartConstructionObligations
 
+namespace FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch global-start data to the
+Figure 13 board/free-line/layer-patch ordinary-source global-start final
+surface.
+-/
+def toFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner :=
+    TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  layerPatches := h.scaffold.patches
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/layer-patch global-start data to the
+compact ordinary-source final reduction input package.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofCheckedStackLayerPatchDataGlobalCodeLabelIndexStart
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second checked-stack/layer-patch package and the
+global numeric-state start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second checked-stack/layer-patch package and the
+global numeric-state start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+
 set_option linter.style.longLine false in
 /--
 Encoded endpoint from second-candidate origin-zero active/corner windows and
@@ -12880,6 +12954,36 @@ theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesLabelIndex
     (labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   FinalL2C2CheckedStackLayerPatchLabelIndexStartConstructionObligations.domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndexStart := labelIndexStart }
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the split second-candidate checked-stack and layer-patch
+finite scaffold obligations, with the global numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesGlobalCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndexStart : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations.encoded_domino_problem_undecidable
+    { scaffold := { checkedStacks := checkedStacks, patches := patches }
+      labelIndexStart := labelIndexStart }
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the split second-candidate checked-stack and
+layer-patch finite scaffold obligations, with the global numeric-state start
+decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksAndLayerPatchesGlobalCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (labelIndexStart : GlobalCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations.domino_problem_undecidable
     { scaffold := { checkedStacks := checkedStacks, patches := patches }
       labelIndexStart := labelIndexStart }
 
@@ -19862,6 +19966,27 @@ package and the fixed-start source-level position-code decoder.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchLabelIndexStartConstructionObligations
     (h : FinalL2C2CheckedStackLayerPatchLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the second checked-stack/layer-patch
+scaffold package and the global numeric-state start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the second checked-stack/layer-patch scaffold
+package and the global numeric-state start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
