@@ -998,6 +998,46 @@ theorem sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
       TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
     rfl
 
+set_option linter.style.longLine false in
+/-- The bounded-search accumulator step gives the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_decoderStep
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (sourceSearchCodeLabelIndexFromPrimrec_of_decoderStep hstep)
+
+set_option linter.style.longLine false in
+/-- One-fuel bounded-search rows give the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_oneRows
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (sourceSearchCodeLabelIndexFromPrimrec_of_oneRows hrows)
+
+set_option linter.style.longLine false in
+/-- Variable-branch bounded-search one-row proofs give the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (sourceSearchCodeLabelIndexFromPrimrec_of_oneVarRows hrows)
+
+set_option linter.style.longLine false in
+/-- Bounded-interior bounded-search rows give the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_boundedInteriorRows
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_oneVarRows
+    (sourceSearchCodeOneVarRowsPrimrec_of_boundedInteriorRows hbounded)
+
+set_option linter.style.longLine false in
+/-- Interior bounded-search rows give the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_interiorRows
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  sourceSearchCodeLabelIndexStartPrimrec_of_boundedInteriorRows
+    (sourceSearchCodeBoundedInteriorRowsPrimrec_of_interiorRows hinterior)
+
 /--
 Primitive recursiveness of the source-level position-coded offset decoder is
 enough for primitive recursiveness of the source-level position-coded indexed

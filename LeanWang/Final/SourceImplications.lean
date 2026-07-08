@@ -84,6 +84,21 @@ theorem searchCodeLabelIndexStartPrimrec_of_labelIndex
     hindex
 
 set_option linter.style.longLine false in
+/-- The bounded-search decoder-step target gives the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_decoderStep
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_decoderStep
+    hstep
+
+set_option linter.style.longLine false in
+/-- One-fuel bounded-search rows give the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_oneRows
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_oneRows hrows
+
+set_option linter.style.longLine false in
 /-- Variable-branch bounded-search one-row proofs give the one-fuel row target. -/
 theorem searchCodeOneRowsPrimrec_of_oneVarRows
     (hrows : SourceSearchCodeOneVarRowsPrimrec) :
@@ -96,6 +111,14 @@ theorem searchCodeLabelIndexPrimrec_of_oneVarRows
     (hrows : SourceSearchCodeOneVarRowsPrimrec) :
     SourceSearchCodeLabelIndexFromPrimrec :=
   TM0FoldedReduction.sourceSearchCodeLabelIndexFromPrimrec_of_oneVarRows hrows
+
+set_option linter.style.longLine false in
+/-- Variable-branch bounded-search one-row proofs give the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_oneVarRows
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_oneVarRows
+    hrows
 
 set_option linter.style.longLine false in
 /-- Interior bounded-search rows give bounded-interior bounded-search rows. -/
@@ -130,12 +153,28 @@ theorem searchCodeLabelIndexPrimrec_of_interiorRows
     (searchCodeOneVarRowsPrimrec_of_interiorRows hinterior)
 
 set_option linter.style.longLine false in
+/-- Interior bounded-search rows give the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_interiorRows
+    (hinterior : SourceSearchCodeInteriorRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_interiorRows
+    hinterior
+
+set_option linter.style.longLine false in
 /-- Bounded-interior bounded-search rows give the bounded-search label-index target. -/
 theorem searchCodeLabelIndexPrimrec_of_boundedInteriorRows
     (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
     SourceSearchCodeLabelIndexFromPrimrec :=
   searchCodeLabelIndexPrimrec_of_oneVarRows
     (searchCodeOneVarRowsPrimrec_of_boundedInteriorRows hbounded)
+
+set_option linter.style.longLine false in
+/-- Bounded-interior bounded-search rows give the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_boundedInteriorRows
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_boundedInteriorRows
+    hbounded
 
 set_option linter.style.longLine false in
 /-- The bounded-search decoder-step and label-index targets are equivalent. -/
