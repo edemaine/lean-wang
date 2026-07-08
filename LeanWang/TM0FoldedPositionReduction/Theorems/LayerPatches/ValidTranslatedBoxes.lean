@@ -48,6 +48,84 @@ theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_dec
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and the generated one-row-at-index position-code decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_oneRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and the generated one-row-at-index position-code decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_oneRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_oneRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and bounded-interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and bounded-interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and interior generated position-code rows at concrete numeric
+label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hinterior
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first checked-stack/valid-translated-box
+Section 7 package and interior generated position-code rows at concrete numeric
+label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c1_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (data : L2C1CheckedStackValidTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c1_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (l2c1CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hinterior
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first checked-stack/valid-translated-box
 Section 7 package and the source-specialized position-code label-index decoder,
 with `positionProgramData` semantic correctness discharged.
 -/
@@ -200,6 +278,84 @@ theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_dec
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_decoderStepCorrect
     (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hstep
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and the generated one-row-at-index position-code decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_oneRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and the generated one-row-at-index position-code decoder,
+with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_oneRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and bounded-interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and bounded-interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hbounded
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and interior generated position-code rows at concrete numeric
+label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hinterior
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+Section 7 package and interior generated position-code rows at concrete numeric
+label slots, with `positionProgramData` semantic correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    (l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData data) hinterior
 
 set_option linter.style.longLine false in
 /--
