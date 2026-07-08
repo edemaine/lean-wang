@@ -1460,6 +1460,19 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructio
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with the global numeric-state start decoder used by ordinary `programData`.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  labelIndexStart : GlobalCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
 with the bounded-search start decoder used by ordinary `programData`.
 -/
 structure FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations :
@@ -8488,6 +8501,22 @@ def ofBoardFreeLineLayerPatchesCodeLabelIndexStart
 set_option linter.style.longLine false in
 /--
 Build the second-candidate ordinary-source inputs from split board/free-line
+layer-patch scaffold fields and the global numeric-state start decoder.
+-/
+def ofBoardFreeLineLayerPatchesGlobalCodeLabelIndexStart
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : GlobalCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofBoardFreeLineLayerPatchesCodeLabelIndexStart
+    boardFreeLineActiveCorner layerPatches
+    (codeLabelIndexStartPrimrec_of_globalCodeLabelIndexStart hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from split board/free-line
 layer-patch scaffold fields and the bounded-search start decoder.
 -/
 def ofBoardFreeLineLayerPatchesSearchCodeLabelIndexStart
@@ -14840,6 +14869,46 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the global numeric-state-start board/free-line/layer-patch package to
+the compact second-candidate ordinary-source final inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofBoardFreeLineLayerPatchesGlobalCodeLabelIndexStart
+    h.boardFreeLineActiveCorner h.layerPatches h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the global numeric-state start decoder used by
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and the global numeric-state start decoder used by
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchSearchCodeLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false in
@@ -15514,6 +15583,23 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObl
       l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hstart : SourceCodeLabelIndexStartPrimrec) :
     FinalFigure13L2C2BoardFreeLineLayerPatchCodeLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  labelIndexStart := hstart
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+ordinary-source global numeric-state-start board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : GlobalCodeLabelIndexStartPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchGlobalCodeLabelIndexStartConstructionObligations where
   boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
   layerPatches := O.patches
   labelIndexStart := hstart
