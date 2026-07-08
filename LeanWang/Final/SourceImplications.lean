@@ -32,18 +32,6 @@ theorem sourceLabelIndexPrimrec_of_globalLabelIndex
     h
 
 set_option linter.style.longLine false in
-/--
-The bounded-search label-index target implies the source-specialized
-position-code target once source statement supports are duplicate-free.
--/
-theorem sourceLabelIndexPrimrec_of_searchCodeLabelIndex
-    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
-    (hnodup : SourceStatementListNodup) :
-    SourcePositionCodeLabelIndexFromPrimrec :=
-  TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_searchCodeLabelIndexFrom
-    hsearch hnodup
-
-set_option linter.style.longLine false in
 /-- The bounded-search decoder-step target gives the bounded-search label-index target. -/
 theorem searchCodeLabelIndexPrimrec_of_decoderStep
     (hstep : SourceSearchCodeDecoderStepPrimrec) :

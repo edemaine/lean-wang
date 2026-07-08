@@ -105,8 +105,7 @@ abbrev SourcePositionCodeLabelIndexStartPrimrec : Prop :=
 set_option linter.style.longLine false in
 /--
 Source-side primitive-recursion target for the bounded-search label-index
-decoder.  Together with `SourceStatementListNodup`, this identifies the
-canonical support-search state codes with the generated position codes.
+decoder used by the ordinary `programData` source route.
 -/
 abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeLabelIndexFromPrimrec
@@ -166,12 +165,5 @@ rows.
 -/
 abbrev SourceSearchCodeBoundedInteriorRowsPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec
-
-/--
-Source-side statement-list uniqueness needed to compare bounded-search state
-codes with generated position codes for translated source machines.
--/
-abbrev SourceStatementListNodup : Prop :=
-  TM0FoldedReduction.SourceStatementListNodup
 
 end LeanWang
