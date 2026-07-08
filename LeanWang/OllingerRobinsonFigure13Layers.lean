@@ -1480,6 +1480,40 @@ theorem compatibleFigure18ScaffoldSquares_of_fig13TilesPlane
     (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles hplane)
 
 /--
+Aligned raw Figure 13 macro-squares supply compatible Figure 18 site squares.
+
+The aligned macro-square hypotheses first give a raw Figure 13 plane tiling by
+compactness; subdividing that plane tiling then gives the compatible Figure 18
+site rectangles used by the scaffold-box interface.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_alignedMacroSquares
+    (hsquares : HasAlignedFigure13MacroSquares) :
+    HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_of_fig13TilesPlane
+    (tilesPlane_fig13Tiles_of_alignedMacroSquares hsquares)
+
+/--
+Robinson board-level aligned macro-squares supply compatible Figure 18 site
+squares.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_robinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_of_alignedMacroSquares
+    (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
+
+/--
+Positive Robinson board-level aligned macro-squares supply compatible Figure
+18 site squares.
+-/
+theorem compatibleFigure18ScaffoldSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    HasCompatibleFigure18ScaffoldSquares :=
+  compatibleFigure18ScaffoldSquares_of_alignedMacroSquares
+    (alignedMacroSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
 A cofinal family of finite square tilings by the concrete Figure 18 scaffold
 tiles supplies compatible Figure 18 site squares of every finite side length.
 

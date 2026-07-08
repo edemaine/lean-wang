@@ -2830,6 +2830,41 @@ def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfCompatibleSquares
 
 set_option linter.style.longLine false in
 /--
+Aligned raw Figure 13 macro-squares supply the positive L2C2 Figure 18
+finite-box target.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfAlignedMacroSquares
+    (hsquares : HasAlignedFigure13MacroSquares) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes :=
+  finalFigure13L2C2Figure18ScaffoldTileableBoxesOfCompatibleSquares
+    (compatibleFigure18ScaffoldSquares_of_alignedMacroSquares hsquares)
+
+set_option linter.style.longLine false in
+/--
+Robinson board-level aligned macro-squares supply the positive L2C2 Figure 18
+finite-box target.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfRobinsonBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonBoardLevelAlignedMacroSquares) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes :=
+  finalFigure13L2C2Figure18ScaffoldTileableBoxesOfCompatibleSquares
+    (compatibleFigure18ScaffoldSquares_of_robinsonBoardLevelAlignedMacroSquares
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
+Positive Robinson board-level aligned macro-squares supply the positive L2C2
+Figure 18 finite-box target.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes :=
+  finalFigure13L2C2Figure18ScaffoldTileableBoxesOfCompatibleSquares
+    (compatibleFigure18ScaffoldSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with
 generated interior position-code rows.
 
