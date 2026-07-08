@@ -550,6 +550,17 @@ theorem sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart
 
 set_option linter.style.longLine false in
 /--
+The source-level position-code start decoder also recovers the bounded
+interior at-index target used by the accumulator route.
+-/
+theorem sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_interiorAtIndex
+    (sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart hstart)
+
+set_option linter.style.longLine false in
+/--
 The position-code start decoder is already strong enough to recover the full
 source-specialized offset decoder target: first recover pointwise interior rows,
 then use the existing bounded-interior accumulator route.

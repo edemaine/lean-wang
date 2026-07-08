@@ -269,6 +269,13 @@ theorem sourceInteriorRowsAtIndexPrimrec_of_labelIndexStart
   TM0FoldedReduction.sourcePositionCodeInteriorRowsAtIndexPrimrec_of_labelIndexStart h
 
 set_option linter.style.longLine false in
+/-- The position-coded start decoder recovers bounded interior rows at index. -/
+theorem sourceBoundedInteriorRowsAtIndexPrimrec_of_labelIndexStart
+    (h : SourcePositionCodeLabelIndexStartPrimrec) :
+    SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeBoundedInteriorRowsAtIndexPrimrec_of_labelIndexStart h
+
+set_option linter.style.longLine false in
 /-- The position-coded start decoder recovers the exact one-row-at-index target. -/
 theorem sourceOneRowsAtIndexPrimrec_of_labelIndexStart
     (h : SourcePositionCodeLabelIndexStartPrimrec) :
