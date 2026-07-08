@@ -16,6 +16,98 @@ namespace TM0FoldedReduction
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+generated position-code accumulator step, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_decoderStepCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+generated position-code accumulator step, with `positionProgramData` semantic
+correctness discharged.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_decoderStepCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeDecoderStepCorrect hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_sourceCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_sourceCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_startCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate using
+origin-zero active/corner windows, finite active-corner layer patches, and the
+fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_l2c2_origin_zero_layer_patches_startCodeCorrect
+    (originZeroWindows : L2C2OriginZeroWindows)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (positionSourceObligationsOfPositionCodeLabelIndexStartCorrect hstart)
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the second checked-stack/layer-patch Section
 7 certificate and the generated position-code accumulator step, with
 `positionProgramData` semantic correctness discharged.
