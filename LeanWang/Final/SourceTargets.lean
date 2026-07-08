@@ -112,6 +112,13 @@ abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeLabelIndexFromPrimrec
 
 /--
+Source-side primitive-recursion target for the bounded-search start decoder
+used directly by ordinary `programData`.
+-/
+abbrev SourceSearchCodeLabelIndexStartPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeLabelIndexStartPrimrec
+
+/--
 Source-side primitive-recursion target for the bounded-search accumulator step.
 This is equivalent to `SourceSearchCodeLabelIndexFromPrimrec` but often closer
 to the recursive decoder implementation.

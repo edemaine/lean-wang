@@ -76,6 +76,14 @@ theorem searchCodeOneRowsPrimrec_of_labelIndex
   TM0FoldedReduction.sourceSearchCodeOneRowsPrimrec_of_labelIndexFrom hindex
 
 set_option linter.style.longLine false in
+/-- The bounded-search label-index target gives the bounded-search start-decoder target. -/
+theorem searchCodeLabelIndexStartPrimrec_of_labelIndex
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    hindex
+
+set_option linter.style.longLine false in
 /-- Variable-branch bounded-search one-row proofs give the one-fuel row target. -/
 theorem searchCodeOneRowsPrimrec_of_oneVarRows
     (hrows : SourceSearchCodeOneVarRowsPrimrec) :

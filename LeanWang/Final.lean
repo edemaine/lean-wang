@@ -8328,6 +8328,19 @@ def ofScaffoldAndSourceSearchCodeLabelIndexFrom
 set_option linter.style.longLine false in
 /--
 Build the second-candidate ordinary-source inputs directly from the scaffold
+package and the bounded-search start decoder used by ordinary `programData`.
+-/
+def ofScaffoldAndSourceSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.sourceObligationsOfSearchCodeLabelIndexStartCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs directly from the scaffold
 package and the bounded-search accumulator step.
 -/
 def ofScaffoldAndSourceSearchCodeDecoderStep
@@ -24793,6 +24806,32 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexF
     (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the bounded-search
+start decoder used by ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexStart
+    scaffold hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the bounded-search start
+decoder used by ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceSearchCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexStart
     scaffold hindex).domino_problem_undecidable
 
 set_option linter.style.longLine false in

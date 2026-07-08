@@ -37,6 +37,12 @@ def sourceSimStepDataForLabelIndexStartWithSearchCode
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
     (NatPartrecToToPartrec.translate c) i
 
+set_option linter.style.longLine false in
+/-- Primitive-recursion target for the source-specialized bounded-search start decoder. -/
+abbrev SourceSearchCodeLabelIndexStartPrimrec : Prop :=
+  Primrec (fun p : Code × Nat =>
+    sourceSimStepDataForLabelIndexStartWithSearchCode p.1 p.2)
+
 theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
     {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
@@ -972,6 +978,25 @@ theorem sourceSimStepDataByLabelIndexWithSearchCode_primrec_of_from
         TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
       rfl
   exact hstart
+
+set_option linter.style.longLine false in
+/-- The full bounded-search label-index decoder gives the bounded-search start-decoder target. -/
+theorem sourceSearchCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeLabelIndexStartPrimrec := by
+  have hstart : Primrec (fun p : Code × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode p.1
+        (sourceStatementCount p.1) 0 p.2) :=
+    hindex.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair
+          (sourceStatementCount_primrec.comp Primrec.fst)
+          (Primrec.pair (Primrec.const 0) Primrec.snd)))
+  exact hstart.of_eq fun p => by
+    unfold sourceSimStepDataForLabelIndexStartWithSearchCode
+      sourceSimStepDataForLabelIndexFromWithSearchCode
+      TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
+    rfl
 
 /--
 Primitive recursiveness of the source-level position-coded offset decoder is
