@@ -1048,6 +1048,42 @@ structure FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstruc
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical-free-site Figure 16 route with the numeric-state
+start decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : SourceCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical-free-site Figure 16 route with the global
+numeric-state start decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : GlobalCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical-free-site Figure 16 route with the bounded-search
+start decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate origin-zero Figure 16 route with generated interior
 position-code rows.
 
@@ -14684,6 +14720,132 @@ theorem domino_problem_undecidable
   h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
+
+namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 ordinary-source start
+package to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate canonical free-site recognition, finite
+compatible Figure 16 level checks, and the numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate canonical free-site recognition,
+finite compatible Figure 16 level checks, and the numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleCanonicalFreeSiteCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 global-start package
+to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate canonical free-site recognition, finite
+compatible Figure 16 level checks, and the global numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate canonical free-site recognition,
+finite compatible Figure 16 level checks, and the global numeric-state start
+decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleCanonicalFreeSiteGlobalCodeLabelIndexStartConstructionObligations
+
+namespace FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 bounded-search start
+package to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      h.canonicalActiveCorner h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate canonical free-site recognition, finite
+compatible Figure 16 level checks, and the bounded-search start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate canonical free-site recognition,
+finite compatible Figure 16 level checks, and the bounded-search start decoder
+for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine true
 
 namespace FinalL2C2Figure16CompatibleOriginZeroConstructionObligations
 
