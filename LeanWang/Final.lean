@@ -24401,6 +24401,38 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesBoundedRow
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from origin-zero active/corner windows,
+finite active-corner layer patches, and interior position-code rows at the
+numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesInteriorRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and interior position-code rows at the numeric
+label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesInteriorRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+    originZeroWindows patches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
 finite active-corner layer patches, and generated-position source obligations.
 -/
 theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesSource
