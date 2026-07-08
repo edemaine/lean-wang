@@ -1938,6 +1938,19 @@ structure FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstruction
 
 set_option linter.style.longLine false in
 /--
+Concrete second-candidate Figure 13 board/free-line/layer-patch scaffold route
+with interior generated position-code rows at concrete numeric label slots.
+-/
+structure FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  boardFreeLineActiveCorner :
+    TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+      l2Component2Figure18ScaffoldData
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Paper-facing second-candidate Figure 13 board/free-line route with
 bounded-interior generated position-code rows at concrete numeric label slots.
 
@@ -1949,6 +1962,20 @@ structure FinalFigure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObliga
     Prop where
   section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData
   sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line route with interior
+generated position-code rows at concrete numeric label slots.
+
+The Section 7 data packages active/corner board/free-line recognition together
+with the aligned raw Robinson macro-square statement that supplies the finite
+layer patches.
+-/
+structure FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -2677,6 +2704,19 @@ structure FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructio
     TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/layer-patch route with
+generated interior position-code rows at the numeric label slots used by the
+accumulator.
+-/
+structure FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -4029,6 +4069,76 @@ theorem domino_problem_undecidable
     h.toScaffold h.toPositionSourceObligations
 
 end FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index decoded-window/layer-patch package to the
+corresponding source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index decoded-window/layer-patch package to the second
+candidate Section 7 layer-patch scaffold data.
+-/
+def toScaffold
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2LayerPatchDataOfCombinedWindows
+    h.combinedActiveCornerWindows h.layerPatches
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index target to generated-position source obligations.
+-/
+def toPositionSourceObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+    h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated interior position-code rows at the
+numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, finite
+active-corner layer patches, and generated interior position-code rows at the
+numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    h.toScaffold h.toPositionSourceObligations
+
+end FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
@@ -8084,6 +8194,20 @@ def ofScaffoldAndSourceBoundedRowsAtIndex
 set_option linter.style.longLine false in
 /--
 Build the second-candidate final inputs directly from the scaffold package and
+generated interior position-code rows at the numeric label slots used by the
+accumulator.
+-/
+def ofScaffoldAndSourceInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSource scaffold
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs directly from the scaffold package and
 generated interior position-code rows.
 -/
 def ofScaffoldAndSourceRows
@@ -8198,6 +8322,24 @@ def ofBoardFreeLineLayerPatchesBoundedRowsAtIndex
 
 set_option linter.style.longLine false in
 /--
+Build the second-candidate final inputs from the split board/free-line
+layer-patch scaffold fields and interior generated position-code rows at the
+numeric label slots used by the accumulator.
+-/
+def ofBoardFreeLineLayerPatchesInteriorRowsAtIndex
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofBoardFreeLineLayerPatchesAndSource
+    boardFreeLineActiveCorner layerPatches
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
 Build the second-candidate final inputs from the proof-facing Robinson Section 7
 board/free-line data and bounded-interior generated position-code rows at the
 numeric label slots used by the accumulator.
@@ -8207,6 +8349,21 @@ def ofRobinsonSection7BoardFreeLineDataBoundedRowsAtIndex
     (sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     FinalL2C2ReductionInputs :=
   ofScaffoldAndSourceBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      section7)
+    sourceRows
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from the proof-facing Robinson Section 7
+board/free-line data and interior generated position-code rows at the numeric
+label slots used by the accumulator.
+-/
+def ofRobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSourceInteriorRowsAtIndex
     (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
       section7)
     sourceRows
@@ -14746,6 +14903,58 @@ theorem domino_problem_undecidable
 end FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index board/free-line/layer-patch package to the
+source-label package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index board/free-line/layer-patch package to the final
+input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofBoardFreeLineLayerPatchesInteriorRowsAtIndex
+    h.boardFreeLineActiveCorner h.layerPatches h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from Section 7 board/free-line active/corner recognition,
+finite layer patches, and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObligations
 
 set_option linter.style.longLine false in
@@ -14796,6 +15005,56 @@ theorem domino_problem_undecidable
   h.toFinalL2C2ReductionInputs.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line package to the split
+board/free-line/layer-patch final surface.
+-/
+def toLayerPatchConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations where
+  boardFreeLineActiveCorner := h.section7.boardFreeLineActiveCorner
+  layerPatches :=
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
+      h.section7).patches
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing Section 7 board/free-line package to the compact
+second-candidate final input package.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
+    h.section7 h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the proof-facing Robinson Section 7 board/free-line data
+and interior generated position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the proof-facing Robinson Section 7 board/free-line
+data and interior generated position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineLayerPatchDecoderStepConstructionObligations
@@ -15133,6 +15392,23 @@ def toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObli
       l2Component2BlankCandidateSanity.cornerIndex_valid)
     (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations where
+  boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+  layerPatches := O.patches
+  sourceRows := hrows
+
+set_option linter.style.longLine false in
+/--
+Project the concrete L2C2 Nat-site Section 7 layer-patch package to the final
+interior-at-index board/free-line/layer-patch surface.
+-/
+def toFinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations where
   boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
   layerPatches := O.patches
   sourceRows := hrows
@@ -20939,6 +21215,28 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchBounded
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+board/free-line layer-patch scaffold package and interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the proof-facing Robinson Section 7
 board/free-line data and bounded-interior generated position-code rows at
 concrete numeric label slots.
@@ -20956,6 +21254,28 @@ concrete numeric label slots.
 -/
 theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObligations
     (h : FinalFigure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
@@ -20983,6 +21303,32 @@ theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataBound
     (sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataBoundedRowsAtIndex
+    section7 sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
+    section7 sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line data and interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData)
+    (sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2ReductionInputs.ofRobinsonSection7BoardFreeLineDataInteriorRowsAtIndex
     section7 sourceRows).domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -21269,6 +21615,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsB
     (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (O.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsInteriorRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+board/free-line layer-patch scaffold package and interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchObligationsInteriorRowsAtIndex
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (O.toFinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
     hrows).domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -22290,6 +22670,30 @@ position-code rows at the numeric label slots used by the accumulator.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, finite active-corner layer patches, and generated interior
+position-code rows at the numeric label slots used by the accumulator.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+finite active-corner layer patches, and generated interior position-code rows
+at the numeric label slots used by the accumulator.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
