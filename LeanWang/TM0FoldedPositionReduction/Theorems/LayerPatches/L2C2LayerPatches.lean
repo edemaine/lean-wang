@@ -613,6 +613,102 @@ theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRows
   domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsCorrect
     data (sourcePositionCodeBoundedInteriorRowsPrimrec_of_interior hinterior)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 macro-squares, and generated-position
+source obligations.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_layer_patches_position_source
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      canonicalActiveCorner hlevel)
+    source
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 macro-squares, and generated-position
+source obligations.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_layer_patches_position_source
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleMacroSquares)
+    (source : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      canonicalActiveCorner hlevel)
+    source
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, and generated-position
+source obligations.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_level_data_layer_patches_position_source
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      canonicalActiveCorner hlevel)
+    source
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, and generated-position
+source obligations.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_level_data_layer_patches_position_source
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (source : PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_position_source
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      canonicalActiveCorner hlevel)
+    source
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_level_data_layer_patches_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      canonicalActiveCorner hlevel)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_checked_fig16_level_data_layer_patches_sourceCodeCorrect
+    (canonicalActiveCorner : L2C2CanonicalFreeSiteRectActiveCorner)
+    (hlevel : Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_sourceCodeCorrect
+    (l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      canonicalActiveCorner hlevel)
+    hindex
+
 end TM0FoldedReduction
 
 end LeanWang
