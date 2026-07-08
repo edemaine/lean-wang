@@ -112,6 +112,39 @@ abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeLabelIndexFromPrimrec
 
 /--
+Source-side primitive-recursion target for the bounded-search accumulator step.
+This is equivalent to `SourceSearchCodeLabelIndexFromPrimrec` but often closer
+to the recursive decoder implementation.
+-/
+abbrev SourceSearchCodeDecoderStepPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeDecoderStepPrimrec
+
+/--
+Source-side primitive-recursion target for the one-fuel bounded-search
+label-index rows.
+-/
+abbrev SourceSearchCodeOneRowsPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeOneRowsPrimrec
+
+/--
+Source-side primitive-recursion target for one bounded-search row on a concrete
+translated Partrec-variable branch.
+-/
+abbrev SourceSearchCodeOneVarRowsPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeOneVarRowsPrimrec
+
+/-- Source-side primitive-recursion target for interior bounded-search rows. -/
+abbrev SourceSearchCodeInteriorRowsPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeInteriorRowsPrimrec
+
+/--
+Source-side primitive-recursion target for bounded-interior bounded-search
+rows.
+-/
+abbrev SourceSearchCodeBoundedInteriorRowsPrimrec : Prop :=
+  TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec
+
+/--
 Source-side statement-list uniqueness needed to compare bounded-search state
 codes with generated position codes for translated source machines.
 -/
