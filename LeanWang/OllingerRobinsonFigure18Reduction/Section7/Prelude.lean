@@ -4007,6 +4007,50 @@ def l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
 
 set_option linter.style.longLine false in
 /--
+Valid translated boxes instantiate the first board/free-line layer-patch
+Section 7 package directly, using the finite no-neighbor active-site checks.
+-/
+def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component1Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component1Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component1Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C1RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c1RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+      (l2c1RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+        boardFreeLineActiveCorner hboxes))
+
+set_option linter.style.longLine false in
+/--
+Valid translated boxes instantiate the second board/free-line layer-patch
+Section 7 package directly, using the finite no-neighbor active-site checks.
+-/
+def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hboxes :
+      ∀ r : Nat, 0 < r →
+        ∃ origin : Int × Int,
+          ∃ base : TranslatedBoxPattern
+            l2Component2Figure18ScaffoldData.scaffold.tiles r origin,
+            ValidTranslatedBoxTiling
+              l2Component2Figure18ScaffoldData.scaffold.tiles r origin base) :
+    L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+    (l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOfTranslatedBoxData
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfValidTranslatedBoxes
+        boardFreeLineActiveCorner hboxes))
+
+set_option linter.style.longLine false in
+/--
 Board/free-line active-corner recognition plus a plane tiling of the compatible
 Figure 18 scaffold tiles instantiate the first board/free-line translated-box
 Section 7 package.

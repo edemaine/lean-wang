@@ -3618,6 +3618,20 @@ def finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes
     TM0FoldedReduction.L2C2ActiveCornerLayerPatches :=
   TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes boxes
 
+set_option linter.style.longLine false in
+/--
+Board/free-line active-corner recognition plus valid translated boxes build the
+second-candidate Section 7 layer-patch scaffold package directly.
+-/
+def finalFigure13L2C2BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (boxes : FinalFigure13L2C2ValidTranslatedBoxes) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+    boardFreeLineActiveCorner boxes
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
 
@@ -6265,8 +6279,15 @@ def toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations) :
     FinalFigure13L2C2BoardFreeLineLayerPatchSourcePositionCodeConstructionObligations :=
-  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
-    |>.toBoardFreeLineLayerPatchSourcePositionCodeConstructionObligations
+  {
+    boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+    layerPatches :=
+      (finalFigure13L2C2BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+        h.boardFreeLineActiveCorner
+        (finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+          h.tileableBoxes)).patches
+    labelIndex := h.labelIndex
+  }
 
 set_option linter.style.longLine false in
 /--
@@ -6393,7 +6414,7 @@ step.
 theorem encoded_domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+  h.toSourcePositionCodeConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -6405,7 +6426,7 @@ step.
 theorem domino_problem_undecidable
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+  h.toSourcePositionCodeConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxDecoderStepConstructionObligations
@@ -6462,7 +6483,7 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+  h.toSourcePositionCodeConstructionObligations
     |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
@@ -6475,7 +6496,7 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCanonicalActiveCornerTileableBoxSourcePositionCodeConstructionObligations
+  h.toSourcePositionCodeConstructionObligations
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTileableBoxGlobalPositionCodeConstructionObligations
@@ -6531,8 +6552,15 @@ the row-source board/free-line/layer-patch package.
 def toBoardFreeLineLayerPatchConstructionObligations
     (h : FinalFigure13L2C2BoardFreeLineTileableBoxConstructionObligations) :
     FinalFigure13L2C2BoardFreeLineLayerPatchConstructionObligations :=
-  h.toCanonicalActiveCornerTileableBoxConstructionObligations
-    |>.toBoardFreeLineLayerPatchConstructionObligations
+  {
+    boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+    layerPatches :=
+      (finalFigure13L2C2BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+        h.boardFreeLineActiveCorner
+        (finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+          h.tileableBoxes)).patches
+    sourceRows := h.sourceRows
+  }
 
 set_option linter.style.longLine false in
 /--
