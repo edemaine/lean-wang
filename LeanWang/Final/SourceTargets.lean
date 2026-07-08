@@ -166,4 +166,27 @@ rows.
 abbrev SourceSearchCodeBoundedInteriorRowsPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeBoundedInteriorRowsPrimrec
 
+/--
+Source-side statement-list uniqueness target for the generated folded TM0
+program.  This is the extra hypothesis needed when using bounded-search
+numeric labels to recover the position-coded decoder route.
+-/
+abbrev SourceStatementListNodup : Prop :=
+  TM0FoldedReduction.SourceStatementListNodup
+
+/--
+Local duplicate-freeness target for each started TM1 statement support list.
+Together with pairwise disjointness below, this implies
+`SourceStatementListNodup`.
+-/
+abbrev SourceStartedTM1StatementSupportNodup : Prop :=
+  TM0FoldedReduction.SourceStartedTM1StatementSupportNodup
+
+/--
+Pairwise-disjointness target for started TM1 statement supports at distinct
+started labels.
+-/
+abbrev SourceStartedTM1StatementSupportPairwiseDisjoint : Prop :=
+  TM0FoldedReduction.SourceStartedTM1StatementSupportPairwiseDisjoint
+
 end LeanWang

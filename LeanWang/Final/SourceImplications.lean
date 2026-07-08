@@ -214,6 +214,55 @@ theorem searchCodeOneVarRowsPrimrec_iff_interiorRowsPrimrec :
     SourceSearchCodeOneVarRowsPrimrec ↔ SourceSearchCodeInteriorRowsPrimrec :=
   TM0FoldedReduction.sourceSearchCodeOneVarRowsPrimrec_iff_interiorRowsPrimrec
 
+set_option linter.style.longLine false in
+/--
+Duplicate-free local started TM1 statement supports, pairwise disjoint across
+distinct started labels, give the statement-list uniqueness needed to compare
+bounded-search labels with position-coded labels.
+-/
+theorem sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    SourceStatementListNodup :=
+  TM0FoldedReduction.sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+    hstmt hdisj
+
+set_option linter.style.longLine false in
+/--
+The bounded-search label-index target plus statement-list uniqueness gives
+the position-coded label-index target.
+-/
+theorem sourceLabelIndexPrimrec_of_searchCodeLabelIndex
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_searchCodeLabelIndexFrom
+    hsearch hnodup
+
+set_option linter.style.longLine false in
+/--
+The bounded-search label-index target plus statement-list uniqueness gives
+the position-coded decoder-step target.
+-/
+theorem sourceDecoderStepPrimrec_of_searchCodeLabelIndex
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeDecoderStepPrimrec_of_sourcePositionCodeLabelIndexFromPrimrec
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+The bounded-search label-index target plus statement-list uniqueness gives
+the final position-coded start-decoder target.
+-/
+theorem sourceLabelIndexStartPrimrec_of_searchCodeLabelIndex
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
 /-- The source-specialized label-index target implies the decoder-step target. -/
 theorem sourceDecoderStepPrimrec_of_sourceLabelIndex
     (h : SourcePositionCodeLabelIndexFromPrimrec) :
