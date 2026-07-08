@@ -1229,6 +1229,71 @@ structure FinalL2C2Figure18ScaffoldTilesPlaneCanonicalFreeSiteLabelIndexStartCon
 
 set_option linter.style.longLine false in
 /--
+Second-candidate canonical routing plus valid translated scaffold boxes with
+generated interior position-code rows.
+
+This is the direct scaffold target below the old checked-stack package: it
+asks for Robinson canonical free-site routing and valid translated boxes, then
+lets the audited no-neighbor checks in the L2C2 scaffold data produce the
+finite layer patches.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
+the generated position-code decoder step.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
+the global position-code label-index target.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
+the source-specialized position-code label-index target.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
+the fixed-start source-specialized position-code label-index target.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate checked-stack scaffold-plane route with generated interior
 position-code rows.
 
@@ -22583,6 +22648,238 @@ theorem domino_problem_undecidable_of_l2c2Figure18ScaffoldTilesPlaneCanonicalFre
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (finalFigure13L2C2OriginZeroTranslatedSourceObligationsOfScaffoldPlaneCanonicalFreeSiteLabelIndexStart
     h).domino_problem_undecidable
+
+set_option linter.style.longLine false
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the second-candidate canonical-routing/valid-translated-box
+source-label package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_sourceCodeCorrect
+    h.routing h.validTranslatedBoxes h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the second-candidate canonical-routing/valid-translated-box
+source-label package.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_sourceCodeCorrect
+    h.routing h.validTranslatedBoxes h.labelIndex
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Project the row-source package to the source-label package. -/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing := h.routing
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_interiorRows h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the row-source package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the row-source package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Project the decoder-step package to the source-label package. -/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing := h.routing
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_decoderStep h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the decoder-step package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the decoder-step package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Project the global-label package to the source-label package. -/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing := h.routing
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the global-label package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the global-label package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Project the fixed-start package to the source-label package. -/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing := h.routing
+  validTranslatedBoxes := h.validTranslatedBoxes
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the fixed-start package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the fixed-start package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the row-source canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the row-source canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the decoder-step canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the decoder-step canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the global-label canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the global-label canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the source-label canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the source-label canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the fixed-start canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the fixed-start canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
 
 namespace FinalL2C2Figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
 

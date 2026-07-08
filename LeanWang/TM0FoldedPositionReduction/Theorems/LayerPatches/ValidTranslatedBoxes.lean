@@ -496,19 +496,24 @@ abbrev L2C2Figure18ScaffoldTiles : TileSet :=
 
 set_option linter.style.longLine false in
 /--
+Valid translated boxes for every positive scale in the second audited
+L2-blank candidate scaffold.
+-/
+abbrev L2C2Figure18ScaffoldValidTranslatedBoxes : Prop :=
+  ∀ r : Nat, 0 < r →
+    ∃ origin : Int × Int,
+      ∃ base : TranslatedBoxPattern L2C2Figure18ScaffoldTiles r origin,
+        ValidTranslatedBoxTiling L2C2Figure18ScaffoldTiles r origin base
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from canonical free-site routing and valid
 translated scaffold boxes for the second audited L2-blank candidate, with
 generated-position source obligations.
 -/
 theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_position_source
     (routing : L2C2CanonicalFreeSiteRectRouting)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            L2C2Figure18ScaffoldTiles r origin,
-            ValidTranslatedBoxTiling
-              L2C2Figure18ScaffoldTiles r origin base)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
     (source : PositionSourceObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_position_source
@@ -525,13 +530,7 @@ generated-position source obligations.
 -/
 theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_position_source
     (routing : L2C2CanonicalFreeSiteRectRouting)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            L2C2Figure18ScaffoldTiles r origin,
-            ValidTranslatedBoxTiling
-              L2C2Figure18ScaffoldTiles r origin base)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
     (source : PositionSourceObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_position_source
@@ -548,13 +547,7 @@ label-index decoder.
 -/
 theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_sourceCodeCorrect
     (routing : L2C2CanonicalFreeSiteRectRouting)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            L2C2Figure18ScaffoldTiles r origin,
-            ValidTranslatedBoxTiling
-              L2C2Figure18ScaffoldTiles r origin base)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_sourceCodeCorrect
@@ -571,13 +564,7 @@ label-index decoder.
 -/
 theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_sourceCodeCorrect
     (routing : L2C2CanonicalFreeSiteRectRouting)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            L2C2Figure18ScaffoldTiles r origin,
-            ValidTranslatedBoxTiling
-              L2C2Figure18ScaffoldTiles r origin base)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_sourceCodeCorrect
