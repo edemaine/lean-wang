@@ -619,6 +619,18 @@ theorem sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
   exact TM0Route.partrecStartedTM0StatementList_nodup_of_pairwise_disjoint
     (NatPartrecToToPartrec.translate c) (hstmt c) (hdisj c)
 
+set_option linter.style.longLine false in
+/--
+The bounded-search descriptor decoder implies the generated position-code
+descriptor decoder once source statement supports are duplicate-free.
+-/
+theorem sourcePositionCodeLabelIndexFromPrimrec_of_searchCodeLabelIndexFrom
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexFromPrimrec :=
+  sourcePositionCodeLabelIndexFrom_primrec_of_searchCodeLabelIndexFrom
+    hsearch hnodup
+
 /-- Source-uniform one-row position-code decoder plus statement uniqueness. -/
 structure SourcePositionCodeOneRowsWithStatementNodup : Prop where
   rows : SourcePositionCodeOneRowsPrimrec

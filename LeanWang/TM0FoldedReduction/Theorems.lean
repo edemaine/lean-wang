@@ -299,6 +299,46 @@ theorem domino_problem_undecidable_of_scaffold_position_source_positionCode
   domino_problem_undecidable_of_scaffold_position_source S hS
     (positionSourceObligationsOfLabelIndexFromWithPositionCode hindex hcorrect)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a scaffold, the bounded-search descriptor
+decoder, and duplicate-free source statement supports.  Statement uniqueness
+identifies the generated position codes with the canonical support-search state
+codes.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_searchCodeWithStatementNodup
+    (S : Scaffold) (hS : IsScaffold S)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
+      hsearch hnodup hcorrect)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a scaffold, the bounded-search descriptor
+decoder, and duplicate-free source statement supports.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_searchCodeWithStatementNodup
+    (S : Scaffold) (hS : IsScaffold S)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source S hS
+    (positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
+      hsearch hnodup hcorrect)
+
 /--
 Encoded domino undecidability from a scaffold and the generated position-code
 accumulator step.

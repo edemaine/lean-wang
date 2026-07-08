@@ -1598,6 +1598,22 @@ final route and all feed the same source-label endpoint.  The existing
 code, but they do not yet solve the uniform proof over `Nat.Partrec.Code`; that
 is where the dependent `SourceStmt tc` family is still visible.
 
+The generated position-code route can now also be reached from the older
+support-search-code descriptor decoder plus statement-list uniqueness:
+
+```lean
+TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_searchCodeLabelIndexFrom
+TM0FoldedReduction.positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
+```
+
+The low-level equality is
+`sourceSimStepDataForLabelIndexFromWithPositionCode_eq_searchCode_of_statementList_nodup`.
+It uses the existing compiler theorem that position codes agree with support
+state codes when the started-TM0 statement-support list is duplicate-free.  This
+does not close the source side, but it gives a useful alternate frontier:
+`SourceSearchCodeLabelIndexFromPrimrec` plus `SourceStatementListNodup` is now
+enough for the generated-position final route.
+
 On the scaffold side, the live endpoint is the L2C2 Section 7
 board/free-line/layer-patch route:
 

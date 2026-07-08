@@ -510,6 +510,48 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_indexVarRo
   sourceSimStepDataForLabelIndexFromWithPositionCode_primrec_of_decoder_step
     (sourcePositionCodeDecoderStep_primrec_of_indexVarRows hvarRows)
 
+set_option linter.style.longLine false in
+/--
+Under duplicate-free started-TM0 statement support, the source-specialized
+position-code descriptor decoder agrees with the support-search-code decoder.
+
+This exposes the main bridge between the cleaner generated position-code route
+and the older support-search-code presentation.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_searchCode_of_statementList_nodup
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup)
+    (c : Code) (fuel k i : Nat) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i =
+      sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i := by
+  unfold sourceSimStepDataForLabelIndexFromWithPositionCode
+    sourceSimStepDataForLabelIndexFromWithSearchCode
+  rw [TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode_eq_withCode_of_minimal]
+  · rw [TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode_eq_withCode]
+  · intro q hq
+    exact TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_minimal_of_statementList_nodup
+      (NatPartrecToToPartrec.translate c) (hnodup c) hq
+
+set_option linter.style.longLine false in
+/--
+Support-search-code primitive recursiveness plus duplicate-free statement
+support gives source-specialized position-code primitive recursiveness.
+-/
+theorem sourcePositionCodeLabelIndexFrom_primrec_of_searchCodeLabelIndexFrom
+    (hsearch : Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2))
+    (hnodup : ∀ c : Code,
+      (TM0Route.partrecStartedTM0StatementList
+        (NatPartrecToToPartrec.translate c)).Nodup) :
+    Primrec (fun p : Code × Nat × Nat × Nat =>
+      sourceSimStepDataForLabelIndexFromWithPositionCode
+        p.1 p.2.1 p.2.2.1 p.2.2.2) :=
+  hsearch.of_eq fun p =>
+    (sourceSimStepDataForLabelIndexFromWithPositionCode_eq_searchCode_of_statementList_nodup
+      hnodup p.1 p.2.1 p.2.2.1 p.2.2.2).symm
+
 
 end TM0FoldedReduction
 

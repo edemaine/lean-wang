@@ -865,6 +865,25 @@ def positionSourceObligationsOfSourcePositionCodeLabelIndexFrom
     PositionSourceObligations :=
   positionSourceObligationsOfLabelIndexFromWithPositionCode hindex hcorrect
 
+set_option linter.style.longLine false in
+/--
+The support-search-code label-index decoder, together with duplicate-free
+source statement supports, gives the generated-position source obligations.
+-/
+def positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    PositionSourceObligations :=
+  positionSourceObligationsOfSourcePositionCodeLabelIndexFrom
+    (sourcePositionCodeLabelIndexFromPrimrec_of_searchCodeLabelIndexFrom
+      hsearch hnodup)
+    hcorrect
+
 /--
 Primitive recursiveness of the generated position-code accumulator step gives
 the generated-position source obligations.
