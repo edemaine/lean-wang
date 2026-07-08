@@ -1113,6 +1113,42 @@ structure FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObl
 
 set_option linter.style.longLine false in
 /--
+Second-candidate origin-zero Figure 16 route with the numeric-state start
+decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : SourceCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate origin-zero Figure 16 route with the global numeric-state
+start decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : GlobalCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate origin-zero Figure 16 route with the bounded-search start
+decoder used by ordinary `programData`.
+-/
+structure FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate canonical-free-site scaffold-plane route with generated
 interior position-code rows.
 
@@ -14959,6 +14995,132 @@ theorem domino_problem_undecidable
 
 end FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
 
+namespace FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate origin-zero Figure 16 ordinary-source start
+package to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the numeric-state start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate origin-zero Figure 16 global-start package to
+checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the global numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the global numeric-state start decoder
+for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxGlobalCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations
+
+namespace FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate origin-zero Figure 16 bounded-search start package
+to checked-stack valid translated boxes.
+-/
+def toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleLevelChecks
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the bounded-search start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate origin-zero recognition, finite
+compatible Figure 16 level checks, and the bounded-search start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine true
+
 namespace FinalFigure13NatSitesIndexedWindowConstructionObligations
 
 set_option linter.style.longLine false in
@@ -21114,6 +21276,68 @@ ordinary `programData`.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the numeric-state start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the numeric-state start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the global numeric-state start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the global numeric-state start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroGlobalCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate origin-zero Figure 16
+recognition and the bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
