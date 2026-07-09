@@ -767,6 +767,23 @@ structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPa
   statementSupport_pairwiseDisjoint :
     SourceStartedTM1StatementSupportPairwiseDisjoint
 
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/valid-translated-box L2C2 Robinson target
+through generated bounded-interior position-code rows.
+
+This is the live non-vacuous certificate surface closest to the current
+scaffold proof: canonical free-site routing supplies the Figure 18 geometry,
+valid translated boxes supply the active-corner layer patches, and the source
+side is the bounded-row generated-position target.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows : SourcePositionCodeBoundedInteriorRowsPrimrec
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -2183,6 +2200,34 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositi
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRows
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    routing validTranslatedBoxes hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, valid translated
+scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRows
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    routing validTranslatedBoxes hrows
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the Section 7 tower/indexed-box
 Robinson scaffold obligations and generated-position source obligations.
 
@@ -3487,6 +3532,34 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations
 set_option linter.style.longLine true
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+valid-translated-box bounded-row Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRows
+    O.routing O.validTranslatedBoxes O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing /
+valid-translated-box bounded-row Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRows
+    O.routing O.validTranslatedBoxes O.sourceRows
+
+end Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
