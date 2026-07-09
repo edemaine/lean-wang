@@ -32,6 +32,14 @@ theorem sourceLabelIndexPrimrec_of_globalLabelIndex
     h
 
 set_option linter.style.longLine false in
+/-- The global position-code label-index target implies the fixed-start source target. -/
+theorem sourceLabelIndexStartPrimrec_of_globalLabelIndex
+    (h : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    h
+
+set_option linter.style.longLine false in
 /-- The bounded-search decoder-step target gives the bounded-search label-index target. -/
 theorem searchCodeLabelIndexPrimrec_of_decoderStep
     (hstep : SourceSearchCodeDecoderStepPrimrec) :

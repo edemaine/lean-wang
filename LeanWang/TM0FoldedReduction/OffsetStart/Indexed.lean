@@ -709,6 +709,18 @@ theorem sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexF
 
 set_option linter.style.longLine false in
 /--
+The global position-code label-index decoder target also gives the fixed-start
+source-specific decoder target.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
+    (sourcePositionCodeLabelIndexFromPrimrec_of_globalPositionCodeLabelIndexFromPrimrec
+      hindex)
+
+set_option linter.style.longLine false in
+/--
 The global position-code label-index decoder target implies the generated
 source-code accumulator-step target used by the preferred final route.
 -/
