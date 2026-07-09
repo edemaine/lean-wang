@@ -185,6 +185,86 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
       O (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first origin-zero Section 7 layer-patch
+obligation surface and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_interiorRowsAtIndexCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
+      O (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first origin-zero Section 7
+layer-patch obligation surface and interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_interiorRowsAtIndexCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_section7_layer_patches_position_source
+      O (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second origin-zero Section 7 layer-patch
+obligation surface and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_interiorRowsAtIndexCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
+      O (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second origin-zero Section 7
+layer-patch obligation surface and interior generated position-code rows at
+concrete numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_interiorRowsAtIndexCorrect
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_origin_zero_section7_layer_patches_position_source
+      O (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
 /--
 Encoded domino undecidability from origin-zero active/corner windows and finite
 active-corner layer patches for the first audited L2-blank candidate, with
@@ -326,6 +406,40 @@ theorem
     domino_problem_undecidable_l2c2_origin_zero_layer_patches_position_source
       originZeroWindows patches
       (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from origin-zero active/corner windows and finite
+active-corner layer patches for the first audited L2-blank candidate, with
+interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorRowsAtIndexCorrect
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+      originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from origin-zero active/corner windows and
+finite active-corner layer patches for the first audited L2-blank candidate,
+with interior generated position-code rows at concrete numeric label slots.
+-/
+theorem
+    domino_problem_undecidable_l2c1_origin_zero_layer_patches_interiorRowsAtIndexCorrect
+    (originZeroWindows : L2C1OriginZeroWindows)
+    (patches : L2C1ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_origin_zero_layer_patches_position_source
+      originZeroWindows patches
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
 
 /--
 Encoded domino undecidability from the first proof-facing Robinson Section 7
@@ -526,6 +640,74 @@ theorem
     domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
       data
       (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the first proof-facing Robinson Section 7
+board/free-line package and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_interiorRowsAtIndexCorrect
+    (data : L2C1RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c1_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second proof-facing Robinson Section 7
+board/free-line package and interior generated position-code rows at concrete
+numeric label slots, with `positionProgramData` semantic correctness
+discharged.
+-/
+theorem
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_interiorRowsAtIndexCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineData)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_position_source
+      data
+      (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
 
 /--
 Encoded domino undecidability from the first proof-facing board/free-line
