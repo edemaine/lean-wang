@@ -490,6 +490,21 @@ structure Figure13L2C2CanonicalFreeSiteLayerPatchesSearchCodeWithNodupObligation
 
 set_option linter.style.longLine false in
 /--
+Concrete canonical-free-site/layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+Canonical free-site active/corner recognition supplies checked origin-zero
+stacks, while layer patches stay explicit.  This route avoids generated
+position-code statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteLayerPatchesSearchCodeStartObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site-routing/layer-patch theorem-facing L2C2
 Robinson/source target.
 
@@ -517,6 +532,21 @@ structure Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObl
 
 set_option linter.style.longLine false in
 /--
+Concrete canonical-free-site-routing/layer-patch L2C2 Robinson target through
+the bounded-search fixed-start decoder for ordinary `programData`.
+
+The routing certificate is first converted to canonical active/corner
+recognition, then to checked origin-zero stacks.  No generated-position
+statement-list uniqueness bridge is required.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeStartObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site-routing/positive-box theorem-facing L2C2
 Robinson/source target.
 
@@ -540,6 +570,22 @@ structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupOb
   positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/positive-box L2C2 Robinson target through
+the bounded-search fixed-start decoder for ordinary `programData`.
+
+Routing supplies checked origin-zero stacks via canonical active/corner
+recognition, and positive active-corner indexed boxes supply the finite patch
+realization.  This is the low finite certificate surface on the ordinary-source
+route.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
 
 set_option linter.style.longLine false in
 /--
