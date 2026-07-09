@@ -840,6 +840,58 @@ theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSour
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch scaffold package and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    scaffold hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+scaffold package and bounded-interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_boundedRowsAtIndexCorrect
+    scaffold hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch scaffold package and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    scaffold hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+scaffold package and interior generated position-code rows at concrete numeric
+label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_layer_patches_interiorRowsAtIndexCorrect
+    scaffold hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
 layer-patch scaffold package, the bounded-search descriptor decoder, and
 statement-list uniqueness.
 -/
@@ -894,6 +946,66 @@ theorem domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesSo
   domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
     { checkedStacks := checkedStacks, patches := layerPatches }
     hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split checked origin-zero stacks,
+active-corner layer patches, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    { checkedStacks := checkedStacks, patches := layerPatches }
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split checked origin-zero stacks,
+active-corner layer patches, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    { checkedStacks := checkedStacks, patches := layerPatches }
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split checked origin-zero stacks,
+active-corner layer patches, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    { checkedStacks := checkedStacks, patches := layerPatches }
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split checked origin-zero stacks,
+active-corner layer patches, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    { checkedStacks := checkedStacks, patches := layerPatches }
+    hrows
 
 set_option linter.style.longLine false in
 /--
@@ -958,6 +1070,70 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLa
     (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
       originZeroWindows)
     layerPatches hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hrows
 
 set_option linter.style.longLine false in
 /--
@@ -2943,6 +3119,61 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
 
+namespace Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch package and bounded-interior generated position-code rows at
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    O.scaffold O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+package and bounded-interior generated position-code rows at numeric label
+slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataBoundedRowsAtIndex
+    O.scaffold O.sourceRows
+
+end Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations
+
+namespace Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch package and interior generated position-code rows at numeric label
+slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    O.scaffold O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+package and interior generated position-code rows at numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataInteriorRowsAtIndex
+    O.scaffold O.sourceRows
+
+end Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations
+
 namespace Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations
 
 set_option linter.style.longLine false in
@@ -2997,6 +3228,80 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexObligations
 
+namespace Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Bundle split checked stacks and layer patches into the checked-stack/layer-patch
+bounded-at-index certificate package.
+-/
+def toCheckedStackLayerPatchBoundedRowsAtIndexObligations
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations) :
+    Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations where
+  scaffold := { checkedStacks := O.checkedStacks, patches := O.layerPatches }
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split checked stacks, layer patches,
+and bounded-interior generated position-code rows at numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStackLayerPatchBoundedRowsAtIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split checked stacks, layer patches, and
+bounded-interior generated position-code rows at numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStackLayerPatchBoundedRowsAtIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
+
+namespace Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Bundle split checked stacks and layer patches into the checked-stack/layer-patch
+interior-at-index certificate package.
+-/
+def toCheckedStackLayerPatchInteriorRowsAtIndexObligations
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations) :
+    Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations where
+  scaffold := { checkedStacks := O.checkedStacks, patches := O.layerPatches }
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split checked stacks, layer patches,
+and interior generated position-code rows at numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStackLayerPatchInteriorRowsAtIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split checked stacks, layer patches, and
+interior generated position-code rows at numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStackLayerPatchInteriorRowsAtIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations
+
 namespace Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeWithNodupObligations
 
 set_option linter.style.longLine false in
@@ -3049,6 +3354,86 @@ theorem domino_problem_undecidable
     O.originZeroWindows O.layerPatches O.sourceLabelIndex
 
 end Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero windows and layer patches to checked stacks plus layer
+patches, preserving bounded-at-index source rows.
+-/
+def toCheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
+    (O : Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations) :
+    Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      O.originZeroWindows
+  layerPatches := O.layerPatches
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero windows, layer patches, and
+bounded-interior generated position-code rows at numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero windows, layer patches, and
+bounded-interior generated position-code rows at numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations
+
+namespace Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero windows and layer patches to checked stacks plus layer
+patches, preserving interior-at-index source rows.
+-/
+def toCheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations
+    (O : Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations) :
+    Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      O.originZeroWindows
+  layerPatches := O.layerPatches
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero windows, layer patches, and
+interior generated position-code rows at numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero windows, layer patches, and
+interior generated position-code rows at numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations
 
 namespace Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations
 

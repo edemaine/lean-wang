@@ -462,6 +462,26 @@ structure Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete finite checked-stack/layer-patch L2C2 Robinson target through
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete finite checked-stack/layer-patch L2C2 Robinson target through
+interior generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2CheckedStackLayerPatchInteriorRowsAtIndexObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete finite checked-stack/layer-patch L2C2 Robinson target through the
 bounded-search descriptor decoder and statement-list uniqueness.
 -/
@@ -498,6 +518,28 @@ structure Figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexObligations :
   checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete split checked-stack/layer-patch L2C2 Robinson target through
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete split checked-stack/layer-patch L2C2 Robinson target through interior
+generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2CheckedStacksAndLayerPatchesInteriorRowsAtIndexObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -539,6 +581,28 @@ structure Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations :
   originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/layer-patch L2C2 Robinson target through
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/layer-patch L2C2 Robinson target through interior
+generated position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesInteriorRowsAtIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--
