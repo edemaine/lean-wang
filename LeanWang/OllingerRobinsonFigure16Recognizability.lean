@@ -121,6 +121,154 @@ theorem parentIndexCandidates_ne_nil (target : Figure18Site) :
   intro hnil
   simp [hnil] at htarget
 
+/-- Does a pair of L2 summand symbols overlay to the requested thick component? -/
+def thickOverlayBool
+    (first second : Figure16.Symbol) (target : Figure16.Thick) : Bool :=
+  match first, second with
+  | .blank, .thick component => decide (component = target)
+  | .thick component, .blank => decide (component = target)
+  | .line firstLine, .line secondLine =>
+      match target.lineSum? with
+      | none => false
+      | some sum =>
+          decide ((sum.first = firstLine ∧ sum.second = secondLine) ∨
+            (sum.first = secondLine ∧ sum.second = firstLine))
+  | _, _ => false
+
+/-- A complete thin/thick/black component triple for one displayed tile. -/
+abbrev ComponentTriple := Figure16.Thin × Figure16.Thick × Figure16.Black
+
+/-- All 400 component triples before imposing the Figure 13 tile-list restriction. -/
+def allComponentTriples : List ComponentTriple :=
+  Figure16.Thin.all.flatMap fun thin =>
+    Figure16.Thick.all.flatMap fun thick =>
+      Figure16.Black.all.map fun black => (thin, thick, black)
+
+/-- Component triple transcribed at a Figure 13 tile index. -/
+def componentTripleAt (index : Fin 92) : ComponentTriple :=
+  (thinComponentAt index, thickComponentAt index, blackComponentAt index)
+
+/-- Does `child` equal the component triple produced at one parent quadrant? -/
+def componentTripleChildMatchesBool
+    (parent : ComponentTriple) (quadrant : Quadrant) (child : ComponentTriple) : Bool :=
+  decide (Figure16.Symbol.thin child.1 =
+    Figure16.phiL1Star.entry (quadrantColumn quadrant) (quadrantRow quadrant)) &&
+  thickOverlayBool
+    ((Figure16.phiL2Component1 parent.1).entry
+      (quadrantColumn quadrant) (quadrantRow quadrant))
+    ((Figure16.phiL2Component2 parent.2.1).entry
+      (quadrantColumn quadrant) (quadrantRow quadrant))
+    child.2.1 &&
+  decide (Figure16.Symbol.black child.2.2 =
+    (Figure16.phiL3 parent.2.2).entry
+      (quadrantColumn quadrant) (quadrantRow quadrant))
+
+/-- Figure 13-indexed specialization of `componentTripleChildMatchesBool`. -/
+def childComponentMatchesBool
+    (parent : Fin 92) (quadrant : Quadrant) (child : ComponentTriple) : Bool :=
+  componentTripleChildMatchesBool (componentTripleAt parent) quadrant child
+
+/-- Does an existing Figure 13 tile have the produced child component triple? -/
+def childMatchesBool (parent : Fin 92) (quadrant : Quadrant) (child : Fin 92) : Bool :=
+  childComponentMatchesBool parent quadrant (componentTripleAt child)
+
+/-- Child tile indices produced at one quadrant of an audited parent expansion. -/
+def childIndexCandidates (parent : Fin 92) (quadrant : Quadrant) : List (Fin 92) :=
+  (List.finRange 92).filter fun child => childMatchesBool parent quadrant child
+
+theorem mem_childIndexCandidates_iff
+    {parent child : Fin 92} {quadrant : Quadrant} :
+    child ∈ childIndexCandidates parent quadrant ↔
+      childMatchesBool parent quadrant child = true := by
+  simp [childIndexCandidates]
+
+/-- Histogram of child-candidate counts over all 92 parents and four quadrants. -/
+def childIndexCandidateCountHistogram : List (Nat × Nat) :=
+  (List.range 93).filterMap fun count =>
+    let cases := (List.finRange 92).flatMap fun parent =>
+      Quadrant.all.filter fun quadrant =>
+        (childIndexCandidates parent quadrant).length == count
+    if cases.isEmpty then none else some (count, cases.length)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem childIndexCandidateCountHistogram_eq :
+    childIndexCandidateCountHistogram = [(0, 12), (1, 356)] := by
+  native_decide
+
+/-- Parent/quadrant pairs whose produced component triple is absent from Figure 13. -/
+def missingChildParentQuadrants : List (Nat × Quadrant) :=
+  (List.finRange 92).flatMap fun parent =>
+    (Quadrant.all.filter fun quadrant =>
+      (childIndexCandidates parent quadrant).isEmpty).map fun quadrant =>
+        (parent.val, quadrant)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem missingChildParentQuadrants_eq :
+    missingChildParentQuadrants =
+      [(68, .southwest), (69, .southwest), (70, .southwest),
+        (71, .southwest), (72, .southwest), (73, .southwest),
+        (74, .southwest), (75, .southwest), (76, .southwest),
+        (77, .southwest), (78, .southwest), (79, .southwest)] := by
+  native_decide
+
+/-- Distinct component triples in the human Figure 13 table. -/
+def currentComponentTriples : List ComponentTriple :=
+  ((List.finRange 92).map componentTripleAt).eraseDups
+
+/-- Distinct component triples produced by one substitution step. -/
+def substitutionImageComponentTriples : List ComponentTriple :=
+  ((List.finRange 92).flatMap fun parent =>
+    Quadrant.all.flatMap fun quadrant =>
+      allComponentTriples.filter fun child =>
+        childComponentMatchesBool parent quadrant child).eraseDups
+
+/-- Current triples together with all triples produced in one substitution step. -/
+def oneStepClosedComponentTriples : List ComponentTriple :=
+  (currentComponentTriples ++ substitutionImageComponentTriples).eraseDups
+
+/-- Substitution image of an arbitrary finite component-triple alphabet. -/
+def substitutionImageOf (parents : List ComponentTriple) : List ComponentTriple :=
+  (parents.flatMap fun parent =>
+    Quadrant.all.flatMap fun quadrant =>
+      allComponentTriples.filter fun child =>
+        componentTripleChildMatchesBool parent quadrant child).eraseDups
+
+/-- Every cell of the 104-triple alphabet has a unique child in that alphabet. -/
+def oneStepClosedUniqueChildrenBool : Bool :=
+  oneStepClosedComponentTriples.all fun parent =>
+    Quadrant.all.all fun quadrant =>
+      decide (((oneStepClosedComponentTriples.filter fun child =>
+        componentTripleChildMatchesBool parent quadrant child).length) = 1)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem oneStepClosedUniqueChildrenBool_eq_true :
+    oneStepClosedUniqueChildrenBool = true := by
+  native_decide
+
+/-- The substitution image of the 104-triple alphabet stays inside it. -/
+def oneStepClosedUnderSubstitutionBool : Bool :=
+  (substitutionImageOf oneStepClosedComponentTriples).all fun child =>
+    decide (child ∈ oneStepClosedComponentTriples)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem oneStepClosedUnderSubstitutionBool_eq_true :
+    oneStepClosedUnderSubstitutionBool = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem componentTripleCounts_eq :
+    (currentComponentTriples.length,
+      substitutionImageComponentTriples.length,
+      oneStepClosedComponentTriples.length,
+      (substitutionImageOf oneStepClosedComponentTriples).length) =
+        (92, 103, 104, 103) := by
+  native_decide
+
 /-- One quadrant-aligned `2 x 2` block of child Figure 18 sites. -/
 structure AlignedChildBlock where
   southwest : Figure18Site

@@ -835,6 +835,24 @@ of the four artificial quarters of one raw tile. Its unique-parent theorem
 checks consistency of the human Figure 16 layer map on those 92 blocks; it does
 not yet test adjacency between distinct Figure 13 tiles.
 
+The direct layer-overlay decoder now exposes a second transcription issue. Of
+the `92 * 4 = 368` parent/quadrant cells, 356 decode uniquely to one of the 92
+human Figure 13 component rows, while the southwest children of parents 68-79
+decode to component triples absent from that table. The one-step substitution
+image has 103 distinct triples; adjoining it to the 92 transcribed triples gives
+a 104-triple alphabet. Lean verifies both that every parent/quadrant has a
+unique child in this 104-triple alphabet and that the alphabet is closed under
+substitution. These facts are recorded by
+`childIndexCandidateCountHistogram_eq`, `missingChildParentQuadrants_eq`,
+`componentTripleCounts_eq`, `oneStepClosedUniqueChildrenBool_eq_true`, and
+`oneStepClosedUnderSubstitutionBool_eq_true`.
+
+This 104-triple alphabet is a clean formal candidate, but it should not silently
+replace the paper's displayed 92-tile set. Before assigning corrected Wang
+edges, determine whether the 12 additional triples expose a Figure 13
+transcription error, an omitted identification/recoloring convention, or a
+genuine enlargement of the paper's tile alphabet.
+
 The theorem surface now also has the more Robinson-shaped
 `L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` /
 `L2C2RobinsonSection7BoardFreeLineTranslatedBoxData` packages.  These replace

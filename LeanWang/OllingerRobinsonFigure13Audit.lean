@@ -50,6 +50,24 @@ structure Figure13Figure16AuditCertificate : Prop where
     allTargetsHaveUniqueParentIndexBool = false
   figure16EveryTargetHasParentIndex :
     allTargetsHaveParentIndexBool = true
+  figure16ChildIndexCandidateCountHistogram :
+    childIndexCandidateCountHistogram = [(0, 12), (1, 356)]
+  figure16MissingChildParentQuadrants :
+    missingChildParentQuadrants =
+      [(68, .southwest), (69, .southwest), (70, .southwest),
+        (71, .southwest), (72, .southwest), (73, .southwest),
+        (74, .southwest), (75, .southwest), (76, .southwest),
+        (77, .southwest), (78, .southwest), (79, .southwest)]
+  figure16ComponentTripleCounts :
+    (currentComponentTriples.length,
+      substitutionImageComponentTriples.length,
+      oneStepClosedComponentTriples.length,
+      (substitutionImageOf oneStepClosedComponentTriples).length) =
+        (92, 103, 104, 103)
+  figure16OneStepClosedUniqueChildren :
+    oneStepClosedUniqueChildrenBool = true
+  figure16OneStepClosedUnderSubstitution :
+    oneStepClosedUnderSubstitutionBool = true
   figure16AlignedBlockCount :
     alignedCompatibleChildBlockCount = 92
   figure16AlignedBlocksAreSingleRawTiles :
@@ -72,6 +90,13 @@ theorem figure13Figure16AuditCertificate :
   figure16RadiusZeroParentIndexAmbiguous :=
     allTargetsHaveUniqueParentIndexBool_eq_false
   figure16EveryTargetHasParentIndex := allTargetsHaveParentIndexBool_eq_true
+  figure16ChildIndexCandidateCountHistogram :=
+    childIndexCandidateCountHistogram_eq
+  figure16MissingChildParentQuadrants := missingChildParentQuadrants_eq
+  figure16ComponentTripleCounts := componentTripleCounts_eq
+  figure16OneStepClosedUniqueChildren := oneStepClosedUniqueChildrenBool_eq_true
+  figure16OneStepClosedUnderSubstitution :=
+    oneStepClosedUnderSubstitutionBool_eq_true
   figure16AlignedBlockCount := alignedCompatibleChildBlockCount_eq
   figure16AlignedBlocksAreSingleRawTiles :=
     allAlignedCompatibleBlocksHaveSameIndexBool_eq_true
