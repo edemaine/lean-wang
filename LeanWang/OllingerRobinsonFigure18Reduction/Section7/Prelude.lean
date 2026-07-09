@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.OllingerRobinsonFigure13Audit
 import LeanWang.OllingerRobinsonFigure18Reduction.Core
 import LeanWang.OllingerRobinsonCanonicalOriginZero
 
@@ -1718,7 +1719,7 @@ def l2c1CheckedStacksForListedActiveSiteRectangles :
     l2Component1BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.southwest
     l2Component1BlankCandidateSanity.cornerIndex_valid
-    l2Component1BlankCandidatePairCompatibilityBool
+    l2Component1BlankCandidate_pairCompatibility
 
 /--
 Rectangle-level checked stack certificates for the second audited L2-blank
@@ -1750,7 +1751,7 @@ def l2c2CheckedStacksForListedActiveSiteRectangles :
     l2Component2BlankCandidateSanity.activeSiteSpecs_valid
     0 Quadrant.northeast
     l2Component2BlankCandidateSanity.cornerIndex_valid
-    l2Component2BlankCandidatePairCompatibilityBool
+    l2Component2BlankCandidate_pairCompatibility
 
 /--
 Origin-zero active/corner windows plus the audited finite compatibility table
@@ -1776,7 +1777,7 @@ def l2c1OriginZeroCheckedStacksOfOriginZeroWindows
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid
       hwindows
-      l2Component1BlankCandidatePairCompatibilityBool
+      l2Component1BlankCandidate_pairCompatibility
 
 /--
 Origin-zero active/corner windows plus the audited finite compatibility table
@@ -1802,7 +1803,7 @@ def l2c2OriginZeroCheckedStacksOfOriginZeroWindows
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid
       hwindows
-      l2Component2BlankCandidatePairCompatibilityBool
+      l2Component2BlankCandidate_pairCompatibility
 
 /--
 Canonical Robinson free-site active/corner recognition plus the audited finite
@@ -3800,7 +3801,7 @@ def
       0 Quadrant.southwest
       l2Component1BlankCandidateSanity.cornerIndex_valid where
   boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
-  pairCompatibility := l2Component1BlankCandidatePairCompatibilityBool
+  pairCompatibility := l2Component1BlankCandidate_pairCompatibility
   patches := data.patches
 
 /--
@@ -3816,7 +3817,7 @@ def
       0 Quadrant.northeast
       l2Component2BlankCandidateSanity.cornerIndex_valid where
   boardFreeLineActiveCorner := data.boardFreeLineActiveCorner
-  pairCompatibility := l2Component2BlankCandidatePairCompatibilityBool
+  pairCompatibility := l2Component2BlankCandidate_pairCompatibility
   patches := data.patches
 
 /--
@@ -5136,7 +5137,7 @@ def l2c1OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
   NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     (l2c1OriginZeroWindowsOfCheckedStacks data.checkedStacks)
-    l2Component1BlankCandidatePairCompatibilityBool
+    l2Component1BlankCandidate_pairCompatibility
     (by
       simpa [l2Component1Figure18ScaffoldData] using
         l2Component1PositiveTranslatedIsolatedBoxesOfValidBoxes
@@ -5156,7 +5157,7 @@ def l2c2OriginZeroTranslatedObligationsOfCheckedStackValidTranslatedBoxData
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     (l2c2OriginZeroWindowsOfCheckedStacks data.checkedStacks)
-    l2Component2BlankCandidatePairCompatibilityBool
+    l2Component2BlankCandidate_pairCompatibility
     (by
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfValidBoxes
@@ -5178,7 +5179,7 @@ def l2c1OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesP
       l2Component1BlankCandidateSanity.cornerIndex_valid :=
   NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     originZeroWindows
-    l2Component1BlankCandidatePairCompatibilityBool
+    l2Component1BlankCandidate_pairCompatibility
     (by
       simpa [l2Component1Figure18ScaffoldData] using
         l2Component1PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
@@ -5200,7 +5201,7 @@ def l2c2OriginZeroTranslatedObligationsOfOriginZeroWindowsFigure18ScaffoldTilesP
       l2Component2BlankCandidateSanity.cornerIndex_valid :=
   NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
     originZeroWindows
-    l2Component2BlankCandidatePairCompatibilityBool
+    l2Component2BlankCandidate_pairCompatibility
     (by
       simpa [l2Component2Figure18ScaffoldData] using
         l2Component2PositiveTranslatedIsolatedBoxesOfFigure18ScaffoldTilesPlane
@@ -9335,7 +9336,7 @@ def l2c1CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
         l2Component1BlankCandidateCornerSite,
         NatSiteSpecSanity.activeSiteData,
         NatSiteSpecSanity.cornerSite] using
-        l2Component1BlankCandidatePairCompatibilityBool)
+        l2Component1BlankCandidate_pairCompatibility)
 
 def l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
     (hgrids :
@@ -9390,7 +9391,7 @@ def l2c2CompatibleLevelCanonicalCheckedCompatibleFig16Obligations
         l2Component2BlankCandidateCornerSite,
         NatSiteSpecSanity.activeSiteData,
         NatSiteSpecSanity.cornerSite] using
-        l2Component2BlankCandidatePairCompatibilityBool)
+        l2Component2BlankCandidate_pairCompatibility)
 
 def l2c1SignalTowerCanonicalCheckedCompatibleFig16Obligations
     (htower :
