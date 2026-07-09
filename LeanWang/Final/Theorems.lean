@@ -1362,6 +1362,21 @@ structure FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIn
 
 set_option linter.style.longLine false in
 /--
+Second-candidate origin-zero active/corner windows plus positive Robinson
+board-level aligned macro-squares with the ordinary-source bounded-search
+fixed-start decoder.
+
+This route uses ordinary `programData`, so it avoids the generated-position
+statement-list uniqueness bridge.
+-/
+structure FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate checked-stack scaffold-plane route with generated interior
 position-code rows.
 
@@ -3876,6 +3891,21 @@ def finalFigure13L2C2BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
     TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
   TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
     boardFreeLineActiveCorner boxes
+
+set_option linter.style.longLine false in
+/--
+Origin-zero windows and positive Robinson board-level aligned macro-squares
+instantiate the second-candidate Section 7 board/free-line layer-patch package.
+-/
+def finalFigure13L2C2BoardFreeLineLayerPatchDataOfOriginZeroWindowsRobinsonPositiveBoardLevelAlignedMacroSquares
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2BoardFreeLineLayerPatchDataOfValidTranslatedBoxes
+    (TM0FoldedReduction.l2c2BareBoardFreeLineActiveCornerOfOriginZeroWindows
+      originZeroWindows)
+    (finalFigure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowLayerPatchSourcePositionCodeConstructionObligations
@@ -24776,6 +24806,68 @@ set_option linter.style.longLine false in
 theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations
     (h :
       FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false
+namespace FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Convert the ordinary-source positive-board-level scaffold package into final inputs. -/
+def toFinalL2C2SourceReductionInputs
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexStart
+    (finalFigure13L2C2BoardFreeLineLayerPatchDataOfOriginZeroWindowsRobinsonPositiveBoardLevelAlignedMacroSquares
+      h.originZeroWindows h.alignedMacroSquares)
+    h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero windows, positive board-level aligned
+macro-squares, and the ordinary bounded-search fixed-start decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero windows, positive board-level aligned
+macro-squares, and the ordinary bounded-search fixed-start decoder.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero windows, positive
+board-level aligned macro-squares, and the ordinary bounded-search fixed-start
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero windows, positive board-level
+aligned macro-squares, and the ordinary bounded-search fixed-start decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSearchCodeLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
