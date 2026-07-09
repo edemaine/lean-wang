@@ -2676,6 +2676,46 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations
 
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Forget the expanded Nat-site Section 7 obligation record to compact
+layer-patch data while retaining the ordinary-source bounded-search start
+decoder.
+-/
+def toLayerPatchDataSearchCodeStartObligations
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations where
+  section7 :=
+    { boardFreeLineActiveCorner := O.section7.boardFreeLineActiveCorner
+      patches := O.section7.patches }
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from expanded Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStart
+    O.section7 O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from expanded Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStart
+    O.section7 O.sourceSearchStart
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations
+
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations
 
 set_option linter.style.longLine false in
@@ -2800,6 +2840,32 @@ theorem domino_problem_undecidable
     O.section7 O.sourceLabelIndex
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from compact Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    O.section7 O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from compact Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    O.section7 O.sourceSearchStart
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations
 
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations
 
