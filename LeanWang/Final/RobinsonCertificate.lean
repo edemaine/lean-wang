@@ -23,6 +23,29 @@ open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 set_option linter.style.longLine false in
 /--
+Concrete scaffold for the second audited L2 blank candidate used by the compact
+Robinson certificate routes in this file.
+-/
+abbrev Figure13L2C2Scaffold : Scaffold :=
+  (scaffoldDataOfNatSites
+    l2Component2BlankCandidateActiveSiteSpecs
+    l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+    0 Quadrant.northeast
+    l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold
+
+set_option linter.style.longLine false in
+/--
+Positive-radius active-corner indexed boxes for the concrete L2C2 scaffold.
+
+This is the finite backward-realization target just below active-corner layer
+patches: the existing constructor supplies the radius-zero corner patch and
+turns these boxes into `L2C2ActiveCornerLayerPatches`.
+-/
+abbrev Figure13L2C2PositiveActiveCornerIndexedBoxes : Prop :=
+  ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox Figure13L2C2Scaffold r)
+
+set_option linter.style.longLine false in
+/--
 Current theorem-facing concrete L2C2 Robinson/source target.
 
 The scaffold field is the origin-zero active/corner-window plus translated
@@ -184,6 +207,33 @@ structure Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/positive-box theorem-facing L2C2 Robinson/source
+target.
+
+This is one step below `Figure13L2C2OriginZeroLayerPatches...`: positive
+active-corner indexed boxes are converted to finite layer patches by the
+existing scaffold constructor.
+-/
+structure Figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/positive-box L2C2 Robinson target through the
+bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -234,6 +284,32 @@ structure Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObl
     Prop where
   routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/positive-box theorem-facing L2C2
+Robinson/source target.
+
+This exposes the Section 7 backward-realization obligation as positive
+active-corner indexed boxes instead of prebuilt layer patches.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/positive-box L2C2 Robinson target through
+the bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
 
@@ -787,6 +863,72 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSearchCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+positive active-corner indexed boxes, and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    originZeroWindows
+    (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+      positiveBoxes)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, positive
+active-corner indexed boxes, and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    originZeroWindows
+    (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+      positiveBoxes)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+positive active-corner indexed boxes, the bounded-search descriptor decoder,
+and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    originZeroWindows positiveBoxes
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, positive
+active-corner indexed boxes, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    originZeroWindows positiveBoxes
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from canonical free-site active/corner
 recognition, active-corner layer patches, and the source-specialized generated
 position-code label-index decoder.
@@ -908,6 +1050,72 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerP
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
     routing layerPatches
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    routing
+    (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+      positiveBoxes)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    routing
+    (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfPositiveBoxes
+      positiveBoxes)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    routing positiveBoxes
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    routing positiveBoxes
     (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
 
 set_option linter.style.longLine false in
@@ -1422,6 +1630,59 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations
 
+namespace Figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/positive-box
+Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    O.originZeroWindows O.positiveBoxes O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/positive-box
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexFrom
+    O.originZeroWindows O.positiveBoxes O.sourceLabelIndex
+
+end Figure13L2C2OriginZeroPositiveBoxesSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/positive-box
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodup
+    O.originZeroWindows O.positiveBoxes O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/positive-box Robinson
+package, the bounded-search descriptor decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodup
+    O.originZeroWindows O.positiveBoxes O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations
+
 namespace Figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
@@ -1532,6 +1793,64 @@ theorem domino_problem_undecidable
     O.routing O.layerPatches O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+positive-box Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    O.routing O.positiveBoxes O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / positive-box
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    O.routing O.positiveBoxes O.sourceLabelIndex
+
+end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexObligations
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+positive-box Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodup
+    O.routing O.positiveBoxes O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / positive-box
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodup
+    O.routing O.positiveBoxes O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
