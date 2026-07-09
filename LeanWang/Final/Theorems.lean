@@ -27492,6 +27492,47 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from concrete L2C2 origin-zero
+active/corner windows, cofinally many raw Figure 13 squares, the bounded-search
+label-index source target, and local started-TM1 statement-support
+uniqueness/disjointness.
+
+This is the same source-search route as
+`...WithStatementNodup`, but exposes the lower proof frontier that implies
+source statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithPairwiseDisjoint
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithStatementNodup
+    originZeroWindows hsquares hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
+cofinally many raw Figure 13 squares, the bounded-search label-index source
+target, and local started-TM1 statement-support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithPairwiseDisjoint
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithStatementNodup
+    originZeroWindows hsquares hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero
 active/corner windows, cofinally many raw Figure 13 squares, and the
 fixed-start source-level position-code decoder target.
 -/
