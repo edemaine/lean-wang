@@ -27532,6 +27532,126 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 
 set_option linter.style.longLine false in
 /--
+Build the concrete L2C2 origin-zero/cofinal Figure 13 layer-patch scaffold
+package.
+
+This is the ordinary-source analogue of the origin-zero translated-positive-box
+route above: origin-zero windows provide the Section 7 board/free-line
+active-corner invariant, and cofinal raw Figure 13 squares provide positive
+active-corner layer patches.
+-/
+def finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  let scaffold :=
+    finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares
+  { boardFreeLineActiveCorner := scaffold.toBoardFreeLineActiveCorner
+    patches := scaffold.toActiveCornerLayerBoxPatches }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the ordinary bounded-search
+label-index source target.
+
+Unlike the `...WithStatementNodup` route, this goes through ordinary
+`programData` source obligations and does not need the generated-position
+statement-list uniqueness bridge.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
+cofinally many raw Figure 13 squares, and the ordinary bounded-search
+label-index source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourceSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexFrom
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the ordinary bounded-search
+decoder-step source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeDecoderStep
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeDecoderStep
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hstep).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
+cofinally many raw Figure 13 squares, and the ordinary bounded-search
+decoder-step source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeDecoderStep
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hstep : SourceSearchCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeDecoderStep
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and ordinary bounded-search
+interior rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
+cofinally many raw Figure 13 squares, and ordinary bounded-search interior
+rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from concrete L2C2 origin-zero
 active/corner windows, cofinally many raw Figure 13 squares, and the
 fixed-start source-level position-code decoder target.
