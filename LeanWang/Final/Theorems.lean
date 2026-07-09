@@ -2808,17 +2808,30 @@ set_option linter.style.longLine false in
 /--
 Cofinal raw Figure 13 tileable squares.
 
-This is the compactness-facing version of the positive-box scaffold premise:
-Robinson's substitution only needs arbitrarily large finite squares, not an
-already-built plane tiling.
+This diagnostic surface is false for the current Figure 13 macro-tile
+transcription, because cofinally many raw Figure 13 squares would compactly
+give a raw Figure 13 plane tiling.  The live scaffold route should instead use
+the Section 7 board/free-line layer-patch or positive-box data surfaces.
 -/
 abbrev FinalFigure13L2C2Fig13CofinalTileableSquares : Prop :=
   ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
 
 set_option linter.style.longLine false in
 /--
+The raw cofinal Figure 13 square surface is not a viable final scaffold
+assumption for the current transcription.
+-/
+theorem not_finalFigure13L2C2Fig13CofinalTileableSquares :
+    ¬ FinalFigure13L2C2Fig13CofinalTileableSquares :=
+  TM0FoldedReduction.not_cofinalTileableSquares_fig13Tiles
+
+set_option linter.style.longLine false in
+/--
 Cofinal raw Figure 13 squares supply tileable boxes for the shared Figure 18
 scaffold tiles.
+
+This is retained as a diagnostic implication from the false raw cofinal
+surface, not as the preferred construction route.
 -/
 def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfFig13CofinalSquares
     (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares) :
