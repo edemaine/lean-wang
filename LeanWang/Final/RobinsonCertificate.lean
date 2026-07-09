@@ -452,6 +452,33 @@ structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupOb
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
 
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/positive-box L2C2 Robinson target through
+the bounded-search fixed-start decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/positive-box L2C2 Robinson target through
+the bounded-search fixed-start decoder and concrete started-TM1 support
+uniqueness/disjointness.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+  statementSupport_nodup : SourceStartedTM1StatementSupportNodup
+  statementSupport_pairwiseDisjoint :
+    SourceStartedTM1StatementSupportPairwiseDisjoint
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -1595,6 +1622,78 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositi
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search fixed-start decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    routing positiveBoxes
+    (sourceLabelIndexPrimrec_of_labelIndexStart
+      (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+        hsearch hnodup))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search fixed-start decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSourceLabelIndexFrom
+    routing positiveBoxes
+    (sourceLabelIndexPrimrec_of_labelIndexStart
+      (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+        hsearch hnodup))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search fixed-start decoder, and
+concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjoint
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    routing positiveBoxes hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, positive
+active-corner indexed boxes, the bounded-search fixed-start decoder, and
+concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjoint
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    routing positiveBoxes hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the Section 7 tower/indexed-box
 Robinson scaffold obligations and generated-position source obligations.
 
@@ -2659,6 +2758,82 @@ theorem domino_problem_undecidable
     O.routing O.positiveBoxes O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeWithNodupObligations
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+positive-box Robinson package, the bounded-search fixed-start decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    O.routing O.positiveBoxes O.sourceSearchStart O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / positive-box
+Robinson package, the bounded-search fixed-start decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodup
+    O.routing O.positiveBoxes O.sourceSearchStart O.statementList_nodup
+
+end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations
+
+set_option linter.style.longLine false
+namespace Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations
+
+set_option linter.style.longLine false in
+/--
+Project the pairwise-disjoint support package to the statement-list `Nodup`
+package.
+-/
+def toSearchCodeStartWithNodupObligations
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations) :
+    Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithNodupObligations where
+  routing := O.routing
+  positiveBoxes := O.positiveBoxes
+  sourceSearchStart := O.sourceSearchStart
+  statementList_nodup :=
+    sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      O.statementSupport_nodup O.statementSupport_pairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+positive-box Robinson package, the bounded-search fixed-start decoder, and
+concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toSearchCodeStartWithNodupObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / positive-box
+Robinson package, the bounded-search fixed-start decoder, and concrete
+started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toSearchCodeStartWithNodupObligations.domino_problem_undecidable
+
+end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations
+set_option linter.style.longLine true
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
