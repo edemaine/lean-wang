@@ -405,6 +405,68 @@ theorem sourceLabelIndexFromSplit?_lt_bound
   rcases sourceLabelIndexFromSplit?_eq_some h with ⟨_hstmt, hblock, _hv⟩
   exact (Nat.div_lt_iff_lt_mul sourcePartrecVarList_length_pos).1 hblock
 
+theorem sourceLabelIndexFromSplit?_block_lt_of_lt_bound
+    {fuel i : Nat} (hi : i < fuel * TM0Route.partrecVarList.length) :
+    i / TM0Route.partrecVarList.length < fuel :=
+  (Nat.div_lt_iff_lt_mul sourcePartrecVarList_length_pos).2 hi
+
+theorem sourceLabelIndexFromSplit?_exists_of_lt_bound
+    {fuel k i : Nat} (hi : i < fuel * TM0Route.partrecVarList.length) :
+    ∃ stmtIndex v, sourceLabelIndexFromSplit? fuel k i = some (stmtIndex, v) := by
+  have hblock := sourceLabelIndexFromSplit?_block_lt_of_lt_bound hi
+  have hmod :
+      i % TM0Route.partrecVarList.length < TM0Route.partrecVarList.length :=
+    Nat.mod_lt i sourcePartrecVarList_length_pos
+  let v : TM0Route.PartrecVar :=
+    TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]'hmod
+  have hv :
+      TM0Route.partrecVarList[i % TM0Route.partrecVarList.length]? = some v := by
+    simp [v, List.getElem?_eq_getElem (l := TM0Route.partrecVarList) hmod]
+  exact ⟨k + i / TM0Route.partrecVarList.length, v,
+    sourceLabelIndexFromSplit?_of_getElem? hblock hv⟩
+
+theorem sourceLabelIndexFromSplit?_isSome_iff_lt_bound
+    {fuel k i : Nat} :
+    (sourceLabelIndexFromSplit? fuel k i).isSome ↔
+      i < fuel * TM0Route.partrecVarList.length := by
+  constructor
+  · intro hsome
+    cases h : sourceLabelIndexFromSplit? fuel k i with
+    | none =>
+        simp [h] at hsome
+    | some q =>
+        exact sourceLabelIndexFromSplit?_lt_bound
+          (fuel := fuel) (k := k) (i := i)
+          (stmtIndex := q.1) (v := q.2) h
+  · intro hi
+    rcases sourceLabelIndexFromSplit?_exists_of_lt_bound (k := k) hi with
+      ⟨stmtIndex, v, hsplit⟩
+    simp [hsplit]
+
+theorem sourceLabelIndexFromSplit?_eq_none_iff_bound_le
+    {fuel k i : Nat} :
+    sourceLabelIndexFromSplit? fuel k i = none ↔
+      fuel * TM0Route.partrecVarList.length ≤ i := by
+  constructor
+  · intro hnone
+    by_contra hnot
+    have hi : i < fuel * TM0Route.partrecVarList.length := Nat.lt_of_not_ge hnot
+    rcases sourceLabelIndexFromSplit?_exists_of_lt_bound (k := k) hi with
+      ⟨stmtIndex, v, hsplit⟩
+    rw [hsplit] at hnone
+    simp at hnone
+  · intro hle
+    cases h : sourceLabelIndexFromSplit? fuel k i with
+    | none =>
+        rfl
+    | some q =>
+        have hi :
+            i < fuel * TM0Route.partrecVarList.length :=
+          sourceLabelIndexFromSplit?_lt_bound
+            (fuel := fuel) (k := k) (i := i)
+            (stmtIndex := q.1) (v := q.2) h
+        exact False.elim ((Nat.not_lt_of_ge hle) hi)
+
 theorem sourceLabelIndexStartSplit?_stmtIndex_lt
     {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
     (h : sourceLabelIndexStartSplit? c i = some (stmtIndex, v)) :
@@ -527,6 +589,13 @@ theorem sourceLabelIndexStartSplit?_isSome_iff_lt_labelCount
     rcases sourceLabelIndexStartSplit?_exists_of_lt_labelCount hi with
       ⟨stmtIndex, v, hsplit⟩
     simp [hsplit]
+
+theorem sourceLabelIndexStartSplit?_eq_none_iff_labelCount_le
+    {c : Code} {i : Nat} :
+    sourceLabelIndexStartSplit? c i = none ↔ sourceLabelCount c ≤ i := by
+  unfold sourceLabelIndexStartSplit?
+  rw [sourceLabelIndexFromSplit?_eq_none_iff_bound_le,
+    sourceLabelCount_eq_statementCount_mul]
 
 theorem sourceLabelAtByStatementFrom?_of_split
     {c : Code} {fuel k i stmtIndex : Nat} {v : TM0Route.PartrecVar}
