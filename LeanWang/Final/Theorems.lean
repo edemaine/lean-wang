@@ -25943,6 +25943,186 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and the source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeLabelIndexFrom
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    { scaffold := scaffold, labelIndex := hindex }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeLabelIndexFrom
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
+    { scaffold := scaffold, labelIndex := hindex }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and the fixed-start source-specialized
+position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStart
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStartConstructionObligations
+    { scaffold := scaffold, labelIndexStart := hstart }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and the fixed-start source-specialized
+position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStart
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStartConstructionObligations
+    { scaffold := scaffold, labelIndexStart := hstart }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated interior position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxInteriorRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated interior position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxInteriorRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated one-row position-code
+rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxOneRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated one-row position-code
+rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxOneRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxBoundedRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box scaffold object and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxBoundedRows
+    (scaffold :
+      NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from decoded origin-zero active/corner
 windows, finite active-corner layer patches, and generated interior
 position-code rows.
