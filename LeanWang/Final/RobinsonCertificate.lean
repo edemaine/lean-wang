@@ -214,6 +214,16 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligat
 set_option linter.style.longLine false in
 /--
 Compact concrete Section 7 layer-patch L2C2 Robinson target through the
+fixed-start source-level generated position-code decoder.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceLabelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the
 bounded-search descriptor decoder and statement-list uniqueness.
 -/
 structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations :
@@ -1425,6 +1435,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_sourceCodeCorrect
     data hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the fixed-start source-level
+generated position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStart
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_scaffold_position_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      data)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the fixed-start source-level
+generated position-code decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStart
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_scaffold_position_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      data)
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
 
 set_option linter.style.longLine false in
 /--
@@ -3067,6 +3111,32 @@ theorem domino_problem_undecidable
     O.section7 O.sourceLabelIndex
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from compact Section 7 layer-patch data and the fixed-start
+source-level generated position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStart
+    O.section7 O.sourceLabelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from compact Section 7 layer-patch data and the fixed-start
+source-level generated position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStart
+    O.section7 O.sourceLabelIndexStart
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations
 
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations
 
