@@ -3127,6 +3127,18 @@ def finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
     Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
       l2Component2Figure18ScaffoldData hboxes
 
+set_option linter.style.longLine false in
+/--
+The concrete Figure 13 L2C2 valid-box statement is the same translated-box
+target used by the canonical-routing scaffold endpoint.
+-/
+def finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+    (validBoxes : FinalFigure13L2C2ValidTranslatedBoxes) :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes := by
+  simpa [FinalFigure13L2C2ValidTranslatedBoxes,
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes,
+    TM0FoldedReduction.L2C2Figure18ScaffoldTiles] using validBoxes
+
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
 
@@ -4781,6 +4793,23 @@ def toCombinedWindowLayerPatchSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/valid-box package to the canonical-routing/valid-box
+source-label endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+      h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/valid-box package to the existing
 origin-zero/translated-positive-box source-label endpoint.
 -/
@@ -4845,6 +4874,23 @@ def toDecoderStepConstructionObligations
   combinedActiveCornerWindows := h.combinedActiveCornerWindows
   validTranslatedBoxes := h.validTranslatedBoxes
   decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box fixed-start package to the
+canonical-routing/valid-box fixed-start endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxLabelIndexStartConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+      h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
+  labelIndexStart := h.labelIndexStart
 
 set_option linter.style.longLine false in
 /--
@@ -4920,6 +4966,23 @@ def toCombinedWindowLayerPatchDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the decoded-window/valid-box decoder-step package to the
+canonical-routing/valid-box decoder-step endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+      h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
+  decoderStep := h.decoderStep
+
+set_option linter.style.longLine false in
+/--
 Project the decoded-window/valid-box decoder-step package to the generic
 Nat-site indexed-window decoder-step endpoint.
 -/
@@ -4986,6 +5049,23 @@ def toCombinedWindowLayerPatchGlobalPositionCodeConstructionObligations
   combinedActiveCornerWindows := h.combinedActiveCornerWindows
   layerPatches :=
     finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the decoded-window/valid-box global-label package to the
+canonical-routing/valid-box global-label endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+      h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -5068,6 +5148,22 @@ def toCombinedWindowLayerPatchConstructionObligations
   combinedActiveCornerWindows := h.combinedActiveCornerWindows
   layerPatches :=
     finalFigure13L2C2LayerPatchesOfValidTranslatedBoxes h.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the row-source decoded-window/valid-box package to the
+canonical-routing/valid-box row-source endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+      h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
   sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
@@ -5156,6 +5252,17 @@ def toConstructionObligations
   sourceRows :=
     TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
       h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row decoded-window/valid-box package to the
+canonical-routing/valid-box row-source endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxOneRowsConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations :=
+  h.toConstructionObligations
+    |>.toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
@@ -5271,6 +5378,17 @@ def toConstructionObligations
     (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
     FinalFigure13L2C2CombinedWindowValidBoxConstructionObligations :=
   h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row decoded-window/valid-box package to the
+canonical-routing/valid-box row-source endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalFigure13L2C2CombinedWindowValidBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations :=
+  h.toConstructionObligations
+    |>.toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--

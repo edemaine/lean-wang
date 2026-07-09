@@ -1264,6 +1264,16 @@ def l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
     originZeroWindows
 
 /--
+Combined active/corner windows give canonical free-site-rectangle routing for
+the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+    (hwindows : L2C1OriginZeroCombinedActiveCornerWindows) :
+    L2C1CanonicalFreeSiteRectRouting :=
+  l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCombinedActiveCornerWindows hwindows)
+
+/--
 Origin-zero active/corner windows give canonical free-site-rectangle routing
 for the second audited L2-blank candidate.
 -/
@@ -1272,6 +1282,16 @@ def l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
     L2C2CanonicalFreeSiteRectRouting :=
   hasFigure18RobinsonBoardCanonicalFreeSiteRectRoutingForTable_of_originZeroWindows
     originZeroWindows
+
+/--
+Combined active/corner windows give canonical free-site-rectangle routing for
+the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectRoutingOfCombinedActiveCornerWindows
+    (hwindows : L2C2OriginZeroCombinedActiveCornerWindows) :
+    L2C2CanonicalFreeSiteRectRouting :=
+  l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCombinedActiveCornerWindows hwindows)
 
 set_option linter.style.longLine false in
 /--
