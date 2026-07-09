@@ -53,6 +53,20 @@ structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligati
   section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Concrete Section 7 translated-box theorem-facing L2C2 Robinson/source target
+through the bounded-search descriptor decoder.
+
+The `statementList_nodup` field is the explicit bridge that identifies
+support-search state codes with generated position codes.
+-/
+structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -64,6 +78,17 @@ structure Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations 
     Prop where
   scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
+Robinson/source target through the bounded-search descriptor decoder.
+-/
+structure Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
 
 set_option linter.style.longLine false in
 /--
@@ -437,6 +462,34 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations
 
+namespace Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line translated-box Robinson package, the bounded-search descriptor
+decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+    O.section7 O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+translated-box Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+    O.section7 O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations
+
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
@@ -462,5 +515,33 @@ theorem domino_problem_undecidable
     O.scaffold O.sourceLabelIndex
 
 end Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
+
+namespace Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 finite
+checked-stack/valid-translated-box Robinson package, the bounded-search
+descriptor decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_searchCodeWithNodupCorrect
+    O.scaffold O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 finite
+checked-stack/valid-translated-box Robinson package, the bounded-search
+descriptor decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_searchCodeWithNodupCorrect
+    O.scaffold O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligations
 
 end LeanWang

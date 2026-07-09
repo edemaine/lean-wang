@@ -612,6 +612,43 @@ theorem
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the second Section 7 board/free-line
+translated-box package, the bounded-search label-index decoder, and
+duplicate-free source statement supports.  Statement uniqueness identifies the
+generated position codes with the support-search state codes.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodupCorrect
+        hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second Section 7 board/free-line
+translated-box package, the bounded-search label-index decoder, and
+duplicate-free source statement supports.
+-/
+theorem
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+    (data : L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_position_source
+      data
+      (positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodupCorrect
+        hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the first Section 7 board/free-line
 translated-box package and the generated position-code accumulator step, with
 `positionProgramData` semantic correctness discharged.
@@ -941,6 +978,42 @@ theorem
       (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
         data)
       hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/valid-translated-box
+finite scaffold package, the bounded-search label-index decoder, and
+duplicate-free source statement supports.
+-/
+theorem
+    encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_searchCodeWithNodupCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  exact
+    encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+        data)
+      hsearch hnodup
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/valid-translated-box
+finite scaffold package, the bounded-search label-index decoder, and
+duplicate-free source statement supports.
+-/
+theorem
+    domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_searchCodeWithNodupCorrect
+    (data : L2C2CheckedStackValidTranslatedBoxData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  exact
+    domino_problem_undecidable_l2c2_board_free_line_translated_box_data_searchCodeWithNodupCorrect
+      (l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+        data)
+      hsearch hnodup
 
 set_option linter.style.longLine false in
 /--
