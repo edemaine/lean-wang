@@ -976,6 +976,84 @@ theorem sourceLabelAtByStatementStartWithPositionCode?_eq_none_of_labelCount_le
       rw [sourceLabelAtByStatementFrom?_eq_none_of_start_labelCount_le hi] at hfst
       cases hfst
 
+set_option linter.style.longLine false in
+/--
+The raw source label lookup has no result once the flat label index is past
+the bounded statement/variable rectangle.
+-/
+theorem sourceLabelAtByStatementFrom?_eq_none_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+        (NatPartrecToToPartrec.translate c) fuel k i = none := by
+  induction fuel generalizing k i with
+  | zero =>
+      exact TM0Route.partrecStartedTM0LabelAtByStatementFrom?_zero
+        (NatPartrecToToPartrec.translate c) k i
+  | succ fuel ih =>
+      rw [TM0Route.partrecStartedTM0LabelAtByStatementFrom?_succ]
+      cases hv : TM0Route.partrecVarList[i]? with
+      | some v =>
+          have hslot : i < TM0Route.partrecVarList.length := by
+            exact (List.getElem?_eq_some_iff.1 hv).1
+          have hge :
+              TM0Route.partrecVarList.length ≤ i := by
+            calc
+              TM0Route.partrecVarList.length ≤
+                  (fuel + 1) * TM0Route.partrecVarList.length := by
+                nth_rewrite 1 [← Nat.one_mul TM0Route.partrecVarList.length]
+                exact Nat.mul_le_mul_right _ (Nat.succ_le_succ (Nat.zero_le fuel))
+              _ ≤ i := hi
+          exact False.elim ((Nat.not_lt_of_ge hge) hslot)
+      | none =>
+          have htail :
+              fuel * TM0Route.partrecVarList.length ≤
+                i - TM0Route.partrecVarList.length := by
+            rw [Nat.succ_mul] at hi
+            exact Nat.le_sub_of_add_le hi
+          exact ih (k := k + 1) (i := i - TM0Route.partrecVarList.length) htail
+
+set_option linter.style.longLine false in
+/--
+The support-search-coded source label lookup has no result past the bounded
+statement/variable rectangle.
+-/
+theorem sourceLabelAtByStatementFromWithSearchCode?_eq_none_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+        (NatPartrecToToPartrec.translate c) fuel k i = none := by
+  unfold TM0FoldedCompiler.labelAtByStatementFromWithSearchCode?
+  rw [sourceLabelAtByStatementFrom?_eq_none_of_bound_le (c := c)
+    (fuel := fuel) (k := k) (i := i) hi]
+  rfl
+
+set_option linter.style.longLine false in
+/--
+The position-coded source label lookup has no result past the bounded
+statement/variable rectangle.
+-/
+theorem sourceLabelAtByStatementFromWithPositionCode?_eq_none_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i = none := by
+  cases hdecode :
+      TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?
+        (NatPartrecToToPartrec.translate c) fuel k i with
+  | none =>
+      rfl
+  | some q =>
+      have hfst :
+          TM0Route.partrecStartedTM0LabelAtByStatementFrom?
+              (NatPartrecToToPartrec.translate c) fuel k i = some q.1 := by
+        simpa [hdecode] using
+          (TM0FoldedCompiler.labelAtByStatementFromWithPositionCode?_fst_eq
+            (NatPartrecToToPartrec.translate c) fuel k i).symm
+      rw [sourceLabelAtByStatementFrom?_eq_none_of_bound_le (c := c)
+        (fuel := fuel) (k := k) (i := i) hi] at hfst
+      cases hfst
+
 /--
 Source-code version of the fully offset descriptor decoder.
 
@@ -1063,6 +1141,21 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_of_block_var_get?
         stmt v := by
   exact sourceSimStepDataForLabelIndexFromWithSearchCode_of_split
     (sourceLabelIndexFromSplit?_of_block_var_get? hblock hv) hstmt
+
+set_option linter.style.longLine false in
+/--
+The support-search-code descriptor decoder emits no rows past the bounded
+statement/variable rectangle.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    sourceSimStepDataForLabelIndexFromWithSearchCode c fuel k i = [] := by
+  unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+  rw [sourceLabelAtByStatementFromWithSearchCode?_eq_none_of_bound_le
+    (c := c) (fuel := fuel) (k := k) (i := i) hi]
+  rfl
 
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_zero
     (c : Code) (k i : Nat) :

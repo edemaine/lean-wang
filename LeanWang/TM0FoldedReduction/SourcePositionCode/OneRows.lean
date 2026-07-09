@@ -78,6 +78,21 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_of_block_var_get?
     exact Nat.mod_eq_of_lt hi
   simp [hmod]
 
+set_option linter.style.longLine false in
+/--
+The generated position-code descriptor decoder emits no rows past the bounded
+statement/variable rectangle.
+-/
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_nil_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i = [] := by
+  unfold sourceSimStepDataForLabelIndexFromWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithPositionCode
+  rw [sourceLabelAtByStatementFromWithPositionCode?_eq_none_of_bound_le
+    (c := c) (fuel := fuel) (k := k) (i := i) hi]
+  rfl
+
 theorem sourceSimStepDataForLabelIndexFromWithPositionCode_zero_block_var_get?
     {c : Code} {fuel i : Nat} {v : TM0Route.PartrecVar}
     (hv : TM0Route.partrecVarList[i]? = some v) :
