@@ -4013,6 +4013,21 @@ def toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the bounded-at-index decoded-window/layer-patch package to the
+equivalent fixed-start decoder package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowLayerPatchLabelIndexStartConstructionObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  layerPatches := h.layerPatches
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.mpr
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the bounded-at-index decoded-window/layer-patch package to the second
 candidate Section 7 layer-patch scaffold data.
 -/
@@ -16954,6 +16969,20 @@ def toSourcePositionCodeConstructionObligations
   layerPatches := h.layerPatches
   labelIndex :=
     TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index board/free-line/layer-patch package to the
+equivalent fixed-start decoder package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.mpr
       h.sourceRows
 
 set_option linter.style.longLine false in
