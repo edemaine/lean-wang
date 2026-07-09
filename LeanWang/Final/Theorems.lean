@@ -1274,6 +1274,24 @@ structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstruc
 set_option linter.style.longLine false in
 /--
 Second-candidate canonical routing plus valid translated scaffold boxes with
+generated bounded-interior position-code rows at concrete numeric label slots.
+
+This is the at-index analogue of
+`FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations`.
+It keeps the generated-position route on the canonical valid-box theorem surface
+instead of first forgetting to a decoder-step obligation.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows :
+    TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
 the generated position-code decoder step.
 -/
 structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations :
@@ -15367,6 +15385,23 @@ namespace FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionO
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box bounded-row-at-index
+data directly to the canonical-routing/valid-box bounded-row-at-index endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-row-at-index
 data directly to the canonical-routing/valid-box decoder-step endpoint.
 -/
 def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
@@ -15404,11 +15439,12 @@ concrete numeric label slots.
 theorem encoded_domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toBoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations.section7
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
-      h.sourceRows)
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  let c :=
+    h.toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+      c.routing c.validTranslatedBoxes c.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -15419,11 +15455,12 @@ concrete numeric label slots.
 theorem domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toBoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations.section7
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
-      h.sourceRows)
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  let c :=
+    h.toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+      c.routing c.validTranslatedBoxes c.sourceRows
 
 end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
 
@@ -24452,6 +24489,29 @@ theorem domino_problem_undecidable
     h.routing h.validTranslatedBoxes h.sourceRows
 
 end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the bounded-row-at-index source package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the bounded-row-at-index source package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
 
 namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
 
