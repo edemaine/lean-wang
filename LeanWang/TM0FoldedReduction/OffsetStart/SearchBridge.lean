@@ -10,8 +10,6 @@ Bridges between support-search descriptors, position-code descriptors, and
 canonical numeric-state descriptors.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction

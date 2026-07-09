@@ -9,8 +9,6 @@ import LeanWang.TM0FoldedReduction.OffsetStart.SearchBridge
 Computability consequences for folded source program data and generated position-program data.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction

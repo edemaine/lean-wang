@@ -14,8 +14,6 @@ computability supplied by the folded compiler, keeping the remaining
 uniformization target explicit.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
