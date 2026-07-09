@@ -129,6 +129,32 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligati
 
 set_option linter.style.longLine false in
 /--
+Compact concrete Section 7 layer-patch theorem-facing L2C2 Robinson/source
+target.
+
+This uses the lower `L2C2RobinsonSection7BoardFreeLineLayerPatchData` record
+directly: board/free-line active-corner recognition plus finite active-corner
+layer patches.  The expanded Nat-site obligation record remains available for
+certificate-level conversion.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the
+bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete finite checked-stack/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -676,6 +702,60 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
     O (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_sourceCodeCorrect
+    data hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_sourceCodeCorrect
+    data hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package, the bounded-search descriptor
+decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodup
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    data (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package, the bounded-search descriptor
+decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodup
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    data (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
 
 set_option linter.style.longLine false in
 /--
@@ -1469,6 +1549,60 @@ theorem domino_problem_undecidable
     O.section7 O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    O.section7 O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    O.section7 O.sourceLabelIndex
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson package, the bounded-search
+descriptor decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodup
+    O.section7 O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson package, the bounded-search
+descriptor decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodup
+    O.section7 O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
 
