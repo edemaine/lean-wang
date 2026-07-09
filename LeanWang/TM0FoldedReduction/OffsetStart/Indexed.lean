@@ -96,6 +96,12 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode
   exact TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode_eq_withCode
     (NatPartrecToToPartrec.translate c) i
 
+theorem sourceSimStepDataForLabelIndexStartWithCode_eq_nil_of_labelCount_le
+    {c : Code} {i : Nat} (hi : sourceLabelCount c ≤ i) :
+    sourceSimStepDataForLabelIndexStartWithCode c i = [] := by
+  rw [← sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode]
+  exact sourceSimStepDataForLabelIndexStartWithSearchCode_eq_nil_of_labelCount_le hi
+
 set_option linter.style.longLine false in
 /-- The numeric-state start decoder gives the bounded-search start-decoder target. -/
 theorem sourceSearchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart

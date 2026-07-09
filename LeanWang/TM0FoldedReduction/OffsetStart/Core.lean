@@ -167,6 +167,16 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_of_one_add_var_get?
   exact sourceSimStepDataForLabelIndexStartWithSearchCode_of_split
     (sourceLabelIndexStartSplit?_of_one_add_var_get? (c := c) hv) (sourceStatementAt_one c)
 
+theorem sourceSimStepDataForLabelIndexStartWithSearchCode_eq_nil_of_labelCount_le
+    {c : Code} {i : Nat} (hi : sourceLabelCount c ≤ i) :
+    sourceSimStepDataForLabelIndexStartWithSearchCode c i = [] := by
+  unfold sourceSimStepDataForLabelIndexStartWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
+  change sourceSimStepDataForLabelIndexFromWithSearchCode c
+      (sourceStatementCount c) 0 i = []
+  rw [sourceLabelCount_eq_statementCount_mul] at hi
+  exact sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_bound_le hi
+
 /-- Source-code version of the canonical position-coded offset-start decoder. -/
 def sourceSimStepDataForLabelIndexStartWithPositionCode
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
