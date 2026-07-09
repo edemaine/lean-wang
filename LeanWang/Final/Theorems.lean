@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Final.SourceImplications
 import LeanWang.Final.RobinsonCertificate
+import LeanWang.OllingerRobinsonFigure13Audit
 import LeanWang.OllingerRobinsonFigure13Obstructions
 
 /-!
@@ -4776,7 +4777,7 @@ def toOriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
     NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
       (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
         h.combinedActiveCornerWindows)
-      l2Component2BlankCandidatePairCompatibilityBool
+      l2Component2BlankCandidate_pairCompatibility
       (by
         simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
   labelIndex := h.labelIndex
@@ -5097,7 +5098,7 @@ def toOriginZeroTranslatedPositiveBoxConstructionObligations
     NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
       (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
         h.combinedActiveCornerWindows)
-      l2Component2BlankCandidatePairCompatibilityBool
+      l2Component2BlankCandidate_pairCompatibility
       (by
         simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
   sourceRows := h.sourceRows
@@ -5201,7 +5202,7 @@ def toOriginZeroTranslatedPositiveBoxOneRowsConstructionObligations
     NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
       (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
         h.combinedActiveCornerWindows)
-      l2Component2BlankCandidatePairCompatibilityBool
+      l2Component2BlankCandidate_pairCompatibility
       (by
         simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
   sourceRows := h.sourceRows
@@ -5307,7 +5308,7 @@ def toOriginZeroTranslatedPositiveBoxBoundedRowsConstructionObligations
     NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofFigure18ScaffoldDataPositiveTranslatedIsolatedBoxes
       (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
         h.combinedActiveCornerWindows)
-      l2Component2BlankCandidatePairCompatibilityBool
+      l2Component2BlankCandidate_pairCompatibility
       (by
         simpa [l2Component2Figure18ScaffoldData] using h.isolatedBoxes)
   sourceRows := h.sourceRows
