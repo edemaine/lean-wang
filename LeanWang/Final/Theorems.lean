@@ -25126,8 +25126,7 @@ theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCert
     (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
-    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
-      (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows))
+    O (sourceLabelIndexStartPrimrec_of_boundedInteriorRowsAtIndex hrows)
 
 set_option linter.style.longLine false in
 /--
@@ -25145,8 +25144,7 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateB
     (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
-    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
-      (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows))
+    O (sourceLabelIndexStartPrimrec_of_boundedInteriorRowsAtIndex hrows)
 
 set_option linter.style.longLine false in
 /--
@@ -25164,8 +25162,7 @@ theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCert
     (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
-    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
-      (sourceLabelIndexPrimrec_of_interiorRowsAtIndex hrows))
+    O (sourceLabelIndexStartPrimrec_of_interiorRowsAtIndex hrows)
 
 set_option linter.style.longLine false in
 /--
@@ -25183,8 +25180,7 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateI
     (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
-    O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex
-      (sourceLabelIndexPrimrec_of_interiorRowsAtIndex hrows))
+    O (sourceLabelIndexStartPrimrec_of_interiorRowsAtIndex hrows)
 
 set_option linter.style.longLine false in
 /--

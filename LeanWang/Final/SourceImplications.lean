@@ -369,11 +369,25 @@ theorem sourceLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec :
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
+/-- Bounded interior at-index rows recover the final position-coded start decoder target. -/
+theorem sourceLabelIndexStartPrimrec_of_boundedInteriorRowsAtIndex
+    (h : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_boundedInteriorRowsAtIndex h
+
+set_option linter.style.longLine false in
 /-- The final source-specialized start decoder target is equivalent to interior rows at index. -/
 theorem sourceLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec :
     SourcePositionCodeLabelIndexStartPrimrec ↔
       SourcePositionCodeInteriorRowsAtIndexPrimrec :=
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/-- Interior at-index rows recover the final position-coded start decoder target. -/
+theorem sourceLabelIndexStartPrimrec_of_interiorRowsAtIndex
+    (h : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_interiorRowsAtIndex h
 
 /-- The final source-side decoder-step and source-specialized label-index targets are equivalent. -/
 theorem sourceDecoderStepPrimrec_iff_sourceLabelIndexPrimrec :
