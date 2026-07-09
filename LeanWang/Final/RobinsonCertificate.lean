@@ -23,6 +23,24 @@ open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 set_option linter.style.longLine false in
 /--
+Current theorem-facing concrete L2C2 Robinson/source target.
+
+The scaffold field is the origin-zero active/corner-window plus translated
+positive-box package supplied by the Section 7 Robinson geometry route.  The
+source field is the remaining source-specialized generated position-code
+label-index decoder target.
+-/
+structure Figure13L2C2OriginZeroSourceLabelIndexObligations : Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from a bundled Robinson Figure 13 / Figure 18
 scaffold certificate and generated-position source obligations.
 -/
@@ -340,5 +358,31 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBo
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxObligationsSourceLabelIndexFrom
     O.toL2C2TowerIndexedBoxObligations hindex
+
+namespace Figure13L2C2OriginZeroSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the current concrete L2C2
+Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourceLabelIndexFrom
+    O.scaffold O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the current concrete L2C2 Robinson/source
+obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourceLabelIndexFrom
+    O.scaffold O.sourceLabelIndex
+
+end Figure13L2C2OriginZeroSourceLabelIndexObligations
 
 end LeanWang
