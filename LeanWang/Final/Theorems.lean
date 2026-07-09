@@ -24638,6 +24638,28 @@ theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslate
   h.domino_problem_undecidable
 
 set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the bounded-row-at-index
+canonical-routing/valid-box package.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the bounded-row-at-index
+canonical-routing/valid-box package.
+-/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
 /-- Encoded Wang domino undecidability from the decoder-step canonical-routing/valid-box package. -/
 theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
     (h :
