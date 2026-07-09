@@ -52,6 +52,92 @@ theorem figure13Figure16AuditCertificate :
   figure16RuleValid := Figure16.RuleSource.block_validRectangle_symbolTileSet
   figure16RuleTileable := Figure16.RuleSource.block_tileableSquare_symbolTileSet
 
+/-- The concrete Figure 13 transcription has a thin-layer component at every index. -/
+theorem layerData_componentAtLayerAt_thin (index : Fin 92) :
+    layerData.componentAtLayerAt index .thin =
+      some (LayerComponent.thin (thinComponentAt index)) := by
+  rw [← sparseLayerRows_layerData]
+  exact sparseLayerRows.separateLayerRows.layerData_componentAtLayerAt_thin
+    (sparseLayerRows_thinAt index)
+
+/-- The concrete Figure 13 transcription has a thick-layer component at every index. -/
+theorem layerData_componentAtLayerAt_thick (index : Fin 92) :
+    layerData.componentAtLayerAt index .thick =
+      some (LayerComponent.thick (thickComponentAt index)) := by
+  rw [← sparseLayerRows_layerData]
+  exact sparseLayerRows.separateLayerRows.layerData_componentAtLayerAt_thick
+    (sparseLayerRows_thickAt index)
+
+/-- The concrete Figure 13 transcription has a black-layer component at every index. -/
+theorem layerData_componentAtLayerAt_black (index : Fin 92) :
+    layerData.componentAtLayerAt index .black =
+      some (LayerComponent.black (blackComponentAt index)) := by
+  rw [← sparseLayerRows_layerData]
+  exact sparseLayerRows.separateLayerRows.layerData_componentAtLayerAt_black
+    (sparseLayerRows_blackAt index)
+
+/--
+Every concrete Figure 13 tile row has a component in every Figure 16 layer.
+-/
+theorem layerData_componentAtLayerAt_exists
+    (index : Fin 92) (layer : Layer) :
+    ∃ component : LayerComponent,
+      layerData.componentAtLayerAt index layer = some component ∧
+        component.layer = layer := by
+  cases layer with
+  | thin =>
+      refine ⟨LayerComponent.thin (thinComponentAt index),
+        layerData_componentAtLayerAt_thin index, rfl⟩
+  | thick =>
+      refine ⟨LayerComponent.thick (thickComponentAt index),
+        layerData_componentAtLayerAt_thick index, rfl⟩
+  | black =>
+      refine ⟨LayerComponent.black (blackComponentAt index),
+        layerData_componentAtLayerAt_black index, rfl⟩
+
+/--
+Site-level form of `layerData_componentAtLayerAt_exists`.
+-/
+theorem layerData_componentAtSiteLayer_exists
+    (site : Figure18Site) (layer : Layer) :
+    ∃ component : LayerComponent,
+      layerData.componentAtSiteLayer site layer = some component ∧
+        component.layer = layer :=
+  layerData_componentAtLayerAt_exists site.index layer
+
+/--
+Every concrete Figure 13 site/layer component selects a unique certified
+Figure 16 substitution rule.
+-/
+theorem layerData_componentAtSiteLayer_exists_certifiedSubstitutionRule
+    (site : Figure18Site) (layer : Layer) :
+    ∃ component : LayerComponent,
+      layerData.componentAtSiteLayer site layer = some component ∧
+        component.layer = layer ∧
+          ∃! rule : Figure16.SubstitutionRule,
+            rule ∈ Figure16.certifiedSubstitutionTable.rules ∧
+              rule.source = component.ruleSource := by
+  rcases layerData_componentAtSiteLayer_exists site layer with
+    ⟨component, hcomponent, hlayer⟩
+  exact ⟨component, hcomponent, hlayer,
+    Figure16.certifiedSubstitutionTable.exists_unique_rule_for_source
+      component.ruleSource⟩
+
+/--
+The certified rule selected by every concrete Figure 13 site/layer component
+expands to that component's Figure 16 block.
+-/
+theorem layerData_componentAtSiteLayer_certifiedSubstitutionRule_block
+    {site : Figure18Site} {layer : Layer} {component : LayerComponent}
+    (_hcomponent : layerData.componentAtSiteLayer site layer = some component)
+    {rule : Figure16.SubstitutionRule}
+    (hrule : rule ∈ Figure16.certifiedSubstitutionTable.rules)
+    (hsource : rule.source = component.ruleSource) :
+    rule.block = component.block := by
+  rw [Figure16.certifiedSubstitutionTable.block_eq_source_block hrule,
+    hsource]
+  rfl
+
 /--
 The checked Figure 13 stack attached to a site rectangle expands to a valid
 Figure 16 symbol rectangle in every layer.
