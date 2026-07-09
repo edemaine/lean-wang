@@ -15397,6 +15397,20 @@ def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project the second-candidate canonical-free-site Figure 16 source-label package
+directly to the live Section 7 board/free-line translated-box final surface.
+-/
+def toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      (TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+        h.canonicalActiveCorner h.compatibleLevelChecks)
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project the second-candidate canonical-free-site Figure 16 source-label package
 to the origin-zero/translated-positive-box source-label final surface.
 -/
 def toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
@@ -15414,7 +15428,9 @@ position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -15425,7 +15441,9 @@ position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 end FinalL2C2Figure16CompatibleCanonicalFreeSiteSourcePositionCodeConstructionObligations
 
