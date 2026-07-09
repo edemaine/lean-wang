@@ -92,6 +92,19 @@ structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupOblig
 
 set_option linter.style.longLine false in
 /--
+Concrete Section 7 translated-box theorem-facing L2C2 Robinson/source target
+through the bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the translated-box analogue of the compact layer-patch search-start
+route; it avoids the generated-position-code statement-list uniqueness bridge.
+-/
+structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete Section 7 layer-patch theorem-facing L2C2 Robinson/source target.
 
 This is the current finite-scaffold frontier: Robinson Section 7 supplies the
@@ -2790,6 +2803,51 @@ theorem domino_problem_undecidable
     O.section7 O.sourceLabelIndex
 
 end Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Forget translated boxes to compact layer-patch data while retaining the
+ordinary-source bounded-search start decoder.
+-/
+def toLayerPatchDataSearchCodeStartObligations
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      O.section7
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line translated-box Robinson package and the bounded-search
+fixed-start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      O.section7)
+    O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+translated-box Robinson package and the bounded-search fixed-start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      O.section7)
+    O.sourceSearchStart
+
+end Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations
 
 namespace Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations
 

@@ -1872,6 +1872,16 @@ structure FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstruction
 
 set_option linter.style.longLine false in
 /--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with the bounded-search start decoder used by ordinary `programData`.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  labelIndexStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Paper-facing second-candidate Figure 13 board/free-line route with the
 source-specialized position-code label-index target.
 
@@ -9577,6 +9587,20 @@ def ofCheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
   ofCheckedStackLayerPatchDataSearchCodeLabelIndexStart
     (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
       scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate ordinary-source inputs from paper-facing Section 7
+translated-box data and the bounded-search start decoder.
+-/
+def ofRobinsonSection7BoardFreeLineTranslatedBoxDataSearchCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hindex : SourceSearchCodeLabelIndexStartPrimrec) :
+    FinalL2C2SourceReductionInputs :=
+  ofScaffoldAndSourceSearchCodeLabelIndexStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfTranslatedBoxData
+      section7)
     hindex
 
 set_option linter.style.longLine false in
@@ -17643,6 +17667,59 @@ theorem domino_problem_undecidable
   h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the ordinary-source search-start translated-box package to the compact
+certificate wrapper.
+-/
+def toFigure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations where
+  section7 := h.section7
+  sourceSearchStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the ordinary-source search-start translated-box package to the compact
+second-candidate ordinary-source final inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofRobinsonSection7BoardFreeLineTranslatedBoxDataSearchCodeLabelIndexStart
+    h.section7 h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and the bounded-search
+fixed-start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFigure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and the
+bounded-search fixed-start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFigure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeStartObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations
@@ -26848,6 +26925,32 @@ theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineTranslate
     (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations.mk
+    section7 hstart).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and the bounded-search start decoder used
+by ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataSearchCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations.mk
+    section7 hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and the bounded-search start decoder used
+by ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataSearchCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalFigure13L2C2BoardFreeLineTranslatedBoxSearchCodeLabelIndexStartConstructionObligations.mk
     section7 hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
