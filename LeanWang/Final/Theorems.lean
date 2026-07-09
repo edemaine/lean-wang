@@ -27620,6 +27620,28 @@ namespace Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 set_option linter.style.longLine false in
 /--
 Project the checked-stack/valid-translated-box bounded-search-start certificate
+package to the checked-stack/valid-translated-box final construction surface.
+-/
+def toFinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations where
+  scaffold := O.scaffold
+  labelIndexStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack/valid-translated-box bounded-search-start certificate
+package to the current decoded-window/valid-box final surface.
+-/
+def toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations :=
+  O.toFinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
+    |>.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack/valid-translated-box bounded-search-start certificate
 package to the ordinary-source final reduction inputs.
 -/
 def toFinalL2C2SourceReductionInputs
@@ -27636,7 +27658,8 @@ bounded-search start decoder for ordinary `programData`.
 theorem encoded_domino_problem_undecidable
     (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+  O.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -27646,7 +27669,8 @@ bounded-search start decoder for ordinary `programData`.
 theorem domino_problem_undecidable
     (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+  O.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    |>.domino_problem_undecidable
 
 end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 
