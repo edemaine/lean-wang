@@ -30854,6 +30854,34 @@ theorem domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIn
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the global decoder, routed through the
+fixed-start source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+      scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing Robinson Section 7
+board/free-line layer-patch package and the global decoder, routed through the
+fixed-start source-level position-code target.
+-/
+theorem domino_problem_undecidable_of_scaffoldAndSourceGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : TM0FoldedReduction.GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+      scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing Robinson Section 7
 board/free-line layer-patch package and the source-specialized primitive
 recursive position-code label-index decoder.
 -/
@@ -31140,6 +31168,34 @@ theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceGlobalPositionCodeLab
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2ReductionInputs.ofScaffoldAndSourceGlobalPositionCodeLabelIndexFrom
     scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the proof-facing second L2 candidate
+Robinson Section 7 board/free-line layer-patch package and the global decoder,
+routed through the fixed-start source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2ScaffoldAndSourceGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2ReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+    scaffold
+    (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the proof-facing second L2 candidate Robinson
+Section 7 board/free-line layer-patch package and the global decoder, routed
+through the fixed-start source-level position-code target.
+-/
+theorem domino_problem_undecidable_of_l2c2ScaffoldAndSourceGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2ReductionInputs.ofScaffoldAndSourcePositionCodeLabelIndexStart
+    scaffold
+    (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -31809,6 +31865,32 @@ theorem domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCo
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the checked-stack/layer-patch finite
+scaffold certificate and the global decoder, routed through the fixed-start
+source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the checked-stack/layer-patch finite scaffold
+certificate and the global decoder, routed through the fixed-start source-level
+position-code target.
+-/
+theorem domino_problem_undecidable_of_checkedStackLayerPatchDataGlobalPositionCodeLabelIndexStart
+    (scaffold : TM0FoldedReduction.L2C1CheckedStackLayerPatchData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the origin-zero translated-box finite
 scaffold certificate and generated-position source obligations.
 -/
@@ -31983,6 +32065,59 @@ theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeL
   domino_problem_undecidable
     (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexFrom
       scaffold hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and the fixed-start source-level position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+      scaffold hstart)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and the fixed-start source-level position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable
+    (FinalReductionInputs.ofOriginZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+      scaffold hstart)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero translated-box finite
+scaffold certificate and the global decoder, routed through the fixed-start
+source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeLabelIndexStart
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero translated-box finite scaffold
+certificate and the global decoder, routed through the fixed-start source-level
+position-code target.
+-/
+theorem domino_problem_undecidable_of_originZeroTranslatedBoxGlobalPositionCodeLabelIndexStart
+    (scaffold : FinalOriginZeroTranslatedBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_originZeroTranslatedBoxSourcePositionCodeLabelIndexStart
+    scaffold (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
 
 set_option linter.style.longLine false in
 /--
@@ -32284,6 +32419,34 @@ theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesLabelIndex
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+finite active-corner layer patches, and the global decoder, routed through the
+fixed-start source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesGlobalPositionCodeLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesLabelIndexStart
+    originZeroWindows patches (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, finite
+active-corner layer patches, and the global decoder, routed through the
+fixed-start source-level position-code target.
+-/
+theorem domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesGlobalPositionCodeLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C1OriginZeroWindows)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_originZeroWindowsAndLayerPatchesLabelIndexStart
+    originZeroWindows patches (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the split checked-stack and layer-patch
 finite scaffold obligations.
 -/
@@ -32495,6 +32658,34 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesLabelIndexStar
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
     { checkedStacks := checkedStacks, patches := patches } hstart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the global decoder, routed through the
+fixed-start source-level position-code target.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobalPositionCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesLabelIndexStart
+    checkedStacks patches (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the global decoder, routed through the fixed-start
+source-level position-code target.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesGlobalPositionCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_checkedStacksAndLayerPatchesLabelIndexStart
+    checkedStacks patches (sourceLabelIndexStartPrimrec_of_globalLabelIndex hindex)
 
 
 end LeanWang
