@@ -355,6 +355,18 @@ set_option linter.style.longLine false in
 /--
 For the exact generated row slots used by the accumulator, primitive
 recursiveness of the fixed-start position-code decoder is equivalent to
+primitive recursiveness of bounded interior at-index decoding.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec :=
+  sourcePositionCodeLabelIndexStartPrimrec_iff_oneRowsAtIndexPrimrec.trans
+    sourcePositionCodeOneRowsAtIndexPrimrec_iff_boundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+For the exact generated row slots used by the accumulator, primitive
+recursiveness of the fixed-start position-code decoder is equivalent to
 primitive recursiveness of interior at-index decoding.
 
 This names the current narrow source frontier directly: closing either the
