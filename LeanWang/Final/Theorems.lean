@@ -2806,6 +2806,30 @@ abbrev FinalFigure13L2C2Figure18ScaffoldTileableBoxes : Prop :=
 
 set_option linter.style.longLine false in
 /--
+Cofinal raw Figure 13 tileable squares.
+
+This is the compactness-facing version of the positive-box scaffold premise:
+Robinson's substitution only needs arbitrarily large finite squares, not an
+already-built plane tiling.
+-/
+abbrev FinalFigure13L2C2Fig13CofinalTileableSquares : Prop :=
+  ∀ n : Nat, ∃ m : Nat, n ≤ m ∧ TileableSquare fig13Tiles m
+
+set_option linter.style.longLine false in
+/--
+Cofinal raw Figure 13 squares supply tileable boxes for the shared Figure 18
+scaffold tiles.
+-/
+def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfFig13CofinalSquares
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares) :
+    FinalFigure13L2C2Figure18ScaffoldTileableBoxes := by
+  intro r _hr
+  exact tileableBox_of_tilesPlane
+    (tilesPlane_figure18ScaffoldTiles_of_tilesPlane_fig13Tiles
+      (tilesPlane_fig13Tiles_of_cofinal_tileableSquares hsquares)) r
+
+set_option linter.style.longLine false in
+/--
 Compatible Figure 18 site squares supply the positive finite-box target used by
 the L2C2 valid-translated-box route.
 
@@ -28181,6 +28205,60 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSource
       FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Build the Section 7 board/free-line L2C2 source-label package from cofinal raw
+Figure 13 squares.
+-/
+def finalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligationsOfFig13CofinalSquares
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations where
+  boardFreeLineActiveCorner := boardFreeLineActiveCorner
+  tileableBoxes :=
+    finalFigure13L2C2Figure18ScaffoldTileableBoxesOfFig13CofinalSquares
+      hsquares
+  labelIndex := hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing L2C2 scaffold
+premises: Section 7 board/free-line active/corner recognition, cofinally many
+raw Figure 13 tileable squares, and the source-specialized position-code
+label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations
+    (finalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligationsOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing L2C2 scaffold premises:
+Section 7 board/free-line active/corner recognition, cofinally many raw Figure
+13 tileable squares, and the source-specialized position-code label-index
+target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligations
+    (finalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligationsOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares hindex)
 
 set_option linter.style.longLine false in
 /--
