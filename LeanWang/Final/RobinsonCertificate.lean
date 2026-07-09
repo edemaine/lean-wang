@@ -639,6 +639,20 @@ structure Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeWithNodupObligatio
 
 set_option linter.style.longLine false in
 /--
+Concrete finite checked-stack/valid-translated-box L2C2 Robinson target through
+the bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the checked finite-scaffold valid-translated-box analogue of the
+ordinary-source search-start endpoint and does not require statement-list
+uniqueness.
+-/
+structure Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from a bundled Robinson Figure 13 / Figure 18
 scaffold certificate and generated-position source obligations.
 -/
