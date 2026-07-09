@@ -27407,6 +27407,118 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBo
 
 set_option linter.style.longLine false in
 /--
+Build the concrete L2C2 origin-zero translated-positive-box scaffold object from
+origin-zero active/corner windows and cofinally many raw Figure 13 squares.
+-/
+def finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares) :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid :=
+  NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations.ofL2C2Figure18ScaffoldDataPositiveFig13CofinalSquares
+    originZeroWindows hsquares
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero
+active/corner windows, cofinally many raw Figure 13 squares, and the
+source-specialized position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeLabelIndexFrom
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeLabelIndexFrom
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero
+active/corner windows, cofinally many raw Figure 13 squares, and the
+fixed-start source-level position-code decoder target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStart
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hstart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the fixed-start source-level
+position-code decoder target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexStart
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxLabelIndexStart
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hstart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero
+active/corner windows, cofinally many raw Figure 13 squares, and generated
+interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxInteriorRows
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and generated interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxInteriorRows
+    (finalFigure13L2C2OriginZeroTranslatedPositiveBoxOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from decoded origin-zero active/corner
 windows, finite active-corner layer patches, and generated interior
 position-code rows.
