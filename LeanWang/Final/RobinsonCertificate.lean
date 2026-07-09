@@ -561,6 +561,21 @@ structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSear
 
 set_option linter.style.longLine false in
 /--
+Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
+generated position-code bounded rows and statement-list uniqueness.
+
+The source bridge below turns these generated position-code rows into the
+ordinary bounded-search row target used by the positive-board route.
+-/
+structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceRows : SourcePositionCodeBoundedInteriorRowsPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 

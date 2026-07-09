@@ -163,6 +163,19 @@ theorem searchCodeBoundedInteriorRowsPrimrec_of_interiorRows
     hinterior
 
 set_option linter.style.longLine false in
+/--
+Generated position-code bounded-interior rows give bounded-search
+bounded-interior rows once statement-list uniqueness identifies position codes
+with support-search state codes.
+-/
+theorem searchCodeBoundedInteriorRowsPrimrec_of_positionCodeBoundedInteriorRows
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourceSearchCodeBoundedInteriorRowsPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeBoundedInteriorRowsVar_primrec_of_positionCodeBoundedInteriorRows
+    hbounded hnodup
+
+set_option linter.style.longLine false in
 /-- Bounded-interior bounded-search rows give variable-branch one-row proofs. -/
 theorem searchCodeOneVarRowsPrimrec_of_boundedInteriorRows
     (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :

@@ -25069,6 +25069,75 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoard
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   O.domino_problem_undecidable
 
+set_option linter.style.longLine false
+namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the generated-position bounded-row package to the bounded-search
+positive-board package using statement-list uniqueness.
+-/
+def toSearchCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations) :
+    Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations where
+  activeCorner := O.activeCorner
+  alignedMacroSquares := O.alignedMacroSquares
+  sourceBoundedRows :=
+    searchCodeBoundedInteriorRowsPrimrec_of_positionCodeBoundedInteriorRows
+      O.sourceRows O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, positive board-level aligned macro-squares, generated position-code
+bounded rows, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toSearchCodeBoundedRowsObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+positive board-level aligned macro-squares, generated position-code bounded
+rows, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toSearchCodeBoundedRowsObligations.domino_problem_undecidable
+
+end Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the certificate-level canonical
+free-site positive-board generated-position bounded-row package with
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the certificate-level canonical free-site
+positive-board generated-position bounded-row package with statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.domino_problem_undecidable
+
 namespace FinalL2C2Figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
 
 set_option linter.style.longLine false in
