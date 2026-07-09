@@ -653,6 +653,36 @@ structure Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete L2C2 canonical-free-site/Figure 16 compatibility target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+This exposes the audited Figure 16 compatibility layer directly at the
+certificate surface, before forgetting it to checked valid-translated boxes.
+-/
+structure Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations :
+    Prop where
+  canonicalActiveCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete L2C2 origin-zero/Figure 16 compatibility target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the origin-zero analogue of the direct Figure 16 compatibility
+certificate surface and avoids generated-position statement-list uniqueness.
+-/
+structure Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  compatibleLevelChecks :
+    TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from a bundled Robinson Figure 13 / Figure 18
 scaffold certificate and generated-position source obligations.
 -/

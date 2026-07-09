@@ -26505,6 +26505,85 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 
+set_option linter.style.longLine false
+namespace Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project the canonical-free-site/Figure 16 bounded-search-start certificate
+package to the existing final construction surface.
+-/
+def toFinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    FinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations where
+  canonicalActiveCorner := O.canonicalActiveCorner
+  compatibleLevelChecks := O.compatibleLevelChecks
+  labelIndexStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from canonical-free-site recognition, Figure 16 compatibility
+checks, and the bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from canonical-free-site recognition, Figure 16
+compatibility checks, and the bounded-search start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2Figure16CompatibleCanonicalFreeSiteSearchCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations
+
+set_option linter.style.longLine false
+namespace Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero/Figure 16 bounded-search-start certificate package to
+the existing final construction surface.
+-/
+def toFinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    FinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations where
+  originZeroWindows := O.originZeroWindows
+  compatibleLevelChecks := O.compatibleLevelChecks
+  labelIndexStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero recognition, Figure 16 compatibility checks,
+and the bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero recognition, Figure 16 compatibility
+checks, and the bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2Figure16CompatibleOriginZeroSearchCodeLabelIndexStartConstructionObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations
+
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
