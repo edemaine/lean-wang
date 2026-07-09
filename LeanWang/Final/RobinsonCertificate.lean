@@ -148,6 +148,25 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithNodupObl
 
 set_option linter.style.longLine false in
 /--
+Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
+bounded-search fixed-start decoder and concrete started-TM1 support
+uniqueness/disjointness.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations :
+    Prop where
+  section7 :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+  statementSupport_nodup : SourceStartedTM1StatementSupportNodup
+  statementSupport_pairwiseDisjoint :
+    SourceStartedTM1StatementSupportPairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
 Compact concrete Section 7 layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -182,6 +201,20 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithNodu
   section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
   sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder and concrete started-TM1 support
+uniqueness/disjointness.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+  statementSupport_nodup : SourceStartedTM1StatementSupportNodup
+  statementSupport_pairwiseDisjoint :
+    SourceStartedTM1StatementSupportPairwiseDisjoint
 
 set_option linter.style.longLine false in
 /--
@@ -823,6 +856,48 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch scaffold package, the bounded-search fixed-start
+decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjoint
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithNodup
+    O hstart
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch scaffold package, the bounded-search fixed-start decoder, and
+concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjoint
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithNodup
+    O hstart
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
 board/free-line layer-patch data package and the source-specialized generated
 position-code label-index decoder.
@@ -904,6 +979,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
   domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
     data (sourceLabelIndexPrimrec_of_labelIndexStart
       (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hstart hnodup))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package, the bounded-search fixed-start
+decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjoint
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithNodup
+    data hstart
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package, the bounded-search fixed-start
+decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjoint
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithNodup
+    data hstart
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
 
 set_option linter.style.longLine false in
 /--
@@ -1864,6 +1973,49 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithNodupObligations
 
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations
+
+set_option linter.style.longLine false in
+/--
+Project the pairwise-disjoint support package to the statement-list `Nodup`
+package.
+-/
+def toSearchCodeStartWithNodupObligations
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithNodupObligations where
+  section7 := O.section7
+  sourceSearchStart := O.sourceSearchStart
+  statementList_nodup :=
+    sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      O.statementSupport_nodup O.statementSupport_pairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch Robinson package, the bounded-search fixed-start
+decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toSearchCodeStartWithNodupObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch Robinson package, the bounded-search fixed-start decoder, and
+concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toSearchCodeStartWithNodupObligations.domino_problem_undecidable
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartWithPairwiseDisjointObligations
+
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
@@ -1945,6 +2097,51 @@ theorem domino_problem_undecidable
     O.section7 O.sourceSearchStart O.statementList_nodup
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithNodupObligations
+
+set_option linter.style.longLine false
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations
+
+set_option linter.style.longLine false in
+/--
+Project the pairwise-disjoint support package to the statement-list `Nodup`
+package.
+-/
+def toSearchCodeStartWithNodupObligations
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithNodupObligations where
+  section7 := O.section7
+  sourceSearchStart := O.sourceSearchStart
+  statementList_nodup :=
+    sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      O.statementSupport_nodup O.statementSupport_pairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson package, the bounded-search
+fixed-start decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toSearchCodeStartWithNodupObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data Robinson package, the bounded-search
+fixed-start decoder, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toSearchCodeStartWithNodupObligations.domino_problem_undecidable
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartWithPairwiseDisjointObligations
+set_option linter.style.longLine true
 
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsObligations
 
