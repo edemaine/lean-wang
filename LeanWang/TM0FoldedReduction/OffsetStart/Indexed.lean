@@ -304,6 +304,21 @@ theorem sourcePositionCodeLabelIndexStartPrimrec_iff_labelIndexFromPrimrec :
 
 set_option linter.style.longLine false in
 /--
+For the source-specialized position-code route, the fixed-start decoder target
+is equivalent to primitive recursiveness of the generated accumulator step.
+
+This is the narrowest remaining machine-side target: proving the local
+accumulator-step decoder uniformly in the source code closes the fixed-start
+and full offset decoder targets used by the final reduction.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_iff_decoderStepPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔
+      SourcePositionCodeDecoderStepPrimrec :=
+  sourcePositionCodeLabelIndexStartPrimrec_iff_labelIndexFromPrimrec.trans
+    sourcePositionCodeDecoderStepPrimrec_iff_sourcePositionCodeLabelIndexFromPrimrec.symm
+
+set_option linter.style.longLine false in
+/--
 The source-specialized position-code start decoder gives the exact
 one-row-at-index target used by the generated accumulator.
 -/

@@ -374,6 +374,12 @@ theorem sourceDecoderStepPrimrec_iff_sourceLabelIndexPrimrec :
   ⟨sourceLabelIndexPrimrec_of_decoderStep,
     sourceDecoderStepPrimrec_of_sourceLabelIndex⟩
 
+set_option linter.style.longLine false in
+/-- The final source-specialized start decoder target is equivalent to the accumulator-step target. -/
+theorem sourceLabelIndexStartPrimrec_iff_decoderStepPrimrec :
+    SourcePositionCodeLabelIndexStartPrimrec ↔ SourcePositionCodeDecoderStepPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_iff_decoderStepPrimrec
+
 /-- One-row generated position-code rows give the interior-row target. -/
 theorem sourceInteriorRowsPrimrec_of_oneRows
     (h : SourcePositionCodeOneRowsPrimrec) :
