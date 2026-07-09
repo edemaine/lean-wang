@@ -26044,6 +26044,44 @@ set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
 layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route, the bounded-search start decoder, and duplicate-free
+started-TM0 statement support.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateSearchCodeLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hstart hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
+certificate route, the bounded-search start decoder, and duplicate-free
+started-TM0 statement support.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateSearchCodeLabelIndexStart
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
+    O (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hstart hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7
+layer-patch scaffold package, using the patch-preserving Robinson scaffold
 certificate route and one generated position-code row at the concrete numeric
 label slots decoded by the final accumulator.
 -/

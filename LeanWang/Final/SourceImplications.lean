@@ -269,6 +269,42 @@ theorem sourceLabelIndexStartPrimrec_of_searchCodeLabelIndex
   TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_labelIndexFrom
     (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
 
+set_option linter.style.longLine false in
+/--
+The bounded-search fixed-start decoder plus statement-list uniqueness gives
+the final position-coded start-decoder target.
+-/
+theorem sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    hsearch hnodup
+
+set_option linter.style.longLine false in
+/--
+The numeric-state fixed-start decoder plus statement-list uniqueness gives
+the final position-coded start-decoder target.
+-/
+theorem sourceLabelIndexStartPrimrec_of_codeLabelIndexStart
+    (hstart : SourceCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    (searchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart hstart) hnodup
+
+set_option linter.style.longLine false in
+/--
+The global numeric-state fixed-start decoder plus statement-list uniqueness
+gives the final position-coded start-decoder target.
+-/
+theorem sourceLabelIndexStartPrimrec_of_globalCodeLabelIndexStart
+    (hstart : GlobalCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  sourceLabelIndexStartPrimrec_of_codeLabelIndexStart
+    (codeLabelIndexStartPrimrec_of_globalCodeLabelIndexStart hstart) hnodup
+
 /-- The source-specialized label-index target implies the decoder-step target. -/
 theorem sourceDecoderStepPrimrec_of_sourceLabelIndex
     (h : SourcePositionCodeLabelIndexFromPrimrec) :

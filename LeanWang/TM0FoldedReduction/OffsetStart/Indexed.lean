@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.TM0FoldedReduction.OffsetStart.Core
+import LeanWang.TM0FoldedReduction.SourcePositionCode.Decoder
 
 /-!
 Indexed descriptor-list definitions, start-decoder equivalences, and
@@ -128,6 +129,39 @@ theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq (c : Code) (i : N
       TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
         (NatPartrecToToPartrec.translate c) i :=
   rfl
+
+set_option linter.style.longLine false in
+/--
+Under duplicate-free started-TM0 statement support, the fixed-start
+position-code decoder agrees with the fixed-start bounded-search decoder.
+
+This is the start-decoder form of
+`sourceSimStepDataForLabelIndexFromWithPositionCode_eq_searchCode_of_statementList_nodup`.
+-/
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq_searchCode_of_statementList_nodup
+    (hnodup : SourceStatementListNodup) (c : Code) (i : Nat) :
+    sourceSimStepDataForLabelIndexStartWithPositionCode c i =
+      sourceSimStepDataForLabelIndexStartWithSearchCode c i := by
+  unfold sourceSimStepDataForLabelIndexStartWithPositionCode
+    sourceSimStepDataForLabelIndexStartWithSearchCode
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
+    TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
+  exact
+    sourceSimStepDataForLabelIndexFromWithPositionCode_eq_searchCode_of_statementList_nodup
+      hnodup c (sourceStatementCount c) 0 i
+
+set_option linter.style.longLine false in
+/--
+The bounded-search fixed-start decoder plus statement-list uniqueness gives
+the final position-coded fixed-start decoder target.
+-/
+theorem sourcePositionCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    SourcePositionCodeLabelIndexStartPrimrec :=
+  hsearch.of_eq fun p =>
+    (sourceSimStepDataForLabelIndexStartWithPositionCode_eq_searchCode_of_statementList_nodup
+      hnodup p.1 p.2).symm
 
 theorem sourceSimStepDataForLabelIndexFrom_eq_withCode
     (c : Code) (fuel k i : Nat) :
