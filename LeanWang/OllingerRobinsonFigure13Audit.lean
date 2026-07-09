@@ -49,6 +49,8 @@ structure Figure13Figure16AuditCertificate : Prop where
     allTargetsHaveUniqueParentIndexBool = false
   figure16EveryTargetHasParentIndex :
     allTargetsHaveParentIndexBool = true
+  figure16AlignedBlockUniqueParent :
+    allAlignedCompatibleBlocksHaveUniqueParentBool = true
 
 /-- The checked finite audit package for the concrete Figure 13/Figure 16 data. -/
 theorem figure13Figure16AuditCertificate :
@@ -63,6 +65,8 @@ theorem figure13Figure16AuditCertificate :
   figure16RadiusZeroParentIndexAmbiguous :=
     allTargetsHaveUniqueParentIndexBool_eq_false
   figure16EveryTargetHasParentIndex := allTargetsHaveParentIndexBool_eq_true
+  figure16AlignedBlockUniqueParent :=
+    allAlignedCompatibleBlocksHaveUniqueParentBool_eq_true
 
 /-- The concrete Figure 13 transcription has a thin-layer component at every index. -/
 theorem layerData_componentAtLayerAt_thin (index : Fin 92) :
