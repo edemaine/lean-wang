@@ -358,6 +358,16 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligat
 set_option linter.style.longLine false in
 /--
 Compact concrete Section 7 layer-patch L2C2 Robinson target through the
+generated position-code accumulator step.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStepObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the
 fixed-start source-level generated position-code decoder.
 -/
 structure Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations :
@@ -493,6 +503,16 @@ structure Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete finite checked-stack/layer-patch L2C2 Robinson target through the
+generated position-code accumulator step.
+-/
+structure Figure13L2C2CheckedStackLayerPatchDecoderStepObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete finite checked-stack/layer-patch L2C2 Robinson target through
 bounded-interior generated position-code rows at concrete numeric label slots.
 -/
@@ -549,6 +569,17 @@ structure Figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexObligations :
   checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete split checked-stack/layer-patch L2C2 Robinson target through the
+generated position-code accumulator step.
+-/
+structure Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 set_option linter.style.longLine false in
 /--
@@ -612,6 +643,17 @@ structure Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations :
   originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/layer-patch L2C2 Robinson target through the
+generated position-code accumulator step.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
 
 set_option linter.style.longLine false in
 /--

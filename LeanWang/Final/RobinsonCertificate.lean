@@ -559,6 +559,32 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the generated position-code
+accumulator step.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStep
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    data (sourceLabelIndexPrimrec_of_decoderStep hstep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the generated position-code
+accumulator step.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStep
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
+    data (sourceLabelIndexPrimrec_of_decoderStep hstep)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
 board/free-line layer-patch data package and the fixed-start source-level
 generated position-code decoder.
 -/
@@ -2921,6 +2947,32 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexObligations
 
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStepObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from compact Section 7 layer-patch data and the generated
+position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStepObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStep
+    O.section7 O.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from compact Section 7 layer-patch data and the generated
+position-code accumulator step.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStepObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStep
+    O.section7 O.decoderStep
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataDecoderStepObligations
+
 namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataLabelIndexStartObligations
 
 set_option linter.style.longLine false in
@@ -3261,6 +3313,32 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
 
+namespace Figure13L2C2CheckedStackLayerPatchDecoderStepObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch package and the generated position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchDecoderStepObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    O.scaffold (sourceLabelIndexPrimrec_of_decoderStep O.decoderStep)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+package and the generated position-code accumulator step.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchDecoderStepObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    O.scaffold (sourceLabelIndexPrimrec_of_decoderStep O.decoderStep)
+
+end Figure13L2C2CheckedStackLayerPatchDecoderStepObligations
+
 namespace Figure13L2C2CheckedStackLayerPatchBoundedRowsAtIndexObligations
 
 set_option linter.style.longLine false in
@@ -3369,6 +3447,43 @@ theorem domino_problem_undecidable
     O.checkedStacks O.layerPatches O.sourceLabelIndex
 
 end Figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexObligations
+
+namespace Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations
+
+set_option linter.style.longLine false in
+/--
+Bundle split checked stacks and layer patches into the checked-stack/layer-patch
+decoder-step certificate package.
+-/
+def toCheckedStackLayerPatchDecoderStepObligations
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations) :
+    Figure13L2C2CheckedStackLayerPatchDecoderStepObligations where
+  scaffold := { checkedStacks := O.checkedStacks, patches := O.layerPatches }
+  decoderStep := O.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split checked stacks, layer patches,
+and the generated position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStackLayerPatchDecoderStepObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split checked stacks, layer patches, and the
+generated position-code accumulator step.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStackLayerPatchDecoderStepObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations
 
 namespace Figure13L2C2CheckedStacksAndLayerPatchesBoundedRowsAtIndexObligations
 
@@ -3496,6 +3611,46 @@ theorem domino_problem_undecidable
     O.originZeroWindows O.layerPatches O.sourceLabelIndex
 
 end Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero windows and layer patches to checked stacks plus layer
+patches, preserving the generated position-code accumulator-step target.
+-/
+def toCheckedStacksAndLayerPatchesDecoderStepObligations
+    (O : Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations) :
+    Figure13L2C2CheckedStacksAndLayerPatchesDecoderStepObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      O.originZeroWindows
+  layerPatches := O.layerPatches
+  decoderStep := O.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero windows, layer patches, and
+the generated position-code accumulator step.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStacksAndLayerPatchesDecoderStepObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero windows, layer patches, and the
+generated position-code accumulator step.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStacksAndLayerPatchesDecoderStepObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroLayerPatchesDecoderStepObligations
 
 namespace Figure13L2C2OriginZeroLayerPatchesBoundedRowsAtIndexObligations
 
