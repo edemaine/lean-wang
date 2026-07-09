@@ -1128,6 +1128,38 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxIn
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from origin-zero active/corner windows,
+valid translated boxes, and bounded-interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexFrom
+    originZeroWindows validTranslatedBoxes
+    (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, valid
+translated boxes, and bounded-interior generated position-code rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexFrom
+    originZeroWindows validTranslatedBoxes
+    (sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
 valid translated boxes, and the bounded-search fixed-start decoder for
 ordinary `programData`.
 -/
@@ -3115,6 +3147,33 @@ theorem domino_problem_undecidable
     O.originZeroWindows O.validTranslatedBoxes O.sourceRows
 
 end Figure13L2C2OriginZeroValidTranslatedBoxInteriorRowsAtIndexObligations
+
+namespace Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window /
+valid-translated-box package and bounded-interior generated position-code rows
+at label indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    O.originZeroWindows O.validTranslatedBoxes O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window / valid-translated-box
+package and bounded-interior generated position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    O.originZeroWindows O.validTranslatedBoxes O.sourceRows
+
+end Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations
 
 namespace Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations
 

@@ -643,6 +643,21 @@ structure Figure13L2C2OriginZeroValidTranslatedBoxInteriorRowsAtIndexObligations
 set_option linter.style.longLine false in
 /--
 Concrete origin-zero-window/valid-translated-box L2C2 Robinson target through
+bounded-interior generated position-code rows at concrete numeric label slots.
+
+This is the weakest at-index source target currently exposed for the
+origin-zero valid-box scaffold route.
+-/
+structure Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/valid-translated-box L2C2 Robinson target through
 the bounded-search fixed-start decoder for ordinary `programData`.
 
 Valid translated boxes are converted to finite active-corner layer patches by
