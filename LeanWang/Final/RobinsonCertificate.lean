@@ -517,6 +517,21 @@ structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeS
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/positive-board-level L2C2 Robinson target through
+the bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the ordinary-source certificate surface for the positive board-level
+route and therefore does not require generated-position statement-list
+uniqueness.
+-/
+structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
