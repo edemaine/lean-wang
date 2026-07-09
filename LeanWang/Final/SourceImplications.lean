@@ -47,6 +47,14 @@ theorem searchCodeLabelIndexPrimrec_of_decoderStep
   TM0FoldedReduction.sourceSearchCodeLabelIndexFromPrimrec_of_decoderStep hstep
 
 set_option linter.style.longLine false in
+/-- The global bounded-search label-index target implies the source-specialized bounded-search target. -/
+theorem searchCodeLabelIndexPrimrec_of_globalSearchCodeLabelIndex
+    (hindex : GlobalSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeLabelIndexFromPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexFromPrimrec_of_globalSearchCodeLabelIndexFromPrimrec
+    hindex
+
+set_option linter.style.longLine false in
 /-- The bounded-search label-index target recovers the bounded-search decoder-step target. -/
 theorem searchCodeDecoderStepPrimrec_of_labelIndex
     (hindex : SourceSearchCodeLabelIndexFromPrimrec) :

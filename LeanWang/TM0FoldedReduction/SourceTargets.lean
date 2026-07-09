@@ -56,6 +56,33 @@ abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
   Primrec (fun p : Code × Nat × Nat × Nat =>
     sourceSimStepDataForLabelIndexFromWithSearchCode p.1 p.2.1 p.2.2.1 p.2.2.2)
 
+set_option linter.style.longLine false in
+/--
+Global primitive-recursion target for the bounded-search label-index decoder.
+This is the non-source-specialized version of
+`SourceSearchCodeLabelIndexFromPrimrec`; the source route uses it after
+precomposing with `NatPartrecToToPartrec.translate`.
+-/
+abbrev GlobalSearchCodeLabelIndexFromPrimrec : Prop :=
+  Primrec (fun p : Turing.ToPartrec.Code × Nat × Nat × Nat =>
+    TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode
+      p.1 p.2.1 p.2.2.1 p.2.2.2)
+
+/--
+The global bounded-search label-index target implies the source-specialized
+bounded-search label-index target by precomposing with the source-code
+translation.
+-/
+theorem sourceSearchCodeLabelIndexFromPrimrec_of_globalSearchCodeLabelIndexFromPrimrec
+    (hindex : GlobalSearchCodeLabelIndexFromPrimrec) :
+    SourceSearchCodeLabelIndexFromPrimrec := by
+  exact (hindex.comp
+    (Primrec.pair
+      (NatPartrecToToPartrec.translate_primrec.comp Primrec.fst)
+      Primrec.snd)).of_eq fun p => by
+        unfold sourceSimStepDataForLabelIndexFromWithSearchCode
+        rfl
+
 /-- One-row bounded-search rows generate the interior-row bounded-search target. -/
 theorem sourceSearchCodeInteriorRowsPrimrec_of_oneVarRows
     (hrows : SourceSearchCodeOneVarRowsPrimrec) :

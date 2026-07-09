@@ -124,6 +124,16 @@ decoder used by the ordinary `programData` source route.
 abbrev SourceSearchCodeLabelIndexFromPrimrec : Prop :=
   TM0FoldedReduction.SourceSearchCodeLabelIndexFromPrimrec
 
+set_option linter.style.longLine false in
+/--
+Global primitive-recursion target for the bounded-search label-index decoder
+used by ordinary `programData`.  This is the non-source-specialized version of
+`SourceSearchCodeLabelIndexFromPrimrec`; the final reduction uses it after
+precomposing with `NatPartrecToToPartrec.translate`.
+-/
+abbrev GlobalSearchCodeLabelIndexFromPrimrec : Prop :=
+  TM0FoldedReduction.GlobalSearchCodeLabelIndexFromPrimrec
+
 /--
 Source-side primitive-recursion target for the numeric-state start decoder
 used directly by ordinary `programData`.
