@@ -25070,6 +25070,86 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoard
   O.domino_problem_undecidable
 
 set_option linter.style.longLine false
+namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations
+
+set_option linter.style.longLine false in
+/--
+Project the direct generated-position positive-board row package to the
+Section 7 board/free-line layer-patch data.
+-/
+def toBoardFreeLineLayerPatchData
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData :=
+  finalFigure13L2C2BoardFreeLineLayerPatchDataOfOriginZeroWindowsRobinsonPositiveBoardLevelAlignedMacroSquares
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      O.activeCorner)
+    O.alignedMacroSquares
+
+set_option linter.style.longLine false in
+/--
+Project generated position-code bounded rows to the direct generated-position
+source obligations, using `positionProgramData` correctness.
+-/
+def toPositionSourceObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    TM0FoldedReduction.PositionSourceObligations :=
+  TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+    O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, positive board-level aligned macro-squares, and generated
+position-code bounded rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    O.toBoardFreeLineLayerPatchData O.toPositionSourceObligations
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+positive board-level aligned macro-squares, and generated position-code bounded
+rows.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    O.toBoardFreeLineLayerPatchData O.toPositionSourceObligations
+
+end Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the certificate-level canonical
+free-site positive-board generated-position bounded-row package.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the certificate-level canonical free-site
+positive-board generated-position bounded-row package.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.domino_problem_undecidable
+
+set_option linter.style.longLine false
 namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations
 
 set_option linter.style.longLine false in

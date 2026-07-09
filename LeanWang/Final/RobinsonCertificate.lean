@@ -562,6 +562,21 @@ structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSear
 set_option linter.style.longLine false in
 /--
 Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
+generated position-code bounded rows for `positionProgramData`.
+
+This is the direct generated-position row-level positive-board route.  It uses
+the semantic correctness theorem for `positionProgramData` and does not require
+statement-list uniqueness for the canonical bounded-search row decoder.
+-/
+structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceRows : SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
 generated position-code bounded rows and statement-list uniqueness.
 
 The source bridge below turns these generated position-code rows into the
