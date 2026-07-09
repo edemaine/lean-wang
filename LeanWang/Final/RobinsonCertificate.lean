@@ -479,6 +479,22 @@ structure Figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexObligations :
 set_option linter.style.longLine false in
 /--
 Concrete origin-zero-window/valid-translated-box L2C2 Robinson target through
+the bounded-search fixed-start decoder for ordinary `programData`.
+
+Valid translated boxes are converted to finite active-corner layer patches by
+the audited no-neighbor checks for the second L2 component.  This ordinary
+source route does not require generated-position statement-list uniqueness.
+-/
+structure Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/valid-translated-box L2C2 Robinson target through
 the bounded-search fixed-start decoder and statement-list uniqueness.
 -/
 structure Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations :
@@ -1913,6 +1929,46 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSo
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from origin-zero active/corner windows,
+valid translated boxes, and the bounded-search fixed-start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+        originZeroWindows)
+      (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+        validTranslatedBoxes))
+    hsearch
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, valid
+translated boxes, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStart
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+        originZeroWindows)
+      (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+        validTranslatedBoxes))
+    hsearch
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
 valid translated boxes, and the bounded-search fixed-start decoder.
 -/
 theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodup
@@ -3341,6 +3397,49 @@ theorem domino_problem_undecidable
     O.originZeroWindows O.validTranslatedBoxes O.sourceLabelIndex
 
 end Figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero-window/valid-box fixed-start certificate to compact
+Section 7 layer-patch data with the same ordinary-source decoder.
+-/
+def toLayerPatchDataSearchCodeStartObligations
+    (O : Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfCheckedStacks
+      (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+        O.originZeroWindows)
+      (TM0FoldedReduction.l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+        O.validTranslatedBoxes)
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/valid-box
+Robinson package and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    O.originZeroWindows O.validTranslatedBoxes O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/valid-box Robinson
+package and the bounded-search fixed-start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    O.originZeroWindows O.validTranslatedBoxes O.sourceSearchStart
+
+end Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations
 
 namespace Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations
 
