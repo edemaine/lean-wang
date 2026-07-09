@@ -14576,6 +14576,19 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box row-source data
+directly to the live Section 7 board/free-line translated-box surface.
+-/
+def toBoardFreeLineTranslatedBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project second-candidate checked-stack/valid-translated-box row-source data to
 the decoded-window/valid-box final surface through canonical active/corner
 recognition.
@@ -14617,8 +14630,10 @@ translated scaffold boxes, and generated interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14628,8 +14643,10 @@ translated scaffold boxes, and generated interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows)
 
 end FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
@@ -14647,6 +14664,19 @@ def toConstructionObligations
   sourceRows :=
     TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
       h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box one-row data
+directly to the live Section 7 board/free-line translated-box surface.
+-/
+def toBoardFreeLineTranslatedBoxOneRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -14680,8 +14710,10 @@ translated scaffold boxes, and generated one-row position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxOneRowsConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14691,8 +14723,10 @@ translated scaffold boxes, and generated one-row position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_oneRowsCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxOneRowsConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows)
 
 end FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations
 
@@ -14720,6 +14754,19 @@ def toConstructionObligations
     (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
     FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations :=
   h.toOneRowsConstructionObligations.toConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-row data
+directly to the live Section 7 board/free-line translated-box surface.
+-/
+def toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -14753,8 +14800,10 @@ translated scaffold boxes, and generated bounded-interior position-code rows.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14764,8 +14813,10 @@ translated scaffold boxes, and generated bounded-interior position-code rows.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows)
 
 end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
 
@@ -14790,6 +14841,20 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box bounded-row-at-index
+data directly to the live Section 7 board/free-line translated-box surface.
+-/
+def toBoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from second-candidate checked origin-zero stacks, valid
 translated scaffold boxes, and bounded-interior generated position-code rows at
 concrete numeric label slots.
@@ -14798,8 +14863,10 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14811,8 +14878,10 @@ theorem domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_boundedRowsAtIndexCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_boundedInteriorAtIndex
+      h.sourceRows)
 
 end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
 
@@ -14839,6 +14908,20 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligatio
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box interior-row-at-index
+data directly to the live Section 7 board/free-line translated-box surface.
+-/
+def toBoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from second-candidate checked origin-zero stacks, valid
 translated scaffold boxes, and interior generated position-code rows at
 concrete numeric label slots.
@@ -14847,8 +14930,10 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+      h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14860,8 +14945,10 @@ theorem domino_problem_undecidable
     (h :
       FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_interiorRowsAtIndexCorrect
-    h.scaffold h.sourceRows
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations.section7
+    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_interiorAtIndex
+      h.sourceRows)
 
 end FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations
 
@@ -14915,6 +15002,20 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligatio
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box decoder-step data
+directly to the live Section 7 board/free-line translated-box source-label
+surface.
+-/
+def toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_decoderStep h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box decoder-step data
 to the decoded-window/valid-box source-label final surface through canonical
 active/corner recognition.
 -/
@@ -14956,8 +15057,9 @@ translated scaffold boxes, and the generated position-code decoder step.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_decoderStep h.decoderStep)
 
 set_option linter.style.longLine false in
 /--
@@ -14967,8 +15069,9 @@ translated scaffold boxes, and the generated position-code decoder step.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_decoderStep h.decoderStep)
 
 end FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations
 
@@ -15023,6 +15126,21 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionOb
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box global-label data
+directly to the live Section 7 board/free-line translated-box source-label
+surface.
+-/
+def toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-label data
 to the canonical-active-corner/valid-box source-label final surface.
 -/
 def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObligations
@@ -15081,8 +15199,9 @@ translated scaffold boxes, and the global position-code label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 set_option linter.style.longLine false in
 /--
@@ -15092,8 +15211,9 @@ translated scaffold boxes, and the global position-code label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
-    |>.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    (sourceLabelIndexPrimrec_of_globalLabelIndex h.labelIndex)
 
 end FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations
 
@@ -15134,6 +15254,20 @@ def toCanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionOb
   validTranslatedBoxes :=
     finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
       h.scaffold.validTranslatedBoxes
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box source-label data
+directly to the live Section 7 board/free-line translated-box source-label
+surface.
+-/
+def toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -15208,8 +15342,9 @@ decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFigure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
-    |>.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -15220,8 +15355,9 @@ decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFigure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
-    |>.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 end FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
