@@ -27456,6 +27456,42 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from concrete L2C2 origin-zero
+active/corner windows, cofinally many raw Figure 13 squares, the bounded-search
+label-index source target, and duplicate-free source statement lists.
+
+This is the current clean theorem surface for the alternate source route:
+statement-list uniqueness identifies bounded-search state codes with generated
+position codes.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithStatementNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    originZeroWindows hsquares
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
+cofinally many raw Figure 13 squares, the bounded-search label-index source
+target, and duplicate-free source statement lists.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithStatementNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
+    originZeroWindows hsquares
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero
 active/corner windows, cofinally many raw Figure 13 squares, and the
 fixed-start source-level position-code decoder target.
 -/
