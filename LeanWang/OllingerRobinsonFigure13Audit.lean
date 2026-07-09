@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinsonFigure13Data
+import LeanWang.OllingerRobinsonFigure16Recognizability
 
 /-!
 Combined finite audit certificate for the Figure 13/Figure 16 scaffold data.
@@ -41,6 +41,14 @@ structure Figure13Figure16AuditCertificate : Prop where
   figure16RuleTileable :
     ∀ _ : Figure16.RuleSource,
       TileableSquare Figure16.Symbol.tileSet 2
+  figure16ParentIndexCandidateHistogram :
+    parentIndexCandidateCountHistogram =
+      [(1, 20), (2, 82), (3, 51), (4, 36), (5, 15),
+        (7, 28), (8, 48), (24, 48), (40, 40)]
+  figure16RadiusZeroParentIndexAmbiguous :
+    allTargetsHaveUniqueParentIndexBool = false
+  figure16EveryTargetHasParentIndex :
+    allTargetsHaveParentIndexBool = true
 
 /-- The checked finite audit package for the concrete Figure 13/Figure 16 data. -/
 theorem figure13Figure16AuditCertificate :
@@ -51,6 +59,10 @@ theorem figure13Figure16AuditCertificate :
   figure16Substitution := Figure16.humanTranscriptionCertificate
   figure16RuleValid := Figure16.RuleSource.block_validRectangle_symbolTileSet
   figure16RuleTileable := Figure16.RuleSource.block_tileableSquare_symbolTileSet
+  figure16ParentIndexCandidateHistogram := parentIndexCandidateCountHistogram_eq
+  figure16RadiusZeroParentIndexAmbiguous :=
+    allTargetsHaveUniqueParentIndexBool_eq_false
+  figure16EveryTargetHasParentIndex := allTargetsHaveParentIndexBool_eq_true
 
 /-- The concrete Figure 13 transcription has a thin-layer component at every index. -/
 theorem layerData_componentAtLayerAt_thin (index : Fin 92) :
