@@ -1837,6 +1837,26 @@ def l2c2OriginZeroWindowsOfCheckedStacks
   hasFigure18IndexedActiveCornerOriginZeroWindows_of_checkedStacks hchecked
 
 /--
+Finite origin-zero checked stacks give canonical free-site-rectangle routing for
+the first audited L2-blank candidate.
+-/
+def l2c1CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+    (hchecked : L2C1OriginZeroCheckedStacks) :
+    L2C1CanonicalFreeSiteRectRouting :=
+  l2c1CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (l2c1OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
+Finite origin-zero checked stacks give canonical free-site-rectangle routing for
+the second audited L2-blank candidate.
+-/
+def l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+    (hchecked : L2C2OriginZeroCheckedStacks) :
+    L2C2CanonicalFreeSiteRectRouting :=
+  l2c2CanonicalFreeSiteRectRoutingOfOriginZeroWindows
+    (l2c2OriginZeroWindowsOfCheckedStacks hchecked)
+
+/--
 Origin-zero active/corner windows supply the field-based Robinson Section 7
 signal tower for the first audited L2-blank candidate.
 -/

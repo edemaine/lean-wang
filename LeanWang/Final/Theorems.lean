@@ -14324,6 +14324,22 @@ def toFigure13L2C2CanonicalActiveCornerValidBoxConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box row-source data
+directly to the canonical-routing/valid-box endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project second-candidate checked-stack/valid-translated-box row-source data to
 the decoded-window/valid-box final surface through canonical active/corner
 recognition.
@@ -14398,6 +14414,17 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box one-row data
+directly to the canonical-routing/valid-box row-source endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxOneRowsConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations :=
+  h.toConstructionObligations
+    |>.toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Project second-candidate checked-stack/valid-translated-box one-row data to
 the checked-stack/layer-patch one-row package.
 -/
@@ -14460,6 +14487,17 @@ def toConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box bounded-row data
+directly to the canonical-routing/valid-box row-source endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations :=
+  h.toConstructionObligations
+    |>.toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
 Project second-candidate checked-stack/valid-translated-box bounded-row data to
 the checked-stack/layer-patch bounded-row package.
 -/
@@ -14499,6 +14537,23 @@ namespace FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionO
 
 set_option linter.style.longLine false in
 /--
+Project second-candidate checked-stack/valid-translated-box bounded-row-at-index
+data directly to the canonical-routing/valid-box decoder-step endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  decoderStep := sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Encoded endpoint from second-candidate checked origin-zero stacks, valid
 translated scaffold boxes, and bounded-interior generated position-code rows at
 concrete numeric label slots.
@@ -14526,6 +14581,25 @@ theorem domino_problem_undecidable
 end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexConstructionObligations
 
 namespace FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box interior-row-at-index
+data directly to the canonical-routing/valid-box decoder-step endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  decoderStep :=
+    sourceDecoderStepPrimrec_of_boundedInteriorRowsAtIndex
+      (sourceBoundedInteriorRowsAtIndexPrimrec_of_interiorRowsAtIndex h.sourceRows)
 
 set_option linter.style.longLine false in
 /--
@@ -14585,6 +14659,22 @@ def toFigure13L2C2CanonicalActiveCornerValidBoxSourcePositionCodeConstructionObl
   labelIndex :=
     sourceLabelIndexPrimrec_of_decoderStep
       h.decoderStep
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box decoder-step data
+directly to the canonical-routing/valid-box decoder-step endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  decoderStep := h.decoderStep
 
 set_option linter.style.longLine false in
 /--
@@ -14675,6 +14765,23 @@ def toCheckedStackLayerPatchGlobalPositionCodeConstructionObligations
   scaffold :=
     TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
       h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box global-label data
+directly to the canonical-routing/valid-box global-label endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations
+    (h :
+      FinalL2C2CheckedStackValidTranslatedBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxGlobalPositionCodeConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
@@ -14775,6 +14882,22 @@ def toCheckedStackLayerPatchSourcePositionCodeConstructionObligations
   scaffold :=
     TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
       h.scaffold
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box source-label data
+directly to the canonical-routing/valid-box source-label endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
   labelIndex := h.labelIndex
 
 set_option linter.style.longLine false in
