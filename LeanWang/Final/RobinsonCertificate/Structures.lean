@@ -269,6 +269,24 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligati
 set_option linter.style.longLine false in
 /--
 Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
+global bounded-search descriptor decoder.
+
+This ordinary-source route avoids the generated-position statement-list
+uniqueness bridge.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchGlobalSearchCodeObligations :
+    Prop where
+  section7 :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  globalSearch : GlobalSearchCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
 bounded-search fixed-start decoder for ordinary `programData`.
 
 Unlike the generated-position-code route, this ordinary-source package does
@@ -357,6 +375,19 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObli
   section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the global
+bounded-search descriptor decoder.
+
+This ordinary-source route avoids the generated-position statement-list
+uniqueness bridge.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataGlobalSearchCodeObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  globalSearch : GlobalSearchCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
 /--
