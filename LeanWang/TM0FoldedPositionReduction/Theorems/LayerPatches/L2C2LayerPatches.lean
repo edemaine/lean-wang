@@ -382,6 +382,166 @@ theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patche
 
 set_option linter.style.longLine false in
 /--
+Encoded domino undecidability from the second audited L2-blank candidate using
+canonical free-site routing, finite active-corner layer patches, and generated
+one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_oneRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+using canonical free-site routing, finite active-corner layer patches, and
+generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_oneRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeOneRowsCorrect hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+canonical free-site routing, finite active-corner layer patches, and generated
+bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+using canonical free-site routing, finite active-corner layer patches, and
+generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+canonical free-site routing, finite active-corner layer patches, and generated
+bounded-interior position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+using canonical free-site routing, finite active-corner layer patches, and
+generated bounded-interior position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect hbounded)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+canonical free-site routing, finite active-corner layer patches, and generated
+interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+using canonical free-site routing, finite active-corner layer patches, and
+generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second audited L2-blank candidate using
+canonical free-site routing, finite active-corner layer patches, and generated
+interior position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second audited L2-blank candidate
+using canonical free-site routing, finite active-corner layer patches, and
+generated interior position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (patches : L2C2ActiveCornerLayerPatches)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_layer_patches_position_source
+    (l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    patches
+    (positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect hinterior)
+
+set_option linter.style.longLine false in
+/--
 Encoded domino undecidability from the second checked-stack/layer-patch Section
 7 certificate and the generated position-code accumulator step, with
 `positionProgramData` semantic correctness discharged.

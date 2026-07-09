@@ -1258,6 +1258,22 @@ structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligat
 set_option linter.style.longLine false in
 /--
 Second-candidate canonical routing plus valid translated scaffold boxes with
+generated bounded-interior position-code rows.
+
+This is the bounded-row version of
+`FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations`
+and is the current proof-facing machine/source target for this scaffold route.
+-/
+structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate canonical routing plus valid translated scaffold boxes with
 the generated position-code decoder step.
 -/
 structure FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations :
@@ -24378,22 +24394,13 @@ set_option linter.style.longLine true
 namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
 
 set_option linter.style.longLine false in
-/-- Project the row-source package to the source-label package. -/
-def toSourcePositionCodeConstructionObligations
-    (h :
-      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
-    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxSourcePositionCodeConstructionObligations where
-  routing := h.routing
-  validTranslatedBoxes := h.validTranslatedBoxes
-  labelIndex := sourceLabelIndexPrimrec_of_interiorRows h.sourceRows
-
-set_option linter.style.longLine false in
 /-- Encoded endpoint from the row-source package. -/
 theorem encoded_domino_problem_undecidable
     (h :
       FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
 
 set_option linter.style.longLine false in
 /-- Unencoded endpoint from the row-source package. -/
@@ -24401,9 +24408,32 @@ theorem domino_problem_undecidable
     (h :
       FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
 
 end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
+
+namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the bounded-row source package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the bounded-row source package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    h.routing h.validTranslatedBoxes h.sourceRows
+
+end FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
 
 namespace FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxDecoderStepConstructionObligations
 
@@ -24510,6 +24540,22 @@ set_option linter.style.longLine false in
 theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
     (h :
       FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from the bounded-row canonical-routing/valid-box package. -/
+theorem encoded_domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from the bounded-row canonical-routing/valid-box package. -/
+theorem domino_problem_undecidable_of_l2c2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+    (h :
+      FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 

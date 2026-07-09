@@ -573,6 +573,170 @@ theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_transl
       validTranslatedBoxes)
     hindex
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_oneRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_oneRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_oneRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_oneRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hbounded
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsAtIndexCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hbounded
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and bounded-interior generated position-code rows
+at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_boundedRowsAtIndexCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hbounded
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hinterior
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hinterior : SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hinterior
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsAtIndexCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hinterior
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and interior generated position-code rows at
+concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_interiorRowsAtIndexCorrect
+    (routing : L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes : L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hinterior : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_canonical_free_site_routing_layer_patches_interiorRowsAtIndexCorrect
+    routing
+    (l2c2ActiveCornerLayerPatchesOfValidTranslatedBoxes
+      validTranslatedBoxes)
+    hinterior
+
 end TM0FoldedReduction
 
 end LeanWang
