@@ -3632,6 +3632,88 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 
+namespace Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical-free-site recognition plus Figure 16 compatibility to the
+checked-stack/valid-translated-box certificate package.
+-/
+def toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16
+      O.canonicalActiveCorner O.compatibleLevelChecks
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical-free-site recognition, Figure
+16 compatibility, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical-free-site recognition, Figure 16
+compatibility, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations
+
+namespace Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero recognition plus Figure 16 compatibility to the
+checked-stack/valid-translated-box certificate package.
+-/
+def toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackValidTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      O.originZeroWindows O.compatibleLevelChecks
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero recognition, Figure 16
+compatibility, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero recognition, Figure 16
+compatibility, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCheckedStackValidTranslatedBoxSearchCodeStartObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations
+
 namespace Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations
 
 set_option linter.style.longLine false in
