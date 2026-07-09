@@ -416,6 +416,13 @@ theorem sourceFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex
   TM0FoldedReduction.sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex h
 
 set_option linter.style.longLine false in
+/-- Bounded interior rows at index already include the first interior row. -/
+theorem sourceFirstInteriorRowsAtIndexPrimrec_of_boundedInteriorRowsAtIndex
+    (h : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_boundedInteriorAtIndex h
+
+set_option linter.style.longLine false in
 /-- The exact one-row-at-index target recovers the final position-coded start decoder target. -/
 theorem sourceLabelIndexStartPrimrec_of_oneRowsAtIndex
     (h : SourcePositionCodeOneRowsAtIndexPrimrec) :

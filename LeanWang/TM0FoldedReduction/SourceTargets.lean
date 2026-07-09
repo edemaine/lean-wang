@@ -333,6 +333,20 @@ theorem sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_interiorAtIndex
 
 set_option linter.style.longLine false in
 /--
+Bounded-interior at-index rows already contain the first nonempty generated
+position-code row: it is bounded row `0`, i.e. one-row slot `1`.
+-/
+theorem sourcePositionCodeFirstInteriorRowsAtIndexPrimrec_of_boundedInteriorAtIndex
+    (hbounded : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    SourcePositionCodeFirstInteriorRowsAtIndexPrimrec :=
+  (hbounded.comp
+    (Primrec.pair Primrec.fst
+      (Primrec.pair (Primrec.const 0) Primrec.snd))).of_eq fun p =>
+        sourcePositionCodeBoundedInteriorRowsAtIndex_eq_oneRowsAtIndex_succ
+          p.1 0 p.2
+
+set_option linter.style.longLine false in
+/--
 Interior numeric-slot rows give bounded-interior numeric-slot rows by cutting
 off the known empty post-statement tail.
 -/
