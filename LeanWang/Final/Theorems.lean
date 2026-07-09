@@ -1007,6 +1007,16 @@ structure FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionO
 
 set_option linter.style.longLine false in
 /--
+Second-candidate valid-translated-box route with the source-specialized
+position-code fixed-start label-index target.
+-/
+structure FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate valid-translated-box route with the numeric-state start
 decoder used by ordinary `programData`.
 -/
@@ -15742,6 +15752,63 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
+namespace FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/-- Forget the fixed-start label-index target to the source-specialized offset target. -/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Convert the fixed-start package to the valid-translated-box decoder-step package. -/
+def toDecoderStepConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackValidTranslatedBoxDecoderStepConstructionObligations where
+  scaffold := h.scaffold
+  decoderStep := sourceDecoderStepPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box fixed-start data to
+the checked-stack/layer-patch fixed-start package.
+-/
+def toCheckedStackLayerPatchLabelIndexStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2CheckedStackLayerPatchLabelIndexStartConstructionObligations where
+  scaffold :=
+    TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCheckedStackValidTranslatedBoxData
+      h.scaffold
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the source-specialized position-code fixed-start
+decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_startCodeCorrect
+    h.scaffold h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from second-candidate checked origin-zero stacks, valid
+translated scaffold boxes, and the source-specialized position-code fixed-start
+decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_boxes_startCodeCorrect
+    h.scaffold h.labelIndexStart
+
+end FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations
+
 set_option linter.style.longLine false in
 /--
 Package split checked origin-zero stacks, valid translated scaffold boxes, and
@@ -15750,19 +15817,25 @@ second-candidate checked-stack/valid-translated-box source-label final surface.
 -/
 def finalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligationsOfCheckedStacksValidTranslatedBoxes
     (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            l2Component2Figure18ScaffoldData.scaffold.tiles
-            r origin,
-            ValidTranslatedBoxTiling
-              l2Component2Figure18ScaffoldData.scaffold.tiles
-              r origin base)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     FinalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations where
   scaffold := { checkedStacks := checkedStacks, validTranslatedBoxes := validTranslatedBoxes }
   labelIndex := hindex
+
+set_option linter.style.longLine false in
+/--
+Package split checked origin-zero stacks, valid translated scaffold boxes, and
+the source-specialized fixed-start position-code decoder into the concrete
+second-candidate checked-stack/valid-translated-box final surface.
+-/
+def finalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligationsOfCheckedStacksValidTranslatedBoxes
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligations where
+  scaffold := { checkedStacks := checkedStacks, validTranslatedBoxes := validTranslatedBoxes }
+  labelIndexStart := hstart
 
 set_option linter.style.longLine false in
 /--
@@ -15772,15 +15845,7 @@ position-code label-index decoder.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksValidTranslatedBoxesSourcePositionCodeLabelIndexFrom
     (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            l2Component2Figure18ScaffoldData.scaffold.tiles
-            r origin,
-            ValidTranslatedBoxTiling
-              l2Component2Figure18ScaffoldData.scaffold.tiles
-              r origin base)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
   (finalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligationsOfCheckedStacksValidTranslatedBoxes
@@ -15794,19 +15859,39 @@ position-code label-index decoder.
 -/
 theorem domino_problem_undecidable_of_l2c2CheckedStacksValidTranslatedBoxesSourcePositionCodeLabelIndexFrom
     (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
-    (validTranslatedBoxes :
-      ∀ r : Nat, 0 < r →
-        ∃ origin : Int × Int,
-          ∃ base : TranslatedBoxPattern
-            l2Component2Figure18ScaffoldData.scaffold.tiles
-            r origin,
-            ValidTranslatedBoxTiling
-              l2Component2Figure18ScaffoldData.scaffold.tiles
-              r origin base)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
     (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (finalL2C2CheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligationsOfCheckedStacksValidTranslatedBoxes
     checkedStacks validTranslatedBoxes hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from split second-candidate checked
+origin-zero stacks, valid translated scaffold boxes, and the source-specialized
+position-code fixed-start decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2CheckedStacksValidTranslatedBoxesSourcePositionCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (finalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligationsOfCheckedStacksValidTranslatedBoxes
+    checkedStacks validTranslatedBoxes hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from split second-candidate checked origin-zero
+stacks, valid translated scaffold boxes, and the source-specialized
+position-code fixed-start decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2CheckedStacksValidTranslatedBoxesSourcePositionCodeLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks)
+    (validTranslatedBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (finalL2C2CheckedStackValidTranslatedBoxLabelIndexStartConstructionObligationsOfCheckedStacksValidTranslatedBoxes
+    checkedStacks validTranslatedBoxes hstart).domino_problem_undecidable
 
 namespace FinalL2C2CheckedStackValidTranslatedBoxCodeLabelIndexStartConstructionObligations
 
