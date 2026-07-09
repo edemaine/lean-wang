@@ -804,19 +804,36 @@ diagnostics, not proof-facing assumptions.
   diagnostic surface.
 - The standalone subdivided Figure 18 site route is also false: the Figure 18
   site graph has no compatible `3 x 3` square
-  (`Figure18Site.hasRectangleStackBool_three_three_eq_false`), so
+  (`Figure18Site.not_tileableSquare_figure18ScaffoldTiles_three`), so
   `HasCompatibleFigure18ScaffoldSquares` / `TilesPlane figure18ScaffoldTiles`
   should not be used as the scaffold-instantiation target.
 
-The proof-facing route is therefore the Section 7 active-corner/translated-box
-route.  The board/free-line construction should produce the active/corner boxes
-needed by `L2C1SignalTowerTranslatedBoxData` / `L2C2SignalTowerTranslatedBoxData`
-(or the underlying
-`NatSiteRobinsonSignalTowerTranslatedPositiveBoxObligations`) directly:
-obstruction signals identify free rows and columns, routed board cells carry
-payload matches between neighboring virtual free-grid crossings, and the finite
-Figure 13/Figure 16 layer checks certify the local stack data at those routed
-crossings.
+This obstruction also rules out the Section 7 active-corner/translated-box
+route for the *current* scaffold tiles. Every plane tiling of
+`combineWithScaffold S T seed` projects to a plane tiling of `S.tiles`; payload
+routing cannot repair a non-tileable base layer. The Lean bridge is
+`not_tilesPlane_combineWithFigure18Scaffold`.
+
+The paper explicitly says that the Figure 13 tiles form an intrinsically
+substitutive plane tileset. Therefore the contradiction identifies an error in
+our raw Figure 13 Wang-edge transcription, not a failure of the paper's
+construction. The immediate scaffold task is now:
+
+1. Replace the visually assigned edge identifiers in
+   `OllingerRobinsonFigure13.lean` by a compositional boundary encoding derived
+   from the human-audited L1/L2/L3 component rows.
+2. Decode the Figure 16 expansion of each of the 92 parent tiles to a concrete
+   `2 x 2` block of child tile indices.
+3. Mechanically verify that every expansion block is valid and that parent-edge
+   matching is equivalent to matching along the expanded block boundary.
+4. Rebuild the Figure 18 subdivision and Section 7 scaffold only after those
+   checks establish arbitrarily large valid Figure 13 patches.
+
+The current finite recognizability check remains useful but has a narrower
+meaning: there are exactly 92 aligned compatible child blocks, and each consists
+of the four artificial quarters of one raw tile. Its unique-parent theorem
+checks consistency of the human Figure 16 layer map on those 92 blocks; it does
+not yet test adjacency between distinct Figure 13 tiles.
 
 The theorem surface now also has the more Robinson-shaped
 `L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` /
@@ -1614,8 +1631,9 @@ does not close the source side, but it gives a useful alternate frontier:
 `SourceSearchCodeLabelIndexFromPrimrec` plus `SourceStatementListNodup` is now
 enough for the generated-position final route.
 
-On the scaffold side, the live endpoint is the L2C2 Section 7
-board/free-line/layer-patch route:
+On the scaffold side, the intended endpoint remains the L2C2 Section 7
+board/free-line/layer-patch route, but it is paused until the raw Figure 13 edge
+transcription is corrected:
 
 ```lean
 NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
@@ -1628,10 +1646,11 @@ The human-audited finite inputs are now checked in as
 `figures/figure16-layer-components.png`.  The Lean transcription in
 `LeanWang.OllingerRobinsonFigure13Data` points back to the Figure 13 TSV and
 keeps the Figure 13/Figure 16 layer patches visible through
-`NatSiteRobinsonLayerPatchScaffoldCertificate`.  Future scaffold work should
-turn this concrete transcription into `HasActiveCornerLayerBoxPatches` plus the
-Section 7 board/free-line active-corner invariant, rather than reviving the
-refuted checked Figure 16 level-data or raw Figure 13 box routes.
+`NatSiteRobinsonLayerPatchScaffoldCertificate`. The next scaffold work should
+first derive corrected Wang edges and valid Figure 16 child blocks from this
+concrete transcription. Only then should it turn the corrected scaffold into
+`HasActiveCornerLayerBoxPatches` plus the Section 7 board/free-line
+active-corner invariant.
 
 ### 7. Final Undecidability Theorem
 

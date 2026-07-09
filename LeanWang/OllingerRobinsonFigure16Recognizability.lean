@@ -194,6 +194,33 @@ def allAlignedCompatibleBlocksHaveUniqueParentBool : Bool :=
   alignedCompatibleChildBlocks.all fun block =>
     decide (commonParentIndexCandidateCount block = 1)
 
+/-- Number of quadrant-aligned blocks admitted by the current raw edge transcription. -/
+def alignedCompatibleChildBlockCount : Nat :=
+  alignedCompatibleChildBlocks.length
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem alignedCompatibleChildBlockCount_eq :
+    alignedCompatibleChildBlockCount = 92 := by
+  native_decide
+
+/--
+Do all currently admitted aligned blocks consist of the four quarters of one
+raw Figure 13 tile? This diagnostic distinguishes internal subdivision seams
+from genuine adjacency between different Figure 13 tiles.
+-/
+def allAlignedCompatibleBlocksHaveSameIndexBool : Bool :=
+  alignedCompatibleChildBlocks.all fun block =>
+    decide (block.southwest.index = block.southeast.index ∧
+      block.southwest.index = block.northwest.index ∧
+      block.southwest.index = block.northeast.index)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem allAlignedCompatibleBlocksHaveSameIndexBool_eq_true :
+    allAlignedCompatibleBlocksHaveSameIndexBool = true := by
+  native_decide
+
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem allAlignedCompatibleBlocksHaveUniqueParentBool_eq_true :

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonFigure16Recognizability
+import LeanWang.OllingerRobinsonFigure18Obstruction
 
 /-!
 Combined finite audit certificate for the Figure 13/Figure 16 scaffold data.
@@ -49,8 +50,14 @@ structure Figure13Figure16AuditCertificate : Prop where
     allTargetsHaveUniqueParentIndexBool = false
   figure16EveryTargetHasParentIndex :
     allTargetsHaveParentIndexBool = true
+  figure16AlignedBlockCount :
+    alignedCompatibleChildBlockCount = 92
+  figure16AlignedBlocksAreSingleRawTiles :
+    allAlignedCompatibleBlocksHaveSameIndexBool = true
   figure16AlignedBlockUniqueParent :
     allAlignedCompatibleBlocksHaveUniqueParentBool = true
+  figure18RawEdgeObstruction :
+    ¬ TileableSquare figure18ScaffoldTiles 3
 
 /-- The checked finite audit package for the concrete Figure 13/Figure 16 data. -/
 theorem figure13Figure16AuditCertificate :
@@ -65,8 +72,13 @@ theorem figure13Figure16AuditCertificate :
   figure16RadiusZeroParentIndexAmbiguous :=
     allTargetsHaveUniqueParentIndexBool_eq_false
   figure16EveryTargetHasParentIndex := allTargetsHaveParentIndexBool_eq_true
+  figure16AlignedBlockCount := alignedCompatibleChildBlockCount_eq
+  figure16AlignedBlocksAreSingleRawTiles :=
+    allAlignedCompatibleBlocksHaveSameIndexBool_eq_true
   figure16AlignedBlockUniqueParent :=
     allAlignedCompatibleBlocksHaveUniqueParentBool_eq_true
+  figure18RawEdgeObstruction :=
+    Figure18Site.not_tileableSquare_figure18ScaffoldTiles_three
 
 /-- The concrete Figure 13 transcription has a thin-layer component at every index. -/
 theorem layerData_componentAtLayerAt_thin (index : Fin 92) :
