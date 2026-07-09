@@ -247,6 +247,42 @@ theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows
             (stmt := stmt) hv hstmt]
           simp [sourceSearchCodeOneRowsVar_stmt_some hstmt]
 
+set_option linter.style.longLine false in
+/--
+For each fixed source code, support-search one-row descriptors are primitive
+recursive in the statement offset and source variable.
+
+The proof goes through the already available fixed-code label-index decoder and
+uses the finite index of the variable in `partrecVarList`.
+-/
+theorem sourceSearchCodeOneRowsVar_primrec_fixed (c : Code) :
+    Primrec (fun p : Nat × TM0Route.PartrecVar =>
+      sourceSearchCodeOneRowsVar c p.1 p.2) := by
+  let tc := NatPartrecToToPartrec.translate c
+  let idx : Nat × TM0Route.PartrecVar → Nat :=
+    fun p => @List.idxOf TM0Route.PartrecVar instBEqOfDecidableEq
+      p.2 TM0Route.partrecVarList
+  have hidx : Primrec idx :=
+    (Primrec.list_idxOf₁ TM0Route.partrecVarList).comp Primrec.snd
+  have hdecoder : Primrec (fun p : Nat × TM0Route.PartrecVar =>
+      sourceSimStepDataForLabelIndexFromWithSearchCode c 1 p.1
+        (idx p)) := by
+    exact (TM0FoldedCompiler.simStepDataForLabelIndexFromWithSearchCode_primrec_fixed
+      tc).comp
+        (Primrec.pair (Primrec.const 1) (Primrec.pair Primrec.fst hidx))
+  exact hdecoder.of_eq fun p => by
+    rw [sourceSimStepDataForLabelIndexFromWithSearchCode_one_eq_varRows]
+    have hget :
+        TM0Route.partrecVarList[idx p]? = some p.2 := by
+      rcases p with ⟨_k, v⟩
+      cases v with
+      | none =>
+          simp [idx, TM0Route.partrecVarList]
+      | some a =>
+          cases a <;>
+            simp [idx, TM0Route.partrecVarList, PartrecToTM2Support.stackAlphabetList]
+    simp [hget]
+
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_one_zero
     (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexFromWithSearchCode c 1 0 i = [] := by
