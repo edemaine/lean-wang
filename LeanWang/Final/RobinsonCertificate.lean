@@ -194,6 +194,140 @@ theorem domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateInterio
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and generated-position source obligations.
+
+This keeps the current finite Figure 13/Figure 16 layer-patch certificate as a
+first-class final endpoint, instead of forcing callers to forget immediately to
+the older realization-only Robinson certificate.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateSource
+    C.toScaffoldCertificate source
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateSource
+    C.toScaffoldCertificate source
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and the fixed-start generated position-code source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateLabelIndexStart
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and the fixed-start generated position-code source target.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateLabelIndexStart
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSourceLabelIndexFrom
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSourceLabelIndexFrom
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and bounded interior generated position-code rows at label indices.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateBoundedRowsAtIndex
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and bounded interior generated position-code rows at label indices.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateBoundedRowsAtIndex
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and interior generated position-code rows at label indices.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateInteriorRowsAtIndex
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from a bundled Robinson layer-patch scaffold
+certificate and interior generated position-code rows at label indices.
+-/
+theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateInteriorRowsAtIndex
+    (C : NatSiteRobinsonLayerPatchScaffoldCertificate)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the Section 7 tower/indexed-box
 Robinson scaffold obligations and generated-position source obligations.
 
