@@ -4655,8 +4655,8 @@ theorem encoded_domino_problem_undecidable
     (h :
       FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-    h.toScaffold h.toPositionSourceObligations
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsAtIndexCorrect
+    h.toScaffold h.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -4668,8 +4668,8 @@ theorem domino_problem_undecidable
     (h :
       FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-    h.toScaffold h.toPositionSourceObligations
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsAtIndexCorrect
+    h.toScaffold h.sourceRows
 
 end FinalFigure13L2C2CombinedWindowLayerPatchInteriorRowsAtIndexConstructionObligations
 set_option linter.style.longLine true

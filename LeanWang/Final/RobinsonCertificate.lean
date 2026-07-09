@@ -1823,10 +1823,8 @@ theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineL
     (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
     (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-    data
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
-      hrows)
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsAtIndexCorrect
+    data hrows
 
 set_option linter.style.longLine false in
 /--
@@ -1838,10 +1836,8 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
     (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
     (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
-    data
-    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
-      hrows)
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_interiorRowsAtIndexCorrect
+    data hrows
 
 set_option linter.style.longLine false in
 /--
