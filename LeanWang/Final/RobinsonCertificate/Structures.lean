@@ -63,6 +63,24 @@ structure Figure13L2C2OriginZeroSourceLabelIndexObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Concrete L2C2 origin-zero/translated-positive-box Robinson target through the
+fixed-start source-level generated position-code decoder.
+
+This is the compact origin-zero analogue of the tower/indexed-box fixed-start
+route and avoids asking callers for the stronger full offset label-index
+decoder.
+-/
+structure Figure13L2C2OriginZeroSourceLabelIndexStartObligations : Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceLabelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete L2C2 origin-zero/translated-positive-box Robinson target through
 bounded-interior generated position-code rows at label indices.
 

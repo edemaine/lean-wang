@@ -1931,6 +1931,40 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBo
   domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxObligationsSourceLabelIndexFrom
     O.toL2C2TowerIndexedBoxObligations hindex
 
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+active/corner-window plus translated-positive-box Robinson scaffold obligations
+and the fixed-start generated position-code source target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxCertificateLabelIndexStart
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxObligationsLabelIndexStart
+    O.toL2C2TowerIndexedBoxObligations hstart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero active/corner
+window plus translated-positive-box Robinson scaffold obligations and the
+fixed-start generated position-code source target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxCertificateLabelIndexStart
+    (O : NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonTowerIndexedBoxObligationsLabelIndexStart
+    O.toL2C2TowerIndexedBoxObligations hstart
+
 namespace Figure13L2C2OriginZeroSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
@@ -1956,6 +1990,32 @@ theorem domino_problem_undecidable
     O.scaffold O.sourceLabelIndex
 
 end Figure13L2C2OriginZeroSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroSourceLabelIndexStartObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source fixed-start obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceLabelIndexStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxCertificateLabelIndexStart
+    O.scaffold O.sourceLabelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source fixed-start obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceLabelIndexStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroTranslatedPositiveBoxCertificateLabelIndexStart
+    O.scaffold O.sourceLabelIndexStart
+
+end Figure13L2C2OriginZeroSourceLabelIndexStartObligations
 
 namespace Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations
 
