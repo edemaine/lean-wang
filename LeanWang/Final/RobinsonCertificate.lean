@@ -64,6 +64,41 @@ structure Figure13L2C2OriginZeroSourceLabelIndexObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
+Concrete L2C2 origin-zero/translated-positive-box Robinson target through
+bounded-interior generated position-code rows at label indices.
+
+This exposes the current geometric certificate route through the direct
+position-coded row decoder, without morally depending on canonical row-list
+equality.
+-/
+structure Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations : Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete L2C2 origin-zero/translated-positive-box Robinson target through
+interior generated position-code rows at label indices.
+
+This is the cleanest direct row-at-index source surface currently exposed from
+the compact Robinson certificate module.
+-/
+structure Figure13L2C2OriginZeroSourceInteriorRowsAtIndexObligations : Prop where
+  scaffold :
+    NatSiteRobinsonOriginZeroTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete Section 7 translated-box theorem-facing L2C2 Robinson/source target.
 
 The scaffold field is the paper-facing board/free-line package that asks for
@@ -2895,6 +2930,64 @@ theorem domino_problem_undecidable
     O.scaffold O.sourceLabelIndex
 
 end Figure13L2C2OriginZeroSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source row-at-index obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateBoundedRowsAtIndex
+    (O.scaffold.toL2C2TowerIndexedBoxObligations).toScaffoldCertificate
+    O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source row-at-index obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateBoundedRowsAtIndex
+    (O.scaffold.toL2C2TowerIndexedBoxObligations).toScaffoldCertificate
+    O.sourceRows
+
+end Figure13L2C2OriginZeroSourceBoundedRowsAtIndexObligations
+
+namespace Figure13L2C2OriginZeroSourceInteriorRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source interior-row-at-index obligation
+package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateInteriorRowsAtIndex
+    (O.scaffold.toL2C2TowerIndexedBoxObligations).toScaffoldCertificate
+    O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 origin-zero
+translated-positive-box Robinson/source interior-row-at-index obligation
+package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroSourceInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonScaffoldCertificateInteriorRowsAtIndex
+    (O.scaffold.toL2C2TowerIndexedBoxObligations).toScaffoldCertificate
+    O.sourceRows
+
+end Figure13L2C2OriginZeroSourceInteriorRowsAtIndexObligations
 
 namespace Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations
 
