@@ -7908,6 +7908,16 @@ theorem not_finalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionO
   fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
     h.compatibleLevelChecks
 
+theorem not_figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations :
+    ¬ Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
+
+theorem not_figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations :
+    ¬ Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations :=
+  fun h => not_figure18CanonicalCheckedRecognizedCompatibleLevelChecks
+    h.compatibleLevelChecks
+
 namespace FinalReductionInputs
 
 /-- Build the final inputs directly from the scaffold package and source obligations. -/

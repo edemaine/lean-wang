@@ -893,8 +893,10 @@ set_option linter.style.longLine false in
 Concrete L2C2 canonical-free-site/Figure 16 compatibility target through the
 bounded-search fixed-start decoder for ordinary `programData`.
 
-This exposes the audited Figure 16 compatibility layer directly at the
-certificate surface, before forgetting it to checked valid-translated boxes.
+This is a diagnostic surface for the current transcription: the Figure 16
+compatible-level premise is formally refuted in `LeanWang.Final.Theorems`.
+The live scaffold route should use checked-stack valid-translated-box data or
+decoded combined-window valid boxes directly.
 -/
 structure Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations :
     Prop where
@@ -910,6 +912,8 @@ bounded-search fixed-start decoder for ordinary `programData`.
 
 This is the origin-zero analogue of the direct Figure 16 compatibility
 certificate surface and avoids generated-position statement-list uniqueness.
+It is diagnostic for the current transcription because the Figure 16
+compatible-level premise is formally refuted in `LeanWang.Final.Theorems`.
 -/
 structure Figure13L2C2Figure16CompatibleOriginZeroSearchCodeStartObligations :
     Prop where
