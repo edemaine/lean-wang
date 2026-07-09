@@ -10,8 +10,6 @@ Indexed-window Figure 18 position-reduction wrappers with generated
 folded-position correctness imported.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 open Nat.Partrec (Code)
