@@ -25138,6 +25138,76 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoard
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   O.domino_problem_undecidable
 
+set_option linter.style.longLine false
+namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations
+
+set_option linter.style.longLine false in
+/--
+Project the pairwise-disjoint support package to the statement-list `Nodup`
+package for the generated-position bounded-row positive-board route.
+-/
+def toPositionCodeBoundedRowsWithNodupObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations) :
+    Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations where
+  activeCorner := O.activeCorner
+  alignedMacroSquares := O.alignedMacroSquares
+  sourceRows := O.sourceRows
+  statementList_nodup :=
+    sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      O.statementSupport_nodup O.statementSupport_pairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, positive board-level aligned macro-squares, generated position-code
+bounded rows, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toPositionCodeBoundedRowsWithNodupObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+positive board-level aligned macro-squares, generated position-code bounded
+rows, and concrete started-TM1 support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toPositionCodeBoundedRowsWithNodupObligations.domino_problem_undecidable
+
+end Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the certificate-level canonical
+free-site positive-board generated-position bounded-row package with concrete
+started-TM1 support uniqueness/disjointness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the certificate-level canonical free-site
+positive-board generated-position bounded-row package with concrete started-TM1
+support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.domino_problem_undecidable
+
 namespace FinalL2C2Figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
 
 set_option linter.style.longLine false in

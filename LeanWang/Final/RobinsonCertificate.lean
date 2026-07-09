@@ -576,6 +576,25 @@ structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPosi
 
 set_option linter.style.longLine false in
 /--
+Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
+generated position-code bounded rows and concrete started-TM1 support
+uniqueness/disjointness.
+
+This is the lower source frontier for the generated-position bounded-row route:
+the source statement-list uniqueness package is recovered from local
+duplicate-freeness and pairwise disjointness of statement supports.
+-/
+structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceRows : SourcePositionCodeBoundedInteriorRowsPrimrec
+  statementSupport_nodup : SourceStartedTM1StatementSupportNodup
+  statementSupport_pairwiseDisjoint :
+    SourceStartedTM1StatementSupportPairwiseDisjoint
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
