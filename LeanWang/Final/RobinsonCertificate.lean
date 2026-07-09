@@ -405,6 +405,21 @@ structure Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+Origin-zero active/corner windows are converted to checked-stack recognition,
+and the finite layer patches are kept explicit.  This avoids the
+generated-position statement-list uniqueness bridge.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete origin-zero-window/positive-box theorem-facing L2C2 Robinson/source
 target.
 
@@ -429,6 +444,21 @@ structure Figure13L2C2OriginZeroPositiveBoxesSearchCodeWithNodupObligations :
   positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/positive-box L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+Positive active-corner indexed boxes are converted to finite layer patches by
+the existing scaffold constructor.  This route does not require generated
+position-code statement-list uniqueness.
+-/
+structure Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  positiveBoxes : Figure13L2C2PositiveActiveCornerIndexedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
 
 set_option linter.style.longLine false in
 /--

@@ -13578,6 +13578,106 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations
 
+namespace Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero windows plus finite layer patches to the split
+checked-stack/layer-patch bounded-search-start certificate package.
+-/
+def toCheckedStacksAndLayerPatchesSearchCodeStartObligations
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations) :
+    Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations where
+  checkedStacks :=
+    TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      O.originZeroWindows
+  layerPatches := O.layerPatches
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero/layer-patch bounded-search-start certificate package
+to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  O.toCheckedStacksAndLayerPatchesSearchCodeStartObligations
+    |>.toFinalL2C2SourceReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero windows, layer patches, and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero windows, layer patches, and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroLayerPatchesSearchCodeStartObligations
+
+namespace Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project origin-zero windows plus positive active-corner boxes to the
+checked-stack/positive-box bounded-search-start construction package.
+-/
+def toCheckedStackPositiveBoxSearchCodeLabelIndexStartConstructionObligations
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations) :
+    FinalL2C2CheckedStackPositiveBoxSearchCodeLabelIndexStartConstructionObligations where
+  scaffold :=
+    { checkedStacks :=
+        TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+          O.originZeroWindows
+      positiveBoxes := O.positiveBoxes }
+  labelIndexStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the origin-zero/positive-box bounded-search-start certificate package
+to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofCheckedStackPositiveBoxDataSearchCodeLabelIndexStart
+    O.toCheckedStackPositiveBoxSearchCodeLabelIndexStartConstructionObligations.scaffold
+    O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from origin-zero windows, positive active-corner boxes, and
+the bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from origin-zero windows, positive active-corner boxes, and
+the bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroPositiveBoxesSearchCodeStartObligations
+
 set_option linter.style.longLine false in
 /--
 Encoded endpoint from second-candidate origin-zero active/corner windows and
