@@ -1695,6 +1695,66 @@ structure FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstruct
 
 set_option linter.style.longLine false in
 /--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with generated interior position-code rows.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with generated one-row position-code rows.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with generated bounded-interior position-code rows.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with generated bounded-interior position-code rows at concrete label slots.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with generated interior position-code rows at concrete label slots.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Paper-facing second-candidate Figure 13 board/free-line translated-box route
+with the fixed-start source-specialized position-code label-index target.
+-/
+structure FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Paper-facing second-candidate Figure 13 board/free-line route with the
 source-specialized position-code label-index target.
 
@@ -16583,6 +16643,258 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start translated-box package to the source-label
+translated-box package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and the fixed-start
+generated position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and the fixed-start
+generated position-code decoder.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the row-source translated-box package to the source-label translated-box
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and generated
+interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and generated
+interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the one-row translated-box package to the interior-row translated-box
+package.
+-/
+def toConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations where
+  section7 := h.section7
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeInteriorRowsPrimrec_of_oneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the one-row translated-box package to the source-label translated-box
+package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeOneRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and generated one-row
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and generated
+one-row position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row translated-box package to the one-row translated-box
+package.
+-/
+def toOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations where
+  section7 := h.section7
+  sourceRows :=
+    TM0FoldedReduction.sourcePositionCodeOneRowsPrimrec_of_boundedInterior
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-row translated-box package to the source-label
+translated-box package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 := h.section7
+  labelIndex :=
+    TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and generated
+bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOneRowsConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and generated
+bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOneRowsConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index translated-box package to the equivalent
+fixed-start translated-box package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations where
+  section7 := h.section7
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.mpr
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and bounded-interior
+generated position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toLabelIndexStartConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toLabelIndexStartConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index translated-box package to the equivalent
+fixed-start translated-box package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations where
+  section7 := h.section7
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec.mpr
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from live Section 7 translated-box data and generated
+interior position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toLabelIndexStartConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from live Section 7 translated-box data and generated
+interior position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toLabelIndexStartConstructionObligations.domino_problem_undecidable
+
+end FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2BoardFreeLineDataSourcePositionCodeConstructionObligations
