@@ -29486,6 +29486,78 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslate
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete L2C2 free-site-rectangle
+translated-positive-box scaffold object and bounded-interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndex
+    (scaffold :
+      NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 free-site-rectangle
+translated-positive-box scaffold object and bounded-interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndex
+    (scaffold :
+      NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 free-site-rectangle
+translated-positive-box scaffold object and generated interior position-code
+rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndex
+    (scaffold :
+      NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 free-site-rectangle
+translated-positive-box scaffold object and generated interior position-code
+rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndex
+    (scaffold :
+      NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+        l2Component2BlankCandidateActiveSiteSpecs
+        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+        0 Quadrant.northeast
+        l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+    { scaffold := scaffold, sourceRows := hrows }
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the concrete second-candidate Figure 13
 free-site-rectangle/translated-positive-box scaffold package and the generated
 position-code decoder step.
