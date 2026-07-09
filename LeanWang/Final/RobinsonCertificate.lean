@@ -158,6 +158,32 @@ structure Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeWithNodupObligations
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/layer-patch theorem-facing L2C2 Robinson/source
+target.
+
+Origin-zero active/corner windows supply the checked-stack recognition side,
+while layer patches remain the finite Figure 13/Figure 16 realization witness.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/layer-patch L2C2 Robinson target through the
+bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -180,6 +206,33 @@ bounded-search descriptor decoder and statement-list uniqueness.
 structure Figure13L2C2CanonicalFreeSiteLayerPatchesSearchCodeWithNodupObligations :
     Prop where
   activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/layer-patch theorem-facing L2C2
+Robinson/source target.
+
+This exposes the live scaffold surface with the canonical free-site routing
+itself as the geometry field; the active/corner recognition used downstream is
+derived from that routing.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/layer-patch L2C2 Robinson target through
+the bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
@@ -670,6 +723,70 @@ theorem domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesSe
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, active-corner
+layer patches, and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStacksAndLayerPatchesSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2OriginZeroCheckedStacksOfOriginZeroWindows
+      originZeroWindows)
+    layerPatches hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    originZeroWindows layerPatches
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows,
+active-corner layer patches, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    originZeroWindows layerPatches
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from canonical free-site active/corner
 recognition, active-corner layer patches, and the source-specialized generated
 position-code label-index decoder.
@@ -730,6 +847,67 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteLayerPatchesS
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexFrom
     activeCorner layerPatches
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing,
+active-corner layer patches, and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    layerPatches hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, active-corner layer
+patches, and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2CanonicalFreeSiteRectActiveCornerOfRouting routing)
+    layerPatches hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing,
+active-corner layer patches, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    routing layerPatches
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, active-corner layer
+patches, the bounded-search descriptor decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodup
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    routing layerPatches
     (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
 
 set_option linter.style.longLine false in
@@ -1191,6 +1369,59 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeWithNodupObligations
 
+namespace Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/layer-patch
+Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    O.originZeroWindows O.layerPatches O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/layer-patch
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSourceLabelIndexFrom
+    O.originZeroWindows O.layerPatches O.sourceLabelIndex
+
+end Figure13L2C2OriginZeroLayerPatchesSourceLabelIndexObligations
+
+namespace Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/layer-patch
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodup
+    O.originZeroWindows O.layerPatches O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/layer-patch Robinson
+package, the bounded-search descriptor decoder, and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodup
+    O.originZeroWindows O.layerPatches O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2OriginZeroLayerPatchesSearchCodeWithNodupObligations
+
 namespace Figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
@@ -1243,6 +1474,64 @@ theorem domino_problem_undecidable
     O.activeCorner O.layerPatches O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2CanonicalFreeSiteLayerPatchesSearchCodeWithNodupObligations
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+layer-patch Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    O.routing O.layerPatches O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / layer-patch
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexFrom
+    O.routing O.layerPatches O.sourceLabelIndex
+
+end Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSourceLabelIndexObligations
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+layer-patch Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodup
+    O.routing O.layerPatches O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / layer-patch
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodup
+    O.routing O.layerPatches O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2CanonicalFreeSiteRoutingLayerPatchesSearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
