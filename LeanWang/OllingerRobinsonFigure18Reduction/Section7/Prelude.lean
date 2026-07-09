@@ -1338,6 +1338,30 @@ def l2c2CanonicalFreeSiteRectActiveCornerOfRouting
     exact (routing level).cornerSite
 
 /--
+Positive centered active-corner indexed boxes for the first audited L2-blank
+candidate.
+-/
+abbrev L2C1PositiveActiveCornerIndexedBoxes : Prop :=
+  ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+    (scaffoldDataOfNatSites
+      l2Component1BlankCandidateActiveSiteSpecs
+      l2Component1BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.southwest
+      l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+/--
+Positive centered active-corner indexed boxes for the second audited L2-blank
+candidate.
+-/
+abbrev L2C2PositiveActiveCornerIndexedBoxes : Prop :=
+  ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
+    (scaffoldDataOfNatSites
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+
+/--
 Finite active-corner layer patches for the first audited L2-blank candidate.
 -/
 abbrev L2C1ActiveCornerLayerPatches : Prop :=
@@ -1365,13 +1389,7 @@ Positive centered active-corner indexed boxes instantiate the finite layer
 patches for the first audited L2-blank candidate.
 -/
 def l2c1ActiveCornerLayerPatchesOfPositiveBoxes
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component1BlankCandidateActiveSiteSpecs
-          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.southwest
-          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C1PositiveActiveCornerIndexedBoxes) :
     L2C1ActiveCornerLayerPatches :=
   scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
     l2Component1BlankCandidateActiveSiteSpecs
@@ -1386,13 +1404,7 @@ Positive centered active-corner indexed boxes instantiate the finite layer
 patches for the second audited L2-blank candidate.
 -/
 def l2c2ActiveCornerLayerPatchesOfPositiveBoxes
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component2BlankCandidateActiveSiteSpecs
-          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.northeast
-          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C2PositiveActiveCornerIndexedBoxes) :
     L2C2ActiveCornerLayerPatches :=
   scaffoldDataOfNatSitesLayerPatchesOfPositiveActiveCornerIndexedBoxes
     l2Component2BlankCandidateActiveSiteSpecs
@@ -2891,13 +2903,7 @@ structure L2C1RobinsonSection7BoardFreeLinePositiveBoxData : Prop where
   boardFreeLineActiveCorner :
     Section7BoardFreeLineActiveCornerInvariant
       l2Component1Figure18ScaffoldData
-  positiveBoxes :
-    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-      (scaffoldDataOfNatSites
-        l2Component1BlankCandidateActiveSiteSpecs
-        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.southwest
-        l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+  positiveBoxes : L2C1PositiveActiveCornerIndexedBoxes
 
 /--
 Robinson Section 7 board/free-line data plus centered positive active-corner
@@ -2907,13 +2913,7 @@ structure L2C2RobinsonSection7BoardFreeLinePositiveBoxData : Prop where
   boardFreeLineActiveCorner :
     Section7BoardFreeLineActiveCornerInvariant
       l2Component2Figure18ScaffoldData
-  positiveBoxes :
-    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-      (scaffoldDataOfNatSites
-        l2Component2BlankCandidateActiveSiteSpecs
-        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.northeast
-        l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+  positiveBoxes : L2C2PositiveActiveCornerIndexedBoxes
 
 /--
 Robinson Section 7 board/free-line data plus finite active-corner layer patches
@@ -2980,13 +2980,7 @@ centered active-corner boxes are the concrete finite patch obligation.
 -/
 structure L2C1CheckedStackPositiveBoxData : Prop where
   checkedStacks : L2C1OriginZeroCheckedStacks
-  positiveBoxes :
-    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-      (scaffoldDataOfNatSites
-        l2Component1BlankCandidateActiveSiteSpecs
-        l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.southwest
-        l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)
+  positiveBoxes : L2C1PositiveActiveCornerIndexedBoxes
 
 set_option linter.style.longLine false in
 /--
@@ -2995,13 +2989,7 @@ Finite scaffold data for the second audited L2-blank candidate, one step below
 -/
 structure L2C2CheckedStackPositiveBoxData : Prop where
   checkedStacks : L2C2OriginZeroCheckedStacks
-  positiveBoxes :
-    ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-      (scaffoldDataOfNatSites
-        l2Component2BlankCandidateActiveSiteSpecs
-        l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-        0 Quadrant.northeast
-        l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)
+  positiveBoxes : L2C2PositiveActiveCornerIndexedBoxes
 
 set_option linter.style.longLine false in
 /--
@@ -3869,13 +3857,7 @@ def l2c1RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
     (boardFreeLineActiveCorner :
       Section7BoardFreeLineActiveCornerInvariant
         l2Component1Figure18ScaffoldData)
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component1BlankCandidateActiveSiteSpecs
-          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.southwest
-          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C1PositiveActiveCornerIndexedBoxes) :
     L2C1RobinsonSection7BoardFreeLineLayerPatchData where
   boardFreeLineActiveCorner := boardFreeLineActiveCorner
   patches :=
@@ -3894,13 +3876,7 @@ def l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxes
     (boardFreeLineActiveCorner :
       Section7BoardFreeLineActiveCornerInvariant
         l2Component2Figure18ScaffoldData)
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component2BlankCandidateActiveSiteSpecs
-          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.northeast
-          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C2PositiveActiveCornerIndexedBoxes) :
     L2C2RobinsonSection7BoardFreeLineLayerPatchData where
   boardFreeLineActiveCorner := boardFreeLineActiveCorner
   patches :=
@@ -4995,13 +4971,7 @@ checked finite scaffold package directly.
 -/
 def l2c1CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
     (hchecked : L2C1OriginZeroCheckedStacks)
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component1BlankCandidateActiveSiteSpecs
-          l2Component1BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.southwest
-          l2Component1BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C1PositiveActiveCornerIndexedBoxes) :
     L2C1CheckedStackLayerPatchData where
   checkedStacks := hchecked
   patches := l2c1ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
@@ -5013,13 +4983,7 @@ checked finite scaffold package directly.
 -/
 def l2c2CheckedStackLayerPatchDataOfCheckedStacksPositiveBoxes
     (hchecked : L2C2OriginZeroCheckedStacks)
-    (hboxes_pos :
-      ∀ r : Nat, 0 < r → Nonempty (ActiveCornerIndexedBox
-        (scaffoldDataOfNatSites
-          l2Component2BlankCandidateActiveSiteSpecs
-          l2Component2BlankCandidateSanity.activeSiteSpecs_valid
-          0 Quadrant.northeast
-          l2Component2BlankCandidateSanity.cornerIndex_valid).scaffold r)) :
+    (hboxes_pos : L2C2PositiveActiveCornerIndexedBoxes) :
     L2C2CheckedStackLayerPatchData where
   checkedStacks := hchecked
   patches := l2c2ActiveCornerLayerPatchesOfPositiveBoxes hboxes_pos
