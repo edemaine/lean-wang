@@ -187,6 +187,55 @@ abbrev SourcePositionCodeLabelIndexStartPrimrec : Prop :=
   Primrec (fun p : Code × Nat =>
     sourceSimStepDataForLabelIndexStartWithPositionCode p.1 p.2)
 
+set_option linter.style.longLine false in
+/--
+For a fixed source code, the canonical start decoder is primitive recursive in
+the flat label index.
+
+The final source target is stronger: it must be uniform in the source code
+itself.  This fixed-code lemma records that the remaining difficulty is that
+uniformity, not the start-offset arithmetic.
+-/
+theorem sourceSimStepDataForLabelIndexStart_primrec_fixed (c : Code) :
+    Primrec (sourceSimStepDataForLabelIndexStart c) := by
+  let tc := NatPartrecToToPartrec.translate c
+  exact (TM0FoldedCompiler.simStepDataForLabelIndexStart_primrec_fixed
+    tc).of_eq fun i => by
+      unfold sourceSimStepDataForLabelIndexStart
+      rfl
+
+set_option linter.style.longLine false in
+/-- Fixed-source primitive-recursiveness of the numeric-state start decoder. -/
+theorem sourceSimStepDataForLabelIndexStartWithCode_primrec_fixed (c : Code) :
+    Primrec (sourceSimStepDataForLabelIndexStartWithCode c) := by
+  let tc := NatPartrecToToPartrec.translate c
+  exact (TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode_primrec_fixed
+    tc).of_eq fun i => by
+      unfold sourceSimStepDataForLabelIndexStartWithCode
+      rfl
+
+set_option linter.style.longLine false in
+/-- Fixed-source primitive-recursiveness of the support-search start decoder. -/
+theorem sourceSimStepDataForLabelIndexStartWithSearchCode_primrec_fixed
+    (c : Code) :
+    Primrec (sourceSimStepDataForLabelIndexStartWithSearchCode c) := by
+  let tc := NatPartrecToToPartrec.translate c
+  exact (TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode_primrec_fixed
+    tc).of_eq fun i => by
+      unfold sourceSimStepDataForLabelIndexStartWithSearchCode
+      rfl
+
+set_option linter.style.longLine false in
+/-- Fixed-source primitive-recursiveness of the position-coded start decoder. -/
+theorem sourceSimStepDataForLabelIndexStartWithPositionCode_primrec_fixed
+    (c : Code) :
+    Primrec (sourceSimStepDataForLabelIndexStartWithPositionCode c) := by
+  let tc := NatPartrecToToPartrec.translate c
+  exact (TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode_primrec_fixed
+    tc).of_eq fun i => by
+      unfold sourceSimStepDataForLabelIndexStartWithPositionCode
+      rfl
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_of_split
     {c : Code} {i stmtIndex : Nat} {v : TM0Route.PartrecVar}
     {stmt : Option (Turing.TM1.Stmt
