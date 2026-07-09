@@ -41,16 +41,28 @@ structure Figure13L2C2OriginZeroSourceLabelIndexObligations : Prop where
 
 set_option linter.style.longLine false in
 /--
-Concrete Section 7 theorem-facing L2C2 Robinson/source target.
+Concrete Section 7 translated-box theorem-facing L2C2 Robinson/source target.
 
-The scaffold field is the paper-facing board/free-line data package for the
-second audited L2 blank candidate.  This is closer to the current geometric
-instantiation work than the derived origin-zero translated-positive-box
-obligation package.
+The scaffold field is the paper-facing board/free-line package that asks for
+translated active-corner boxes rather than raw Figure 13 board-level macro-square
+alignment.  This is the live Section 7 route for the second audited L2 blank
+candidate.
 -/
-structure Figure13L2C2Section7BoardFreeLineSourceLabelIndexObligations :
+structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations :
     Prop where
-  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineData
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineTranslatedBoxData
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+/--
+Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
+Robinson/source target.
+
+This packages the finite scaffold work just before it is converted to the
+Section 7 board/free-line translated-box data.
+-/
+structure Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
   sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
 
 set_option linter.style.longLine false in
@@ -399,30 +411,56 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2OriginZeroSourceLabelIndexObligations
 
-namespace Figure13L2C2Section7BoardFreeLineSourceLabelIndexObligations
+namespace Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations
 
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Section 7
-board/free-line Robinson/source obligation package.
+board/free-line translated-box Robinson/source obligation package.
 -/
 theorem encoded_domino_problem_undecidable
-    (O : Figure13L2C2Section7BoardFreeLineSourceLabelIndexObligations) :
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCodeCorrect
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
     O.section7 O.sourceLabelIndex
 
 set_option linter.style.longLine false in
 /--
 Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
-Robinson/source obligation package.
+translated-box Robinson/source obligation package.
 -/
 theorem domino_problem_undecidable
-    (O : Figure13L2C2Section7BoardFreeLineSourceLabelIndexObligations) :
+    (O : Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_robinson_section7_board_free_line_data_sourceCodeCorrect
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
     O.section7 O.sourceLabelIndex
 
-end Figure13L2C2Section7BoardFreeLineSourceLabelIndexObligations
+end Figure13L2C2Section7BoardFreeLineTranslatedBoxSourceLabelIndexObligations
+
+namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 finite
+checked-stack/valid-translated-box Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_sourceCodeCorrect
+    O.scaffold O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 finite
+checked-stack/valid-translated-box Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_checked_stack_valid_translated_box_data_sourceCodeCorrect
+    O.scaffold O.sourceLabelIndex
+
+end Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
 end LeanWang
