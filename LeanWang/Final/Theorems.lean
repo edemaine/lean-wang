@@ -26040,6 +26040,91 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateS
   domino_problem_undecidable_of_figure13L2C2Section7LayerPatchCertificateLabelIndexStart
     O (sourceLabelIndexStartPrimrec_of_sourceLabelIndex hindex)
 
+set_option linter.style.longLine false
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project the compact Section 7 layer-patch/bounded-search-start certificate
+package to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeLabelIndexStart
+    O.section7 O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from compact Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from compact Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations
+
+set_option linter.style.longLine false
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Forget the expanded Nat-site Section 7 obligation record to compact
+layer-patch data while retaining the ordinary-source bounded-search start
+decoder.
+-/
+def toLayerPatchDataSearchCodeStartObligations
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations where
+  section7 :=
+    { boardFreeLineActiveCorner := O.section7.boardFreeLineActiveCorner
+      patches := O.section7.patches }
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the expanded Section 7 layer-patch/bounded-search-start certificate
+package to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  O.toLayerPatchDataSearchCodeStartObligations.toFinalL2C2SourceReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from expanded Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from expanded Section 7 layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations
+
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Nat-site Section 7

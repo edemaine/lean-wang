@@ -130,6 +130,24 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligati
 set_option linter.style.longLine false in
 /--
 Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+Unlike the generated-position-code route, this ordinary-source package does
+not require a statement-list uniqueness bridge.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeStartObligations :
+    Prop where
+  section7 :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
 bounded-search fixed-start decoder.
 
 The `statementList_nodup` field is the explicit bridge from bounded-search
@@ -190,6 +208,19 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeWithNodupObli
   section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the compact record-shaped endpoint for the route that avoids generated
+position-code statement-list uniqueness.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataSearchCodeStartObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
 
 set_option linter.style.longLine false in
 /--
