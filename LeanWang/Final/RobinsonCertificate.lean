@@ -324,6 +324,19 @@ structure Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations :
 
 set_option linter.style.longLine false in
 /--
+Concrete finite checked-stack/layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the checked finite-scaffold analogue of the Section 7 ordinary-source
+search-start endpoint and does not require statement-list uniqueness.
+-/
+structure Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete split checked-stack/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -348,6 +361,21 @@ structure Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeWithNodupObligations
   layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
+Concrete split checked-stack/layer-patch L2C2 Robinson target through the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+The split fields are the finite scaffold facts closest to the checked-stack
+and layer-patch transcription, still without the generated-position
+statement-list uniqueness bridge.
+-/
+structure Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations :
+    Prop where
+  checkedStacks : TM0FoldedReduction.L2C2OriginZeroCheckedStacks
+  layerPatches : TM0FoldedReduction.L2C2ActiveCornerLayerPatches
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
 
 set_option linter.style.longLine false in
 /--

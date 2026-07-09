@@ -13485,6 +13485,99 @@ theorem domino_problem_undecidable
 
 end FinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations
 
+namespace Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack/layer-patch bounded-search-start certificate package
+to the existing ordinary-source final construction surface.
+-/
+def toFinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations) :
+    FinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations where
+  scaffold := O.scaffold
+  labelIndexStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the checked-stack/layer-patch bounded-search-start certificate package
+to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  O.toFinalL2C2CheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations
+    |>.toFinalL2C2SourceReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from checked-stack/layer-patch data and the bounded-search
+start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from checked-stack/layer-patch data and the bounded-search
+start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations
+
+namespace Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Combine the split checked-stack/layer-patch bounded-search-start certificate
+package into the compact checked-stack/layer-patch certificate package.
+-/
+def toCheckedStackLayerPatchSearchCodeStartObligations
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations) :
+    Figure13L2C2CheckedStackLayerPatchSearchCodeStartObligations where
+  scaffold :=
+    { checkedStacks := O.checkedStacks
+      patches := O.layerPatches }
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Project the split checked-stack/layer-patch bounded-search-start certificate
+package to the ordinary-source final reduction inputs.
+-/
+def toFinalL2C2SourceReductionInputs
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations) :
+    FinalL2C2SourceReductionInputs :=
+  O.toCheckedStackLayerPatchSearchCodeStartObligations.toFinalL2C2SourceReductionInputs
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from split checked-stack/layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from split checked-stack/layer-patch data and the
+bounded-search start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+
+end Figure13L2C2CheckedStacksAndLayerPatchesSearchCodeStartObligations
+
 set_option linter.style.longLine false in
 /--
 Encoded endpoint from second-candidate origin-zero active/corner windows and
