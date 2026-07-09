@@ -786,6 +786,22 @@ structure Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPa
 set_option linter.style.longLine false in
 /--
 Concrete canonical-free-site-routing/valid-translated-box L2C2 Robinson target
+through the bounded-search fixed-start decoder for ordinary `programData`.
+
+Canonical free-site routing supplies the origin-zero active/corner windows,
+valid translated boxes supply the active-corner layer patches, and the source
+side avoids generated-position statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations :
+    Prop where
+  routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site-routing/valid-translated-box L2C2 Robinson target
 through generated bounded-interior position-code rows.
 
 This is the live non-vacuous certificate surface closest to the current
@@ -2353,6 +2369,44 @@ theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingPositi
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from canonical free-site routing, valid
+translated scaffold boxes, and the bounded-search fixed-start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStart
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2CanonicalFreeSiteRectActiveCornerOfRouting
+        routing))
+    validTranslatedBoxes
+    hsearch
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site routing, valid translated
+scaffold boxes, and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStart
+    (routing : TM0FoldedReduction.L2C2CanonicalFreeSiteRectRouting)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStart
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2CanonicalFreeSiteRectActiveCornerOfRouting
+        routing))
+    validTranslatedBoxes
+    hsearch
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site routing, valid
 translated scaffold boxes, and generated bounded-interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRows
@@ -3823,6 +3877,52 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CanonicalFreeSiteRoutingPositiveBoxesSearchCodeStartWithPairwiseDisjointObligations
 set_option linter.style.longLine true
+
+namespace Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project canonical-free-site routing plus valid translated boxes to the
+origin-zero-window valid-box fixed-start certificate package.
+-/
+def toOriginZeroValidTranslatedBoxSearchCodeStartObligations
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations) :
+    Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2CanonicalFreeSiteRectActiveCornerOfRouting
+        O.routing)
+  validTranslatedBoxes := O.validTranslatedBoxes
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site-routing /
+valid-box Robinson package and the bounded-search fixed-start decoder for
+ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStart
+    O.routing O.validTranslatedBoxes O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site-routing / valid-box
+Robinson package and the bounded-search fixed-start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStart
+    O.routing O.validTranslatedBoxes O.sourceSearchStart
+
+end Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxSearchCodeStartObligations
 
 namespace Figure13L2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsObligations
 
