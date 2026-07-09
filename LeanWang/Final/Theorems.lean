@@ -24918,6 +24918,142 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxSour
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineTranslatedBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated bounded-interior
+position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated bounded-interior
+position-code rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated bounded-interior rows at
+concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated bounded-interior rows at
+concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated interior rows at concrete
+numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and generated interior rows at concrete
+numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and the fixed-start source-specialized
+position-code label-index target.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the live second-candidate Section 7
+board/free-line translated-box data and the fixed-start source-specialized
+position-code label-index target.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalFigure13L2C2BoardFreeLineTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the live second-candidate Section 7
 board/free-line translated-box data and the source-specialized position-code
 label-index decoder.
 -/
