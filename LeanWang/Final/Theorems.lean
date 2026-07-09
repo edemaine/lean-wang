@@ -15652,6 +15652,19 @@ def toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the second-candidate origin-zero Figure 16 source-label package
+directly to the live Section 7 board/free-line translated-box final surface.
+-/
+def toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations
+    (h : FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations where
+  section7 :=
+    TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineTranslatedBoxDataOfOriginZeroWindowsCanonicalCheckedCompatibleFig16
+      h.originZeroWindows h.compatibleLevelChecks
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/--
 Project the second-candidate origin-zero Figure 16 source-label package to the
 origin-zero/translated-positive-box source-label final surface.
 -/
@@ -15670,7 +15683,9 @@ label-index decoder.
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 set_option linter.style.longLine false in
 /--
@@ -15681,7 +15696,9 @@ label-index decoder.
 theorem domino_problem_undecidable
     (h : FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toCheckedStackValidTranslatedBoxSourcePositionCodeConstructionObligations.domino_problem_undecidable
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
+    h.toBoardFreeLineTranslatedBoxSourcePositionCodeConstructionObligations.section7
+    h.labelIndex
 
 end FinalL2C2Figure16CompatibleOriginZeroSourcePositionCodeConstructionObligations
 
