@@ -25000,6 +25000,75 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAl
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   O.domino_problem_undecidable
 
+set_option linter.style.longLine false
+namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+
+set_option linter.style.longLine false in
+/--
+Convert the canonical-free-site row-level positive-board certificate to the
+origin-zero positive-board certificate.
+-/
+def toOriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations) :
+    Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c2OriginZeroWindowsOfCanonicalFreeSiteRectActiveCorner
+      O.activeCorner
+  alignedMacroSquares := O.alignedMacroSquares
+  sourceBoundedRows := O.sourceBoundedRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, positive board-level aligned macro-squares, and bounded-interior
+bounded-search rows.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toOriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+positive board-level aligned macro-squares, and bounded-interior bounded-search
+rows.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toOriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the certificate-level canonical
+free-site positive-board bounded-row package.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the certificate-level canonical free-site
+positive-board bounded-row package.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations
+    (O :
+      Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.domino_problem_undecidable
+
 namespace FinalL2C2Figure18ScaffoldTilesPlaneCheckedStacksConstructionObligations
 
 set_option linter.style.longLine false in

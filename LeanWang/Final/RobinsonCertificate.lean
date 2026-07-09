@@ -546,6 +546,21 @@ structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeB
 
 set_option linter.style.longLine false in
 /--
+Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
+bounded-interior bounded-search rows for ordinary `programData`.
+
+Canonical free-site active/corner recognition supplies the origin-zero window
+invariant, so this is the row-level positive-board route one scaffold step
+closer to the local recognizability proof.
+-/
+structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceBoundedRows : SourceSearchCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
