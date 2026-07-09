@@ -532,6 +532,20 @@ structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeS
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/positive-board-level L2C2 Robinson target through
+bounded-interior bounded-search rows for ordinary `programData`.
+
+This exposes the row-level source frontier directly for the live ordinary-source
+positive board-level route.
+-/
+structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceBoundedRows : SourceSearchCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
