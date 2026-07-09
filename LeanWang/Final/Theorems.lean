@@ -29182,13 +29182,14 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 
 set_option linter.style.longLine false in
 /--
-Encoded Wang domino undecidability from concrete L2C2 origin-zero
-active/corner windows, cofinally many raw Figure 13 squares, the bounded-search
-label-index source target, and duplicate-free source statement lists.
+Encoded Wang domino undecidability from the refuted concrete L2C2
+origin-zero/cofinal-Figure-13 route, the bounded-search label-index source
+target, and duplicate-free source statement lists.
 
-This is the current clean theorem surface for the alternate source route:
-statement-list uniqueness identifies bounded-search state codes with generated
-position codes.
+This is retained as a diagnostic implication.  The cofinal raw Figure 13
+square premise is inconsistent for the current transcription; the non-vacuous
+ordinary-source route should use the Section 7 layer-patch or translated-box
+surfaces directly.
 -/
 theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFromWithStatementNodup
     (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
@@ -29259,13 +29260,13 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 
 set_option linter.style.longLine false in
 /--
-Build the concrete L2C2 origin-zero/cofinal Figure 13 layer-patch scaffold
-package.
+Build the diagnostic concrete L2C2 origin-zero/cofinal Figure 13 layer-patch
+scaffold package.
 
 This is the ordinary-source analogue of the origin-zero translated-positive-box
-route above: origin-zero windows provide the Section 7 board/free-line
-active-corner invariant, and cofinal raw Figure 13 squares provide positive
-active-corner layer patches.
+route above, but it depends on the refuted cofinal raw Figure 13 square
+premise.  It remains useful for comparing route shapes, not as a live
+construction target.
 -/
 def finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
     (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
@@ -29279,9 +29280,9 @@ def finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
 
 set_option linter.style.longLine false in
 /--
-Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
-windows, cofinally many raw Figure 13 squares, and the ordinary bounded-search
-label-index source target.
+Encoded Wang domino undecidability from the diagnostic L2C2
+origin-zero/cofinal-Figure-13 route and the ordinary bounded-search label-index
+source target.
 
 Unlike the `...WithStatementNodup` route, this goes through ordinary
 `programData` source obligations and does not need the generated-position
@@ -29299,9 +29300,9 @@ theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13Cofinal
 
 set_option linter.style.longLine false in
 /--
-Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
-cofinally many raw Figure 13 squares, and the ordinary bounded-search
-label-index source target.
+Wang domino undecidability from the diagnostic L2C2
+origin-zero/cofinal-Figure-13 route and the ordinary bounded-search label-index
+source target.
 -/
 theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeLabelIndexFrom
     (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
@@ -29315,9 +29316,9 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 
 set_option linter.style.longLine false in
 /--
-Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
-windows, cofinally many raw Figure 13 squares, and the ordinary bounded-search
-decoder-step source target.
+Encoded Wang domino undecidability from the diagnostic L2C2
+origin-zero/cofinal-Figure-13 route and the ordinary bounded-search decoder-step
+source target.
 -/
 theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeDecoderStep
     (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
@@ -29331,9 +29332,9 @@ theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13Cofinal
 
 set_option linter.style.longLine false in
 /--
-Wang domino undecidability from concrete L2C2 origin-zero active/corner windows,
-cofinally many raw Figure 13 squares, and the ordinary bounded-search
-decoder-step source target.
+Wang domino undecidability from the diagnostic L2C2
+origin-zero/cofinal-Figure-13 route and the ordinary bounded-search decoder-step
+source target.
 -/
 theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeDecoderStep
     (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
@@ -30537,8 +30538,8 @@ theorem domino_problem_undecidable_of_figure13L2C2BoardFreeLineTileableBoxSource
 
 set_option linter.style.longLine false in
 /--
-Build the Section 7 board/free-line L2C2 source-label package from cofinal raw
-Figure 13 squares.
+Build a diagnostic Section 7 board/free-line L2C2 source-label package from
+the refuted cofinal raw Figure 13 square premise.
 -/
 def finalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionObligationsOfFig13CofinalSquares
     (boardFreeLineActiveCorner :
@@ -30555,8 +30556,8 @@ def finalFigure13L2C2BoardFreeLineTileableBoxSourcePositionCodeConstructionOblig
 
 set_option linter.style.longLine false in
 /--
-Build the proof-facing Section 7 board/free-line L2C2 package from cofinal raw
-Figure 13 squares.
+Build the diagnostic Section 7 board/free-line L2C2 package from the refuted
+cofinal raw Figure 13 square premise.
 -/
 def finalL2C2RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
     (boardFreeLineActiveCorner :
@@ -30569,8 +30570,8 @@ def finalL2C2RobinsonSection7BoardFreeLineDataOfFig13CofinalSquares
 
 set_option linter.style.longLine false in
 /--
-Build the proof-facing Section 7 board/free-line L2C2 layer-patch package from
-cofinal raw Figure 13 squares.
+Build the diagnostic Section 7 board/free-line L2C2 layer-patch package from
+the refuted cofinal raw Figure 13 square premise.
 -/
 def finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
     (boardFreeLineActiveCorner :
@@ -30584,10 +30585,8 @@ def finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
 
 set_option linter.style.longLine false in
 /--
-Encoded Wang domino undecidability from the paper-facing L2C2 Section 7
-premises: board/free-line active/corner recognition, cofinally many raw Figure
-13 tileable squares, and the source-specialized position-code label-index
-target.
+Encoded Wang domino undecidability from the diagnostic L2C2 Section 7 cofinal
+Figure 13 route and the source-specialized position-code label-index target.
 -/
 theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
     (boardFreeLineActiveCorner :
@@ -30603,9 +30602,8 @@ theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineF
 
 set_option linter.style.longLine false in
 /--
-Wang domino undecidability from the paper-facing L2C2 Section 7 premises:
-board/free-line active/corner recognition, cofinally many raw Figure 13
-tileable squares, and the source-specialized position-code label-index target.
+Wang domino undecidability from the diagnostic L2C2 Section 7 cofinal Figure 13
+route and the source-specialized position-code label-index target.
 -/
 theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourcePositionCodeLabelIndexFrom
     (boardFreeLineActiveCorner :
@@ -30621,8 +30619,8 @@ theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13Cofi
 
 set_option linter.style.longLine false in
 /--
-Encoded Wang domino undecidability from the paper-facing L2C2 Section 7
-premises and the ordinary bounded-search label-index source target.
+Encoded Wang domino undecidability from the diagnostic L2C2 Section 7 cofinal
+Figure 13 route and the ordinary bounded-search label-index source target.
 
 This route uses ordinary `programData` source obligations, so it avoids the
 generated-position statement-list `Nodup` bridge.
@@ -30641,8 +30639,8 @@ theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineF
 
 set_option linter.style.longLine false in
 /--
-Wang domino undecidability from the paper-facing L2C2 Section 7 premises and
-the ordinary bounded-search label-index source target.
+Wang domino undecidability from the diagnostic L2C2 Section 7 cofinal Figure 13
+route and the ordinary bounded-search label-index source target.
 -/
 theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeLabelIndexFrom
     (boardFreeLineActiveCorner :
