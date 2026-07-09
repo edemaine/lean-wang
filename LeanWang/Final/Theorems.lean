@@ -27621,6 +27621,102 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresS
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the one-fuel
+bounded-search row decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeOneRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the one-fuel
+bounded-search row decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeOneRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the variable-branch
+one-row bounded-search decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeOneVarRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneVarRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and the variable-branch
+one-row bounded-search decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeOneVarRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneVarRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and bounded-interior
+bounded-search rows.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeBoundedRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hbounded).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from concrete L2C2 origin-zero active/corner
+windows, cofinally many raw Figure 13 squares, and bounded-interior
+bounded-search rows.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroFig13CofinalSquaresSourceSearchCodeBoundedRows
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    (finalFigure13L2C2OriginZeroLayerPatchDataOfFig13CofinalSquares
+      originZeroWindows hsquares)
+    hbounded).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from concrete L2C2 origin-zero active/corner
 windows, cofinally many raw Figure 13 squares, and ordinary bounded-search
 interior rows.
 -/
@@ -28866,6 +28962,108 @@ theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13Cofi
     (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
       boardFreeLineActiveCorner hsquares)
     hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing L2C2 Section 7
+premises and the one-fuel bounded-search row decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeOneRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing L2C2 Section 7 premises and
+the one-fuel bounded-search row decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeOneRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing L2C2 Section 7
+premises and the variable-branch one-row bounded-search decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeOneVarRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneVarRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hrows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing L2C2 Section 7 premises and
+the variable-branch one-row bounded-search decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeOneVarRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hrows : SourceSearchCodeOneVarRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeOneVarRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hrows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the paper-facing L2C2 Section 7
+premises and bounded-interior bounded-search rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeBoundedRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hbounded).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the paper-facing L2C2 Section 7 premises and
+bounded-interior bounded-search rows.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLineFig13CofinalSquaresSourceSearchCodeBoundedRows
+    (boardFreeLineActiveCorner :
+      TM0FoldedReduction.Section7BoardFreeLineActiveCornerInvariant
+        l2Component2Figure18ScaffoldData)
+    (hsquares : FinalFigure13L2C2Fig13CofinalTileableSquares)
+    (hbounded : SourceSearchCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2SourceReductionInputs.ofScaffoldAndSourceSearchCodeBoundedRows
+    (finalL2C2RobinsonSection7BoardFreeLineLayerPatchDataOfFig13CofinalSquares
+      boardFreeLineActiveCorner hsquares)
+    hbounded).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
