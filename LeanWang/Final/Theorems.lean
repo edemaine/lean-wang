@@ -1334,6 +1334,34 @@ structure FinalL2C2OriginZeroWindowsValidTranslatedBoxLabelIndexStartConstructio
 
 set_option linter.style.longLine false in
 /--
+Second-candidate origin-zero active/corner windows plus positive Robinson
+board-level aligned macro-squares with the source-specialized position-code
+label-index target.
+
+This exposes the live scaffold route directly: the aligned macro-squares
+produce valid translated boxes, while origin-zero windows provide the
+canonical free-site routing.
+-/
+structure FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate origin-zero active/corner windows plus positive Robinson
+board-level aligned macro-squares with the fixed-start source-specialized
+position-code label-index target.
+-/
+structure FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate checked-stack scaffold-plane route with generated interior
 position-code rows.
 
@@ -3312,6 +3340,18 @@ def finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
 
 set_option linter.style.longLine false in
 /--
+Positive Robinson board-level aligned macro-squares provide the concrete L2C2
+valid translated scaffold boxes used by the origin-zero-window route.
+-/
+def finalFigure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    FinalFigure13L2C2ValidTranslatedBoxes :=
+  finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
+    (finalFigure13L2C2Figure18ScaffoldTileableBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+set_option linter.style.longLine false in
+/--
 The concrete Figure 13 L2C2 valid-box statement is the same translated-box
 target used by the canonical-routing scaffold endpoint.
 -/
@@ -3321,6 +3361,18 @@ def finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBo
   simpa [FinalFigure13L2C2ValidTranslatedBoxes,
     TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes,
     TM0FoldedReduction.L2C2Figure18ScaffoldTiles] using validBoxes
+
+set_option linter.style.longLine false in
+/--
+Positive Robinson board-level aligned macro-squares provide the L2C2 valid
+translated-box target used by the final origin-zero-window endpoints.
+-/
+def finalFigure13L2C2Figure18ScaffoldValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes :=
+  finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+    (finalFigure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2OriginZeroTranslatedPositiveBoxSourcePositionCodeConstructionObligations
@@ -24603,6 +24655,127 @@ set_option linter.style.longLine false in
 theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsValidTranslatedBoxLabelIndexStartConstructionObligations
     (h :
       FinalL2C2OriginZeroWindowsValidTranslatedBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false
+namespace FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project positive board-level aligned macro-squares to the origin-zero-window
+valid-translated-box source-label package.
+-/
+def toOriginZeroWindowsValidTranslatedBoxSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations) :
+    FinalL2C2OriginZeroWindowsValidTranslatedBoxSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2Figure18ScaffoldValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      h.alignedMacroSquares
+  labelIndex := h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from origin-zero windows and positive board-level aligned macro-squares. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toOriginZeroWindowsValidTranslatedBoxSourcePositionCodeConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from origin-zero windows and positive board-level aligned macro-squares. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toOriginZeroWindowsValidTranslatedBoxSourcePositionCodeConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start positive-board-level scaffold package to the
+source-label positive-board-level scaffold package.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  alignedMacroSquares := h.alignedMacroSquares
+  labelIndex := sourceLabelIndexPrimrec_of_labelIndexStart h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start positive-board-level scaffold package to the
+origin-zero-window valid-translated-box fixed-start package.
+-/
+def toOriginZeroWindowsValidTranslatedBoxLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    FinalL2C2OriginZeroWindowsValidTranslatedBoxLabelIndexStartConstructionObligations where
+  originZeroWindows := h.originZeroWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2Figure18ScaffoldValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      h.alignedMacroSquares
+  labelIndexStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from the fixed-start positive-board-level scaffold package. -/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toSourcePositionCodeConstructionObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from the fixed-start positive-board-level scaffold package. -/
+theorem domino_problem_undecidable
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toSourcePositionCodeConstructionObligations.domino_problem_undecidable
+
+end FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from origin-zero windows and positive board-level aligned macro-squares. -/
+theorem encoded_domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from origin-zero windows and positive board-level aligned macro-squares. -/
+theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Encoded Wang domino undecidability from fixed-start origin-zero windows and positive board-level aligned macro-squares. -/
+theorem encoded_domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Wang domino undecidability from fixed-start origin-zero windows and positive board-level aligned macro-squares. -/
+theorem domino_problem_undecidable_of_l2c2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations
+    (h :
+      FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
