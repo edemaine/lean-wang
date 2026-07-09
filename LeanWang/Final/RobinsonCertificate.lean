@@ -175,6 +175,36 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsObligations 
 
 set_option linter.style.longLine false in
 /--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through generated
+one-row position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndexObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceRows : SourcePositionCodeOneRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through generated
+bounded-interior position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndexObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Compact concrete Section 7 layer-patch L2C2 Robinson target through generated
+interior position-code rows at concrete numeric label slots.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndexObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete finite checked-stack/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -828,6 +858,92 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_boundedRowsCorrect
     data hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated one-row position-code
+rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    data
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated one-row position-code
+rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeOneRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    data
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated bounded-interior
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    data hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated bounded-interior
+position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_boundedRowsAtIndexCorrect
+    data hrows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated interior position-code
+rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    data
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      hrows)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and generated interior position-code
+rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndex
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hrows : SourcePositionCodeInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_layer_patch_data_position_source
+    data
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
+      hrows)
 
 set_option linter.style.longLine false in
 /--
@@ -1731,6 +1847,85 @@ theorem domino_problem_undecidable
     O.section7 O.sourceRows
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact L2C2 Section 7 layer-patch
+data package and generated one-row position-code rows at label indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndex
+    O.section7 O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact L2C2 Section 7 layer-patch data
+package and generated one-row position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndex
+    O.section7 O.sourceRows
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataOneRowsAtIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact L2C2 Section 7 layer-patch
+data package and generated bounded-interior position-code rows at label
+indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndex
+    O.section7 O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact L2C2 Section 7 layer-patch data
+package and generated bounded-interior position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndex
+    O.section7 O.sourceRows
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataBoundedRowsAtIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact L2C2 Section 7 layer-patch
+data package and generated interior position-code rows at label indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndex
+    O.section7 O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact L2C2 Section 7 layer-patch data
+package and generated interior position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndex
+    O.section7 O.sourceRows
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchDataInteriorRowsAtIndexObligations
 
 namespace Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
 
