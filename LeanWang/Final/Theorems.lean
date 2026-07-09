@@ -15295,6 +15295,22 @@ def toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box bounded-row data
+directly to the canonical-routing/valid-box bounded-row endpoint.
+-/
+def toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
+    FinalL2C2CanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations where
+  routing :=
+    TM0FoldedReduction.l2c2CanonicalFreeSiteRectRoutingOfOriginZeroCheckedStacks
+      h.scaffold.checkedStacks
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-row data
 directly to the canonical-routing/valid-box row-source endpoint.
 -/
 def toCanonicalFreeSiteRoutingValidTranslatedBoxConstructionObligations
@@ -15323,11 +15339,12 @@ translated scaffold boxes, and generated bounded-interior position-code rows.
 -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations.section7
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-      h.sourceRows)
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
+  let c :=
+    h.toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+  exact
+    TM0FoldedReduction.encoded_domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+      c.routing c.validTranslatedBoxes c.sourceRows
 
 set_option linter.style.longLine false in
 /--
@@ -15336,11 +15353,12 @@ translated scaffold boxes, and generated bounded-interior position-code rows.
 -/
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  TM0FoldedReduction.domino_problem_undecidable_l2c2_board_free_line_translated_box_data_sourceCodeCorrect
-    h.toBoardFreeLineTranslatedBoxBoundedRowsConstructionObligations.section7
-    (TM0FoldedReduction.sourcePositionCodeLabelIndexFromPrimrec_of_positionCodeBoundedInteriorRows
-      h.sourceRows)
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
+  let c :=
+    h.toCanonicalFreeSiteRoutingValidTranslatedBoxBoundedRowsConstructionObligations
+  exact
+    TM0FoldedReduction.domino_problem_undecidable_l2c2_canonical_free_site_routing_valid_translated_boxes_boundedRowsCorrect
+      c.routing c.validTranslatedBoxes c.sourceRows
 
 end FinalL2C2CheckedStackValidTranslatedBoxBoundedRowsConstructionObligations
 
