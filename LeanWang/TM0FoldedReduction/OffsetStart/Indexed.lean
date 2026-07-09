@@ -11,38 +11,36 @@ Indexed descriptor-list definitions, start-decoder equivalences, and
 primitive-recursion target bridges.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
 
-def sourceSimStepDataForLabelIndex
+noncomputable def sourceSimStepDataForLabelIndex
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndex
     (NatPartrecToToPartrec.translate c) i
 
 /-- Source-code indexed descriptor list for the folded finite-TM0 reduction. -/
-def sourceSimStepDataByLabelIndex (c : Code) : List TM0FoldedCompiler.SimStepData :=
+noncomputable def sourceSimStepDataByLabelIndex (c : Code) : List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndex c)
 
 /-- Source-code indexed descriptor list through the numeric-state decoder path. -/
-def sourceSimStepDataByLabelIndexWithCode (c : Code) :
+noncomputable def sourceSimStepDataByLabelIndexWithCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithCode c)
 
 /-- Source-code indexed descriptor list through the bounded-search decoder path. -/
-def sourceSimStepDataByLabelIndexWithSearchCode (c : Code) :
+noncomputable def sourceSimStepDataByLabelIndexWithSearchCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithSearchCode c)
 
 /-- Source-code indexed descriptor list through the position-coded decoder path. -/
-def sourceSimStepDataByLabelIndexWithPositionCode (c : Code) :
+noncomputable def sourceSimStepDataByLabelIndexWithPositionCode (c : Code) :
     List TM0FoldedCompiler.SimStepData :=
   (List.range (sourceLabelCount c)).flatMap
     (sourceSimStepDataForLabelIndexStartWithPositionCode c)

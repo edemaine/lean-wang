@@ -9,27 +9,25 @@ import LeanWang.TM0FoldedReduction.Source
 Core offset-start descriptor definitions and pointwise position-code start lemmas.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
 
-def sourceSimStepDataForLabelIndexStart
+noncomputable def sourceSimStepDataForLabelIndexStart
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexStart
     (NatPartrecToToPartrec.translate c) i
 
 /-- Source-code version of the canonical numeric-state offset-start decoder. -/
-def sourceSimStepDataForLabelIndexStartWithCode
+noncomputable def sourceSimStepDataForLabelIndexStartWithCode
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithCode
     (NatPartrecToToPartrec.translate c) i
 
 /-- Source-code version of the canonical bounded-search offset-start decoder. -/
-def sourceSimStepDataForLabelIndexStartWithSearchCode
+noncomputable def sourceSimStepDataForLabelIndexStartWithSearchCode
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithSearchCode
     (NatPartrecToToPartrec.translate c) i
@@ -178,7 +176,7 @@ theorem sourceSimStepDataForLabelIndexStartWithSearchCode_eq_nil_of_labelCount_l
   exact sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_bound_le hi
 
 /-- Source-code version of the canonical position-coded offset-start decoder. -/
-def sourceSimStepDataForLabelIndexStartWithPositionCode
+noncomputable def sourceSimStepDataForLabelIndexStartWithPositionCode
     (c : Code) (i : Nat) : List TM0FoldedCompiler.SimStepData :=
   TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode
     (NatPartrecToToPartrec.translate c) i
