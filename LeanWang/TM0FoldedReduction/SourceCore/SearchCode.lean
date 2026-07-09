@@ -9,15 +9,13 @@ import LeanWang.TM0FoldedReduction.SourceCore.Basic
 Bounded-search source-code descriptor rows and accumulator decoder.
 -/
 
-noncomputable section
-
 namespace LeanWang
 
 namespace TM0FoldedReduction
 
 open Nat.Partrec (Code)
 
-def sourceSearchCodeOneRowsVar
+noncomputable def sourceSearchCodeOneRowsVar
     (c : Code) (k : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   match TM0Route.partrecStartedTM0StatementAt?
@@ -62,7 +60,7 @@ theorem sourceSearchCodeOneRowsVar_statementCount_add_primrec :
   exact (Primrec.const ([] : List TM0FoldedCompiler.SimStepData)).of_eq fun p =>
     (sourceSearchCodeOneRowsVar_statementCount_add p.1 p.2.1 p.2.2).symm
 
-def sourceSearchCodeInteriorRowsVar
+noncomputable def sourceSearchCodeInteriorRowsVar
     (c : Code) (j : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   sourceSearchCodeOneRowsVar c (j + 1) v
@@ -78,7 +76,7 @@ theorem sourceSearchCodeInteriorRowsVar_primrec_of_oneRows
     (Primrec.pair Primrec.fst
       (Primrec.pair hj (Primrec.snd.comp Primrec.snd)))
 
-def sourceSearchCodeBoundedInteriorRowsVar
+noncomputable def sourceSearchCodeBoundedInteriorRowsVar
     (c : Code) (j : Nat) (v : TM0Route.PartrecVar) :
     List TM0FoldedCompiler.SimStepData :=
   if j + 1 < sourceStatementCount c then
@@ -336,7 +334,7 @@ def sourceSearchCodeDecoderRows (s : SourceSearchCodeDecoderState) :
 def sourceSearchCodeDecoderInit (k i : Nat) : SourceSearchCodeDecoderState :=
   (k, i, none)
 
-def sourceSearchCodeDecoderStepVar
+noncomputable def sourceSearchCodeDecoderStepVar
     (c : Code) (k i : Nat) (v : TM0Route.PartrecVar) :
     SourceSearchCodeDecoderState :=
   match TM0Route.partrecStartedTM0StatementAt?
@@ -356,20 +354,20 @@ def sourceSearchCodeDecoderStepVar
                   (NatPartrecToToPartrec.translate c))))
           stmt v))
 
-def sourceSearchCodeDecoderStepNone (c : Code) (k i : Nat) :
+noncomputable def sourceSearchCodeDecoderStepNone (c : Code) (k i : Nat) :
     SourceSearchCodeDecoderState :=
   match TM0Route.partrecVarList[i]? with
   | none => (k + 1, i - TM0Route.partrecVarList.length, none)
   | some v => sourceSearchCodeDecoderStepVar c k i v
 
-def sourceSearchCodeDecoderStepNoneRows (c : Code) (k i : Nat) :
+noncomputable def sourceSearchCodeDecoderStepNoneRows (c : Code) (k i : Nat) :
     SourceSearchCodeDecoderState :=
   match TM0Route.partrecVarList[i]? with
   | none => (k + 1, i - TM0Route.partrecVarList.length, none)
   | some _ => (k, i, some (sourceSimStepDataForLabelIndexFromWithSearchCode c 1 k i))
 
 /-- One accumulator step for the source-level bounded-search descriptor decoder. -/
-def sourceSearchCodeDecoderStep (c : Code)
+noncomputable def sourceSearchCodeDecoderStep (c : Code)
     (s : SourceSearchCodeDecoderState) : SourceSearchCodeDecoderState :=
   match s.2.2 with
   | some rows => (s.1, s.2.1, some rows)
@@ -591,7 +589,7 @@ theorem sourceSearchCodeDecoderStep_primrec_of_oneRows
   sourceSearchCodeDecoderStep_primrec_of_stepNone
     (sourceSearchCodeDecoderStepNone_primrec_of_oneRows hrows)
 
-def sourceSearchCodeDecoderStateFrom
+noncomputable def sourceSearchCodeDecoderStateFrom
     (c : Code) (fuel : Nat) (s : SourceSearchCodeDecoderState) :
     SourceSearchCodeDecoderState :=
   fuel.rec s (fun _ s => sourceSearchCodeDecoderStep c s)
@@ -656,11 +654,11 @@ theorem sourceSearchCodeDecoderRows_stateFrom_none_eq
                 sourceSimStepDataForLabelIndexFromWithSearchCode_succ_of_stmt_some
                   hv hstmt]
 
-def sourceSearchCodeDecoderState (c : Code) (fuel k i : Nat) :
+noncomputable def sourceSearchCodeDecoderState (c : Code) (fuel k i : Nat) :
     SourceSearchCodeDecoderState :=
   sourceSearchCodeDecoderStateFrom c fuel (sourceSearchCodeDecoderInit k i)
 
-def sourceSearchCodeDecoder (c : Code) (fuel k i : Nat) :
+noncomputable def sourceSearchCodeDecoder (c : Code) (fuel k i : Nat) :
     List TM0FoldedCompiler.SimStepData :=
   sourceSearchCodeDecoderRows (sourceSearchCodeDecoderState c fuel k i)
 
