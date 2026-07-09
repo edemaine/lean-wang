@@ -574,6 +574,42 @@ theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_searchCodeWi
 set_option linter.style.longLine false in
 /--
 Encoded domino undecidability from the second checked-stack/layer-patch Section
+7 certificate and the bounded-search label-index decoder, using concrete
+started-TM1 statement-support uniqueness/disjointness to recover the generated
+position-coded source route.
+-/
+theorem encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_searchCodeWithPairwiseDisjointCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_l2c2_checked_stack_layer_patches_searchCodeWithNodupCorrect
+    data hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from the second checked-stack/layer-patch
+Section 7 certificate and the bounded-search label-index decoder, using
+concrete started-TM1 statement-support uniqueness/disjointness to recover the
+generated position-coded source route.
+-/
+theorem domino_problem_undecidable_l2c2_checked_stack_layer_patches_searchCodeWithPairwiseDisjointCorrect
+    (data : L2C2CheckedStackLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_l2c2_checked_stack_layer_patches_searchCodeWithNodupCorrect
+    data hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from the second checked-stack/layer-patch Section
 7 certificate and the source-specialized position-code start decoder, with
 `positionProgramData` semantic correctness discharged.
 -/

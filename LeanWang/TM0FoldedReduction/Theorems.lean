@@ -448,6 +448,54 @@ theorem domino_problem_undecidable_of_scaffold_position_source_searchCodeWithSta
     (positionSourceObligationsOfSearchCodeLabelIndexFromWithStatementNodup
       hsearch hnodup hcorrect)
 
+set_option linter.style.longLine false in
+/--
+Encoded domino undecidability from a scaffold, the bounded-search descriptor
+decoder, and concrete started-TM1 statement-support uniqueness/disjointness.
+
+This exposes the proof target below the opaque source statement-list `Nodup`:
+local TM1 statement supports must be duplicate-free and pairwise disjoint across
+distinct started TM1 labels.
+-/
+theorem encoded_domino_problem_undecidable_of_scaffold_position_source_searchCodeWithPairwiseDisjoint
+    (S : Scaffold) (hS : IsScaffold S)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_scaffold_position_source_searchCodeWithStatementNodup
+    S hS hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+    hcorrect
+
+set_option linter.style.longLine false in
+/--
+Unencoded domino undecidability from a scaffold, the bounded-search descriptor
+decoder, and concrete started-TM1 statement-support uniqueness/disjointness.
+-/
+theorem domino_problem_undecidable_of_scaffold_position_source_searchCodeWithPairwiseDisjoint
+    (S : Scaffold) (hS : IsScaffold S)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hstmt : SourceStartedTM1StatementSupportNodup)
+    (hdisj : SourceStartedTM1StatementSupportPairwiseDisjoint)
+    (hcorrect : ∀ tc : Turing.ToPartrec.Code,
+      (TM0FoldedCompiler.positionProgramData tc).HaltsEmpty ↔
+        (Turing.TM0.eval
+          (TM0Route.partrecStartedTM0Machine tc)
+          TM0Route.partrecStartedTM0Input).Dom) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_scaffold_position_source_searchCodeWithStatementNodup
+    S hS hsearch
+    (sourceStatementListNodup_of_startedTM1StatementSupportPairwiseDisjoint
+      hstmt hdisj)
+    hcorrect
+
 /--
 Encoded domino undecidability from a scaffold and the generated position-code
 accumulator step.
