@@ -381,6 +381,25 @@ theorem sourceSimStepDataForLabelIndexFromWithPositionCode_succ_of_stmt_some
       (c := c) (fuel := fuel + 1) (k := k) (block := 0)
       (i := i) (v := v) (stmt := stmt) (by omega) hv (by simpa using hstmt)
 
+theorem sourceSimStepDataForLabelIndexFromWithPositionCode_eq_nil_of_statementCount_le
+    (c : Code) (fuel k i : Nat) (hk : sourceStatementCount c ≤ k) :
+    sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i = [] := by
+  induction fuel generalizing k i with
+  | zero =>
+      exact sourceSimStepDataForLabelIndexFromWithPositionCode_zero c k i
+  | succ fuel ih =>
+      cases hv : TM0Route.partrecVarList[i]? with
+      | none =>
+          rw [sourceSimStepDataForLabelIndexFromWithPositionCode_succ_of_var_none
+            (c := c) (fuel := fuel) (k := k) (i := i) hv]
+          exact ih (k + 1) (i - TM0Route.partrecVarList.length) (by omega)
+      | some v =>
+          exact sourceSimStepDataForLabelIndexFromWithPositionCode_succ_of_stmt_none
+            (c := c) (fuel := fuel) (k := k) (i := i) (v := v) hv
+            (TM0Route.partrecStartedTM0StatementAt?_eq_none_of_count_le
+              (NatPartrecToToPartrec.translate c)
+              (by simpa [sourceStatementCount] using hk))
+
 theorem sourcePositionCodeDecoderRows_stateFrom_none_eq
     (c : Code) (fuel k i : Nat) :
     sourceSearchCodeDecoderRows
@@ -461,6 +480,20 @@ theorem sourcePositionCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithPosit
       sourceSimStepDataForLabelIndexFromWithPositionCode c fuel k i := by
   unfold sourcePositionCodeDecoder sourcePositionCodeDecoderState sourceSearchCodeDecoderInit
   exact sourcePositionCodeDecoderRows_stateFrom_none_eq c fuel k i
+
+theorem sourcePositionCodeDecoder_eq_nil_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    sourcePositionCodeDecoder c fuel k i = [] := by
+  rw [sourcePositionCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithPositionCode]
+  exact sourceSimStepDataForLabelIndexFromWithPositionCode_eq_nil_of_bound_le hi
+
+theorem sourcePositionCodeDecoder_eq_nil_of_statementCount_le
+    (c : Code) (fuel k i : Nat) (hk : sourceStatementCount c ≤ k) :
+    sourcePositionCodeDecoder c fuel k i = [] := by
+  rw [sourcePositionCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithPositionCode]
+  exact sourceSimStepDataForLabelIndexFromWithPositionCode_eq_nil_of_statementCount_le
+    c fuel k i hk
 
 set_option linter.style.longLine false in
 /--

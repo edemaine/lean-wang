@@ -728,6 +728,20 @@ theorem sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchC
   unfold sourceSearchCodeDecoder sourceSearchCodeDecoderState sourceSearchCodeDecoderInit
   exact sourceSearchCodeDecoderRows_stateFrom_none_eq c fuel k i
 
+theorem sourceSearchCodeDecoder_eq_nil_of_bound_le
+    {c : Code} {fuel k i : Nat}
+    (hi : fuel * TM0Route.partrecVarList.length ≤ i) :
+    sourceSearchCodeDecoder c fuel k i = [] := by
+  rw [sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode]
+  exact sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_bound_le hi
+
+theorem sourceSearchCodeDecoder_eq_nil_of_statementCount_le
+    (c : Code) (fuel k i : Nat) (hk : sourceStatementCount c ≤ k) :
+    sourceSearchCodeDecoder c fuel k i = [] := by
+  rw [sourceSearchCodeDecoder_eq_sourceSimStepDataForLabelIndexFromWithSearchCode]
+  exact sourceSimStepDataForLabelIndexFromWithSearchCode_eq_nil_of_statementCount_le
+    c fuel k i hk
+
 theorem sourceSimStepDataForLabelIndexFromWithSearchCode_primrec_of_decoder_step
     (hstep : Primrec (fun p : Code × SourceSearchCodeDecoderState =>
       sourceSearchCodeDecoderStep p.1 p.2)) :
