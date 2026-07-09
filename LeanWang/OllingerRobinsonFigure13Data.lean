@@ -5767,6 +5767,18 @@ theorem
       checkedPositiveBoardLevelData_iff_robinsonPositiveBoardLevelAlignedMacroSquares
 
 /--
+The positive Robinson-board aligned macro-square surface is impossible for the
+current Figure 13 transcription.  It is equivalent to raw positive-board square
+tilability, which is refuted by the `2 × 2` obstruction above.
+-/
+theorem not_hasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares :
+    ¬ HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares := by
+  intro hlevel
+  exact not_hasFigure13PositiveBoardLevelTileableSquares
+    (positiveBoardLevelTileableSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+      hlevel)
+
+/--
 The over-strong row-major checked Figure 16 source raw-boundary board target
 forgets to the exact positive board-level raw Figure 13 checked data.
 -/

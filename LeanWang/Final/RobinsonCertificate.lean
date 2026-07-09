@@ -493,9 +493,10 @@ set_option linter.style.longLine false in
 /--
 Concrete origin-zero-window/positive-board-level L2C2 Robinson/source target.
 
-Positive Robinson board-level aligned macro-squares are the live scaffold
-construction surface; they are converted below to valid translated Figure 18
-scaffold boxes.
+This is retained as a diagnostic theorem surface.  For the current Figure 13
+transcription, positive Robinson board-level aligned macro-squares are
+refuted by the raw `2 × 2` obstruction, so the proof-facing scaffold route
+should use compatible Figure 18/layer-patch data instead.
 -/
 structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations :
     Prop where
@@ -535,8 +536,9 @@ set_option linter.style.longLine false in
 Concrete origin-zero-window/positive-board-level L2C2 Robinson target through
 bounded-interior bounded-search rows for ordinary `programData`.
 
-This exposes the row-level source frontier directly for the live ordinary-source
-positive board-level route.
+This diagnostic row-level surface is vacuous for the current Figure 13
+transcription because the positive board-level macro-square assumption is
+refuted.
 -/
 structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations :
     Prop where
@@ -549,9 +551,9 @@ set_option linter.style.longLine false in
 Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
 bounded-interior bounded-search rows for ordinary `programData`.
 
-Canonical free-site active/corner recognition supplies the origin-zero window
-invariant, so this is the row-level positive-board route one scaffold step
-closer to the local recognizability proof.
+This diagnostic row-level surface is vacuous for the current Figure 13
+transcription because the positive board-level macro-square assumption is
+refuted.
 -/
 structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresSearchCodeBoundedRowsObligations :
     Prop where
@@ -564,9 +566,10 @@ set_option linter.style.longLine false in
 Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
 generated position-code bounded rows for `positionProgramData`.
 
-This is the direct generated-position row-level positive-board route.  It uses
-the semantic correctness theorem for `positionProgramData` and does not require
-statement-list uniqueness for the canonical bounded-search row decoder.
+This diagnostic generated-position row-level surface is vacuous for the current
+Figure 13 transcription because the positive board-level macro-square
+assumption is refuted.  The non-vacuous scaffold route should go through
+compatible Figure 18/layer-patch data.
 -/
 structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsObligations :
     Prop where
@@ -579,8 +582,10 @@ set_option linter.style.longLine false in
 Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
 generated position-code bounded rows and statement-list uniqueness.
 
-The source bridge below turns these generated position-code rows into the
-ordinary bounded-search row target used by the positive-board route.
+This is the older diagnostic positive-board route through the canonical
+bounded-search row decoder.  It is vacuous for the current Figure 13
+transcription because the positive board-level macro-square assumption is
+refuted.
 -/
 structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithNodupObligations :
     Prop where
@@ -595,9 +600,9 @@ Concrete canonical-free-site/positive-board-level L2C2 Robinson target through
 generated position-code bounded rows and concrete started-TM1 support
 uniqueness/disjointness.
 
-This is the lower source frontier for the generated-position bounded-row route:
-the source statement-list uniqueness package is recovered from local
-duplicate-freeness and pairwise disjointness of statement supports.
+This is the older diagnostic positive-board route through the support
+disjointness bridge.  It is vacuous for the current Figure 13 transcription
+because the positive board-level macro-square assumption is refuted.
 -/
 structure Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPositionCodeBoundedRowsWithPairwiseDisjointObligations :
     Prop where
@@ -1828,8 +1833,10 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSe
 
 set_option linter.style.longLine false in
 /--
-Positive Robinson board-level aligned macro-squares provide valid translated
-boxes for the concrete L2C2 Figure 18 scaffold.
+Positive Robinson board-level aligned macro-squares, if supplied, imply valid
+translated boxes for the concrete L2C2 Figure 18 scaffold.  The premise is
+refuted for the current Figure 13 transcription, so this remains a diagnostic
+implication rather than a proof-facing construction route.
 -/
 def figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :

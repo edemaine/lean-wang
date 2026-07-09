@@ -1338,9 +1338,10 @@ Second-candidate origin-zero active/corner windows plus positive Robinson
 board-level aligned macro-squares with the source-specialized position-code
 label-index target.
 
-This exposes the live scaffold route directly: the aligned macro-squares
-produce valid translated boxes, while origin-zero windows provide the
-canonical free-site routing.
+This is retained as a diagnostic route.  For the current Figure 13
+transcription, positive Robinson board-level aligned macro-squares are refuted
+by the raw `2 × 2` obstruction, so the proof-facing route should use compatible
+Figure 18/layer-patch data instead.
 -/
 structure FinalL2C2OriginZeroWindowsPositiveBoardLevelAlignedMacroSquaresSourcePositionCodeConstructionObligations :
     Prop where
@@ -2963,8 +2964,9 @@ def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfRobinsonBoardLevelAlignedMac
 
 set_option linter.style.longLine false in
 /--
-Positive Robinson board-level aligned macro-squares supply the positive L2C2
-Figure 18 finite-box target.
+Positive Robinson board-level aligned macro-squares, if supplied, imply the
+positive L2C2 Figure 18 finite-box target.  The premise is refuted for the
+current Figure 13 transcription.
 -/
 def finalFigure13L2C2Figure18ScaffoldTileableBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
@@ -3355,8 +3357,10 @@ def finalFigure13L2C2ValidTranslatedBoxesOfFigure18ScaffoldTileableBoxes
 
 set_option linter.style.longLine false in
 /--
-Positive Robinson board-level aligned macro-squares provide the concrete L2C2
-valid translated scaffold boxes used by the origin-zero-window route.
+Positive Robinson board-level aligned macro-squares, if supplied, imply the
+concrete L2C2 valid translated scaffold boxes used by the origin-zero-window
+diagnostic route.  The premise is refuted for the current Figure 13
+transcription.
 -/
 def finalFigure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
@@ -3379,8 +3383,10 @@ def finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBo
 
 set_option linter.style.longLine false in
 /--
-Positive Robinson board-level aligned macro-squares provide the L2C2 valid
-translated-box target used by the final origin-zero-window endpoints.
+Positive Robinson board-level aligned macro-squares, if supplied, imply the
+L2C2 valid translated-box target used by the final origin-zero-window
+diagnostic endpoints.  The premise is refuted for the current Figure 13
+transcription.
 -/
 def finalFigure13L2C2Figure18ScaffoldValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
@@ -25224,7 +25230,8 @@ namespace Figure13L2C2CanonicalFreeSitePositiveBoardLevelAlignedMacroSquaresPosi
 set_option linter.style.longLine false in
 /--
 Project the pairwise-disjoint support package to the statement-list `Nodup`
-package for the generated-position bounded-row positive-board route.
+package for the older diagnostic generated-position bounded-row positive-board
+route.
 -/
 def toPositionCodeBoundedRowsWithNodupObligations
     (O :

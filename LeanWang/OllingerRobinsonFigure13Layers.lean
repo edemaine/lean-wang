@@ -1503,8 +1503,9 @@ theorem compatibleFigure18ScaffoldSquares_of_robinsonBoardLevelAlignedMacroSquar
     (alignedMacroSquares_of_robinsonBoardLevelAlignedMacroSquares hlevel)
 
 /--
-Positive Robinson board-level aligned macro-squares supply compatible Figure
-18 site squares.
+Positive Robinson board-level aligned macro-squares, if supplied, imply
+compatible Figure 18 site squares.  The premise is refuted for the current
+Figure 13 transcription, so this is a diagnostic implication.
 -/
 theorem compatibleFigure18ScaffoldSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
     (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
