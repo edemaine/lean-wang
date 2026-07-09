@@ -383,6 +383,18 @@ theorem sourceOneRowsAtIndexPrimrec_of_labelIndexStart
   TM0FoldedReduction.sourcePositionCodeOneRowsAtIndexPrimrec_of_labelIndexStart h
 
 set_option linter.style.longLine false in
+/-- The generated position-code zero row is uniformly empty and primitive recursive. -/
+theorem sourceZeroRowsAtIndexPrimrec :
+    SourcePositionCodeZeroRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodeZeroRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/-- Generated position-code rows past the translated statement support are uniformly empty and primitive recursive. -/
+theorem sourcePostStatementRowsAtIndexPrimrec :
+    SourcePositionCodePostStatementRowsAtIndexPrimrec :=
+  TM0FoldedReduction.sourcePositionCodePostStatementRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
 /-- The position-coded start decoder gives the first interior row target. -/
 theorem sourceFirstInteriorRowsAtIndexPrimrec_of_labelIndexStart
     (h : SourcePositionCodeLabelIndexStartPrimrec) :

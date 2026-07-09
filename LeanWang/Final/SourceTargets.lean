@@ -56,6 +56,20 @@ abbrev SourcePositionCodeOneRowsAtIndexPrimrec : Prop :=
   TM0FoldedReduction.SourcePositionCodeOneRowsAtIndexPrimrec
 
 /--
+Source-side primitive-recursion target for the known empty zero row of
+generated position-code rows at concrete numeric label slots.
+-/
+abbrev SourcePositionCodeZeroRowsAtIndexPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodeZeroRowsAtIndexPrimrec
+
+/--
+Source-side primitive-recursion target for the known empty post-statement tail
+of generated position-code rows at concrete numeric label slots.
+-/
+abbrev SourcePositionCodePostStatementRowsAtIndexPrimrec : Prop :=
+  TM0FoldedReduction.SourcePositionCodePostStatementRowsAtIndexPrimrec
+
+/--
 Source-side primitive-recursion target for the first nonempty generated
 position-code row at concrete numeric label slots.
 -/
