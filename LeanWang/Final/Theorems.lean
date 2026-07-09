@@ -2610,6 +2610,38 @@ structure FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRows
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 free-site-rectangle/translated-positive-box
+scaffold route with bounded-interior generated position-code rows at the
+numeric label slots used by the accumulator.
+-/
+structure FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 free-site-rectangle/translated-positive-box
+scaffold route with generated interior position-code rows at the numeric label
+slots used by the accumulator.
+-/
+structure FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations :
+    Prop where
+  scaffold :
+    NatSiteRobinsonCanonicalFreeSiteRectTranslatedPositiveBoxObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceRows : SourcePositionCodeInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 free-site-rectangle/translated-positive-box
 scaffold route with the generated position-code decoder-step source target.
 -/
 structure FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations :
@@ -21296,6 +21328,118 @@ end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstr
 set_option linter.style.longLine true
 
 set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index free-site-rectangle package to its source-label
+form.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_boundedInteriorRowsAtIndex h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the bounded-at-index free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
+        h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the bounded-at-index concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toBoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the bounded-at-index concrete second-candidate Figure
+13 free-site-rectangle/translated-positive-box package.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toBoardFreeLineLayerPatchBoundedRowsAtIndexConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index free-site-rectangle package to its source-label
+form.
+-/
+def toSourcePositionCodeConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxSourcePositionCodeConstructionObligations where
+  scaffold := h.scaffold
+  labelIndex := sourceLabelIndexPrimrec_of_interiorRowsAtIndex h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the interior-at-index free-site-rectangle route to the direct Section 7
+board/free-line/layer-patch route.
+-/
+def toBoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations :=
+  (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfFreeSiteRectObligations
+    h.scaffold)
+      |>.toFinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+        h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from the interior-at-index concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box package.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toBoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from the interior-at-index concrete second-candidate Figure
+13 free-site-rectangle/translated-positive-box package.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toBoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
 namespace FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxDecoderStepConstructionObligations
 
 set_option linter.style.longLine false in
@@ -29289,6 +29433,54 @@ bounded-interior position-code rows.
 theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations
     (h :
       FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box scaffold package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box scaffold package and
+bounded-interior generated position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxBoundedRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box scaffold package and generated
+interior position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete second-candidate Figure 13
+free-site-rectangle/translated-positive-box scaffold package and generated
+interior position-code rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations
+    (h :
+      FinalFigure13L2C2CanonicalFreeSiteRectTranslatedPositiveBoxInteriorRowsAtIndexConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
