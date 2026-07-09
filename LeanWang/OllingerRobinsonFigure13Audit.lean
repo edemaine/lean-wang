@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinsonFigure16Recognizability
+import LeanWang.OllingerRobinson104
 import LeanWang.OllingerRobinsonFigure18Obstruction
 
 /-!
@@ -68,6 +68,8 @@ structure Figure13Figure16AuditCertificate : Prop where
     oneStepClosedUniqueChildrenBool = true
   figure16OneStepClosedUnderSubstitution :
     oneStepClosedUnderSubstitutionBool = true
+  figure16Closed104AlphabetLength : Closed104.alphabet.length = 104
+  figure16Closed104ChildrenUnique : Closed104.allChildrenUniqueBool = true
   figure16AlignedBlockCount :
     alignedCompatibleChildBlockCount = 92
   figure16AlignedBlocksAreSingleRawTiles :
@@ -97,6 +99,8 @@ theorem figure13Figure16AuditCertificate :
   figure16OneStepClosedUniqueChildren := oneStepClosedUniqueChildrenBool_eq_true
   figure16OneStepClosedUnderSubstitution :=
     oneStepClosedUnderSubstitutionBool_eq_true
+  figure16Closed104AlphabetLength := Closed104.alphabet_length
+  figure16Closed104ChildrenUnique := Closed104.allChildrenUniqueBool_eq_true
   figure16AlignedBlockCount := alignedCompatibleChildBlockCount_eq
   figure16AlignedBlocksAreSingleRawTiles :=
     allAlignedCompatibleBlocksHaveSameIndexBool_eq_true

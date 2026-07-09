@@ -336,18 +336,25 @@ final route: the direct Figure 18 site-square problem is a diagnostic surface,
 while the proof-facing scaffold target is the Section 7 checked-stack plus
 valid-translated-box/layer-patch route.
 
-The standalone raw Figure 13 positive-board and Figure 16 source/raw-boundary
-surfaces are diagnostics, not final assumptions: the raw Figure 13 macro tiles
-do not tile even a `2 x 2` square, and the over-strong Figure 16
-source/raw-boundary diagnostic has no adjacent two-cell witnesses in the current
-transcription.  `LeanWang.OllingerRobinsonFigure13Data` now also proves the
-global contradiction wrappers
+The standalone legacy Figure 13 positive-board and Figure 16
+source/raw-boundary surfaces are diagnostics, not final assumptions: the old
+Figure 13 transcription omitted the final 12 tiles from the paper's 104-tile
+set, so that 92-tile list does not tile even a `2 x 2` square. The over-strong
+Figure 16 source/raw-boundary diagnostic consequently has no adjacent two-cell
+witnesses. `LeanWang.OllingerRobinsonFigure13Data` proves the resulting legacy
+contradiction wrappers
 `not_hasCanonicalFigure16SourceRawBoundaryCheckedLevelData`,
 `not_hasCanonicalFigure16SourceRawBoundaryLevelChecks`,
 `not_hasCanonicalCheckedFigure16SourceRawBoundaryMacroSquaresBool`, and
 `not_hasCanonicalFigure16SourceRawBoundaryBoardLevelChecks`: any all-level
 canonical source/raw-boundary route would imply positive-board raw Figure 13
 square tilings, contradicting the checked finite obstruction.
+
+`LeanWang.OllingerRobinson104` is the corrected route. It closes the human
+L1/L2/L3 rows under Figure 16, recovers exactly the omitted final row, and
+defines a total unique substitution on the resulting 104 component triples.
+The older `Fin 92` modules remain available to audit how the omission was
+detected, but should not be used for the concrete scaffold proof.
 
 There is no direct `PartrecToTM2`/TM2-to-table reduction in the current route.
 TM2 remains only as Mathlib's intermediate evaluator on the way to TM0. The

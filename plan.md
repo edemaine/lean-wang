@@ -822,7 +822,7 @@ construction. The immediate scaffold task is now:
 1. Replace the visually assigned edge identifiers in
    `OllingerRobinsonFigure13.lean` by a compositional boundary encoding derived
    from the human-audited L1/L2/L3 component rows.
-2. Decode the Figure 16 expansion of each of the 92 parent tiles to a concrete
+2. Decode the Figure 16 expansion of each of the 104 parent tiles to a concrete
    `2 x 2` block of child tile indices.
 3. Mechanically verify that every expansion block is valid and that parent-edge
    matching is equivalent to matching along the expanded block boundary.
@@ -847,11 +847,22 @@ substitution. These facts are recorded by
 `componentTripleCounts_eq`, `oneStepClosedUniqueChildrenBool_eq_true`, and
 `oneStepClosedUnderSubstitutionBool_eq_true`.
 
-This 104-triple alphabet is a clean formal candidate, but it should not silently
-replace the paper's displayed 92-tile set. Before assigning corrected Wang
-edges, determine whether the 12 additional triples expose a Figure 13
-transcription error, an omitted identification/recoloring convention, or a
-genuine enlargement of the paper's tile alphabet.
+The source resolves the apparent discrepancy: the original Figure 13 page has
+104 tiles, arranged as an eight-tile first row followed by eight twelve-tile
+rows. The indexed crop and TSV stopped after 92, omitting the final twelve-tile
+row. Ollinger's own [2009 slides](https://www.univ-orleans.fr/lifo/membres/Nicolas.Ollinger/talks/2009/04/lirmm.pdf)
+independently describe the construction as "an aperiodic tile set of 104
+tiles". The twelve omitted rows are exactly the twelve triples found by
+substitution closure.
+
+`LeanWang.OllingerRobinson104` now defines the corrected 104-triple alphabet
+without migrating the large `Fin 92` diagnostic development. It proves the
+alphabet has length 104 and no duplicates, records the exact twelve omitted
+rows, and exposes a total executable child decoder
+`Closed104.childIndex : Fin 104 -> Quadrant -> Fin 104` with uniqueness and
+matching theorems. The corrected scaffold route should build on this module;
+the old `Fin 92` route remains useful only for auditing how the omission was
+detected.
 
 The theorem surface now also has the more Robinson-shaped
 `L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` /
