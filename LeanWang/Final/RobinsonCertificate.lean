@@ -374,6 +374,49 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
 set_option linter.style.longLine false in
 /--
 Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch scaffold package and the global bounded-search
+descriptor decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchGlobalSearchCode
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsearch : GlobalSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      { boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+        patches := O.patches })
+    (TM0FoldedReduction.sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+      (searchCodeLabelIndexPrimrec_of_globalSearchCodeLabelIndex hsearch))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch scaffold package and the global bounded-search descriptor decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchGlobalSearchCode
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsearch : GlobalSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      { boardFreeLineActiveCorner := O.boardFreeLineActiveCorner
+        patches := O.patches })
+    (TM0FoldedReduction.sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+      (searchCodeLabelIndexPrimrec_of_globalSearchCodeLabelIndex hsearch))
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
 board/free-line layer-patch scaffold package, the bounded-search descriptor
 decoder, and statement-list uniqueness.
 -/
@@ -608,6 +651,40 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataSourceLabelIndexFrom
     data (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the global bounded-search
+descriptor decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataGlobalSearchCode
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hsearch : GlobalSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  TM0FoldedReduction.encoded_domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      data)
+    (TM0FoldedReduction.sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+      (searchCodeLabelIndexPrimrec_of_globalSearchCodeLabelIndex hsearch))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the compact concrete L2C2 Section 7
+board/free-line layer-patch data package and the global bounded-search
+descriptor decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchDataGlobalSearchCode
+    (data : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData)
+    (hsearch : GlobalSearchCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  TM0FoldedReduction.domino_problem_undecidable_of_scaffold_source
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      data)
+    (TM0FoldedReduction.sourceObligationsOfLabelIndexFromWithSearchCodeCorrect
+      (searchCodeLabelIndexPrimrec_of_globalSearchCodeLabelIndex hsearch))
 
 set_option linter.style.longLine false in
 /--
