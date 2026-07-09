@@ -29174,5 +29174,32 @@ theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesSourcePosition
   domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexFrom
     { checkedStacks := checkedStacks, patches := patches } hindex
 
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the split checked-stack and layer-patch
+finite scaffold obligations and the fixed-start source-level position-code
+decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_checkedStacksAndLayerPatchesLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    { checkedStacks := checkedStacks, patches := patches } hstart
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the split checked-stack and layer-patch finite
+scaffold obligations and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_checkedStacksAndLayerPatchesLabelIndexStart
+    (checkedStacks : TM0FoldedReduction.L2C1OriginZeroCheckedStacks)
+    (patches : TM0FoldedReduction.L2C1ActiveCornerLayerPatches)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_checkedStackLayerPatchDataSourcePositionCodeLabelIndexStart
+    { checkedStacks := checkedStacks, patches := patches } hstart
+
 
 end LeanWang
