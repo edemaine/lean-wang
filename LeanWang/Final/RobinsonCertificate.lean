@@ -129,6 +129,35 @@ structure Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations :
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
 
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site / checked-Figure-16 theorem-facing L2C2
+Robinson/source target.
+
+This exposes the current finite scaffold work one step below
+`Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations`: canonical
+free-site active/corner recognition supplies the checked origin-zero stacks,
+and checked compatible Figure 16 level data supplies the active-corner layer
+patches.
+-/
+structure Figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete canonical-free-site / checked-Figure-16 L2C2 Robinson target through
+the bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodupObligations :
+    Prop where
+  activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner
+  fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -553,6 +582,70 @@ theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSear
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, and the
+source-specialized generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    (activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      activeCorner fig16)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+checked compatible Figure 16 level data, and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    (activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2CheckedStackLayerPatchDataOfCanonicalFreeSiteCanonicalCheckedCompatibleFig16LevelData
+      activeCorner fig16)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from canonical free-site active/corner
+recognition, checked compatible Figure 16 level data, the bounded-search
+descriptor decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodup
+    (activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    activeCorner fig16
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from canonical free-site active/corner recognition,
+checked compatible Figure 16 level data, the bounded-search descriptor decoder,
+and statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodup
+    (activeCorner : TM0FoldedReduction.L2C2CanonicalFreeSiteRectActiveCorner)
+    (fig16 : TM0FoldedReduction.Figure18CanonicalCheckedRecognizedCompatibleLevelData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    activeCorner fig16
+    (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the Section 7 tower/indexed-box
 Robinson scaffold obligations and generated-position source obligations.
 
@@ -956,6 +1049,60 @@ theorem domino_problem_undecidable
     O.scaffold O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations
+
+namespace Figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site /
+checked-Figure-16 Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    O.activeCorner O.fig16 O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site / checked-Figure-16
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexFrom
+    O.activeCorner O.fig16 O.sourceLabelIndex
+
+end Figure13L2C2CanonicalFreeSiteCheckedFig16SourceLabelIndexObligations
+
+namespace Figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the canonical-free-site /
+checked-Figure-16 Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodup
+    O.activeCorner O.fig16 O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the canonical-free-site / checked-Figure-16
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodup
+    O.activeCorner O.fig16 O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2CanonicalFreeSiteCheckedFig16SearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
