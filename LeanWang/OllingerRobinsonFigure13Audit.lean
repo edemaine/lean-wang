@@ -171,6 +171,86 @@ theorem checkedLayerStackOfSiteRectangle_tileableExpandedSquare {n : Nat}
     TileableSquare Figure16.Symbol.tileSet (2 * n) :=
   (checkedLayerStackOfSiteRectangle R hcompatible).tileableExpandedSquare layer
 
+/--
+The first audited L2 blank candidate passes the finite generated
+site-pair/layer-stack compatibility check.
+-/
+theorem l2Component1BlankCandidate_pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      l2Component1BlankCandidateActiveSiteData
+      l2Component1BlankCandidateCornerSite = true :=
+  l2Component1BlankCandidatePairCompatibilityBool
+
+/--
+The second audited L2 blank candidate passes the finite generated
+site-pair/layer-stack compatibility check.
+-/
+theorem l2Component2BlankCandidate_pairCompatibility :
+    generatedStackAllowedSitePairCompatibilityBool
+      l2Component2BlankCandidateActiveSiteData
+      l2Component2BlankCandidateCornerSite = true :=
+  l2Component2BlankCandidatePairCompatibilityBool
+
+/--
+Every locally compatible square rectangle using only the first L2 candidate's
+listed active sites and corner has a matching compatible checked Figure 13/16
+layer stack.
+-/
+theorem l2Component1BlankCandidate_exists_compatible_checkedLayerStackRectangle
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = l2Component1BlankCandidateCornerSite ∨
+        R i j ∈ l2Component1BlankCandidateActiveSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    ∃ (stackData : CheckedLayerStackRectangle n n),
+      ∃ (_hsite : stackData.sites.matchesSiteRectangleBool R = true),
+        ∃ (hmatch :
+          (sparseRawDataOfSites l2Component1BlankCandidateActiveSiteData
+            l2Component1BlankCandidateCornerSite).layerStackRectangleMatchesBool
+              stackData = true),
+          stackData.compatibleBool
+            (sparseRawDataOfSites l2Component1BlankCandidateActiveSiteData
+              l2Component1BlankCandidateCornerSite).layerData
+            (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+              hmatch) = true :=
+  sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+    l2Component1BlankCandidateActiveSiteData
+    l2Component1BlankCandidateCornerSite
+    l2Component1BlankCandidate_pairCompatibility R hsites hh hv
+
+/--
+Every locally compatible square rectangle using only the second L2 candidate's
+listed active sites and corner has a matching compatible checked Figure 13/16
+layer stack.
+-/
+theorem l2Component2BlankCandidate_exists_compatible_checkedLayerStackRectangle
+    {n : Nat} (R : SiteRectangle n n)
+    (hsites : ∀ i : Fin n, ∀ j : Fin n,
+      R i j = l2Component2BlankCandidateCornerSite ∨
+        R i j ∈ l2Component2BlankCandidateActiveSiteData.sites)
+    (hh : ∀ i : Fin n, ∀ j : Fin n, ∀ hi : i.val + 1 < n,
+      Figure18Site.hCompatible (R i j) (R ⟨i.val + 1, hi⟩ j) = true)
+    (hv : ∀ i : Fin n, ∀ j : Fin n, ∀ hj : j.val + 1 < n,
+      Figure18Site.vCompatible (R i j) (R i ⟨j.val + 1, hj⟩) = true) :
+    ∃ (stackData : CheckedLayerStackRectangle n n),
+      ∃ (_hsite : stackData.sites.matchesSiteRectangleBool R = true),
+        ∃ (hmatch :
+          (sparseRawDataOfSites l2Component2BlankCandidateActiveSiteData
+            l2Component2BlankCandidateCornerSite).layerStackRectangleMatchesBool
+              stackData = true),
+          stackData.compatibleBool
+            (sparseRawDataOfSites l2Component2BlankCandidateActiveSiteData
+              l2Component2BlankCandidateCornerSite).layerData
+            (CheckedSparseRawData.lookupBool_layerData_of_layerStackRectangleMatchesBool
+              hmatch) = true :=
+  sparseRawDataOfSites_exists_compatible_checkedLayerStackRectangle
+    l2Component2BlankCandidateActiveSiteData
+    l2Component2BlankCandidateCornerSite
+    l2Component2BlankCandidate_pairCompatibility R hsites hh hv
+
 end ConcreteData
 end LayeredFigure18ScaffoldData
 end Figure13Layers
