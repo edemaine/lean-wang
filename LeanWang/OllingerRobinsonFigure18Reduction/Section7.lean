@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonFigure18Reduction.Section7.PositionSource
 import LeanWang.OllingerRobinsonFigure18Reduction.Section7.InteriorRows
+import LeanWang.OllingerRobinsonFigure13Audit
 
 /-!
 Section 7 final theorem wrappers.
