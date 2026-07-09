@@ -491,6 +491,32 @@ structure Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObliga
 
 set_option linter.style.longLine false in
 /--
+Concrete origin-zero-window/positive-board-level L2C2 Robinson/source target.
+
+Positive Robinson board-level aligned macro-squares are the live scaffold
+construction surface; they are converted below to valid translated Figure 18
+scaffold boxes.
+-/
+structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete origin-zero-window/positive-board-level L2C2 Robinson target through
+the bounded-search fixed-start decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations :
+    Prop where
+  originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows
+  alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+  statementList_nodup : SourceStatementListNodup
+
+set_option linter.style.longLine false in
+/--
 Concrete canonical-free-site/layer-patch theorem-facing L2C2 Robinson/source
 target.
 
@@ -1704,6 +1730,91 @@ theorem domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSe
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexFrom
     originZeroWindows validTranslatedBoxes
+    (sourceLabelIndexPrimrec_of_labelIndexStart
+      (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hsearch hnodup))
+
+set_option linter.style.longLine false in
+/--
+Positive Robinson board-level aligned macro-squares provide valid translated
+boxes for the concrete L2C2 Figure 18 scaffold.
+-/
+def figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+    (hlevel : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares) :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes := by
+  simpa [TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes,
+    TM0FoldedReduction.L2C2Figure18ScaffoldTiles] using
+    Figure18ScaffoldData.positiveTranslatedValidBoxes_ofFigure18ScaffoldTileableBoxes
+      l2Component2Figure18ScaffoldData
+      (fun r _hr =>
+        tileableBoxes_of_compatibleFigure18ScaffoldSquares
+          (compatibleFigure18ScaffoldSquares_of_robinsonPositiveBoardLevelAlignedMacroSquares
+            hlevel) r)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+positive Robinson board-level aligned macro-squares, and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexFrom
+    originZeroWindows
+    (figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      alignedMacroSquares)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, positive
+Robinson board-level aligned macro-squares, and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexFrom
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexFrom
+    originZeroWindows
+    (figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      alignedMacroSquares)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from origin-zero active/corner windows,
+positive Robinson board-level aligned macro-squares, and the bounded-search
+fixed-start decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexFrom
+    originZeroWindows alignedMacroSquares
+    (sourceLabelIndexPrimrec_of_labelIndexStart
+      (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hsearch hnodup))
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from origin-zero active/corner windows, positive
+Robinson board-level aligned macro-squares, and the bounded-search fixed-start
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodup
+    (originZeroWindows : TM0FoldedReduction.L2C2OriginZeroWindows)
+    (alignedMacroSquares : HasFigure13RobinsonPositiveBoardLevelAlignedMacroSquares)
+    (hsearch : SourceSearchCodeLabelIndexStartPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexFrom
+    originZeroWindows alignedMacroSquares
     (sourceLabelIndexPrimrec_of_labelIndexStart
       (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart hsearch hnodup))
 
@@ -2929,6 +3040,108 @@ theorem domino_problem_undecidable
   O.toSourceLabelIndexObligations.domino_problem_undecidable
 
 end Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations
+
+set_option linter.style.longLine false
+namespace Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Project the positive-board-level scaffold certificate to the valid-translated
+box certificate package.
+-/
+def toOriginZeroValidTranslatedBoxSourceLabelIndexObligations
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations) :
+    Figure13L2C2OriginZeroValidTranslatedBoxSourceLabelIndexObligations where
+  originZeroWindows := O.originZeroWindows
+  validTranslatedBoxes :=
+    figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      O.alignedMacroSquares
+  sourceLabelIndex := O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/positive-board
+Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toOriginZeroValidTranslatedBoxSourceLabelIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/positive-board
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toOriginZeroValidTranslatedBoxSourceLabelIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations
+set_option linter.style.longLine true
+
+set_option linter.style.longLine false
+namespace Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations
+
+set_option linter.style.longLine false in
+/-- Project the fixed-start positive-board certificate to the source-label package. -/
+def toSourceLabelIndexObligations
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations) :
+    Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSourceLabelIndexObligations where
+  originZeroWindows := O.originZeroWindows
+  alignedMacroSquares := O.alignedMacroSquares
+  sourceLabelIndex :=
+    sourceLabelIndexPrimrec_of_labelIndexStart
+      (sourceLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
+        O.sourceSearchStart O.statementList_nodup)
+
+set_option linter.style.longLine false in
+/--
+Project the fixed-start positive-board certificate to the fixed-start valid-box
+certificate package.
+-/
+def toOriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations) :
+    Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations where
+  originZeroWindows := O.originZeroWindows
+  validTranslatedBoxes :=
+    figure13L2C2ValidTranslatedBoxesOfRobinsonPositiveBoardLevelAlignedMacroSquares
+      O.alignedMacroSquares
+  sourceSearchStart := O.sourceSearchStart
+  statementList_nodup := O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the origin-zero-window/positive-board
+Robinson package and the bounded-search fixed-start decoder.
+-/
+theorem encoded_domino_problem_undecidable
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toSourceLabelIndexObligations.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the origin-zero-window/positive-board Robinson
+package and the bounded-search fixed-start decoder.
+-/
+theorem domino_problem_undecidable
+    (O :
+      Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toSourceLabelIndexObligations.domino_problem_undecidable
+
+end Figure13L2C2OriginZeroPositiveBoardLevelAlignedMacroSquaresSearchCodeStartWithNodupObligations
+set_option linter.style.longLine true
 
 namespace Figure13L2C2CanonicalFreeSiteLayerPatchesSourceLabelIndexObligations
 
