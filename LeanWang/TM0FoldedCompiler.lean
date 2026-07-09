@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.TM0FoldedCompiler.Correctness
+import LeanWang.TM0FoldedCompiler.CorrectnessPosition
 
 /-!
 Semantic correctness for the folded finite one-sided TM0 program.
