@@ -104,6 +104,31 @@ structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligati
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
 
+set_option linter.style.longLine false in
+/--
+Concrete finite checked-stack/layer-patch theorem-facing L2C2 Robinson/source
+target.
+
+This is the finite scaffold package closest to the Figure 13/Figure 16
+transcription: checked origin-zero stacks provide the Section 7 recognition
+data, and layer patches provide the active-corner realization data.
+-/
+structure Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete finite checked-stack/layer-patch L2C2 Robinson target through the
+bounded-search descriptor decoder and statement-list uniqueness.
+-/
+structure Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -470,6 +495,64 @@ theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatc
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch scaffold package and the source-specialized generated position-code
+label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+scaffold package and the source-specialized generated position-code label-index
+decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    (TM0FoldedReduction.l2c2Section7BoardFreeLineLayerPatchObligationsOfCheckedStackLayerPatchData
+      scaffold)
+    hindex
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch scaffold package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSearchCodeWithNodup
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    scaffold (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+scaffold package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSearchCodeWithNodup
+    (scaffold : TM0FoldedReduction.L2C2CheckedStackLayerPatchData)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    scaffold (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from the Section 7 tower/indexed-box
 Robinson scaffold obligations and generated-position source obligations.
 
@@ -819,6 +902,60 @@ theorem domino_problem_undecidable
     O.section7 O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations
+
+namespace Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    O.scaffold O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSourceLabelIndexFrom
+    O.scaffold O.sourceLabelIndex
+
+end Figure13L2C2CheckedStackLayerPatchSourceLabelIndexObligations
+
+namespace Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 checked-stack /
+layer-patch Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSearchCodeWithNodup
+    O.scaffold O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 checked-stack / layer-patch
+Robinson package, the bounded-search descriptor decoder, and statement-list
+uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CheckedStackLayerPatchDataSearchCodeWithNodup
+    O.scaffold O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2CheckedStackLayerPatchSearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
