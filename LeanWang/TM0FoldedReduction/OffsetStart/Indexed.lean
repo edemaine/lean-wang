@@ -111,6 +111,18 @@ theorem sourceCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
   hindex.of_eq fun p =>
     sourceSimStepDataForLabelIndexStartWithSearchCode_eq_withCode p.1 p.2
 
+set_option linter.style.longLine false in
+/--
+The numeric-state and bounded-search start decoders have the same
+source-uniform primitive-recursion strength.  They differ only in the code path
+used to name the generated finite-state labels.
+-/
+theorem sourceSearchCodeLabelIndexStartPrimrec_iff_codeLabelIndexStartPrimrec :
+    SourceSearchCodeLabelIndexStartPrimrec ↔
+      SourceCodeLabelIndexStartPrimrec :=
+  ⟨sourceCodeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart,
+    sourceSearchCodeLabelIndexStartPrimrec_of_codeLabelIndexStart⟩
+
 theorem sourceSimStepDataForLabelIndexStartWithPositionCode_eq (c : Code) (i : Nat) :
     sourceSimStepDataForLabelIndexStartWithPositionCode c i =
       TM0FoldedCompiler.simStepDataForLabelIndexStartWithPositionCode

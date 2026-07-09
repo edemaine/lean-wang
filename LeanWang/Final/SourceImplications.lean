@@ -104,6 +104,12 @@ theorem codeLabelIndexStartPrimrec_of_searchCodeLabelIndexStart
     hindex
 
 set_option linter.style.longLine false in
+/-- The bounded-search and numeric-state start decoder targets are equivalent. -/
+theorem searchCodeLabelIndexStartPrimrec_iff_codeLabelIndexStartPrimrec :
+    SourceSearchCodeLabelIndexStartPrimrec ↔ SourceCodeLabelIndexStartPrimrec :=
+  TM0FoldedReduction.sourceSearchCodeLabelIndexStartPrimrec_iff_codeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
 /-- The bounded-search decoder-step target gives the bounded-search start-decoder target. -/
 theorem searchCodeLabelIndexStartPrimrec_of_decoderStep
     (hstep : SourceSearchCodeDecoderStepPrimrec) :
