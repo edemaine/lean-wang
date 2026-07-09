@@ -928,6 +928,75 @@ structure FinalL2C2CheckedStackPositiveBoxSearchCodeLabelIndexStartConstructionO
 
 set_option linter.style.longLine false in
 /--
+Second-candidate paper-facing Section 7 positive-box route with generated
+interior position-code rows.
+-/
+structure FinalL2C2Section7PositiveBoxConstructionObligations : Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with generated
+one-row position-code rows.
+-/
+structure FinalL2C2Section7PositiveBoxOneRowsConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with generated
+bounded-interior position-code rows.
+-/
+structure FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with the generated
+position-code decoder step.
+-/
+structure FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  decoderStep : SourcePositionCodeDecoderStepPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with the global
+position-code label-index decoder.
+-/
+structure FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndex : GlobalPositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with the
+source-specialized position-code label-index decoder.
+-/
+structure FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Second-candidate paper-facing Section 7 positive-box route with the fixed-start
+source-level position-code decoder.
+-/
+structure FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations :
+    Prop where
+  section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData
+  labelIndexStart : SourcePositionCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
 Second-candidate finite-scaffold construction route one step below layer
 patches.
 -/
@@ -9270,6 +9339,111 @@ def ofCheckedStackPositiveBoxDataSourcePositionCodeLabelIndexFrom
       hindex)
 
 set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and generated-position source obligations.
+-/
+def ofSection7PositiveBoxDataSource
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    FinalL2C2ReductionInputs :=
+  ofScaffoldAndSource
+    (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfPositiveBoxData
+      section7)
+    source
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and generated interior position-code rows.
+-/
+def ofSection7PositiveBoxData
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and generated one-row position-code rows.
+-/
+def ofSection7PositiveBoxDataOneRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeOneRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and generated bounded-interior position-code rows.
+-/
+def ofSection7PositiveBoxDataBoundedRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeBoundedInteriorRowsCorrect
+      sourceRows)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and the generated position-code decoder step.
+-/
+def ofSection7PositiveBoxDataDecoderStep
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeDecoderStepCorrect
+      hstep)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and the global position-code label-index decoder.
+-/
+def ofSection7PositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      (sourceLabelIndexPrimrec_of_globalLabelIndex hindex))
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and the source-specialized position-code label-index decoder.
+-/
+def ofSection7PositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Build the second-candidate final inputs from paper-facing Section 7 positive-box
+data and the fixed-start source-level position-code decoder.
+-/
+def ofSection7PositiveBoxDataSourcePositionCodeLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    FinalL2C2ReductionInputs :=
+  ofSection7PositiveBoxDataSource section7
+    (TM0FoldedReduction.positionSourceObligationsOfPositionCodeLabelIndexStartCorrect
+      hstart)
+
+set_option linter.style.longLine false in
 /-- Encoded endpoint from the preferred second-candidate final inputs. -/
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2ReductionInputs) :
@@ -15178,6 +15352,209 @@ theorem domino_problem_undecidable
   h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
 
 end FinalL2C2CheckedStackPositiveBoxSearchCodeLabelIndexStartConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and generated interior
+rows into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxData
+    h.section7 h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxOneRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and generated one-row data
+into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxOneRowsConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataOneRows
+    h.section7 h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box one-row data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box one-row data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxOneRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxOneRowsConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and generated
+bounded-interior rows into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataBoundedRows
+    h.section7 h.sourceRows
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box bounded rows. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box bounded rows. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and the generated
+position-code decoder step into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataDecoderStep
+    h.section7 h.decoderStep
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box decoder-step data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box decoder-step data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and the global
+position-code label-index decoder into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    h.section7 h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box global-label data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box global-label data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and the source-specialized
+position-code label-index decoder into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataSourcePositionCodeLabelIndexFrom
+    h.section7 h.labelIndex
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box source-label data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box source-label data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations
+
+namespace FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Convert second-candidate Section 7 positive-box data and the fixed-start
+source-level position-code decoder into the preferred final endpoint inputs.
+-/
+def toFinalL2C2ReductionInputs
+    (h : FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations) :
+    FinalL2C2ReductionInputs :=
+  FinalL2C2ReductionInputs.ofSection7PositiveBoxDataSourcePositionCodeLabelIndexStart
+    h.section7 h.labelIndexStart
+
+set_option linter.style.longLine false in
+/-- Encoded endpoint from second-candidate Section 7 positive-box fixed-start data. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toFinalL2C2ReductionInputs.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/-- Unencoded endpoint from second-candidate Section 7 positive-box fixed-start data. -/
+theorem domino_problem_undecidable
+    (h : FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toFinalL2C2ReductionInputs.domino_problem_undecidable
+
+end FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations
 
 namespace FinalL2C2CheckedStackValidTranslatedBoxConstructionObligations
 
@@ -24098,6 +24475,174 @@ theorem domino_problem_undecidable_of_l2c2CheckedStackPositiveBoxDataSourcePosit
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   (FinalL2C2CheckedStackPositiveBoxSourcePositionCodeConstructionObligations.mk
     scaffold hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and generated interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxConstructionObligations.mk
+    section7 sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and generated interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxConstructionObligations.mk
+    section7 sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and generated one-row position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOneRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxOneRowsConstructionObligations.mk
+    section7 sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and generated one-row position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataOneRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeOneRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxOneRowsConstructionObligations.mk
+    section7 sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and generated bounded-interior position-code rows.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataBoundedRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations.mk
+    section7 sourceRows).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and generated bounded-interior position-code rows.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataBoundedRows
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (sourceRows : TM0FoldedReduction.SourcePositionCodeBoundedInteriorRowsPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxBoundedRowsConstructionObligations.mk
+    section7 sourceRows).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and the generated position-code decoder step.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataDecoderStep
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations.mk
+    section7 hstep).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and the generated position-code decoder step.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataDecoderStep
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstep : SourcePositionCodeDecoderStepPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxDecoderStepConstructionObligations.mk
+    section7 hstep).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and the global position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations.mk
+    section7 hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and the global position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataGlobalPositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : GlobalPositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxGlobalPositionCodeConstructionObligations.mk
+    section7 hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and the source-specialized position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations.mk
+    section7 hindex).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and the source-specialized position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataSourcePositionCodeLabelIndexFrom
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxSourcePositionCodeConstructionObligations.mk
+    section7 hindex).domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from second-candidate Section 7 positive-box
+data and the fixed-start source-level position-code decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  (FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations.mk
+    section7 hstart).encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from second-candidate Section 7 positive-box data
+and the fixed-start source-level position-code decoder.
+-/
+theorem domino_problem_undecidable_of_l2c2RobinsonSection7BoardFreeLinePositiveBoxDataLabelIndexStart
+    (section7 : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLinePositiveBoxData)
+    (hstart : SourcePositionCodeLabelIndexStartPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  (FinalL2C2Section7PositiveBoxLabelIndexStartConstructionObligations.mk
+    section7 hstart).domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
