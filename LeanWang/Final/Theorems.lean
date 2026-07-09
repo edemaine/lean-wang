@@ -17039,6 +17039,20 @@ def toSourcePositionCodeConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the interior-at-index board/free-line/layer-patch package to the
+equivalent fixed-start decoder package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineLayerPatchInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineLayerPatchLabelIndexStartConstructionObligations where
+  boardFreeLineActiveCorner := h.boardFreeLineActiveCorner
+  layerPatches := h.layerPatches
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec.mpr
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the interior-at-index board/free-line/layer-patch package to the final
 input package.
 -/
@@ -17091,6 +17105,19 @@ def toLayerPatchConstructionObligations
 
 set_option linter.style.longLine false in
 /--
+Project the paper-facing bounded-at-index Section 7 board/free-line package to
+the equivalent fixed-start decoder package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataBoundedRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations where
+  section7 := h.section7
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_boundedInteriorRowsAtIndexPrimrec.mpr
+      h.sourceRows
+
+set_option linter.style.longLine false in
+/--
 Project the paper-facing Section 7 board/free-line package to the compact
 second-candidate final input package.
 -/
@@ -17140,6 +17167,19 @@ def toLayerPatchConstructionObligations
     (TM0FoldedReduction.l2c2RobinsonSection7BoardFreeLineLayerPatchDataOfBoardFreeLineData
       h.section7).patches
   sourceRows := h.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Project the paper-facing interior-at-index Section 7 board/free-line package to
+the equivalent fixed-start decoder package.
+-/
+def toLabelIndexStartConstructionObligations
+    (h : FinalFigure13L2C2BoardFreeLineDataInteriorRowsAtIndexConstructionObligations) :
+    FinalFigure13L2C2BoardFreeLineDataLabelIndexStartConstructionObligations where
+  section7 := h.section7
+  labelIndexStart :=
+    sourceLabelIndexStartPrimrec_iff_interiorRowsAtIndexPrimrec.mpr
+      h.sourceRows
 
 set_option linter.style.longLine false in
 /--
