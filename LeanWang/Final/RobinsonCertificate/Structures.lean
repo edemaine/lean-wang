@@ -690,6 +690,23 @@ structure Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations
 
 set_option linter.style.longLine false in
 /--
+Concrete decoded combined-window/valid-translated-box L2C2 Robinson target
+through bounded-interior generated position-code rows at concrete numeric label
+slots.
+
+This is the generated-position sibling of
+`Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations`.
+-/
+structure Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes :
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
+
+set_option linter.style.longLine false in
+/--
 Concrete origin-zero-window/valid-translated-box L2C2 Robinson target through
 the bounded-search fixed-start decoder and statement-list uniqueness.
 -/
@@ -1081,6 +1098,19 @@ structure Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations :
     Prop where
   scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
   sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete finite checked-stack/valid-translated-box L2C2 Robinson target through
+bounded-interior generated position-code rows at concrete numeric label slots.
+
+This keeps the checked-stack valid-box scaffold package aligned with the
+current generated-position source frontier.
+-/
+structure Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations :
+    Prop where
+  scaffold : TM0FoldedReduction.L2C2CheckedStackValidTranslatedBoxData
+  sourceRows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec
 
 set_option linter.style.longLine false in
 /--

@@ -1237,6 +1237,42 @@ theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidTranslatedB
 
 set_option linter.style.longLine false in
 /--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+combined windows, valid translated boxes, and bounded-interior generated
+position-code rows at concrete numeric label slots.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndex
+    (combinedActiveCornerWindows :
+      TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+      combinedActiveCornerWindows)
+    validTranslatedBoxes hrows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner combined
+windows, valid translated boxes, and bounded-interior generated position-code
+rows at concrete numeric label slots.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndex
+    (combinedActiveCornerWindows :
+      TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows)
+    (validTranslatedBoxes :
+      TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes)
+    (hrows : SourcePositionCodeBoundedInteriorRowsAtIndexPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndex
+    (TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+      combinedActiveCornerWindows)
+    validTranslatedBoxes hrows
+
+set_option linter.style.longLine false in
+/--
 Encoded Wang domino undecidability from origin-zero active/corner windows,
 valid translated boxes, and the bounded-search fixed-start decoder.
 -/
@@ -3259,6 +3295,47 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations
 
+namespace Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Project decoded combined windows plus valid translated boxes to the
+origin-zero-window valid-box bounded-row-at-index certificate package.
+-/
+def toOriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations
+    (O : Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    Figure13L2C2OriginZeroValidTranslatedBoxBoundedRowsAtIndexObligations where
+  originZeroWindows :=
+    TM0FoldedReduction.l2c2OriginZeroWindowsOfCombinedActiveCornerWindows
+      O.combinedActiveCornerWindows
+  validTranslatedBoxes := O.validTranslatedBoxes
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded combined windows, valid-box
+Robinson data, and bounded-interior generated position-code rows at label
+indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndex
+    O.combinedActiveCornerWindows O.validTranslatedBoxes O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded combined windows, valid-box Robinson
+data, and bounded-interior generated position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndex
+    O.combinedActiveCornerWindows O.validTranslatedBoxes O.sourceRows
+
+end Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations
+
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 
 set_option linter.style.longLine false in
@@ -3299,6 +3376,47 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
+
+namespace Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box scaffold data to the decoded
+combined-window valid-box bounded-row-at-index certificate package.
+-/
+def toCombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    Figure13L2C2CombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations where
+  combinedActiveCornerWindows :=
+    TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
+        O.scaffold.checkedStacks)
+  validTranslatedBoxes := O.scaffold.validTranslatedBoxes
+  sourceRows := O.sourceRows
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked-stack/valid-translated-box data
+and bounded-interior generated position-code rows at label indices.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked-stack/valid-translated-box data and
+bounded-interior generated position-code rows at label indices.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCombinedWindowValidTranslatedBoxBoundedRowsAtIndexObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CheckedStackValidTranslatedBoxBoundedRowsAtIndexObligations
 
 namespace Figure13L2C2Figure16CompatibleCanonicalFreeSiteSearchCodeStartObligations
 
