@@ -3075,6 +3075,22 @@ structure FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObli
 set_option linter.style.longLine false in
 /--
 Concrete second-candidate Figure 13 decoded-window/valid-box route with the
+bounded-search fixed-start decoder for ordinary `programData`.
+
+This is the final concrete valid-box surface corresponding to
+`Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations`.
+It avoids the generated-position statement-list uniqueness bridge.
+-/
+structure FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations :
+    Prop where
+  combinedActiveCornerWindows :
+    TM0FoldedReduction.L2C2OriginZeroCombinedActiveCornerWindows
+  validTranslatedBoxes : FinalFigure13L2C2ValidTranslatedBoxes
+  sourceSearchStart : SourceSearchCodeLabelIndexStartPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete second-candidate Figure 13 decoded-window/valid-box route with the
 generated position-code decoder step.
 -/
 structure FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations :
@@ -5365,6 +5381,52 @@ theorem domino_problem_undecidable
     |>.domino_problem_undecidable
 
 end FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
+
+set_option linter.style.longLine false
+namespace FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+
+set_option linter.style.longLine false in
+/--
+Project the concrete decoded-window/valid-box bounded-search-start package to
+the compact certificate endpoint for ordinary `programData`.
+-/
+def toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations) :
+    Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations where
+  combinedActiveCornerWindows := h.combinedActiveCornerWindows
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.validTranslatedBoxes
+  sourceSearchStart := h.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded endpoint from decoded origin-zero active/corner windows, concrete
+valid translated boxes, and the bounded-search start decoder for ordinary
+`programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Unencoded endpoint from decoded origin-zero active/corner windows, concrete
+valid translated boxes, and the bounded-search start decoder for ordinary
+`programData`.
+-/
+theorem domino_problem_undecidable
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    |>.domino_problem_undecidable
+
+end FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
 
 set_option linter.style.longLine false
 namespace FinalFigure13L2C2CombinedWindowValidBoxDecoderStepConstructionObligations
@@ -30092,6 +30154,30 @@ valid translated boxes, and the fixed-start source-level position-code decoder.
 theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations
     (h :
       FinalFigure13L2C2CombinedWindowValidBoxLabelIndexStartConstructionObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  h.domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from decoded origin-zero active/corner
+windows, concrete valid translated boxes, and the bounded-search fixed-start
+decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  h.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from decoded origin-zero active/corner windows,
+concrete valid translated boxes, and the bounded-search fixed-start decoder for
+ordinary `programData`.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    (h :
+      FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   h.domino_problem_undecidable
 
