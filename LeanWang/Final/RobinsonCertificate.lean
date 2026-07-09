@@ -67,6 +67,43 @@ structure Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupOblig
   sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
   statementList_nodup : SourceStatementListNodup
 
+set_option linter.style.longLine false in
+/--
+Concrete Section 7 layer-patch theorem-facing L2C2 Robinson/source target.
+
+This is the current finite-scaffold frontier: Robinson Section 7 supplies the
+board/free-line active-corner invariant and the Figure 13/Figure 16 layer
+patches directly, without forgetting them to plain translated boxes first.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations :
+    Prop where
+  section7 :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceLabelIndex : SourcePositionCodeLabelIndexFromPrimrec
+
+set_option linter.style.longLine false in
+/--
+Concrete Section 7 layer-patch theorem-facing L2C2 Robinson target through the
+bounded-search descriptor decoder.
+
+The `statementList_nodup` field is the explicit bridge from bounded-search
+state codes to generated position codes.
+-/
+structure Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations :
+    Prop where
+  section7 :
+    NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid
+  sourceSearch : SourceSearchCodeLabelIndexFromPrimrec
+  statementList_nodup : SourceStatementListNodup
+
 /--
 Concrete finite checked-stack/valid-translated-box theorem-facing L2C2
 Robinson/source target.
@@ -325,6 +362,111 @@ theorem domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertific
   domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
     C (TM0FoldedReduction.positionSourceObligationsOfPositionCodeInteriorRowsAtIndexCorrect
       hrows)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch scaffold package and generated-position source
+obligations.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSource
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    O.toL2C2LayerPatchScaffoldCertificate source
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch scaffold package and generated-position source obligations.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSource
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (source : TM0FoldedReduction.PositionSourceObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13RobinsonLayerPatchScaffoldCertificateSource
+    O.toL2C2LayerPatchScaffoldCertificate source
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch scaffold package and the source-specialized
+generated position-code label-index decoder.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSource
+    O (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch scaffold package and the source-specialized generated
+position-code label-index decoder.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hindex : SourcePositionCodeLabelIndexFromPrimrec) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSource
+    O (TM0FoldedReduction.positionSourceObligationsOfSourcePositionCodeLabelIndexFromCorrect
+      hindex)
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch scaffold package, the bounded-search descriptor
+decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodup
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    O (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch scaffold package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodup
+    (O : NatSiteRobinsonSection7BoardFreeLineLayerPatchObligations
+      l2Component2BlankCandidateActiveSiteSpecs
+      l2Component2BlankCandidateSanity.activeSiteSpecs_valid
+      0 Quadrant.northeast
+      l2Component2BlankCandidateSanity.cornerIndex_valid)
+    (hsearch : SourceSearchCodeLabelIndexFromPrimrec)
+    (hnodup : SourceStatementListNodup) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    O (sourceLabelIndexPrimrec_of_searchCodeLabelIndex hsearch hnodup)
 
 set_option linter.style.longLine false in
 /--
@@ -623,6 +765,60 @@ theorem domino_problem_undecidable
     O.section7 O.sourceSearch O.statementList_nodup
 
 end Figure13L2C2Section7BoardFreeLineTranslatedBoxSearchCodeWithNodupObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch Robinson/source obligation package.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    O.section7 O.sourceLabelIndex
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch Robinson/source obligation package.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexFrom
+    O.section7 O.sourceLabelIndex
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchSourceLabelIndexObligations
+
+namespace Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from the concrete L2C2 Section 7
+board/free-line layer-patch Robinson package, the bounded-search descriptor
+decoder, and statement-list uniqueness.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  encoded_domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodup
+    O.section7 O.sourceSearch O.statementList_nodup
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from the concrete L2C2 Section 7 board/free-line
+layer-patch Robinson package, the bounded-search descriptor decoder, and
+statement-list uniqueness.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  domino_problem_undecidable_of_figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodup
+    O.section7 O.sourceSearch O.statementList_nodup
+
+end Figure13L2C2Section7BoardFreeLineLayerPatchSearchCodeWithNodupObligations
 
 namespace Figure13L2C2CheckedStackValidTranslatedBoxSourceLabelIndexObligations
 
