@@ -3433,6 +3433,18 @@ def finalFigure13L2C2ValidTranslatedBoxesToL2C2Figure18ScaffoldValidTranslatedBo
 
 set_option linter.style.longLine false in
 /--
+The canonical-routing valid-translated-box target is definitionally the same
+finite L2C2 valid-box target used by the concrete final surfaces.
+-/
+def finalFigure13L2C2ValidTranslatedBoxesOfL2C2Figure18ScaffoldValidTranslatedBoxes
+    (validBoxes : TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes) :
+    FinalFigure13L2C2ValidTranslatedBoxes := by
+  simpa [FinalFigure13L2C2ValidTranslatedBoxes,
+    TM0FoldedReduction.L2C2Figure18ScaffoldValidTranslatedBoxes,
+    TM0FoldedReduction.L2C2Figure18ScaffoldTiles] using validBoxes
+
+set_option linter.style.longLine false in
+/--
 Positive Robinson board-level aligned macro-squares, if supplied, imply the
 L2C2 valid translated-box target used by the final origin-zero-window
 diagnostic endpoints.  The premise is refuted for the current Figure 13
@@ -16261,6 +16273,28 @@ def toCheckedStackLayerPatchSearchCodeLabelIndexStartConstructionObligations
 set_option linter.style.longLine false in
 /--
 Project second-candidate checked-stack/valid-translated-box bounded-search
+start data to the current decoded-window/valid-box bounded-search final
+surface.
+
+Checked stacks give canonical active/corner recognition, hence decoded
+origin-zero active/corner windows; the valid translated boxes are the same
+finite box target used by the decoded-window endpoint.
+-/
+def toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
+    FinalFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations where
+  combinedActiveCornerWindows :=
+    TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
+        h.scaffold.checkedStacks)
+  validTranslatedBoxes :=
+    finalFigure13L2C2ValidTranslatedBoxesOfL2C2Figure18ScaffoldValidTranslatedBoxes
+      h.scaffold.validTranslatedBoxes
+  sourceSearchStart := h.labelIndexStart
+
+set_option linter.style.longLine false in
+/--
+Project second-candidate checked-stack/valid-translated-box bounded-search
 start data to the compact ordinary-source final reduction input package.
 -/
 def toFinalL2C2SourceReductionInputs
@@ -16278,7 +16312,8 @@ translated scaffold boxes, and the bounded-search start decoder for ordinary
 theorem encoded_domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  h.toFinalL2C2SourceReductionInputs.encoded_domino_problem_undecidable
+  h.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    |>.encoded_domino_problem_undecidable
 
 set_option linter.style.longLine false in
 /--
@@ -16289,7 +16324,8 @@ translated scaffold boxes, and the bounded-search start decoder for ordinary
 theorem domino_problem_undecidable
     (h : FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  h.toFinalL2C2SourceReductionInputs.domino_problem_undecidable
+  h.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
+    |>.domino_problem_undecidable
 
 end FinalL2C2CheckedStackValidTranslatedBoxSearchCodeLabelIndexStartConstructionObligations
 
