@@ -3591,6 +3591,47 @@ theorem domino_problem_undecidable
 
 end Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations
 
+namespace Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
+
+set_option linter.style.longLine false in
+/--
+Project checked-stack/valid-translated-box scaffold data to the decoded
+combined-window valid-box certificate package.
+-/
+def toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
+    Figure13L2C2CombinedWindowValidTranslatedBoxSearchCodeStartObligations where
+  combinedActiveCornerWindows :=
+    TM0FoldedReduction.l2c2OriginZeroCombinedActiveCornerWindowsOfCanonicalFreeSiteRectActiveCorner
+      (TM0FoldedReduction.l2c2ActiveCornerOfOriginZeroCheckedStacks
+        O.scaffold.checkedStacks)
+  validTranslatedBoxes := O.scaffold.validTranslatedBoxes
+  sourceSearchStart := O.sourceSearchStart
+
+set_option linter.style.longLine false in
+/--
+Encoded Wang domino undecidability from checked-stack/valid-translated-box data
+and the bounded-search fixed-start decoder for ordinary `programData`.
+-/
+theorem encoded_domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  O.toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    |>.encoded_domino_problem_undecidable
+
+set_option linter.style.longLine false in
+/--
+Wang domino undecidability from checked-stack/valid-translated-box data and the
+bounded-search fixed-start decoder for ordinary `programData`.
+-/
+theorem domino_problem_undecidable
+    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  O.toCombinedWindowValidTranslatedBoxSearchCodeStartObligations
+    |>.domino_problem_undecidable
+
+end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
+
 namespace Figure13L2C2OriginZeroValidTranslatedBoxSearchCodeStartWithNodupObligations
 
 set_option linter.style.longLine false in

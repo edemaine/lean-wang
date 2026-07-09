@@ -27650,28 +27650,6 @@ def toFinalL2C2SourceReductionInputs
   FinalL2C2SourceReductionInputs.ofCheckedStackValidTranslatedBoxDataSearchCodeLabelIndexStart
     O.scaffold O.sourceSearchStart
 
-set_option linter.style.longLine false in
-/--
-Encoded endpoint from checked-stack/valid-translated-box data and the
-bounded-search start decoder for ordinary `programData`.
--/
-theorem encoded_domino_problem_undecidable
-    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  O.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
-    |>.encoded_domino_problem_undecidable
-
-set_option linter.style.longLine false in
-/--
-Unencoded endpoint from checked-stack/valid-translated-box data and the
-bounded-search start decoder for ordinary `programData`.
--/
-theorem domino_problem_undecidable
-    (O : Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  O.toFigure13L2C2CombinedWindowValidBoxSearchCodeStartConstructionObligations
-    |>.domino_problem_undecidable
-
 end Figure13L2C2CheckedStackValidTranslatedBoxSearchCodeStartObligations
 
 set_option linter.style.longLine false
