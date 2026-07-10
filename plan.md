@@ -71,6 +71,8 @@ position-row obligation in the final theorem.
   parent whose four children are its central `2 x 2` block.
 - Global desubstitution: every valid corrected-Ollinger plane is, up to one of
   four parity choices, the Figure 16 substitution of another valid plane.
+- An infinite typed desubstitution tower, retaining the parity origin and four
+  exact child equations between every pair of consecutive valid planes.
 
 ## Remaining scaffold proof
 
