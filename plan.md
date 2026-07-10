@@ -150,6 +150,11 @@ position-row obligation in the final theorem.
   roles restrict the complete payload palette to the corresponding wire
   equality, active crossings carry source tiles, and corner crossings carry
   the seed. The resulting finite tileset construction is primitive recursive.
+- A concrete local role decoder for Robinson signal tiles. The two clear-edge
+  direction bits classify every tile as a horizontal channel, vertical
+  channel, active crossing, or inactive site; this decoder is primitive
+  recursive, agrees exactly with the all-clear crossing predicate, and leaves
+  the corner role reserved for a later finite marker decoration.
 
 ## Remaining scaffold proof
 
