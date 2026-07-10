@@ -64,6 +64,7 @@ import LeanWang.OllingerRobinson104QuarterGeometry
 import LeanWang.OllingerRobinson104RedShades
 import LeanWang.OllingerRobinson104RedShadePaths
 import LeanWang.OllingerRobinson104RedShadeCycles
+import LeanWang.OllingerRobinson104RedShadeCrossingBoards
 import LeanWang.OllingerRobinson104Signals
 import LeanWang.OllingerRobinson104ShadedSignals
 import LeanWang.OllingerRobinson104SignalCorridors

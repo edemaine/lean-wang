@@ -195,6 +195,10 @@ position-row obligation in the final theorem.
   is forced around an arbitrarily large cycle to all four corners. Red-edge
   presence then supplies such a shade, so every oriented board has an actual
   uniform light/dark corner shade.
+- In the same `level + 2` refined grid, the canonical scale-`2^level` board and
+  a board seeded one refinement later at scale `2^(level-1)` are both
+  certified. Their coordinate inequalities prove that their sides cross, while
+  their sizes differ by only a factor of two.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through
