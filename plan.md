@@ -142,6 +142,9 @@ position-row obligation in the final theorem.
   At every depth `d >= 5`, any coarse index grid contains a Cartesian family
   of `2^(d-3)` selected coordinates in each direction, each with the certified
   inward boundaries and clear interior lanes.
+- A signal-theoretic free-crossing theorem: local allowance and edge matching
+  force every selected crossing in that Cartesian family to carry the exact
+  all-clear state, independently of all emit/absorb choices elsewhere.
 
 ## Remaining scaffold proof
 
