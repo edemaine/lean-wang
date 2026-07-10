@@ -85,6 +85,9 @@ position-row obligation in the final theorem.
 - A finite red-port topology and native certificate that every depth-two
   supertile contains a complete red rectangular cycle, providing a uniform
   seed for the nested Robinson boards.
+- Finite local red-line expansion certificates and a proposition-level
+  iteration theorem proving those red cycles double under every further
+  substitution, hence occur at unbounded scales.
 
 ## Remaining scaffold proof
 

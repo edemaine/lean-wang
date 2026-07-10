@@ -49,5 +49,8 @@ import LeanWang.OllingerRobinson104Primitivity
 import LeanWang.OllingerRobinson104HierarchyRecurrence
 import LeanWang.OllingerRobinson104PlaneDecode
 import LeanWang.OllingerRobinson104RedCycles
+import LeanWang.OllingerRobinson104RedCycleExpansion
+import LeanWang.OllingerRobinson104RedCycleScaling
+import LeanWang.OllingerRobinson104RedBoards
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
