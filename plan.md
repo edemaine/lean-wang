@@ -185,6 +185,10 @@ position-row obligation in the final theorem.
   dark paths are transparent. Every valid tiling projects to both a valid
   shaded quarter tiling and a matching obstruction-signal plane, and hence to
   the corrected quarter hierarchy.
+- The final shaded obstruction alphabet is now a concrete `RoutedScaffold`.
+  Its primitive-recursive two-bit decoder classifies inactive, horizontal,
+  vertical, and active payload roles exactly as before, while retaining the
+  shade layer needed for the growing free-board proof.
 
 ## Remaining scaffold proof
 
