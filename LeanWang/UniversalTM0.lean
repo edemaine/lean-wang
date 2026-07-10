@@ -47,6 +47,13 @@ def machine :=
 def input (c : Nat.Partrec.Code) :=
   TM0Route.partrecStartedTM0InputFor (sourceInput c)
 
+/--
+The varying initial tape is computable from the source code.  This is now a
+standalone binary-encoding lemma; it does not inspect or compile source syntax.
+-/
+theorem input_computable : Computable input := by
+  sorry
+
 theorem eval_dom_iff (c : Nat.Partrec.Code) :
     (Turing.TM0.eval machine (input c)).Dom ↔
       (Nat.Partrec.Code.eval c 0).Dom := by

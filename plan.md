@@ -1639,6 +1639,48 @@ positive-box/layer-patch interfaces.
 
 ### Current Frontier Checkpoint
 
+#### Fixed-universal-machine route (active as of 2026-07-10)
+
+The active machine reduction no longer compiles arbitrary source syntax.
+`LeanWang.UniversalCode` chooses one universal `Nat.Partrec.Code` and proves
+that specializing it carries the ordinary halting problem.
+`LeanWang.UniversalTM0` then translates that universal code once and proves
+that the resulting single TM0 machine, started on input
+`Nat.pair (encode c) 0`, halts exactly when `c` halts on `0`.
+
+The folded layer now has the dual interface needed by this argument:
+
+```lean
+TM0FoldedCompiler.positionProgramDataForInput
+UniversalFoldedReduction.program
+```
+
+The simulation state count and position-coded simulation rows in
+`UniversalFoldedReduction.program` are constants.  Only the initialization
+rows vary with `UniversalTM0.input c`.  Their data construction is proved
+primitive recursive in `LeanWang.TM0FoldedInput.Computability`.  The complete
+fixed-domino, scaffold, encoded, and unencoded undecidability theorems are wired
+through `LeanWang.UniversalFoldedReduction`.
+
+Two focused proof holes remain on this route:
+
+1. `UniversalTM0.input_computable`: Mathlib's binary `trNat`/`trInit` input
+   encoding is computable.
+2. `UniversalFoldedReduction.program_haltsEmpty_iff`: the parameterized
+   initialization prelude writes the supplied finite word, rewinds to the
+   origin, and then the existing fixed position-coded simulation correctness
+   applies.
+
+These are ordinary finite-data and execution lemmas.  Neither involves
+dependent source statements or uniform compilation over arbitrary
+`Nat.Partrec.Code` syntax.
+
+The older source-uniform position decoder route below is retained as historical
+infrastructure, but it is no longer the intended path to the final theorem.
+In particular, do not spend further effort closing
+`SourcePositionCodeLabelIndexFromPrimrec` unless it becomes useful for a
+separate general-purpose compiler result.
+
 As of the current Lean tree, `lake build LeanWang.TM0FoldedPositionReduction`
 builds successfully and the generated-position semantic correctness theorem is
 available through

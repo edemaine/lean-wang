@@ -31,8 +31,9 @@ theorem foldedCellOfTapeAt_init_right_zero (tc : Turing.ToPartrec.Code) (i : Nat
       simp only [foldedCellOfTapeAt]
       rw [hleft, hright]
       simp [foldedOriginSymbol, inputSymbol,
-        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
-        Turing.TM2to1.trInit, Turing.PartrecToTM2.trList,
+        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM0InputFor,
+        TM0Route.partrecStartedTM2InputFor, Turing.TM2to1.trInit,
+        Turing.PartrecToTM2.trList,
         Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk',
         Turing.Tape.nth]
   | succ i =>
@@ -48,8 +49,9 @@ theorem foldedCellOfTapeAt_init_right_zero (tc : Turing.ToPartrec.Code) (i : Nat
       simp only [foldedCellOfTapeAt]
       rw [hleft, hright]
       simp [foldedBlank, inputSymbol,
-        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
-        Turing.TM2to1.trInit, Turing.PartrecToTM2.trList,
+        TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM0InputFor,
+        TM0Route.partrecStartedTM2InputFor, Turing.TM2to1.trInit,
+        Turing.PartrecToTM2.trList,
         Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk',
         Turing.Tape.nth]
 
