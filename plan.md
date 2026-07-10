@@ -263,6 +263,11 @@ position-row obligation in the final theorem.
   certificate for every corner child with the literal opposite shade. Applying
   this construction twice produces all sixteen two-level corner descendants
   in the same refined grid with the grandparent's original shade.
+- The four two-level descendants that lie strictly inside the parent are
+  identified by base-4 block digits `1` and `2`. Each has a certified board
+  interval strictly contained in the parent and a constructive uniform-shade
+  certificate equal to the parent's shade. These are exactly the recursive
+  inner obstructions in Robinson's free-line count.
 
 ## Remaining scaffold proof
 
