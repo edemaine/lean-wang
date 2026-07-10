@@ -66,6 +66,9 @@ position-row obligation in the final theorem.
   preserves and reflects horizontal and vertical compatibility.
 - Proposition 8's finite `4 x 4` test: all 328 extendable well-behaved central
   blocks are substitution images.
+- A proposition-level local recognizability theorem: every valid typed `4 x 4`
+  neighborhood with the distinguished central phase has a unique `Fin 104`
+  parent whose four children are its central `2 x 2` block.
 
 ## Remaining scaffold proof
 
@@ -74,14 +77,14 @@ The remaining theorem must construct a concrete `S : Scaffold` and prove
 
 ### 1. Lift finite recognizability
 
-Connect the checked finite enumeration to arbitrary valid plane tilings:
+Lift local recognizability to arbitrary valid plane tilings:
 
-- prove the row generator enumerates every legal length-four row;
-- prove every legal `4 x 4` neighborhood with the distinguished thin-layer
-  phase appears in `extendableCentralRowPairs`;
-- use `badExtendableCentralRowPairs_eq_nil` to recover the parent tile;
-- prove the parent is unique and neighboring decoded parents match, using the
-  boundary-reflection certificates.
+- extract the typed `4 x 4` neighborhood around every phase-`a` site;
+- define the unique parent index on the selected parity sublattice;
+- prove neighboring decoded parents match, using the boundary-reflection
+  certificates;
+- prove substituting the decoded parent tiling recovers the original tiling at
+  the selected phase.
 
 ### 2. Obtain arbitrarily large free squares
 

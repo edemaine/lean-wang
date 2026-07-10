@@ -41,5 +41,6 @@ import LeanWang.OllingerRobinsonFigure13Data
 import LeanWang.OllingerRobinson104Tiling
 import LeanWang.OllingerRobinson104Recognizability
 import LeanWang.OllingerRobinson104FiniteRecognizability
+import LeanWang.OllingerRobinson104LocalRecognizability
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
