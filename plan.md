@@ -258,7 +258,9 @@ position-row obligation in the final theorem.
   force every child shade to be opposite its parent. Two applications give
   the same-shade scale-`k-2` descendants used by the free-line recurrence.
   Uniform board shades are unique, so the opposite-shade result applies
-  directly to arbitrary parent and child shade certificates.
+  directly to arbitrary parent and child shade certificates. The two-color
+  involution also makes this constructive: any parent certificate produces a
+  certificate for every corner child with the literal opposite shade.
 
 ## Remaining scaffold proof
 

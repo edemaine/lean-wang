@@ -43,6 +43,18 @@ def code : Shade → Nat
   | .light => 1
   | .dark => 2
 
+def opposite : Shade → Shade
+  | .light => .dark
+  | .dark => .light
+
+@[simp] theorem opposite_opposite (shade : Shade) :
+    shade.opposite.opposite = shade := by
+  cases shade <;> rfl
+
+theorem eq_opposite_of_ne {first second : Shade} (hne : first ≠ second) :
+    second = first.opposite := by
+  cases first <;> cases second <;> simp_all [opposite]
+
 theorem code_injective : Function.Injective code := by
   intro first second heq
   cases first <;> cases second <;> simp [code] at heq ⊢

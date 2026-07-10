@@ -419,6 +419,36 @@ theorem cornerShade_ne_parent
   have hcorner := CycleShade.shade_eq canonicalCorner cornerShaded
   simpa only [hparent, hcorner] using hopposite
 
+/-- A parent certificate constructs every corner child with the opposite shade. -/
+theorem exists_opposite_cornerShade_of_parent
+    (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    {level : Nat} (hlevel : 1 ≤ level) (blockX blockY : Nat)
+    (cornerX cornerY : Fin 2) {parentShade : RedShades.Shade}
+    (parentShaded : CycleShade stateGrid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) parentShade)
+    (valid : ValidShadeGrid (iterateRefine (level + 2) grid) stateGrid) :
+    CycleShade stateGrid
+      (2 ^ (level - 1) * (4 * (2 * blockX + cornerX.val) + 1))
+      (2 ^ (level - 1) * (4 * (2 * blockX + cornerX.val) + 3))
+      (2 ^ (level - 1) * (4 * (2 * blockY + cornerY.val) + 1))
+      (2 ^ (level - 1) * (4 * (2 * blockY + cornerY.val) + 3))
+      parentShade.opposite := by
+  rcases exists_opposite_corner_shades grid hlevel blockX blockY
+      cornerX cornerY valid with
+    ⟨canonicalParentShade, canonicalCornerShade,
+      canonicalParent, canonicalCorner, hopposite⟩
+  have hparent := CycleShade.shade_eq canonicalParent parentShaded
+  have hcorner : canonicalCornerShade = parentShade.opposite :=
+    RedShades.Shade.eq_opposite_of_ne (by
+      intro heq
+      apply hopposite
+      rw [hparent, heq])
+  simpa only [hcorner] using canonicalCorner
+
 end TranslatedRedShadeCrossings
 end Closed104
 end Figure13Layers
