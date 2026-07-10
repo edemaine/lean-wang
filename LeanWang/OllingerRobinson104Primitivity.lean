@@ -33,6 +33,22 @@ def childrenTable : List (List Index) :=
 def children (parent : Index) : List Index :=
   childrenTable.getD parent.val []
 
+def allChildrenTableCorrectBool : Bool :=
+  (List.finRange 104).all fun parent =>
+    decide (children parent = childrenAt parent)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem allChildrenTableCorrectBool_eq_true :
+    allChildrenTableCorrectBool = true := by
+  native_decide
+
+theorem children_eq_childrenAt (parent : Index) :
+    children parent = childrenAt parent := by
+  have hparent := List.all_eq_true.1 allChildrenTableCorrectBool_eq_true
+    parent (List.mem_finRange parent)
+  exact of_decide_eq_true hparent
+
 /-- Set-like list of tile types reached after exactly `level` substitutions. -/
 def descendants : Nat → Index → List Index
   | 0, parent => [parent]

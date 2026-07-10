@@ -76,6 +76,9 @@ position-row obligation in the final theorem.
 - A native-checked primitivity certificate: every corrected tile type occurs
   below every parent after five substitutions, so board patterns recur
   uniformly in every hierarchy.
+- A tower-occurrence theorem turning that finite reachability into actual fine
+  plane coordinates; in particular every corrected tile type occurs in every
+  valid plane tiling.
 
 ## Remaining scaffold proof
 
