@@ -82,6 +82,9 @@ position-row obligation in the final theorem.
 - A lossless decoder from ordinary `TileIn tileSet` plane tilings to typed
   `Fin 104` planes, so the hierarchy applies directly to the public Wang-tiling
   predicate.
+- A finite red-port topology and native certificate that every depth-two
+  supertile contains a complete red rectangular cycle, providing a uniform
+  seed for the nested Robinson boards.
 
 ## Remaining scaffold proof
 
