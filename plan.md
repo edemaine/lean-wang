@@ -180,6 +180,11 @@ position-row obligation in the final theorem.
   shades, and decodes every valid shaded tiling back to a valid quarter plane
   with matching shade edges. A finite `416 x 81` audit proves that every local
   quarter site has an admissible shade state.
+- The obstruction alphabet is rebuilt over that shade layer. Light red paths
+  obey Robinson's outer-edge emit-or-absorb and inner-edge absorb-only rules;
+  dark paths are transparent. Every valid tiling projects to both a valid
+  shaded quarter tiling and a matching obstruction-signal plane, and hence to
+  the corrected quarter hierarchy.
 
 ## Remaining scaffold proof
 

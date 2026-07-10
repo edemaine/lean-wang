@@ -1,0 +1,181 @@
+/-
+Copyright (c) 2026 lean-wang contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Erik Demaine, Stefan Langerman, GPT 5.5
+-/
+import LeanWang.OllingerRobinson104RedShades
+import LeanWang.OllingerRobinson104Signals
+
+/-!
+Robinson obstruction signals over the light/dark red-wire decoration.
+
+Only light red paths are treated as square borders. Dark paths are transparent
+to obstruction signals, which is the local mechanism behind the noncrossing
+light-square family used by the CIRM reduction.
+-/
+
+noncomputable section
+
+namespace LeanWang
+namespace OllingerRobinson
+namespace Figure13Layers
+namespace Closed104
+namespace ShadedSignals
+
+open Figure16 Quarters QuarterGeometry QuarterRegrouping
+
+set_option maxRecDepth 20000
+
+/-- Shade of the vertical red path through a quarter, if present. -/
+def verticalShade? (state : RedShades.State) : Option RedShades.Shade :=
+  match state.south with
+  | some shade => some shade
+  | none => state.north
+
+/-- Shade of the horizontal red path through a quarter, if present. -/
+def horizontalShade? (state : RedShades.State) : Option RedShades.Shade :=
+  match state.west with
+  | some shade => some shade
+  | none => state.east
+
+/-- A vertical red path is an obstruction border exactly when it is light. -/
+def selectedVerticalInterior? (base : RedShades.Site) :
+    Option Signals.HorizontalInterior :=
+  if verticalShade? base.2 = some .light then
+    Signals.verticalInterior? (components base.1.1).2.1 base.1.2
+  else none
+
+/-- A horizontal red path is an obstruction border exactly when it is light. -/
+def selectedHorizontalInterior? (base : RedShades.Site) :
+    Option Signals.VerticalInterior :=
+  if horizontalShade? base.2 = some .light then
+    Signals.horizontalInterior? (components base.1.1).2.1 base.1.2
+  else none
+
+/-- Robinson signal rule after selecting only light red borders. -/
+def locallyAllowed (base : RedShades.Site) (signal : Signals.State) : Bool :=
+  Signals.horizontalAllowed (selectedVerticalInterior? base) signal &&
+    Signals.verticalAllowed (selectedHorizontalInterior? base) signal
+
+abbrev Site := RedShades.Site × Signals.State
+
+def allSites : List Site :=
+  RedShades.allSites.flatMap fun base =>
+    (Signals.State.all.filter fun signal => locallyAllowed base signal).map fun signal =>
+      (base, signal)
+
+@[simp] theorem mem_allSites_iff (site : Site) :
+    site ∈ allSites ↔
+      RedShades.locallyAllowed site.1.1 site.1.2 = true ∧
+        locallyAllowed site.1 site.2 = true := by
+  rcases site with ⟨base, signal⟩
+  simp [allSites, RedShades.mem_allSites_iff]
+
+/-- Layer a shaded quarter tile with its obstruction-signal edges. -/
+def tile (site : Site) : WangTile :=
+  WangTile.product (RedShades.tile site.1) (Signals.State.tile site.2)
+
+@[irreducible] def tileSet : TileSet := allSites.map tile
+
+theorem tile_mem (site : Site)
+    (hshade : RedShades.locallyAllowed site.1.1 site.1.2 = true)
+    (hsignal : locallyAllowed site.1 site.2 = true) :
+    tile site ∈ tileSet := by
+  unfold tileSet
+  exact List.mem_map.2
+    ⟨site, (mem_allSites_iff site).2 ⟨hshade, hsignal⟩, rfl⟩
+
+theorem exists_site_of_mem {wang : WangTile} (hwang : wang ∈ tileSet) :
+    ∃ site : Site, site ∈ allSites ∧ tile site = wang := by
+  unfold tileSet at hwang
+  rcases List.mem_map.1 hwang with ⟨site, hsite, rfl⟩
+  exact ⟨site, hsite, rfl⟩
+
+@[irreducible] noncomputable def decode (wang : TileIn tileSet) : Site :=
+  Classical.choose (exists_site_of_mem wang.2)
+
+theorem decode_mem (wang : TileIn tileSet) : decode wang ∈ allSites := by
+  unfold decode
+  exact (Classical.choose_spec (exists_site_of_mem wang.2)).1
+
+theorem decode_tile (wang : TileIn tileSet) : tile (decode wang) = wang.1 := by
+  unfold decode
+  exact (Classical.choose_spec (exists_site_of_mem wang.2)).2
+
+theorem decode_shadeAllowed (wang : TileIn tileSet) :
+    RedShades.locallyAllowed (decode wang).1.1 (decode wang).1.2 = true :=
+  (mem_allSites_iff (decode wang)).1 (decode_mem wang) |>.1
+
+theorem decode_signalAllowed (wang : TileIn tileSet) :
+    locallyAllowed (decode wang).1 (decode wang).2 = true :=
+  (mem_allSites_iff (decode wang)).1 (decode_mem wang) |>.2
+
+def basePlane (x : Int × Int → TileIn tileSet) :
+    Int × Int → TileIn RedShades.tileSet :=
+  fun p => ⟨RedShades.tile (decode (x p)).1, by
+    apply RedShades.tile_mem
+    exact decode_shadeAllowed (x p)⟩
+
+def signalPlane (x : Int × Int → TileIn tileSet) : Int × Int → Signals.State :=
+  fun p => (decode (x p)).2
+
+theorem basePlane_tile (x : Int × Int → TileIn tileSet) (p : Int × Int) :
+    (basePlane x p).1 = RedShades.tile (decode (x p)).1 := rfl
+
+theorem basePlane_valid {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) :
+    ValidPlaneTiling RedShades.tileSet (basePlane x) := by
+  constructor
+  · intro p
+    have hproduct : WangTile.HMatches
+        (tile (decode (x p)))
+        (tile (decode (x (p.1 + 1, p.2)))) := by
+      rw [decode_tile, decode_tile]
+      exact hx.1 p
+    exact (WangTile.HMatches_product_iff _ _ _ _).1 hproduct |>.1
+  · intro p
+    have hproduct : WangTile.VMatches
+        (tile (decode (x p)))
+        (tile (decode (x (p.1, p.2 + 1)))) := by
+      rw [decode_tile, decode_tile]
+      exact hx.2 p
+    exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.1
+
+theorem signalPlane_matches {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) :
+    (∀ p : Int × Int,
+      WangTile.HMatches (Signals.State.tile (signalPlane x p))
+        (Signals.State.tile (signalPlane x (p.1 + 1, p.2)))) ∧
+      ∀ p : Int × Int,
+        WangTile.VMatches (Signals.State.tile (signalPlane x p))
+          (Signals.State.tile (signalPlane x (p.1, p.2 + 1))) := by
+  constructor
+  · intro p
+    have hproduct : WangTile.HMatches
+        (tile (decode (x p)))
+        (tile (decode (x (p.1 + 1, p.2)))) := by
+      rw [decode_tile, decode_tile]
+      exact hx.1 p
+    exact (WangTile.HMatches_product_iff _ _ _ _).1 hproduct |>.2
+  · intro p
+    have hproduct : WangTile.VMatches
+        (tile (decode (x p)))
+        (tile (decode (x (p.1, p.2 + 1)))) := by
+      rw [decode_tile, decode_tile]
+      exact hx.2 p
+    exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.2
+
+/-- The final signal layer still projects to a valid corrected quarter plane. -/
+def quarterPlane (x : Int × Int → TileIn tileSet) : QuarterPlane :=
+  RedShades.quarterPlane (basePlane x)
+
+theorem quarterPlane_valid {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) :
+    ValidQuarterPlane (quarterPlane x) :=
+  RedShades.quarterPlane_valid (basePlane_valid hx)
+
+end ShadedSignals
+end Closed104
+end Figure13Layers
+end OllingerRobinson
+end LeanWang
