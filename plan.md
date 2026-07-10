@@ -270,6 +270,11 @@ position-row obligation in the final theorem.
   inner obstructions in Robinson's free-line count. Their two intervals in
   either axis are also certified to be ordered and pairwise disjoint, with
   nonempty gaps to each parent side and between the two inner boards.
+- A finite universal audit establishes the recurrence base case. In every
+  depth-four refined block, quarter row `16` has no vertical red path anywhere
+  across the scale-2 board interior, and quarter column `16` has no horizontal
+  red path. They are therefore a free row and column for every shade assignment;
+  when the board is light, their crossing has the literal clear signal state.
 
 ## Remaining scaffold proof
 

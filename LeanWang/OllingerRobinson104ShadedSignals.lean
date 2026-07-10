@@ -52,6 +52,18 @@ def selectedHorizontalFor (component : Thick) (quadrant : Quadrant)
     Signals.horizontalInterior? component quadrant
   else none
 
+theorem selectedVerticalFor_of_none {component : Thick} {quadrant : Quadrant}
+    (state : RedShades.State)
+    (hnone : Signals.verticalInterior? component quadrant = none) :
+    selectedVerticalFor component quadrant state = none := by
+  simp [selectedVerticalFor, hnone]
+
+theorem selectedHorizontalFor_of_none {component : Thick} {quadrant : Quadrant}
+    (state : RedShades.State)
+    (hnone : Signals.horizontalInterior? component quadrant = none) :
+    selectedHorizontalFor component quadrant state = none := by
+  simp [selectedHorizontalFor, hnone]
+
 /-- A vertical red path is an obstruction border exactly when it is light. -/
 def selectedVerticalInterior? (base : RedShades.Site) :
     Option Signals.HorizontalInterior :=
