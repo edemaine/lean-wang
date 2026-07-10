@@ -90,6 +90,16 @@ theorem foldedInitStateListFor_eq_foldedInitStateList :
     foldedInitStateListFor TM0Route.partrecStartedTM0Input = foldedInitStateList := by
   rfl
 
+/-- On the original input, the parameterized constructor is the proved program. -/
+theorem positionProgramDataForInput_eq_positionProgramData
+    (tc : Turing.ToPartrec.Code) :
+    positionProgramDataForInput
+        (TM0Route.partrecStartedTM0StateCount tc)
+        (simStepDataByLabelIndexWithPositionCode tc)
+        TM0Route.partrecStartedTM0Input =
+      positionProgramData tc := by
+  rfl
+
 end TM0FoldedCompiler
 
 end LeanWang
