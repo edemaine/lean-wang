@@ -38,41 +38,107 @@ def horizontalShade? (state : RedShades.State) : Option RedShades.Shade :=
   | some shade => some shade
   | none => state.east
 
+/-- Selected vertical-border rule with the component made explicit. -/
+def selectedVerticalFor (component : Thick) (quadrant : Quadrant)
+    (state : RedShades.State) : Option Signals.HorizontalInterior :=
+  if verticalShade? state = some .light then
+    Signals.verticalInterior? component quadrant
+  else none
+
+/-- Selected horizontal-border rule with the component made explicit. -/
+def selectedHorizontalFor (component : Thick) (quadrant : Quadrant)
+    (state : RedShades.State) : Option Signals.VerticalInterior :=
+  if horizontalShade? state = some .light then
+    Signals.horizontalInterior? component quadrant
+  else none
+
 /-- A vertical red path is an obstruction border exactly when it is light. -/
 def selectedVerticalInterior? (base : RedShades.Site) :
     Option Signals.HorizontalInterior :=
-  if verticalShade? base.2 = some .light then
-    Signals.verticalInterior? (components base.1.1).2.1 base.1.2
-  else none
+  selectedVerticalFor (components base.1.1).2.1 base.1.2 base.2
 
 /-- A horizontal red path is an obstruction border exactly when it is light. -/
 def selectedHorizontalInterior? (base : RedShades.Site) :
     Option Signals.VerticalInterior :=
-  if horizontalShade? base.2 = some .light then
-    Signals.horizontalInterior? (components base.1.1).2.1 base.1.2
-  else none
+  selectedHorizontalFor (components base.1.1).2.1 base.1.2 base.2
 
 @[simp] theorem selectedVerticalInterior_of_light {base : RedShades.Site}
     (hlight : verticalShade? base.2 = some .light) :
     selectedVerticalInterior? base =
       Signals.verticalInterior? (components base.1.1).2.1 base.1.2 := by
-  simp [selectedVerticalInterior?, hlight]
+  simp [selectedVerticalInterior?, selectedVerticalFor, hlight]
 
 @[simp] theorem selectedVerticalInterior_of_not_light {base : RedShades.Site}
     (hlight : verticalShade? base.2 ≠ some .light) :
     selectedVerticalInterior? base = none := by
-  simp [selectedVerticalInterior?, hlight]
+  simp [selectedVerticalInterior?, selectedVerticalFor, hlight]
 
 @[simp] theorem selectedHorizontalInterior_of_light {base : RedShades.Site}
     (hlight : horizontalShade? base.2 = some .light) :
     selectedHorizontalInterior? base =
       Signals.horizontalInterior? (components base.1.1).2.1 base.1.2 := by
-  simp [selectedHorizontalInterior?, hlight]
+  simp [selectedHorizontalInterior?, selectedHorizontalFor, hlight]
+
+theorem southwest_selected_of_allowed {state : RedShades.State}
+    (hallowed : RedShades.allowedFor .b .northeast state = true)
+    (hshade : state.east = some .light) :
+    selectedVerticalFor .b .northeast state = some .east ∧
+      selectedHorizontalFor .b .northeast state = some .north := by
+  rcases state with ⟨west, east, south, north⟩
+  simp [RedShades.allowedFor, RedShades.hasWest, RedShades.hasEast,
+    RedShades.hasSouth, RedShades.hasNorth, RedShades.hasHorizontal,
+    RedShades.hasVertical, RedShades.cornerWest, RedShades.cornerEast,
+    RedShades.cornerSouth, RedShades.cornerNorth, RedShades.optionPresent,
+    selectedVerticalFor, selectedHorizontalFor, verticalShade?, horizontalShade?,
+    Signals.verticalInterior?, Signals.horizontalInterior?] at hallowed hshade ⊢
+  aesop
+
+theorem southeast_selected_of_allowed {state : RedShades.State}
+    (hallowed : RedShades.allowedFor .c .northwest state = true)
+    (hshade : state.west = some .light) :
+    selectedVerticalFor .c .northwest state = some .west ∧
+      selectedHorizontalFor .c .northwest state = some .north := by
+  rcases state with ⟨west, east, south, north⟩
+  simp [RedShades.allowedFor, RedShades.hasWest, RedShades.hasEast,
+    RedShades.hasSouth, RedShades.hasNorth, RedShades.hasHorizontal,
+    RedShades.hasVertical, RedShades.cornerWest, RedShades.cornerEast,
+    RedShades.cornerSouth, RedShades.cornerNorth, RedShades.optionPresent,
+    selectedVerticalFor, selectedHorizontalFor, verticalShade?, horizontalShade?,
+    Signals.verticalInterior?, Signals.horizontalInterior?] at hallowed hshade ⊢
+  aesop
+
+theorem northeast_selected_of_allowed {state : RedShades.State}
+    (hallowed : RedShades.allowedFor .d .southwest state = true)
+    (hshade : state.west = some .light) :
+    selectedVerticalFor .d .southwest state = some .west ∧
+      selectedHorizontalFor .d .southwest state = some .south := by
+  rcases state with ⟨west, east, south, north⟩
+  simp [RedShades.allowedFor, RedShades.hasWest, RedShades.hasEast,
+    RedShades.hasSouth, RedShades.hasNorth, RedShades.hasHorizontal,
+    RedShades.hasVertical, RedShades.cornerWest, RedShades.cornerEast,
+    RedShades.cornerSouth, RedShades.cornerNorth, RedShades.optionPresent,
+    selectedVerticalFor, selectedHorizontalFor, verticalShade?, horizontalShade?,
+    Signals.verticalInterior?, Signals.horizontalInterior?] at hallowed hshade ⊢
+  aesop
+
+theorem northwest_selected_of_allowed {state : RedShades.State}
+    (hallowed : RedShades.allowedFor .a .southeast state = true)
+    (hshade : state.east = some .light) :
+    selectedVerticalFor .a .southeast state = some .east ∧
+      selectedHorizontalFor .a .southeast state = some .south := by
+  rcases state with ⟨west, east, south, north⟩
+  simp [RedShades.allowedFor, RedShades.hasWest, RedShades.hasEast,
+    RedShades.hasSouth, RedShades.hasNorth, RedShades.hasHorizontal,
+    RedShades.hasVertical, RedShades.cornerWest, RedShades.cornerEast,
+    RedShades.cornerSouth, RedShades.cornerNorth, RedShades.optionPresent,
+    selectedVerticalFor, selectedHorizontalFor, verticalShade?, horizontalShade?,
+    Signals.verticalInterior?, Signals.horizontalInterior?] at hallowed hshade ⊢
+  aesop
 
 @[simp] theorem selectedHorizontalInterior_of_not_light {base : RedShades.Site}
     (hlight : horizontalShade? base.2 ≠ some .light) :
     selectedHorizontalInterior? base = none := by
-  simp [selectedHorizontalInterior?, hlight]
+  simp [selectedHorizontalInterior?, selectedHorizontalFor, hlight]
 
 /-- Robinson signal rule after selecting only light red borders. -/
 def locallyAllowed (base : RedShades.Site) (signal : Signals.State) : Bool :=

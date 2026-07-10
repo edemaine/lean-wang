@@ -215,6 +215,10 @@ position-row obligation in the final theorem.
   the corrected quarter hierarchy. Public local lemmas reduce light paths to
   the original oriented-border rule, reduce dark paths to transparent
   transmission, and expose literal matching of decoded signal flows.
+- The shaded-border selector is factored by explicit component and quadrant.
+  Finite local proofs certify that all four uniformly light board corners are
+  recognized with their exact inward horizontal and vertical signal
+  directions, without unfolding hierarchy data.
 - The final shaded obstruction alphabet is now a concrete `RoutedScaffold`.
   Its primitive-recursive two-bit decoder classifies inactive, horizontal,
   vertical, and active payload roles exactly as before, while retaining the
