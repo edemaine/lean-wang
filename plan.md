@@ -102,6 +102,9 @@ position-row obligation in the final theorem.
 - A corrected 416-tile quarter subdivision with certified distinctness,
   decoding, and checkerboard phase transitions, replacing all old `Fin 92`
   Figure 18 site types.
+- A global quarter-regrouping theorem: every valid typed quarter plane has a
+  southwest parity origin and decomposes exactly into four quadrants of one
+  corrected parent index at every selected `2 x 2` macrocell.
 
 ## Remaining scaffold proof
 
