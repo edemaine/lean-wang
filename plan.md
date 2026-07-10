@@ -91,6 +91,9 @@ position-row obligation in the final theorem.
 - A coordinate embedding theorem identifying each abstract grid refinement
   with the contiguous child block at the corresponding parity origin in an
   actual hierarchy tower.
+- An iterated embedding theorem composing those parity origins through any
+  tower depth and identifying the resulting fine-plane quadrant with the
+  corresponding iterated refinement.
 
 ## Remaining scaffold proof
 

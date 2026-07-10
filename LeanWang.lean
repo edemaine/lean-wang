@@ -53,5 +53,6 @@ import LeanWang.OllingerRobinson104RedCycleExpansion
 import LeanWang.OllingerRobinson104RedCycleScaling
 import LeanWang.OllingerRobinson104RedBoards
 import LeanWang.OllingerRobinson104HierarchyEmbedding
+import LeanWang.OllingerRobinson104IteratedEmbedding
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
