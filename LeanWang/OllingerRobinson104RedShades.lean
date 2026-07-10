@@ -221,6 +221,24 @@ theorem west_south_corner_eq_of_allowedFor {component : Thick}
   cases component <;> cases quadrant <;>
     simp_all [allowedFor, cornerWest, cornerSouth]
 
+theorem east_north_corner_eq_of_allowedFor {component : Thick}
+    {quadrant : Quadrant} {state : State}
+    (hallowed : allowedFor component quadrant state = true)
+    (heast : cornerEast component quadrant = true)
+    (hnorth : cornerNorth component quadrant = true) :
+    state.east = state.north := by
+  cases component <;> cases quadrant <;>
+    simp_all [allowedFor, cornerEast, cornerNorth]
+
+theorem crossing_opposite_of_allowedFor {component : Thick}
+    {quadrant : Quadrant} {state : State}
+    (hallowed : allowedFor component quadrant state = true)
+    (hhorizontal : hasHorizontal component quadrant = true)
+    (hvertical : hasVertical component quadrant = true) :
+    state.west ≠ state.south := by
+  simp [allowedFor, hhorizontal, hvertical] at hallowed
+  aesop
+
 theorem east_present_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
     (heast : hasEast (components site.1).2.1 site.2 = true) :

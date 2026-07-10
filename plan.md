@@ -198,7 +198,10 @@ position-row obligation in the final theorem.
 - In the same `level + 2` refined grid, the canonical scale-`2^level` board and
   a board seeded one refinement later at scale `2^(level-1)` are both
   certified. Their coordinate inequalities prove that their sides cross, while
-  their sizes differ by only a factor of two.
+  their sizes differ by only a factor of two. Shade paths are propagated to
+  their concrete intersection, where the local crossing rule forces the two
+  uniform board shades to differ. Thus both light and dark boards occur at
+  unbounded scales.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through

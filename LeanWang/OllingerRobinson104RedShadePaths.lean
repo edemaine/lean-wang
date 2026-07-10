@@ -93,6 +93,35 @@ theorem ValidShadeGrid.west_south_corner_eq
   unfold componentAt at hwest hsouth
   exact RedShades.west_south_corner_eq_of_allowedFor hallowed hwest hsouth
 
+theorem ValidShadeGrid.east_north_corner_eq
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (heast : RedShades.cornerEast
+      (componentAt indexGrid x y) (quadrantAt x y) = true)
+    (hnorth : RedShades.cornerNorth
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).east = (stateGrid x y).north := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at heast hnorth
+  exact RedShades.east_north_corner_eq_of_allowedFor hallowed heast hnorth
+
+theorem ValidShadeGrid.crossing_opposite
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hhorizontal : RedShades.hasHorizontal
+      (componentAt indexGrid x y) (quadrantAt x y) = true)
+    (hvertical : RedShades.hasVertical
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).west ≠ (stateGrid x y).south := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hhorizontal hvertical
+  exact RedShades.crossing_opposite_of_allowedFor
+    hallowed hhorizontal hvertical
+
 /-- Equality of horizontal shade across a sequence of path quarters. -/
 theorem horizontal_shade_across
     (state : Nat → RedShades.State) (start count : Nat)
