@@ -41,6 +41,9 @@ import LeanWang.OllingerRobinsonFigure13Data
 import LeanWang.OllingerRobinson104Tiling
 import LeanWang.OllingerRobinson104Recognizability
 import LeanWang.OllingerRobinson104StableTiles
+import LeanWang.OllingerRobinson104StableTilesCertificate
+import LeanWang.OllingerRobinson104StableTilesCorrect
+import LeanWang.OllingerRobinson104StableTiling
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.TM0FoldedReduction
 import LeanWang.TM0FoldedTranscriptionReduction
