@@ -194,7 +194,8 @@ position-row obligation in the final theorem.
   corners and contiguous `R0`/`R1`/`R2`/`R3` paths, and a shade on one corner
   is forced around an arbitrarily large cycle to all four corners. Red-edge
   presence then supplies such a shade, so every oriented board has an actual
-  uniform light/dark corner shade.
+  uniform light/dark corner shade. Prefix propagation extends that shade to
+  both edge labels of every strict interior quarter on all four board sides.
 - In the same `level + 2` refined grid, the canonical scale-`2^level` board and
   a board seeded one refinement later at scale `2^(level-1)` are both
   certified. Their coordinate inequalities prove that their sides cross, while

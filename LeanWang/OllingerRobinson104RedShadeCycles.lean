@@ -410,6 +410,120 @@ theorem CycleOn.exists_cycleShade
   · simp [hshade] at hpresent
   · exact ⟨shade, CycleOn.cycleShade cycle valid shade hshade⟩
 
+set_option maxHeartbeats 500000 in
+-- The proof propagates through a dependent prefix of the south quarter path.
+theorem CycleShade.south_at
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat} {shade : RedShades.Shade}
+    (shaded : CycleShade stateGrid west east south north shade)
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) {qx : Nat}
+    (hwest : quarterWest west < qx) (heast : qx < quarterEast east) :
+    (stateGrid qx (quarterSouth south)).west = some shade ∧
+      (stateGrid qx (quarterSouth south)).east = some shade := by
+  have hflow := horizontal_shade_across
+    (fun x => stateGrid x (quarterSouth south)) (quarterWest west)
+    (qx - quarterWest west - 1)
+    (fun i hi => valid.hmatch (quarterWest west + i) (quarterSouth south))
+    (fun i hi => valid.horizontal_eq
+      (quarterWest west + i + 1) (quarterSouth south)
+      (CycleOn.south_path cycle (by omega) (by omega)))
+  have hend : quarterWest west + (qx - quarterWest west - 1) + 1 = qx := by
+    omega
+  rw [hend] at hflow
+  have hwestShade := hflow.symm.trans shaded.southwest
+  exact ⟨hwestShade,
+    (valid.horizontal_eq qx (quarterSouth south)
+      (CycleOn.south_path cycle hwest heast)).symm.trans hwestShade⟩
+
+set_option maxHeartbeats 500000 in
+-- The proof propagates through a dependent prefix of the north quarter path.
+theorem CycleShade.north_at
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat} {shade : RedShades.Shade}
+    (shaded : CycleShade stateGrid west east south north shade)
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) {qx : Nat}
+    (hwest : quarterWest west < qx) (heast : qx < quarterEast east) :
+    (stateGrid qx (quarterNorth north)).west = some shade ∧
+      (stateGrid qx (quarterNorth north)).east = some shade := by
+  have hflow := horizontal_shade_across
+    (fun x => stateGrid x (quarterNorth north)) (quarterWest west)
+    (qx - quarterWest west - 1)
+    (fun i hi => valid.hmatch (quarterWest west + i) (quarterNorth north))
+    (fun i hi => valid.horizontal_eq
+      (quarterWest west + i + 1) (quarterNorth north)
+      (CycleOn.north_path cycle (by omega) (by omega)))
+  have hend : quarterWest west + (qx - quarterWest west - 1) + 1 = qx := by
+    omega
+  rw [hend] at hflow
+  have hwestShade := hflow.symm.trans shaded.northwest
+  exact ⟨hwestShade,
+    (valid.horizontal_eq qx (quarterNorth north)
+      (CycleOn.north_path cycle hwest heast)).symm.trans hwestShade⟩
+
+set_option maxHeartbeats 500000 in
+-- The proof propagates through a dependent prefix of the west quarter path.
+theorem CycleShade.west_at
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat} {shade : RedShades.Shade}
+    (shaded : CycleShade stateGrid west east south north shade)
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) {qy : Nat}
+    (hsouth : quarterSouth south < qy) (hnorth : qy < quarterNorth north) :
+    (stateGrid (quarterWest west) qy).south = some shade ∧
+      (stateGrid (quarterWest west) qy).north = some shade := by
+  have hstart :
+      (stateGrid (quarterWest west) (quarterSouth south)).north = some shade := by
+    rw [← valid.east_north_corner_eq (quarterWest west) (quarterSouth south)
+      (CycleOn.southwest_corner cycle).1 (CycleOn.southwest_corner cycle).2]
+    exact shaded.southwest
+  have hflow := vertical_shade_across
+    (fun y => stateGrid (quarterWest west) y) (quarterSouth south)
+    (qy - quarterSouth south - 1)
+    (fun i hi => valid.vmatch (quarterWest west) (quarterSouth south + i))
+    (fun i hi => valid.vertical_eq (quarterWest west)
+      (quarterSouth south + i + 1)
+      (CycleOn.west_path cycle (by omega) (by omega)))
+  have hend : quarterSouth south + (qy - quarterSouth south - 1) + 1 = qy := by
+    omega
+  rw [hend] at hflow
+  have hsouthShade := hflow.symm.trans hstart
+  exact ⟨hsouthShade,
+    (valid.vertical_eq (quarterWest west) qy
+      (CycleOn.west_path cycle hsouth hnorth)).symm.trans hsouthShade⟩
+
+set_option maxHeartbeats 500000 in
+-- The proof propagates through a dependent prefix of the east quarter path.
+theorem CycleShade.east_at
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat} {shade : RedShades.Shade}
+    (shaded : CycleShade stateGrid west east south north shade)
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) {qy : Nat}
+    (hsouth : quarterSouth south < qy) (hnorth : qy < quarterNorth north) :
+    (stateGrid (quarterEast east) qy).south = some shade ∧
+      (stateGrid (quarterEast east) qy).north = some shade := by
+  have hstart :
+      (stateGrid (quarterEast east) (quarterSouth south)).north = some shade := by
+    rw [← valid.west_north_corner_eq (quarterEast east) (quarterSouth south)
+      (CycleOn.southeast_corner cycle).1 (CycleOn.southeast_corner cycle).2]
+    exact shaded.southeast
+  have hflow := vertical_shade_across
+    (fun y => stateGrid (quarterEast east) y) (quarterSouth south)
+    (qy - quarterSouth south - 1)
+    (fun i hi => valid.vmatch (quarterEast east) (quarterSouth south + i))
+    (fun i hi => valid.vertical_eq (quarterEast east)
+      (quarterSouth south + i + 1)
+      (CycleOn.east_path cycle (by omega) (by omega)))
+  have hend : quarterSouth south + (qy - quarterSouth south - 1) + 1 = qy := by
+    omega
+  rw [hend] at hflow
+  have hsouthShade := hflow.symm.trans hstart
+  exact ⟨hsouthShade,
+    (valid.vertical_eq (quarterEast east) qy
+      (CycleOn.east_path cycle hsouth hnorth)).symm.trans hsouthShade⟩
+
 /-- Corner shades carried by one canonical depth-two board. -/
 structure FixedCycleShade (stateGrid : Nat → Nat → RedShades.State)
     (shade : RedShades.Shade) : Prop where
