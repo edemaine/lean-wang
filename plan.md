@@ -145,11 +145,20 @@ position-row obligation in the final theorem.
 - A signal-theoretic free-crossing theorem: local allowance and edge matching
   force every selected crossing in that Cartesian family to carry the exact
   all-clear state, independently of all emit/absorb choices elsewhere.
+- A role-sensitive routed-scaffold combination replacing the insufficient
+  Boolean active/inactive payload interface. Horizontal and vertical channel
+  roles restrict the complete payload palette to the corresponding wire
+  equality, active crossings carry source tiles, and corner crossings carry
+  the seed. The resulting finite tileset construction is primitive recursive.
 
 ## Remaining scaffold proof
 
-The remaining theorem must construct a concrete `S : Scaffold` and prove
-`IsScaffold S`. Keep this work independent of the machine reduction.
+The remaining theorem must instantiate the concrete Robinson signal tiles as
+a `RoutedScaffold` and prove its forward and backward square-routing
+properties. Keep this work independent of the machine reduction. The older
+Boolean `Scaffold` instance remains useful as an intermediate signal decoder,
+but cannot express payload transmission along horizontal and vertical
+channels and is not the final reduction interface.
 
 ### 1. Obtain arbitrarily large free squares
 

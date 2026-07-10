@@ -31,6 +31,7 @@ import LeanWang.TM0FoldedInput.Halting
 import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
+import LeanWang.RoutedScaffold
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.OllingerRobinsonFigure13
 import LeanWang.OllingerRobinsonFigure16
