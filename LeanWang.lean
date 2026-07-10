@@ -62,5 +62,6 @@ import LeanWang.OllingerRobinson104QuarterGeometry
 import LeanWang.OllingerRobinson104Signals
 import LeanWang.OllingerRobinson104SignalCorridors
 import LeanWang.OllingerRobinson104SignalScaffold
+import LeanWang.OllingerRobinson104SignalPlaneDecode
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final

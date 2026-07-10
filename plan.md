@@ -123,6 +123,10 @@ position-row obligation in the final theorem.
 - A concrete `Scaffold` over the corrected signal tiles. Its active predicate
   reads the paired edge colors and is primitive recursive; the distinguished
   all-clear corner is a certified member of the scaffold tileset.
+- A combined-plane decoder retaining both scaffold and payload layers. It
+  recovers a valid signal tiling, regroups its quarter layer into a valid
+  corrected index plane and hierarchy, and records that clear sites carry
+  payload tiles while the distinguished clear corner carries the seed.
 
 ## Remaining scaffold proof
 
