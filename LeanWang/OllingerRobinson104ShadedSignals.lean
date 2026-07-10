@@ -181,6 +181,33 @@ def allSites : List Site :=
 def tile (site : Site) : WangTile :=
   WangTile.product (RedShades.tile site.1) (Signals.State.tile site.2)
 
+theorem signalStateTile_injective : Function.Injective Signals.State.tile := by
+  intro first second heq
+  rcases first with ⟨firstWest, firstEast, firstSouth, firstNorth⟩
+  rcases second with ⟨secondWest, secondEast, secondSouth, secondNorth⟩
+  have hwest := Signals.Flow.code_injective (congrArg WangTile.w heq)
+  have heast := Signals.Flow.code_injective (congrArg WangTile.e heq)
+  have hsouth := Signals.Flow.code_injective (congrArg WangTile.s heq)
+  have hnorth := Signals.Flow.code_injective (congrArg WangTile.n heq)
+  change firstWest = secondWest at hwest
+  change firstEast = secondEast at heast
+  change firstSouth = secondSouth at hsouth
+  change firstNorth = secondNorth at hnorth
+  subst secondWest
+  subst secondEast
+  subst secondSouth
+  subst secondNorth
+  rfl
+
+theorem tile_injective : Function.Injective tile := by
+  intro first second heq
+  change WangTile.product (RedShades.tile first.1) (Signals.State.tile first.2) =
+    WangTile.product (RedShades.tile second.1) (Signals.State.tile second.2) at heq
+  have hpair := product_eq_iff.mp heq
+  apply Prod.ext
+  · exact RedShades.tile_injective hpair.1
+  · exact signalStateTile_injective hpair.2
+
 @[irreducible] def tileSet : TileSet := allSites.map tile
 
 theorem tile_mem (site : Site)
@@ -208,6 +235,10 @@ theorem decode_tile (wang : TileIn tileSet) : tile (decode wang) = wang.1 := by
   unfold decode
   exact (Classical.choose_spec (exists_site_of_mem wang.2)).2
 
+theorem decode_tile_site (site : Site) (hsite : tile site ∈ tileSet) :
+    decode ⟨tile site, hsite⟩ = site :=
+  tile_injective (decode_tile ⟨tile site, hsite⟩)
+
 theorem decode_shadeAllowed (wang : TileIn tileSet) :
     RedShades.locallyAllowed (decode wang).1.1 (decode wang).1.2 = true :=
   (mem_allSites_iff (decode wang)).1 (decode_mem wang) |>.1
@@ -221,6 +252,22 @@ def basePlane (x : Int × Int → TileIn tileSet) :
   fun p => ⟨RedShades.tile (decode (x p)).1, by
     apply RedShades.tile_mem
     exact decode_shadeAllowed (x p)⟩
+
+theorem decode_basePlane (x : Int × Int → TileIn tileSet) (p : Int × Int) :
+    RedShades.decode (basePlane x p) = (decode (x p)).1 := by
+  apply RedShades.decode_tile_site
+
+theorem shadePlane_basePlane (x : Int × Int → TileIn tileSet)
+    (p : Int × Int) :
+    RedShades.shadePlane (basePlane x) p = (decode (x p)).1.2 := by
+  change (RedShades.decode (basePlane x p)).2 = _
+  rw [decode_basePlane]
+
+theorem quarterPlane_basePlane (x : Int × Int → TileIn tileSet)
+    (p : Int × Int) :
+    RedShades.quarterPlane (basePlane x) p = (decode (x p)).1.1 := by
+  change (RedShades.decode (basePlane x p)).1 = _
+  rw [decode_basePlane]
 
 def signalPlane (x : Int × Int → TileIn tileSet) : Int × Int → Signals.State :=
   fun p => (decode (x p)).2

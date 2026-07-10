@@ -95,6 +95,24 @@ def tile (state : State) : WangTile where
   e := edgeCode state.east
   w := edgeCode state.west
 
+theorem tile_injective : Function.Injective tile := by
+  intro first second heq
+  rcases first with ⟨firstWest, firstEast, firstSouth, firstNorth⟩
+  rcases second with ⟨secondWest, secondEast, secondSouth, secondNorth⟩
+  have hwest := edgeCode_injective (congrArg WangTile.w heq)
+  have heast := edgeCode_injective (congrArg WangTile.e heq)
+  have hsouth := edgeCode_injective (congrArg WangTile.s heq)
+  have hnorth := edgeCode_injective (congrArg WangTile.n heq)
+  change firstWest = secondWest at hwest
+  change firstEast = secondEast at heast
+  change firstSouth = secondSouth at hsouth
+  change firstNorth = secondNorth at hnorth
+  subst secondWest
+  subst secondEast
+  subst secondSouth
+  subst secondNorth
+  rfl
+
 end State
 
 /-- Red corner path entering the west edge of this quarter. -/
@@ -300,6 +318,15 @@ def allSites : List Site :=
 def tile (site : Site) : WangTile :=
   WangTile.product (quarterTile site.1) (State.tile site.2)
 
+theorem tile_injective : Function.Injective tile := by
+  intro first second heq
+  change WangTile.product (quarterTile first.1) (State.tile first.2) =
+    WangTile.product (quarterTile second.1) (State.tile second.2) at heq
+  have hpair := product_eq_iff.mp heq
+  apply Prod.ext
+  · exact quarterTile_injective hpair.1
+  · exact State.tile_injective hpair.2
+
 @[irreducible] def tileSet : TileSet := allSites.map tile
 
 theorem tile_mem (site : Site) (hallowed : locallyAllowed site.1 site.2 = true) :
@@ -323,6 +350,10 @@ theorem decode_mem (wang : TileIn tileSet) : decode wang ∈ allSites := by
 theorem decode_tile (wang : TileIn tileSet) : tile (decode wang) = wang.1 := by
   unfold decode
   exact (Classical.choose_spec (exists_site_of_mem wang.2)).2
+
+theorem decode_tile_site (site : Site) (hsite : tile site ∈ tileSet) :
+    decode ⟨tile site, hsite⟩ = site :=
+  tile_injective (decode_tile ⟨tile site, hsite⟩)
 
 theorem decode_allowed (wang : TileIn tileSet) :
     locallyAllowed (decode wang).1 (decode wang).2 = true :=

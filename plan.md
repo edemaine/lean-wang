@@ -228,23 +228,30 @@ position-row obligation in the final theorem.
   matching payload tiles and directional wires, light/dark red paths,
   obstruction signals, the corrected quarter plane, its regrouped parent
   plane, and an infinite hierarchy tower.
+- The shade and obstruction-signal decoders are now exact, not merely
+  choice-equivalent at the encoded Wang-tile level: injectivity of both finite
+  encodings identifies nested decoder outputs. Consequently every final routed
+  plane supplies one natural quarter grid carrying a valid shade assignment,
+  locally allowed shaded obstruction signals, and matching signal edges at the
+  same coordinates.
 
 ## Remaining scaffold proof
 
-The remaining theorem must add obstruction signals to one selected red shade,
-instantiate the resulting tiles as a `RoutedScaffold`, and prove its forward
-and backward square-routing properties. Keep this work independent of the
-machine reduction. The older unshaded `Scaffold` and routed instances remain
-useful as intermediate local decoders, but are not the final reduction
-interface.
+The final shaded obstruction tiles and their `RoutedScaffold` instance are
+complete. The remaining theorem must prove its forward and backward
+square-routing properties. Keep this work independent of the machine
+reduction. The older unshaded `Scaffold` and routed instances remain useful as
+intermediate local decoders, but are not the final reduction interface.
 
 ### 1. Obtain arbitrarily large free squares
 
-First prove that the shade decoration selects a noncrossing family of red
-borders with unbounded members. Add Robinson obstruction signals only to that
-shade. Then iterate desubstitution and the board/free-line recurrence to show
-that every decorated plane contains arbitrarily large recognizable active
-squares with a distinguished lower-left corner.
+The shade decoration already selects a noncrossing family of red borders with
+unbounded light members, and Robinson obstruction signals are instantiated on
+exactly those borders. Next prove the board/free-line recurrence on the
+combined natural grid: a uniformly light board forces sufficiently many clear
+rows and columns in its interior. Their crossings must have active routing
+role. Use the unbounded light boards to obtain arbitrarily large recognizable
+active squares with a distinguished lower-left corner.
 
 ### 2. Prove backward realization
 
