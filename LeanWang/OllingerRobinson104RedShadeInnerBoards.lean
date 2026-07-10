@@ -75,6 +75,34 @@ theorem innerBoard_strictly_inside
   have hpositive : 0 < 2 ^ extra := pow_pos (by decide) _
   fin_cases inner <;> simp [innerBlock] <;> constructor <;> nlinarith
 
+/-- The two inner board intervals partition the parent interior in order. -/
+theorem innerBoards_order
+    {level : Nat} (hlevel : 2 ≤ level) (block : Nat) :
+    2 ^ level * (4 * block + 1) <
+        2 ^ (level - 2) * (4 * innerBlock block (0 : Fin 2) + 1) ∧
+      2 ^ (level - 2) * (4 * innerBlock block (0 : Fin 2) + 1) <
+        2 ^ (level - 2) * (4 * innerBlock block (0 : Fin 2) + 3) ∧
+      2 ^ (level - 2) * (4 * innerBlock block (0 : Fin 2) + 3) <
+        2 ^ (level - 2) * (4 * innerBlock block (1 : Fin 2) + 1) ∧
+      2 ^ (level - 2) * (4 * innerBlock block (1 : Fin 2) + 1) <
+        2 ^ (level - 2) * (4 * innerBlock block (1 : Fin 2) + 3) ∧
+      2 ^ (level - 2) * (4 * innerBlock block (1 : Fin 2) + 3) <
+        2 ^ level * (4 * block + 3) := by
+  obtain ⟨extra, rfl⟩ := Nat.exists_eq_add_of_le hlevel
+  simp only [Nat.add_sub_cancel_left]
+  have hpow : 2 ^ (2 + extra) = 4 * 2 ^ extra := by
+    rw [show 2 + extra = extra + 2 by omega, pow_add]
+    norm_num
+    omega
+  rw [hpow]
+  have hpositive : 0 < 2 ^ extra := pow_pos (by decide) _
+  simp [innerBlock]
+  constructor
+  · nlinarith
+  · constructor
+    · nlinarith
+    · nlinarith
+
 end RedShadeInnerBoards
 end Closed104
 end Figure13Layers

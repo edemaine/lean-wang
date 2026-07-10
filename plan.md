@@ -267,7 +267,9 @@ position-row obligation in the final theorem.
   identified by base-4 block digits `1` and `2`. Each has a certified board
   interval strictly contained in the parent and a constructive uniform-shade
   certificate equal to the parent's shade. These are exactly the recursive
-  inner obstructions in Robinson's free-line count.
+  inner obstructions in Robinson's free-line count. Their two intervals in
+  either axis are also certified to be ordered and pairwise disjoint, with
+  nonempty gaps to each parent side and between the two inner boards.
 
 ## Remaining scaffold proof
 
