@@ -155,6 +155,10 @@ position-row obligation in the final theorem.
   channel, active crossing, or inactive site; this decoder is primitive
   recursive, agrees exactly with the all-clear crossing predicate, and leaves
   the corner role reserved for a later finite marker decoration.
+- A generic decoder for planes over any routed scaffold product. It recovers
+  valid matching scaffold and payload layers and exposes complete-palette,
+  horizontal-wire, vertical-wire, source-tile, and fixed-seed facts according
+  to the decoded role at each site.
 
 ## Remaining scaffold proof
 
