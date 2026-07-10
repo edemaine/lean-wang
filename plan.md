@@ -131,6 +131,9 @@ position-row obligation in the final theorem.
   thick lane (`R1`, `R3`, `R0`, or `R2`), with finite substitution
   preservation certificates and a concrete-plane theorem giving such boards
   at every unbounded hierarchy scale.
+- An exact embedding from parent coordinates and quadrants into the decorated
+  quarter plane. Oriented board-side facts now specialize directly to the
+  concrete inner/outer signal endpoint rules at those quarter coordinates.
 
 ## Remaining scaffold proof
 

@@ -65,5 +65,6 @@ import LeanWang.OllingerRobinson104SignalScaffold
 import LeanWang.OllingerRobinson104SignalPlaneDecode
 import LeanWang.OllingerRobinson104OrientedRedCycles
 import LeanWang.OllingerRobinson104OrientedPlaneRedBoards
+import LeanWang.OllingerRobinson104SignalQuarterEmbedding
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
