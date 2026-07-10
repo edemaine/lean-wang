@@ -22,6 +22,7 @@ import LeanWang.TM0FoldedInput.InitSearchWriteReturn
 import LeanWang.TM0FoldedInput.InitSteps
 import LeanWang.TM0FoldedInput.InitRunCore
 import LeanWang.TM0FoldedInput.InitRun
+import LeanWang.TM0FoldedInput.InitRelation
 import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
