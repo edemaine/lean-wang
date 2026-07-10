@@ -189,6 +189,10 @@ position-row obligation in the final theorem.
   A symbolic path proof now forces any shade on its southwest edge around its
   straight sides and corner turns to all four board corners, establishing the
   uniform-color seed for the scaled cycle argument.
+- The shade geometry and propagation theorem now hold for every oriented red
+  cycle, not just the seed: index-board coordinates map to exact inward quarter
+  corners and contiguous `R0`/`R1`/`R2`/`R3` paths, and a shade on one corner
+  is forced around an arbitrarily large cycle to all four corners.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through

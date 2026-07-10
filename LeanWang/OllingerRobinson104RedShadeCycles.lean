@@ -15,7 +15,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeCycles
 
-open RedCycles Signals.FreeCellLocal RedShadePaths
+open RedCycles QuarterGeometry Signals.FreeCellLocal RedShadePaths
 
 set_option maxRecDepth 20000
 
@@ -80,6 +80,315 @@ theorem fixedGeometry (parent : Index) : FixedGeometry parent := by
     east5 := ?_
   }
   all_goals revert parent; native_decide
+
+def quarterWest (west : Nat) : Nat := 2 * west + 1
+def quarterEast (east : Nat) : Nat := 2 * east
+def quarterSouth (south : Nat) : Nat := 2 * south + 1
+def quarterNorth (north : Nat) : Nat := 2 * north
+
+@[simp] theorem quadrantAt_quarterSouth_yBit (x south : Nat) :
+    (quadrantAt x (quarterSouth south)).yBit = true := by
+  cases hbit : (x % 2 == 1) <;>
+    simp [quadrantAt, quarterSouth, Quadrant.ofBits, Quadrant.yBit, hbit]
+
+@[simp] theorem quadrantAt_quarterNorth_yBit (x north : Nat) :
+    (quadrantAt x (quarterNorth north)).yBit = false := by
+  cases hbit : (x % 2 == 1) <;>
+    simp [quadrantAt, quarterNorth, Quadrant.ofBits, Quadrant.yBit, hbit]
+
+@[simp] theorem quadrantAt_quarterWest_xBit (west y : Nat) :
+    (quadrantAt (quarterWest west) y).xBit = true := by
+  cases hbit : (y % 2 == 1) <;>
+    simp [quadrantAt, quarterWest, Quadrant.ofBits, Quadrant.xBit, hbit]
+
+@[simp] theorem quadrantAt_quarterEast_xBit (east y : Nat) :
+    (quadrantAt (quarterEast east) y).xBit = false := by
+  cases hbit : (y % 2 == 1) <;>
+    simp [quadrantAt, quarterEast, Quadrant.ofBits, Quadrant.xBit, hbit]
+
+theorem CycleOn.southwest_corner
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north) :
+    RedShades.cornerEast
+        (componentAt grid (quarterWest west) (quarterSouth south))
+        (quadrantAt (quarterWest west) (quarterSouth south)) = true ∧
+      RedShades.cornerNorth
+        (componentAt grid (quarterWest west) (quarterSouth south))
+        (quadrantAt (quarterWest west) (quarterSouth south)) = true := by
+  have hcomponent :
+      componentAt grid (quarterWest west) (quarterSouth south) = .b := by
+    rw [componentAt]
+    simp only [quarterWest, quarterSouth]
+    have hdivX : (2 * west + 1) / 2 = west := by omega
+    have hdivY : (2 * south + 1) / 2 = south := by omega
+    rw [hdivX, hdivY, ← indexThick_eq]
+    exact cycle.southwest
+  rw [hcomponent]
+  simp [quadrantAt, quarterWest, quarterSouth, Quadrant.ofBits,
+    RedShades.cornerEast, RedShades.cornerNorth]
+
+theorem CycleOn.southeast_corner
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north) :
+    RedShades.cornerWest
+        (componentAt grid (quarterEast east) (quarterSouth south))
+        (quadrantAt (quarterEast east) (quarterSouth south)) = true ∧
+      RedShades.cornerNorth
+        (componentAt grid (quarterEast east) (quarterSouth south))
+        (quadrantAt (quarterEast east) (quarterSouth south)) = true := by
+  have hcomponent :
+      componentAt grid (quarterEast east) (quarterSouth south) = .c := by
+    rw [componentAt]
+    simp only [quarterEast, quarterSouth]
+    have hdivX : (2 * east) / 2 = east := by omega
+    have hdivY : (2 * south + 1) / 2 = south := by omega
+    rw [hdivX, hdivY, ← indexThick_eq]
+    exact cycle.southeast
+  rw [hcomponent]
+  simp [quadrantAt, quarterEast, quarterSouth, Quadrant.ofBits,
+    RedShades.cornerWest, RedShades.cornerNorth]
+
+theorem CycleOn.northeast_corner
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north) :
+    RedShades.cornerWest
+        (componentAt grid (quarterEast east) (quarterNorth north))
+        (quadrantAt (quarterEast east) (quarterNorth north)) = true ∧
+      RedShades.cornerSouth
+        (componentAt grid (quarterEast east) (quarterNorth north))
+        (quadrantAt (quarterEast east) (quarterNorth north)) = true := by
+  have hcomponent :
+      componentAt grid (quarterEast east) (quarterNorth north) = .d := by
+    rw [componentAt]
+    simp only [quarterEast, quarterNorth]
+    have hdivX : (2 * east) / 2 = east := by omega
+    have hdivY : (2 * north) / 2 = north := by omega
+    rw [hdivX, hdivY, ← indexThick_eq]
+    exact cycle.northeast
+  rw [hcomponent]
+  simp [quadrantAt, quarterEast, quarterNorth, Quadrant.ofBits,
+    RedShades.cornerWest, RedShades.cornerSouth]
+
+theorem CycleOn.northwest_corner
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north) :
+    RedShades.cornerEast
+        (componentAt grid (quarterWest west) (quarterNorth north))
+        (quadrantAt (quarterWest west) (quarterNorth north)) = true ∧
+      RedShades.cornerSouth
+        (componentAt grid (quarterWest west) (quarterNorth north))
+        (quadrantAt (quarterWest west) (quarterNorth north)) = true := by
+  have hcomponent :
+      componentAt grid (quarterWest west) (quarterNorth north) = .a := by
+    rw [componentAt]
+    simp only [quarterWest, quarterNorth]
+    have hdivX : (2 * west + 1) / 2 = west := by omega
+    have hdivY : (2 * north) / 2 = north := by omega
+    rw [hdivX, hdivY, ← indexThick_eq]
+    exact cycle.northwest
+  rw [hcomponent]
+  simp [quadrantAt, quarterWest, quarterNorth, Quadrant.ofBits,
+    RedShades.cornerEast, RedShades.cornerSouth]
+
+set_option maxHeartbeats 500000 in
+-- Dependent quarter-grid arithmetic needs more elaboration than the default.
+theorem CycleOn.south_path
+    {grid : Nat → Nat → Index} {west east south north qx : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (hwest : quarterWest west < qx) (heast : qx < quarterEast east) :
+    RedShades.hasHorizontal
+      (componentAt grid qx (quarterSouth south))
+      (quadrantAt qx (quarterSouth south)) = true := by
+  have hparentWest : west < qx / 2 := by
+    unfold quarterWest at hwest
+    omega
+  have hparentEast : qx / 2 < east := by
+    unfold quarterEast at heast
+    omega
+  have hline := cycle.southLane (qx / 2) hparentWest hparentEast
+  rw [indexThick_eq] at hline
+  unfold RedShades.hasHorizontal
+  rw [quadrantAt_quarterSouth_yBit]
+  simp only [redHorizontalAt]
+  unfold componentAt
+  have hdivY : quarterSouth south / 2 = south := by
+    unfold quarterSouth
+    omega
+  rw [hdivY]
+  exact hline
+
+set_option maxHeartbeats 500000 in
+-- Dependent quarter-grid arithmetic needs more elaboration than the default.
+theorem CycleOn.north_path
+    {grid : Nat → Nat → Index} {west east south north qx : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (hwest : quarterWest west < qx) (heast : qx < quarterEast east) :
+    RedShades.hasHorizontal
+      (componentAt grid qx (quarterNorth north))
+      (quadrantAt qx (quarterNorth north)) = true := by
+  have hparentWest : west < qx / 2 := by
+    unfold quarterWest at hwest
+    omega
+  have hparentEast : qx / 2 < east := by
+    unfold quarterEast at heast
+    omega
+  have hline := cycle.northLane (qx / 2) hparentWest hparentEast
+  rw [indexThick_eq] at hline
+  unfold RedShades.hasHorizontal
+  rw [quadrantAt_quarterNorth_yBit]
+  simp only [redHorizontalAt]
+  unfold componentAt
+  have hdivY : quarterNorth north / 2 = north := by
+    unfold quarterNorth
+    omega
+  rw [hdivY]
+  exact hline
+
+set_option maxHeartbeats 500000 in
+-- Dependent quarter-grid arithmetic needs more elaboration than the default.
+theorem CycleOn.west_path
+    {grid : Nat → Nat → Index} {west east south north qy : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (hsouth : quarterSouth south < qy) (hnorth : qy < quarterNorth north) :
+    RedShades.hasVertical
+      (componentAt grid (quarterWest west) qy)
+      (quadrantAt (quarterWest west) qy) = true := by
+  have hparentSouth : south < qy / 2 := by
+    unfold quarterSouth at hsouth
+    omega
+  have hparentNorth : qy / 2 < north := by
+    unfold quarterNorth at hnorth
+    omega
+  have hline := cycle.westLane (qy / 2) hparentSouth hparentNorth
+  rw [indexThick_eq] at hline
+  unfold RedShades.hasVertical
+  rw [quadrantAt_quarterWest_xBit]
+  simp only [redVerticalAt]
+  unfold componentAt
+  have hdivX : quarterWest west / 2 = west := by
+    unfold quarterWest
+    omega
+  rw [hdivX]
+  exact hline
+
+set_option maxHeartbeats 500000 in
+-- Dependent quarter-grid arithmetic needs more elaboration than the default.
+theorem CycleOn.east_path
+    {grid : Nat → Nat → Index} {west east south north qy : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (hsouth : quarterSouth south < qy) (hnorth : qy < quarterNorth north) :
+    RedShades.hasVertical
+      (componentAt grid (quarterEast east) qy)
+      (quadrantAt (quarterEast east) qy) = true := by
+  have hparentSouth : south < qy / 2 := by
+    unfold quarterSouth at hsouth
+    omega
+  have hparentNorth : qy / 2 < north := by
+    unfold quarterNorth at hnorth
+    omega
+  have hline := cycle.eastLane (qy / 2) hparentSouth hparentNorth
+  rw [indexThick_eq] at hline
+  unfold RedShades.hasVertical
+  rw [quadrantAt_quarterEast_xBit]
+  simp only [redVerticalAt]
+  unfold componentAt
+  have hdivX : quarterEast east / 2 = east := by
+    unfold quarterEast
+    omega
+  rw [hdivX]
+  exact hline
+
+/-- Uniform shade at the four inward quarter corners of an arbitrary board. -/
+structure CycleShade (stateGrid : Nat → Nat → RedShades.State)
+    (west east south north : Nat) (shade : RedShades.Shade) : Prop where
+  southwest : (stateGrid (quarterWest west) (quarterSouth south)).east =
+    some shade
+  southeast : (stateGrid (quarterEast east) (quarterSouth south)).west =
+    some shade
+  northeast : (stateGrid (quarterEast east) (quarterNorth north)).west =
+    some shade
+  northwest : (stateGrid (quarterWest west) (quarterNorth north)).east =
+    some shade
+
+set_option maxHeartbeats 500000 in
+-- The proof composes four dependent quarter-grid path calculations.
+/-- A shade on one edge of any oriented board propagates to every corner. -/
+theorem CycleOn.cycleShade
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) (shade : RedShades.Shade)
+    (hshade :
+      (stateGrid (quarterWest west) (quarterSouth south)).east = some shade) :
+    CycleShade stateGrid west east south north shade := by
+  have hquarterWestEast : quarterWest west < quarterEast east := by
+    unfold quarterWest quarterEast
+    have := cycle.west_lt_east
+    omega
+  have hquarterSouthNorth : quarterSouth south < quarterNorth north := by
+    unfold quarterSouth quarterNorth
+    have := cycle.south_lt_north
+    omega
+  have hsouth :
+      (stateGrid (quarterWest west) (quarterSouth south)).east =
+        (stateGrid (quarterEast east) (quarterSouth south)).west := by
+    have hflow := horizontal_shade_across
+      (fun qx => stateGrid qx (quarterSouth south))
+      (quarterWest west) (quarterEast east - quarterWest west - 1)
+      (fun i hi => valid.hmatch (quarterWest west + i) (quarterSouth south))
+      (fun i hi => valid.horizontal_eq
+        (quarterWest west + i + 1) (quarterSouth south)
+        (CycleOn.south_path cycle (by omega) (by omega)))
+    have hend : quarterWest west +
+        (quarterEast east - quarterWest west - 1) + 1 = quarterEast east := by
+      omega
+    simpa only [hend] using hflow
+  have hseNorth :
+      (stateGrid (quarterEast east) (quarterSouth south)).north = some shade := by
+    rw [← valid.west_north_corner_eq
+      (quarterEast east) (quarterSouth south)
+      (CycleOn.southeast_corner cycle).1 (CycleOn.southeast_corner cycle).2]
+    exact hsouth.symm.trans hshade
+  have heast :
+      (stateGrid (quarterEast east) (quarterSouth south)).north =
+        (stateGrid (quarterEast east) (quarterNorth north)).south := by
+    have hflow := vertical_shade_across
+      (fun qy => stateGrid (quarterEast east) qy)
+      (quarterSouth south) (quarterNorth north - quarterSouth south - 1)
+      (fun i hi => valid.vmatch (quarterEast east) (quarterSouth south + i))
+      (fun i hi => valid.vertical_eq
+        (quarterEast east) (quarterSouth south + i + 1)
+        (CycleOn.east_path cycle (by omega) (by omega)))
+    have hend : quarterSouth south +
+        (quarterNorth north - quarterSouth south - 1) + 1 = quarterNorth north := by
+      omega
+    simpa only [hend] using hflow
+  have hneWest :
+      (stateGrid (quarterEast east) (quarterNorth north)).west = some shade := by
+    rw [valid.west_south_corner_eq
+      (quarterEast east) (quarterNorth north)
+      (CycleOn.northeast_corner cycle).1 (CycleOn.northeast_corner cycle).2]
+    exact heast.symm.trans hseNorth
+  have hnorth :
+      (stateGrid (quarterWest west) (quarterNorth north)).east =
+        (stateGrid (quarterEast east) (quarterNorth north)).west := by
+    have hflow := horizontal_shade_across
+      (fun qx => stateGrid qx (quarterNorth north))
+      (quarterWest west) (quarterEast east - quarterWest west - 1)
+      (fun i hi => valid.hmatch (quarterWest west + i) (quarterNorth north))
+      (fun i hi => valid.horizontal_eq
+        (quarterWest west + i + 1) (quarterNorth north)
+        (CycleOn.north_path cycle (by omega) (by omega)))
+    have hend : quarterWest west +
+        (quarterEast east - quarterWest west - 1) + 1 = quarterEast east := by
+      omega
+    simpa only [hend] using hflow
+  exact {
+    southwest := hshade
+    southeast := hsouth.symm.trans hshade
+    northeast := hneWest
+    northwest := hnorth.trans hneWest
+  }
 
 /-- Corner shades carried by one canonical depth-two board. -/
 structure FixedCycleShade (stateGrid : Nat → Nat → RedShades.State)
