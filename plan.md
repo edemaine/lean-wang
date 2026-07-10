@@ -79,6 +79,9 @@ position-row obligation in the final theorem.
 - A tower-occurrence theorem turning that finite reachability into actual fine
   plane coordinates; in particular every corrected tile type occurs in every
   valid plane tiling.
+- A lossless decoder from ordinary `TileIn tileSet` plane tilings to typed
+  `Fin 104` planes, so the hierarchy applies directly to the public Wang-tiling
+  predicate.
 
 ## Remaining scaffold proof
 
