@@ -108,6 +108,10 @@ position-row obligation in the final theorem.
 - An ordinary-Wang decoder for quarter planes, including reflected macro-boundary
   matching, so every valid 416-tile plane recovers a valid 104-index hierarchy
   together with exact block equations.
+- A quarter-level red-path geometry: the two thick-line lanes are identified
+  with literal tile quarters, and a finite certificate fixes every depth-two
+  board's oriented boundary as `R1` south, `R3` north, `R0` west, and `R2`
+  east, with all four corner turns facing inward.
 
 ## Remaining scaffold proof
 
