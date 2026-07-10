@@ -59,5 +59,6 @@ import LeanWang.OllingerRobinson104Quarters
 import LeanWang.OllingerRobinson104QuarterRegrouping
 import LeanWang.OllingerRobinson104QuarterPlaneDecode
 import LeanWang.OllingerRobinson104QuarterGeometry
+import LeanWang.OllingerRobinson104Signals
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final

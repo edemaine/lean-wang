@@ -112,6 +112,10 @@ position-row obligation in the final theorem.
   with literal tile quarters, and a finite certificate fixes every depth-two
   board's oriented boundary as `R1` south, `R3` north, `R0` west, and `R2`
   east, with all four corner turns facing inward.
+- A finite directed obstruction-signal layer over the 416 quarter tiles,
+  implementing Robinson's outer-edge emit-or-absorb and inner-edge
+  absorb-only rules. Every tiling of this layer provably projects to a valid
+  corrected quarter plane and a matching plane of locally allowed signals.
 
 ## Remaining scaffold proof
 
