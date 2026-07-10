@@ -168,22 +168,35 @@ position-row obligation in the final theorem.
   coordinates below every hierarchy tower origin form the abstract valid
   signal grid, so every selected crossing at every depth `d >= 5` has the
   active route role and therefore carries a tile of the source tileset.
+- A finite diagnostic showed that the preceding obstruction layer cannot yet
+  be the final scaffold: it decorates every red wire, leaving only a
+  constant-width free set in canonical growing boards. The CIRM construction
+  first splits red wires into light and dark shades and allows light wires to
+  cross only dark wires. Thus the unshaded signal/free-crossing modules are
+  retained local lemmas, not the final square-routing argument.
+- The missing finite light/dark red-wire layer is now defined over corrected
+  quarter tiles. It records exact red-path edge incidence, propagates a shade
+  through straight paths and corners, requires crossing paths to have opposite
+  shades, and decodes every valid shaded tiling back to a valid quarter plane
+  with matching shade edges. A finite `416 x 81` audit proves that every local
+  quarter site has an admissible shade state.
 
 ## Remaining scaffold proof
 
-The remaining theorem must instantiate the concrete Robinson signal tiles as
-a `RoutedScaffold` and prove its forward and backward square-routing
-properties. Keep this work independent of the machine reduction. The older
-Boolean `Scaffold` instance remains useful as an intermediate signal decoder,
-but cannot express payload transmission along horizontal and vertical
-channels and is not the final reduction interface.
+The remaining theorem must add obstruction signals to one selected red shade,
+instantiate the resulting tiles as a `RoutedScaffold`, and prove its forward
+and backward square-routing properties. Keep this work independent of the
+machine reduction. The older unshaded `Scaffold` and routed instances remain
+useful as intermediate local decoders, but are not the final reduction
+interface.
 
 ### 1. Obtain arbitrarily large free squares
 
-Iterate desubstitution to recover the hierarchical square structure. Then use
-Robinson's board/free-line argument to show that every plane scaffold tiling
-contains arbitrarily large recognizable active squares with a distinguished
-lower-left corner.
+First prove that the shade decoration selects a noncrossing family of red
+borders with unbounded members. Add Robinson obstruction signals only to that
+shade. Then iterate desubstitution and the board/free-line recurrence to show
+that every decorated plane contains arbitrarily large recognizable active
+squares with a distinguished lower-left corner.
 
 ### 2. Prove backward realization
 
