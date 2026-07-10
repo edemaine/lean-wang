@@ -164,6 +164,10 @@ position-row obligation in the final theorem.
   while retaining source-tile membership and directional payload-wire facts.
   This is the forward decoder that supersedes the older Boolean combined-plane
   route.
+- An actual-plane instantiation of the free-crossing theorem. Exact quarter
+  coordinates below every hierarchy tower origin form the abstract valid
+  signal grid, so every selected crossing at every depth `d >= 5` has the
+  active route role and therefore carries a tile of the source tileset.
 
 ## Remaining scaffold proof
 
