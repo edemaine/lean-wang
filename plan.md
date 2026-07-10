@@ -260,7 +260,9 @@ position-row obligation in the final theorem.
   Uniform board shades are unique, so the opposite-shade result applies
   directly to arbitrary parent and child shade certificates. The two-color
   involution also makes this constructive: any parent certificate produces a
-  certificate for every corner child with the literal opposite shade.
+  certificate for every corner child with the literal opposite shade. Applying
+  this construction twice produces all sixteen two-level corner descendants
+  in the same refined grid with the grandparent's original shade.
 
 ## Remaining scaffold proof
 

@@ -449,6 +449,50 @@ theorem exists_opposite_cornerShade_of_parent
       rw [hparent, heq])
   simpa only [hcorner] using canonicalCorner
 
+/-- Every two-level corner descendant has the same shade as its grandparent. -/
+theorem exists_same_grandchildShade_of_parent
+    (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    {level : Nat} (hlevel : 2 ≤ level) (blockX blockY : Nat)
+    (childX childY grandchildX grandchildY : Fin 2)
+    {parentShade : RedShades.Shade}
+    (parentShaded : CycleShade stateGrid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) parentShade)
+    (valid : ValidShadeGrid (iterateRefine (level + 2) grid) stateGrid) :
+    CycleShade stateGrid
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockX + childX.val) + grandchildX.val) + 1))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockX + childX.val) + grandchildX.val) + 3))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockY + childY.val) + grandchildY.val) + 1))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockY + childY.val) + grandchildY.val) + 3))
+      parentShade := by
+  have hchildLevel : 1 ≤ level - 1 := by omega
+  have childShaded := exists_opposite_cornerShade_of_parent grid
+    (by omega : 1 ≤ level) blockX blockY childX childY parentShaded valid
+  have hgrid :
+      iterateRefine (level - 1 + 2) (iterateRefine 1 grid) =
+        iterateRefine (level + 2) grid := by
+    rw [iterateRefine_add]
+    congr 1
+    omega
+  have validChild : ValidShadeGrid
+      (iterateRefine (level - 1 + 2) (iterateRefine 1 grid)) stateGrid := by
+    rw [hgrid]
+    exact valid
+  have grandchildShaded := exists_opposite_cornerShade_of_parent
+    (iterateRefine 1 grid) hchildLevel
+    (2 * blockX + childX.val) (2 * blockY + childY.val)
+    grandchildX grandchildY childShaded validChild
+  have hlevelSub : level - 1 - 1 = level - 2 := by omega
+  simpa only [hlevelSub, RedShades.Shade.opposite_opposite] using
+    grandchildShaded
+
 end TranslatedRedShadeCrossings
 end Closed104
 end Figure13Layers
