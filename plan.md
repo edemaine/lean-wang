@@ -181,7 +181,10 @@ position-row obligation in the final theorem.
   with matching shade edges. A finite `416 x 81` audit proves that every local
   quarter site has an admissible shade state. Proof-facing lemmas expose shade
   equality on straight paths and all corner turns, opposite shades at
-  crossings, and literal shade equality across neighboring Wang edges.
+  crossings, and literal shade equality across neighboring Wang edges. An
+  abstract valid shade grid and generic finite horizontal/vertical path
+  propagation lemmas isolate the forthcoming cycle-color proof from Wang-tile
+  product encodings.
 - The obstruction alphabet is rebuilt over that shade layer. Light red paths
   obey Robinson's outer-edge emit-or-absorb and inner-edge absorb-only rules;
   dark paths are transparent. Every valid tiling projects to both a valid
