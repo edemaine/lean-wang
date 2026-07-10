@@ -99,6 +99,9 @@ position-row obligation in the final theorem.
 - The red-board seed is uniform for all 104 parents: its depth-two corners are
   `(1,1)` and `(3,3)`, yielding canonical scaled corners at `2^level` and
   `3 * 2^level` in every plane.
+- A corrected 416-tile quarter subdivision with certified distinctness,
+  decoding, and checkerboard phase transitions, replacing all old `Fin 92`
+  Figure 18 site types.
 
 ## Remaining scaffold proof
 

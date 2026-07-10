@@ -55,5 +55,6 @@ import LeanWang.OllingerRobinson104RedBoards
 import LeanWang.OllingerRobinson104HierarchyEmbedding
 import LeanWang.OllingerRobinson104IteratedEmbedding
 import LeanWang.OllingerRobinson104PlaneRedBoards
+import LeanWang.OllingerRobinson104Quarters
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
