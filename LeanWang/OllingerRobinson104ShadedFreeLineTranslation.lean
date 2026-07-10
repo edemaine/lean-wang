@@ -121,27 +121,35 @@ theorem cycleShade_shift_iff (shadeGrid : Nat → Nat → RedShades.State)
       CycleShade shadeGrid
         (offsetX + west) (offsetX + east)
         (offsetY + south) (offsetY + north) shade := by
+  have hwest : 2 * offsetX + quarterWest west =
+      quarterWest (offsetX + west) := by
+    simp [quarterWest]
+    omega
+  have heast : 2 * offsetX + quarterEast east =
+      quarterEast (offsetX + east) := by
+    simp [quarterEast]
+    omega
+  have hsouth : 2 * offsetY + quarterSouth south =
+      quarterSouth (offsetY + south) := by
+    simp [quarterSouth]
+    omega
+  have hnorth : 2 * offsetY + quarterNorth north =
+      quarterNorth (offsetY + north) := by
+    simp [quarterNorth]
+    omega
   constructor
   · intro shaded
     constructor
-    · simpa [shiftQuarterGrid, quarterWest, quarterSouth, Nat.add_assoc] using
-        shaded.southwest
-    · simpa [shiftQuarterGrid, quarterEast, quarterSouth, Nat.add_assoc] using
-        shaded.southeast
-    · simpa [shiftQuarterGrid, quarterEast, quarterNorth, Nat.add_assoc] using
-        shaded.northeast
-    · simpa [shiftQuarterGrid, quarterWest, quarterNorth, Nat.add_assoc] using
-        shaded.northwest
+    · simpa only [shiftQuarterGrid, hwest, hsouth] using shaded.southwest
+    · simpa only [shiftQuarterGrid, heast, hsouth] using shaded.southeast
+    · simpa only [shiftQuarterGrid, heast, hnorth] using shaded.northeast
+    · simpa only [shiftQuarterGrid, hwest, hnorth] using shaded.northwest
   · intro shaded
     constructor
-    · simpa [shiftQuarterGrid, quarterWest, quarterSouth, Nat.add_assoc] using
-        shaded.southwest
-    · simpa [shiftQuarterGrid, quarterEast, quarterSouth, Nat.add_assoc] using
-        shaded.southeast
-    · simpa [shiftQuarterGrid, quarterEast, quarterNorth, Nat.add_assoc] using
-        shaded.northeast
-    · simpa [shiftQuarterGrid, quarterWest, quarterNorth, Nat.add_assoc] using
-        shaded.northwest
+    · simpa only [shiftQuarterGrid, hwest, hsouth] using shaded.southwest
+    · simpa only [shiftQuarterGrid, heast, hsouth] using shaded.southeast
+    · simpa only [shiftQuarterGrid, heast, hnorth] using shaded.northeast
+    · simpa only [shiftQuarterGrid, hwest, hnorth] using shaded.northwest
 
 theorem isFreeRow_shift_iff (depth : Nat) (grid : Nat → Nat → Index)
     (shadeGrid : Nat → Nat → RedShades.State)

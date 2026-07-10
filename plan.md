@@ -270,15 +270,13 @@ position-row obligation in the final theorem.
   inner obstructions in Robinson's free-line count. Their two intervals in
   either axis are also certified to be ordered and pairwise disjoint, with
   nonempty gaps to each parent side and between the two inner boards.
-- A finite universal audit establishes the recurrence base case. In every
-  depth-four refined block, quarter row `16` has no vertical red path anywhere
-  across the scale-2 board interior, and quarter column `16` has no horizontal
-  red path. They are therefore a free row and column for every shade assignment;
-  when the board is light, their crossing has the literal clear signal state.
+- A fresh finite audit refuted the proposed fixed center-line base case: the
+  center row and column can carry perpendicular red paths for valid local shade
+  choices. Free lines must therefore be selected from the board-dependent
+  finite enumeration below; no universal center seed is assumed.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
-  transport. The central base-case row, column, and clear crossing therefore
-  occur in every translated scale-2 light board, not only the origin block.
+  transport.
 - Free rows and columns themselves are translation-equivariant. Restricting a
   shade grid to an aligned coarse block and refining locally yields a free line
   exactly when the `2^depth`/quarter-scaled translated line is free in the
@@ -287,8 +285,7 @@ position-row obligation in the final theorem.
 - Aligned restrictions of a valid combined shade/signal grid are again valid,
   and uniform board-shade certificates transport across the same restriction.
   An ordered `FreeGrid` now records finite lower-bound witnesses for free rows
-  and columns; every selected crossing is signal-clear, and every translated
-  scale-2 light board has a singleton `FreeGrid` base witness.
+  and columns, and every selected crossing is signal-clear.
 - Free rows and columns inside a bounded board now have Boolean tests proved
   equivalent to the proposition-level definitions and exact finite-set
   enumerations. Every ordered `FreeGrid` witness injects into these sets, so a

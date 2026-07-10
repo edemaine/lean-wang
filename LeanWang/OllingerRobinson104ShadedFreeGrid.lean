@@ -3,7 +3,6 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104ShadedFreeLineSeed
 import LeanWang.OllingerRobinson104ShadedFreeLineTranslation
 
 /-!
@@ -16,13 +15,14 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedFreeGrid
 
-open OrientedRedCycles RedShadeCycles ShadedPlaneSignalGrid
+open OrientedRedCycles RedShadeCycles RefinementTranslation
+  ShadedFreeLineTranslation ShadedPlaneSignalGrid
 
 set_option maxRecDepth 20000
 
 structure FreeGrid (indexGrid : Nat → Nat → Index)
     (shadeGrid : Nat → Nat → RedShades.State)
-    (west east south north size : Nat) : Prop where
+    (west east south north size : Nat) where
   columnAt : Fin size → Nat
   rowAt : Fin size → Nat
   column_strictMono : ∀ {i j}, i < j → columnAt i < columnAt j
@@ -77,20 +77,84 @@ def singleton
   freeColumn := fun _ => freeColumn
   freeRow := fun _ => freeRow
 
-theorem center_at (grid : Nat → Nat → Index)
-    (shadeGrid : Nat → Nat → RedShades.State) (blockX blockY : Nat) :
-    FreeGrid (RedCycles.iterateRefine 4 grid) shadeGrid
-      (16 * blockX + 4) (16 * blockX + 12)
-      (16 * blockY + 4) (16 * blockY + 12) 1 := by
-  apply singleton
-  · simp [quarterWest]
-  · simp [quarterEast]
-  · simp [quarterSouth]
-  · simp [quarterNorth]
-  · exact ShadedFreeLineSeed.centerColumn_free_at
-      grid shadeGrid blockX blockY
-  · exact ShadedFreeLineSeed.centerRow_free_at
-      grid shadeGrid blockX blockY
+def FreeGrid.translate
+    {depth : Nat} {grid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {blockX blockY west east south north size : Nat}
+    (freeGrid : FreeGrid
+      (RedCycles.iterateRefine depth (shiftGrid grid blockX blockY))
+      (shiftQuarterGrid shadeGrid
+        (2 ^ (depth + 1) * blockX) (2 ^ (depth + 1) * blockY))
+      west east south north size) :
+    FreeGrid (RedCycles.iterateRefine depth grid) shadeGrid
+      (2 ^ depth * blockX + west) (2 ^ depth * blockX + east)
+      (2 ^ depth * blockY + south) (2 ^ depth * blockY + north) size where
+  columnAt := fun i => 2 ^ (depth + 1) * blockX + freeGrid.columnAt i
+  rowAt := fun i => 2 ^ (depth + 1) * blockY + freeGrid.rowAt i
+  column_strictMono := by
+    intro i j hij
+    exact Nat.add_lt_add_left (freeGrid.column_strictMono hij) _
+  row_strictMono := by
+    intro i j hij
+    exact Nat.add_lt_add_left (freeGrid.row_strictMono hij) _
+  column_west := by
+    intro i
+    have hoffset : 2 ^ (depth + 1) * blockX =
+        2 * (2 ^ depth * blockX) := by
+      rw [pow_succ]
+      ac_rfl
+    have hboundary : quarterWest (2 ^ depth * blockX + west) =
+        2 ^ (depth + 1) * blockX + quarterWest west := by
+      simp [quarterWest, hoffset]
+      omega
+    rw [hboundary]
+    exact Nat.add_lt_add_left (freeGrid.column_west i) _
+  column_east := by
+    intro i
+    have hoffset : 2 ^ (depth + 1) * blockX =
+        2 * (2 ^ depth * blockX) := by
+      rw [pow_succ]
+      ac_rfl
+    have hboundary : quarterEast (2 ^ depth * blockX + east) =
+        2 ^ (depth + 1) * blockX + quarterEast east := by
+      simp [quarterEast, hoffset]
+      omega
+    rw [hboundary]
+    exact Nat.add_lt_add_left (freeGrid.column_east i) _
+  row_south := by
+    intro i
+    have hoffset : 2 ^ (depth + 1) * blockY =
+        2 * (2 ^ depth * blockY) := by
+      rw [pow_succ]
+      ac_rfl
+    have hboundary : quarterSouth (2 ^ depth * blockY + south) =
+        2 ^ (depth + 1) * blockY + quarterSouth south := by
+      simp [quarterSouth, hoffset]
+      omega
+    rw [hboundary]
+    exact Nat.add_lt_add_left (freeGrid.row_south i) _
+  row_north := by
+    intro i
+    have hoffset : 2 ^ (depth + 1) * blockY =
+        2 * (2 ^ depth * blockY) := by
+      rw [pow_succ]
+      ac_rfl
+    have hboundary : quarterNorth (2 ^ depth * blockY + north) =
+        2 ^ (depth + 1) * blockY + quarterNorth north := by
+      simp [quarterNorth, hoffset]
+      omega
+    rw [hboundary]
+    exact Nat.add_lt_add_left (freeGrid.row_north i) _
+  freeColumn := by
+    intro i
+    exact (isFreeColumn_shift_iff depth grid shadeGrid
+      blockX blockY south north (freeGrid.columnAt i)).1
+        (freeGrid.freeColumn i)
+  freeRow := by
+    intro i
+    exact (isFreeRow_shift_iff depth grid shadeGrid
+      blockX blockY west east (freeGrid.rowAt i)).1
+        (freeGrid.freeRow i)
 
 end ShadedFreeGrid
 end Closed104

@@ -75,7 +75,7 @@ def freeColumns (indexGrid : Nat → Nat → Index)
     row ∈ freeRows indexGrid shadeGrid west east south north ↔
       quarterSouth south < row ∧ row < quarterNorth north ∧
         IsFreeRow indexGrid shadeGrid west east row := by
-  simp [freeRows, freeRowBool_eq_true_iff]
+  simp [freeRows, freeRowBool_eq_true_iff, and_assoc]
 
 @[simp] theorem mem_freeColumns_iff
     {indexGrid : Nat → Nat → Index}
@@ -84,7 +84,7 @@ def freeColumns (indexGrid : Nat → Nat → Index)
     column ∈ freeColumns indexGrid shadeGrid west east south north ↔
       quarterWest west < column ∧ column < quarterEast east ∧
         IsFreeColumn indexGrid shadeGrid south north column := by
-  simp [freeColumns, freeColumnBool_eq_true_iff]
+  simp [freeColumns, freeColumnBool_eq_true_iff, and_assoc]
 
 theorem FreeGrid.size_le_freeRows_card
     {indexGrid : Nat → Nat → Index}
@@ -100,7 +100,11 @@ theorem FreeGrid.size_le_freeRows_card
     intro i j heq
     apply Fin.ext
     by_contra hne
-    have hcases : i < j ∨ j < i := lt_or_gt_of_ne hne
+    have hij_ne : i ≠ j := by
+      intro hij
+      subst j
+      exact hne rfl
+    have hcases : i < j ∨ j < i := lt_or_gt_of_ne hij_ne
     rcases hcases with hij | hji
     · have := freeGrid.row_strictMono hij
       exact (Nat.ne_of_lt this) (congrArg Subtype.val heq)
@@ -123,7 +127,11 @@ theorem FreeGrid.size_le_freeColumns_card
     intro i j heq
     apply Fin.ext
     by_contra hne
-    have hcases : i < j ∨ j < i := lt_or_gt_of_ne hne
+    have hij_ne : i ≠ j := by
+      intro hij
+      subst j
+      exact hne rfl
+    have hcases : i < j ∨ j < i := lt_or_gt_of_ne hij_ne
     rcases hcases with hij | hji
     · have := freeGrid.column_strictMono hij
       exact (Nat.ne_of_lt this) (congrArg Subtype.val heq)
