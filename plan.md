@@ -864,6 +864,23 @@ matching theorems. The corrected scaffold route should build on this module;
 the old `Fin 92` route remains useful only for auditing how the omission was
 detected.
 
+`LeanWang.OllingerRobinson104Tiles` gives the corrected alphabet a
+compositional Wang-edge projection. The 104 decorated component triples project
+to 40 distinct extensional Wang edge tuples; this is expected to forget some
+cosmetic/internal thick-line placement. Lean verifies that all 104 Figure 16
+child blocks are valid over this 40-tile projection and that every horizontal
+or vertical parent match is preserved across the corresponding doubled child
+boundary. The proposition-level interfaces are `childRectangle_valid`,
+`childHMatches_of_hMatches`, and `childVMatches_of_vMatches`.
+
+The projection intentionally does not claim reflection: different decorated
+triples can have the same four Wang edge colors. Substitution iteration and
+forward construction of arbitrarily large valid patches can use the 40-tile
+projection directly. The hierarchy/recognizability proof should remain on the
+typed 104-symbol alphabet, or use a standard collared/SFT-to-Wang encoding if
+the final scaffold roles need to distinguish decorated symbols that share an
+edge tuple.
+
 The theorem surface now also has the more Robinson-shaped
 `L2C1RobinsonSection7BoardFreeLineTranslatedBoxData` /
 `L2C2RobinsonSection7BoardFreeLineTranslatedBoxData` packages.  These replace

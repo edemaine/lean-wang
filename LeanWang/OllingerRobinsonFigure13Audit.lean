@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104
+import LeanWang.OllingerRobinson104Tiles
 import LeanWang.OllingerRobinsonFigure18Obstruction
 
 /-!
@@ -70,6 +70,12 @@ structure Figure13Figure16AuditCertificate : Prop where
     oneStepClosedUnderSubstitutionBool = true
   figure16Closed104AlphabetLength : Closed104.alphabet.length = 104
   figure16Closed104ChildrenUnique : Closed104.allChildrenUniqueBool = true
+  figure16Closed104ChildRectanglesValid :
+    Closed104.allChildRectanglesValidBool = true
+  figure16Closed104HorizontalBoundariesPreserved :
+    Closed104.allHorizontalBoundariesPreservedBool = true
+  figure16Closed104VerticalBoundariesPreserved :
+    Closed104.allVerticalBoundariesPreservedBool = true
   figure16AlignedBlockCount :
     alignedCompatibleChildBlockCount = 92
   figure16AlignedBlocksAreSingleRawTiles :
@@ -101,6 +107,12 @@ theorem figure13Figure16AuditCertificate :
     oneStepClosedUnderSubstitutionBool_eq_true
   figure16Closed104AlphabetLength := Closed104.alphabet_length
   figure16Closed104ChildrenUnique := Closed104.allChildrenUniqueBool_eq_true
+  figure16Closed104ChildRectanglesValid :=
+    Closed104.allChildRectanglesValidBool_eq_true
+  figure16Closed104HorizontalBoundariesPreserved :=
+    Closed104.allHorizontalBoundariesPreservedBool_eq_true
+  figure16Closed104VerticalBoundariesPreserved :=
+    Closed104.allVerticalBoundariesPreservedBool_eq_true
   figure16AlignedBlockCount := alignedCompatibleChildBlockCount_eq
   figure16AlignedBlocksAreSingleRawTiles :=
     allAlignedCompatibleBlocksHaveSameIndexBool_eq_true
