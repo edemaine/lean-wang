@@ -275,6 +275,10 @@ position-row obligation in the final theorem.
   across the scale-2 board interior, and quarter column `16` has no horizontal
   red path. They are therefore a free row and column for every shade assignment;
   when the board is light, their crossing has the literal clear signal state.
+- Iterated refinement is now proved equivariant under arbitrary coarse-grid
+  translations, including exact quarter-component and obstruction-selector
+  transport. The central base-case row, column, and clear crossing therefore
+  occur in every translated scale-2 light board, not only the origin block.
 
 ## Remaining scaffold proof
 
