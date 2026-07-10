@@ -70,6 +70,11 @@ theorem depthTwo_supertile_has_redCycleOn (parent : Index) :
   exact ⟨west, east, south, north,
     redCycleOn_of_redCycle_eq_true hwest hsouth hcycle⟩
 
+theorem depthTwo_supertile_has_fixed_redCycleOn (parent : Index) :
+    RedCycleOn (fun x y => gridAt (supertile 2 parent) x y) 1 3 1 3 :=
+  redCycleOn_of_redCycle_eq_true (by decide) (by decide)
+    (depthTwo_supertile_has_fixed_redCycle parent)
+
 /-- Iterate simultaneous Figure 16 substitution on an index grid. -/
 def iterateRefine : Nat → (Nat → Nat → Index) → Nat → Nat → Index
   | 0, grid => grid

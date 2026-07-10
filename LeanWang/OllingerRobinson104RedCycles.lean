@@ -103,6 +103,18 @@ theorem depthTwo_supertile_has_redCycle (parent : Index) :
           west.val east.val south.val north.val = true :=
   every_depthTwo_supertile_has_redCycle parent
 
+/- In fact, the depth-two cycle has the same coordinates below every parent. -/
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem every_depthTwo_supertile_has_fixed_redCycle :
+    ∀ parent : Index,
+      redCycle (supertile 2 parent) 1 3 1 3 = true := by
+  native_decide
+
+theorem depthTwo_supertile_has_fixed_redCycle (parent : Index) :
+    redCycle (supertile 2 parent) 1 3 1 3 = true :=
+  every_depthTwo_supertile_has_fixed_redCycle parent
+
 end RedCycles
 end Closed104
 end Figure13Layers

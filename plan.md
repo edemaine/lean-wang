@@ -96,6 +96,9 @@ position-row obligation in the final theorem.
   corresponding iterated refinement.
 - A concrete-plane red-board theorem: every valid corrected-Ollinger plane has
   red rectangular cycles at explicit origins and unbounded `2^level` scales.
+- The red-board seed is uniform for all 104 parents: its depth-two corners are
+  `(1,1)` and `(3,3)`, yielding canonical scaled corners at `2^level` and
+  `3 * 2^level` in every plane.
 
 ## Remaining scaffold proof
 

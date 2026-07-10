@@ -83,6 +83,14 @@ theorem constantGrid_depthTwo_has_redCycleOn (parent : Index) :
   intro x y hx hy
   exact depthTwo_supertile_eq_iterateRefine parent ⟨x, hx⟩ ⟨y, hy⟩
 
+theorem constantGrid_depthTwo_has_fixed_redCycleOn (parent : Index) :
+    RedCycleOn (iterateRefine 2 (fun _ _ => parent)) 1 3 1 3 := by
+  apply PlaneRedBoards.RedCycleOn.congr_of_eq_on
+    (bound := 4) (depthTwo_supertile_has_fixed_redCycleOn parent)
+    (by decide) (by decide)
+  intro x y hx hy
+  exact depthTwo_supertile_eq_iterateRefine parent ⟨x, hx⟩ ⟨y, hy⟩
+
 theorem iterateRefine_two_apply (grid : Nat → Nat → Index) (x y : Nat) :
     iterateRefine 2 grid x y =
       childBlock
@@ -111,6 +119,14 @@ theorem grid_depthTwo_has_redCycleOn (grid : Nat → Nat → Index) :
   refine ⟨west, east, south, north,
     PlaneRedBoards.RedCycleOn.congr_of_eq_on
       cycle east.isLt north.isLt ?_⟩
+  intro x y hx hy
+  exact (iterateRefine_two_local grid hx hy).symm
+
+theorem grid_depthTwo_has_fixed_redCycleOn (grid : Nat → Nat → Index) :
+    RedCycleOn (iterateRefine 2 grid) 1 3 1 3 := by
+  apply PlaneRedBoards.RedCycleOn.congr_of_eq_on
+    (bound := 4) (constantGrid_depthTwo_has_fixed_redCycleOn (grid 0 0))
+    (by decide) (by decide)
   intro x y hx hy
   exact (iterateRefine_two_local grid hx hy).symm
 
@@ -156,6 +172,32 @@ theorem Tower.has_unbounded_redCycles
   rw [tower.zero] at scaledCycle
   exact ⟨descendOrigin tower 0 (level + 2) (0, 0),
     west, east, south, north, scaledCycle⟩
+
+/-- Canonical form: the same depth-two cycle scales in every hierarchy plane. -/
+theorem Tower.has_fixed_unbounded_redCycles
+    {base : ValidPlane} (tower : Tower base) (level : Nat) :
+    ∃ origin : Int × Int,
+      RedCycleOn (natGridAt base.tiling origin)
+        (2 ^ level) (2 ^ level * 3) (2 ^ level) (2 ^ level * 3) := by
+  let coarseGrid :=
+    natGridAt (tower.plane (level + 2)).tiling (0, 0)
+  have seedCycle := grid_depthTwo_has_fixed_redCycleOn coarseGrid
+  have scaledCycle := seedCycle.iterateRefine level
+  simp only [doubleN_eq, Nat.mul_one] at scaledCycle
+  have hadd : iterateRefine level (iterateRefine 2 coarseGrid) =
+      iterateRefine (level + 2) coarseGrid :=
+    iterateRefine_add level 2 coarseGrid
+  rw [hadd] at scaledCycle
+  have hembed := HierarchyEmbedding.Tower.natGridAt_descendOrigin
+    tower (level + 2) 0 (0, 0)
+  have hembed' :
+      natGridAt (tower.plane 0).tiling
+          (descendOrigin tower 0 (level + 2) (0, 0)) =
+        iterateRefine (level + 2) coarseGrid := by
+    simpa only [Nat.zero_add, coarseGrid] using hembed
+  rw [← hembed'] at scaledCycle
+  rw [tower.zero] at scaledCycle
+  exact ⟨descendOrigin tower 0 (level + 2) (0, 0), scaledCycle⟩
 
 end PlaneRedBoards
 end Closed104
