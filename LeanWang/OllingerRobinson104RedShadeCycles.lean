@@ -390,6 +390,26 @@ theorem CycleOn.cycleShade
     northwest := hnorth.trans hneWest
   }
 
+set_option maxHeartbeats 500000 in
+-- Selecting the corner edge elaborates the dependent quarter-grid coordinate.
+/-- Every oriented red board has one uniform light/dark corner shade. -/
+theorem CycleOn.exists_cycleShade
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (cycle : OrientedRedCycles.CycleOn grid west east south north)
+    (valid : ValidShadeGrid grid stateGrid) :
+    ∃ shade, CycleShade stateGrid west east south north shade := by
+  have heast : RedShades.hasEast
+      (componentAt grid (quarterWest west) (quarterSouth south))
+      (quadrantAt (quarterWest west) (quarterSouth south)) = true := by
+    simp [RedShades.hasEast, (CycleOn.southwest_corner cycle).1]
+  have hpresent := valid.east_present
+    (quarterWest west) (quarterSouth south) heast
+  rcases hshade :
+      (stateGrid (quarterWest west) (quarterSouth south)).east with _ | shade
+  · simp [hshade] at hpresent
+  · exact ⟨shade, CycleOn.cycleShade cycle valid shade hshade⟩
+
 /-- Corner shades carried by one canonical depth-two board. -/
 structure FixedCycleShade (stateGrid : Nat → Nat → RedShades.State)
     (shade : RedShades.Shade) : Prop where

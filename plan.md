@@ -192,7 +192,9 @@ position-row obligation in the final theorem.
 - The shade geometry and propagation theorem now hold for every oriented red
   cycle, not just the seed: index-board coordinates map to exact inward quarter
   corners and contiguous `R0`/`R1`/`R2`/`R3` paths, and a shade on one corner
-  is forced around an arbitrarily large cycle to all four corners.
+  is forced around an arbitrarily large cycle to all four corners. Red-edge
+  presence then supplies such a shade, so every oriented board has an actual
+  uniform light/dark corner shade.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through
