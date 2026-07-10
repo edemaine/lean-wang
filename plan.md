@@ -69,38 +69,29 @@ position-row obligation in the final theorem.
 - A proposition-level local recognizability theorem: every valid typed `4 x 4`
   neighborhood with the distinguished central phase has a unique `Fin 104`
   parent whose four children are its central `2 x 2` block.
+- Global desubstitution: every valid corrected-Ollinger plane is, up to one of
+  four parity choices, the Figure 16 substitution of another valid plane.
 
 ## Remaining scaffold proof
 
 The remaining theorem must construct a concrete `S : Scaffold` and prove
 `IsScaffold S`. Keep this work independent of the machine reduction.
 
-### 1. Lift finite recognizability
-
-Lift local recognizability to arbitrary valid plane tilings:
-
-- extract the typed `4 x 4` neighborhood around every phase-`a` site;
-- define the unique parent index on the selected parity sublattice;
-- prove neighboring decoded parents match, using the boundary-reflection
-  certificates;
-- prove substituting the decoded parent tiling recovers the original tiling at
-  the selected phase.
-
-### 2. Obtain arbitrarily large free squares
+### 1. Obtain arbitrarily large free squares
 
 Iterate desubstitution to recover the hierarchical square structure. Then use
 Robinson's board/free-line argument to show that every plane scaffold tiling
 contains arbitrarily large recognizable active squares with a distinguished
 lower-left corner.
 
-### 3. Prove backward realization
+### 2. Prove backward realization
 
 Construct scaffold tilings containing active-corner boxes of every finite size,
 or equivalently finite layer patches that compactness assembles into the
 required plane tiling. Show arbitrary payload tiles can be routed through the
 active square and obstruction channels.
 
-### 4. Package and finish
+### 3. Package and finish
 
 Bundle the forward and backward results as `IsScaffold S`, apply
 `LeanWang.encoded_domino_problem_undecidable` and
