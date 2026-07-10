@@ -279,6 +279,11 @@ position-row obligation in the final theorem.
   translations, including exact quarter-component and obstruction-selector
   transport. The central base-case row, column, and clear crossing therefore
   occur in every translated scale-2 light board, not only the origin block.
+- Free rows and columns themselves are translation-equivariant. Restricting a
+  shade grid to an aligned coarse block and refining locally yields a free line
+  exactly when the `2^depth`/quarter-scaled translated line is free in the
+  global refinement. This is the induction interface for reinserting recursive
+  inner-board free lines into their parent board.
 
 ## Remaining scaffold proof
 
