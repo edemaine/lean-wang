@@ -15,6 +15,7 @@ import LeanWang.UniversalTM0
 import LeanWang.TM0FiniteCompiler
 import LeanWang.TM0FoldedProgram
 import LeanWang.TM0FoldedInput
+import LeanWang.TM0FoldedInput.Computability
 import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
