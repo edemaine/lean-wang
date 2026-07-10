@@ -155,14 +155,16 @@ def allSites : List Site :=
 def tile (site : Site) : WangTile :=
   WangTile.product (quarterTile site.1) (State.tile site.2)
 
-def tileSet : TileSet := allSites.map tile
+@[irreducible] def tileSet : TileSet := allSites.map tile
 
 theorem tile_mem (site : Site) (hallowed : locallyAllowed site.1 site.2 = true) :
-    tile site ∈ tileSet :=
-  List.mem_map.2 ⟨site, (mem_allSites_iff site).2 hallowed, rfl⟩
+    tile site ∈ tileSet := by
+  unfold tileSet
+  exact List.mem_map.2 ⟨site, (mem_allSites_iff site).2 hallowed, rfl⟩
 
 theorem exists_site_of_mem {wang : WangTile} (hwang : wang ∈ tileSet) :
     ∃ site : Site, site ∈ allSites ∧ tile site = wang := by
+  unfold tileSet at hwang
   rcases List.mem_map.1 hwang with ⟨site, hsite, rfl⟩
   exact ⟨site, hsite, rfl⟩
 

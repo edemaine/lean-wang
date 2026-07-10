@@ -120,6 +120,9 @@ position-row obligation in the final theorem.
   flow is constant between consecutive red boundaries, two inner-facing
   endpoints force a clear corridor, and either outer-facing endpoint forces
   an obstructed corridor.
+- A concrete `Scaffold` over the corrected signal tiles. Its active predicate
+  reads the paired edge colors and is primitive recursive; the distinguished
+  all-clear corner is a certified member of the scaffold tileset.
 
 ## Remaining scaffold proof
 
