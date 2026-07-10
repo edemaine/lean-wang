@@ -7,17 +7,15 @@ import LeanWang.Final.SourceImplications
 import LeanWang.Final.RobinsonCertificate
 import LeanWang.OllingerRobinsonFigure13Audit
 import LeanWang.OllingerRobinsonFigure13Obstructions
+import LeanWang.UniversalFoldedReduction
 
 /-!
 Final theorem surface for the Wang-tile undecidability proof.
 
-This module keeps the public endpoint small.  The remaining work is isolated in
-`FinalReductionInputs`: the finite-transcription-facing Robinson Section 7
-board/free-line layer-patch scaffold package and the generated-position source
-obligations for the folded TM0 reduction.  Constructors below also expose the
-source-row route and the origin-zero-window route, which derives the checked
-stacks from the geometric origin-zero scaffold invariant and the audited finite
-Figure 13 / Figure 16 pair-compatibility table.
+The preferred endpoint uses the fixed universal TM0 reduction, so its only
+remaining input is the finite-transcription-facing Robinson Section 7
+board/free-line layer-patch scaffold package.  Older source-row wrappers are
+retained below for compatibility and diagnostics.
 
 The cleanest paper-facing scaffold surface is
 `FinalSection7PositiveBoxConstructionObligations`: Robinson Section 7
@@ -36,8 +34,38 @@ open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData
 open OllingerRobinson.Figure13Layers.LayeredFigure18ScaffoldData.ConcreteData
 
 /--
-The two remaining construction interfaces for the current preferred route to
-the domino problem.
+The sole remaining construction interface for the preferred fixed-universal
+reduction: a certified L2C2 Robinson scaffold.
+-/
+structure FinalUniversalReductionInputs : Prop where
+  scaffold : TM0FoldedReduction.L2C2RobinsonSection7BoardFreeLineLayerPatchData
+
+namespace FinalUniversalReductionInputs
+
+set_option linter.style.longLine false in
+/-- Encoded domino undecidability from the preferred fixed-universal route. -/
+theorem encoded_domino_problem_undecidable
+    (h : FinalUniversalReductionInputs) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  UniversalFoldedReduction.encoded_domino_problem_undecidable
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      h.scaffold)
+
+set_option linter.style.longLine false in
+/-- Unencoded domino undecidability from the preferred fixed-universal route. -/
+theorem domino_problem_undecidable
+    (h : FinalUniversalReductionInputs) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  UniversalFoldedReduction.domino_problem_undecidable
+    l2Component2Figure18ScaffoldData.scaffold
+    (TM0FoldedReduction.l2c2IsScaffoldOfRobinsonSection7BoardFreeLineLayerPatchData
+      h.scaffold)
+
+end FinalUniversalReductionInputs
+
+/--
+The two construction interfaces for the older generated-source route.
 
 `scaffold` packages the Section 7 board/free-line active-corner recognition and
 the finite active-corner layer patches for the audited first L2 candidate.
