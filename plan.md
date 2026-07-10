@@ -251,6 +251,11 @@ position-row obligation in the final theorem.
   coordinate, and iterated refinement exposes every such translated board at
   arbitrary scale. This supplies the full family of nested boards needed for
   Robinson's free-line recurrence.
+- For every translated scale-`k` board, its southwest scale-`k-1` corner board
+  is now constructed in the same refined grid. Their north and west sides
+  cross at certified strict interior coordinates, so shade propagation and
+  the local crossing rule force their uniform shades to be opposite. This is
+  the first uniform parent-child edge of the shade-recursion tree.
 
 ## Remaining scaffold proof
 
