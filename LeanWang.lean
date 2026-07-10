@@ -26,6 +26,7 @@ import LeanWang.TM0FoldedInput.InitRelation
 import LeanWang.TM0FoldedInput.Simulation
 import LeanWang.TM0FoldedInput.WriteMove
 import LeanWang.TM0FoldedInput.LocalStep
+import LeanWang.TM0FoldedInput.Reach
 import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
