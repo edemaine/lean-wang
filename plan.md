@@ -127,6 +127,10 @@ position-row obligation in the final theorem.
   recovers a valid signal tiling, regroups its quarter layer into a valid
   corrected index plane and hierarchy, and records that clear sites carry
   payload tiles while the distinguished clear corner carries the seed.
+- An oriented red-cycle invariant strengthening every board side to its exact
+  thick lane (`R1`, `R3`, `R0`, or `R2`), with finite substitution
+  preservation certificates and a concrete-plane theorem giving such boards
+  at every unbounded hierarchy scale.
 
 ## Remaining scaffold proof
 
