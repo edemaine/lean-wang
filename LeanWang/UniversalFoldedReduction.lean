@@ -5,8 +5,8 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.Theorems
+import LeanWang.TM0FoldedInput.Halting
 import LeanWang.TM0FoldedInput.Computability
-import LeanWang.TM0FoldedPositionCorrect
 import LeanWang.UniversalTM0
 import Mathlib.Computability.Reduce
 
@@ -58,7 +58,10 @@ route.
 -/
 theorem program_haltsEmpty_iff (c : Code) :
     (program c).HaltsEmpty ↔ (Nat.Partrec.Code.eval c 0).Dom := by
-  sorry
+  exact
+    (TM0FoldedCompiler.positionProgramDataOnInput_haltsEmpty_iff_tm0_eval_dom
+      UniversalTM0.code (UniversalTM0.input_ne_nil c)).trans
+        (UniversalTM0.eval_dom_iff c)
 
 /-- Fixed-corner Wang instance generated from the fixed universal program. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=

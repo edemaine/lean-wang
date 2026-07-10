@@ -197,6 +197,9 @@ def machine :=
 def input (c : Nat.Partrec.Code) :=
   TM0Route.partrecStartedTM0InputFor (sourceInput c)
 
+theorem input_ne_nil (c : Nat.Partrec.Code) : input c ≠ [] := by
+  simp [input, TM0Route.partrecStartedTM0InputFor, Turing.TM2to1.trInit]
+
 /--
 The varying initial tape is computable from the source code.  This is now a
 standalone binary-encoding lemma; it does not inspect or compile source syntax.
