@@ -30,6 +30,18 @@ theorem domino_problem_undecidable
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   UniversalFoldedReduction.domino_problem_undecidable S hS
 
+/-- Encoded Wang domino undecidability from a channel-aware routed scaffold. -/
+theorem encoded_domino_problem_undecidable_of_routed
+    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
+  UniversalFoldedReduction.encoded_domino_problem_undecidable_of_routed S hS
+
+/-- Wang domino undecidability from a channel-aware routed scaffold. -/
+theorem domino_problem_undecidable_of_routed
+    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
+  UniversalFoldedReduction.domino_problem_undecidable_of_routed S hS
+
 end LeanWang
 
 end

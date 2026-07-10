@@ -11,7 +11,8 @@ unencoded plane-tiling predicates for finite Wang tilesets are undecidable:
 ```
 
 The public conditional versions are already proved in `LeanWang.Final`. The
-only remaining hypothesis is a concrete proof of `IsScaffold`.
+only remaining hypothesis for the final channel-aware construction is a
+concrete proof of `IsRoutedScaffold`.
 
 ## Chosen reduction
 
@@ -44,7 +45,9 @@ argument.
 5. `UniversalFoldedReduction.program_haltsEmpty_iff` proves that the folded
    finite program halts exactly when `Nat.Partrec.Code.eval c 0` is defined.
 6. `MachineTiles` and the scaffold reduction turn nonhalting into plane tiling.
-7. Mathlib's `ComputablePred.halting_problem` yields both undecidability
+7. The direct `IsRoutedScaffold` reduction preserves the horizontal and
+   vertical channel constraints used by the Robinson board construction.
+8. Mathlib's `ComputablePred.halting_problem` yields both undecidability
    theorems.
 
 There is no remaining source-uniform compiler, descriptor decoder, or generated
@@ -266,9 +269,9 @@ active square and obstruction channels.
 
 ### 3. Package and finish
 
-Bundle the forward and backward results as `IsScaffold S`, apply
-`LeanWang.encoded_domino_problem_undecidable` and
-`LeanWang.domino_problem_undecidable`, then run:
+Bundle the forward and backward results as `IsRoutedScaffold S`, apply
+`LeanWang.encoded_domino_problem_undecidable_of_routed` and
+`LeanWang.domino_problem_undecidable_of_routed`, then run:
 
 ```bash
 lake build

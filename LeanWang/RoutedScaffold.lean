@@ -228,4 +228,17 @@ theorem combineWithRoutedScaffold_computable (S : RoutedScaffold) :
       combineWithRoutedScaffold S input.1 input.2) :=
   (combineWithRoutedScaffold_primrec S).to_comp
 
+/-- The abstract property required of a channel-aware routed scaffold. -/
+def IsRoutedScaffold (S : RoutedScaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    TilesPlane (combineWithRoutedScaffold S T seed) ↔
+      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
+
+/-- Correctness theorem exposed by any certified routed scaffold. -/
+theorem routedScaffold_reduction_correct {S : RoutedScaffold}
+    (hS : IsRoutedScaffold S) (T : TileSet) (seed : WangTile) :
+    TilesPlane (combineWithRoutedScaffold S T seed) ↔
+      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
+  hS T seed
+
 end LeanWang
