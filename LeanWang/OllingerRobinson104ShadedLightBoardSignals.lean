@@ -40,7 +40,8 @@ theorem CycleShade.south_selected
       (shadeGrid quarterX (quarterSouth south)) = some .north := by
   apply ShadedSignals.selectedHorizontalFor_r1
   · rw [componentAt, show quarterSouth south / 2 = south by
-      simp [quarterSouth]]
+      unfold quarterSouth
+      omega]
     rw [← indexThick_eq]
     exact cycle.southLane (quarterX / 2) (by
       simp [quarterWest] at hwest
@@ -88,7 +89,8 @@ theorem CycleShade.west_selected
       (shadeGrid (quarterWest west) quarterY) = some .east := by
   apply ShadedSignals.selectedVerticalFor_r0
   · rw [componentAt, show quarterWest west / 2 = west by
-      simp [quarterWest]]
+      unfold quarterWest
+      omega]
     rw [← indexThick_eq]
     exact cycle.westLane (quarterY / 2) (by
       simp [quarterSouth] at hsouth
@@ -133,7 +135,7 @@ theorem CycleShade.south_signal_rules
     (signalGrid quarterX (quarterSouth south)).south ≠ .none ∧
       (signalGrid quarterX (quarterSouth south)).north ≠ .forward := by
   apply Signals.vertical_interiorNorth_rules
-  simpa only [shaded.south_selected cycle valid hwest heast] using
+  simpa only [south_selected shaded cycle valid hwest heast] using
     valid.verticalAllowed quarterX (quarterSouth south)
 
 theorem CycleShade.north_signal_rules
@@ -146,7 +148,7 @@ theorem CycleShade.north_signal_rules
     (signalGrid quarterX (quarterNorth north)).north ≠ .none ∧
       (signalGrid quarterX (quarterNorth north)).south ≠ .backward := by
   apply Signals.vertical_interiorSouth_rules
-  simpa only [shaded.north_selected cycle valid hwest heast] using
+  simpa only [north_selected shaded cycle valid hwest heast] using
     valid.verticalAllowed quarterX (quarterNorth north)
 
 theorem CycleShade.west_signal_rules
@@ -159,7 +161,7 @@ theorem CycleShade.west_signal_rules
     (signalGrid (quarterWest west) quarterY).west ≠ .none ∧
       (signalGrid (quarterWest west) quarterY).east ≠ .forward := by
   apply Signals.horizontal_interiorEast_rules
-  simpa only [shaded.west_selected cycle valid hsouth hnorth] using
+  simpa only [west_selected shaded cycle valid hsouth hnorth] using
     valid.horizontalAllowed (quarterWest west) quarterY
 
 theorem CycleShade.east_signal_rules
@@ -172,7 +174,7 @@ theorem CycleShade.east_signal_rules
     (signalGrid (quarterEast east) quarterY).east ≠ .none ∧
       (signalGrid (quarterEast east) quarterY).west ≠ .backward := by
   apply Signals.horizontal_interiorWest_rules
-  simpa only [shaded.east_selected cycle valid hsouth hnorth] using
+  simpa only [east_selected shaded cycle valid hsouth hnorth] using
     valid.horizontalAllowed (quarterEast east) quarterY
 
 end ShadedPlaneSignalGrid

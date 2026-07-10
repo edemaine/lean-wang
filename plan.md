@@ -241,6 +241,11 @@ position-row obligation in the final theorem.
   oriented board is now recognized as the corresponding inward-facing signal
   endpoint. The local signal rule therefore gives the exact outer-edge
   nonempty and inner-edge nonemission constraints uniformly along each side.
+- Free rows and columns are formalized as strict board lines crossed by no
+  selected inner light border. Corridor propagation from the two light outer
+  sides proves that every obstruction edge on a free line is empty. A free-row
+  and free-column crossing therefore has the literal clear signal state, the
+  active routing role, and a retained payload tile from the source tileset.
 
 ## Remaining scaffold proof
 
