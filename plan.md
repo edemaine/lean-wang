@@ -159,6 +159,11 @@ position-row obligation in the final theorem.
   valid matching scaffold and payload layers and exposes complete-palette,
   horizontal-wire, vertical-wire, source-tile, and fixed-seed facts according
   to the decoded role at each site.
+- A concrete routed-product decoder for Robinson signal planes, recovering the
+  corrected quarter regrouping, parent index plane, and infinite hierarchy
+  while retaining source-tile membership and directional payload-wire facts.
+  This is the forward decoder that supersedes the older Boolean combined-plane
+  route.
 
 ## Remaining scaffold proof
 
