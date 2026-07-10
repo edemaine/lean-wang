@@ -53,6 +53,18 @@ theorem ValidShadeGrid.vertical_eq
   unfold componentAt at hpath
   exact RedShades.vertical_eq_of_allowedFor hallowed hpath
 
+theorem ValidShadeGrid.east_present
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hpath : RedShades.hasEast
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).east.isSome = true := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hpath
+  exact RedShades.east_present_of_allowedFor hallowed hpath
+
 theorem ValidShadeGrid.west_north_corner_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
