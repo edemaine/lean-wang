@@ -128,6 +128,12 @@ def centralCodeBlock (middle : List Nat × List Nat) : CodeBlock :=
 def centerParentCandidates (middle : List Nat × List Nat) : List Index :=
   (parentCodeBlocks.filter fun entry => entry.2 == centralCodeBlock middle).map Prod.fst
 
+theorem mem_centerParentCandidates_iff {middle : List Nat × List Nat}
+    {parent : Index} :
+    parent ∈ centerParentCandidates middle ↔
+      childCodeBlock parent = centralCodeBlock middle := by
+  simp [centerParentCandidates, parentCodeBlocks]
+
 def badExtendableCentralRowPairs : List (List Nat × List Nat) :=
   let blocks := parentCodeBlocks
   extendableCentralRowPairs.filter fun middle =>
@@ -159,6 +165,36 @@ set_option maxRecDepth 20000 in
 theorem nonUniqueExtendableCentralRowPairs_eq_nil :
     nonUniqueExtendableCentralRowPairs = [] := by
   native_decide
+
+theorem centerParentCandidates_length_eq_one
+    {middle : List Nat × List Nat}
+    (hmiddle : middle ∈ extendableCentralRowPairs) :
+    (centerParentCandidates middle).length = 1 := by
+  by_contra hlength
+  have hmem : middle ∈ nonUniqueExtendableCentralRowPairs := by
+    simp [nonUniqueExtendableCentralRowPairs, hmiddle, hlength]
+  rw [nonUniqueExtendableCentralRowPairs_eq_nil] at hmem
+  simp at hmem
+
+/-- Every extendable well-behaved center has a unique substitution parent. -/
+theorem existsUnique_parent_of_mem_extendableCentralRowPairs
+    {middle : List Nat × List Nat}
+    (hmiddle : middle ∈ extendableCentralRowPairs) :
+    ∃! parent : Index, childCodeBlock parent = centralCodeBlock middle := by
+  have hlength := centerParentCandidates_length_eq_one hmiddle
+  cases hlist : centerParentCandidates middle with
+  | nil =>
+      simp [hlist] at hlength
+  | cons parent tail =>
+      cases tail with
+      | nil =>
+          refine ⟨parent, ?_, ?_⟩
+          · exact mem_centerParentCandidates_iff.1 (by simp [hlist])
+          · intro other hother
+            have hmem := mem_centerParentCandidates_iff.2 hother
+            simpa [hlist] using hmem
+      | cons other tail =>
+          simp [hlist] at hlength
 
 end FiniteRecognizability
 end Closed104
