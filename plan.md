@@ -94,6 +94,8 @@ position-row obligation in the final theorem.
 - An iterated embedding theorem composing those parity origins through any
   tower depth and identifying the resulting fine-plane quadrant with the
   corresponding iterated refinement.
+- A concrete-plane red-board theorem: every valid corrected-Ollinger plane has
+  red rectangular cycles at explicit origins and unbounded `2^level` scales.
 
 ## Remaining scaffold proof
 
