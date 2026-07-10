@@ -137,10 +137,8 @@ def hasNorth (component : Thick) (quadrant : Quadrant) : Bool :=
 
 def optionPresent (value : Option Shade) : Bool := value.isSome
 
-/-- Local red-path incidence, propagation, corner, and crossing rules. -/
-def locallyAllowed (site : QuarterIndex) (state : State) : Bool :=
-  let component := (components site.1).2.1
-  let quadrant := site.2
+/-- Local rule with the thick component made explicit for proof reuse. -/
+def allowedFor (component : Thick) (quadrant : Quadrant) (state : State) : Bool :=
   decide (optionPresent state.west = hasWest component quadrant) &&
     decide (optionPresent state.east = hasEast component quadrant) &&
     decide (optionPresent state.south = hasSouth component quadrant) &&
@@ -160,27 +158,74 @@ def locallyAllowed (site : QuarterIndex) (state : State) : Bool :=
     (if hasHorizontal component quadrant && hasVertical component quadrant then
       decide (state.west ≠ state.south) else true)
 
+/-- Local red-path incidence, propagation, corner, and crossing rules. -/
+def locallyAllowed (site : QuarterIndex) (state : State) : Bool :=
+  allowedFor (components site.1).2.1 site.2 state
+
+theorem horizontal_eq_of_allowedFor {component : Thick} {quadrant : Quadrant}
+    {state : State} (hallowed : allowedFor component quadrant state = true)
+    (hhorizontal : hasHorizontal component quadrant = true) :
+    state.west = state.east := by
+  simp [allowedFor, hhorizontal] at hallowed
+  aesop
+
+theorem vertical_eq_of_allowedFor {component : Thick} {quadrant : Quadrant}
+    {state : State} (hallowed : allowedFor component quadrant state = true)
+    (hvertical : hasVertical component quadrant = true) :
+    state.south = state.north := by
+  simp [allowedFor, hvertical] at hallowed
+  aesop
+
 theorem horizontal_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
     (hhorizontal : hasHorizontal (components site.1).2.1 site.2 = true) :
-    state.west = state.east := by
-  simp [locallyAllowed, hhorizontal] at hallowed
-  aesop
+    state.west = state.east :=
+  horizontal_eq_of_allowedFor hallowed hhorizontal
 
 theorem vertical_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
     (hvertical : hasVertical (components site.1).2.1 site.2 = true) :
-    state.south = state.north := by
-  simp [locallyAllowed, hvertical] at hallowed
-  aesop
+    state.south = state.north :=
+  vertical_eq_of_allowedFor hallowed hvertical
 
 theorem crossing_opposite_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
     (hhorizontal : hasHorizontal (components site.1).2.1 site.2 = true)
     (hvertical : hasVertical (components site.1).2.1 site.2 = true) :
     state.west ≠ state.south := by
-  simp [locallyAllowed, hhorizontal, hvertical] at hallowed
+  simp [locallyAllowed, allowedFor, hhorizontal, hvertical] at hallowed
   aesop
+
+theorem east_present_of_allowedFor {component : Thick} {quadrant : Quadrant}
+    {state : State} (hallowed : allowedFor component quadrant state = true)
+    (heast : hasEast component quadrant = true) :
+    state.east.isSome = true := by
+  simp [allowedFor, heast] at hallowed
+  aesop
+
+theorem west_north_corner_eq_of_allowedFor {component : Thick}
+    {quadrant : Quadrant} {state : State}
+    (hallowed : allowedFor component quadrant state = true)
+    (hwest : cornerWest component quadrant = true)
+    (hnorth : cornerNorth component quadrant = true) :
+    state.west = state.north := by
+  cases component <;> cases quadrant <;>
+    simp_all [allowedFor, cornerWest, cornerNorth]
+
+theorem west_south_corner_eq_of_allowedFor {component : Thick}
+    {quadrant : Quadrant} {state : State}
+    (hallowed : allowedFor component quadrant state = true)
+    (hwest : cornerWest component quadrant = true)
+    (hsouth : cornerSouth component quadrant = true) :
+    state.west = state.south := by
+  cases component <;> cases quadrant <;>
+    simp_all [allowedFor, cornerWest, cornerSouth]
+
+theorem east_present_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (heast : hasEast (components site.1).2.1 site.2 = true) :
+    state.east.isSome = true := by
+  exact east_present_of_allowedFor hallowed heast
 
 theorem east_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
@@ -190,7 +235,7 @@ theorem east_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
   rcases site with ⟨index, quadrant⟩
   generalize hcomponent : (components index).2.1 = component at *
   cases component <;> cases quadrant <;>
-    simp_all [locallyAllowed, cornerEast, cornerSouth]
+    simp_all [locallyAllowed, allowedFor, cornerEast, cornerSouth]
 
 theorem east_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
@@ -200,7 +245,7 @@ theorem east_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
   rcases site with ⟨index, quadrant⟩
   generalize hcomponent : (components index).2.1 = component at *
   cases component <;> cases quadrant <;>
-    simp_all [locallyAllowed, cornerEast, cornerNorth]
+    simp_all [locallyAllowed, allowedFor, cornerEast, cornerNorth]
 
 theorem west_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
@@ -210,7 +255,7 @@ theorem west_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
   rcases site with ⟨index, quadrant⟩
   generalize hcomponent : (components index).2.1 = component at *
   cases component <;> cases quadrant <;>
-    simp_all [locallyAllowed, cornerWest, cornerSouth]
+    simp_all [locallyAllowed, allowedFor, cornerWest, cornerSouth]
 
 theorem west_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
     (hallowed : locallyAllowed site state = true)
@@ -220,7 +265,7 @@ theorem west_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
   rcases site with ⟨index, quadrant⟩
   generalize hcomponent : (components index).2.1 = component at *
   cases component <;> cases quadrant <;>
-    simp_all [locallyAllowed, cornerWest, cornerNorth]
+    simp_all [locallyAllowed, allowedFor, cornerWest, cornerNorth]
 
 abbrev Site := QuarterIndex × State
 

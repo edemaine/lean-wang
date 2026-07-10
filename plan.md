@@ -185,6 +185,10 @@ position-row obligation in the final theorem.
   abstract valid shade grid and generic finite horizontal/vertical path
   propagation lemmas isolate the forthcoming cycle-color proof from Wang-tile
   product encodings.
+- The universal depth-two red board has certified quarter-level shade geometry.
+  A symbolic path proof now forces any shade on its southwest edge around its
+  straight sides and corner turns to all four board corners, establishing the
+  uniform-color seed for the scaled cycle argument.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through

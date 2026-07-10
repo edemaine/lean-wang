@@ -29,6 +29,58 @@ structure ValidShadeGrid (indexGrid : Nat → Nat → Index)
   hmatch : ∀ x y, (stateGrid x y).east = (stateGrid (x + 1) y).west
   vmatch : ∀ x y, (stateGrid x y).north = (stateGrid x (y + 1)).south
 
+theorem ValidShadeGrid.horizontal_eq
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hpath : RedShades.hasHorizontal
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).west = (stateGrid x y).east := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hpath
+  exact RedShades.horizontal_eq_of_allowedFor hallowed hpath
+
+theorem ValidShadeGrid.vertical_eq
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hpath : RedShades.hasVertical
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).south = (stateGrid x y).north := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hpath
+  exact RedShades.vertical_eq_of_allowedFor hallowed hpath
+
+theorem ValidShadeGrid.west_north_corner_eq
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hwest : RedShades.cornerWest
+      (componentAt indexGrid x y) (quadrantAt x y) = true)
+    (hnorth : RedShades.cornerNorth
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).west = (stateGrid x y).north := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hwest hnorth
+  exact RedShades.west_north_corner_eq_of_allowedFor hallowed hwest hnorth
+
+theorem ValidShadeGrid.west_south_corner_eq
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
+    (hwest : RedShades.cornerWest
+      (componentAt indexGrid x y) (quadrantAt x y) = true)
+    (hsouth : RedShades.cornerSouth
+      (componentAt indexGrid x y) (quadrantAt x y) = true) :
+    (stateGrid x y).west = (stateGrid x y).south := by
+  have hallowed := valid.allowed x y
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  unfold componentAt at hwest hsouth
+  exact RedShades.west_south_corner_eq_of_allowedFor hallowed hwest hsouth
+
 /-- Equality of horizontal shade across a sequence of path quarters. -/
 theorem horizontal_shade_across
     (state : Nat → RedShades.State) (start count : Nat)
