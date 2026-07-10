@@ -116,6 +116,10 @@ position-row obligation in the final theorem.
   implementing Robinson's outer-edge emit-or-absorb and inner-edge
   absorb-only rules. Every tiling of this layer provably projects to a valid
   corrected quarter plane and a matching plane of locally allowed signals.
+- A one-dimensional corridor calculus for the concrete signal layer: signal
+  flow is constant between consecutive red boundaries, two inner-facing
+  endpoints force a clear corridor, and either outer-facing endpoint forces
+  an obstructed corridor.
 
 ## Remaining scaffold proof
 

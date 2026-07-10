@@ -45,6 +45,10 @@ def code : Flow → Nat
   | .forward => 1
   | .backward => 2
 
+theorem code_injective : Function.Injective code := by
+  intro first second heq
+  cases first <;> cases second <;> simp [code] at heq ⊢
+
 end Flow
 
 /-- Directed obstruction signals on the four edges of one quarter tile. -/
