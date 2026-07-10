@@ -43,7 +43,7 @@ The finite folded program for source code `c`.  Its simulation rows are fixed;
 only `UniversalTM0.input c` is compiled into initialization rows.
 -/
 def program (c : Code) : FiniteTM0Program :=
-  TM0FoldedCompiler.positionProgramDataForInput stateCount simulationSteps
+  TM0FoldedCompiler.positionProgramDataOnInput UniversalTM0.code
     (UniversalTM0.input c)
 
 theorem program_computable : Computable program := by

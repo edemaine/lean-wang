@@ -81,6 +81,34 @@ def positionProgramDataForInput
   start := foldedStartState
   table := initRowsForInput input ++ simRowsOfStepData steps
 
+/-- The position-coded folded simulation of `tc` on an arbitrary finite input. -/
+def positionProgramDataOnInput
+    (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) : FiniteTM0Program :=
+  positionProgramDataForInput
+    (TM0Route.partrecStartedTM0StateCount tc)
+    (simStepDataByLabelIndexWithPositionCode tc) input
+
+@[simp]
+theorem positionProgramDataOnInput_symbols
+    (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) :
+    (positionProgramDataOnInput tc input).symbols = foldedSymbolList := rfl
+
+@[simp]
+theorem positionProgramDataOnInput_states
+    (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) :
+    (positionProgramDataOnInput tc input).states =
+      foldedStateListForInput (TM0Route.partrecStartedTM0StateCount tc) input := rfl
+
+@[simp]
+theorem positionProgramDataOnInput_blank
+    (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) :
+    (positionProgramDataOnInput tc input).blank = foldedBlank := rfl
+
+@[simp]
+theorem positionProgramDataOnInput_start
+    (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) :
+    (positionProgramDataOnInput tc input).start = foldedStartState := rfl
+
 /-- The parameterized definitions conservatively extend the old input-`0` data. -/
 theorem initRowsForInput_eq_initRowsData :
     initRowsForInput TM0Route.partrecStartedTM0Input = initRowsData := by
@@ -93,10 +121,7 @@ theorem foldedInitStateListFor_eq_foldedInitStateList :
 /-- On the original input, the parameterized constructor is the proved program. -/
 theorem positionProgramDataForInput_eq_positionProgramData
     (tc : Turing.ToPartrec.Code) :
-    positionProgramDataForInput
-        (TM0Route.partrecStartedTM0StateCount tc)
-        (simStepDataByLabelIndexWithPositionCode tc)
-        TM0Route.partrecStartedTM0Input =
+    positionProgramDataOnInput tc TM0Route.partrecStartedTM0Input =
       positionProgramData tc := by
   rfl
 
