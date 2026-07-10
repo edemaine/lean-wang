@@ -289,6 +289,11 @@ position-row obligation in the final theorem.
   An ordered `FreeGrid` now records finite lower-bound witnesses for free rows
   and columns; every selected crossing is signal-clear, and every translated
   scale-2 light board has a singleton `FreeGrid` base witness.
+- Free rows and columns inside a bounded board now have Boolean tests proved
+  equivalent to the proposition-level definitions and exact finite-set
+  enumerations. Every ordered `FreeGrid` witness injects into these sets, so a
+  size-`n` recursive witness certifies at least `n` actual free rows and columns
+  for the later consecutive-channel routing argument.
 
 ## Remaining scaffold proof
 
