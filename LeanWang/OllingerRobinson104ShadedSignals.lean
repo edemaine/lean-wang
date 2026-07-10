@@ -163,6 +163,50 @@ theorem verticalAllowed_of_locallyAllowed {base : RedShades.Site}
     simpa only [locallyAllowed, Bool.and_eq_true] using hallowed
   exact hparts.2
 
+theorem selectedHorizontalFor_r1 {component : Thick} {quadrant : Quadrant}
+    {state : RedShades.State}
+    (hline : QuarterGeometry.containsLine component .r1 = true)
+    (hbit : quadrant.yBit = true)
+    (hshade : horizontalShade? state = some .light) :
+    selectedHorizontalFor component quadrant state = some .north := by
+  simp only [selectedHorizontalFor, hshade, if_true]
+  rcases component <;> rcases quadrant <;>
+    simp_all [Signals.horizontalInterior?, QuarterGeometry.containsLine,
+      QuarterGeometry.redHorizontalAt, Figure16.Thick.lineSum?, Quadrant.yBit]
+
+theorem selectedHorizontalFor_r3 {component : Thick} {quadrant : Quadrant}
+    {state : RedShades.State}
+    (hline : QuarterGeometry.containsLine component .r3 = true)
+    (hbit : quadrant.yBit = false)
+    (hshade : horizontalShade? state = some .light) :
+    selectedHorizontalFor component quadrant state = some .south := by
+  simp only [selectedHorizontalFor, hshade, if_true]
+  rcases component <;> rcases quadrant <;>
+    simp_all [Signals.horizontalInterior?, QuarterGeometry.containsLine,
+      QuarterGeometry.redHorizontalAt, Figure16.Thick.lineSum?, Quadrant.yBit]
+
+theorem selectedVerticalFor_r0 {component : Thick} {quadrant : Quadrant}
+    {state : RedShades.State}
+    (hline : QuarterGeometry.containsLine component .r0 = true)
+    (hbit : quadrant.xBit = true)
+    (hshade : verticalShade? state = some .light) :
+    selectedVerticalFor component quadrant state = some .east := by
+  simp only [selectedVerticalFor, hshade, if_true]
+  rcases component <;> rcases quadrant <;>
+    simp_all [Signals.verticalInterior?, QuarterGeometry.containsLine,
+      QuarterGeometry.redVerticalAt, Figure16.Thick.lineSum?, Quadrant.xBit]
+
+theorem selectedVerticalFor_r2 {component : Thick} {quadrant : Quadrant}
+    {state : RedShades.State}
+    (hline : QuarterGeometry.containsLine component .r2 = true)
+    (hbit : quadrant.xBit = false)
+    (hshade : verticalShade? state = some .light) :
+    selectedVerticalFor component quadrant state = some .west := by
+  simp only [selectedVerticalFor, hshade, if_true]
+  rcases component <;> rcases quadrant <;>
+    simp_all [Signals.verticalInterior?, QuarterGeometry.containsLine,
+      QuarterGeometry.redVerticalAt, Figure16.Thick.lineSum?, Quadrant.xBit]
+
 abbrev Site := RedShades.Site × Signals.State
 
 def allSites : List Site :=

@@ -45,6 +45,36 @@ structure ValidGrid (indexGrid : Nat → Nat → Index)
     (signalGrid quarterX quarterY).north =
       (signalGrid quarterX (quarterY + 1)).south
 
+theorem ValidGrid.horizontalAllowed
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {signalGrid : Nat → Nat → Signals.State}
+    (valid : ValidGrid indexGrid shadeGrid signalGrid)
+    (quarterX quarterY : Nat) :
+    Signals.horizontalAllowed
+      (ShadedSignals.selectedVerticalFor
+        (componentAt indexGrid quarterX quarterY)
+        (quadrantAt quarterX quarterY) (shadeGrid quarterX quarterY))
+      (signalGrid quarterX quarterY) = true := by
+  simpa only [ShadedSignals.selectedVerticalInterior?, componentAt] using
+    ShadedSignals.horizontalAllowed_of_locallyAllowed
+      (valid.signalAllowed quarterX quarterY)
+
+theorem ValidGrid.verticalAllowed
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {signalGrid : Nat → Nat → Signals.State}
+    (valid : ValidGrid indexGrid shadeGrid signalGrid)
+    (quarterX quarterY : Nat) :
+    Signals.verticalAllowed
+      (ShadedSignals.selectedHorizontalFor
+        (componentAt indexGrid quarterX quarterY)
+        (quadrantAt quarterX quarterY) (shadeGrid quarterX quarterY))
+      (signalGrid quarterX quarterY) = true := by
+  simpa only [ShadedSignals.selectedHorizontalInterior?, componentAt] using
+    ShadedSignals.verticalAllowed_of_locallyAllowed
+      (valid.signalAllowed quarterX quarterY)
+
 /-- Signal states on the natural quarter grid below a parent coordinate. -/
 def signalGrid (decoded : ShadedRoutedPlaneDecode.Decoded x)
     (parentOrigin : Int × Int) : Nat → Nat → Signals.State :=

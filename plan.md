@@ -234,6 +234,10 @@ position-row obligation in the final theorem.
   plane supplies one natural quarter grid carrying a valid shade assignment,
   locally allowed shaded obstruction signals, and matching signal edges at the
   same coordinates.
+- Every strict quarter along all four sides of an arbitrary uniformly light
+  oriented board is now recognized as the corresponding inward-facing signal
+  endpoint. The local signal rule therefore gives the exact outer-edge
+  nonempty and inner-edge nonemission constraints uniformly along each side.
 
 ## Remaining scaffold proof
 
