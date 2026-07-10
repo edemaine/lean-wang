@@ -186,7 +186,9 @@ position-row obligation in the final theorem.
   obey Robinson's outer-edge emit-or-absorb and inner-edge absorb-only rules;
   dark paths are transparent. Every valid tiling projects to both a valid
   shaded quarter tiling and a matching obstruction-signal plane, and hence to
-  the corrected quarter hierarchy.
+  the corrected quarter hierarchy. Public local lemmas reduce light paths to
+  the original oriented-border rule, reduce dark paths to transparent
+  transmission, and expose literal matching of decoded signal flows.
 - The final shaded obstruction alphabet is now a concrete `RoutedScaffold`.
   Its primitive-recursive two-bit decoder classifies inactive, horizontal,
   vertical, and active payload roles exactly as before, while retaining the

@@ -52,10 +52,50 @@ def selectedHorizontalInterior? (base : RedShades.Site) :
     Signals.horizontalInterior? (components base.1.1).2.1 base.1.2
   else none
 
+@[simp] theorem selectedVerticalInterior_of_light {base : RedShades.Site}
+    (hlight : verticalShade? base.2 = some .light) :
+    selectedVerticalInterior? base =
+      Signals.verticalInterior? (components base.1.1).2.1 base.1.2 := by
+  simp [selectedVerticalInterior?, hlight]
+
+@[simp] theorem selectedVerticalInterior_of_not_light {base : RedShades.Site}
+    (hlight : verticalShade? base.2 ≠ some .light) :
+    selectedVerticalInterior? base = none := by
+  simp [selectedVerticalInterior?, hlight]
+
+@[simp] theorem selectedHorizontalInterior_of_light {base : RedShades.Site}
+    (hlight : horizontalShade? base.2 = some .light) :
+    selectedHorizontalInterior? base =
+      Signals.horizontalInterior? (components base.1.1).2.1 base.1.2 := by
+  simp [selectedHorizontalInterior?, hlight]
+
+@[simp] theorem selectedHorizontalInterior_of_not_light {base : RedShades.Site}
+    (hlight : horizontalShade? base.2 ≠ some .light) :
+    selectedHorizontalInterior? base = none := by
+  simp [selectedHorizontalInterior?, hlight]
+
 /-- Robinson signal rule after selecting only light red borders. -/
 def locallyAllowed (base : RedShades.Site) (signal : Signals.State) : Bool :=
   Signals.horizontalAllowed (selectedVerticalInterior? base) signal &&
     Signals.verticalAllowed (selectedHorizontalInterior? base) signal
+
+theorem horizontalAllowed_of_locallyAllowed {base : RedShades.Site}
+    {signal : Signals.State} (hallowed : locallyAllowed base signal = true) :
+    Signals.horizontalAllowed (selectedVerticalInterior? base) signal = true := by
+  have hparts :
+      Signals.horizontalAllowed (selectedVerticalInterior? base) signal = true ∧
+        Signals.verticalAllowed (selectedHorizontalInterior? base) signal = true := by
+    simpa only [locallyAllowed, Bool.and_eq_true] using hallowed
+  exact hparts.1
+
+theorem verticalAllowed_of_locallyAllowed {base : RedShades.Site}
+    {signal : Signals.State} (hallowed : locallyAllowed base signal = true) :
+    Signals.verticalAllowed (selectedHorizontalInterior? base) signal = true := by
+  have hparts :
+      Signals.horizontalAllowed (selectedVerticalInterior? base) signal = true ∧
+        Signals.verticalAllowed (selectedHorizontalInterior? base) signal = true := by
+    simpa only [locallyAllowed, Bool.and_eq_true] using hallowed
+  exact hparts.2
 
 abbrev Site := RedShades.Site × Signals.State
 
@@ -164,6 +204,22 @@ theorem signalPlane_matches {x : Int × Int → TileIn tileSet}
       rw [decode_tile, decode_tile]
       exact hx.2 p
     exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.2
+
+theorem signalPlane_hmatch {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) (p : Int × Int) :
+    (signalPlane x p).east =
+      (signalPlane x (p.1 + 1, p.2)).west := by
+  apply Signals.Flow.code_injective
+  simpa [WangTile.HMatches, Signals.State.tile] using
+    (signalPlane_matches hx).1 p
+
+theorem signalPlane_vmatch {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) (p : Int × Int) :
+    (signalPlane x p).north =
+      (signalPlane x (p.1, p.2 + 1)).south := by
+  apply Signals.Flow.code_injective
+  simpa [WangTile.VMatches, Signals.State.tile] using
+    (signalPlane_matches hx).2 p
 
 /-- The final signal layer still projects to a valid corrected quarter plane. -/
 def quarterPlane (x : Int × Int → TileIn tileSet) : QuarterPlane :=
