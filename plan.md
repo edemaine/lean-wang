@@ -189,6 +189,10 @@ position-row obligation in the final theorem.
   Its primitive-recursive two-bit decoder classifies inactive, horizontal,
   vertical, and active payload roles exactly as before, while retaining the
   shade layer needed for the growing free-board proof.
+- A final routed-product plane decoder exposes all layers simultaneously:
+  matching payload tiles and directional wires, light/dark red paths,
+  obstruction signals, the corrected quarter plane, its regrouped parent
+  plane, and an infinite hierarchy tower.
 
 ## Remaining scaffold proof
 
