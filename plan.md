@@ -1662,14 +1662,17 @@ primitive recursive in `LeanWang.TM0FoldedInput.Computability`.  The complete
 fixed-domino, scaffold, encoded, and unencoded undecidability theorems are wired
 through `LeanWang.UniversalFoldedReduction`.
 
-Two focused proof holes remain on this route:
+One focused proof hole remains on this route:
 
-1. `UniversalTM0.input_computable`: Mathlib's binary `trNat`/`trInit` input
-   encoding is computable.
-2. `UniversalFoldedReduction.program_haltsEmpty_iff`: the parameterized
+1. `UniversalFoldedReduction.program_haltsEmpty_iff`: the parameterized
    initialization prelude writes the supplied finite word, rewinds to the
    origin, and then the existing fixed position-coded simulation correctness
    applies.
+
+`UniversalTM0.input_computable` is now proved directly.  Its proof gives
+Mathlib's `trNat` binary encoder a primitive-recursive strong-recursion
+presentation, then proves the singleton-list and TM2-to-TM1 initial-tape
+encodings primitive recursive by list combinators.
 
 These are ordinary finite-data and execution lemmas.  Neither involves
 dependent source statements or uniform compilation over arbitrary
