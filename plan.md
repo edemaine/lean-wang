@@ -179,7 +179,9 @@ position-row obligation in the final theorem.
   through straight paths and corners, requires crossing paths to have opposite
   shades, and decodes every valid shaded tiling back to a valid quarter plane
   with matching shade edges. A finite `416 x 81` audit proves that every local
-  quarter site has an admissible shade state.
+  quarter site has an admissible shade state. Proof-facing lemmas expose shade
+  equality on straight paths and all corner turns, opposite shades at
+  crossings, and literal shade equality across neighboring Wang edges.
 - The obstruction alphabet is rebuilt over that shade layer. Light red paths
   obey Robinson's outer-edge emit-or-absorb and inner-edge absorb-only rules;
   dark paths are transparent. Every valid tiling projects to both a valid

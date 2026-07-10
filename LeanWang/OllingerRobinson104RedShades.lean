@@ -80,6 +80,15 @@ def edgeCode : Option Shade → Nat
   | none => 0
   | some shade => shade.code
 
+theorem edgeCode_injective : Function.Injective edgeCode := by
+  intro first second heq
+  rcases first with _ | first <;> rcases second with _ | second
+  · rfl
+  · cases second <;> simp [edgeCode, Shade.code] at heq
+  · cases first <;> simp [edgeCode, Shade.code] at heq
+  · exact congrArg some (Shade.code_injective (by
+      simpa only [edgeCode] using heq))
+
 def tile (state : State) : WangTile where
   n := edgeCode state.north
   s := edgeCode state.south
@@ -150,6 +159,68 @@ def locallyAllowed (site : QuarterIndex) (state : State) : Bool :=
       decide (state.west = state.north) else true) &&
     (if hasHorizontal component quadrant && hasVertical component quadrant then
       decide (state.west ≠ state.south) else true)
+
+theorem horizontal_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (hhorizontal : hasHorizontal (components site.1).2.1 site.2 = true) :
+    state.west = state.east := by
+  simp [locallyAllowed, hhorizontal] at hallowed
+  aesop
+
+theorem vertical_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (hvertical : hasVertical (components site.1).2.1 site.2 = true) :
+    state.south = state.north := by
+  simp [locallyAllowed, hvertical] at hallowed
+  aesop
+
+theorem crossing_opposite_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (hhorizontal : hasHorizontal (components site.1).2.1 site.2 = true)
+    (hvertical : hasVertical (components site.1).2.1 site.2 = true) :
+    state.west ≠ state.south := by
+  simp [locallyAllowed, hhorizontal, hvertical] at hallowed
+  aesop
+
+theorem east_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (heast : cornerEast (components site.1).2.1 site.2 = true)
+    (hsouth : cornerSouth (components site.1).2.1 site.2 = true) :
+    state.east = state.south := by
+  rcases site with ⟨index, quadrant⟩
+  generalize hcomponent : (components index).2.1 = component at *
+  cases component <;> cases quadrant <;>
+    simp_all [locallyAllowed, cornerEast, cornerSouth]
+
+theorem east_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (heast : cornerEast (components site.1).2.1 site.2 = true)
+    (hnorth : cornerNorth (components site.1).2.1 site.2 = true) :
+    state.east = state.north := by
+  rcases site with ⟨index, quadrant⟩
+  generalize hcomponent : (components index).2.1 = component at *
+  cases component <;> cases quadrant <;>
+    simp_all [locallyAllowed, cornerEast, cornerNorth]
+
+theorem west_south_corner_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (hwest : cornerWest (components site.1).2.1 site.2 = true)
+    (hsouth : cornerSouth (components site.1).2.1 site.2 = true) :
+    state.west = state.south := by
+  rcases site with ⟨index, quadrant⟩
+  generalize hcomponent : (components index).2.1 = component at *
+  cases component <;> cases quadrant <;>
+    simp_all [locallyAllowed, cornerWest, cornerSouth]
+
+theorem west_north_corner_eq_of_allowed {site : QuarterIndex} {state : State}
+    (hallowed : locallyAllowed site state = true)
+    (hwest : cornerWest (components site.1).2.1 site.2 = true)
+    (hnorth : cornerNorth (components site.1).2.1 site.2 = true) :
+    state.west = state.north := by
+  rcases site with ⟨index, quadrant⟩
+  generalize hcomponent : (components index).2.1 = component at *
+  cases component <;> cases quadrant <;>
+    simp_all [locallyAllowed, cornerWest, cornerNorth]
 
 abbrev Site := QuarterIndex × State
 
@@ -277,6 +348,20 @@ theorem shadePlane_matches {x : Int × Int → TileIn tileSet}
       rw [decode_tile, decode_tile]
       exact hx.2 p
     exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.2
+
+theorem shadePlane_hmatch {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) (p : Int × Int) :
+    (shadePlane x p).east =
+      (shadePlane x (p.1 + 1, p.2)).west := by
+  apply State.edgeCode_injective
+  simpa [WangTile.HMatches, State.tile] using (shadePlane_matches hx).1 p
+
+theorem shadePlane_vmatch {x : Int × Int → TileIn tileSet}
+    (hx : ValidPlaneTiling tileSet x) (p : Int × Int) :
+    (shadePlane x p).north =
+      (shadePlane x (p.1, p.2 + 1)).south := by
+  apply State.edgeCode_injective
+  simpa [WangTile.VMatches, State.tile] using (shadePlane_matches hx).2 p
 
 end RedShades
 end Closed104
