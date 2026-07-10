@@ -45,5 +45,6 @@ import LeanWang.OllingerRobinson104LocalRecognizability
 import LeanWang.OllingerRobinson104Desubstitution
 import LeanWang.OllingerRobinson104ParentPlane
 import LeanWang.OllingerRobinson104Hierarchy
+import LeanWang.OllingerRobinson104Primitivity
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final

@@ -73,6 +73,9 @@ position-row obligation in the final theorem.
   four parity choices, the Figure 16 substitution of another valid plane.
 - An infinite typed desubstitution tower, retaining the parity origin and four
   exact child equations between every pair of consecutive valid planes.
+- A native-checked primitivity certificate: every corrected tile type occurs
+  below every parent after five substitutions, so board patterns recur
+  uniformly in every hierarchy.
 
 ## Remaining scaffold proof
 
