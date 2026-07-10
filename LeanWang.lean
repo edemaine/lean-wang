@@ -45,9 +45,4 @@ import LeanWang.OllingerRobinson104StableTilesCertificate
 import LeanWang.OllingerRobinson104StableTilesCorrect
 import LeanWang.OllingerRobinson104StableTiling
 import LeanWang.OllingerRobinsonFigure13Obstructions
-import LeanWang.TM0FoldedReduction
-import LeanWang.TM0FoldedTranscriptionReduction
-import LeanWang.TM0FoldedPositionReduction
-import LeanWang.OllingerRobinsonFigure18Reduction
-import LeanWang.OllingerRobinsonFigure18PositionReduction
 import LeanWang.Final

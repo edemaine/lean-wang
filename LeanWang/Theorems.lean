@@ -10,11 +10,10 @@ import LeanWang.MachineTiles
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
 
-This file collects the generic tiling theorems used by the reductions:
+This file collects the generic tiling theorems used by the reduction:
 machine-tile correctness, fixed-corner-square compactness, and the abstract
-scaffold construction. The partial-recursive-code reduction is kept in
-`TM0FoldedReduction`, so this file does not expose a separate machine-side
-reduction interface.
+scaffold construction. The fixed universal-machine specialization is kept in
+`UniversalFoldedReduction`.
 -/
 
 noncomputable section
