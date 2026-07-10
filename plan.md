@@ -185,6 +185,10 @@ position-row obligation in the final theorem.
   abstract valid shade grid and generic finite horizontal/vertical path
   propagation lemmas isolate the forthcoming cycle-color proof from Wang-tile
   product encodings.
+- The shade grid is instantiated at exact coordinates in every final routed
+  product plane. Quarter regrouping supplies a valid natural shade grid below
+  any parent coordinate, and the hierarchy embedding transports it through
+  arbitrary refinement depths.
 - The obstruction alphabet is rebuilt over that shade layer. Light red paths
   obey Robinson's outer-edge emit-or-absorb and inner-edge absorb-only rules;
   dark paths are transparent. Every valid tiling projects to both a valid
