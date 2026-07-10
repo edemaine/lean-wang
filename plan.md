@@ -105,6 +105,9 @@ position-row obligation in the final theorem.
 - A global quarter-regrouping theorem: every valid typed quarter plane has a
   southwest parity origin and decomposes exactly into four quadrants of one
   corrected parent index at every selected `2 x 2` macrocell.
+- An ordinary-Wang decoder for quarter planes, including reflected macro-boundary
+  matching, so every valid 416-tile plane recovers a valid 104-index hierarchy
+  together with exact block equations.
 
 ## Remaining scaffold proof
 

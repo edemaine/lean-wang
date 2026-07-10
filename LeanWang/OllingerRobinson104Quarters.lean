@@ -73,7 +73,7 @@ theorem quarterTile_injective : Function.Injective quarterTile := by
 def candidates (wang : WangTile) : List QuarterIndex :=
   all.filter fun site => quarterTile site == wang
 
-def decode (wang : WangTile) : QuarterIndex :=
+@[irreducible] def decode (wang : WangTile) : QuarterIndex :=
   (candidates wang).headD (⟨0, by decide⟩, .southwest)
 
 def allDecodeCorrectBool : Bool :=

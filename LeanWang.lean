@@ -57,5 +57,6 @@ import LeanWang.OllingerRobinson104IteratedEmbedding
 import LeanWang.OllingerRobinson104PlaneRedBoards
 import LeanWang.OllingerRobinson104Quarters
 import LeanWang.OllingerRobinson104QuarterRegrouping
+import LeanWang.OllingerRobinson104QuarterPlaneDecode
 import LeanWang.OllingerRobinsonFigure13Obstructions
 import LeanWang.Final
