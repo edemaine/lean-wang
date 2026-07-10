@@ -138,6 +138,10 @@ position-row obligation in the final theorem.
   `8 x 8` quarter gadget has inward-facing boundaries at local coordinates
   `3` and `6` and boundary-free lanes `4` and `5`, with child parity selecting
   a canonical clear crossing.
+- A scale-independent embedding of that gadget through arbitrary refinements.
+  At every depth `d >= 5`, any coarse index grid contains a Cartesian family
+  of `2^(d-3)` selected coordinates in each direction, each with the certified
+  inward boundaries and clear interior lanes.
 
 ## Remaining scaffold proof
 
