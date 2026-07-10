@@ -257,6 +257,8 @@ position-row obligation in the final theorem.
   interior coordinates, so shade propagation and the local crossing rule
   force every child shade to be opposite its parent. Two applications give
   the same-shade scale-`k-2` descendants used by the free-line recurrence.
+  Uniform board shades are unique, so the opposite-shade result applies
+  directly to arbitrary parent and child shade certificates.
 
 ## Remaining scaffold proof
 

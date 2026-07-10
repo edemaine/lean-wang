@@ -383,6 +383,42 @@ theorem exists_opposite_corner_shades
       largeShaded smallShaded valid <;> dsimp at * <;>
         rw [hpow] <;> nlinarith
 
+theorem CycleShade.shade_eq
+    {stateGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat} {firstShade secondShade : RedShades.Shade}
+    (first : CycleShade stateGrid west east south north firstShade)
+    (second : CycleShade stateGrid west east south north secondShade) :
+    firstShade = secondShade :=
+  Option.some.inj (first.southwest.symm.trans second.southwest)
+
+/-- Any supplied corner-board shade certificate is opposite its parent. -/
+theorem cornerShade_ne_parent
+    (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    {level : Nat} (hlevel : 1 ≤ level) (blockX blockY : Nat)
+    (cornerX cornerY : Fin 2)
+    {parentShade cornerShade : RedShades.Shade}
+    (parentShaded : CycleShade stateGrid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) parentShade)
+    (cornerShaded : CycleShade stateGrid
+      (2 ^ (level - 1) * (4 * (2 * blockX + cornerX.val) + 1))
+      (2 ^ (level - 1) * (4 * (2 * blockX + cornerX.val) + 3))
+      (2 ^ (level - 1) * (4 * (2 * blockY + cornerY.val) + 1))
+      (2 ^ (level - 1) * (4 * (2 * blockY + cornerY.val) + 3))
+      cornerShade)
+    (valid : ValidShadeGrid (iterateRefine (level + 2) grid) stateGrid) :
+    parentShade ≠ cornerShade := by
+  rcases exists_opposite_corner_shades grid hlevel blockX blockY
+      cornerX cornerY valid with
+    ⟨canonicalParentShade, canonicalCornerShade,
+      canonicalParent, canonicalCorner, hopposite⟩
+  have hparent := CycleShade.shade_eq canonicalParent parentShaded
+  have hcorner := CycleShade.shade_eq canonicalCorner cornerShaded
+  simpa only [hparent, hcorner] using hopposite
+
 end TranslatedRedShadeCrossings
 end Closed104
 end Figure13Layers
