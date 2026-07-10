@@ -52,7 +52,8 @@ proof task.
   reductions and derives undecidability from Mathlib's halting problem.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.
 - `LeanWang.OllingerRobinson104*` contains the corrected 104-component
-  Figure 13/Figure 16 transcription and current finite scaffold experiments.
+  Figure 13/Figure 16 transcription, substitution boundary certificates, and
+  the successful finite Proposition 8 recognizability check.
 
 ## Build
 

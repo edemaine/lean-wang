@@ -60,50 +60,44 @@ position-row obligation in the final theorem.
 - A finite transcription of Figure 13 and Figure 16, including the corrected
   104 component triples in `figures/fig13-human.tsv`.
 - Substitution-generated plane tilings for the corrected 104-symbol alphabet.
-- Finite diagnostics showing that the old 92-tile edge transcription and the
-  synthetic stable-edge relation cannot be the final scaffold relation.
+- The corrected Figure 16 `L2b` extension (`R1`, not `R3`) and a 104-tile Wang
+  encoding that retains both thick-line boundary lanes.
+- Finite certificates that every substituted block is valid and substitution
+  preserves and reflects horizontal and vertical compatibility.
+- Proposition 8's finite `4 x 4` test: all 328 extendable well-behaved central
+  blocks are substitution images.
 
 ## Remaining scaffold proof
 
 The remaining theorem must construct a concrete `S : Scaffold` and prove
 `IsScaffold S`. Keep this work independent of the machine reduction.
 
-### 1. Recover the intended local matching relation
+### 1. Lift finite recognizability
 
-Use the corrected Figure 13 component table and Figure 16 substitution. Verify:
+Connect the checked finite enumeration to arbitrary valid plane tilings:
 
-- every substituted `2 x 2` block is locally valid;
-- substitution preserves and reflects horizontal and vertical compatibility;
-- the concrete relation admits the intended 104 tile types and no spurious
-  local configurations needed by the recognizability argument.
+- prove the row generator enumerates every legal length-four row;
+- prove every legal `4 x 4` neighborhood with the distinguished thin-layer
+  phase appears in `extendableCentralRowPairs`;
+- use `badExtendableCentralRowPairs_eq_nil` to recover the parent tile;
+- prove the parent is unique and neighboring decoded parents match, using the
+  boundary-reflection certificates.
 
-The current synthetic least closure is diagnostic only: its finite `4 x 4`
-test admits well-behaved central blocks that are not substitution images.
-
-### 2. Prove finite recognizability
-
-Formalize Proposition 8 of `cirm.pdf` as a checked finite theorem:
-
-- define the well-behaved central `2 x 2` predicate;
-- enumerate legal `4 x 4` neighborhoods;
-- prove each well-behaved center is the image of a unique parent tile and phase;
-- lift the Boolean certificate to a proposition-level desubstitution theorem.
-
-### 3. Obtain arbitrarily large free squares
+### 2. Obtain arbitrarily large free squares
 
 Iterate desubstitution to recover the hierarchical square structure. Then use
 Robinson's board/free-line argument to show that every plane scaffold tiling
 contains arbitrarily large recognizable active squares with a distinguished
 lower-left corner.
 
-### 4. Prove backward realization
+### 3. Prove backward realization
 
 Construct scaffold tilings containing active-corner boxes of every finite size,
 or equivalently finite layer patches that compactness assembles into the
 required plane tiling. Show arbitrary payload tiles can be routed through the
 active square and obstruction channels.
 
-### 5. Package and finish
+### 4. Package and finish
 
 Bundle the forward and backward results as `IsScaffold S`, apply
 `LeanWang.encoded_domino_problem_undecidable` and

@@ -22,7 +22,7 @@ phi_L2(L2a) =
   L2a R3
 phi_L2(L2b) =
   R0 -
-  L2b R3
+  L2b R1
 phi_L2(L2c) =
   R2 -
   L2c G3

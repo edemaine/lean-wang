@@ -88,7 +88,7 @@ set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem parentIndexCandidateCountHistogram_eq :
     parentIndexCandidateCountHistogram =
-      [(1, 20), (2, 82), (3, 51), (4, 36), (5, 15),
+      [(1, 22), (2, 80), (3, 48), (4, 44), (5, 10),
         (7, 28), (8, 48), (24, 48), (40, 40)] := by
   native_decide
 
@@ -266,7 +266,7 @@ theorem componentTripleCounts_eq :
       substitutionImageComponentTriples.length,
       oneStepClosedComponentTriples.length,
       (substitutionImageOf oneStepClosedComponentTriples).length) =
-        (92, 103, 104, 103) := by
+        (92, 104, 104, 104) := by
   native_decide
 
 /-- One quadrant-aligned `2 x 2` block of child Figure 18 sites. -/

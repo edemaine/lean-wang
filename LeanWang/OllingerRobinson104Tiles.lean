@@ -9,11 +9,9 @@ import LeanWang.OllingerRobinson104
 Compositional Wang-edge encoding of the corrected 104 Ollinger tiles.
 
 Each rendered edge carries one thin endpoint, one thick endpoint, and an
-optional black endpoint. Thin endpoints record a red/green color and one of the
-two corner lanes. Thick wires reach the midpoint of an edge, so only their
-red/green color is exposed there; the thick-line number records internal
-placement, not a second Wang-edge lane. The resulting finite checks certify
-that every Figure 16 child block is valid and that substitution preserves and
+optional black endpoint. Thin and thick endpoints both record a red/green color
+and one of the two boundary lanes. The resulting finite checks certify that
+every Figure 16 child block is valid and that substitution preserves and
 reflects matching across parent boundaries.
 -/
 
@@ -118,7 +116,7 @@ def thickSouth : Figure16.Thick → WireEnd
 
 def thickEast : Figure16.Thick → WireEnd
   | .a => .redLow
-  | .b => .redLow
+  | .b => .redHigh
   | .c => .greenLow
   | .d => .greenHigh
   | component => lineSumHorizontal component
@@ -161,8 +159,8 @@ def blackWest : Figure16.Black → Bool
 /-- Numeric code for the three superimposed endpoint layers on one edge. -/
 def edgeCode (thin thick : WireEnd) (black : Bool) : Nat :=
   thin.code +
-    4 * (match thick.color with | .red => 0 | .green => 1) +
-      if black then 8 else 0
+    4 * thick.code +
+      if black then 16 else 0
 
 /-- Corrected Wang tile assembled from one thin/thick/black component triple. -/
 def tile (components : Components) : WangTile where
@@ -182,7 +180,7 @@ def tileSet : TileSet :=
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 @[simp]
-theorem tileSet_length : tileSet.length = 40 := by
+theorem tileSet_length : tileSet.length = 104 := by
   native_decide
 
 set_option linter.style.nativeDecide false in
@@ -283,6 +281,48 @@ theorem childVMatches_of_vMatches (lower upper : Index)
       (tile (components lower)) (tile (components upper))) :
     ChildVMatches lower upper := by
   have hlower := List.all_eq_true.1 allVerticalBoundariesPreservedBool_eq_true
+    lower (List.mem_finRange lower)
+  have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
+  exact (of_decide_eq_true hupper) hmatch
+
+/-- Finite check that horizontal matching is reflected by substitution. -/
+def allHorizontalBoundariesReflectedBool : Bool :=
+  (List.finRange 104).all fun left =>
+    (List.finRange 104).all fun right =>
+      decide (ChildHMatches left right →
+        WangTile.HMatches (tile (components left)) (tile (components right)))
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem allHorizontalBoundariesReflectedBool_eq_true :
+    allHorizontalBoundariesReflectedBool = true := by
+  native_decide
+
+/-- Finite check that vertical matching is reflected by substitution. -/
+def allVerticalBoundariesReflectedBool : Bool :=
+  (List.finRange 104).all fun lower =>
+    (List.finRange 104).all fun upper =>
+      decide (ChildVMatches lower upper →
+        WangTile.VMatches (tile (components lower)) (tile (components upper)))
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem allVerticalBoundariesReflectedBool_eq_true :
+    allVerticalBoundariesReflectedBool = true := by
+  native_decide
+
+theorem hMatches_of_childHMatches (left right : Index)
+    (hmatch : ChildHMatches left right) :
+    WangTile.HMatches (tile (components left)) (tile (components right)) := by
+  have hleft := List.all_eq_true.1 allHorizontalBoundariesReflectedBool_eq_true
+    left (List.mem_finRange left)
+  have hright := List.all_eq_true.1 hleft right (List.mem_finRange right)
+  exact (of_decide_eq_true hright) hmatch
+
+theorem vMatches_of_childVMatches (lower upper : Index)
+    (hmatch : ChildVMatches lower upper) :
+    WangTile.VMatches (tile (components lower)) (tile (components upper)) := by
+  have hlower := List.all_eq_true.1 allVerticalBoundariesReflectedBool_eq_true
     lower (List.mem_finRange lower)
   have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
   exact (of_decide_eq_true hupper) hmatch

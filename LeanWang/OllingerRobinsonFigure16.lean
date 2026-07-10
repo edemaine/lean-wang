@@ -261,7 +261,7 @@ def tile : Symbol → WangTile
   | .thin .c => t 9 12 13 6
   | .thin .d => t 14 4 11 15
   | .thick .a => t 16 17 18 19
-  | .thick .b => t 20 21 18 22
+  | .thick .b => t 20 21 32 22
   | .thick .c => t 23 24 25 26
   | .thick .d => t 27 28 29 30
   | .thick .e => t 20 31 32 33
@@ -371,16 +371,9 @@ def hasRectangleStackBool (width height : Nat) : Bool :=
   | 0 => true
   | depth + 1 => !(rowStackTops width depth).isEmpty
 
-/--
-Diagnostic obstruction: the raw Figure 16 component-symbol tiles do not even
-tile a `6 × 6` square.
-
-This confirms that `Symbol.tileSet` is only a local checking device for the
-Figure 16 substitution blocks, not the standalone scaffold tileset whose
-cofinal square tilings should drive compactness.
--/
-theorem hasRectangleStackBool_six_six_eq_false :
-    hasRectangleStackBool 6 6 = false := by
+/-- The corrected component-symbol compatibility admits a `6 × 6` square. -/
+theorem hasRectangleStackBool_six_six_eq_true :
+    hasRectangleStackBool 6 6 = true := by
   decide
 
 end Symbol
@@ -846,7 +839,7 @@ def phiL2Component1 : Thin → Block
 /-- Second summand of `phi_L2`, applied to an `L2` component. -/
 def phiL2Component2 : Thick → Block
   | .a => .mkRows .G2 .blank .L2a .R3
-  | .b => .mkRows .R0 .blank .L2b .R3
+  | .b => .mkRows .R0 .blank .L2b .R1
   | .c => .mkRows .R2 .blank .L2c .G3
   | .d => .mkRows .G0 .blank .L2d .G1
   | .e => .mkRows .R0 .blank .L2e .R1
@@ -938,7 +931,7 @@ theorem phiL2Component2_a :
   rfl
 
 theorem phiL2Component2_b :
-    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R3 :=
+    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R1 :=
   rfl
 
 theorem phiL2Component2_c :
@@ -1579,7 +1572,7 @@ structure HumanTranscriptionCertificate : Prop where
   phiL2Component2_a :
     phiL2Component2 .a = .mkRows .G2 .blank .L2a .R3
   phiL2Component2_b :
-    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R3
+    phiL2Component2 .b = .mkRows .R0 .blank .L2b .R1
   phiL2Component2_c :
     phiL2Component2 .c = .mkRows .R2 .blank .L2c .G3
   phiL2Component2_d :

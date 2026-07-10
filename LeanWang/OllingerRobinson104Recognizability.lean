@@ -3,8 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104StableTilesCorrect
-import LeanWang.OllingerRobinson104Tiling
+import LeanWang.OllingerRobinson104Tiles
 
 /-!
 Finite recognizability facts for the corrected Ollinger alphabet.
@@ -116,27 +115,6 @@ theorem thin_eq_thinNorth_of_vMatches {lower upper : Index}
   have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
   exact (of_decide_eq_true hupper) h
 
-/-- Equal stable derived tiles still determine a unique thin-layer phase. -/
-def allDerivedOneEqualTilesHaveEqualThinBool : Bool :=
-  (List.finRange 104).all fun i =>
-    (List.finRange 104).all fun j =>
-      decide (derivedTile 1 i = derivedTile 1 j →
-        (components i).1 = (components j).1)
-
-set_option linter.style.nativeDecide false in
-set_option maxRecDepth 20000 in
-theorem allDerivedOneEqualTilesHaveEqualThinBool_eq_true :
-    allDerivedOneEqualTilesHaveEqualThinBool = true := by
-  native_decide
-
-theorem thin_eq_of_derivedTile_one_eq {i j : Index}
-    (h : derivedTile 1 i = derivedTile 1 j) :
-    (components i).1 = (components j).1 := by
-  have hi := List.all_eq_true.1 allDerivedOneEqualTilesHaveEqualThinBool_eq_true
-    i (List.mem_finRange i)
-  have hij := List.all_eq_true.1 hi j (List.mem_finRange j)
-  exact (of_decide_eq_true hij) h
-
 /-- Counterexamples to horizontal boundary reflection in the current edge code. -/
 def horizontalBoundaryReflectionFailures : List (Nat × Nat) :=
   (List.finRange 104).flatMap fun left =>
@@ -154,6 +132,18 @@ def verticalBoundaryReflectionFailures : List (Nat × Nat) :=
         !decide (WangTile.VMatches
           (tile (components lower)) (tile (components upper)))).map fun upper =>
             (lower.val, upper.val)
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem horizontalBoundaryReflectionFailures_eq_nil :
+    horizontalBoundaryReflectionFailures = [] := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+theorem verticalBoundaryReflectionFailures_eq_nil :
+    verticalBoundaryReflectionFailures = [] := by
+  native_decide
 
 end Closed104
 end Figure13Layers
