@@ -341,8 +341,9 @@ def nextAfterOrigin : Nat :=
 
 theorem partrecStartedTM0Input_length :
     TM0Route.partrecStartedTM0Input.length = 1 := by
-  simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM2Input,
-    Turing.TM2to1.trInit, Turing.PartrecToTM2.trList]
+  simp [TM0Route.partrecStartedTM0Input, TM0Route.partrecStartedTM0InputFor,
+    TM0Route.partrecStartedTM2InputFor, Turing.TM2to1.trInit,
+    Turing.PartrecToTM2.trList]
 
 theorem nextAfterOrigin_eq_initReturnState_zero :
     nextAfterOrigin = initReturnState 0 := by
