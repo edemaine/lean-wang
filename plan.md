@@ -134,6 +134,10 @@ position-row obligation in the final theorem.
 - An exact embedding from parent coordinates and quadrants into the decorated
   quarter plane. Oriented board-side facts now specialize directly to the
   concrete inner/outer signal endpoint rules at those quarter coordinates.
+- A finite `104 x 4` free-cell certificate: below every parent child, an
+  `8 x 8` quarter gadget has inward-facing boundaries at local coordinates
+  `3` and `6` and boundary-free lanes `4` and `5`, with child parity selecting
+  a canonical clear crossing.
 
 ## Remaining scaffold proof
 
