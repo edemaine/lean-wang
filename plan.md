@@ -246,6 +246,11 @@ position-row obligation in the final theorem.
   sides proves that every obstruction edge on a free line is empty. A free-row
   and free-column crossing therefore has the literal clear signal state, the
   active routing role, and a retained payload tile from the source tileset.
+- The universal oriented depth-two board is no longer restricted to the block
+  at the origin. A translation theorem embeds it below every coarse-grid
+  coordinate, and iterated refinement exposes every such translated board at
+  arbitrary scale. This supplies the full family of nested boards needed for
+  Robinson's free-line recurrence.
 
 ## Remaining scaffold proof
 
