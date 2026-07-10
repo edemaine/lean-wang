@@ -789,14 +789,22 @@ theorem Translates.dom {c : Nat.Partrec.Code} {tc : Code}
     rcases Part.dom_iff_mem.1 hc with ⟨x, hx⟩
     exact Part.dom_iff_mem.2 ⟨[x], (h n [x]).2 ⟨x, hx, rfl⟩⟩
 
+theorem Translates.tm2_dom_at {c : Nat.Partrec.Code} {tc : Code}
+    (h : Translates c tc) (n : Nat) :
+    (StateTransition.eval
+      (Turing.TM2.step Turing.PartrecToTM2.tr)
+      (Turing.PartrecToTM2.init tc [n])).Dom ↔
+        (Nat.Partrec.Code.eval c n).Dom := by
+  rw [Turing.PartrecToTM2.tr_eval tc [n]]
+  exact (part_dom_map_iff Turing.PartrecToTM2.halt (tc.eval [n])).trans (h.dom n)
+
 theorem Translates.tm2_dom {c : Nat.Partrec.Code} {tc : Code}
     (h : Translates c tc) :
     (StateTransition.eval
       (Turing.TM2.step Turing.PartrecToTM2.tr)
       (Turing.PartrecToTM2.init tc [0])).Dom ↔
-        (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [Turing.PartrecToTM2.tr_eval tc [0]]
-  exact (part_dom_map_iff Turing.PartrecToTM2.halt (tc.eval [0])).trans (h.dom 0)
+        (Nat.Partrec.Code.eval c 0).Dom :=
+  h.tm2_dom_at 0
 
 theorem translates_zero : Translates .zero (translate .zero) := by
   intro n v
@@ -1223,6 +1231,13 @@ theorem translate_tm2_dom (c : Nat.Partrec.Code) :
       (Turing.PartrecToTM2.init (translate c) [0])).Dom ↔
         (Nat.Partrec.Code.eval c 0).Dom := by
   exact (translate_correct c).tm2_dom
+
+theorem translate_tm2_dom_at (c : Nat.Partrec.Code) (n : Nat) :
+    (StateTransition.eval
+      (Turing.TM2.step Turing.PartrecToTM2.tr)
+      (Turing.PartrecToTM2.init (translate c) [n])).Dom ↔
+        (Nat.Partrec.Code.eval c n).Dom := by
+  exact (translate_correct c).tm2_dom_at n
 
 end NatPartrecToToPartrec
 

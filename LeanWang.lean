@@ -11,6 +11,7 @@ import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.UniversalCode
 import LeanWang.TM0Route
+import LeanWang.UniversalTM0
 import LeanWang.TM0FiniteCompiler
 import LeanWang.TM0FoldedProgram
 import LeanWang.TM0FoldedGeneratedInit

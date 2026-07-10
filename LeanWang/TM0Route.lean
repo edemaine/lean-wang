@@ -4388,36 +4388,53 @@ theorem partrecStartedTM2_respects (tc : Turing.ToPartrec.Code) :
       refine ⟨relabelTM2Cfg (StartedLabel.wrap tc) b₁, rfl, ?_⟩
       exact Relation.TransGen.single (by simp [partrecStartedTM2_step_eq_map, hstep])
 
+/-- The unary input stack for evaluating a code at input `n`. -/
+def partrecStartedTM2InputFor (n : Nat) :
+    List (PartrecStackSymbol Turing.PartrecToTM2.K'.main) :=
+  Turing.PartrecToTM2.trList [n]
+
 /-- The unary input stack for evaluating a code at input `0`. -/
 def partrecStartedTM2Input : List (PartrecStackSymbol Turing.PartrecToTM2.K'.main) :=
-  Turing.PartrecToTM2.trList [0]
+  partrecStartedTM2InputFor 0
+
+/-- Mathlib's `PartrecToTM2` initial evaluator configuration at input `n`. -/
+def partrecInitFor (tc : Turing.ToPartrec.Code) (n : Nat) :
+    Turing.TM2.Cfg PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar :=
+  Turing.PartrecToTM2.init tc [n]
 
 /-- Mathlib's `PartrecToTM2` initial evaluator configuration at the local aliases. -/
 def partrecInit (tc : Turing.ToPartrec.Code) :
     Turing.TM2.Cfg PartrecStackSymbol Turing.PartrecToTM2.Λ' PartrecVar :=
-  Turing.PartrecToTM2.init tc [0]
+  partrecInitFor tc 0
 
-theorem partrecStartedTM2_init_relabel (tc : Turing.ToPartrec.Code) :
-    relabelTM2Cfg (StartedLabel.wrap tc) (partrecInit tc) =
-      Turing.TM2.init Turing.PartrecToTM2.K'.main partrecStartedTM2Input := by
+theorem partrecStartedTM2_init_relabel_for
+    (tc : Turing.ToPartrec.Code) (n : Nat) :
+    relabelTM2Cfg (StartedLabel.wrap tc) (partrecInitFor tc n) =
+      Turing.TM2.init Turing.PartrecToTM2.K'.main
+        (partrecStartedTM2InputFor n) := by
   change
     (Turing.TM2.Cfg.mk
       (some (StartedLabel.wrap tc (PartrecToTM2Support.startLabel tc)))
       (none : PartrecVar)
-      (Turing.PartrecToTM2.K'.elim (Turing.PartrecToTM2.trList [0]) [] [] []) :
+      (Turing.PartrecToTM2.K'.elim (Turing.PartrecToTM2.trList [n]) [] [] []) :
         Turing.TM2.Cfg PartrecStackSymbol (StartedLabel tc) PartrecVar) =
     Turing.TM2.Cfg.mk
       (some (default : StartedLabel tc))
       (default : PartrecVar)
       (Function.update (fun _ : Turing.PartrecToTM2.K' => [])
-        Turing.PartrecToTM2.K'.main partrecStartedTM2Input)
+        Turing.PartrecToTM2.K'.main (partrecStartedTM2InputFor n))
   rw [Turing.TM2.Cfg.mk.injEq]
   constructor
   · rfl
   constructor
   · rfl
   · funext k
-    cases k <;> simp [partrecStartedTM2Input]
+    cases k <;> simp [partrecStartedTM2InputFor]
+
+theorem partrecStartedTM2_init_relabel (tc : Turing.ToPartrec.Code) :
+    relabelTM2Cfg (StartedLabel.wrap tc) (partrecInit tc) =
+      Turing.TM2.init Turing.PartrecToTM2.K'.main partrecStartedTM2Input := by
+  exact partrecStartedTM2_init_relabel_for tc 0
 
 theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
     (f <$> p).Dom ↔ p.Dom := by
@@ -4428,22 +4445,32 @@ theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
 The code-specific started TM2 evaluator has the same halting domain as the
 original `PartrecToTM2.init` evaluator configuration.
 -/
-theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
+theorem partrecStartedTM2_eval_dom_iff_partrec_for
+    (tc : Turing.ToPartrec.Code) (n : Nat) :
     (Turing.TM2.eval (partrecStartedTM2 tc)
-      Turing.PartrecToTM2.K'.main partrecStartedTM2Input).Dom ↔
+      Turing.PartrecToTM2.K'.main (partrecStartedTM2InputFor n)).Dom ↔
       (StateTransition.eval
         (Turing.TM2.step partrecTM2)
-        (partrecInit tc)).Dom := by
+        (partrecInitFor tc n)).Dom := by
   unfold Turing.TM2.eval
   exact (part_dom_map_iff
       (fun c : Turing.TM2.Cfg PartrecStackSymbol (StartedLabel tc) PartrecVar =>
         c.stk Turing.PartrecToTM2.K'.main)
       (StateTransition.eval
         (Turing.TM2.step (partrecStartedTM2 tc))
-        (Turing.TM2.init Turing.PartrecToTM2.K'.main partrecStartedTM2Input))).trans
+        (Turing.TM2.init Turing.PartrecToTM2.K'.main
+          (partrecStartedTM2InputFor n)))).trans
     (StateTransition.tr_eval_dom
       (partrecStartedTM2_respects tc)
-      (partrecStartedTM2_init_relabel tc))
+      (partrecStartedTM2_init_relabel_for tc n))
+
+theorem partrecStartedTM2_eval_dom_iff_partrec (tc : Turing.ToPartrec.Code) :
+    (Turing.TM2.eval (partrecStartedTM2 tc)
+      Turing.PartrecToTM2.K'.main partrecStartedTM2Input).Dom ↔
+      (StateTransition.eval
+        (Turing.TM2.step partrecTM2)
+        (partrecInit tc)).Dom :=
+  partrecStartedTM2_eval_dom_iff_partrec_for tc 0
 
 /-- The TM1 machine obtained from the code-specific started TM2 evaluator. -/
 def partrecStartedTM1Machine (tc : Turing.ToPartrec.Code) :=
@@ -5795,11 +5822,16 @@ theorem partrecStartedTM1_supports (tc : Turing.ToPartrec.Code) :
     (S := partrecStartedTM2Labels tc)
     (partrecStartedTM2_supports tc)
 
-/-- The TM1/TM0 input list obtained from the started TM2 input stack. -/
-def partrecStartedTM0Input :
+/-- The TM1/TM0 input list obtained from the started TM2 input stack for `n`. -/
+def partrecStartedTM0InputFor (n : Nat) :
     List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
   Turing.TM2to1.trInit (Γ := PartrecStackSymbol)
-    Turing.PartrecToTM2.K'.main partrecStartedTM2Input
+    Turing.PartrecToTM2.K'.main (partrecStartedTM2InputFor n)
+
+/-- The TM1/TM0 input list obtained from the started TM2 input stack at `0`. -/
+def partrecStartedTM0Input :
+    List (Turing.TM2to1.Γ' PartrecStack PartrecStackSymbol) :=
+  partrecStartedTM0InputFor 0
 
 /-- The TM0 machine obtained by composing Mathlib's TM2-to-TM1 and TM1-to-TM0 reductions. -/
 def partrecStartedTM0Machine (tc : Turing.ToPartrec.Code) :=
@@ -9607,14 +9639,24 @@ theorem partrecStartedTM0_supports (tc : Turing.ToPartrec.Code) :
 Correctness of the composed Mathlib TM0 route for the code-specific started
 TM2 evaluator.
 -/
+theorem partrecStartedTM0_eval_dom_iff_tm2_for
+    (tc : Turing.ToPartrec.Code) (n : Nat) :
+    (Turing.TM0.eval (partrecStartedTM0Machine tc)
+      (partrecStartedTM0InputFor n)).Dom ↔
+      (Turing.TM2.eval (partrecStartedTM2 tc)
+        Turing.PartrecToTM2.K'.main (partrecStartedTM2InputFor n)).Dom := by
+  unfold partrecStartedTM0Machine partrecStartedTM1Machine
+    partrecStartedTM0InputFor
+  rw [Turing.TM1to0.tr_eval]
+  exact Turing.TM2to1.tr_eval_dom
+    (M := partrecStartedTM2 tc) Turing.PartrecToTM2.K'.main
+      (partrecStartedTM2InputFor n)
+
 theorem partrecStartedTM0_eval_dom_iff_tm2 (tc : Turing.ToPartrec.Code) :
     (Turing.TM0.eval (partrecStartedTM0Machine tc) partrecStartedTM0Input).Dom ↔
       (Turing.TM2.eval (partrecStartedTM2 tc)
-        Turing.PartrecToTM2.K'.main partrecStartedTM2Input).Dom := by
-  unfold partrecStartedTM0Machine partrecStartedTM1Machine partrecStartedTM0Input
-  rw [Turing.TM1to0.tr_eval]
-  exact Turing.TM2to1.tr_eval_dom
-    (M := partrecStartedTM2 tc) Turing.PartrecToTM2.K'.main partrecStartedTM2Input
+        Turing.PartrecToTM2.K'.main partrecStartedTM2Input).Dom :=
+  partrecStartedTM0_eval_dom_iff_tm2_for tc 0
 
 end TM0Route
 
