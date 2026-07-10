@@ -284,6 +284,11 @@ position-row obligation in the final theorem.
   exactly when the `2^depth`/quarter-scaled translated line is free in the
   global refinement. This is the induction interface for reinserting recursive
   inner-board free lines into their parent board.
+- Aligned restrictions of a valid combined shade/signal grid are again valid,
+  and uniform board-shade certificates transport across the same restriction.
+  An ordered `FreeGrid` now records finite lower-bound witnesses for free rows
+  and columns; every selected crossing is signal-clear, and every translated
+  scale-2 light board has a singleton `FreeGrid` base witness.
 
 ## Remaining scaffold proof
 

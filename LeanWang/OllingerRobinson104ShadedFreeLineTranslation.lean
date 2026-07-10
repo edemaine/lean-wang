@@ -25,6 +25,124 @@ def shiftQuarterGrid {α : Type} (grid : Nat → Nat → α)
     (offsetX offsetY : Nat) : Nat → Nat → α :=
   fun x y => grid (offsetX + x) (offsetY + y)
 
+set_option maxHeartbeats 1000000 in
+-- Normalizing the dependent shade and signal rules through both grid shifts.
+theorem validGrid_shift (depth : Nat) (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {signalGrid : Nat → Nat → Signals.State}
+    (valid : ValidGrid (iterateRefine depth grid) shadeGrid signalGrid)
+    (blockX blockY : Nat) :
+    ValidGrid
+      (iterateRefine depth (shiftGrid grid blockX blockY))
+      (shiftQuarterGrid shadeGrid
+        (2 ^ (depth + 1) * blockX) (2 ^ (depth + 1) * blockY))
+      (shiftQuarterGrid signalGrid
+        (2 ^ (depth + 1) * blockX) (2 ^ (depth + 1) * blockY)) := by
+  let quarterOffsetX := 2 ^ (depth + 1) * blockX
+  let quarterOffsetY := 2 ^ (depth + 1) * blockY
+  have hscale : 2 ∣ 2 ^ (depth + 1) := dvd_pow_self 2 (by omega)
+  have hquadrant (x y : Nat) :
+      quadrantAt (quarterOffsetX + x) (quarterOffsetY + y) =
+        quadrantAt x y :=
+    quadrantAt_shift (2 ^ (depth + 1)) blockX blockY x y hscale
+  constructor
+  · constructor
+    · intro x y
+      have hallowed := valid.shadeValid.allowed
+        (quarterOffsetX + x) (quarterOffsetY + y)
+      change RedShades.allowedFor
+        (componentAt (iterateRefine depth grid)
+          (quarterOffsetX + x) (quarterOffsetY + y))
+        (quadrantAt (quarterOffsetX + x) (quarterOffsetY + y))
+        (shadeGrid (quarterOffsetX + x) (quarterOffsetY + y)) = true at hallowed
+      change RedShades.allowedFor
+        (componentAt (iterateRefine depth (shiftGrid grid blockX blockY)) x y)
+        (quadrantAt x y)
+        (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY x y) = true
+      rw [componentAt_iterateRefine_shift, ← hquadrant]
+      exact hallowed
+    · intro x y
+      simpa only [shiftQuarterGrid, Nat.add_assoc] using
+        valid.shadeValid.hmatch (quarterOffsetX + x) (quarterOffsetY + y)
+    · intro x y
+      simpa only [shiftQuarterGrid, Nat.add_assoc] using
+        valid.shadeValid.vmatch (quarterOffsetX + x) (quarterOffsetY + y)
+  · intro x y
+    have hallowed := valid.signalAllowed
+      (quarterOffsetX + x) (quarterOffsetY + y)
+    change ShadedSignals.locallyAllowed
+      (((iterateRefine depth grid)
+          ((quarterOffsetX + x) / 2) ((quarterOffsetY + y) / 2),
+        quadrantAt (quarterOffsetX + x) (quarterOffsetY + y)),
+        shadeGrid (quarterOffsetX + x) (quarterOffsetY + y))
+      (signalGrid (quarterOffsetX + x) (quarterOffsetY + y)) = true at hallowed
+    unfold ShadedSignals.locallyAllowed at hallowed ⊢
+    change (Signals.horizontalAllowed
+        (ShadedSignals.selectedVerticalFor
+          (componentAt (iterateRefine depth grid)
+            (quarterOffsetX + x) (quarterOffsetY + y))
+          (quadrantAt (quarterOffsetX + x) (quarterOffsetY + y))
+          (shadeGrid (quarterOffsetX + x) (quarterOffsetY + y)))
+        (signalGrid (quarterOffsetX + x) (quarterOffsetY + y)) &&
+      Signals.verticalAllowed
+        (ShadedSignals.selectedHorizontalFor
+          (componentAt (iterateRefine depth grid)
+            (quarterOffsetX + x) (quarterOffsetY + y))
+          (quadrantAt (quarterOffsetX + x) (quarterOffsetY + y))
+          (shadeGrid (quarterOffsetX + x) (quarterOffsetY + y)))
+        (signalGrid (quarterOffsetX + x) (quarterOffsetY + y))) = true at hallowed
+    change (Signals.horizontalAllowed
+        (ShadedSignals.selectedVerticalFor
+          (componentAt (iterateRefine depth (shiftGrid grid blockX blockY)) x y)
+          (quadrantAt x y)
+          (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY x y))
+        (shiftQuarterGrid signalGrid quarterOffsetX quarterOffsetY x y) &&
+      Signals.verticalAllowed
+        (ShadedSignals.selectedHorizontalFor
+          (componentAt (iterateRefine depth (shiftGrid grid blockX blockY)) x y)
+          (quadrantAt x y)
+          (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY x y))
+        (shiftQuarterGrid signalGrid quarterOffsetX quarterOffsetY x y)) = true
+    rw [componentAt_iterateRefine_shift, ← hquadrant]
+    exact hallowed
+  · intro x y
+    simpa only [shiftQuarterGrid, Nat.add_assoc] using
+      valid.hmatch (quarterOffsetX + x) (quarterOffsetY + y)
+  · intro x y
+    simpa only [shiftQuarterGrid, Nat.add_assoc] using
+      valid.vmatch (quarterOffsetX + x) (quarterOffsetY + y)
+
+theorem cycleShade_shift_iff (shadeGrid : Nat → Nat → RedShades.State)
+    (offsetX offsetY west east south north : Nat)
+    (shade : RedShades.Shade) :
+    CycleShade
+        (shiftQuarterGrid shadeGrid (2 * offsetX) (2 * offsetY))
+        west east south north shade ↔
+      CycleShade shadeGrid
+        (offsetX + west) (offsetX + east)
+        (offsetY + south) (offsetY + north) shade := by
+  constructor
+  · intro shaded
+    constructor
+    · simpa [shiftQuarterGrid, quarterWest, quarterSouth, Nat.add_assoc] using
+        shaded.southwest
+    · simpa [shiftQuarterGrid, quarterEast, quarterSouth, Nat.add_assoc] using
+        shaded.southeast
+    · simpa [shiftQuarterGrid, quarterEast, quarterNorth, Nat.add_assoc] using
+        shaded.northeast
+    · simpa [shiftQuarterGrid, quarterWest, quarterNorth, Nat.add_assoc] using
+        shaded.northwest
+  · intro shaded
+    constructor
+    · simpa [shiftQuarterGrid, quarterWest, quarterSouth, Nat.add_assoc] using
+        shaded.southwest
+    · simpa [shiftQuarterGrid, quarterEast, quarterSouth, Nat.add_assoc] using
+        shaded.southeast
+    · simpa [shiftQuarterGrid, quarterEast, quarterNorth, Nat.add_assoc] using
+        shaded.northeast
+    · simpa [shiftQuarterGrid, quarterWest, quarterNorth, Nat.add_assoc] using
+        shaded.northwest
+
 theorem isFreeRow_shift_iff (depth : Nat) (grid : Nat → Nat → Index)
     (shadeGrid : Nat → Nat → RedShades.State)
     (blockX blockY west east row : Nat) :
