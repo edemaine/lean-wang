@@ -88,6 +88,9 @@ position-row obligation in the final theorem.
 - Finite local red-line expansion certificates and a proposition-level
   iteration theorem proving those red cycles double under every further
   substitution, hence occur at unbounded scales.
+- A coordinate embedding theorem identifying each abstract grid refinement
+  with the contiguous child block at the corresponding parity origin in an
+  actual hierarchy tower.
 
 ## Remaining scaffold proof
 
