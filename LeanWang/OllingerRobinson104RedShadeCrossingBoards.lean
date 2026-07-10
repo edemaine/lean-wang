@@ -194,6 +194,29 @@ theorem oppositeCycleShades (grid : Nat → Nat → Index)
     rw [hsmallAt, hlargeAt, heq]
   exact ⟨largeShade, smallShade, largeShaded, smallShaded, hshadeOpposite⟩
 
+/-- At least one of the comparable crossing boards is light. -/
+def HasLightCycleAtLevel (stateGrid : Nat → Nat → RedShades.State)
+    (level : Nat) : Prop :=
+  RedShadeCycles.CycleShade stateGrid
+      (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level) .light ∨
+    RedShadeCycles.CycleShade stateGrid
+      (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+      (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) .light
+
+/-- Light boards occur at every scale, up to the fixed factor-two choice. -/
+theorem hasLightCycleAtLevel (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State} {level : Nat}
+    (hlevel : 1 ≤ level) (valid : ValidShadeGrid
+      (iterateRefine (level + 2) grid) stateGrid) :
+    HasLightCycleAtLevel stateGrid level := by
+  rcases oppositeCycleShades grid hlevel valid with
+    ⟨largeShade, smallShade, largeShaded, smallShaded, hopposite⟩
+  cases largeShade <;> cases smallShade
+  · exact False.elim (hopposite rfl)
+  · exact Or.inl largeShaded
+  · exact Or.inr smallShaded
+  · exact False.elim (hopposite rfl)
+
 end RedShadeCrossingBoards
 end Closed104
 end Figure13Layers

@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedRoutedPlaneDecode
 import LeanWang.OllingerRobinson104RedShadePaths
+import LeanWang.OllingerRobinson104RedShadeCrossingBoards
 import LeanWang.OllingerRobinson104IteratedEmbedding
 
 /-!
@@ -134,6 +135,17 @@ theorem refined_stateGrid_valid
       (stateGrid decoded (fineParentOrigin decoded depth coarseOrigin)) := by
   rw [← parentGrid_eq_iterateRefine decoded depth coarseOrigin]
   exact stateGrid_valid decoded _
+
+/-- Every final routed product plane has light boards at unbounded scales. -/
+theorem hasLightCycleAtLevel
+    (decoded : ShadedRoutedPlaneDecode.Decoded x)
+    {level : Nat} (hlevel : 1 ≤ level) (coarseOrigin : Int × Int) :
+    RedShadeCrossingBoards.HasLightCycleAtLevel
+      (stateGrid decoded
+        (fineParentOrigin decoded (level + 2) coarseOrigin)) level := by
+  exact RedShadeCrossingBoards.hasLightCycleAtLevel
+    (coarseGrid decoded (level + 2) coarseOrigin) hlevel
+    (refined_stateGrid_valid decoded (level + 2) coarseOrigin)
 
 end ShadedPlaneShadeGrid
 end Closed104

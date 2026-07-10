@@ -201,7 +201,9 @@ position-row obligation in the final theorem.
   their sizes differ by only a factor of two. Shade paths are propagated to
   their concrete intersection, where the local crossing rule forces the two
   uniform board shades to differ. Thus both light and dark boards occur at
-  unbounded scales.
+  unbounded scales. This is instantiated in every decoded routed product plane:
+  at each hierarchy level, one of the two boards is uniformly light and has
+  scale at least `2^(level-1)`.
 - The shade grid is instantiated at exact coordinates in every final routed
   product plane. Quarter regrouping supplies a valid natural shade grid below
   any parent coordinate, and the hierarchy embedding transports it through
