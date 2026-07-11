@@ -21,6 +21,7 @@ namespace Closed104
 namespace SparseFreeLineLocalProjection
 
 open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
+  RedShadeGraphSearchSoundness
   RedShadeGraphWeightedSearch
   RedShadeGraphTranslation
   BorderCoverageLocalAudit
@@ -259,6 +260,71 @@ theorem projectsTo_of_backedCandidate
   }⟩
   have sourceOdd : source.parity = true := sourceParity.trans odd
   simpa [sourceOdd] using Path.trans head tail
+
+/-- A bounded route from any backed local candidate yields a global projection. -/
+theorem projectsTo_of_boundedLocalRoute
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (blockX blockY : Nat) {candidate : Candidate} {start : WeightedStart}
+    {target : Port}
+    (backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+      (south := south) (north := north))
+    (startCoordinate : translatePort start.port (8 * blockX) (8 * blockY) =
+      sparsePort candidate.port)
+    (startParity : start.parity = candidate.parity)
+    (path : BoundedPath (fineGrid (grid blockX blockY)) 8 8
+      start.port target (Bool.xor start.parity true))
+    (htargetX : target.x < 8) (htargetY : target.y < 8)
+    (targetLive : portPresent (fineGrid (grid blockX blockY)) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north)
+      (translatePort target (8 * blockX) (8 * blockY))) := by
+  have translated := SparseFreeLineLocalTransport.boundedPath_two_block
+    grid blockX blockY path
+  have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+      (translatePort target (8 * blockX) (8 * blockY))
+      (Bool.xor candidate.parity true) := by
+    rw [← startCoordinate]
+    simpa only [startParity] using translated
+  have globalLive : portPresent (iterateRefine 2 grid)
+      (translatePort target (8 * blockX) (8 * blockY)) = true := by
+    rw [SparseFreeLineLocalTransport.portPresent_two_block
+      grid blockX blockY target htargetX htargetY] at targetLive
+    exact targetLive
+  rcases backed with ⟨source, sourceParity, head⟩
+  refine ⟨{
+    source := source
+    path := ?_
+    targetLive := globalLive
+  }⟩
+  simpa only [sourceParity, Bool.false_xor] using Path.trans head tail
+
+/-- Local starts embed in a global source family after macrocell translation. -/
+def StartsEmbed
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (blockX blockY : Nat) (starts : List WeightedStart) : Prop :=
+  ∀ start ∈ starts, ∃ candidate ∈ family.candidates,
+    translatePort start.port (8 * blockX) (8 * blockY) =
+      sparsePort candidate.port ∧
+    start.parity = candidate.parity
+
+/-- A checked local route projects whenever all of its starts embed globally. -/
+theorem projectsTo_of_boundedLocalRoute_of_family
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (blockX blockY : Nat) {starts : List WeightedStart} {target : Port}
+    (embed : StartsEmbed family blockX blockY starts)
+    (route : BoundedLocalRoute (grid blockX blockY) starts target)
+    (htargetX : target.x < 8) (htargetY : target.y < 8) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north)
+      (translatePort target (8 * blockX) (8 * blockY))) := by
+  rcases route with ⟨start, hstart, path, targetLive⟩
+  rcases embed start hstart with
+    ⟨candidate, hcandidate, startCoordinate, startParity⟩
+  exact projectsTo_of_boundedLocalRoute blockX blockY
+    (family.backed candidate hcandidate) startCoordinate startParity
+    path htargetX htargetY targetLive
 
 /-- Aligned bounded row routes project an odd retained row to a local target row. -/
 theorem verticalProjectionAt_of_alignedChecks
