@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104RedShadeGraphSearch
+import LeanWang.OllingerRobinson104RedShadeGraphRefinementAudit
 import LeanWang.OllingerRobinson104ShadedFreeLineOffsets
 
 /-!
@@ -35,13 +35,15 @@ def boardPorts : List Port :=
 def nodes (parent : Index) : List Node :=
   exploreFast (localGrid parent) 32 32 12000 boardPorts
 
-def verticalReached (offset quarterX : Nat) (node : Node) : Bool :=
+def verticalReached (parent : Index) (offset quarterX : Nat) (node : Node) : Bool :=
   node.parity &&
+    RedShadeGraphRefinement.portPresent (localGrid parent) node.current &&
     (decide (node.current = ⟨quarterX, 9 + offset, .south⟩) ||
       decide (node.current = ⟨quarterX, 9 + offset, .north⟩))
 
-def horizontalReached (offset quarterY : Nat) (node : Node) : Bool :=
+def horizontalReached (parent : Index) (offset quarterY : Nat) (node : Node) : Bool :=
   node.parity &&
+    RedShadeGraphRefinement.portPresent (localGrid parent) node.current &&
     (decide (node.current = ⟨9 + offset, quarterY, .west⟩) ||
       decide (node.current = ⟨9 + offset, quarterY, .east⟩))
 
@@ -52,12 +54,12 @@ def completeFor (parent : Index) (parentNodes : List Node) : Bool :=
       (if (Signals.verticalInterior?
             (componentAt (localGrid parent) coordinate (9 + offset))
             (quadrantAt coordinate (9 + offset))).isSome then
-        parentNodes.any (verticalReached offset coordinate)
+        parentNodes.any (verticalReached parent offset coordinate)
       else true) &&
       (if (Signals.horizontalInterior?
             (componentAt (localGrid parent) (9 + offset) coordinate)
             (quadrantAt (9 + offset) coordinate)).isSome then
-        parentNodes.any (horizontalReached offset coordinate)
+        parentNodes.any (horizontalReached parent offset coordinate)
       else true)
 
 abbrev Data := Index × List Node

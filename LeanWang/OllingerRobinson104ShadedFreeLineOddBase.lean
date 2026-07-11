@@ -16,7 +16,8 @@ namespace ShadedFreeLineOddBase
 
 open RedCycles OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphBoards RedShadeCrossingBoards
-  RedShadePaths ShadedFreeLineGraph ShadedFreeLineOffsets
+  RedShadePaths ShadedFreeLineGraph ShadedFreeLinePatternRefinement
+  ShadedFreeLineOffsets
   ShadedFreeLineRecurrence ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 100000
@@ -51,7 +52,7 @@ theorem vertical_node_exists (parent : Index) {offset quarterX : Nat}
     (hinterior : Signals.verticalInterior?
       (componentAt (localGrid parent) quarterX (5 + 2 * offset))
       (quadrantAt quarterX (5 + 2 * offset)) ≠ none) :
-    ∃ node ∈ nodes parent, verticalReached offset quarterX node = true := by
+    ∃ node ∈ nodes parent, verticalReached parent offset quarterX node = true := by
   have hcomplete := completeFor_eq_true parent
   simp only [completeFor, List.all_eq_true] at hcomplete
   have hoffsetComplete := hcomplete offset hoffset
@@ -74,7 +75,7 @@ theorem horizontal_node_exists (parent : Index) {offset quarterY : Nat}
     (hinterior : Signals.horizontalInterior?
       (componentAt (localGrid parent) (5 + 2 * offset) quarterY)
       (quadrantAt (5 + 2 * offset) quarterY) ≠ none) :
-    ∃ node ∈ nodes parent, horizontalReached offset quarterY node = true := by
+    ∃ node ∈ nodes parent, horizontalReached parent offset quarterY node = true := by
   have hcomplete := completeFor_eq_true parent
   simp only [completeFor, List.all_eq_true] at hcomplete
   have hoffsetComplete := hcomplete offset hoffset
@@ -90,6 +91,54 @@ theorem horizontal_node_exists (parent : Index) {offset quarterY : Nat}
   | some interior =>
       simp only [hvalue, Option.isSome_some, if_true, Bool.and_eq_true] at hcase
       simpa only [List.any_eq_true] using hcase.2
+
+theorem liveRowCertificate (parent : Index) {offset : Nat}
+    (hoffset : offset ∈ freeOffsets 0) :
+    LiveRowCertificate (localGrid parent) 2 6 2 6 (5 + 2 * offset) := by
+  intro quarterX hwest heast hinterior
+  have hwest' : 5 < quarterX := by simpa [quarterWest] using hwest
+  have heast' : quarterX < 12 := by simpa [quarterEast] using heast
+  rcases vertical_node_exists parent hoffset hwest' heast' hinterior with
+    ⟨node, hnode, hreached⟩
+  have sound := exploreFast_sound hnode
+  have onCycle := onCycle_of_mem_boardPorts sound.1
+  have cycle : CycleOn (localGrid parent) 2 6 2 6 := by
+    simpa [localGrid] using largeCycle (fun _ _ => parent) 1
+  simp only [verticalReached, Bool.and_eq_true, Bool.or_eq_true,
+    decide_eq_true_eq] at hreached
+  refine ⟨{
+    port := node.current
+    parity := node.parity
+    start := node.origin
+    onCycle := onCycle
+    path := sound.2
+    startLive := portPresent_of_onCycle cycle onCycle
+    portLive := hreached.1.2
+  }, hreached.1.1, hreached.2⟩
+
+theorem liveColumnCertificate (parent : Index) {offset : Nat}
+    (hoffset : offset ∈ freeOffsets 0) :
+    LiveColumnCertificate (localGrid parent) 2 6 2 6 (5 + 2 * offset) := by
+  intro quarterY hsouth hnorth hinterior
+  have hsouth' : 5 < quarterY := by simpa [quarterSouth] using hsouth
+  have hnorth' : quarterY < 12 := by simpa [quarterNorth] using hnorth
+  rcases horizontal_node_exists parent hoffset hsouth' hnorth' hinterior with
+    ⟨node, hnode, hreached⟩
+  have sound := exploreFast_sound hnode
+  have onCycle := onCycle_of_mem_boardPorts sound.1
+  have cycle : CycleOn (localGrid parent) 2 6 2 6 := by
+    simpa [localGrid] using largeCycle (fun _ _ => parent) 1
+  simp only [horizontalReached, Bool.and_eq_true, Bool.or_eq_true,
+    decide_eq_true_eq] at hreached
+  refine ⟨{
+    port := node.current
+    parity := node.parity
+    start := node.origin
+    onCycle := onCycle
+    path := sound.2
+    startLive := portPresent_of_onCycle cycle onCycle
+    portLive := hreached.1.2
+  }, hreached.1.1, hreached.2⟩
 
 theorem rowCertificate (parent : Index) {offset : Nat}
     (hoffset : offset ∈ freeOffsets 0) :
@@ -107,10 +156,10 @@ theorem rowCertificate (parent : Index) {offset : Nat}
   rcases hreached.2 with hsouth | hnorth
   · left
     rw [← hsouth]
-    exact hreached.1 ▸ sound.2
+    exact hreached.1.1 ▸ sound.2
   · right
     rw [← hnorth]
-    exact hreached.1 ▸ sound.2
+    exact hreached.1.1 ▸ sound.2
 
 theorem columnCertificate (parent : Index) {offset : Nat}
     (hoffset : offset ∈ freeOffsets 0) :
@@ -128,10 +177,10 @@ theorem columnCertificate (parent : Index) {offset : Nat}
   rcases hreached.2 with hwest | heast
   · left
     rw [← hwest]
-    exact hreached.1 ▸ sound.2
+    exact hreached.1.1 ▸ sound.2
   · right
     rw [← heast]
-    exact hreached.1 ▸ sound.2
+    exact hreached.1.1 ▸ sound.2
 
 /-- The odd base also retains its graph paths for recursive refinement. -/
 theorem graphHolds_odd_zero : GraphHolds .odd 0 := by
@@ -141,12 +190,12 @@ theorem graphHolds_odd_zero : GraphHolds .odd 0 := by
     simpa [ShadedFreeLineRecurrence.localGrid, localGrid,
       refinementDepth, Phase.extra, west, east, scale, Phase.factor,
       lineCoordinate, quarterStart, quarterWest] using
-      rowCertificate parent mem
+      liveRowCertificate parent mem
   · intro offset mem
     simpa [ShadedFreeLineRecurrence.localGrid, localGrid,
       refinementDepth, Phase.extra, west, east, scale, Phase.factor,
       lineCoordinate, quarterStart, quarterWest] using
-      columnCertificate parent mem
+      liveColumnCertificate parent mem
 
 /-- The two checked lines establish the minimal odd-scale recurrence base. -/
 theorem holds_odd_zero : Holds .odd 0 :=

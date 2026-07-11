@@ -86,12 +86,12 @@ def Holds (phase : Phase) (depth : Nat) : Prop :=
 def GraphHolds (phase : Phase) (depth : Nat) : Prop :=
   ∀ parent : Index,
     (∀ offset ∈ freeOffsets depth,
-      RowCertificate (localGrid phase depth parent)
+      LiveRowCertificate (localGrid phase depth parent)
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
         (lineCoordinate phase depth offset)) ∧
     (∀ offset ∈ freeOffsets depth,
-      ColumnCertificate (localGrid phase depth parent)
+      LiveColumnCertificate (localGrid phase depth parent)
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
         (lineCoordinate phase depth offset))
@@ -123,11 +123,13 @@ theorem holds_of_graphHolds {phase : Phase} {depth : Nat}
   · intro index
     apply isFreeColumn_of_certificate valid cycle shaded
     simpa [lineCoordinate, offsetAt] using
-      certificates.2 (offsetAtDepth depth index) (offsetAtDepth_mem depth index)
+      (certificates.2 (offsetAtDepth depth index)
+        (offsetAtDepth_mem depth index)).toColumnCertificate
   · intro index
     apply isFreeRow_of_certificate valid cycle shaded
     simpa [lineCoordinate, offsetAt] using
-      certificates.1 (offsetAtDepth depth index) (offsetAtDepth_mem depth index)
+      (certificates.1 (offsetAtDepth depth index)
+        (offsetAtDepth_mem depth index)).toRowCertificate
 
 /-- The checked even base retains the paths needed by later refinements. -/
 theorem graphHolds_even_one : GraphHolds .even 1 := by
@@ -137,12 +139,12 @@ theorem graphHolds_even_one : GraphHolds .even 1 := by
     simpa [localGrid, ShadedFreeLineGraphBase.localGrid,
       refinementDepth, Phase.extra, west, east, scale,
       Phase.factor, lineCoordinate, quarterStart, quarterWest] using
-      ShadedFreeLineGraphBase.rowCertificate parent mem
+      ShadedFreeLineGraphBase.liveRowCertificate parent mem
   · intro offset mem
     simpa [localGrid, ShadedFreeLineGraphBase.localGrid,
       refinementDepth, Phase.extra, west, east, scale,
       Phase.factor, lineCoordinate, quarterStart, quarterWest] using
-      ShadedFreeLineGraphBase.columnCertificate parent mem
+      ShadedFreeLineGraphBase.liveColumnCertificate parent mem
 
 /-- The exhaustive first-level graph certificates establish the recurrence base. -/
 theorem holds_even_one : Holds .even 1 :=
@@ -232,12 +234,12 @@ theorem localGrid_succ (phase : Phase) (depth : Nat) (parent : Index) :
 def ProjectionStep : Prop :=
   ∀ phase depth parent,
     (∀ offset ∈ freeOffsets depth,
-      RowCertificate (localGrid phase depth parent)
+      LiveRowCertificate (localGrid phase depth parent)
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
         (lineCoordinate phase depth offset)) →
     (∀ offset ∈ freeOffsets depth,
-      ColumnCertificate (localGrid phase depth parent)
+      LiveColumnCertificate (localGrid phase depth parent)
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
         (lineCoordinate phase depth offset)) →
@@ -251,7 +253,7 @@ theorem graphPeriodicStep_of_projectionStep
   intro phase depth graph parent
   have old := graph parent
   have projected := projection phase depth parent old.1 old.2
-  have certificates := certificates_of_projection projected
+  have certificates := liveCertificates_of_projection projected
   constructor
   · intro offset mem
     simpa [localGrid_succ, west_succ, east_succ] using

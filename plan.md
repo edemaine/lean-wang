@@ -367,6 +367,12 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   `certificates_of_projection` lifts such a projection through two
   substitutions, while `graphPeriodicStep_of_projectionStep` reduces the
   recurrence to the concrete geometric `ProjectionStep` alone.
+- Both finite bases now audit endpoint presence in addition to odd path
+  reachability. `LiveRowCertificate` and `LiveColumnCertificate` package the
+  actual endpoint as a `WeightedSource`; sparse refinement transports both its
+  path and liveness. `GraphHolds` retains these live certificates at every
+  depth, and `liveCertificates_of_projection` closes the invariant under a
+  concrete projection step.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to
