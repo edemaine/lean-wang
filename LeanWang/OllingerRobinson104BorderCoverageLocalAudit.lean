@@ -21,6 +21,7 @@ namespace Closed104
 namespace BorderCoverageLocalAudit
 
 open RedCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphSearch
+  RedShadeGraphSearchSoundness
   RedShadeGraphWeightedSearch ShadedFreeLinePatternRefinement
   Signals.FreeCellLocal
 
@@ -64,7 +65,7 @@ def columnStarts (parent : Index) (kind : SourceKind)
 
 def reached (parent : Index) (starts : List WeightedStart)
     (target : Port) : Bool :=
-  let nodes := exploreFastWeightedReach (fineGrid parent) 8 8 1000 starts
+  let nodes := exploreFastWeighted (fineGrid parent) 8 8 1000 starts
   portPresent (fineGrid parent) target &&
     nodes.any fun node => node.parity && decide (node.current = target)
 
@@ -74,6 +75,13 @@ def LocalRoute (parent : Index) (starts : List WeightedStart)
     Path (fineGrid parent) start.port target (Bool.xor start.parity true) ∧
       portPresent (fineGrid parent) target = true
 
+def BoundedLocalRoute (parent : Index) (starts : List WeightedStart)
+    (target : Port) : Prop :=
+  ∃ start ∈ starts,
+    BoundedPath (fineGrid parent) 8 8 start.port target
+      (Bool.xor start.parity true) ∧
+      portPresent (fineGrid parent) target = true
+
 theorem reached_sound
     {parent : Index} {starts : List WeightedStart} {target : Port}
     (checked : reached parent starts target = true) :
@@ -81,7 +89,21 @@ theorem reached_sound
   simp only [reached, Bool.and_eq_true, List.any_eq_true,
     decide_eq_true_eq] at checked
   rcases checked.2 with ⟨node, hnode, hparity, hcurrent⟩
-  rcases exploreFastWeightedReach_sound hnode with ⟨start, hstart, path⟩
+  rcases exploreFastWeighted_sound hnode with ⟨start, hstart, _horigin, path⟩
+  refine ⟨start, hstart, ?_, checked.1⟩
+  rw [hcurrent] at path
+  simpa [hparity] using path
+
+theorem reached_bounded_sound
+    {parent : Index} {starts : List WeightedStart} {target : Port}
+    (hstarts : ∀ start ∈ starts, PortInBounds start.port 8 8)
+    (checked : reached parent starts target = true) :
+    BoundedLocalRoute parent starts target := by
+  simp only [reached, Bool.and_eq_true, List.any_eq_true,
+    decide_eq_true_eq] at checked
+  rcases checked.2 with ⟨node, hnode, hparity, hcurrent⟩
+  rcases exploreFastWeighted_bounded_sound hstarts hnode with
+    ⟨start, hstart, path⟩
   refine ⟨start, hstart, ?_, checked.1⟩
   rw [hcurrent] at path
   simpa [hparity] using path
