@@ -17,6 +17,7 @@ import LeanWang.UniversalCode
 import LeanWang.TM0Route
 import LeanWang.UniversalTM0
 import LeanWang.UniversalFoldedReduction
+import LeanWang.UniversalDirectReduction
 import LeanWang.TM0FiniteCompiler
 import LeanWang.TM0FoldedProgram
 import LeanWang.TM0FoldedInput
