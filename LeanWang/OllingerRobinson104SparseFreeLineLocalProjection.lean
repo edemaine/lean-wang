@@ -260,6 +260,190 @@ theorem projectsTo_of_backedCandidate
   have sourceOdd : source.parity = true := sourceParity.trans odd
   simpa [sourceOdd] using Path.trans head tail
 
+/-- Aligned bounded row routes project an odd retained row to a local target row. -/
+theorem verticalProjectionAt_of_alignedChecks
+    {grid : Nat → Nat → Index} {west east south north oldRow targetY : Nat}
+    (row : LiveRowCertificate grid west east south north oldRow)
+    (hodd : oldRow % 2 = 1) (htargetY : targetY < 8)
+    (checks : ∀ blockX, alignedRowCheck
+      (grid blockX (oldRow / 2)) 1 targetY = true) :
+    VerticalProjectionAt grid west east south north
+      (8 * (oldRow / 2) + targetY) := by
+  intro x hwest heast interior
+  let blockX := x / 8
+  let localX := x % 8
+  have hlocalX : localX < 8 := Nat.mod_lt _ (by decide)
+  have hx : 8 * blockX + localX = x := by
+    have hdecompose := Nat.mod_add_div x 8
+    dsimp [blockX, localX]
+    omega
+  have localInterior : Signals.verticalInterior?
+      (componentAt (fineGrid (grid blockX (oldRow / 2))) localX targetY)
+      (quadrantAt localX targetY) ≠ none := by
+    have transported := interior
+    rw [← hx] at transported
+    rw [Signals.FreeCellEmbedding.componentAt_two_block
+      grid 0 blockX (oldRow / 2) localX targetY hlocalX htargetY] at transported
+    rw [Signals.FreeCellEmbedding.quadrantAt_block] at transported
+    change Signals.verticalInterior?
+      (componentAt (iterateRefine 2
+        (fun _ _ => grid blockX (oldRow / 2))) localX targetY)
+      (quadrantAt localX targetY) ≠ none
+    simpa [iterateRefine] using transported
+  have hwestLocal : quarterWest (4 * west) < 8 * blockX + localX := by
+    simpa only [hx] using hwest
+  have heastLocal : 8 * blockX + localX < quarterEast (4 * east) := by
+    simpa only [hx] using heast
+  have covered := alignedRowCheck_bounded_sound (checks blockX)
+    localX hlocalX localInterior
+  rcases covered with route | route
+  · left
+    rcases route with ⟨start, hstart, path, targetLive⟩
+    rcases alignedRowStart_backed row hodd blockX localX
+        hwestLocal heastLocal hstart with
+      ⟨candidate, candidateOdd, backed, startCoordinate⟩
+    have startOdd : start.parity = true := by
+      rcases mem_alignedRowStarts hstart with ⟨_, _, _, odd, _⟩
+      exact odd
+    have translated := SparseFreeLineLocalTransport.boundedPath_two_block
+      grid blockX (oldRow / 2) path
+    have targetCoordinate : translatePort ⟨localX, targetY, .south⟩
+        (8 * blockX) (8 * (oldRow / 2)) =
+        ⟨x, 8 * (oldRow / 2) + targetY, .south⟩ := by
+      simp only [translatePort]
+      rw [hx]
+    have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+        ⟨x, 8 * (oldRow / 2) + targetY, .south⟩ false := by
+      rw [← startCoordinate, ← targetCoordinate]
+      simpa only [startOdd, Bool.true_xor, Bool.not_true] using translated
+    have globalLive : portPresent (iterateRefine 2 grid)
+        ⟨x, 8 * (oldRow / 2) + targetY, .south⟩ = true := by
+      rw [SparseFreeLineLocalTransport.portPresent_two_block
+        grid blockX (oldRow / 2) ⟨localX, targetY, .south⟩
+        hlocalX htargetY] at targetLive
+      rw [targetCoordinate] at targetLive
+      exact targetLive
+    exact projectsTo_of_backedCandidate backed candidateOdd tail globalLive
+  · right
+    rcases route with ⟨start, hstart, path, targetLive⟩
+    rcases alignedRowStart_backed row hodd blockX localX
+        hwestLocal heastLocal hstart with
+      ⟨candidate, candidateOdd, backed, startCoordinate⟩
+    have startOdd : start.parity = true := by
+      rcases mem_alignedRowStarts hstart with ⟨_, _, _, odd, _⟩
+      exact odd
+    have translated := SparseFreeLineLocalTransport.boundedPath_two_block
+      grid blockX (oldRow / 2) path
+    have targetCoordinate : translatePort ⟨localX, targetY, .north⟩
+        (8 * blockX) (8 * (oldRow / 2)) =
+        ⟨x, 8 * (oldRow / 2) + targetY, .north⟩ := by
+      simp only [translatePort]
+      rw [hx]
+    have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+        ⟨x, 8 * (oldRow / 2) + targetY, .north⟩ false := by
+      rw [← startCoordinate, ← targetCoordinate]
+      simpa only [startOdd, Bool.true_xor, Bool.not_true] using translated
+    have globalLive : portPresent (iterateRefine 2 grid)
+        ⟨x, 8 * (oldRow / 2) + targetY, .north⟩ = true := by
+      rw [SparseFreeLineLocalTransport.portPresent_two_block
+        grid blockX (oldRow / 2) ⟨localX, targetY, .north⟩
+        hlocalX htargetY] at targetLive
+      rw [targetCoordinate] at targetLive
+      exact targetLive
+    exact projectsTo_of_backedCandidate backed candidateOdd tail globalLive
+
+/-- Aligned bounded column routes project an odd retained column locally. -/
+theorem horizontalProjectionAt_of_alignedChecks
+    {grid : Nat → Nat → Index} {west east south north oldColumn targetX : Nat}
+    (column : LiveColumnCertificate grid west east south north oldColumn)
+    (hodd : oldColumn % 2 = 1) (htargetX : targetX < 8)
+    (checks : ∀ blockY, alignedColumnCheck
+      (grid (oldColumn / 2) blockY) 1 targetX = true) :
+    HorizontalProjectionAt grid west east south north
+      (8 * (oldColumn / 2) + targetX) := by
+  intro y hsouth hnorth interior
+  let blockY := y / 8
+  let localY := y % 8
+  have hlocalY : localY < 8 := Nat.mod_lt _ (by decide)
+  have hy : 8 * blockY + localY = y := by
+    have hdecompose := Nat.mod_add_div y 8
+    dsimp [blockY, localY]
+    omega
+  have localInterior : Signals.horizontalInterior?
+      (componentAt (fineGrid (grid (oldColumn / 2) blockY)) targetX localY)
+      (quadrantAt targetX localY) ≠ none := by
+    have transported := interior
+    rw [← hy] at transported
+    rw [Signals.FreeCellEmbedding.componentAt_two_block
+      grid 0 (oldColumn / 2) blockY targetX localY htargetX hlocalY] at transported
+    rw [Signals.FreeCellEmbedding.quadrantAt_block] at transported
+    change Signals.horizontalInterior?
+      (componentAt (iterateRefine 2
+        (fun _ _ => grid (oldColumn / 2) blockY)) targetX localY)
+      (quadrantAt targetX localY) ≠ none
+    simpa [iterateRefine] using transported
+  have hsouthLocal : quarterSouth (4 * south) < 8 * blockY + localY := by
+    simpa only [hy] using hsouth
+  have hnorthLocal : 8 * blockY + localY < quarterNorth (4 * north) := by
+    simpa only [hy] using hnorth
+  have covered := alignedColumnCheck_bounded_sound (checks blockY)
+    localY hlocalY localInterior
+  rcases covered with route | route
+  · left
+    rcases route with ⟨start, hstart, path, targetLive⟩
+    rcases alignedColumnStart_backed column hodd blockY localY
+        hsouthLocal hnorthLocal hstart with
+      ⟨candidate, candidateOdd, backed, startCoordinate⟩
+    have startOdd : start.parity = true := by
+      rcases mem_alignedColumnStarts hstart with ⟨_, _, _, odd, _⟩
+      exact odd
+    have translated := SparseFreeLineLocalTransport.boundedPath_two_block
+      grid (oldColumn / 2) blockY path
+    have targetCoordinate : translatePort ⟨targetX, localY, .west⟩
+        (8 * (oldColumn / 2)) (8 * blockY) =
+        ⟨8 * (oldColumn / 2) + targetX, y, .west⟩ := by
+      simp only [translatePort]
+      rw [hy]
+    have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+        ⟨8 * (oldColumn / 2) + targetX, y, .west⟩ false := by
+      rw [← startCoordinate, ← targetCoordinate]
+      simpa only [startOdd, Bool.true_xor, Bool.not_true] using translated
+    have globalLive : portPresent (iterateRefine 2 grid)
+        ⟨8 * (oldColumn / 2) + targetX, y, .west⟩ = true := by
+      rw [SparseFreeLineLocalTransport.portPresent_two_block
+        grid (oldColumn / 2) blockY ⟨targetX, localY, .west⟩
+        htargetX hlocalY] at targetLive
+      rw [targetCoordinate] at targetLive
+      exact targetLive
+    exact projectsTo_of_backedCandidate backed candidateOdd tail globalLive
+  · right
+    rcases route with ⟨start, hstart, path, targetLive⟩
+    rcases alignedColumnStart_backed column hodd blockY localY
+        hsouthLocal hnorthLocal hstart with
+      ⟨candidate, candidateOdd, backed, startCoordinate⟩
+    have startOdd : start.parity = true := by
+      rcases mem_alignedColumnStarts hstart with ⟨_, _, _, odd, _⟩
+      exact odd
+    have translated := SparseFreeLineLocalTransport.boundedPath_two_block
+      grid (oldColumn / 2) blockY path
+    have targetCoordinate : translatePort ⟨targetX, localY, .east⟩
+        (8 * (oldColumn / 2)) (8 * blockY) =
+        ⟨8 * (oldColumn / 2) + targetX, y, .east⟩ := by
+      simp only [translatePort]
+      rw [hy]
+    have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+        ⟨8 * (oldColumn / 2) + targetX, y, .east⟩ false := by
+      rw [← startCoordinate, ← targetCoordinate]
+      simpa only [startOdd, Bool.true_xor, Bool.not_true] using translated
+    have globalLive : portPresent (iterateRefine 2 grid)
+        ⟨8 * (oldColumn / 2) + targetX, y, .east⟩ = true := by
+      rw [SparseFreeLineLocalTransport.portPresent_two_block
+        grid (oldColumn / 2) blockY ⟨targetX, localY, .east⟩
+        htargetX hlocalY] at targetLive
+      rw [targetCoordinate] at targetLive
+      exact targetLive
+    exact projectsTo_of_backedCandidate backed candidateOdd tail globalLive
+
 /-- Every required fine vertical segment has an exact sparse old ancestor. -/
 def VerticalSparseAncestors (grid : Nat → Nat → Index)
     (oldRow fineRow : Nat) : Prop :=
