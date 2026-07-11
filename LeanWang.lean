@@ -21,6 +21,7 @@ import LeanWang.UniversalMachineCertificate
 import LeanWang.UniversalFoldedReduction
 import LeanWang.UniversalDirectReduction
 import LeanWang.TM0DirectInput
+import LeanWang.TM0FixedDirectProgram
 import LeanWang.Theorems
 import LeanWang.RoutedScaffold
 import LeanWang.RoutedPlaneDecode
