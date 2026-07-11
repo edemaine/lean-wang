@@ -111,7 +111,7 @@ theorem quarter_blocks (decoded : Decoded x) (k : Int × Int) :
   block_spec decoded.quarter_valid decoded.quarterOrigin_phase k
 
 theorem active_payload (decoded : Decoded x) (p : Int × Int)
-    (hrole : Signals.routeRole (decoded.base p).1 = .active) :
+    (hrole : ShadedSignals.routeRole (decoded.base p).1 = .active) :
     decoded.payload p ∈ T := by
   apply decoded.routed.active_tile p
   simpa only [ShadedSignals.routedScaffold_role, base] using hrole
@@ -123,14 +123,14 @@ theorem corner_payload (decoded : Decoded x) (p : Int × Int)
   simpa only [ShadedSignals.routedScaffold_role, base] using hrole
 
 theorem horizontal_payload_wire (decoded : Decoded x) (p : Int × Int)
-    (hrole : Signals.routeRole (decoded.base p).1 = .horizontal) :
+    (hrole : ShadedSignals.routeRole (decoded.base p).1 = .horizontal) :
     decoded.payload p ∈ completePayloads T ∧
       (decoded.payload p).w = (decoded.payload p).e := by
   apply decoded.routed.horizontal_wire p
   simpa only [ShadedSignals.routedScaffold_role, base] using hrole
 
 theorem vertical_payload_wire (decoded : Decoded x) (p : Int × Int)
-    (hrole : Signals.routeRole (decoded.base p).1 = .vertical) :
+    (hrole : ShadedSignals.routeRole (decoded.base p).1 = .vertical) :
     decoded.payload p ∈ completePayloads T ∧
       (decoded.payload p).s = (decoded.payload p).n := by
   apply decoded.routed.vertical_wire p

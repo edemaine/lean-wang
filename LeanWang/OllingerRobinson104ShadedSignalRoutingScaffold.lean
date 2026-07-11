@@ -38,53 +38,68 @@ theorem quarterLayer_primrec : Primrec quarterLayer :=
   WangTile.productBase_primrec.comp WangTile.productBase_primrec
 
 @[simp] theorem quarterLayer_tile (site : Site) :
-    quarterLayer (tile site) = quarterTile site.1.1 := by
+    quarterLayer (tile site) = Quarters.quarterTile site.1.1 := by
   simp [quarterLayer, tile, RedShades.tile]
 
 /-- The finite marker selecting the lower-left payload seed crossing. -/
 def isCornerMarker (wang : WangTile) : Bool :=
   Signals.isClear wang &&
-    quarterLayer wang == quarterTile Signals.cornerQuarter
+    quarterLayer wang == Quarters.quarterTile Signals.cornerQuarter
 
 theorem isCornerMarker_primrec : Primrec isCornerMarker := by
   exact Primrec.and.comp Signals.isClear_primrec
     (Primrec.beq.comp quarterLayer_primrec
-      (Primrec.const (quarterTile Signals.cornerQuarter)))
+      (Primrec.const (Quarters.quarterTile Signals.cornerQuarter)))
 
 /-- Routing role with the distinguished all-clear quarter promoted to corner. -/
 def routeRole (wang : WangTile) : RouteRole :=
-  if isCornerMarker wang then .corner else Signals.routeRole wang
+  if isCornerMarker wang then RouteRole.corner else Signals.routeRole wang
 
 theorem routeRole_primrec : Primrec routeRole := by
   have hmarker : PrimrecPred (fun wang => isCornerMarker wang = true) :=
     Primrec.eq.comp isCornerMarker_primrec (Primrec.const true)
-  exact Primrec.ite hmarker (Primrec.const .corner) Signals.routeRole_primrec
+  exact Primrec.ite hmarker (Primrec.const RouteRole.corner)
+    Signals.routeRole_primrec
 
 theorem routeRole_eq_active_or_corner_iff (wang : WangTile) :
-    routeRole wang = .active ∨ routeRole wang = .corner ↔
-      Signals.routeRole wang = .active := by
-  simp only [routeRole, isCornerMarker]
-  split_ifs with hmarker
-  · simp only [false_or, true_iff]
-    have hclear : Signals.isClear wang = true := (Bool.and_eq_true.mp hmarker).1
-    exact (Signals.routeRole_eq_active_iff wang).2 hclear
-  · simp
+    routeRole wang = RouteRole.active ∨
+      routeRole wang = RouteRole.corner ↔
+        Signals.routeRole wang = RouteRole.active := by
+  by_cases hmarker : isCornerMarker wang = true
+  · have hclear : Signals.isClear wang = true := by
+      change (Signals.isClear wang &&
+        quarterLayer wang == Quarters.quarterTile Signals.cornerQuarter) = true
+        at hmarker
+      have hparts : Signals.isClear wang = true ∧
+          (quarterLayer wang ==
+            Quarters.quarterTile Signals.cornerQuarter) = true := by
+        simpa only [Bool.and_eq_true] using hmarker
+      exact hparts.1
+    simp [routeRole, hmarker, (Signals.routeRole_eq_active_iff wang).2 hclear]
+  · simp [routeRole, hmarker, Signals.routeRole_ne_corner]
 
 theorem routeRole_tile_eq_corner_iff (site : Site) :
-    routeRole (tile site) = .corner ↔
+    routeRole (tile site) = RouteRole.corner ↔
       site.2 = clearState ∧ site.1.1 = Signals.cornerQuarter := by
-  rw [routeRole]
-  split_ifs with hmarker
-  · simp only [true_iff]
-    rw [Bool.and_eq_true, isClear_tile_eq_true_iff] at hmarker
-    exact ⟨hmarker.1,
-      quarterTile_injective (by simpa only [quarterLayer_tile] using hmarker.2)⟩
-  · simp only [Signals.routeRole_ne_corner, false_iff, not_and]
-    intro hclear hquarter
-    apply hmarker
-    rw [Bool.and_eq_true, isClear_tile_eq_true_iff, quarterLayer_tile,
-      beq_iff_eq]
-    exact ⟨hclear, congrArg quarterTile hquarter⟩
+  by_cases hmarker : isCornerMarker (tile site) = true
+  · have hparts : site.2 = clearState ∧
+        site.1.1 = Signals.cornerQuarter := by
+      change (Signals.isClear (tile site) &&
+        quarterLayer (tile site) ==
+          Quarters.quarterTile Signals.cornerQuarter) = true at hmarker
+      rw [Bool.and_eq_true, isClear_tile_eq_true_iff, beq_iff_eq,
+        quarterLayer_tile] at hmarker
+      exact ⟨hmarker.1, Quarters.quarterTile_injective hmarker.2⟩
+    simp [routeRole, hmarker, hparts]
+  · constructor
+    · intro hcorner
+      have : Signals.routeRole (tile site) = .corner := by
+        simpa [routeRole, hmarker] using hcorner
+      exact False.elim (Signals.routeRole_ne_corner _ this)
+    · rintro ⟨hclear, hquarter⟩
+      exfalso
+      apply hmarker
+      simp [isCornerMarker, hclear, hquarter, isClear_tile_eq_true_iff]
 
 theorem routeRole_tile_eq_active_iff (site : Site) :
     routeRole (tile site) = .active ↔
@@ -102,7 +117,8 @@ theorem routeRole_tile_eq_active_iff (site : Site) :
         ⟨hclear, hcorner⟩))
   · rintro ⟨hclear, hnotCorner⟩
     have hor := (routeRole_eq_active_or_corner_iff (tile site)).2
-      ((Signals.routeRole_tile_eq_active_iff site).2 hclear)
+      ((Signals.routeRole_eq_active_iff _).2
+        ((isClear_tile_eq_true_iff site).2 hclear))
     rcases hor with hactive | hcorner
     · exact hactive
     · exact False.elim (hnotCorner
@@ -111,7 +127,8 @@ theorem routeRole_tile_eq_active_iff (site : Site) :
 theorem routeRole_tile_clear (site : Site) (hclear : site.2 = clearState) :
     routeRole (tile site) = .active ∨ routeRole (tile site) = .corner :=
   (routeRole_eq_active_or_corner_iff _).2
-    ((Signals.routeRole_tile_eq_active_iff site).2 hclear)
+    ((Signals.routeRole_eq_active_iff _).2
+      ((isClear_tile_eq_true_iff site).2 hclear))
 
 /-- Final shaded Robinson scaffold with directional payload channels. -/
 @[irreducible] def routedScaffold : RoutedScaffold where

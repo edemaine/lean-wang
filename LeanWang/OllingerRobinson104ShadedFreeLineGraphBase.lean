@@ -199,6 +199,57 @@ def freeGrid (parent : Index)
     exact isFreeRow_of_certificate valid cycle shaded
       (rowCertificate parent (offsetAt_mem index))
 
+/-- Drop the two southwest audited lines, placing the marker at index zero. -/
+def cornerGridIndex (index : Fin 4) : Fin 6 :=
+  ⟨index.val + 2, by omega⟩
+
+/-- The northeast `4 x 4` suffix of the parent-0 grid starts at the marker. -/
+def cornerFreeGrid
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (localGrid 0) stateGrid)
+    (shaded : CycleShade stateGrid 4 12 4 12 .light) :
+    FreeGrid (localGrid 0) stateGrid 4 12 4 12 4 :=
+  let full := freeGrid 0 valid shaded
+  { columnAt := fun index => full.columnAt (cornerGridIndex index)
+    rowAt := fun index => full.rowAt (cornerGridIndex index)
+    column_strictMono := by
+      intro first second hlt
+      apply full.column_strictMono
+      simp [cornerGridIndex]
+      omega
+    row_strictMono := by
+      intro first second hlt
+      apply full.row_strictMono
+      simp [cornerGridIndex]
+      omega
+    column_west := fun index => full.column_west (cornerGridIndex index)
+    column_east := fun index => full.column_east (cornerGridIndex index)
+    row_south := fun index => full.row_south (cornerGridIndex index)
+    row_north := fun index => full.row_north (cornerGridIndex index)
+    freeColumn := fun index => full.freeColumn (cornerGridIndex index)
+    freeRow := fun index => full.freeRow (cornerGridIndex index) }
+
+set_option linter.style.nativeDecide false in
+theorem cornerFreeGrid_lowerLeft_quarter :
+    (localGrid 0
+        ((9 + offsetAt (cornerGridIndex 0)) / 2)
+        ((9 + offsetAt (cornerGridIndex 0)) / 2),
+      quadrantAt
+        (9 + offsetAt (cornerGridIndex 0))
+        (9 + offsetAt (cornerGridIndex 0))) = Signals.cornerQuarter := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+@[simp] theorem cornerFreeGrid_lowerLeft_coordinate
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (localGrid 0) stateGrid)
+    (shaded : CycleShade stateGrid 4 12 4 12 .light) :
+    (cornerFreeGrid valid shaded).columnAt 0 = 16 ∧
+      (cornerFreeGrid valid shaded).rowAt 0 = 16 := by
+  change 9 + offsetAt (cornerGridIndex 0) = 16 ∧
+    9 + offsetAt (cornerGridIndex 0) = 16
+  native_decide
+
 end ShadedFreeLineGraphBase
 end Closed104
 end Figure13Layers

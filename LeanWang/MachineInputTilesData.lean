@@ -88,7 +88,7 @@ theorem initialLeft_primrec :
     Primrec.pair Primrec.fst
       (Primrec.pair (Primrec.fst.comp Primrec.snd)
         (Primrec.pred.comp (Primrec.snd.comp Primrec.snd)))
-  exact Primrec.ite hzero (Primrec.const .boundary)
+  exact Primrec.ite hzero (Primrec.const MachineCell.boundary)
     (initialCell_primrec.comp hpred)
 
 theorem action_primrec :
@@ -106,8 +106,9 @@ theorem nextSymbol_primrec :
   unfold nextSymbol
   have hzero : PrimrecPred (fun p : TableProgram × List Nat × Nat => p.2.2 = 0) :=
     Primrec.eq.comp (Primrec.snd.comp Primrec.snd) (Primrec.const 0)
-  have haction := action_primrec.comp
-    (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd))
+  have haction : Primrec (fun p : TableProgram × List Nat × Nat =>
+      action p.1 p.2.1) := action_primrec.comp
+        (Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd))
   exact Primrec.ite hzero (Primrec.fst.comp haction) inputAt_primrec
 
 private theorem moveApply_primrec :
@@ -157,7 +158,7 @@ theorem nextLeft_primrec :
     Primrec.pair Primrec.fst
       (Primrec.pair (Primrec.fst.comp Primrec.snd)
         (Primrec.pred.comp (Primrec.snd.comp Primrec.snd)))
-  exact Primrec.ite hzero (Primrec.const .boundary)
+  exact Primrec.ite hzero (Primrec.const MachineCell.boundary)
     (nextCell_primrec.comp hpred)
 
 theorem historyTile_primrec :
@@ -266,7 +267,8 @@ def seed (program : TableProgram) (input : List Nat) : WangTile :=
 theorem initialTiles_primrec :
     Primrec (fun p : TableProgram × List Nat => initialTiles p.1 p.2) := by
   unfold initialTiles
-  have hlength := Primrec.list_length.comp Primrec.snd
+  have hlength : Primrec (fun p : TableProgram × List Nat => p.2.length) :=
+    Primrec.list_length.comp Primrec.snd
   have hbound := Primrec.nat_add.comp hlength (Primrec.const 3)
   have hrange := Primrec.list_range.comp hbound
   have hmap : Primrec₂ (fun p : TableProgram × List Nat => fun position =>

@@ -28,8 +28,11 @@ def postProgram : PostProgram :=
 def inputWord (code : Code) : List Nat :=
   TM0DirectInput.inputWord (UniversalTM0.input code)
 
+theorem inputWord_primrec : Primrec inputWord :=
+  TM0DirectInput.inputWord_primrec.comp UniversalTM0.input_primrec
+
 theorem inputWord_computable : Computable inputWord :=
-  TM0DirectInput.inputWord_computable.comp UniversalTM0.input_computable
+  inputWord_primrec.to_comp
 
 def machine : Machine :=
   postProgram.toTableProgram.toMachine
@@ -55,25 +58,43 @@ theorem fixedDomino_correct (code : Code) :
   exact (MachineInputTiles.tilesQuarterWithSeed_iff_not_halts
     (input_supported code)).trans (not_congr (machine_halts_iff code))
 
+def instanceInput (code : Code) : TableProgram × List Nat :=
+  (postProgram.toTableProgram, inputWord code)
+
+theorem instanceInput_primrec : Primrec instanceInput := by
+  exact Primrec.pair (Primrec.const postProgram.toTableProgram)
+    inputWord_primrec
+
+def fixedTiles (code : Code) : TileSet :=
+  MachineInputTilesData.tiles (instanceInput code).1 (instanceInput code).2
+
+theorem fixedTiles_primrec : Primrec fixedTiles := by
+  exact MachineInputTilesData.tiles_primrec.comp instanceInput_primrec
+
+def fixedSeed (code : Code) : WangTile :=
+  MachineInputTilesData.seed (instanceInput code).1 (instanceInput code).2
+
+theorem fixedSeed_primrec : Primrec fixedSeed := by
+  exact MachineInputTilesData.seed_primrec.comp instanceInput_primrec
+
 /-- Executable finite-list presentation of `fixedDomino`. -/
 def fixedDominoData (code : Code) : TileSet × WangTile :=
-  (MachineInputTilesData.tiles postProgram.toTableProgram (inputWord code),
-    MachineInputTilesData.seed postProgram.toTableProgram (inputWord code))
+  (fixedTiles code, fixedSeed code)
 
-theorem fixedDominoData_computable : Computable fixedDominoData := by
-  have harg : Computable (fun code : Code =>
-      (postProgram.toTableProgram, inputWord code)) :=
-    Computable.pair (Computable.const postProgram.toTableProgram)
-      inputWord_computable
-  exact Computable.pair
-    (MachineInputTilesData.tiles_computable.comp harg)
-    (MachineInputTilesData.seed_computable.comp harg)
+theorem fixedDominoData_primrec : Primrec fixedDominoData := by
+  exact Primrec.pair fixedTiles_primrec fixedSeed_primrec
+
+theorem fixedDominoData_computable : Computable fixedDominoData :=
+  fixedDominoData_primrec.to_comp
 
 theorem fixedDominoData_correct (code : Code) :
     TilesQuarterWithSeed (fixedDominoData code).1
         (fixedDominoData code).2 ↔
       ¬ (Nat.Partrec.Code.eval code 0).Dom := by
   unfold fixedDominoData
+  change TilesQuarterWithSeed
+    (MachineInputTilesData.tiles postProgram.toTableProgram (inputWord code))
+    (MachineInputTilesData.seed postProgram.toTableProgram (inputWord code)) ↔ _
   rw [MachineInputTilesData.seed_eq]
   rw [tilesQuarterWithSeed_congr
     (MachineInputTilesData.mem_tiles_iff

@@ -204,8 +204,11 @@ theorem input_ne_nil (c : Nat.Partrec.Code) : input c ≠ [] := by
 The varying initial tape is computable from the source code.  This is now a
 standalone binary-encoding lemma; it does not inspect or compile source syntax.
 -/
+theorem input_primrec : Primrec input := by
+  exact partrecStartedTM0InputFor_primrec.comp sourceInput_primrec
+
 theorem input_computable : Computable input := by
-  exact partrecStartedTM0InputFor_primrec.to_comp.comp sourceInput_computable
+  exact input_primrec.to_comp
 
 theorem eval_dom_iff (c : Nat.Partrec.Code) :
     (Turing.TM0.eval machine (input c)).Dom ↔

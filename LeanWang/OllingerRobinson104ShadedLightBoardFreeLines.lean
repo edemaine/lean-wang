@@ -212,13 +212,17 @@ theorem routeRole_at_clear_eq_corner_iff
   constructor
   · intro hcorner
     have hquarter := (hrole.1 hcorner).2
-    simpa only [ShadedRoutedPlaneDecode.Decoded.quarter,
-      ShadedSignals.quarterPlane, ShadedSignals.sitePlane, p] using hquarter
+    change RedShades.quarterPlane
+      (ShadedSignals.basePlane decoded.base) p = Signals.cornerQuarter
+    rw [ShadedSignals.quarterPlane_basePlane]
+    exact hquarter
   · intro hquarter
     apply hrole.2
     refine ⟨hsignal, ?_⟩
-    simpa only [ShadedRoutedPlaneDecode.Decoded.quarter,
-      ShadedSignals.quarterPlane, ShadedSignals.sitePlane, p] using hquarter
+    change RedShades.quarterPlane
+      (ShadedSignals.basePlane decoded.base) p = Signals.cornerQuarter at hquarter
+    rw [ShadedSignals.quarterPlane_basePlane] at hquarter
+    exact hquarter
 
 theorem payload_at_clear_corner_eq_seed
     (decoded : ShadedRoutedPlaneDecode.Decoded x)

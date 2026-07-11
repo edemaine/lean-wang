@@ -323,6 +323,10 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   theorem into an ordered size-6 `FreeGrid` for every valid light canonical
   board. Downstream edits rebuild this proof-facing wrapper in seconds without
   rerunning the exhaustive search.
+- For parent tile `0`, the third audited row and column cross at the exact
+  distinguished `(0, southwest)` quarter. Dropping the first two rows and
+  columns therefore gives a checked `4 x 4` free grid whose lower-left payload
+  is forced to the seed by the routed corner marker.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
