@@ -313,17 +313,15 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   finite square. A generic constructor packages semantic freedom at all
   indexed offsets into an ordered `FreeGrid`. The six audited graph lines
   instantiate this constructor at depth one in every translated parent block,
-  so the remaining induction step is precisely a two-refinement lift of the
-  row and column graph certificates along `expandOffset`.
+  so the remaining induction step is a weighted two-refinement projection of
+  the complete row and column certificate family.
 - Robinson's Section 7 proof identifies the cleaner induction invariant: the
   whole free-line pattern repeats periodically inside the next board, rather
   than individual quarter-graph ports refining spatially. The exact Lean list
   decomposition is now proved: a successor pattern consists of the new first
   side line, both descendants of every old offset, and the new last side line.
   Consequently every offset is strictly below the removed outer endpoint.
-  The semantic step should prove this whole-pattern periodicity directly and
-  avoid any retained depth-two exhaustive search.
-- The semantic recurrence is now stated for both scale parities. This is
+- The recurrence is now stated for both scale parities. This is
   necessary because the crossing-board theorem guarantees a light board at
   level `L` or `L-1` but does not pin which parity is light. The even depth-one
   base is discharged by the existing finite graph certificates. For either
@@ -332,8 +330,8 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   an ordered `FreeGrid`. The odd parity now starts at the genuinely minimal
   level-one board: a cached all-parent graph audit proves its two scaled
   depth-zero offsets free and graph-search soundness exposes `holds_odd_zero`.
-  Thus the common periodic successor theorem is the only remaining
-  board/free-line recurrence obligation.
+  Both bases now retain `GraphHolds`, rather than immediately discarding their
+  paths into semantic freedom.
 - Red-wire propagation is factored through a finite port graph. Straight
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality
@@ -360,6 +358,15 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   matching edges and parity-reversing crossings, lifts through two
   substitutions to a path with exactly the same parity. Induction therefore
   lifts arbitrary finite path certificates at every recurrence depth.
+- A line-by-line projection was rejected by a finite diagnostic: some new red
+  components connect to a different old free line. A full-board depth-two
+  audit succeeds, and the correct weighted whole-pattern flood also succeeds:
+  outer-cycle sources begin even, old free-line sources begin odd, and every
+  new candidate is reached odd. `WeightedSource`, `ProjectsTo`, and
+  `PatternProjection` encode exactly this invariant. The generic theorem
+  `certificates_of_projection` lifts such a projection through two
+  substitutions, while `graphPeriodicStep_of_projectionStep` reduces the
+  recurrence to the concrete geometric `ProjectionStep` alone.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to

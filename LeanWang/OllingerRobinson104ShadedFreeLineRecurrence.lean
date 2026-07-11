@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedFreeLineGraphBase
+import LeanWang.OllingerRobinson104ShadedFreeLinePatternRefinement
 
 /-!
 The semantic Figure 18 free-line recurrence.
@@ -20,6 +21,7 @@ namespace Closed104
 namespace ShadedFreeLineRecurrence
 
 open RedCycles RedShadeCycles RedShadePaths ShadedFreeGrid ShadedFreeLineGraphBase
+  ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineOffsets ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 100000
@@ -57,6 +59,9 @@ def offsetAt (phase : Phase) (depth : Nat)
     (index : Fin (freeOffsets depth).length) : Nat :=
   phase.factor * offsetAtDepth depth index
 
+def lineCoordinate (phase : Phase) (depth offset : Nat) : Nat :=
+  quarterStart phase depth + phase.factor * offset
+
 /-- Every recursive candidate row and column is semantically free. -/
 def OffsetsFree (phase : Phase) (depth : Nat) (parent : Index)
     (stateGrid : Nat → Nat → RedShades.State) : Prop :=
@@ -77,36 +82,71 @@ def Holds (phase : Phase) (depth : Nat) : Prop :=
       (west phase depth) (east phase depth) .light →
     OffsetsFree phase depth parent stateGrid
 
-set_option maxHeartbeats 1000000 in
--- Normalizing the translated audited grid through the abstract recurrence coordinates.
-/-- The exhaustive first-level graph certificates establish the recurrence base. -/
-theorem holds_even_one : Holds .even 1 := by
+/-- Row and column paths retained for the recursive geometric argument. -/
+def GraphHolds (phase : Phase) (depth : Nat) : Prop :=
+  ∀ parent : Index,
+    (∀ offset ∈ freeOffsets depth,
+      RowCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset)) ∧
+    (∀ offset ∈ freeOffsets depth,
+      ColumnCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset))
+
+theorem two_pow_refinementLevel_eq_scale (phase : Phase) (depth : Nat) :
+    2 ^ (2 * depth + phase.extra) = scale phase depth := by
+  cases phase
+  · simp [Phase.extra, scale, Phase.factor, pow_mul]
+  · rw [show 2 * depth + Phase.odd.extra = 2 * depth + 1 by rfl,
+      pow_add, pow_mul]
+    simp [scale, Phase.factor, mul_comm]
+
+theorem canonicalCycle (phase : Phase) (depth : Nat) (parent : Index) :
+    OrientedRedCycles.CycleOn (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth) := by
+  have cycle := OrientedRedBoardTranslations.at_scale
+    (fun _ _ => parent) (2 * depth + phase.extra) 0 0
+  rw [two_pow_refinementLevel_eq_scale] at cycle
+  simpa [localGrid, refinementDepth, west, east, mul_comm] using cycle
+
+/-- Retained graph certificates imply the semantic free-line invariant. -/
+theorem holds_of_graphHolds {phase : Phase} {depth : Nat}
+    (graph : GraphHolds phase depth) : Holds phase depth := by
   intro parent stateGrid valid shaded
-  let grid : Nat → Nat → Index := fun _ _ => parent
-  have hshift : RefinementTranslation.shiftGrid grid 0 0 = grid := by
-    funext x y
-    simp [RefinementTranslation.shiftGrid, grid]
-  have localValid : ValidShadeGrid
-      (iterateRefine 4 (RefinementTranslation.shiftGrid grid 0 0)) stateGrid := by
-    rw [hshift]
-    simpa [localGrid, refinementDepth, Phase.extra, grid] using valid
-  have localShaded : CycleShade stateGrid 4 12 4 12 .light := by
-    simpa [west, east, scale, Phase.factor] using shaded
+  have cycle := canonicalCycle phase depth parent
+  have certificates := graph parent
   constructor
   · intro index
-    have free := freeColumn_offsetAtDepth_one_shift grid 0 0 rfl
-      localValid localShaded index
-    rw [hshift] at free
-    simpa [localGrid, refinementDepth, quarterStart, west, east, scale,
-      offsetAt, Phase.factor, Phase.extra, quarterWest, grid]
-      using free
+    apply isFreeColumn_of_certificate valid cycle shaded
+    simpa [lineCoordinate, offsetAt] using
+      certificates.2 (offsetAtDepth depth index) (offsetAtDepth_mem depth index)
   · intro index
-    have free := freeRow_offsetAtDepth_one_shift grid 0 0 rfl
-      localValid localShaded index
-    rw [hshift] at free
-    simpa [localGrid, refinementDepth, quarterStart, west, east, scale,
-      offsetAt, Phase.factor, Phase.extra, quarterWest, grid]
-      using free
+    apply isFreeRow_of_certificate valid cycle shaded
+    simpa [lineCoordinate, offsetAt] using
+      certificates.1 (offsetAtDepth depth index) (offsetAtDepth_mem depth index)
+
+/-- The checked even base retains the paths needed by later refinements. -/
+theorem graphHolds_even_one : GraphHolds .even 1 := by
+  intro parent
+  constructor
+  · intro offset mem
+    simpa [localGrid, ShadedFreeLineGraphBase.localGrid,
+      refinementDepth, Phase.extra, west, east, scale,
+      Phase.factor, lineCoordinate, quarterStart, quarterWest] using
+      ShadedFreeLineGraphBase.rowCertificate parent mem
+  · intro offset mem
+    simpa [localGrid, ShadedFreeLineGraphBase.localGrid,
+      refinementDepth, Phase.extra, west, east, scale,
+      Phase.factor, lineCoordinate, quarterStart, quarterWest] using
+      ShadedFreeLineGraphBase.columnCertificate parent mem
+
+/-- The exhaustive first-level graph certificates establish the recurrence base. -/
+theorem holds_even_one : Holds .even 1 :=
+  holds_of_graphHolds graphHolds_even_one
 
 /-- Semantic offsets package into the ordered grid used by routing. -/
 def freeGridOfOffsetsFree
@@ -159,13 +199,70 @@ def freeGridOfOffsetsFree
   freeColumn := free.1
   freeRow := free.2
 
-/-- Robinson periodicity at one step is the sole remaining recurrence lemma. -/
-def PeriodicStep : Prop :=
-  ∀ phase depth, Holds phase depth → Holds phase (depth + 1)
+/-- Graph-level recurrence, before shade semantics are discarded. -/
+def GraphPeriodicStep : Prop :=
+  ∀ phase depth, GraphHolds phase depth → GraphHolds phase (depth + 1)
 
-theorem holds_from (phase : Phase) (baseDepth : Nat)
-    (base : Holds phase baseDepth) (step : PeriodicStep) :
-    ∀ extra, Holds phase (baseDepth + extra) := by
+theorem scale_succ (phase : Phase) (depth : Nat) :
+    scale phase (depth + 1) = 4 * scale phase depth := by
+  simp [scale, pow_succ]
+  ac_rfl
+
+theorem west_succ (phase : Phase) (depth : Nat) :
+    west phase (depth + 1) = 4 * west phase depth := by
+  simp [west, scale_succ]
+
+theorem east_succ (phase : Phase) (depth : Nat) :
+    east phase (depth + 1) = 4 * east phase depth := by
+  rw [east, east, scale_succ]
+  ac_rfl
+
+theorem localGrid_succ (phase : Phase) (depth : Nat) (parent : Index) :
+    localGrid phase (depth + 1) parent =
+      iterateRefine 2 (localGrid phase depth parent) := by
+  unfold localGrid
+  rw [show refinementDepth phase (depth + 1) =
+      2 + refinementDepth phase depth by
+    simp [refinementDepth]
+    omega]
+  exact (PlaneRedBoards.iterateRefine_add 2
+    (refinementDepth phase depth) (fun _ _ => parent)).symm
+
+/-- Concrete whole-pattern projections are exactly the remaining graph step. -/
+def ProjectionStep : Prop :=
+  ∀ phase depth parent,
+    (∀ offset ∈ freeOffsets depth,
+      RowCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset)) →
+    (∀ offset ∈ freeOffsets depth,
+      ColumnCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset)) →
+    PatternProjection (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (freeOffsets (depth + 1)) (lineCoordinate phase (depth + 1))
+
+theorem graphPeriodicStep_of_projectionStep
+    (projection : ProjectionStep) : GraphPeriodicStep := by
+  intro phase depth graph parent
+  have old := graph parent
+  have projected := projection phase depth parent old.1 old.2
+  have certificates := certificates_of_projection projected
+  constructor
+  · intro offset mem
+    simpa [localGrid_succ, west_succ, east_succ] using
+      certificates.1 offset mem
+  · intro offset mem
+    simpa [localGrid_succ, west_succ, east_succ] using
+      certificates.2 offset mem
+
+theorem graphHolds_from (phase : Phase) (baseDepth : Nat)
+    (base : GraphHolds phase baseDepth) (step : GraphPeriodicStep) :
+    ∀ extra, GraphHolds phase (baseDepth + extra) := by
   intro extra
   induction extra with
   | zero => simpa

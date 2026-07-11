@@ -133,18 +133,24 @@ theorem columnCertificate (parent : Index) {offset : Nat}
     rw [← heast]
     exact hreached.1 ▸ sound.2
 
-/-- The two checked lines establish the minimal odd-scale recurrence base. -/
-theorem holds_odd_zero : Holds .odd 0 := by
-  intro parent stateGrid valid shaded
-  have cycle : CycleOn (localGrid parent) 2 6 2 6 := by
-    simpa [localGrid] using largeCycle (fun _ _ => parent) 1
+/-- The odd base also retains its graph paths for recursive refinement. -/
+theorem graphHolds_odd_zero : GraphHolds .odd 0 := by
+  intro parent
   constructor
-  · intro index
-    apply isFreeColumn_of_certificate valid cycle shaded
-    exact columnCertificate parent (offsetAtDepth_mem 0 index)
-  · intro index
-    apply isFreeRow_of_certificate valid cycle shaded
-    exact rowCertificate parent (offsetAtDepth_mem 0 index)
+  · intro offset mem
+    simpa [ShadedFreeLineRecurrence.localGrid, localGrid,
+      refinementDepth, Phase.extra, west, east, scale, Phase.factor,
+      lineCoordinate, quarterStart, quarterWest] using
+      rowCertificate parent mem
+  · intro offset mem
+    simpa [ShadedFreeLineRecurrence.localGrid, localGrid,
+      refinementDepth, Phase.extra, west, east, scale, Phase.factor,
+      lineCoordinate, quarterStart, quarterWest] using
+      columnCertificate parent mem
+
+/-- The two checked lines establish the minimal odd-scale recurrence base. -/
+theorem holds_odd_zero : Holds .odd 0 :=
+  holds_of_graphHolds graphHolds_odd_zero
 
 end ShadedFreeLineOddBase
 end Closed104
