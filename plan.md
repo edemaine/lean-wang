@@ -286,7 +286,9 @@ position-row obligation in the final theorem.
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality
   or opposition from its accumulated crossing parity, giving the recursive
-  geometry proof a compact certificate language.
+  geometry proof a compact certificate language. A Boolean move-list checker
+  is proved sound for this graph, allowing native finite geometry searches to
+  return ordinary proposition-level path proofs.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
