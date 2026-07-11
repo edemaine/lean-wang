@@ -1,0 +1,137 @@
+/-
+Copyright (c) 2026 lean-wang contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Erik Demaine, Stefan Langerman, GPT 5.5
+-/
+import LeanWang.OllingerRobinson104SparseFreeLineLocalStates
+import LeanWang.OllingerRobinson104SignalFreeCellEmbedding
+
+/-!
+# Transporting sparse free-line ancestors between translated macrocells
+
+The finite state checks apply to a constant-parent `8 x 8` quarter block.  This
+module transports their witnesses to the corresponding translated block in an
+arbitrary iterated refinement, retaining the exact sparse global coordinate.
+-/
+
+namespace LeanWang
+namespace OllingerRobinson
+namespace Figure13Layers
+namespace Closed104
+namespace SparseFreeLineLocalTransport
+
+open RedCycles RedShadeGraphRefinement Signals.FreeCellLocal
+  Signals.FreeCellEmbedding SparseFreeLineLocalStates
+
+set_option maxRecDepth 20000
+
+theorem sparseCoordinate_two_block (block offset : Nat) (hoffset : offset < 2) :
+    sparseCoordinate (2 * block + offset) = 8 * block + sparseCoordinate offset := by
+  have cases : offset = 0 ∨ offset = 1 := by omega
+  rcases cases with rfl | rfl
+  · simp [sparseCoordinate, macroOrigin, localCoordinate]
+  · have hdiv : (2 * block + 1) / 2 = block := by omega
+    simp [sparseCoordinate, macroOrigin, localCoordinate, hdiv]
+
+theorem componentAt_old_block (grid : Nat → Nat → Index)
+    (level blockX blockY localX localY : Nat)
+    (hx : localX < 2) (hy : localY < 2) :
+    componentAt (iterateRefine level grid)
+        (2 * blockX + localX) (2 * blockY + localY) =
+      componentAt (coarseGrid (iterateRefine level grid blockX blockY))
+        localX localY := by
+  simp [componentAt, coarseGrid]
+  congr <;> omega
+
+theorem quadrantAt_old_block (blockX blockY localX localY : Nat)
+    (hx : localX < 2) (hy : localY < 2) :
+    quadrantAt (2 * blockX + localX) (2 * blockY + localY) =
+      quadrantAt localX localY := by
+  have hxCases : localX = 0 ∨ localX = 1 := by omega
+  have hyCases : localY = 0 ∨ localY = 1 := by omega
+  rcases hxCases with rfl | rfl <;> rcases hyCases with rfl | rfl <;>
+    simp [quadrantAt]
+
+/-- A checked local vertical ancestor becomes an old-grid sparse ancestor. -/
+theorem verticalAncestor_two_block
+    (grid : Nat → Nat → Index) (level blockX blockY : Nat)
+    (sourceY targetY targetX : Nat)
+    (hsourceY : sourceY < 2) (htargetY : targetY < 8)
+    (htargetX : targetX < 8)
+    (checked : verticalCheck sourceY targetY
+      (iterateRefine level grid blockX blockY) = true)
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine (level + 2) grid)
+        (8 * blockX + targetX) (8 * blockY + targetY))
+      (quadrantAt (8 * blockX + targetX) (8 * blockY + targetY)) ≠ none) :
+    ∃ sourceX, sourceX < 2 ∧
+      sparseCoordinate (2 * blockX + sourceX) = 8 * blockX + targetX ∧
+      Signals.verticalInterior?
+        (componentAt (iterateRefine level grid)
+          (2 * blockX + sourceX) (2 * blockY + sourceY))
+        (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none := by
+  let parent := iterateRefine level grid blockX blockY
+  have localInterior : Signals.verticalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none := by
+    rw [componentAt_two_block grid level blockX blockY targetX targetY
+      htargetX htargetY] at interior
+    rw [quadrantAt_block] at interior
+    change Signals.verticalInterior?
+      (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none
+    simpa only [parent] using interior
+  rcases verticalCheck_sound checked targetX htargetX localInterior with
+    ⟨sourceX, hsourceX, coordinate, sourceInterior⟩
+  refine ⟨sourceX, hsourceX, ?_, ?_⟩
+  · rw [sparseCoordinate_two_block blockX sourceX hsourceX, coordinate]
+  · rw [componentAt_old_block grid level blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    rw [quadrantAt_old_block blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    exact sourceInterior
+
+/-- A checked local horizontal ancestor becomes an old-grid sparse ancestor. -/
+theorem horizontalAncestor_two_block
+    (grid : Nat → Nat → Index) (level blockX blockY : Nat)
+    (sourceX targetX targetY : Nat)
+    (hsourceX : sourceX < 2) (htargetX : targetX < 8)
+    (htargetY : targetY < 8)
+    (checked : horizontalCheck sourceX targetX
+      (iterateRefine level grid blockX blockY) = true)
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine (level + 2) grid)
+        (8 * blockX + targetX) (8 * blockY + targetY))
+      (quadrantAt (8 * blockX + targetX) (8 * blockY + targetY)) ≠ none) :
+    ∃ sourceY, sourceY < 2 ∧
+      sparseCoordinate (2 * blockY + sourceY) = 8 * blockY + targetY ∧
+      Signals.horizontalInterior?
+        (componentAt (iterateRefine level grid)
+          (2 * blockX + sourceX) (2 * blockY + sourceY))
+        (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none := by
+  let parent := iterateRefine level grid blockX blockY
+  have localInterior : Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none := by
+    rw [componentAt_two_block grid level blockX blockY targetX targetY
+      htargetX htargetY] at interior
+    rw [quadrantAt_block] at interior
+    change Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none
+    simpa only [parent] using interior
+  rcases horizontalCheck_sound checked targetY htargetY localInterior with
+    ⟨sourceY, hsourceY, coordinate, sourceInterior⟩
+  refine ⟨sourceY, hsourceY, ?_, ?_⟩
+  · rw [sparseCoordinate_two_block blockY sourceY hsourceY, coordinate]
+  · rw [componentAt_old_block grid level blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    rw [quadrantAt_old_block blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    exact sourceInterior
+
+end SparseFreeLineLocalTransport
+end Closed104
+end Figure13Layers
+end OllingerRobinson
+end LeanWang
