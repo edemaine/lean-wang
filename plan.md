@@ -387,6 +387,20 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   `7` (odd phase) have no perpendicular target segments. The per-old-line
   strengthening is false for two degenerate groups, so the retained quotient
   obligation intentionally permits routing through the whole old pattern.
+- Robinson's original Section 7 argument (`robinson.pdf`, pp. 203-204) is a
+  periodic geometric count: the middle free-line pattern repeats exactly and
+  the two half-patterns repeat at the sides. A raw-empty-line probe shows why
+  the light/dark decoration cannot be discarded in this formalization: at
+  depths one through three the even phase has only two geometrically empty
+  candidate offsets and the odd phase only one.
+- `RedShadeGraphWeightedSearch` now implements the whole-pattern audit
+  faithfully. Each source carries its already-known outer-cycle parity;
+  weighted flood soundness cancels that initial weight and returns an ordinary
+  proposition-level path. `projectsTo_of_weightedNode` turns any reached node
+  of total odd parity directly into `ProjectsTo`. A proof-producing quotient
+  audit must still retain the chosen source descriptor (or certify both live
+  endpoint sides), because a row/column certificate existentially chooses its
+  endpoint.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to

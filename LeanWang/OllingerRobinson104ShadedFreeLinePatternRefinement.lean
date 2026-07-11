@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104RedShadeGraphPathRefinement
+import LeanWang.OllingerRobinson104RedShadeGraphWeightedSearch
 import LeanWang.OllingerRobinson104ShadedFreeLineGraph
 import LeanWang.OllingerRobinson104ShadedFreeLineOffsets
 
@@ -26,7 +27,7 @@ namespace ShadedFreeLinePatternRefinement
 
 open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
   RedShadeGraphRefinement ShadedFreeLineGraph Signals.FreeCellLocal
-  ShadedFreeLineOffsets
+  ShadedFreeLineOffsets RedShadeGraphSearch RedShadeGraphWeightedSearch
 
 set_option maxRecDepth 20000
 
@@ -170,6 +171,34 @@ structure ProjectsTo {grid : Nat → Nat → Index}
   path : Path (iterateRefine 2 grid) (sparsePort source.port) target
     (Bool.xor source.parity true)
   targetLive : portPresent (iterateRefine 2 grid) target = true
+
+def WeightedSource.weightedStart
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (source : WeightedSource grid west east south north) : WeightedStart where
+  port := sparsePort source.port
+  parity := source.parity
+
+/-- A successful total-odd weighted flood node is exactly a projection witness. -/
+theorem projectsTo_of_weightedNode
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (sources : List (WeightedSource grid west east south north))
+    {width height fuel : Nat} {node : Node} {target : Port}
+    (hnode : node ∈ exploreFastWeighted (iterateRefine 2 grid)
+      width height fuel (sources.map WeightedSource.weightedStart))
+    (hparity : node.parity = true) (hcurrent : node.current = target)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases exploreFastWeighted_sound hnode with
+    ⟨start, hstart, _horigin, path⟩
+  rcases List.mem_map.1 hstart with ⟨source, hsource, rfl⟩
+  refine ⟨{
+    source := source
+    path := ?_
+    targetLive := targetLive
+  }⟩
+  rw [hcurrent] at path
+  simpa [WeightedSource.weightedStart, hparity] using path
 
 /-- An odd local tail from an outer-cycle port projects to its target. -/
 def ProjectsTo.ofCyclePath
