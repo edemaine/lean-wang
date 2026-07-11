@@ -163,6 +163,25 @@ theorem offsets_pairwise (depth : Nat) :
 theorem offsets_nodup (depth : Nat) : (offsets depth).Nodup :=
   (offsets_pairwise depth).imp fun hlt => Nat.ne_of_lt hlt
 
+def offsetAt (depth : Nat) (index : Fin (offsets depth).length) : Nat :=
+  (offsets depth).get index
+
+theorem offsetAt_mem (depth : Nat) (index : Fin (offsets depth).length) :
+    offsetAt depth index ∈ offsets depth := List.get_mem _ _
+
+theorem offsetAt_strictMono (depth : Nat)
+    {first second : Fin (offsets depth).length} (hlt : first < second) :
+    offsetAt depth first < offsetAt depth second :=
+  (offsets_pairwise depth).rel_get_of_lt hlt
+
+theorem offsetAt_full_bounds (depth : Nat)
+    (index : Fin (offsets depth).length) :
+    0 < offsetAt depth index ∧
+      offsetAt depth index < 4 ^ (depth + 1) - 1 := by
+  have hmem := offsets_mem_freeOffsets depth _ (offsetAt_mem depth index)
+  exact ⟨(mem_freeOffsets_bounds depth hmem).1,
+    mem_freeOffsets_lt_last depth hmem⟩
+
 /-- Every successor offset is one of the retained children of an old offset. -/
 theorem mem_offsets_succ_cases (depth : Nat) {offset : Nat}
     (hoffset : offset ∈ offsets (depth + 1)) :

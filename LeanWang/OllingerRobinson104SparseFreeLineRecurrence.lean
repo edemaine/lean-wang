@@ -21,8 +21,11 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineRecurrence
 
-open RedCycles ShadedFreeLineGraph ShadedFreeLinePatternRefinement
-  ShadedFreeLineRecurrence SparseFreeLineOffsets
+open RedCycles RedShadeCycles RedShadePaths ShadedFreeLineGraph
+  ShadedFreeLinePatternRefinement ShadedFreeGrid ShadedFreeLineRecurrence
+  ShadedPlaneSignalGrid SparseFreeLineOffsets
+
+set_option maxRecDepth 20000
 
 /-- Live graph certificates for the reduced offset family at one scale. -/
 def GraphHolds (phase : Phase) (depth : Nat) : Prop :=
@@ -217,6 +220,90 @@ theorem graphHolds_unbounded (step : ProjectionStep) (size : Nat) :
   constructor
   · exact graphHolds_from step .even 1 graphHolds_even_one size
   · simpa using graphHolds_from step .odd 0 graphHolds_odd_zero size
+
+/-- Sparse graph certificates yield an ordered semantic free grid on a light board. -/
+def freeGridOfGraphHolds
+    {phase : Phase} {depth : Nat} (graph : GraphHolds phase depth)
+    (parent : Index) {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (localGrid phase depth parent) stateGrid)
+    (shaded : CycleShade stateGrid
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth) .light) :
+    FreeGrid (localGrid phase depth parent) stateGrid
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth) (offsets depth).length where
+  columnAt := fun index => lineCoordinate phase depth (offsetAt depth index)
+  rowAt := fun index => lineCoordinate phase depth (offsetAt depth index)
+  column_strictMono := by
+    intro first second hlt
+    have hmono := offsetAt_strictMono depth hlt
+    cases phase <;> simp [lineCoordinate, Phase.factor] <;> omega
+  row_strictMono := by
+    intro first second hlt
+    have hmono := offsetAt_strictMono depth hlt
+    cases phase <;> simp [lineCoordinate, Phase.factor] <;> omega
+  column_west := by
+    intro index
+    have hpositive := (offsetAt_full_bounds depth index).1
+    cases phase <;>
+      simp [lineCoordinate, quarterStart, west, scale, Phase.factor,
+        quarterWest] <;> omega
+  column_east := by
+    intro index
+    have hbound := (offsetAt_full_bounds depth index).2
+    rw [pow_succ] at hbound
+    cases phase <;>
+      simp [lineCoordinate, quarterStart, west, east, scale, Phase.factor,
+        quarterWest, quarterEast] <;> omega
+  row_south := by
+    intro index
+    have hpositive := (offsetAt_full_bounds depth index).1
+    cases phase <;>
+      simp [lineCoordinate, quarterStart, west, scale, Phase.factor,
+        quarterWest, quarterSouth] <;> omega
+  row_north := by
+    intro index
+    have hbound := (offsetAt_full_bounds depth index).2
+    rw [pow_succ] at hbound
+    cases phase <;>
+      simp [lineCoordinate, quarterStart, west, east, scale, Phase.factor,
+        quarterWest, quarterNorth] <;> omega
+  freeColumn := by
+    intro index
+    have certificates := graph parent
+    apply isFreeColumn_of_certificate valid (canonicalCycle phase depth parent) shaded
+    exact (certificates.2 (offsetAt depth index) (offsetAt_mem depth index)).toColumnCertificate
+  freeRow := by
+    intro index
+    have certificates := graph parent
+    apply isFreeRow_of_certificate valid (canonicalCycle phase depth parent) shaded
+    exact (certificates.1 (offsetAt depth index) (offsetAt_mem depth index)).toRowCertificate
+
+def unboundedFreeGrids (step : ProjectionStep) (size : Nat)
+    (evenParent oddParent : Index)
+    {evenState oddState : Nat → Nat → RedShades.State}
+    (evenValid : ValidShadeGrid (localGrid .even (1 + size) evenParent) evenState)
+    (oddValid : ValidShadeGrid (localGrid .odd size oddParent) oddState)
+    (evenShaded : CycleShade evenState
+      (west .even (1 + size)) (east .even (1 + size))
+      (west .even (1 + size)) (east .even (1 + size)) .light)
+    (oddShaded : CycleShade oddState
+      (west .odd size) (east .odd size)
+      (west .odd size) (east .odd size) .light) :
+    FreeGrid (localGrid .even (1 + size) evenParent) evenState
+        (west .even (1 + size)) (east .even (1 + size))
+        (west .even (1 + size)) (east .even (1 + size)) (size + 2) ×
+      FreeGrid (localGrid .odd size oddParent) oddState
+        (west .odd size) (east .odd size)
+        (west .odd size) (east .odd size) (size + 1) := by
+  have graphs := graphHolds_unbounded step size
+  constructor
+  · have grid := freeGridOfGraphHolds graphs.1 evenParent evenValid evenShaded
+    rw [offsets_length, show 1 + size + 1 = size + 2 by omega] at grid
+    exact grid
+  · have grid := freeGridOfGraphHolds graphs.2 oddParent oddValid oddShaded
+    rw [offsets_length] at grid
+    exact grid
 
 end SparseFreeLineRecurrence
 end Closed104
