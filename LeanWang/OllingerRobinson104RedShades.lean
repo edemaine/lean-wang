@@ -233,6 +233,20 @@ theorem east_present_of_allowedFor {component : Thick} {quadrant : Quadrant}
   simp [allowedFor, heast] at hallowed
   aesop
 
+theorem west_present_of_allowedFor {component : Thick} {quadrant : Quadrant}
+    {state : State} (hallowed : allowedFor component quadrant state = true)
+    (hwest : hasWest component quadrant = true) :
+    state.west.isSome = true := by
+  simp [allowedFor, hwest] at hallowed
+  aesop
+
+theorem south_present_of_allowedFor {component : Thick} {quadrant : Quadrant}
+    {state : State} (hallowed : allowedFor component quadrant state = true)
+    (hsouth : hasSouth component quadrant = true) :
+    state.south.isSome = true := by
+  simp [allowedFor, hsouth] at hallowed
+  aesop
+
 theorem west_north_corner_eq_of_allowedFor {component : Thick}
     {quadrant : Quadrant} {state : State}
     (hallowed : allowedFor component quadrant state = true)

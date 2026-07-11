@@ -16,14 +16,53 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedFreeLineTranslation
 
-open RedCycles RedShadeCycles RefinementTranslation ShadedPlaneSignalGrid
-  Signals.FreeCellLocal
+open RedCycles RedShadeCycles RedShadePaths RefinementTranslation
+  ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
 def shiftQuarterGrid {α : Type} (grid : Nat → Nat → α)
     (offsetX offsetY : Nat) : Nat → Nat → α :=
   fun x y => grid (offsetX + x) (offsetY + y)
+
+set_option maxHeartbeats 1000000 in
+-- Normalizing the dependent shade rules through both grid shifts.
+theorem validShadeGrid_shift (depth : Nat) (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine depth grid) shadeGrid)
+    (blockX blockY : Nat) :
+    ValidShadeGrid
+      (iterateRefine depth (shiftGrid grid blockX blockY))
+      (shiftQuarterGrid shadeGrid
+        (2 ^ (depth + 1) * blockX) (2 ^ (depth + 1) * blockY)) := by
+  let quarterOffsetX := 2 ^ (depth + 1) * blockX
+  let quarterOffsetY := 2 ^ (depth + 1) * blockY
+  have hscale : 2 ∣ 2 ^ (depth + 1) := dvd_pow_self 2 (by omega)
+  have hquadrant (x y : Nat) :
+      quadrantAt (quarterOffsetX + x) (quarterOffsetY + y) =
+        quadrantAt x y :=
+    quadrantAt_shift (2 ^ (depth + 1)) blockX blockY x y hscale
+  constructor
+  · intro x y
+    have hallowed := valid.allowed
+      (quarterOffsetX + x) (quarterOffsetY + y)
+    change RedShades.allowedFor
+      (componentAt (iterateRefine depth grid)
+        (quarterOffsetX + x) (quarterOffsetY + y))
+      (quadrantAt (quarterOffsetX + x) (quarterOffsetY + y))
+      (shadeGrid (quarterOffsetX + x) (quarterOffsetY + y)) = true at hallowed
+    change RedShades.allowedFor
+      (componentAt (iterateRefine depth (shiftGrid grid blockX blockY)) x y)
+      (quadrantAt x y)
+      (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY x y) = true
+    rw [componentAt_iterateRefine_shift, ← hquadrant]
+    exact hallowed
+  · intro x y
+    simpa only [shiftQuarterGrid, Nat.add_assoc] using
+      valid.hmatch (quarterOffsetX + x) (quarterOffsetY + y)
+  · intro x y
+    simpa only [shiftQuarterGrid, Nat.add_assoc] using
+      valid.vmatch (quarterOffsetX + x) (quarterOffsetY + y)
 
 set_option maxHeartbeats 1000000 in
 -- Normalizing the dependent shade and signal rules through both grid shifts.
@@ -46,27 +85,7 @@ theorem validGrid_shift (depth : Nat) (grid : Nat → Nat → Index)
         quadrantAt x y :=
     quadrantAt_shift (2 ^ (depth + 1)) blockX blockY x y hscale
   constructor
-  · constructor
-    · intro x y
-      have hallowed := valid.shadeValid.allowed
-        (quarterOffsetX + x) (quarterOffsetY + y)
-      change RedShades.allowedFor
-        (componentAt (iterateRefine depth grid)
-          (quarterOffsetX + x) (quarterOffsetY + y))
-        (quadrantAt (quarterOffsetX + x) (quarterOffsetY + y))
-        (shadeGrid (quarterOffsetX + x) (quarterOffsetY + y)) = true at hallowed
-      change RedShades.allowedFor
-        (componentAt (iterateRefine depth (shiftGrid grid blockX blockY)) x y)
-        (quadrantAt x y)
-        (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY x y) = true
-      rw [componentAt_iterateRefine_shift, ← hquadrant]
-      exact hallowed
-    · intro x y
-      simpa only [shiftQuarterGrid, Nat.add_assoc] using
-        valid.shadeValid.hmatch (quarterOffsetX + x) (quarterOffsetY + y)
-    · intro x y
-      simpa only [shiftQuarterGrid, Nat.add_assoc] using
-        valid.shadeValid.vmatch (quarterOffsetX + x) (quarterOffsetY + y)
+  · exact validShadeGrid_shift depth grid valid.shadeValid blockX blockY
   · intro x y
     have hallowed := valid.signalAllowed
       (quarterOffsetX + x) (quarterOffsetY + y)

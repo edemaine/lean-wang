@@ -270,10 +270,13 @@ position-row obligation in the final theorem.
   inner obstructions in Robinson's free-line count. Their two intervals in
   either axis are also certified to be ordered and pairwise disjoint, with
   nonempty gaps to each parent side and between the two inner boards.
-- A fresh finite audit refuted the proposed fixed center-line base case: the
-  center row and column can carry perpendicular red paths for valid local shade
-  choices. Free lines must therefore be selected from the board-dependent
-  finite enumeration below; no universal center seed is assumed.
+- A fresh finite audit refuted the proposed hypothesis-free center-line base
+  case: raw center rows and columns can carry perpendicular red paths. The
+  corrected theorem assumes a valid shade grid and a light parent board,
+  proves every such center segment reaches the south or west parent boundary,
+  and uses the crossing rule to force that segment dark. Thus every translated
+  scale-2 light board has a certified singleton `FreeGrid`, without assuming
+  that the raw center geometry is empty.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
