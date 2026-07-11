@@ -41,6 +41,8 @@ def offsets : Nat → List Nat
   | 0 => [2]
   | depth + 1 => (offsets depth).flatMap children
 
+def pivot (depth : Nat) : Nat := 2 * 4 ^ depth
+
 @[simp] theorem offsets_zero : offsets 0 = [2] := rfl
 
 @[simp] theorem offsets_succ (depth : Nat) :
@@ -173,6 +175,64 @@ theorem mem_offsets_succ_of_child (depth : Nat)
     child ∈ offsets (depth + 1) := by
   rw [offsets_succ, List.mem_flatMap]
   exact ⟨oldOffset, hold, hchild⟩
+
+theorem pivot_even (depth : Nat) : pivot depth % 2 = 0 := by
+  simp [pivot]
+
+theorem pivot_mem_offsets (depth : Nat) : pivot depth ∈ offsets depth := by
+  induction depth with
+  | zero => simp [pivot, offsets]
+  | succ depth ih =>
+      apply mem_offsets_succ_of_child depth ih
+      have heven := pivot_even depth
+      have hpivot : pivot (depth + 1) = 4 * pivot depth := by
+        simp only [pivot, pow_succ]
+        ac_rfl
+      rw [hpivot]
+      simp [children, heven]
+
+theorem even_offset_eq_pivot (depth : Nat) {offset : Nat}
+    (hoffset : offset ∈ offsets depth) (heven : offset % 2 = 0) :
+    offset = pivot depth := by
+  induction depth generalizing offset with
+  | zero => simpa [offsets, pivot] using hoffset
+  | succ depth ih =>
+      rcases mem_offsets_succ_cases depth hoffset with
+        ⟨oldOffset, hold, hchild⟩
+      by_cases holdEven : oldOffset % 2 = 0
+      · simp only [children, holdEven, if_true, List.mem_cons,
+          List.not_mem_nil, or_false] at hchild
+        rcases hchild with rfl | rfl
+        · rw [ih hold holdEven]
+          simp only [pivot, pow_succ]
+          ac_rfl
+        · simp [Nat.add_mod, Nat.mul_mod] at heven
+      · simp only [children, holdEven, if_false,
+          List.mem_singleton] at hchild
+        subst offset
+        simp [Nat.add_mod, Nat.mul_mod] at heven
+
+theorem even_pivot_coordinate (depth : Nat) :
+    lineCoordinate .even depth (pivot depth) = 4 * 4 ^ depth + 1 := by
+  simp [pivot, lineCoordinate_even]
+  omega
+
+theorem odd_pivot_coordinate (depth : Nat) :
+    lineCoordinate .odd depth (pivot depth) = 8 * 4 ^ depth + 1 := by
+  simp [pivot, lineCoordinate_odd]
+  omega
+
+theorem even_extra_coordinate (depth : Nat) :
+    lineCoordinate .even (depth + 1) (extraChild (pivot depth)) =
+      16 * 4 ^ depth + 2 := by
+  simp [extraChild, pivot, lineCoordinate_even, pow_succ]
+  omega
+
+theorem odd_extra_coordinate (depth : Nat) :
+    lineCoordinate .odd (depth + 1) (extraChild (pivot depth)) =
+      32 * 4 ^ depth + 3 := by
+  simp [extraChild, pivot, lineCoordinate_odd, pow_succ]
+  omega
 
 theorem lineCoordinate_evenOffset_sparse
     (phase : Phase) (depth offset : Nat) (heven : offset % 2 = 0) :

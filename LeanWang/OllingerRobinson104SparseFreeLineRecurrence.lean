@@ -147,6 +147,32 @@ def ExtraChildStep : Prop :=
       (west phase (depth + 1)) (east phase (depth + 1))
       (lineCoordinate phase (depth + 1) (extraChild offset))
 
+/-- The extra-child obligation specialized to the unique even pivot. -/
+def PivotExtraStep : Prop :=
+  ∀ phase depth parent,
+    LiveRowCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth (pivot depth)) →
+    LiveColumnCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth (pivot depth)) →
+    LiveRowCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (extraChild (pivot depth))) ∧
+    LiveColumnCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (extraChild (pivot depth)))
+
+theorem extraChildStep_of_pivot (extra : PivotExtraStep) : ExtraChildStep := by
+  intro phase depth parent offset hold heven row column
+  have hoffset := even_offset_eq_pivot depth hold heven
+  subst offset
+  exact extra phase depth parent row column
+
 theorem childStep_of_main_of_extra
     (main : MainChildStep) (extra : ExtraChildStep) : ChildStep := by
   intro phase depth parent offset child hold hchild row column
