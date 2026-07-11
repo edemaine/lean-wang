@@ -306,6 +306,12 @@ position-row obligation in the final theorem.
   Under a valid shade grid and a light enclosing board, these certificates are
   now proved to imply the original `IsFreeRow` and `IsFreeColumn` predicates,
   including the cases where a corner path exposes only one endpoint edge.
+- A native finite audit checks those graph certificates for all six first-level
+  Figure 18 offsets and all 104 possible parent tiles. Its result is isolated
+  in cached audit modules, then converted by the proved graph-search soundness
+  theorem into an ordered size-6 `FreeGrid` for every valid light canonical
+  board. Downstream edits rebuild this proof-facing wrapper in seconds without
+  rerunning the exhaustive search.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
