@@ -15,6 +15,7 @@ import LeanWang.ToPartrecEncoding
 import LeanWang.ToPartrecHelpers
 import LeanWang.NatPartrecToToPartrec
 import LeanWang.UniversalCode
+import LeanWang.UniversalTM0Semantic
 import LeanWang.TM0Route
 import LeanWang.UniversalTM0
 import LeanWang.UniversalMachineCertificate

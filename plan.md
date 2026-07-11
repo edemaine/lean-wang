@@ -80,6 +80,14 @@ their correctness modules have been deleted. The retained fixed TM0-to-Post
 reduction consists only of the folded alphabet and tape geometry, direct
 semantic transition rows, and their step/halting simulation.
 
+A smaller fixed-only route is now available in `UniversalTM0Semantic`. It
+avoids the code-parametric support-list and started-machine compiler entirely:
+the fixed universal evaluator is relabeled once, Mathlib's native finite
+support transformers carry it through TM2, TM1, and TM0, and only the varying
+binary input receives a primitive-recursiveness proof. The remaining machine
+cleanup is to redirect the folded TM0 simulation to this fixed support and then
+delete the obsolete code-parametric route.
+
 ## Completed general tiling infrastructure
 
 - Wang-tile and tileset encodings, finite rectangle search, and matching rules.
