@@ -21,30 +21,29 @@ namespace UniversalDirectReduction
 
 open Nat.Partrec (Code)
 
-def postProgram (code : Code) : PostProgram :=
-  TM0DirectInput.program UniversalTM0.code (UniversalTM0.input code)
+def postProgram : PostProgram :=
+  TM0DirectInput.program UniversalTM0.code
 
 def inputWord (code : Code) : List Nat :=
   TM0DirectInput.inputWord (UniversalTM0.input code)
 
-def machine (code : Code) : Machine :=
-  (postProgram code).toTableProgram.toMachine
+def machine : Machine :=
+  postProgram.toTableProgram.toMachine
 
 theorem input_supported (code : Code) :
-    MachineInput.Supported (machine code) (inputWord code) := by
-  exact TM0DirectInput.input_supported UniversalTM0.code
-    (UniversalTM0.input_ne_nil code)
+    MachineInput.Supported machine (inputWord code) := by
+  exact TM0DirectInput.input_supported UniversalTM0.code (UniversalTM0.input code)
 
 theorem machine_halts_iff (code : Code) :
-    MachineInput.Halts (machine code) (inputWord code) ↔
+    MachineInput.Halts machine (inputWord code) ↔
       (Nat.Partrec.Code.eval code 0).Dom := by
   exact (TM0DirectInput.machine_halts_iff_tm0_eval_dom
     UniversalTM0.code (UniversalTM0.input_ne_nil code)).trans
       (UniversalTM0.eval_dom_iff code)
 
 def fixedDomino (code : Code) : TileSet × WangTile :=
-  (MachineInputTiles.tiles (machine code) (inputWord code),
-    MachineInputTiles.seed (machine code) (inputWord code))
+  (MachineInputTiles.tiles machine (inputWord code),
+    MachineInputTiles.seed machine (inputWord code))
 
 theorem fixedDomino_correct (code : Code) :
     TilesQuarterWithSeed (fixedDomino code).1 (fixedDomino code).2 ↔

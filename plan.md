@@ -72,9 +72,11 @@ and switching `UniversalFoldedReduction` to this interface.  `TM0DirectInput`
 now identifies the finite bottom word with the completed folded TM0 tape,
 starts the table simulation directly in its simulation state, and proves
 halting equivalent to Mathlib's TM0 evaluation.  `UniversalDirectReduction`
-specializes this to the fixed universal machine and proves the resulting
+specializes this to one literal fixed `Machine` and proves the resulting
 seeded Wang instance tiles exactly when `Nat.Partrec.Code.eval code 0` is
-undefined.  The generic
+undefined.  Its proof now uses the fixed `positionProgramData` relation
+directly and no longer imports the parameterized initializer correctness
+chain.  The generic
 `PostProgram.toTableProgram` stuttering simulation has already been extended
 from blank input to any supported Post configuration, so the folded bridge can
 start directly at its simulation configuration.  Once switched, the old
