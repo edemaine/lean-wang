@@ -23,7 +23,7 @@ namespace SparseFreeLineLocalRecurrence
 
 open RedCycles RedShadeGraphRefinement ShadedFreeLineGraph
   ShadedFreeLinePatternRefinement ShadedFreeLineRecurrence
-  SparseFreeLineOffsets SparseFreeLineRecurrence
+  BorderCoverageOffsets SparseFreeLineOffsets SparseFreeLineRecurrence
   SparseFreeLineLocalStates SparseFreeLineLocalProjection
 
 set_option maxRecDepth 20000
@@ -134,6 +134,130 @@ theorem evenMainChildStep :
     (verticalChecks_pivot phase depth parent)
   have horizontal := horizontalProjectionAt_of_checks column
     (horizontalChecks_pivot phase depth parent)
+  constructor
+  · rw [hcoordinate]
+    simpa [localGrid_succ, west_succ, east_succ] using
+      liveRowCertificate_of_verticalProjectionAt vertical
+  · rw [hcoordinate]
+    simpa [localGrid_succ, west_succ, east_succ] using
+      liveColumnCertificate_of_horizontalProjectionAt horizontal
+
+/-- In the even phase, the pivot's extra child is the certified near line. -/
+theorem evenPivotExtraStep :
+    ∀ depth parent,
+      LiveRowCertificate (localGrid .even depth parent)
+        (west .even depth) (east .even depth)
+        (west .even depth) (east .even depth)
+        (lineCoordinate .even depth (pivot depth)) →
+      LiveColumnCertificate (localGrid .even depth parent)
+        (west .even depth) (east .even depth)
+        (west .even depth) (east .even depth)
+        (lineCoordinate .even depth (pivot depth)) →
+      LiveRowCertificate (localGrid .even (depth + 1) parent)
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (lineCoordinate .even (depth + 1) (extraChild (pivot depth))) ∧
+      LiveColumnCertificate (localGrid .even (depth + 1) parent)
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (lineCoordinate .even (depth + 1) (extraChild (pivot depth))) := by
+  intro depth parent row column
+  let oldCoordinate := lineCoordinate .even depth (pivot depth)
+  have hodd : oldCoordinate % 2 = 1 := by
+    dsimp [oldCoordinate]
+    rw [even_pivot_coordinate]
+    omega
+  have hblock : (oldCoordinate / 2) % 2 = 0 := by
+    simpa [oldCoordinate] using pivot_line_block_even .even depth
+  have vertical := verticalProjectionAt_of_alignedChecks row hodd (by decide)
+    (fun blockX => boundedRouteClasses.1 _ (by
+      have hmem := localGrid_mem_rowChildren .even depth parent
+        blockX (oldCoordinate / 2)
+      have hparity : parityOffset (oldCoordinate / 2) = 0 := by
+        apply Fin.ext
+        simpa [parityOffset] using hblock
+      rw [hparity] at hmem
+      exact hmem))
+  have horizontal := horizontalProjectionAt_of_alignedChecks column hodd (by decide)
+    (fun blockY => boundedRouteClasses.2.2.1 _ (by
+      have hmem := localGrid_mem_columnChildren .even depth parent
+        (oldCoordinate / 2) blockY
+      have hparity : parityOffset (oldCoordinate / 2) = 0 := by
+        apply Fin.ext
+        simpa [parityOffset] using hblock
+      rw [hparity] at hmem
+      exact hmem))
+  have hcoordinate :
+      lineCoordinate .even (depth + 1) (extraChild (pivot depth)) =
+        8 * (oldCoordinate / 2) + 2 := by
+    dsimp [oldCoordinate]
+    rw [even_extra_coordinate, even_pivot_coordinate]
+    omega
+  constructor
+  · rw [hcoordinate]
+    simpa [localGrid_succ, west_succ, east_succ] using
+      liveRowCertificate_of_verticalProjectionAt vertical
+  · rw [hcoordinate]
+    simpa [localGrid_succ, west_succ, east_succ] using
+      liveColumnCertificate_of_horizontalProjectionAt horizontal
+
+/-- In the odd phase, every odd offset's main child is the certified exit line. -/
+theorem oddMainChildStep_of_odd :
+    ∀ depth parent offset,
+      offset ∈ offsets depth →
+      offset % 2 = 1 →
+      LiveRowCertificate (localGrid .odd depth parent)
+        (west .odd depth) (east .odd depth)
+        (west .odd depth) (east .odd depth)
+        (lineCoordinate .odd depth offset) →
+      LiveColumnCertificate (localGrid .odd depth parent)
+        (west .odd depth) (east .odd depth)
+        (west .odd depth) (east .odd depth)
+        (lineCoordinate .odd depth offset) →
+      LiveRowCertificate (localGrid .odd (depth + 1) parent)
+        (west .odd (depth + 1)) (east .odd (depth + 1))
+        (west .odd (depth + 1)) (east .odd (depth + 1))
+        (lineCoordinate .odd (depth + 1) (mainChild offset)) ∧
+      LiveColumnCertificate (localGrid .odd (depth + 1) parent)
+        (west .odd (depth + 1)) (east .odd (depth + 1))
+        (west .odd (depth + 1)) (east .odd (depth + 1))
+        (lineCoordinate .odd (depth + 1) (mainChild offset)) := by
+  intro depth parent offset hold hoffset row column
+  let oldCoordinate := lineCoordinate .odd depth offset
+  have hodd : oldCoordinate % 2 = 1 := by
+    dsimp [oldCoordinate]
+    rw [lineCoordinate_odd]
+    omega
+  have hblock : (oldCoordinate / 2) % 2 = 1 := by
+    dsimp [oldCoordinate]
+    rw [lineCoordinate_odd]
+    omega
+  have vertical := verticalProjectionAt_of_alignedChecks row hodd (by decide)
+    (fun blockX => boundedRouteClasses.2.1 _ (by
+      have hmem := localGrid_mem_rowChildren .odd depth parent
+        blockX (oldCoordinate / 2)
+      have hparity : parityOffset (oldCoordinate / 2) = 1 := by
+        apply Fin.ext
+        simpa [parityOffset] using hblock
+      rw [hparity] at hmem
+      exact hmem))
+  have horizontal := horizontalProjectionAt_of_alignedChecks column hodd (by decide)
+    (fun blockY => boundedRouteClasses.2.2.2 _ (by
+      have hmem := localGrid_mem_columnChildren .odd depth parent
+        (oldCoordinate / 2) blockY
+      have hparity : parityOffset (oldCoordinate / 2) = 1 := by
+        apply Fin.ext
+        simpa [parityOffset] using hblock
+      rw [hparity] at hmem
+      exact hmem))
+  have heven : ¬offset % 2 = 0 := by omega
+  have hcoordinate :
+      lineCoordinate .odd (depth + 1) (mainChild offset) =
+        8 * (oldCoordinate / 2) + 7 := by
+    dsimp [oldCoordinate]
+    simp only [mainChild, heven, if_false]
+    rw [lineCoordinate_odd, lineCoordinate_odd, pow_succ]
+    omega
   constructor
   · rw [hcoordinate]
     simpa [localGrid_succ, west_succ, east_succ] using
