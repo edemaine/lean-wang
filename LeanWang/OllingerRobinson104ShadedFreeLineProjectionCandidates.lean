@@ -35,6 +35,11 @@ def Candidate.weightedStart (candidate : Candidate) : WeightedStart where
   port := sparsePort candidate.port
   parity := candidate.parity
 
+/-- The sparse copy of an executable source candidate after two substitutions. -/
+def Candidate.refine (candidate : Candidate) : Candidate where
+  port := sparsePort candidate.port
+  parity := candidate.parity
+
 def Candidate.BackedBy
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (candidate : Candidate) : Prop :=
@@ -42,6 +47,24 @@ def Candidate.BackedBy
     source.parity = candidate.parity ∧
       Path (iterateRefine 2 grid) (sparsePort source.port)
         (sparsePort candidate.port) false
+
+/-- Backing paths persist when both the pattern and candidate are refined. -/
+theorem Candidate.BackedBy.refine
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {candidate : Candidate}
+    (backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+      (south := south) (north := north))
+    (candidateLive : portPresent grid candidate.port = true) :
+    candidate.refine.BackedBy (grid := iterateRefine 2 grid)
+      (west := 4 * west) (east := 4 * east)
+      (south := 4 * south) (north := 4 * north) := by
+  rcases backed with ⟨source, sourceParity, path⟩
+  refine ⟨source.refine, sourceParity, ?_⟩
+  have targetLive :
+      portPresent (iterateRefine 2 grid) (sparsePort candidate.port) = true := by
+    simpa [portPresent_sparse] using candidateLive
+  simpa [Candidate.refine, WeightedSource.refine] using
+    path_refine_sparse path source.refine.portLive targetLive
 
 theorem hasVertical_of_interior_of_live_ports
     {grid : Nat → Nat → Index} {x y : Nat}
@@ -194,6 +217,27 @@ def Family.concat
     (families : List (Family grid west east south north)) :
     Family grid west east south north :=
   families.foldr Family.append Family.empty
+
+/-- Refine every live candidate and its backing path together. -/
+def Family.refine
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (live : ∀ candidate ∈ family.candidates,
+      portPresent grid candidate.port = true) :
+    Family (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) where
+  candidates := family.candidates.map Candidate.refine
+  backed := by
+    intro candidate hcandidate
+    rcases List.mem_map.1 hcandidate with ⟨oldCandidate, hold, rfl⟩
+    exact (family.backed oldCandidate hold).refine (live oldCandidate hold)
+
+@[simp] theorem Family.refine_candidates
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (live : ∀ candidate ∈ family.candidates,
+      portPresent grid candidate.port = true) :
+    (family.refine live).candidates = family.candidates.map Candidate.refine := rfl
 
 @[simp] theorem Family.concat_candidates
     {grid : Nat → Nat → Index} {west east south north : Nat}
