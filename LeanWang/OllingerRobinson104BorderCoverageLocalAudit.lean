@@ -158,6 +158,105 @@ theorem columnCheck_sound
   · exact Or.inl (reached_sound covered)
   · exact Or.inr (reached_sound covered)
 
+/-- Whether a coarse row or column contributes no source, a board side, or a retained free line. -/
+inductive LineKind where
+  | none
+  | cycle
+  | retained
+deriving DecidableEq, Repr
+
+def rowStartsOfKind (parent : Index) (kind : LineKind) (sourceY : Nat) :
+    List WeightedStart :=
+  match kind with
+  | .none => []
+  | .cycle => rowStarts parent .cycle sourceY
+  | .retained => rowStarts parent .retained sourceY
+
+def columnStartsOfKind (parent : Index) (kind : LineKind) (sourceX : Nat) :
+    List WeightedStart :=
+  match kind with
+  | .none => []
+  | .cycle => columnStarts parent .cycle sourceX
+  | .retained => columnStarts parent .retained sourceX
+
+/-- Sources visible in one macrocell are the union of its coarse row and column sources. -/
+def crossStarts (parent : Index) (rowKind columnKind : LineKind)
+    (sourceX sourceY : Nat) : List WeightedStart :=
+  rowStartsOfKind parent rowKind sourceY ++
+    columnStartsOfKind parent columnKind sourceX
+
+def crossRowCheck (parent : Index) (rowKind columnKind : LineKind)
+    (sourceX sourceY targetY : Nat) : Bool :=
+  let starts := crossStarts parent rowKind columnKind sourceX sourceY
+  (List.range 8).all fun x =>
+    let required := (Signals.verticalInterior?
+      (componentAt (fineGrid parent) x targetY)
+      (quadrantAt x targetY)).isSome
+    !required ||
+      reached parent starts ⟨x, targetY, .south⟩ ||
+      reached parent starts ⟨x, targetY, .north⟩
+
+def crossColumnCheck (parent : Index) (rowKind columnKind : LineKind)
+    (sourceX sourceY targetX : Nat) : Bool :=
+  let starts := crossStarts parent rowKind columnKind sourceX sourceY
+  (List.range 8).all fun y =>
+    let required := (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX y)
+      (quadrantAt targetX y)).isSome
+    !required ||
+      reached parent starts ⟨targetX, y, .west⟩ ||
+      reached parent starts ⟨targetX, y, .east⟩
+
+set_option linter.flexible false in
+theorem crossRowCheck_sound
+    {parent : Index} {rowKind columnKind : LineKind}
+    {sourceX sourceY targetY : Nat}
+    (checked : crossRowCheck parent rowKind columnKind sourceX sourceY targetY = true) :
+    ∀ x, x < 8 →
+      Signals.verticalInterior?
+        (componentAt (fineGrid parent) x targetY)
+        (quadrantAt x targetY) ≠ none →
+      LocalRoute parent (crossStarts parent rowKind columnKind sourceX sourceY)
+          ⟨x, targetY, .south⟩ ∨
+        LocalRoute parent (crossStarts parent rowKind columnKind sourceX sourceY)
+          ⟨x, targetY, .north⟩ := by
+  simp only [crossRowCheck, List.all_eq_true, List.mem_range] at checked
+  intro x hx interior
+  have covered := checked x hx
+  have required : (Signals.verticalInterior?
+      (componentAt (fineGrid parent) x targetY)
+      (quadrantAt x targetY)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or, Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_sound covered)
+  · exact Or.inr (reached_sound covered)
+
+set_option linter.flexible false in
+theorem crossColumnCheck_sound
+    {parent : Index} {rowKind columnKind : LineKind}
+    {sourceX sourceY targetX : Nat}
+    (checked : crossColumnCheck parent rowKind columnKind sourceX sourceY targetX = true) :
+    ∀ y, y < 8 →
+      Signals.horizontalInterior?
+        (componentAt (fineGrid parent) targetX y)
+        (quadrantAt targetX y) ≠ none →
+      LocalRoute parent (crossStarts parent rowKind columnKind sourceX sourceY)
+          ⟨targetX, y, .west⟩ ∨
+        LocalRoute parent (crossStarts parent rowKind columnKind sourceX sourceY)
+          ⟨targetX, y, .east⟩ := by
+  simp only [crossColumnCheck, List.all_eq_true, List.mem_range] at checked
+  intro y hy interior
+  have covered := checked y hy
+  have required : (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX y)
+      (quadrantAt targetX y)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or, Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_sound covered)
+  · exact Or.inr (reached_sound covered)
+
 end BorderCoverageLocalAudit
 end Closed104
 end Figure13Layers
