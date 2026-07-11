@@ -39,6 +39,9 @@ set_option linter.style.nativeDecide false in
 theorem states_length : states.length = 56 := by
   native_decide
 
+theorem indexState_mem_states (index : Index) : indexState index ∈ states := by
+  simp [states]
+
 def canonicalIndex (index : Index) : Index :=
   representative (indexState index)
 

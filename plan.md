@@ -425,6 +425,14 @@ semantic transition rows, and their step/halting simulation.
   only 56 reachable border states. Canonical representatives preserve the
   thick component, so black-layer variants can be erased from future geometry
   quotients.
+- The border quotient now preserves the complete executable red-graph
+  observation: local components, live ports, move validity, weighted flood
+  results, and raw row/column source candidates. `CoverageStep` factors through
+  a proof-free `RawCoverageAt`, and `coverageStep_of_canonicalCoverage` reduces
+  its parent cases from 104 tile indices to the 56 canonical border-state
+  representatives. The remaining quotient work is the unbounded depth
+  parameter, to be discharged by a finite periodic audit or an induction on
+  the border substitution.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
