@@ -282,6 +282,11 @@ position-row obligation in the final theorem.
   coordinates, every offset `x` expands to `4x, 4x+1` when `x` is even and to
   `4x+2, 4x+3` when `x` is odd. Removing the borders gives `6, 14, 30, ...`
   candidate rows and columns, with the proved recurrence `F(k+1) = 2F(k)+2`.
+- Red-wire propagation is factored through a finite port graph. Straight
+  segments, matching edges, and corner turns preserve shade; switching wires
+  at a crossing reverses it. Every graph path therefore proves shade equality
+  or opposition from its accumulated crossing parity, giving the recursive
+  geometry proof a compact certificate language.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
