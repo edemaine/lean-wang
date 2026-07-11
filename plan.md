@@ -291,6 +291,10 @@ position-row obligation in the final theorem.
   return ordinary proposition-level path proofs. Link and path certificates
   also translate from a refined local block to its exact absolute coordinates
   in an arbitrary refined grid, preserving crossing parity.
+- Bounded graph search itself is proved sound: every returned node is reached
+  from the requested start by a proposition-level parity path. Finite template
+  discovery is therefore outside the trusted boundary, while successful
+  results can be consumed directly by the recursive geometry proof.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
