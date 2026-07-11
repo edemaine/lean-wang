@@ -218,6 +218,34 @@ def BoundedLocalRoute (parent : Index) (starts : List WeightedStart)
       (Bool.xor start.parity true) ∧
       portPresent (fineGrid parent) target = true
 
+def reachedIn (grid : Nat → Nat → Index) (width height fuel : Nat)
+    (starts : List WeightedStart) (target : Port) : Bool :=
+  let nodes := exploreFastWeighted grid width height fuel starts
+  portPresent grid target &&
+    nodes.any fun node => node.parity && decide (node.current = target)
+
+def BoundedRouteIn (grid : Nat → Nat → Index) (width height : Nat)
+    (starts : List WeightedStart) (target : Port) : Prop :=
+  ∃ start ∈ starts,
+    BoundedPath grid width height start.port target
+      (Bool.xor start.parity true) ∧
+    portPresent grid target = true
+
+theorem reachedIn_bounded_sound
+    {grid : Nat → Nat → Index} {width height fuel : Nat}
+    {starts : List WeightedStart} {target : Port}
+    (hstarts : ∀ start ∈ starts, PortInBounds start.port width height)
+    (checked : reachedIn grid width height fuel starts target = true) :
+    BoundedRouteIn grid width height starts target := by
+  simp only [reachedIn, Bool.and_eq_true, List.any_eq_true,
+    decide_eq_true_eq] at checked
+  rcases checked.2 with ⟨node, hnode, hparity, hcurrent⟩
+  rcases exploreFastWeighted_bounded_sound hstarts hnode with
+    ⟨start, hstart, path⟩
+  refine ⟨start, hstart, ?_, checked.1⟩
+  rw [hcurrent] at path
+  simpa [hparity] using path
+
 theorem reached_sound
     {parent : Index} {starts : List WeightedStart} {target : Port}
     (checked : reached parent starts target = true) :

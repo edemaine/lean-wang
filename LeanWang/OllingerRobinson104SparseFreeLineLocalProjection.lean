@@ -309,6 +309,74 @@ def StartsEmbed
       sparsePort candidate.port ∧
     start.parity = candidate.parity
 
+def localStart (candidate : Candidate)
+    (offsetX offsetY : Nat) : WeightedStart where
+  port := ⟨sparseCoordinate candidate.port.x - offsetX,
+    sparseCoordinate candidate.port.y - offsetY, candidate.port.side⟩
+  parity := candidate.parity
+
+/-- Backed candidates whose sparse copies lie inside one bounded window. -/
+def localizedStarts (candidates : List Candidate)
+    (offsetX offsetY width height : Nat) : List WeightedStart :=
+  (candidates.filter fun candidate => decide
+    (offsetX ≤ sparseCoordinate candidate.port.x ∧
+      sparseCoordinate candidate.port.x < offsetX + width ∧
+      offsetY ≤ sparseCoordinate candidate.port.y ∧
+      sparseCoordinate candidate.port.y < offsetY + height)).map
+        fun candidate => localStart candidate offsetX offsetY
+
+theorem mem_localizedStarts
+    {candidates : List Candidate} {offsetX offsetY width height : Nat}
+    {start : WeightedStart} (hstart : start ∈
+      localizedStarts candidates offsetX offsetY width height) :
+    ∃ candidate ∈ candidates,
+      offsetX ≤ sparseCoordinate candidate.port.x ∧
+      sparseCoordinate candidate.port.x < offsetX + width ∧
+      offsetY ≤ sparseCoordinate candidate.port.y ∧
+      sparseCoordinate candidate.port.y < offsetY + height ∧
+      start = localStart candidate offsetX offsetY := by
+  rw [localizedStarts, List.mem_map] at hstart
+  rcases hstart with ⟨candidate, hcandidate, rfl⟩
+  simp only [List.mem_filter, decide_eq_true_eq] at hcandidate
+  exact ⟨candidate, hcandidate.1, hcandidate.2.1, hcandidate.2.2.1,
+    hcandidate.2.2.2.1, hcandidate.2.2.2.2, rfl⟩
+
+theorem localizedStarts_inBounds
+    (candidates : List Candidate) (offsetX offsetY width height : Nat) :
+    ∀ start ∈ localizedStarts candidates offsetX offsetY width height,
+      PortInBounds start.port width height := by
+  intro start hstart
+  rcases mem_localizedStarts hstart with
+    ⟨candidate, _hcandidate, hxLower, hxUpper, hyLower, hyUpper, rfl⟩
+  rcases candidate with ⟨⟨x, y, side⟩, parity⟩
+  change offsetX ≤ sparseCoordinate x at hxLower
+  change sparseCoordinate x < offsetX + width at hxUpper
+  change offsetY ≤ sparseCoordinate y at hyLower
+  change sparseCoordinate y < offsetY + height at hyUpper
+  have hxEq : offsetX + (sparseCoordinate x - offsetX) =
+      sparseCoordinate x := Nat.add_sub_of_le hxLower
+  have hyEq : offsetY + (sparseCoordinate y - offsetY) =
+      sparseCoordinate y := Nat.add_sub_of_le hyLower
+  simp only [localStart, PortInBounds]
+  constructor <;> omega
+
+theorem localizedStarts_embed
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (blockX blockY width height : Nat) :
+    StartsEmbed family blockX blockY
+      (localizedStarts family.candidates
+        (8 * blockX) (8 * blockY) width height) := by
+  intro start hstart
+  rcases mem_localizedStarts hstart with
+    ⟨candidate, hcandidate, hxLower, _hxUpper, hyLower, _hyUpper, rfl⟩
+  refine ⟨candidate, hcandidate, ?_, rfl⟩
+  rcases candidate with ⟨⟨x, y, side⟩, parity⟩
+  change 8 * blockX ≤ sparseCoordinate x at hxLower
+  change 8 * blockY ≤ sparseCoordinate y at hyLower
+  simp only [localStart, translatePort, sparsePort]
+  rw [Nat.add_sub_of_le hxLower, Nat.add_sub_of_le hyLower]
+
 /-- A checked local route projects whenever all of its starts embed globally. -/
 theorem projectsTo_of_boundedLocalRoute_of_family
     {grid : Nat → Nat → Index} {west east south north : Nat}
@@ -331,10 +399,8 @@ theorem projectsTo_of_boundedLocalRoute_of_family
 def ShiftedBoundedRoute
     (grid : Nat → Nat → Index) (blockX blockY width height : Nat)
     (starts : List WeightedStart) (target : Port) : Prop :=
-  ∃ start ∈ starts,
-    BoundedPath (iterateRefine 2 (shiftGrid grid blockX blockY))
-      width height start.port target (Bool.xor start.parity true) ∧
-    portPresent (iterateRefine 2 (shiftGrid grid blockX blockY)) target = true
+  BoundedRouteIn (iterateRefine 2 (shiftGrid grid blockX blockY))
+    width height starts target
 
 /-- A multi-macrocell route projects once its local starts embed in the family. -/
 theorem projectsTo_of_shiftedBoundedRoute_of_family
