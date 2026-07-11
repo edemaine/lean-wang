@@ -316,6 +316,32 @@ theorem horizontalProjectionAt_of_checks
   horizontalProjectionAt_of_sparseAncestors column rfl
     (horizontalSparseAncestors_of_checks checks)
 
+/-- A vertical projection is exactly a refined live-row certificate. -/
+theorem liveRowCertificate_of_verticalProjectionAt
+    {grid : Nat → Nat → Index} {west east south north row : Nat}
+    (projection : VerticalProjectionAt grid west east south north row) :
+    LiveRowCertificate (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) row := by
+  intro x hwest heast interior
+  rcases projection x hwest heast interior with projected | projected
+  · rcases projected with ⟨projected⟩
+    exact ⟨projected.weightedSource, rfl, Or.inl rfl⟩
+  · rcases projected with ⟨projected⟩
+    exact ⟨projected.weightedSource, rfl, Or.inr rfl⟩
+
+/-- A horizontal projection is exactly a refined live-column certificate. -/
+theorem liveColumnCertificate_of_horizontalProjectionAt
+    {grid : Nat → Nat → Index} {west east south north column : Nat}
+    (projection : HorizontalProjectionAt grid west east south north column) :
+    LiveColumnCertificate (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) column := by
+  intro y hsouth hnorth interior
+  rcases projection y hsouth hnorth interior with projected | projected
+  · rcases projected with ⟨projected⟩
+    exact ⟨projected.weightedSource, rfl, Or.inl rfl⟩
+  · rcases projected with ⟨projected⟩
+    exact ⟨projected.weightedSource, rfl, Or.inr rfl⟩
+
 end SparseFreeLineLocalProjection
 end Closed104
 end Figure13Layers
