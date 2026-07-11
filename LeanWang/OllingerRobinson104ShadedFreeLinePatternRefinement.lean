@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104RedShadeGraphPathRefinement
 import LeanWang.OllingerRobinson104ShadedFreeLineGraph
+import LeanWang.OllingerRobinson104ShadedFreeLineOffsets
 
 /-!
 # Whole-pattern refinement of shaded free-line certificates
@@ -25,6 +26,7 @@ namespace ShadedFreeLinePatternRefinement
 
 open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
   RedShadeGraphRefinement ShadedFreeLineGraph Signals.FreeCellLocal
+  ShadedFreeLineOffsets
 
 set_option maxRecDepth 20000
 
@@ -73,6 +75,20 @@ structure WeightedSource (grid : Nat → Nat → Index)
   path : Path grid start port parity
   startLive : portPresent grid start = true
   portLive : portPresent grid port = true
+
+/-- A live port on the outer cycle is an even source. -/
+def WeightedSource.ofCycle
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : CycleOn grid west east south north) {port : Port}
+    (onCycle : OnCycle west east south north port) :
+    WeightedSource grid west east south north where
+  port := port
+  parity := false
+  start := port
+  onCycle := onCycle
+  path := Path.refl port
+  startLive := portPresent_of_onCycle cycle onCycle
+  portLive := portPresent_of_onCycle cycle onCycle
 
 /-- Every perpendicular segment on a retained row has a live odd source. -/
 def LiveRowCertificate (grid : Nat → Nat → Index)
@@ -155,6 +171,80 @@ structure ProjectsTo {grid : Nat → Nat → Index}
     (Bool.xor source.parity true)
   targetLive : portPresent (iterateRefine 2 grid) target = true
 
+/-- An odd local tail from an outer-cycle port projects to its target. -/
+def ProjectsTo.ofCyclePath
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : CycleOn grid west east south north) {source target : Port}
+    (onCycle : OnCycle west east south north source)
+    (path : Path (iterateRefine 2 grid) (sparsePort source) target true)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target where
+  source := WeightedSource.ofCycle cycle onCycle
+  path := by simpa [WeightedSource.ofCycle] using path
+  targetLive := targetLive
+
+/-- An even local tail from an old odd source projects to its target. -/
+def ProjectsTo.ofOddSourcePath
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {source : WeightedSource grid west east south north} {target : Port}
+    (sourceOdd : source.parity = true)
+    (path : Path (iterateRefine 2 grid) (sparsePort source.port) target false)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target where
+  source := source
+  path := by simpa [sourceOdd] using path
+  targetLive := targetLive
+
+/-- Use a retained row certificate once a local route accepts either endpoint. -/
+theorem projectsTo_of_liveRowCertificate
+    {grid : Nat → Nat → Index} {west east south north row x : Nat}
+    (certificate : LiveRowCertificate grid west east south north row)
+    (hwest : quarterWest west < x) (heast : x < quarterEast east)
+    (interior : Signals.verticalInterior?
+      (componentAt grid x row) (quadrantAt x row) ≠ none)
+    {target : Port}
+    (southPath : ∀ source : WeightedSource grid west east south north,
+      source.port = ⟨x, row, .south⟩ → source.parity = true →
+      Path (iterateRefine 2 grid) (sparsePort source.port) target false)
+    (northPath : ∀ source : WeightedSource grid west east south north,
+      source.port = ⟨x, row, .north⟩ → source.parity = true →
+      Path (iterateRefine 2 grid) (sparsePort source.port) target false)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases certificate x hwest heast interior with
+    ⟨source, sourceOdd, endpoint | endpoint⟩
+  · exact ⟨ProjectsTo.ofOddSourcePath sourceOdd
+      (southPath source endpoint sourceOdd) targetLive⟩
+  · exact ⟨ProjectsTo.ofOddSourcePath sourceOdd
+      (northPath source endpoint sourceOdd) targetLive⟩
+
+/-- Use a retained column certificate once a local route accepts either endpoint. -/
+theorem projectsTo_of_liveColumnCertificate
+    {grid : Nat → Nat → Index} {west east south north column y : Nat}
+    (certificate : LiveColumnCertificate grid west east south north column)
+    (hsouth : quarterSouth south < y) (hnorth : y < quarterNorth north)
+    (interior : Signals.horizontalInterior?
+      (componentAt grid column y) (quadrantAt column y) ≠ none)
+    {target : Port}
+    (westPath : ∀ source : WeightedSource grid west east south north,
+      source.port = ⟨column, y, .west⟩ → source.parity = true →
+      Path (iterateRefine 2 grid) (sparsePort source.port) target false)
+    (eastPath : ∀ source : WeightedSource grid west east south north,
+      source.port = ⟨column, y, .east⟩ → source.parity = true →
+      Path (iterateRefine 2 grid) (sparsePort source.port) target false)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases certificate y hsouth hnorth interior with
+    ⟨source, sourceOdd, endpoint | endpoint⟩
+  · exact ⟨ProjectsTo.ofOddSourcePath sourceOdd
+      (westPath source endpoint sourceOdd) targetLive⟩
+  · exact ⟨ProjectsTo.ofOddSourcePath sourceOdd
+      (eastPath source endpoint sourceOdd) targetLive⟩
+
 /-- The exact whole-pattern obligation needed for one Robinson recurrence step. -/
 structure PatternProjection (grid : Nat → Nat → Index)
     (west east south north : Nat) (fineOffsets : List Nat)
@@ -181,6 +271,62 @@ structure PatternProjection (grid : Nat → Nat → Index)
     Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
       (south := south) (north := north)
       ⟨fineCoordinate offset, y, .east⟩)
+
+/-- The vertical half of a projection obligation at one concrete row. -/
+def VerticalProjectionAt (grid : Nat → Nat → Index)
+    (west east south north row : Nat) : Prop :=
+  ∀ x, quarterWest (4 * west) < x → x < quarterEast (4 * east) →
+    Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) x row) (quadrantAt x row) ≠ none →
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, row, .south⟩) ∨
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, row, .north⟩)
+
+/-- The horizontal half of a projection obligation at one concrete column. -/
+def HorizontalProjectionAt (grid : Nat → Nat → Index)
+    (west east south north column : Nat) : Prop :=
+  ∀ y, quarterSouth (4 * south) < y → y < quarterNorth (4 * north) →
+    Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) column y) (quadrantAt column y) ≠ none →
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨column, y, .west⟩) ∨
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨column, y, .east⟩)
+
+/-- Build a successor projection from its two side cases and old-offset groups. -/
+theorem PatternProjection.ofSuccOffsets
+    {grid : Nat → Nat → Index} {west east south north depth : Nat}
+    {fineCoordinate : Nat → Nat}
+    (leftVertical : VerticalProjectionAt grid west east south north
+      (fineCoordinate 1))
+    (childVertical : ∀ oldOffset ∈ freeOffsets depth,
+      ∀ child ∈ expandOffset oldOffset,
+        VerticalProjectionAt grid west east south north (fineCoordinate child))
+    (rightVertical : VerticalProjectionAt grid west east south north
+      (fineCoordinate (4 ^ (depth + 2) - 2)))
+    (leftHorizontal : HorizontalProjectionAt grid west east south north
+      (fineCoordinate 1))
+    (childHorizontal : ∀ oldOffset ∈ freeOffsets depth,
+      ∀ child ∈ expandOffset oldOffset,
+        HorizontalProjectionAt grid west east south north (fineCoordinate child))
+    (rightHorizontal : HorizontalProjectionAt grid west east south north
+      (fineCoordinate (4 ^ (depth + 2) - 2))) :
+    PatternProjection grid west east south north
+      (freeOffsets (depth + 1)) fineCoordinate := by
+  constructor
+  · intro offset hoffset
+    rcases mem_freeOffsets_succ_cases depth hoffset with
+      rfl | ⟨oldOffset, hold, hchild⟩ | rfl
+    · exact leftVertical
+    · exact childVertical oldOffset hold offset hchild
+    · exact rightVertical
+  · intro offset hoffset
+    rcases mem_freeOffsets_succ_cases depth hoffset with
+      rfl | ⟨oldOffset, hold, hchild⟩ | rfl
+    · exact leftHorizontal
+    · exact childHorizontal oldOffset hold offset hchild
+    · exact rightHorizontal
 
 def ProjectsTo.weightedSource
     {grid : Nat → Nat → Index} {west east south north : Nat}

@@ -373,6 +373,20 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   path and liveness. `GraphHolds` retains these live certificates at every
   depth, and `liveCertificates_of_projection` closes the invariant under a
   concrete projection step.
+- `ProjectsTo.ofCyclePath` and `ProjectsTo.ofOddSourcePath` separate the two
+  admissible local source cases: an odd tail from the enclosing cycle, or an
+  even tail from an old live free-line endpoint. Row and column elimination
+  lemmas consume retained certificates without choosing which side endpoint
+  the finite geometry reaches.
+- `mem_freeOffsets_succ_cases` and `PatternProjection.ofSuccOffsets` reduce
+  the concrete recurrence to vertical and horizontal versions of three finite
+  quotient cases: the left side line, the two children of each old free
+  offset, and the right side line. A disposable weighted graph probe checked
+  the representative even `1 -> 2` and odd `0 -> 1` transitions: every live
+  target is reached with total odd parity; offsets `30,31` (even phase) and
+  `7` (odd phase) have no perpendicular target segments. The per-old-line
+  strengthening is false for two degenerate groups, so the retained quotient
+  obligation intentionally permits routing through the whole old pattern.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to

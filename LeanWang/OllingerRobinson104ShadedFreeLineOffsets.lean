@@ -211,6 +211,25 @@ theorem freeOffsets_succ_decompose (depth : Nat) :
   rw [Nat.mul_sub_left_distrib]
   omega
 
+/-- Every successor offset is a side line or a child of an old free offset. -/
+theorem mem_freeOffsets_succ_cases (depth : Nat) {offset : Nat}
+    (hmem : offset ∈ freeOffsets (depth + 1)) :
+    offset = 1 ∨
+      (∃ oldOffset ∈ freeOffsets depth,
+        offset ∈ expandOffset oldOffset) ∨
+      offset = 4 ^ (depth + 2) - 2 := by
+  rw [freeOffsets_succ_decompose] at hmem
+  simpa [List.mem_flatMap] using hmem
+
+/-- Conversely, every child of an old free offset survives in the successor list. -/
+theorem mem_freeOffsets_succ_of_child (depth : Nat)
+    {oldOffset child : Nat} (hold : oldOffset ∈ freeOffsets depth)
+    (hchild : child ∈ expandOffset oldOffset) :
+    child ∈ freeOffsets (depth + 1) := by
+  rw [freeOffsets_succ_decompose]
+  simp only [List.mem_cons, List.mem_append, List.mem_flatMap]
+  exact Or.inl (Or.inr ⟨oldOffset, hold, hchild⟩)
+
 set_option linter.flexible false in
 theorem mem_extendedOffsets_lt (depth : Nat) {offset : Nat}
     (hmem : offset ∈ extendedOffsets depth) :
