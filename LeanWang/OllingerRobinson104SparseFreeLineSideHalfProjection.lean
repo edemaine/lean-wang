@@ -19,10 +19,13 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineSideHalfProjection
 
-open RedCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphSearchSoundness
+open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
+  RedShadeGraphSearchSoundness
   RedShadeGraphWeightedSearch RedShadeGraphTranslation RefinementTranslation
   Signals.FreeCellLocal
   BorderCoverageLocalAudit BorderGeometry SparseFreeLineLocalProjection
+  ShadedFreeLinePatternRefinement ShadedFreeLineProjectionCandidates
+  ShadedFreeLineRecurrence
   SparseFreeLineSideHalfAudit SparseFreeLineSideHalfClosure
 
 set_option maxRecDepth 20000
@@ -165,6 +168,139 @@ theorem shiftedRouteIn_of_windowAt
       (lowerBlockY depth) 24 16
       (windowStartsIn (windowAt depth parent blockX) lower upper) target := by
   exact shiftedRoute_of_windowAt route
+
+def StartsBacked
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (blockX blockY : Nat) (starts : List WeightedStart) : Prop :=
+  ∀ start ∈ starts, ∃ candidate : Candidate,
+    candidate.BackedBy (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ∧
+    translatePort start.port (8 * blockX) (8 * blockY) =
+      sparsePort candidate.port ∧
+    start.parity = candidate.parity
+
+theorem projectsTo_of_shiftedRoute_of_backedStarts
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (blockX blockY width height : Nat) {starts : List WeightedStart}
+    {target : Port}
+    (backed : StartsBacked (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) blockX blockY starts)
+    (route : ShiftedBoundedRoute grid blockX blockY width height starts target) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north)
+      (translatePort target (8 * blockX) (8 * blockY))) := by
+  rcases route with ⟨start, hstart, path, targetLive⟩
+  rcases backed start hstart with
+    ⟨candidate, candidateBacked, startCoordinate, startParity⟩
+  have translated := SparseFreeLineLocalTransport.boundedPath_shift
+    grid blockX blockY path
+  have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+      (translatePort target (8 * blockX) (8 * blockY))
+      (Bool.xor candidate.parity true) := by
+    rw [← startCoordinate]
+    simpa only [startParity] using translated
+  have globalLive : portPresent (iterateRefine 2 grid)
+      (translatePort target (8 * blockX) (8 * blockY)) = true := by
+    rw [SparseFreeLineLocalTransport.portPresent_shift] at targetLive
+    exact targetLive
+  rcases candidateBacked with ⟨source, sourceParity, head⟩
+  refine ⟨{
+    source := source
+    path := ?_
+    targetLive := globalLive
+  }⟩
+  simpa only [sourceParity, Bool.false_xor] using Path.trans head tail
+
+theorem rowStart_mem_alignedSelf
+    {parent : Index} {start : WeightedStart}
+    (hstart : start ∈ rowStarts parent .retained 1) :
+    start ∈ alignedRowStarts parent 1 start.port.x := by
+  rcases mem_rowStarts_retained hstart with
+    ⟨sourceX, hsourceX, hparity, endpoint⟩
+  rcases endpoint with ⟨hport, hlive⟩ | ⟨hport, hlive⟩
+  · rw [alignedRowStarts, weightedSparseStarts, List.mem_map]
+    refine ⟨⟨sourceX, 1, .south⟩, ?_, ?_⟩
+    · simp only [List.mem_filter]
+      constructor
+      · rw [List.mem_flatMap]
+        refine ⟨sourceX, ?_, by simp [rowSourcePorts]⟩
+        simp only [List.mem_filter, List.mem_range]
+        refine ⟨hsourceX, ?_⟩
+        rw [hport]
+        simp [sparsePort]
+      · exact hlive
+    · cases start
+      simp_all [SourceKind.parity]
+  · rw [alignedRowStarts, weightedSparseStarts, List.mem_map]
+    refine ⟨⟨sourceX, 1, .north⟩, ?_, ?_⟩
+    · simp only [List.mem_filter]
+      constructor
+      · rw [List.mem_flatMap]
+        refine ⟨sourceX, ?_, by simp [rowSourcePorts]⟩
+        simp only [List.mem_filter, List.mem_range]
+        refine ⟨hsourceX, ?_⟩
+        rw [hport]
+        simp [sparsePort]
+      · exact hlive
+    · cases start
+      simp_all [SourceKind.parity]
+
+theorem windowStartsIn_backed
+    (depth : Nat) (parent : Index) (blockX lower upper : Nat)
+    (row : LiveRowCertificate (oldGrid depth parent)
+      (west .odd (depth + 1)) (east .odd (depth + 1))
+      (west .odd (depth + 1)) (east .odd (depth + 1)) (oldRow depth))
+    (hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+      8 * (blockX - 1) + lower)
+    (hwindowEast : 8 * (blockX - 1) + upper ≤
+      quarterEast (4 * east .odd (depth + 1))) :
+    StartsBacked (grid := oldGrid depth parent)
+      (west := west .odd (depth + 1)) (east := east .odd (depth + 1))
+      (south := west .odd (depth + 1)) (north := east .odd (depth + 1))
+      (blockX - 1) (lowerBlockY depth)
+      (windowStartsIn (windowAt depth parent blockX) lower upper) := by
+  intro start hstart
+  rw [windowStartsIn, List.mem_filter] at hstart
+  rcases hstart with ⟨hstart, hbounds⟩
+  rw [windowStarts, List.mem_flatMap] at hstart
+  rcases hstart with ⟨macroX, hmacroX, hstart⟩
+  simp only [List.mem_range] at hmacroX
+  rcases List.mem_map.1 hstart with ⟨localStart, hlocalStart, rfl⟩
+  have hgrid := windowGrid_windowAt depth parent blockX macroX 1
+    hmacroX (by decide)
+  rw [hgrid] at hlocalStart
+  have hlower : lowerBlockY depth + 1 = oldRow depth / 2 := by
+    rw [lowerBlockY, oldRow_eq]
+    have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+    omega
+  rw [hlower] at hlocalStart
+  have hodd : oldRow depth % 2 = 1 := by
+    rw [oldRow_eq]
+    omega
+  have hlocalParity : localStart.parity = true := by
+    rcases mem_rowStarts_retained hlocalStart with
+      ⟨_, _, parity, _⟩
+    exact parity
+  simp only [Bool.and_eq_true, decide_eq_true_eq, translateStart,
+    translatePort] at hbounds
+  let globalBlock := blockX - 1 + macroX
+  have hwestFine : quarterWest (4 * west .odd (depth + 1)) <
+      8 * globalBlock + localStart.port.x := by
+    dsimp [globalBlock]
+    omega
+  have heastFine : 8 * globalBlock + localStart.port.x <
+      quarterEast (4 * east .odd (depth + 1)) := by
+    dsimp [globalBlock]
+    omega
+  rcases alignedRowStart_backed row hodd globalBlock localStart.port.x
+      hwestFine heastFine (rowStart_mem_alignedSelf hlocalStart) with
+    ⟨candidate, candidateOdd, candidateBacked, coordinate⟩
+  refine ⟨candidate, candidateBacked, ?_, ?_⟩
+  · rw [← coordinate]
+    simp only [translateStart, translatePort]
+    dsimp [globalBlock]
+    congr 1 <;> omega
+  · simpa only [hlocalParity, candidateOdd]
 
 theorem auditedShiftedRoutesIn
     (depth : Nat) (parent : Index) (blockX x lower upper
