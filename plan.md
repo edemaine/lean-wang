@@ -299,6 +299,11 @@ position-row obligation in the final theorem.
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to
   discharge the shaded obstruction selector at candidate free coordinates.
+- Row and column graph-certificate predicates isolate the remaining geometry:
+  each perpendicular red segment must have an odd path from a board-side port.
+  Under a valid shade grid and a light enclosing board, these certificates are
+  now proved to imply the original `IsFreeRow` and `IsFreeColumn` predicates,
+  including the cases where a corner path exposes only one endpoint edge.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
