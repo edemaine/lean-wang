@@ -407,6 +407,11 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   straight even link connects them before refinement. `CandidateFamily`
   packages cycle, row, and column candidate lists with this backing proof, and
   any total-odd weighted node reached from such a family yields `ProjectsTo`.
+- `ShadedFreeLineProjectionSourceLists` supplies the executable lists used by
+  that package: all strict ports of the enclosing cycle, and exactly the live
+  endpoints of perpendicular components on each retained row and column.
+  Generic membership proofs turn these lists into backed `Family` values from
+  a canonical cycle and the corresponding live certificates.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to
