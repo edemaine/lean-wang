@@ -34,6 +34,13 @@ The reduction has three independent parts:
 The source-dependent machine compiler has been replaced by a fixed universal
 argument.
 
+The reduction now consumes a four-field `UniversalMachineCertificate`: one
+constant finite table program, a computable source-dependent input word, a
+support proof, and the halting equivalence. All machine-to-Wang and scaffold
+reasoning depends only on this certificate. The existing folded construction
+is confined to one witness and can be replaced independently by a smaller
+fixed-TM0 simulation.
+
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
 2. `UniversalTM0.code` translates this universal evaluator once through

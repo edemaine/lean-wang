@@ -17,6 +17,7 @@ import LeanWang.NatPartrecToToPartrec
 import LeanWang.UniversalCode
 import LeanWang.TM0Route
 import LeanWang.UniversalTM0
+import LeanWang.UniversalMachineCertificate
 import LeanWang.UniversalFoldedReduction
 import LeanWang.UniversalDirectReduction
 import LeanWang.TM0DirectInput

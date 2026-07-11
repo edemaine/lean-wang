@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.MachineInputTilesData
 import LeanWang.TM0DirectInput
 import LeanWang.UniversalTM0
+import LeanWang.UniversalMachineCertificate
 
 /-!
 # Direct finite-input universal Wang reduction
@@ -48,6 +49,14 @@ theorem machine_halts_iff (code : Code) :
     UniversalTM0.code (UniversalTM0.input_ne_nil code)).trans
       (UniversalTM0.eval_dom_iff code)
 
+/-- The legacy folded construction packaged behind the fixed-machine interface. -/
+def certificate : UniversalMachineCertificate where
+  program := postProgram.toTableProgram
+  input := inputWord
+  input_computable := inputWord_computable
+  input_supported := input_supported
+  halts_iff := machine_halts_iff
+
 def fixedDomino (code : Code) : TileSet × WangTile :=
   (MachineInputTiles.tiles machine (inputWord code),
     MachineInputTiles.seed machine (inputWord code))
@@ -79,10 +88,10 @@ theorem fixedSeed_primrec : Primrec fixedSeed := by
 
 /-- Executable finite-list presentation of `fixedDomino`. -/
 def fixedDominoData (code : Code) : TileSet × WangTile :=
-  (fixedTiles code, fixedSeed code)
+  certificate.fixedDominoData code
 
 theorem fixedDominoData_primrec : Primrec fixedDominoData := by
-  exact Primrec.pair fixedTiles_primrec fixedSeed_primrec
+  exact (Primrec.pair fixedTiles_primrec fixedSeed_primrec).of_eq fun _ => rfl
 
 theorem fixedDominoData_computable : Computable fixedDominoData :=
   fixedDominoData_primrec.to_comp
@@ -91,15 +100,7 @@ theorem fixedDominoData_correct (code : Code) :
     TilesQuarterWithSeed (fixedDominoData code).1
         (fixedDominoData code).2 ↔
       ¬ (Nat.Partrec.Code.eval code 0).Dom := by
-  unfold fixedDominoData
-  change TilesQuarterWithSeed
-    (MachineInputTilesData.tiles postProgram.toTableProgram (inputWord code))
-    (MachineInputTilesData.seed postProgram.toTableProgram (inputWord code)) ↔ _
-  rw [MachineInputTilesData.seed_eq]
-  rw [tilesQuarterWithSeed_congr
-    (MachineInputTilesData.mem_tiles_iff
-      postProgram.toTableProgram (inputWord code))]
-  exact fixedDomino_correct code
+  exact certificate.fixedDominoData_correct code
 
 end UniversalDirectReduction
 end LeanWang

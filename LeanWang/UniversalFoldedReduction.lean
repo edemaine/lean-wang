@@ -30,18 +30,22 @@ namespace UniversalFoldedReduction
 
 open Nat.Partrec (Code)
 
+/-- The sole machine-side input to the generic Wang reduction. -/
+def universalMachine : UniversalMachineCertificate :=
+  UniversalDirectReduction.certificate
+
 /-- Fixed-corner Wang instance with the source input forced on its bottom row. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  UniversalDirectReduction.fixedDominoData c
+  universalMachine.fixedDominoData c
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  exact UniversalDirectReduction.fixedDominoData_computable
+  exact universalMachine.fixedDominoData_computable
 
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1
         (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  exact UniversalDirectReduction.fixedDominoData_correct c
+  exact universalMachine.fixedDominoData_correct c
 
 /-- Plane-tiling instance after applying any proved scaffold. -/
 def dominoReduction (S : Scaffold) (c : Code) : TileSet :=
