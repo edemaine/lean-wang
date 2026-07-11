@@ -412,6 +412,21 @@ def ProjectsTo.refineEndpoint
       livePortPath (iterateRefine 2 grid) target projection.targetLive
   targetLive := targetLive
 
+/-- Extend a projection by an even path without changing its odd total parity. -/
+def ProjectsTo.transEven
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {first target : Port}
+    (projection : ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) first)
+    (tail : Path (iterateRefine 2 grid) first target false)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target where
+  source := projection.source
+  path := by
+    simpa only [Bool.xor_false] using Path.trans projection.path tail
+  targetLive := targetLive
+
 /-- A whole-pattern projection supplies every refined live certificate. -/
 theorem liveCertificates_of_projection
     {grid : Nat → Nat → Index} {west east south north : Nat}

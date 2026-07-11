@@ -96,6 +96,86 @@ theorem horizontalInterior_of_live_endpoint
       RedShades.hasEast, RedShades.hasHorizontal, RedShades.cornerWest,
       RedShades.cornerEast, Quadrant.yBit]
 
+theorem projectsTo_north_of_verticalInterior
+    {grid : Nat → Nat → Index} {west east south north x y : Nat}
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) x y) (quadrantAt x y) ≠ none)
+    (northLive : portPresent (iterateRefine 2 grid) ⟨x, y, .north⟩ = true)
+    (projected :
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .south⟩) ∨
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .north⟩)) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, y, .north⟩) := by
+  rcases projected with projected | projected
+  · rcases projected with ⟨projection⟩
+    have vertical := hasVertical_of_interior_of_live_ports interior
+      projection.targetLive northLive
+    exact ⟨projection.transEven
+      (Path.ofLink (Link.vertical x y vertical)) northLive⟩
+  · exact projected
+
+theorem projectsTo_south_of_verticalInterior
+    {grid : Nat → Nat → Index} {west east south north x y : Nat}
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) x y) (quadrantAt x y) ≠ none)
+    (southLive : portPresent (iterateRefine 2 grid) ⟨x, y, .south⟩ = true)
+    (projected :
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .south⟩) ∨
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .north⟩)) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, y, .south⟩) := by
+  rcases projected with projected | projected
+  · exact projected
+  · rcases projected with ⟨projection⟩
+    have vertical := hasVertical_of_interior_of_live_ports interior
+      southLive projection.targetLive
+    exact ⟨projection.transEven
+      (Path.ofLink (Link.symm (Link.vertical x y vertical))) southLive⟩
+
+theorem projectsTo_east_of_horizontalInterior
+    {grid : Nat → Nat → Index} {west east south north x y : Nat}
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) x y) (quadrantAt x y) ≠ none)
+    (eastLive : portPresent (iterateRefine 2 grid) ⟨x, y, .east⟩ = true)
+    (projected :
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .west⟩) ∨
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .east⟩)) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, y, .east⟩) := by
+  rcases projected with projected | projected
+  · rcases projected with ⟨projection⟩
+    have horizontal := hasHorizontal_of_interior_of_live_ports interior
+      projection.targetLive eastLive
+    exact ⟨projection.transEven
+      (Path.ofLink (Link.horizontal x y horizontal)) eastLive⟩
+  · exact projected
+
+theorem projectsTo_west_of_horizontalInterior
+    {grid : Nat → Nat → Index} {west east south north x y : Nat}
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) x y) (quadrantAt x y) ≠ none)
+    (westLive : portPresent (iterateRefine 2 grid) ⟨x, y, .west⟩ = true)
+    (projected :
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .west⟩) ∨
+      Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, y, .east⟩)) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) ⟨x, y, .west⟩) := by
+  rcases projected with projected | projected
+  · exact projected
+  · rcases projected with ⟨projection⟩
+    have horizontal := hasHorizontal_of_interior_of_live_ports interior
+      westLive projection.targetLive
+    exact ⟨projection.transEven
+      (Path.ofLink (Link.symm (Link.horizontal x y horizontal))) westLive⟩
+
 theorem alignedRowStart_backed
     {grid : Nat → Nat → Index} {west east south north oldRow : Nat}
     (row : LiveRowCertificate grid west east south north oldRow)
