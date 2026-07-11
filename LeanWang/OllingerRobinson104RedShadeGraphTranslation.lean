@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104RedShadeGraph
+import LeanWang.OllingerRobinson104RedShadeGraphRefinementAudit
 import LeanWang.OllingerRobinson104RedShadeGraphSearchSoundness
 import LeanWang.OllingerRobinson104RefinementTranslation
 
@@ -18,7 +19,7 @@ namespace Closed104
 namespace RedShadeGraphTranslation
 
 open RedCycles RedShadeGraph RedShadeGraphSearchSoundness
-  RefinementTranslation Signals.FreeCellLocal
+  RedShadeGraphRefinement RefinementTranslation Signals.FreeCellLocal
 
 theorem link_congr_of_component_eq
     {firstGrid secondGrid : Nat → Nat → Index}
@@ -89,6 +90,20 @@ theorem BoundedPath.congr_of_component_eq
 
 def translatePort (port : Port) (offsetX offsetY : Nat) : Port :=
   ⟨offsetX + port.x, offsetY + port.y, port.side⟩
+
+/-- Port liveness is invariant under the canonical refined-block translation. -/
+theorem portPresent_translate
+    (depth : Nat) (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    (port : Port) :
+    portPresent (iterateRefine depth (shiftGrid grid blockX blockY)) port =
+      portPresent (iterateRefine depth grid)
+        (translatePort port (2 ^ (depth + 1) * blockX)
+          (2 ^ (depth + 1) * blockY)) := by
+  rcases port with ⟨x, y, side⟩
+  have hscale : 2 ∣ 2 ^ (depth + 1) := dvd_pow_self 2 (by omega)
+  cases side <;> simp only [portPresent, translatePort] <;>
+    rw [componentAt_iterateRefine_shift,
+      quadrantAt_shift (2 ^ (depth + 1)) blockX blockY x y hscale]
 
 theorem link_translate
     {depth : Nat} {grid : Nat → Nat → Index} {blockX blockY : Nat}

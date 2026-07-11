@@ -72,6 +72,26 @@ theorem boundedPath_two_block
   simpa using path_translate (depth := 2) (grid := grid)
     (blockX := blockX) (blockY := blockY) shifted
 
+/-- A bounded path on an arbitrary shifted neighborhood translates globally. -/
+theorem boundedPath_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {width height : Nat} {first target : Port} {parity : Bool}
+    (path : BoundedPath (iterateRefine 2 (shiftGrid grid blockX blockY))
+      width height first target parity) :
+    Path (iterateRefine 2 grid)
+      (translatePort first (8 * blockX) (8 * blockY))
+      (translatePort target (8 * blockX) (8 * blockY)) parity := by
+  simpa using path_translate (depth := 2) (grid := grid)
+    (blockX := blockX) (blockY := blockY) path.path
+
+theorem portPresent_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat) (port : Port) :
+    portPresent (iterateRefine 2 (shiftGrid grid blockX blockY)) port =
+      portPresent (iterateRefine 2 grid)
+        (translatePort port (8 * blockX) (8 * blockY)) := by
+  simpa using RedShadeGraphTranslation.portPresent_translate
+    2 grid blockX blockY port
+
 theorem portPresent_old_block
     (grid : Nat → Nat → Index) (blockX blockY : Nat)
     (port : Port) (hx : port.x < 2) (hy : port.y < 2) :

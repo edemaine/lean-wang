@@ -24,6 +24,7 @@ open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
   RedShadeGraphSearchSoundness
   RedShadeGraphWeightedSearch
   RedShadeGraphTranslation
+  RefinementTranslation
   BorderCoverageLocalAudit
   ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineProjectionCandidates Signals.FreeCellLocal
@@ -325,6 +326,49 @@ theorem projectsTo_of_boundedLocalRoute_of_family
   exact projectsTo_of_boundedLocalRoute blockX blockY
     (family.backed candidate hcandidate) startCoordinate startParity
     path htargetX htargetY targetLive
+
+/-- A bounded route searched directly in a shifted multi-macrocell neighborhood. -/
+def ShiftedBoundedRoute
+    (grid : Nat → Nat → Index) (blockX blockY width height : Nat)
+    (starts : List WeightedStart) (target : Port) : Prop :=
+  ∃ start ∈ starts,
+    BoundedPath (iterateRefine 2 (shiftGrid grid blockX blockY))
+      width height start.port target (Bool.xor start.parity true) ∧
+    portPresent (iterateRefine 2 (shiftGrid grid blockX blockY)) target = true
+
+/-- A multi-macrocell route projects once its local starts embed in the family. -/
+theorem projectsTo_of_shiftedBoundedRoute_of_family
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (blockX blockY width height : Nat)
+    {starts : List WeightedStart} {target : Port}
+    (embed : StartsEmbed family blockX blockY starts)
+    (route : ShiftedBoundedRoute grid blockX blockY width height starts target) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north)
+      (translatePort target (8 * blockX) (8 * blockY))) := by
+  rcases route with ⟨start, hstart, path, targetLive⟩
+  rcases embed start hstart with
+    ⟨candidate, hcandidate, startCoordinate, startParity⟩
+  have translated := SparseFreeLineLocalTransport.boundedPath_shift
+    grid blockX blockY path
+  have tail : Path (iterateRefine 2 grid) (sparsePort candidate.port)
+      (translatePort target (8 * blockX) (8 * blockY))
+      (Bool.xor candidate.parity true) := by
+    rw [← startCoordinate]
+    simpa only [startParity] using translated
+  have globalLive : portPresent (iterateRefine 2 grid)
+      (translatePort target (8 * blockX) (8 * blockY)) = true := by
+    rw [SparseFreeLineLocalTransport.portPresent_shift] at targetLive
+    exact targetLive
+  rcases family.backed candidate hcandidate with
+    ⟨source, sourceParity, head⟩
+  refine ⟨{
+    source := source
+    path := ?_
+    targetLive := globalLive
+  }⟩
+  simpa only [sourceParity, Bool.false_xor] using Path.trans head tail
 
 /-- Aligned bounded row routes project an odd retained row to a local target row. -/
 theorem verticalProjectionAt_of_alignedChecks
