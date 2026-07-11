@@ -28,6 +28,11 @@ def children (offset : Nat) : List Nat :=
   if offset % 2 = 0 then [4 * offset, 4 * offset + 1]
   else [4 * offset + 3]
 
+def mainChild (offset : Nat) : Nat :=
+  if offset % 2 = 0 then 4 * offset else 4 * offset + 3
+
+def extraChild (offset : Nat) : Nat := 4 * offset + 1
+
 def evenCount : List Nat → Nat
   | [] => 0
   | offset :: rest => (if offset % 2 = 0 then 1 else 0) + evenCount rest
@@ -50,6 +55,29 @@ theorem children_subset_expandOffset (offset : Nat) :
   · simp only [children, heven, if_false, List.mem_singleton] at hchild
     subst child
     simp [expandOffset, heven]
+
+theorem mem_children_cases {offset child : Nat}
+    (hchild : child ∈ children offset) :
+    child = mainChild offset ∨
+      offset % 2 = 0 ∧ child = extraChild offset := by
+  by_cases heven : offset % 2 = 0
+  · simp only [children, mainChild, extraChild, heven, if_true,
+      List.mem_cons, List.not_mem_nil, or_false] at hchild ⊢
+    rcases hchild with hchild | hchild
+    · exact Or.inl hchild
+    · exact Or.inr ⟨trivial, hchild⟩
+  · simp only [children, mainChild, heven, if_false,
+      List.mem_singleton] at hchild ⊢
+    exact Or.inl hchild
+
+theorem mainChild_mem_children (offset : Nat) :
+    mainChild offset ∈ children offset := by
+  by_cases heven : offset % 2 = 0 <;>
+    simp [mainChild, children, heven]
+
+theorem extraChild_mem_children {offset : Nat} (heven : offset % 2 = 0) :
+    extraChild offset ∈ children offset := by
+  simp [extraChild, children, heven]
 
 theorem children_length (offset : Nat) :
     (children offset).length = if offset % 2 = 0 then 2 else 1 := by
@@ -232,6 +260,44 @@ theorem odd_child_coordinate
     right
     rw [exitCoordinate_eq_sparse_add_six hcoordinate]
     rw [lineCoordinate_odd] at hsparse
+    rw [lineCoordinate_odd (depth + 1) (4 * offset + 3),
+      lineCoordinate_odd depth offset, pow_succ]
+    omega
+
+theorem even_mainChild_coordinate (depth offset : Nat) :
+    lineCoordinate .even (depth + 1) (mainChild offset) =
+      sparseCoordinate (lineCoordinate .even depth offset) := by
+  by_cases heven : offset % 2 = 0
+  · simpa [mainChild, heven] using
+      lineCoordinate_evenOffset_sparse .even depth offset heven
+  · have hodd : offset % 2 = 1 := by omega
+    have hcoordinate : (lineCoordinate .even depth offset) % 2 = 0 := by
+      rw [lineCoordinate_even]
+      omega
+    have hsparse := sparseCoordinate_of_even hcoordinate
+    rw [lineCoordinate_even] at hsparse
+    simp only [mainChild, heven, if_false]
+    rw [lineCoordinate_even (depth + 1) (4 * offset + 3),
+      lineCoordinate_even depth offset, pow_succ]
+    omega
+
+theorem odd_mainChild_coordinate (depth offset : Nat) :
+    lineCoordinate .odd (depth + 1) (mainChild offset) =
+        sparseCoordinate (lineCoordinate .odd depth offset) ∨
+      lineCoordinate .odd (depth + 1) (mainChild offset) =
+        exitCoordinate (lineCoordinate .odd depth offset) := by
+  by_cases heven : offset % 2 = 0
+  · left
+    simpa [mainChild, heven] using
+      lineCoordinate_evenOffset_sparse .odd depth offset heven
+  · right
+    have hcoordinate : (lineCoordinate .odd depth offset) % 2 = 1 := by
+      rw [lineCoordinate_odd]
+      omega
+    have hsparse := sparseCoordinate_of_odd hcoordinate
+    rw [exitCoordinate_eq_sparse_add_six hcoordinate]
+    rw [lineCoordinate_odd] at hsparse
+    simp only [mainChild, heven, if_false]
     rw [lineCoordinate_odd (depth + 1) (4 * offset + 3),
       lineCoordinate_odd depth offset, pow_succ]
     omega

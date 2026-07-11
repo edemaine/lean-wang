@@ -104,6 +104,56 @@ def ChildStep : Prop :=
       (west phase (depth + 1)) (east phase (depth + 1))
       (lineCoordinate phase (depth + 1) child)
 
+/-- The main child of every retained line. -/
+def MainChildStep : Prop :=
+  ∀ phase depth parent offset,
+    offset ∈ offsets depth →
+    LiveRowCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveColumnCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveRowCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (mainChild offset)) ∧
+    LiveColumnCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (mainChild offset))
+
+/-- The second child of the unique even line. -/
+def ExtraChildStep : Prop :=
+  ∀ phase depth parent offset,
+    offset ∈ offsets depth →
+    offset % 2 = 0 →
+    LiveRowCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveColumnCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveRowCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (extraChild offset)) ∧
+    LiveColumnCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) (extraChild offset))
+
+theorem childStep_of_main_of_extra
+    (main : MainChildStep) (extra : ExtraChildStep) : ChildStep := by
+  intro phase depth parent offset child hold hchild row column
+  rcases mem_children_cases hchild with rfl | ⟨heven, rfl⟩
+  · exact main phase depth parent offset hold row column
+  · exact extra phase depth parent offset hold heven row column
+
 theorem projectionStep_of_childStep (childrenProject : ChildStep) :
     ProjectionStep := by
   intro phase depth parent rows columns
