@@ -308,6 +308,14 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   Consequently every offset is strictly below the removed outer endpoint.
   The semantic step should prove this whole-pattern periodicity directly and
   avoid any retained depth-two exhaustive search.
+- The semantic recurrence is now stated for both scale parities. This is
+  necessary because the crossing-board theorem guarantees a light board at
+  level `L` or `L-1` but does not pin which parity is light. The even depth-one
+  base is discharged by the existing finite graph certificates. For either
+  parity, a base certificate plus one phase-preserving two-substitution
+  periodicity lemma now yields `OffsetsFree` at every depth and packages it as
+  an ordered `FreeGrid`. The remaining recurrence work is therefore exactly
+  the odd base and the common periodic successor theorem.
 - Red-wire propagation is factored through a finite port graph. Straight
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality
