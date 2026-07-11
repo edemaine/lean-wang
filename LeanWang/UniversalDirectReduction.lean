@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.MachineInputTilesData
 import LeanWang.TM0DirectInput
 import LeanWang.UniversalTM0
 
@@ -27,6 +28,9 @@ def postProgram : PostProgram :=
 def inputWord (code : Code) : List Nat :=
   TM0DirectInput.inputWord (UniversalTM0.input code)
 
+theorem inputWord_computable : Computable inputWord :=
+  TM0DirectInput.inputWord_computable.comp UniversalTM0.input_computable
+
 def machine : Machine :=
   postProgram.toTableProgram.toMachine
 
@@ -50,6 +54,31 @@ theorem fixedDomino_correct (code : Code) :
       ¬ (Nat.Partrec.Code.eval code 0).Dom := by
   exact (MachineInputTiles.tilesQuarterWithSeed_iff_not_halts
     (input_supported code)).trans (not_congr (machine_halts_iff code))
+
+/-- Executable finite-list presentation of `fixedDomino`. -/
+def fixedDominoData (code : Code) : TileSet × WangTile :=
+  (MachineInputTilesData.tiles postProgram.toTableProgram (inputWord code),
+    MachineInputTilesData.seed postProgram.toTableProgram (inputWord code))
+
+theorem fixedDominoData_computable : Computable fixedDominoData := by
+  have harg : Computable (fun code : Code =>
+      (postProgram.toTableProgram, inputWord code)) :=
+    Computable.pair (Computable.const postProgram.toTableProgram)
+      inputWord_computable
+  exact Computable.pair
+    (MachineInputTilesData.tiles_computable.comp harg)
+    (MachineInputTilesData.seed_computable.comp harg)
+
+theorem fixedDominoData_correct (code : Code) :
+    TilesQuarterWithSeed (fixedDominoData code).1
+        (fixedDominoData code).2 ↔
+      ¬ (Nat.Partrec.Code.eval code 0).Dom := by
+  unfold fixedDominoData
+  rw [MachineInputTilesData.seed_eq]
+  rw [tilesQuarterWithSeed_congr
+    (MachineInputTilesData.mem_tiles_iff
+      postProgram.toTableProgram (inputWord code))]
+  exact fixedDomino_correct code
 
 end UniversalDirectReduction
 end LeanWang

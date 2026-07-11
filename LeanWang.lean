@@ -5,6 +5,7 @@ import LeanWang.Machine
 import LeanWang.MachineInput
 import LeanWang.MachineInputHistory
 import LeanWang.MachineInputTiles
+import LeanWang.MachineInputTilesData
 import LeanWang.MachineTiles
 import LeanWang.PostMachine
 import LeanWang.PostMachineInput

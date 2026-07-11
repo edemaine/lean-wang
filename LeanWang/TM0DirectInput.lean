@@ -29,6 +29,28 @@ def inputWord : List SourceSymbol → List Nat
       foldedOriginSymbol first ::
         rest.map (foldedSymbolCode false default)
 
+theorem inputWord_primrec : Primrec inputWord := by
+  have hrest : Primrec (fun rest : List SourceSymbol =>
+      rest.map (foldedSymbolCode false default)) := by
+    refine Primrec.list_map Primrec.id ?_
+    apply Primrec₂.mk
+    exact foldedSymbolCode_primrec.comp
+      (Primrec.pair (Primrec.const false)
+        (Primrec.pair (Primrec.const default) Primrec.snd))
+  have hcons : Primrec₂ (fun (_ : List SourceSymbol) =>
+      fun p : SourceSymbol × List SourceSymbol =>
+        foldedOriginSymbol p.1 ::
+          p.2.map (foldedSymbolCode false default)) := by
+    apply Primrec₂.mk
+    exact Primrec.list_cons.comp
+      (foldedOriginSymbol_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (hrest.comp (Primrec.snd.comp Primrec.snd))
+  exact (Primrec.list_casesOn Primrec.id (Primrec.const []) hcons).of_eq
+    fun input => by cases input <;> rfl
+
+theorem inputWord_computable : Computable inputWord :=
+  inputWord_primrec.to_comp
+
 theorem foldedCellOfTapeAt_init_right_zero
     (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) (position : Nat) :
     foldedCellOfTapeAt

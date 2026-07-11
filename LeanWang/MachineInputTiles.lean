@@ -35,6 +35,47 @@ def toWangTile (westTag eastTag rowTag nextRowTag : Nat)
   w := horizontalColor westTag rowTag
     tile.prevLeft tile.prevCenter tile.nextLeft tile.nextCenter
 
+theorem toWangTile_primrec :
+    Primrec (fun p : Nat × Nat × Nat × Nat × MachineHistoryTile =>
+      toWangTile p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2) := by
+  let history : Nat × Nat × Nat × Nat × MachineHistoryTile →
+      MachineHistoryTile := fun p => p.2.2.2.2
+  let westTag : Nat × Nat × Nat × Nat × MachineHistoryTile → Nat := fun p => p.1
+  let eastTag : Nat × Nat × Nat × Nat × MachineHistoryTile → Nat := fun p => p.2.1
+  let rowTag : Nat × Nat × Nat × Nat × MachineHistoryTile → Nat := fun p => p.2.2.1
+  let nextRowTag : Nat × Nat × Nat × Nat × MachineHistoryTile → Nat :=
+    fun p => p.2.2.2.1
+  have hh : Primrec history := Primrec.snd.comp (Primrec.snd.comp
+    (Primrec.snd.comp (Primrec.snd : Primrec
+      (fun p : Nat × Nat × Nat × Nat × MachineHistoryTile => p.2))))
+  have hw : Primrec westTag := Primrec.fst
+  have he : Primrec eastTag := Primrec.fst.comp Primrec.snd
+  have hr : Primrec rowTag := Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hn : Primrec nextRowTag := Primrec.fst.comp
+    (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+  have hprevLeft := MachineHistoryTile.prevLeft_primrec.comp hh
+  have hprevCenter := MachineHistoryTile.prevCenter_primrec.comp hh
+  have hprevRight := MachineHistoryTile.prevRight_primrec.comp hh
+  have hnextLeft := MachineHistoryTile.nextLeft_primrec.comp hh
+  have hnextCenter := MachineHistoryTile.nextCenter_primrec.comp hh
+  have hnextRight := MachineHistoryTile.nextRight_primrec.comp hh
+  have hnorth := taggedTripleCellColor_primrec.comp
+    (Primrec.pair hn (Primrec.pair hnextLeft
+      (Primrec.pair hnextCenter hnextRight)))
+  have hsouth := taggedTripleCellColor_primrec.comp
+    (Primrec.pair hr (Primrec.pair hprevLeft
+      (Primrec.pair hprevCenter hprevRight)))
+  have heastInner := taggedOverlapCellColor_primrec.comp
+    (Primrec.pair hr (Primrec.pair hprevCenter
+      (Primrec.pair hprevRight (Primrec.pair hnextCenter hnextRight))))
+  have hwestInner := taggedOverlapCellColor_primrec.comp
+    (Primrec.pair hr (Primrec.pair hprevLeft
+      (Primrec.pair hprevCenter (Primrec.pair hnextLeft hnextCenter))))
+  have heast := Primrec₂.natPair.comp he heastInner
+  have hwest := Primrec₂.natPair.comp hw hwestInner
+  exact WangTile.ofTuple_primrec.comp
+    (Primrec.pair hnorth (Primrec.pair hsouth (Primrec.pair heast hwest)))
+
 theorem hMatches_toWangTile_iff
     (westTag eastTag westTag' eastTag' rowTag nextRowTag rowTag' nextRowTag' : Nat)
     (left right : MachineHistoryTile) :
