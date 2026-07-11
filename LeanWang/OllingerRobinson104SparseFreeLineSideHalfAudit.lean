@@ -132,14 +132,71 @@ def recurrenceWindows : List Window :=
         (List.range 3).map fun x =>
           grid (originX + x) (lowerBlockY + y)).eraseDups
 
+/-- Erase the graph-invisible black layer pointwise. -/
+def canonicalWindow (window : Window) : Window :=
+  window.map BorderSubstitution.canonicalIndex
+
+/-- The 60 border-state windows occurring at the first recursive depth. -/
+def canonicalWindows : List Window :=
+  (recurrenceWindows.map canonicalWindow).eraseDups
+
+/-- Extract a successor window at one of the four horizontal residues. -/
+def refineWindow (window : Window) (residueX : Nat) : Window :=
+  let refined := iterateRefine 2 (windowGrid window)
+  (List.range 2).flatMap fun y =>
+    (List.range 3).map fun x => refined (residueX + x) y
+
+def closeWindows (windows : List Window) : List Window :=
+  (windows ++ windows.flatMap fun window =>
+    (List.range 4).map fun residueX =>
+      canonicalWindow (refineWindow window residueX)).eraseDups
+
+/-- The stable 80-state quotient used by the side-half induction. -/
+def closedWindows : List Window := closeWindows canonicalWindows
+
 set_option linter.style.nativeDecide false in
-theorem recurrenceWindows_complete :
-    ∀ window ∈ recurrenceWindows, windowCheck window = true := by
+theorem closedWindows_complete :
+    ∀ window ∈ closedWindows, windowCheck window = true := by
   native_decide
 
 set_option linter.style.nativeDecide false in
 theorem recurrenceWindows_length : recurrenceWindows.length = 68 := by
   native_decide
+
+set_option linter.style.nativeDecide false in
+theorem canonicalWindows_length : canonicalWindows.length = 60 := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem closedWindows_length : closedWindows.length = 80 := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem closedWindows_closed : closeWindows closedWindows = closedWindows := by
+  native_decide
+
+theorem canonicalWindow_mem_closedWindows {window : Window}
+    (hwindow : window ∈ recurrenceWindows) :
+    canonicalWindow window ∈ closedWindows := by
+  rw [closedWindows, closeWindows, List.mem_eraseDups, List.mem_append]
+  left
+  rw [canonicalWindows, List.mem_eraseDups, List.mem_map]
+  exact ⟨window, hwindow, rfl⟩
+
+theorem refineWindow_mem_closedWindows {window : Window}
+    (hwindow : window ∈ closedWindows) {residueX : Nat}
+    (hresidue : residueX < 4) :
+    canonicalWindow (refineWindow window residueX) ∈ closedWindows := by
+  have hmem : canonicalWindow (refineWindow window residueX) ∈
+      closeWindows closedWindows := by
+    rw [closeWindows, List.mem_eraseDups, List.mem_append]
+    right
+    rw [List.mem_flatMap]
+    refine ⟨window, hwindow, ?_⟩
+    rw [List.mem_map]
+    exact ⟨residueX, by simpa using hresidue, rfl⟩
+  rw [closedWindows_closed] at hmem
+  exact hmem
 
 end SparseFreeLineSideHalfAudit
 end Closed104
