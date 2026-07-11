@@ -375,6 +375,43 @@ def ProjectsTo.weightedSource
   startLive := projection.source.refine.startLive
   portLive := projection.targetLive
 
+/-- A projected endpoint remains projected at its literal sparse copy. -/
+def ProjectsTo.refineSparse
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {target : Port}
+    (projection : ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) :
+    ProjectsTo (grid := iterateRefine 2 grid)
+      (west := 4 * west) (east := 4 * east)
+      (south := 4 * south) (north := 4 * north)
+      (sparsePort target) where
+  source := projection.weightedSource
+  path := by
+    simpa [ProjectsTo.weightedSource] using
+      (Path.refl (indexGrid := iterateRefine 2 (iterateRefine 2 grid))
+        (sparsePort target))
+  targetLive := by
+    rw [portPresent_sparse]
+    exact projection.targetLive
+
+/-- A projected endpoint also follows its side-sensitive refinement connector. -/
+def ProjectsTo.refineEndpoint
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {target : Port}
+    (projection : ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target)
+    (targetLive : portPresent (iterateRefine 2 (iterateRefine 2 grid))
+      (refinedPort target) = true) :
+    ProjectsTo (grid := iterateRefine 2 grid)
+      (west := 4 * west) (east := 4 * east)
+      (south := 4 * south) (north := 4 * north)
+      (refinedPort target) where
+  source := projection.weightedSource
+  path := by
+    simpa [ProjectsTo.weightedSource] using
+      livePortPath (iterateRefine 2 grid) target projection.targetLive
+  targetLive := targetLive
+
 /-- A whole-pattern projection supplies every refined live certificate. -/
 theorem liveCertificates_of_projection
     {grid : Nat → Nat → Index} {west east south north : Nat}
