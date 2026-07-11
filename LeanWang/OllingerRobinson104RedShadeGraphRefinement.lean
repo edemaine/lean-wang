@@ -198,6 +198,126 @@ theorem connectorPath_translate (grid : Nat → Nat → Index)
   simpa using path_translate (depth := 2) (grid := grid)
     (blockX := blockX) (blockY := blockY) shifted
 
+def sparsePort (port : Port) : Port :=
+  ⟨sparseCoordinate port.x, sparseCoordinate port.y, port.side⟩
+
+def refinedPort (port : Port) : Port :=
+  match port.side with
+  | .east =>
+      if localCoordinate port.x = 1 then
+        ⟨macroOrigin port.x + 7, sparseCoordinate port.y, .east⟩
+      else sparsePort port
+  | .north =>
+      if localCoordinate port.y = 1 then
+        ⟨sparseCoordinate port.x, macroOrigin port.y + 7, .north⟩
+      else sparsePort port
+  | .west => sparsePort port
+  | .south => sparsePort port
+
+theorem sparseCoordinate_mod_two (coordinate : Nat) :
+    sparseCoordinate coordinate % 2 = coordinate % 2 := by
+  simp [sparseCoordinate, macroOrigin, localCoordinate, Nat.add_mod,
+    Nat.mul_mod]
+
+theorem quadrantAt_sparseCoordinate (x y : Nat) :
+    quadrantAt (sparseCoordinate x) (sparseCoordinate y) = quadrantAt x y := by
+  simp [quadrantAt, sparseCoordinate_mod_two]
+
+theorem portPresent_coarseGrid_local (grid : Nat → Nat → Index)
+    (port : Port) :
+    portPresent (coarseGrid (grid (port.x / 2) (port.y / 2)))
+        ⟨localCoordinate port.x, localCoordinate port.y, port.side⟩ =
+      portPresent grid port := by
+  unfold portPresent
+  change (match port.side with
+    | .west => RedShades.hasWest
+        (componentAt (coarseGrid (grid (port.x / 2) (port.y / 2)))
+          (localCoordinate port.x) (localCoordinate port.y))
+        (quadrantAt (localCoordinate port.x) (localCoordinate port.y))
+    | .east => RedShades.hasEast
+        (componentAt (coarseGrid (grid (port.x / 2) (port.y / 2)))
+          (localCoordinate port.x) (localCoordinate port.y))
+        (quadrantAt (localCoordinate port.x) (localCoordinate port.y))
+    | .south => RedShades.hasSouth
+        (componentAt (coarseGrid (grid (port.x / 2) (port.y / 2)))
+          (localCoordinate port.x) (localCoordinate port.y))
+        (quadrantAt (localCoordinate port.x) (localCoordinate port.y))
+    | .north => RedShades.hasNorth
+        (componentAt (coarseGrid (grid (port.x / 2) (port.y / 2)))
+          (localCoordinate port.x) (localCoordinate port.y))
+        (quadrantAt (localCoordinate port.x) (localCoordinate port.y))) = _
+  have hcoarse : componentAt
+      (coarseGrid (grid (port.x / 2) (port.y / 2)))
+        (localCoordinate port.x) (localCoordinate port.y) =
+      componentAt grid port.x port.y := by
+    simp [componentAt, coarseGrid]
+  rw [hcoarse]
+  have hquadrantLocal :
+      quadrantAt (localCoordinate port.x) (localCoordinate port.y) =
+        quadrantAt port.x port.y := by
+    simp [quadrantAt, localCoordinate]
+  rw [hquadrantLocal]
+  cases port.side <;> rfl
+
+theorem Path.symm {grid : Nat → Nat → Index} {first second : Port}
+    {parity : Bool} (path : Path grid first second parity) :
+    Path grid second first parity := by
+  induction path with
+  | refl port => exact Path.refl port
+  | ofLink link => exact Path.ofLink (Link.symm link)
+  | trans firstPath secondPath firstIH secondIH =>
+      simpa [Bool.xor_comm] using Path.trans secondIH firstIH
+
+set_option maxHeartbeats 1000000 in
+-- Normalizing translated macro origins through the side-sensitive port map.
+/-- A live coarse port reaches its side-sensitive refined image evenly. -/
+theorem livePortPath (grid : Nat → Nat → Index) (port : Port)
+    (hlive : portPresent grid port = true) :
+    Path (iterateRefine 2 grid) (sparsePort port) (refinedPort port) false := by
+  cases hside : port.side with
+  | west =>
+      simpa [refinedPort, hside] using
+        (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+  | south =>
+      simpa [refinedPort, hside] using
+        (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+  | east =>
+      by_cases hexit : localCoordinate port.x = 1
+      · have hpresent : portPresent
+            (coarseGrid (grid (port.x / 2) (port.y / 2)))
+            (internalPort .east (localCoordinate port.y)) = true := by
+          simpa [internalPort, hside, hexit] using
+            (portPresent_coarseGrid_local grid port).trans hlive
+        have hexit' : port.x % 2 = 1 := by
+          simpa [localCoordinate] using hexit
+        have connector := connectorPath_translate grid (port.x / 2) (port.y / 2)
+          .east (localCoordinate_lt_two port.y) hpresent
+        simpa [sparsePort, refinedPort, hside, hexit', internalPort, externalPort,
+          translatePort, sparseCoordinate, macroOrigin, localCoordinate]
+          using connector
+      · have hexit' : port.x % 2 ≠ 1 := by
+          simpa [localCoordinate] using hexit
+        simpa [refinedPort, hside, hexit, hexit'] using
+          (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+  | north =>
+      by_cases hexit : localCoordinate port.y = 1
+      · have hpresent : portPresent
+            (coarseGrid (grid (port.x / 2) (port.y / 2)))
+            (internalPort .north (localCoordinate port.x)) = true := by
+          simpa [internalPort, hside, hexit] using
+            (portPresent_coarseGrid_local grid port).trans hlive
+        have hexit' : port.y % 2 = 1 := by
+          simpa [localCoordinate] using hexit
+        have connector := connectorPath_translate grid (port.x / 2) (port.y / 2)
+          .north (localCoordinate_lt_two port.x) hpresent
+        simpa [sparsePort, refinedPort, hside, hexit', internalPort, externalPort,
+          translatePort, sparseCoordinate, macroOrigin, localCoordinate]
+          using connector
+      · have hexit' : port.y % 2 ≠ 1 := by
+          simpa [localCoordinate] using hexit
+        simpa [refinedPort, hside, hexit, hexit'] using
+          (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+
 end RedShadeGraphRefinement
 end Closed104
 end Figure13Layers
