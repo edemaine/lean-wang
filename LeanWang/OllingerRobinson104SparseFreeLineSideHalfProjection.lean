@@ -302,6 +302,38 @@ theorem windowStartsIn_backed
     congr 1 <;> omega
   · simpa only [hlocalParity, candidateOdd]
 
+theorem windowStartsIn_all (window : Window) :
+    windowStartsIn window 0 24 = windowStarts window := by
+  unfold windowStartsIn
+  apply List.filter_eq_self.2
+  intro start hstart
+  have bounded := windowStarts_inBounds window start hstart
+  simp only [Bool.and_eq_true, decide_eq_true_eq]
+  exact ⟨Nat.zero_le _, bounded.1⟩
+
+theorem projectsTo_of_windowRoute
+    (depth : Nat) (parent : Index) (blockX lower upper : Nat)
+    (row : LiveRowCertificate (oldGrid depth parent)
+      (west .odd (depth + 1)) (east .odd (depth + 1))
+      (west .odd (depth + 1)) (east .odd (depth + 1)) (oldRow depth))
+    (hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+      8 * (blockX - 1) + lower)
+    (hwindowEast : 8 * (blockX - 1) + upper ≤
+      quarterEast (4 * east .odd (depth + 1)))
+    {target : Port}
+    (route : ShiftedBoundedRoute (oldGrid depth parent) (blockX - 1)
+      (lowerBlockY depth) 24 16
+      (windowStartsIn (windowAt depth parent blockX) lower upper) target) :
+    Nonempty (ProjectsTo (grid := oldGrid depth parent)
+      (west := west .odd (depth + 1)) (east := east .odd (depth + 1))
+      (south := west .odd (depth + 1)) (north := east .odd (depth + 1))
+      (translatePort target (8 * (blockX - 1))
+        (8 * lowerBlockY depth))) := by
+  exact projectsTo_of_shiftedRoute_of_backedStarts
+    (blockX - 1) (lowerBlockY depth) 24 16
+    (windowStartsIn_backed depth parent blockX lower upper row
+      hwindowWest hwindowEast) route
+
 theorem auditedShiftedRoutesIn
     (depth : Nat) (parent : Index) (blockX x lower upper
       targetLower targetUpper : Nat)
@@ -444,6 +476,182 @@ theorem auditedShiftedRoutes
       (route_of_canonicalWindow route))
   · exact Or.inr (shiftedRoute_of_windowAt
       (route_of_canonicalWindow route))
+
+theorem nextOldRow_eq (depth : Nat) :
+    oldRow (depth + 1) = 8 * lowerBlockY depth + 3 := by
+  rw [oldRow_eq, lowerBlockY_eq, pow_succ]
+  omega
+
+set_option maxHeartbeats 2000000 in
+-- The four boundary/interior branches normalize large dependent route types.
+/-- The odd pivot-extra row recurs from one side-half window layer to the next. -/
+theorem verticalProjection_nextOldRow
+    (depth : Nat) (parent : Index)
+    (row : LiveRowCertificate (oldGrid depth parent)
+      (west .odd (depth + 1)) (east .odd (depth + 1))
+      (west .odd (depth + 1)) (east .odd (depth + 1)) (oldRow depth)) :
+    VerticalProjectionAt (oldGrid depth parent)
+      (west .odd (depth + 1)) (east .odd (depth + 1))
+      (west .odd (depth + 1)) (east .odd (depth + 1))
+      (oldRow (depth + 1)) := by
+  intro targetX hwest heast interior
+  let blockX := targetX / 8
+  let localX := targetX % 8
+  have hlocalX : localX < 8 := Nat.mod_lt _ (by decide)
+  have htargetX : 8 * blockX + localX = targetX := by
+    have hdecompose := Nat.mod_add_div targetX 8
+    dsimp [blockX, localX]
+    omega
+  have htargetY : 8 * lowerBlockY depth + 3 = oldRow (depth + 1) :=
+    (nextOldRow_eq depth).symm
+  have hwestEq : west .odd (depth + 1) = firstBlock depth := by
+    rw [firstBlock_eq]
+    simp [west, scale, Phase.factor, pow_succ]
+    omega
+  have heastEq : east .odd (depth + 1) = 3 * firstBlock depth := by
+    rw [firstBlock_eq]
+    simp [east, scale, Phase.factor, pow_succ]
+    omega
+  have hfirstPositive : 0 < firstBlock depth := by
+    rw [firstBlock_eq]
+    positivity
+  have hfirstEight : 8 ≤ firstBlock depth := by
+    rw [firstBlock_eq]
+    have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+    omega
+  have hblockLower : firstBlock depth ≤ blockX := by
+    rw [hwestEq, quarterWest] at hwest
+    omega
+  have hblockUpper : blockX < 3 * firstBlock depth := by
+    rw [heastEq, quarterEast] at heast
+    omega
+  have hlastRelevant : lastRelevantBlock depth = 3 * firstBlock depth - 1 := by
+    rw [lastRelevantBlock_eq, firstBlock_eq]
+    omega
+  have hblockRelevant : blockX ≤ lastRelevantBlock depth := by
+    rw [hlastRelevant]
+    omega
+  have htranslatedX : 8 * (blockX - 1) + (8 + localX) = targetX := by
+    omega
+  have localInterior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2
+        (windowGrid (windowAt depth parent blockX))) (8 + localX) 3)
+      (quadrantAt (8 + localX) 3) ≠ none := by
+    have hcomponent := componentAt_iterateRefine_shift 2 (oldGrid depth parent)
+      (blockX - 1) (lowerBlockY depth) (8 + localX) 3
+    norm_num at hcomponent
+    have hsame := sameComponents_windowAt_shift depth parent blockX
+      (8 + localX) 3 (by omega) (by omega)
+    have hquadrant := quadrantAt_shift 8 (blockX - 1) (lowerBlockY depth)
+      (8 + localX) 3 (by decide)
+    have hglobalY : 8 * lowerBlockY depth + 3 = oldRow (depth + 1) :=
+      htargetY
+    rw [hsame, hcomponent, htranslatedX, hglobalY]
+    rw [← hquadrant]
+    simpa [htranslatedX, hglobalY] using interior
+  by_cases hleftmost : blockX = firstBlock depth
+  · rw [hleftmost] at localInterior htargetX htranslatedX
+    have htargetLower : 2 ≤ localX := by
+      rw [hwestEq, quarterWest] at hwest
+      omega
+    have hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+        8 * (firstBlock depth - 1) + 10 := by
+      rw [hwestEq, quarterWest]
+      omega
+    have hwindowEast : 8 * (firstBlock depth - 1) + 24 ≤
+        quarterEast (4 * east .odd (depth + 1)) := by
+      rw [heastEq, quarterEast]
+      omega
+    rcases auditedLeftmostRoutes depth parent localX hlocalX htargetLower
+        localInterior with route | route
+    · left
+      simpa [translatePort, htargetY, htranslatedX] using
+        projectsTo_of_windowRoute depth parent (firstBlock depth) 10 24 row
+          hwindowWest hwindowEast route
+    · right
+      simpa [translatePort, htargetY, htranslatedX] using
+        projectsTo_of_windowRoute depth parent (firstBlock depth) 10 24 row
+          hwindowWest hwindowEast route
+  · by_cases hnextLeft : blockX = firstBlock depth + 1
+    · rw [hnextLeft] at localInterior htargetX htranslatedX
+      have hnextX : 8 * firstBlock depth + (8 + localX) = targetX := by
+        omega
+      have hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+          8 * (firstBlock depth + 1 - 1) + 2 := by
+        rw [hwestEq, quarterWest]
+        omega
+      have hwindowEast : 8 * (firstBlock depth + 1 - 1) + 24 ≤
+          quarterEast (4 * east .odd (depth + 1)) := by
+        rw [heastEq, quarterEast]
+        omega
+      rcases auditedNextLeftRoutes depth parent localX hlocalX localInterior with
+        route | route
+      · left
+        simpa [translatePort, htargetY, hnextX] using
+          projectsTo_of_windowRoute depth parent (firstBlock depth + 1) 2 24
+            row hwindowWest hwindowEast route
+      · right
+        simpa [translatePort, htargetY, hnextX] using
+          projectsTo_of_windowRoute depth parent (firstBlock depth + 1) 2 24
+            row hwindowWest hwindowEast route
+    · by_cases hright : blockX = lastRelevantBlock depth
+      · rw [hright] at localInterior htargetX htranslatedX
+        have hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+            8 * (lastRelevantBlock depth - 1) := by
+          rw [hwestEq, quarterWest, hlastRelevant]
+          omega
+        have hwindowEast : 8 * (lastRelevantBlock depth - 1) + 16 ≤
+            quarterEast (4 * east .odd (depth + 1)) := by
+          rw [heastEq, quarterEast, hlastRelevant]
+          omega
+        rcases auditedRightmostRelevantRoutes depth parent localX hlocalX
+            localInterior with route | route
+        · left
+          simpa [translatePort, htargetY, htranslatedX] using
+            projectsTo_of_windowRoute depth parent (lastRelevantBlock depth)
+              0 16 row hwindowWest hwindowEast route
+        · right
+          simpa [translatePort, htargetY, htranslatedX] using
+            projectsTo_of_windowRoute depth parent (lastRelevantBlock depth)
+              0 16 row hwindowWest hwindowEast route
+      · let delta := blockX - firstBlock depth
+        have hblockEq : firstBlock depth + delta = blockX := by
+          dsimp [delta]
+          omega
+        have hdelta : delta < blockCount depth := by
+          rw [blockCount_eq]
+          dsimp [delta]
+          rw [firstBlock_eq] at hblockUpper hblockLower
+          omega
+        have hwindowWest : quarterWest (4 * west .odd (depth + 1)) <
+            8 * (blockX - 1) := by
+          rw [hwestEq, quarterWest]
+          omega
+        have hwindowEast : 8 * (blockX - 1) + 24 ≤
+            quarterEast (4 * east .odd (depth + 1)) := by
+          rw [heastEq, quarterEast]
+          rw [hlastRelevant] at hright hblockRelevant
+          omega
+        have routes := auditedShiftedRoutes depth parent delta localX hdelta
+          hlocalX (by simpa [hblockEq] using localInterior)
+        rcases routes with route | route
+        · left
+          have projected := projectsTo_of_windowRoute depth parent blockX 0 24 row
+              hwindowWest hwindowEast (by
+                simpa [hblockEq, windowStartsIn_all] using route)
+          change Nonempty (ProjectsTo
+            ⟨8 * (blockX - 1) + (8 + localX),
+              8 * lowerBlockY depth + 3, .south⟩) at projected
+          simpa only [htranslatedX, htargetY] using projected
+        · right
+          have projected := projectsTo_of_windowRoute depth parent blockX 0 24 row
+              hwindowWest hwindowEast (by
+                simpa [hblockEq, windowStartsIn_all] using route)
+          change Nonempty (ProjectsTo
+            ⟨8 * (blockX - 1) + (8 + localX),
+              8 * lowerBlockY depth + 3, .north⟩) at projected
+          simpa only [htranslatedX, htargetY] using projected
+
 
 end SparseFreeLineSideHalfProjection
 end Closed104
