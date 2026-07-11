@@ -171,6 +171,22 @@ def columnFamily
   Family.column certificate (columnPorts grid south north column) fun _ hport =>
     valid_columnPort cycle.south_lt_north hport
 
+/-- The enclosing cycle and every retained row and column as one source family. -/
+def patternFamily
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : CycleOn grid west east south north)
+    (offsets : List Nat) (coordinate : Nat → Nat)
+    (rowCertificate : ∀ offset ∈ offsets,
+      LiveRowCertificate grid west east south north (coordinate offset))
+    (columnCertificate : ∀ offset ∈ offsets,
+      LiveColumnCertificate grid west east south north (coordinate offset)) :
+    Family grid west east south north :=
+  (cycleFamily cycle).append <|
+    (Family.concat (offsets.attach.map fun offset =>
+      rowFamily cycle (rowCertificate offset.1 offset.2))).append <|
+    Family.concat (offsets.attach.map fun offset =>
+      columnFamily cycle (columnCertificate offset.1 offset.2))
+
 end ShadedFreeLineProjectionSourceLists
 end Closed104
 end Figure13Layers

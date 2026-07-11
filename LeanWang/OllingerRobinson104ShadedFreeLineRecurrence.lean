@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedFreeLineGraphBase
 import LeanWang.OllingerRobinson104ShadedFreeLinePatternRefinement
+import LeanWang.OllingerRobinson104ShadedFreeLineProjectionSourceLists
 
 /-!
 The semantic Figure 18 free-line recurrence.
@@ -22,6 +23,7 @@ namespace ShadedFreeLineRecurrence
 
 open RedCycles RedShadeCycles RedShadePaths ShadedFreeGrid ShadedFreeLineGraphBase
   ShadedFreeLineGraph ShadedFreeLinePatternRefinement
+  ShadedFreeLineProjectionCandidates ShadedFreeLineProjectionSourceLists
   ShadedFreeLineOffsets ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 100000
@@ -247,6 +249,28 @@ def ProjectionStep : Prop :=
       (west phase depth) (east phase depth)
       (west phase depth) (east phase depth)
       (freeOffsets (depth + 1)) (lineCoordinate phase (depth + 1))
+
+/-- Executable whole-pattern coverage is the final concrete recurrence fact. -/
+def CoverageStep : Prop :=
+  ∀ phase depth parent,
+    ∀ (rows : ∀ offset ∈ freeOffsets depth,
+      LiveRowCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset))
+      (columns : ∀ offset ∈ freeOffsets depth,
+      LiveColumnCertificate (localGrid phase depth parent)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth)
+        (lineCoordinate phase depth offset)),
+    (patternFamily (canonicalCycle phase depth parent)
+      (freeOffsets depth) (lineCoordinate phase depth) rows columns).CoversPattern
+        (freeOffsets (depth + 1)) (lineCoordinate phase (depth + 1))
+
+theorem projectionStep_of_coverageStep
+    (coverage : CoverageStep) : ProjectionStep := by
+  intro phase depth parent rows columns
+  exact (coverage phase depth parent rows columns).toPatternProjection
 
 theorem graphPeriodicStep_of_projectionStep
     (projection : ProjectionStep) : GraphPeriodicStep := by

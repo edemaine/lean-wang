@@ -172,6 +172,12 @@ structure Family (grid : Nat → Nat → Index)
     Candidate.BackedBy (grid := grid) (west := west) (east := east)
       (south := south) (north := north) candidate
 
+def Family.empty
+    {grid : Nat → Nat → Index} {west east south north : Nat} :
+    Family grid west east south north where
+  candidates := []
+  backed := by simp
+
 def Family.append
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (first second : Family grid west east south north) :
@@ -182,6 +188,12 @@ def Family.append
     rcases List.mem_append.1 hcandidate with hcandidate | hcandidate
     · exact first.backed candidate hcandidate
     · exact second.backed candidate hcandidate
+
+def Family.concat
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (families : List (Family grid west east south north)) :
+    Family grid west east south north :=
+  families.foldr Family.append Family.empty
 
 def Family.cycle
     {grid : Nat → Nat → Index} {west east south north : Nat}
@@ -271,6 +283,85 @@ theorem projectsTo_of_familyNode
       (south := south) (north := north) target) :=
   projectsTo_of_candidateNode family.candidates family.backed hnode
     hparity hcurrent targetLive
+
+def Family.Reached
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (width height fuel : Nat) (target : Port) : Prop :=
+  ∃ node ∈ exploreFastWeighted (iterateRefine 2 grid)
+      width height fuel (family.candidates.map Candidate.weightedStart),
+    node.parity = true ∧ node.current = target ∧
+      portPresent (iterateRefine 2 grid) target = true
+
+theorem Family.Reached.projectsTo
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {family : Family grid west east south north}
+    {width height fuel : Nat} {target : Port}
+    (reached : family.Reached width height fuel target) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases reached with ⟨node, hnode, hparity, hcurrent, targetLive⟩
+  exact projectsTo_of_familyNode family hnode hparity hcurrent targetLive
+
+/-- Weighted coverage of every requested target supplies a pattern projection. -/
+theorem patternProjection_of_familyCoverage
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {fineOffsets : List Nat} {fineCoordinate : Nat → Nat}
+    (family : Family grid west east south north) (width height fuel : Nat)
+    (vertical : ∀ offset ∈ fineOffsets, ∀ x,
+      quarterWest (4 * west) < x → x < quarterEast (4 * east) →
+      Signals.verticalInterior?
+        (componentAt (iterateRefine 2 grid) x (fineCoordinate offset))
+        (quadrantAt x (fineCoordinate offset)) ≠ none →
+      family.Reached width height fuel ⟨x, fineCoordinate offset, .south⟩ ∨
+      family.Reached width height fuel ⟨x, fineCoordinate offset, .north⟩)
+    (horizontal : ∀ offset ∈ fineOffsets, ∀ y,
+      quarterSouth (4 * south) < y → y < quarterNorth (4 * north) →
+      Signals.horizontalInterior?
+        (componentAt (iterateRefine 2 grid) (fineCoordinate offset) y)
+        (quadrantAt (fineCoordinate offset) y) ≠ none →
+      family.Reached width height fuel ⟨fineCoordinate offset, y, .west⟩ ∨
+      family.Reached width height fuel ⟨fineCoordinate offset, y, .east⟩) :
+    PatternProjection grid west east south north fineOffsets fineCoordinate := by
+  constructor
+  · intro offset hoffset x hwest heast interior
+    rcases vertical offset hoffset x hwest heast interior with reached | reached
+    · exact Or.inl reached.projectsTo
+    · exact Or.inr reached.projectsTo
+  · intro offset hoffset y hsouth hnorth interior
+    rcases horizontal offset hoffset y hsouth hnorth interior with reached | reached
+    · exact Or.inl reached.projectsTo
+    · exact Or.inr reached.projectsTo
+
+def Family.CoversPattern
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (family : Family grid west east south north)
+    (fineOffsets : List Nat) (fineCoordinate : Nat → Nat) : Prop :=
+  ∃ width height fuel,
+    (∀ offset ∈ fineOffsets, ∀ x,
+      quarterWest (4 * west) < x → x < quarterEast (4 * east) →
+      Signals.verticalInterior?
+        (componentAt (iterateRefine 2 grid) x (fineCoordinate offset))
+        (quadrantAt x (fineCoordinate offset)) ≠ none →
+      family.Reached width height fuel ⟨x, fineCoordinate offset, .south⟩ ∨
+      family.Reached width height fuel ⟨x, fineCoordinate offset, .north⟩) ∧
+    (∀ offset ∈ fineOffsets, ∀ y,
+      quarterSouth (4 * south) < y → y < quarterNorth (4 * north) →
+      Signals.horizontalInterior?
+        (componentAt (iterateRefine 2 grid) (fineCoordinate offset) y)
+        (quadrantAt (fineCoordinate offset) y) ≠ none →
+      family.Reached width height fuel ⟨fineCoordinate offset, y, .west⟩ ∨
+      family.Reached width height fuel ⟨fineCoordinate offset, y, .east⟩)
+
+theorem Family.CoversPattern.toPatternProjection
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    {family : Family grid west east south north}
+    {fineOffsets : List Nat} {fineCoordinate : Nat → Nat}
+    (coverage : family.CoversPattern fineOffsets fineCoordinate) :
+    PatternProjection grid west east south north fineOffsets fineCoordinate := by
+  rcases coverage with ⟨width, height, fuel, vertical, horizontal⟩
+  exact patternProjection_of_familyCoverage family width height fuel
+    vertical horizontal
 
 end ShadedFreeLineProjectionCandidates
 end Closed104
