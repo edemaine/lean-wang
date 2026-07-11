@@ -20,8 +20,9 @@ import LeanWang.UniversalTM0
 import LeanWang.UniversalMachineCertificate
 import LeanWang.UniversalFoldedReduction
 import LeanWang.UniversalDirectReduction
-import LeanWang.TM0DirectInput
 import LeanWang.TM0FixedDirectProgram
+import LeanWang.TM0FixedDirectGeometry
+import LeanWang.TM0FixedDirectExecution
 import LeanWang.TM0FixedDirectCorrect
 import LeanWang.TM0FixedDirectInput
 import LeanWang.Theorems

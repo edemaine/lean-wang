@@ -37,20 +37,17 @@ argument.
 The reduction now consumes a four-field `UniversalMachineCertificate`: one
 constant finite table program, a computable source-dependent input word, a
 support proof, and the halting equivalence. All machine-to-Wang and scaffold
-reasoning depends only on this certificate. The existing folded construction
-is now used only as a semantic bridge proving the replacement runtime correct;
-it is not part of the certificate data.
+reasoning depends only on this certificate.
 
 `TM0FixedDirectProgram` implements that replacement. It emits semantic folded rows
 directly over the finite reachable-label support and proves their transition
 lookup without position codes or generated descriptor decoding. Both the
-matching-row and no-matching-row cases are complete. The direct runtime is
-proved pointwise equal to the existing certified runtime on every folded
-configuration and this is lifted to the full halting equivalence. The universal
-certificate now uses the direct finite program; position codes and generated
-descriptor decoding are absent from the actual reduction data. Extracting the
-shared folded-tape geometry will also remove those legacy files from the proof
-dependency graph.
+matching-row and no-matching-row cases are complete. `TM0FixedDirectGeometry`
+states the folded-tape invariant independently, and
+`TM0FixedDirectExecution` gives exact write, move, and halt equations for the
+direct table. These yield the runtime and halting equivalence directly from TM0
+semantics. The universal reduction's proof dependency graph contains neither
+the generated position compiler nor its correctness proof.
 
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
