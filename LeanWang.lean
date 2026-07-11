@@ -2,6 +2,8 @@ import LeanWang.Basic
 import LeanWang.TileSubdivision
 import LeanWang.Compactness
 import LeanWang.Machine
+import LeanWang.MachineInput
+import LeanWang.MachineInputHistory
 import LeanWang.MachineTiles
 import LeanWang.PostMachine
 import LeanWang.PartrecToTM2Support

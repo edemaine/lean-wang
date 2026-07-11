@@ -53,6 +53,18 @@ argument.
 There is no remaining source-uniform compiler, descriptor decoder, or generated
 position-row obligation in the final theorem.
 
+### Direct finite-input simplification in progress
+
+The retained fixed-universal route still uses a generated write/rewind prelude
+to place the varying input on an otherwise blank machine tape.  A cleaner
+replacement is now being built: `MachineInput` starts the same fixed machine
+directly on a finite input word, and `MachineInputHistory` proves that its
+space-time diagram uses the existing finite local-history tile language.  The
+remaining machine-side step is to force that finite word with a position-tagged
+bottom Wang row, prove the resulting seeded tiling equivalence, and switch
+`UniversalFoldedReduction` to that interface.  Once switched, the old folded
+initializer modules can be removed from the final dependency graph.
+
 ## Completed general tiling infrastructure
 
 - Wang-tile and tileset encodings, finite rectangle search, and matching rules.
