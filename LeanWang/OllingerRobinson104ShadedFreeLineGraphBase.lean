@@ -364,13 +364,13 @@ def freeGrid_shift (grid : Nat → Nat → Index) (blockX blockY : Nat)
 def cornerGridIndex (index : Fin 4) : Fin 6 :=
   ⟨index.val + 2, by omega⟩
 
-/-- The northeast `4 x 4` suffix of the parent-0 grid starts at the marker. -/
-def cornerFreeGrid
+/-- The northeast `4 x 4` suffix of every audited grid starts at the marker. -/
+def cornerFreeGrid (parent : Index)
     {stateGrid : Nat → Nat → RedShades.State}
-    (valid : ValidShadeGrid (localGrid 0) stateGrid)
+    (valid : ValidShadeGrid (localGrid parent) stateGrid)
     (shaded : CycleShade stateGrid 4 12 4 12 .light) :
-    FreeGrid (localGrid 0) stateGrid 4 12 4 12 4 :=
-  let full := freeGrid 0 valid shaded
+    FreeGrid (localGrid parent) stateGrid 4 12 4 12 4 :=
+  let full := freeGrid parent valid shaded
   { columnAt := fun index => full.columnAt (cornerGridIndex index)
     rowAt := fun index => full.rowAt (cornerGridIndex index)
     column_strictMono := by
@@ -390,9 +390,9 @@ def cornerFreeGrid
     freeColumn := fun index => full.freeColumn (cornerGridIndex index)
     freeRow := fun index => full.freeRow (cornerGridIndex index) }
 
-/-- The marked four-line suffix inside an actual parent-0 block. -/
+/-- The marked four-line suffix inside an actual coarse block. -/
 def cornerFreeGrid_shift (grid : Nat → Nat → Index) (blockX blockY : Nat)
-    (hparent : grid blockX blockY = 0)
+    {parent : Index} (hparent : grid blockX blockY = parent)
     {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid
       (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid)
@@ -420,35 +420,40 @@ def cornerFreeGrid_shift (grid : Nat → Nat → Index) (blockX blockY : Nat)
     freeRow := fun index => full.freeRow (cornerGridIndex index) }
 
 set_option linter.style.nativeDecide false in
-theorem cornerFreeGrid_lowerLeft_quarter :
-    (localGrid 0
+theorem cornerFreeGrid_lowerLeft_marker (parent : Index) :
+    (localGrid parent
         ((9 + offsetAt (cornerGridIndex 0)) / 2)
         ((9 + offsetAt (cornerGridIndex 0)) / 2),
       quadrantAt
         (9 + offsetAt (cornerGridIndex 0))
-        (9 + offsetAt (cornerGridIndex 0))) = Signals.cornerQuarter := by
+        (9 + offsetAt (cornerGridIndex 0))) ∈
+      ShadedSignals.markerQuarters := by
+  revert parent
   native_decide
 
 set_option linter.style.nativeDecide false in
-theorem cornerQuarter_at_sixteen :
-    (localGrid 0 8 8, quadrantAt 16 16) = Signals.cornerQuarter := by
+theorem markerQuarter_at_sixteen (parent : Index) :
+    (localGrid parent 8 8, quadrantAt 16 16) ∈
+      ShadedSignals.markerQuarters := by
+  revert parent
   native_decide
 
-theorem cornerFreeGrid_shift_lowerLeft_quarter
+theorem cornerFreeGrid_shift_lowerLeft_marker
     (grid : Nat → Nat → Index) (blockX blockY : Nat)
-    (hparent : grid blockX blockY = 0) :
+    {parent : Index} (hparent : grid blockX blockY = parent) :
     (iterateRefine 4 (shiftGrid grid blockX blockY) 8 8,
-      quadrantAt 16 16) = Signals.cornerQuarter := by
+      quadrantAt 16 16) ∈ ShadedSignals.markerQuarters := by
   have hlocal := iterateRefine_shift_eq_constant 4 grid blockX blockY 8 8
     (by norm_num) (by norm_num)
   rw [hparent] at hlocal
   rw [hlocal]
-  exact cornerQuarter_at_sixteen
+  exact markerQuarter_at_sixteen parent
 
 /-- The marked free grid transported to its absolute refined coordinates. -/
 def cornerFreeGrid_at (grid : Nat → Nat → Index)
     {stateGrid : Nat → Nat → RedShades.State}
-    (blockX blockY : Nat) (hparent : grid blockX blockY = 0)
+    (blockX blockY : Nat) {parent : Index}
+    (hparent : grid blockX blockY = parent)
     (valid : ValidShadeGrid (iterateRefine 4 grid) stateGrid)
     (shaded : CycleShade stateGrid
       (16 * blockX + 4) (16 * blockX + 12)
@@ -471,11 +476,12 @@ def cornerFreeGrid_at (grid : Nat → Nat → Index)
 
 set_option linter.style.nativeDecide false in
 @[simp] theorem cornerFreeGrid_lowerLeft_coordinate
+    (parent : Index)
     {stateGrid : Nat → Nat → RedShades.State}
-    (valid : ValidShadeGrid (localGrid 0) stateGrid)
+    (valid : ValidShadeGrid (localGrid parent) stateGrid)
     (shaded : CycleShade stateGrid 4 12 4 12 .light) :
-    (cornerFreeGrid valid shaded).columnAt 0 = 16 ∧
-      (cornerFreeGrid valid shaded).rowAt 0 = 16 := by
+    (cornerFreeGrid parent valid shaded).columnAt 0 = 16 ∧
+      (cornerFreeGrid parent valid shaded).rowAt 0 = 16 := by
   change 9 + offsetAt (cornerGridIndex 0) = 16 ∧
     9 + offsetAt (cornerGridIndex 0) = 16
   native_decide

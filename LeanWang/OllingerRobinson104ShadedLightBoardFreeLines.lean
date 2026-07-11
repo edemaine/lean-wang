@@ -200,7 +200,7 @@ theorem routeRole_at_clear_eq_corner_iff
         (decoded.base (ShadedPlaneShadeGrid.point decoded parentOrigin
           quarterX quarterY)).1 = .corner ↔
       decoded.quarter (ShadedPlaneShadeGrid.point decoded parentOrigin
-        quarterX quarterY) = Signals.cornerQuarter := by
+        quarterX quarterY) ∈ ShadedSignals.markerQuarters := by
   let p := ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY
   have hsignal : (ShadedSignals.decode (decoded.base p)).2 =
       Signals.clearState := by
@@ -213,14 +213,14 @@ theorem routeRole_at_clear_eq_corner_iff
   · intro hcorner
     have hquarter := (hrole.1 hcorner).2
     change RedShades.quarterPlane
-      (ShadedSignals.basePlane decoded.base) p = Signals.cornerQuarter
+      (ShadedSignals.basePlane decoded.base) p ∈ ShadedSignals.markerQuarters
     rw [ShadedSignals.quarterPlane_basePlane]
     exact hquarter
   · intro hquarter
     apply hrole.2
     refine ⟨hsignal, ?_⟩
     change RedShades.quarterPlane
-      (ShadedSignals.basePlane decoded.base) p = Signals.cornerQuarter at hquarter
+      (ShadedSignals.basePlane decoded.base) p ∈ ShadedSignals.markerQuarters at hquarter
     rw [ShadedSignals.quarterPlane_basePlane] at hquarter
     exact hquarter
 
@@ -230,8 +230,8 @@ theorem payload_at_clear_corner_eq_seed
     (hclear : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin
       quarterX quarterY = Signals.clearState)
     (hquarter : decoded.quarter
-      (ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY) =
-        Signals.cornerQuarter) :
+      (ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY) ∈
+        ShadedSignals.markerQuarters) :
     decoded.payload (ShadedPlaneShadeGrid.point decoded parentOrigin
       quarterX quarterY) = seed := by
   exact (decoded.corner_payload _

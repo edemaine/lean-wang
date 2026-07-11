@@ -323,15 +323,16 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   theorem into an ordered size-6 `FreeGrid` for every valid light canonical
   board. Downstream edits rebuild this proof-facing wrapper in seconds without
   rerunning the exhaustive search.
-- For parent tile `0`, the third audited row and column cross at the exact
-  distinguished `(0, southwest)` quarter. Dropping the first two rows and
-  columns therefore gives a checked `4 x 4` free grid whose lower-left payload
-  is forced to the seed by the routed corner marker.
+- For every parent tile, the third audited row and column cross at one of
+  exactly four distinguished southwest quarters, with indices `0` through `3`.
+  No other audited crossing has one of those types. Dropping the first two rows
+  and columns therefore gives a checked `4 x 4` free grid whose lower-left
+  payload is forced to the seed by the routed corner marker.
 - Bounded graph-search soundness now retains bounds for every intermediate
   port. Substitution locality transports those bounded paths from the constant
   finite audit to any actual depth-four refined block with the same parent.
-  Thus every light parent-0 occurrence in an arbitrary hierarchy carries the
-  same absolute-coordinate marked `4 x 4` free grid.
+  Thus every light board in an arbitrary hierarchy carries the same
+  absolute-coordinate marked `4 x 4` free grid, independently of parent type.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
