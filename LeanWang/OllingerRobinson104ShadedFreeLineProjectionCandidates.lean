@@ -195,6 +195,18 @@ def Family.concat
     Family grid west east south north :=
   families.foldr Family.append Family.empty
 
+@[simp] theorem Family.concat_candidates
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (families : List (Family grid west east south north)) :
+    (Family.concat families).candidates =
+      families.flatMap Family.candidates := by
+  induction families with
+  | nil => rfl
+  | cons family families ih =>
+      change family.candidates ++ (Family.concat families).candidates = _
+      rw [ih]
+      rfl
+
 def Family.cycle
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (cycle : CycleOn grid west east south north) (ports : List Port)

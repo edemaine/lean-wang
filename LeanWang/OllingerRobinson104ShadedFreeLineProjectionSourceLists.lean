@@ -55,6 +55,15 @@ def columnPorts (grid : Nat → Nat → Index)
         portPresent grid port)
     else []
 
+def patternCandidates (grid : Nat → Nat → Index)
+    (west east south north : Nat) (offsets : List Nat)
+    (coordinate : Nat → Nat) : List Candidate :=
+  ((cyclePorts west east south north).map fun port => ⟨port, false⟩) ++
+  offsets.flatMap (fun offset =>
+    (rowPorts grid west east (coordinate offset)).map fun port => ⟨port, true⟩) ++
+  offsets.flatMap (fun offset =>
+    (columnPorts grid south north (coordinate offset)).map fun port => ⟨port, true⟩)
+
 theorem mem_strictCoordinates {lower upper coordinate : Nat}
     (hboard : lower < upper) (hcoordinate : coordinate ∈ strictCoordinates lower upper) :
     lower < coordinate ∧ coordinate < upper := by
@@ -180,12 +189,42 @@ def patternFamily
       LiveRowCertificate grid west east south north (coordinate offset))
     (columnCertificate : ∀ offset ∈ offsets,
       LiveColumnCertificate grid west east south north (coordinate offset)) :
-    Family grid west east south north :=
-  (cycleFamily cycle).append <|
-    (Family.concat (offsets.attach.map fun offset =>
-      rowFamily cycle (rowCertificate offset.1 offset.2))).append <|
-    Family.concat (offsets.attach.map fun offset =>
-      columnFamily cycle (columnCertificate offset.1 offset.2))
+    Family grid west east south north where
+  candidates := patternCandidates grid west east south north offsets coordinate
+  backed := by
+    intro candidate hcandidate
+    simp only [patternCandidates, List.mem_append] at hcandidate
+    rcases hcandidate with (hcycle | hrow) | hcolumn
+    · rcases List.mem_map.1 hcycle with ⟨port, hport, rfl⟩
+      exact backedBy_cycle cycle
+        (onCycle_of_mem_cyclePorts cycle.west_lt_east cycle.south_lt_north hport)
+    · rcases List.mem_flatMap.1 hrow with ⟨offset, hoffset, hport⟩
+      rcases List.mem_map.1 hport with ⟨port, hportSource, heq⟩
+      cases heq
+      rcases valid_rowPort cycle.west_lt_east hportSource with
+        ⟨x, hwest, heast, interior, endpoint, live⟩
+      exact backedBy_row (rowCertificate offset hoffset)
+        hwest heast interior endpoint live
+    · rcases List.mem_flatMap.1 hcolumn with ⟨offset, hoffset, hport⟩
+      rcases List.mem_map.1 hport with ⟨port, hportSource, heq⟩
+      cases heq
+      rcases valid_columnPort cycle.south_lt_north hportSource with
+        ⟨y, hsouth, hnorth, interior, endpoint, live⟩
+      exact backedBy_column (columnCertificate offset hoffset)
+        hsouth hnorth interior endpoint live
+
+theorem patternFamily_candidates
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (cycle : CycleOn grid west east south north)
+    (offsets : List Nat) (coordinate : Nat → Nat)
+    (rowCertificate : ∀ offset ∈ offsets,
+      LiveRowCertificate grid west east south north (coordinate offset))
+    (columnCertificate : ∀ offset ∈ offsets,
+      LiveColumnCertificate grid west east south north (coordinate offset)) :
+    (patternFamily cycle offsets coordinate
+      rowCertificate columnCertificate).candidates =
+      patternCandidates grid west east south north offsets coordinate := by
+  rfl
 
 end ShadedFreeLineProjectionSourceLists
 end Closed104

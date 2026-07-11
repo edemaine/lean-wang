@@ -412,6 +412,10 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   endpoints of perpendicular components on each retained row and column.
   Generic membership proofs turn these lists into backed `Family` values from
   a canonical cycle and the corresponding live certificates.
+- The proof-carrying `patternFamily` now has `patternCandidates` as its
+  candidate field definitionally. Finite quotient audits can evaluate this raw
+  list without constructing certificate proofs, while
+  `patternFamily_candidates` reconnects the same data to its backing theorem.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
