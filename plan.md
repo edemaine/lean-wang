@@ -447,6 +447,11 @@ semantic transition rows, and their step/halting simulation.
   line is one or three cells left of the sparse east boundary. Thus all local
   path templates need inspect only a fixed-width strip; their geometry does
   not grow with the Robinson board.
+- `BorderCoverageLocalStep.LocalProjectionStep` splits the remaining semantic
+  recurrence into exactly six template families: left, child, and right in
+  each orientation. `graphPeriodicStep_of_localProjectionStep` reconnects
+  those bounded cases to the unbounded free-grid induction via the proved
+  successor-offset decomposition.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
