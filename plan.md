@@ -440,6 +440,11 @@ semantic transition rows, and their step/halting simulation.
   proof method: even the first all-state board is too large to serve as a
   maintainable certificate, confirming that the next proof must localize the
   successor offset cases to bounded substitution neighborhoods.
+- The successor-coordinate arithmetic is now localized: every child of an old
+  free-line offset is at signed distance at most six from the sparse copy of
+  its parent line, uniformly in the phase and depth. Thus child-line path
+  templates need inspect only a fixed-width strip; their geometry does not
+  grow with the Robinson board.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
