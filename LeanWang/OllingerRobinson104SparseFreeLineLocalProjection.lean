@@ -23,6 +23,7 @@ namespace SparseFreeLineLocalProjection
 open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
   ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineProjectionCandidates Signals.FreeCellLocal
+  SparseFreeLineLocalStates
 
 set_option maxRecDepth 20000
 
@@ -103,6 +104,96 @@ def HorizontalSparseAncestors (grid : Nat → Nat → Index)
     ∃ oldY, sparseCoordinate oldY = y ∧
       Signals.horizontalInterior?
         (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none
+
+/-- Per-macrocell vertical checks give exact ancestors on a sparse row. -/
+theorem verticalSparseAncestors_of_checks
+    {grid : Nat → Nat → Index} {oldRow : Nat}
+    (checks : ∀ blockX,
+      verticalCheck (oldRow % 2) (oldRow % 2)
+        (grid blockX (oldRow / 2)) = true) :
+    VerticalSparseAncestors grid oldRow (sparseCoordinate oldRow) := by
+  intro x interior
+  let blockX := x / 8
+  let localX := x % 8
+  let blockY := oldRow / 2
+  let localY := oldRow % 2
+  have hlocalX : localX < 8 := Nat.mod_lt _ (by decide)
+  have hlocalY : localY < 2 := Nat.mod_lt _ (by decide)
+  have hx : 8 * blockX + localX = x := by
+    have := Nat.mod_add_div x 8
+    dsimp [blockX, localX]
+    omega
+  have holdRow : 2 * blockY + localY = oldRow := by
+    have := Nat.mod_add_div oldRow 2
+    dsimp [blockY, localY]
+    omega
+  have hfineRow : 8 * blockY + localY = sparseCoordinate oldRow := by
+    simp [sparseCoordinate, macroOrigin, localCoordinate, blockY, localY]
+  have checked : verticalCheck localY localY
+      (iterateRefine 0 grid blockX blockY) = true := by
+    change verticalCheck localY localY (grid blockX blockY) = true
+    simpa [blockX, blockY, localY] using checks blockX
+  have localInterior : Signals.verticalInterior?
+      (componentAt (iterateRefine (0 + 2) grid)
+        (8 * blockX + localX) (8 * blockY + localY))
+      (quadrantAt (8 * blockX + localX) (8 * blockY + localY)) ≠ none := by
+    simpa [hx, hfineRow] using interior
+  rcases SparseFreeLineLocalTransport.verticalAncestor_two_block
+      grid 0 blockX blockY localY localY localX
+      hlocalY (by omega) hlocalX checked localInterior with
+    ⟨sourceX, hsourceX, sourceCoordinate, sourceInterior⟩
+  refine ⟨2 * blockX + sourceX, ?_, ?_⟩
+  · simpa [hx] using sourceCoordinate
+  · change Signals.verticalInterior?
+        (componentAt grid (2 * blockX + sourceX) (2 * blockY + localY))
+        (quadrantAt (2 * blockX + sourceX) (2 * blockY + localY)) ≠ none
+      at sourceInterior
+    simpa [holdRow] using sourceInterior
+
+/-- Per-macrocell horizontal checks give exact ancestors on a sparse column. -/
+theorem horizontalSparseAncestors_of_checks
+    {grid : Nat → Nat → Index} {oldColumn : Nat}
+    (checks : ∀ blockY,
+      horizontalCheck (oldColumn % 2) (oldColumn % 2)
+        (grid (oldColumn / 2) blockY) = true) :
+    HorizontalSparseAncestors grid oldColumn (sparseCoordinate oldColumn) := by
+  intro y interior
+  let blockX := oldColumn / 2
+  let localX := oldColumn % 2
+  let blockY := y / 8
+  let localY := y % 8
+  have hlocalX : localX < 2 := Nat.mod_lt _ (by decide)
+  have hlocalY : localY < 8 := Nat.mod_lt _ (by decide)
+  have hy : 8 * blockY + localY = y := by
+    have := Nat.mod_add_div y 8
+    dsimp [blockY, localY]
+    omega
+  have holdColumn : 2 * blockX + localX = oldColumn := by
+    have := Nat.mod_add_div oldColumn 2
+    dsimp [blockX, localX]
+    omega
+  have hfineColumn : 8 * blockX + localX = sparseCoordinate oldColumn := by
+    simp [sparseCoordinate, macroOrigin, localCoordinate, blockX, localX]
+  have checked : horizontalCheck localX localX
+      (iterateRefine 0 grid blockX blockY) = true := by
+    change horizontalCheck localX localX (grid blockX blockY) = true
+    simpa [blockX, blockY, localX] using checks blockY
+  have localInterior : Signals.horizontalInterior?
+      (componentAt (iterateRefine (0 + 2) grid)
+        (8 * blockX + localX) (8 * blockY + localY))
+      (quadrantAt (8 * blockX + localX) (8 * blockY + localY)) ≠ none := by
+    simpa [hy, hfineColumn] using interior
+  rcases SparseFreeLineLocalTransport.horizontalAncestor_two_block
+      grid 0 blockX blockY localX localX localY
+      hlocalX (by omega) hlocalY checked localInterior with
+    ⟨sourceY, hsourceY, sourceCoordinate, sourceInterior⟩
+  refine ⟨2 * blockY + sourceY, ?_, ?_⟩
+  · simpa [hy] using sourceCoordinate
+  · change Signals.horizontalInterior?
+        (componentAt grid (2 * blockX + localX) (2 * blockY + sourceY))
+        (quadrantAt (2 * blockX + localX) (2 * blockY + sourceY)) ≠ none
+      at sourceInterior
+    simpa [holdColumn] using sourceInterior
 
 /-- Sparse vertical ancestors project one retained old row to the fine row. -/
 theorem verticalProjectionAt_of_sparseAncestors
@@ -201,6 +292,29 @@ theorem horizontalProjectionAt_of_sparseAncestors
     simpa [candidate, sparsePort, oldCoordinate, coordinate] using
       (Path.refl (indexGrid := iterateRefine 2 grid)
         ⟨fineColumn, y, .east⟩)
+
+/-- Local sparse row checks and an old live certificate give the fine projection. -/
+theorem verticalProjectionAt_of_checks
+    {grid : Nat → Nat → Index} {west east south north oldRow : Nat}
+    (row : LiveRowCertificate grid west east south north oldRow)
+    (checks : ∀ blockX,
+      verticalCheck (oldRow % 2) (oldRow % 2)
+        (grid blockX (oldRow / 2)) = true) :
+    VerticalProjectionAt grid west east south north (sparseCoordinate oldRow) :=
+  verticalProjectionAt_of_sparseAncestors row rfl
+    (verticalSparseAncestors_of_checks checks)
+
+/-- Local sparse column checks and an old live certificate give the fine projection. -/
+theorem horizontalProjectionAt_of_checks
+    {grid : Nat → Nat → Index} {west east south north oldColumn : Nat}
+    (column : LiveColumnCertificate grid west east south north oldColumn)
+    (checks : ∀ blockY,
+      horizontalCheck (oldColumn % 2) (oldColumn % 2)
+        (grid (oldColumn / 2) blockY) = true) :
+    HorizontalProjectionAt grid west east south north
+      (sparseCoordinate oldColumn) :=
+  horizontalProjectionAt_of_sparseAncestors column rfl
+    (horizontalSparseAncestors_of_checks checks)
 
 end SparseFreeLineLocalProjection
 end Closed104
