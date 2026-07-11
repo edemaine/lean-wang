@@ -233,9 +233,11 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   recognized with their exact inward horizontal and vertical signal
   directions, without unfolding hierarchy data.
 - The final shaded obstruction alphabet is now a concrete `RoutedScaffold`.
-  Its primitive-recursive two-bit decoder classifies inactive, horizontal,
-  vertical, and active payload roles exactly as before, while retaining the
-  shade layer needed for the growing free-board proof.
+  Its primitive-recursive decoder classifies inactive, horizontal, vertical,
+  and active payload roles while retaining the shade layer needed for the
+  growing free-board proof. An all-clear occurrence of the distinguished
+  `cornerQuarter` is promoted to the `corner` role, so its payload is forced to
+  the supplied seed; all other all-clear sites remain active.
 - A final routed-product plane decoder exposes all layers simultaneously:
   matching payload tiles and directional wires, light/dark red paths,
   obstruction signals, the corrected quarter plane, its regrouped parent
@@ -346,6 +348,11 @@ complete. The remaining theorem must prove its forward and backward
 square-routing properties. Keep this work independent of the machine
 reduction. The older unshaded `Scaffold` and routed instances remain useful as
 intermediate local decoders, but are not the final reduction interface.
+
+The routed decoder now proves that every clear free crossing carries a tile of
+the source set, and that a clear crossing carries the seed exactly when its
+decoded quarter is `cornerQuarter`. The forward construction must choose each
+large free grid with such a crossing at its lower-left corner.
 
 ### 1. Obtain arbitrarily large free squares
 

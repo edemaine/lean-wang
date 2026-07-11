@@ -177,18 +177,62 @@ theorem routeRole_at_clear
     (hclear : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin
       quarterX quarterY =
       Signals.clearState) :
-    Signals.routeRole
+    ShadedSignals.routeRole
       (decoded.base (ShadedPlaneShadeGrid.point decoded parentOrigin
         quarterX quarterY)).1 =
-        .active := by
+        .active ∨
+      ShadedSignals.routeRole
+        (decoded.base (ShadedPlaneShadeGrid.point decoded parentOrigin
+          quarterX quarterY)).1 = .corner := by
   let p := ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY
-  have hrole : Signals.routeRole
-      (ShadedSignals.tile (ShadedSignals.decode (decoded.base p))) = .active :=
-    (ShadedSignals.routeRole_tile_eq_active_iff _).2 (by
+  have hrole := ShadedSignals.routeRole_tile_clear
+    (ShadedSignals.decode (decoded.base p)) (by
       simpa only [ShadedPlaneSignalGrid.signalGrid,
         ShadedSignals.signalPlane, p] using hclear)
+  simpa only [ShadedSignals.decode_tile] using hrole
+
+theorem routeRole_at_clear_eq_corner_iff
+    (decoded : ShadedRoutedPlaneDecode.Decoded x)
+    (parentOrigin : Int × Int) (quarterX quarterY : Nat)
+    (hclear : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin
+      quarterX quarterY = Signals.clearState) :
+    ShadedSignals.routeRole
+        (decoded.base (ShadedPlaneShadeGrid.point decoded parentOrigin
+          quarterX quarterY)).1 = .corner ↔
+      decoded.quarter (ShadedPlaneShadeGrid.point decoded parentOrigin
+        quarterX quarterY) = Signals.cornerQuarter := by
+  let p := ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY
+  have hsignal : (ShadedSignals.decode (decoded.base p)).2 =
+      Signals.clearState := by
+    simpa only [ShadedPlaneSignalGrid.signalGrid,
+      ShadedSignals.signalPlane, p] using hclear
+  have hrole := ShadedSignals.routeRole_tile_eq_corner_iff
+    (ShadedSignals.decode (decoded.base p))
   rw [ShadedSignals.decode_tile] at hrole
-  exact hrole
+  constructor
+  · intro hcorner
+    have hquarter := (hrole.1 hcorner).2
+    simpa only [ShadedRoutedPlaneDecode.Decoded.quarter,
+      ShadedSignals.quarterPlane, ShadedSignals.sitePlane, p] using hquarter
+  · intro hquarter
+    apply hrole.2
+    refine ⟨hsignal, ?_⟩
+    simpa only [ShadedRoutedPlaneDecode.Decoded.quarter,
+      ShadedSignals.quarterPlane, ShadedSignals.sitePlane, p] using hquarter
+
+theorem payload_at_clear_corner_eq_seed
+    (decoded : ShadedRoutedPlaneDecode.Decoded x)
+    (parentOrigin : Int × Int) (quarterX quarterY : Nat)
+    (hclear : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin
+      quarterX quarterY = Signals.clearState)
+    (hquarter : decoded.quarter
+      (ShadedPlaneShadeGrid.point decoded parentOrigin quarterX quarterY) =
+        Signals.cornerQuarter) :
+    decoded.payload (ShadedPlaneShadeGrid.point decoded parentOrigin
+      quarterX quarterY) = seed := by
+  exact (decoded.corner_payload _
+    ((routeRole_at_clear_eq_corner_iff decoded parentOrigin
+      quarterX quarterY hclear).2 hquarter)).2
 
 theorem payload_free_crossing_mem
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
@@ -214,8 +258,10 @@ theorem payload_free_crossing_mem
   have hclear := CycleShade.clear_at_free_crossing shaded cycle
     (ShadedPlaneSignalGrid.valid decoded parentOrigin)
     hwest heast hsouth hnorth freeRow freeColumn
-  exact decoded.active_payload _
-    (routeRole_at_clear decoded parentOrigin column row hclear)
+  rcases routeRole_at_clear decoded parentOrigin column row hclear with
+    hactive | hcorner
+  · exact decoded.active_payload _ hactive
+  · exact (decoded.corner_payload _ hcorner).1
 
 end ShadedPlaneSignalGrid
 end Closed104

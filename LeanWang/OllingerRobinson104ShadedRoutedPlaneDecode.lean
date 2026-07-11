@@ -116,6 +116,12 @@ theorem active_payload (decoded : Decoded x) (p : Int × Int)
   apply decoded.routed.active_tile p
   simpa only [ShadedSignals.routedScaffold_role, base] using hrole
 
+theorem corner_payload (decoded : Decoded x) (p : Int × Int)
+    (hrole : ShadedSignals.routeRole (decoded.base p).1 = .corner) :
+    decoded.payload p ∈ T ∧ decoded.payload p = seed := by
+  apply decoded.routed.corner_seed p
+  simpa only [ShadedSignals.routedScaffold_role, base] using hrole
+
 theorem horizontal_payload_wire (decoded : Decoded x) (p : Int × Int)
     (hrole : Signals.routeRole (decoded.base p).1 = .horizontal) :
     decoded.payload p ∈ completePayloads T ∧

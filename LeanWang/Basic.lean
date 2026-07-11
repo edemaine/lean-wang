@@ -114,6 +114,19 @@ def product (base payload : WangTile) : WangTile where
   e := Nat.pair base.e payload.e
   w := Nat.pair base.w payload.w
 
+/-- Recover the base layer of a product-encoded Wang tile. -/
+def productBase (tile : WangTile) : WangTile where
+  n := tile.n.unpair.1
+  s := tile.s.unpair.1
+  e := tile.e.unpair.1
+  w := tile.w.unpair.1
+
+@[simp] theorem productBase_product (base payload : WangTile) :
+    productBase (product base payload) = base := by
+  cases base
+  cases payload
+  simp [productBase, product]
+
 theorem toTuple_primrec : Primrec WangTile.toTuple := by
   simpa [WangTile.equivTuple] using
     (Primrec.of_equiv (e := WangTile.equivTuple) : Primrec WangTile.equivTuple)
@@ -133,6 +146,16 @@ theorem e_primrec : Primrec WangTile.e :=
 
 theorem w_primrec : Primrec WangTile.w :=
   Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp toTuple_primrec))
+
+theorem productBase_primrec : Primrec productBase := by
+  exact ofTuple_primrec.comp
+    (Primrec.pair
+      (Primrec.fst.comp (Primrec.unpair.comp n_primrec))
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.unpair.comp s_primrec))
+        (Primrec.pair
+          (Primrec.fst.comp (Primrec.unpair.comp e_primrec))
+          (Primrec.fst.comp (Primrec.unpair.comp w_primrec)))))
 
 theorem product_primrec : Primrec (fun p : WangTile × WangTile => product p.1 p.2) := by
   let f : WangTile × WangTile → Nat × Nat × Nat × Nat := fun p =>
