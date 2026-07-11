@@ -640,6 +640,60 @@ def HorizontalSparseAncestors (grid : Nat → Nat → Index)
       Signals.horizontalInterior?
         (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none
 
+/-- The exact sparse part of a vertical projection repeats at the next scale. -/
+theorem verticalProjectionAt_refineSparse
+    {grid : Nat → Nat → Index} {west east south north oldRow fineRow : Nat}
+    (previous : VerticalProjectionAt grid west east south north oldRow)
+    (coordinate : fineRow = sparseCoordinate oldRow)
+    (ancestors : VerticalSparseAncestors
+      (iterateRefine 2 grid) oldRow fineRow) :
+    VerticalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) fineRow := by
+  intro x hwest heast interior
+  rcases ancestors x interior with ⟨oldX, oldCoordinate, oldInterior⟩
+  have oldWest : quarterWest (4 * west) < oldX := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hwest
+  have oldEast : oldX < quarterEast (4 * east) := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using heast
+  rcases previous oldX oldWest oldEast oldInterior with projected | projected
+  · left
+    rcases projected with ⟨projection⟩
+    refine ⟨?_⟩
+    simpa [sparsePort, oldCoordinate, coordinate] using projection.refineSparse
+  · right
+    rcases projected with ⟨projection⟩
+    refine ⟨?_⟩
+    simpa [sparsePort, oldCoordinate, coordinate] using projection.refineSparse
+
+/-- The exact sparse part of a horizontal projection repeats at the next scale. -/
+theorem horizontalProjectionAt_refineSparse
+    {grid : Nat → Nat → Index} {west east south north oldColumn fineColumn : Nat}
+    (previous : HorizontalProjectionAt grid west east south north oldColumn)
+    (coordinate : fineColumn = sparseCoordinate oldColumn)
+    (ancestors : HorizontalSparseAncestors
+      (iterateRefine 2 grid) oldColumn fineColumn) :
+    HorizontalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) fineColumn := by
+  intro y hsouth hnorth interior
+  rcases ancestors y interior with ⟨oldY, oldCoordinate, oldInterior⟩
+  have oldSouth : quarterSouth (4 * south) < oldY := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hsouth
+  have oldNorth : oldY < quarterNorth (4 * north) := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hnorth
+  rcases previous oldY oldSouth oldNorth oldInterior with projected | projected
+  · left
+    rcases projected with ⟨projection⟩
+    refine ⟨?_⟩
+    simpa [sparsePort, oldCoordinate, coordinate] using projection.refineSparse
+  · right
+    rcases projected with ⟨projection⟩
+    refine ⟨?_⟩
+    simpa [sparsePort, oldCoordinate, coordinate] using projection.refineSparse
+
 /-- Per-macrocell vertical checks give exact ancestors on a sparse row. -/
 theorem verticalSparseAncestors_of_checks
     {grid : Nat → Nat → Index} {oldRow : Nat}
