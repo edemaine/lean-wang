@@ -176,6 +176,50 @@ theorem projectsTo_west_of_horizontalInterior
     exact ⟨projection.transEven
       (Path.ofLink (Link.symm (Link.horizontal x y horizontal))) westLive⟩
 
+/-- A projected old vertical segment follows its north refinement connector. -/
+theorem projectsTo_refineNorth
+    {grid : Nat → Nat → Index} {west east south north oldX oldRow : Nat}
+    (previous : VerticalProjectionAt grid west east south north oldRow)
+    (oldWest : quarterWest (4 * west) < oldX)
+    (oldEast : oldX < quarterEast (4 * east))
+    (oldInterior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) oldX oldRow)
+      (quadrantAt oldX oldRow) ≠ none)
+    (oldNorthLive : portPresent (iterateRefine 2 grid)
+      ⟨oldX, oldRow, .north⟩ = true)
+    (refinedNorthLive : portPresent (iterateRefine 2 (iterateRefine 2 grid))
+      (refinedPort ⟨oldX, oldRow, .north⟩) = true) :
+    Nonempty (ProjectsTo (grid := iterateRefine 2 grid)
+      (west := 4 * west) (east := 4 * east)
+      (south := 4 * south) (north := 4 * north)
+      (refinedPort ⟨oldX, oldRow, .north⟩)) := by
+  have projected := previous oldX oldWest oldEast oldInterior
+  rcases projectsTo_north_of_verticalInterior oldInterior oldNorthLive projected with
+    ⟨projection⟩
+  exact ⟨projection.refineEndpoint refinedNorthLive⟩
+
+/-- A projected old horizontal segment follows its east refinement connector. -/
+theorem projectsTo_refineEast
+    {grid : Nat → Nat → Index} {west east south north oldColumn oldY : Nat}
+    (previous : HorizontalProjectionAt grid west east south north oldColumn)
+    (oldSouth : quarterSouth (4 * south) < oldY)
+    (oldNorth : oldY < quarterNorth (4 * north))
+    (oldInterior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) oldColumn oldY)
+      (quadrantAt oldColumn oldY) ≠ none)
+    (oldEastLive : portPresent (iterateRefine 2 grid)
+      ⟨oldColumn, oldY, .east⟩ = true)
+    (refinedEastLive : portPresent (iterateRefine 2 (iterateRefine 2 grid))
+      (refinedPort ⟨oldColumn, oldY, .east⟩) = true) :
+    Nonempty (ProjectsTo (grid := iterateRefine 2 grid)
+      (west := 4 * west) (east := 4 * east)
+      (south := 4 * south) (north := 4 * north)
+      (refinedPort ⟨oldColumn, oldY, .east⟩)) := by
+  have projected := previous oldY oldSouth oldNorth oldInterior
+  rcases projectsTo_east_of_horizontalInterior oldInterior oldEastLive projected with
+    ⟨projection⟩
+  exact ⟨projection.refineEndpoint refinedEastLive⟩
+
 theorem alignedRowStart_backed
     {grid : Nat → Nat → Index} {west east south north oldRow : Nat}
     (row : LiveRowCertificate grid west east south north oldRow)
@@ -720,6 +764,30 @@ def HorizontalSparseAncestors (grid : Nat → Nat → Index)
       Signals.horizontalInterior?
         (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none
 
+/-- Every segment on a vertical exit copy comes from a live old north endpoint. -/
+def VerticalExitAncestors (grid : Nat → Nat → Index)
+    (oldRow fineRow : Nat) : Prop :=
+  ∀ x, Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) x fineRow)
+      (quadrantAt x fineRow) ≠ none →
+    ∃ oldX, sparseCoordinate oldX = x ∧
+      Signals.verticalInterior?
+        (componentAt grid oldX oldRow) (quadrantAt oldX oldRow) ≠ none ∧
+      portPresent grid ⟨oldX, oldRow, .north⟩ = true ∧
+      portPresent (iterateRefine 2 grid) ⟨x, fineRow, .north⟩ = true
+
+/-- Every segment on a horizontal exit copy comes from a live old east endpoint. -/
+def HorizontalExitAncestors (grid : Nat → Nat → Index)
+    (oldColumn fineColumn : Nat) : Prop :=
+  ∀ y, Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) fineColumn y)
+      (quadrantAt fineColumn y) ≠ none →
+    ∃ oldY, sparseCoordinate oldY = y ∧
+      Signals.horizontalInterior?
+        (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none ∧
+      portPresent grid ⟨oldColumn, oldY, .east⟩ = true ∧
+      portPresent (iterateRefine 2 grid) ⟨fineColumn, y, .east⟩ = true
+
 /-- The exact sparse part of a vertical projection repeats at the next scale. -/
 theorem verticalProjectionAt_refineSparse
     {grid : Nat → Nat → Index} {west east south north oldRow fineRow : Nat}
@@ -773,6 +841,61 @@ theorem horizontalProjectionAt_refineSparse
     rcases projected with ⟨projection⟩
     refine ⟨?_⟩
     simpa [sparsePort, oldCoordinate, coordinate] using projection.refineSparse
+
+/-- The north-going exit copy of a projected vertical line repeats at the next scale. -/
+theorem verticalProjectionAt_refineExit
+    {grid : Nat → Nat → Index} {west east south north oldRow fineRow : Nat}
+    (previous : VerticalProjectionAt grid west east south north oldRow)
+    (coordinate : fineRow = exitCoordinate oldRow)
+    (ancestors : VerticalExitAncestors
+      (iterateRefine 2 grid) oldRow fineRow) :
+    VerticalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) fineRow := by
+  intro x hwest heast interior
+  rcases ancestors x interior with
+    ⟨oldX, oldCoordinate, oldInterior, oldNorthLive, refinedNorthLive⟩
+  have oldWest : quarterWest (4 * west) < oldX := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hwest
+  have oldEast : oldX < quarterEast (4 * east) := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using heast
+  have targetCoordinate :
+      refinedPort ⟨oldX, oldRow, .north⟩ = ⟨x, fineRow, .north⟩ := by
+    simp only [refinedPort]
+    rw [oldCoordinate, ← coordinate]
+  right
+  rw [← targetCoordinate]
+  exact projectsTo_refineNorth previous oldWest oldEast oldInterior
+    oldNorthLive (by rw [targetCoordinate]; exact refinedNorthLive)
+
+/-- The east-going exit copy of a projected horizontal line repeats at the next scale. -/
+theorem horizontalProjectionAt_refineExit
+    {grid : Nat → Nat → Index}
+    {west east south north oldColumn fineColumn : Nat}
+    (previous : HorizontalProjectionAt grid west east south north oldColumn)
+    (coordinate : fineColumn = exitCoordinate oldColumn)
+    (ancestors : HorizontalExitAncestors
+      (iterateRefine 2 grid) oldColumn fineColumn) :
+    HorizontalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north) fineColumn := by
+  intro y hsouth hnorth interior
+  rcases ancestors y interior with
+    ⟨oldY, oldCoordinate, oldInterior, oldEastLive, refinedEastLive⟩
+  have oldSouth : quarterSouth (4 * south) < oldY := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hsouth
+  have oldNorth : oldY < quarterNorth (4 * north) := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hnorth
+  have targetCoordinate :
+      refinedPort ⟨oldColumn, oldY, .east⟩ = ⟨fineColumn, y, .east⟩ := by
+    simp only [refinedPort]
+    rw [oldCoordinate, ← coordinate]
+  right
+  rw [← targetCoordinate]
+  exact projectsTo_refineEast previous oldSouth oldNorth oldInterior
+    oldEastLive (by rw [targetCoordinate]; exact refinedEastLive)
 
 /-- Per-macrocell vertical checks give exact ancestors on a sparse row. -/
 theorem verticalSparseAncestors_of_checks
