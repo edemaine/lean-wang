@@ -46,7 +46,9 @@ directly over the finite reachable-label support and proves their transition
 lookup without position codes or generated descriptor decoding. The remaining
 work is the generic folded configuration simulation, after which this direct
 program replaces the legacy certificate witness. Both the matching-row and
-no-matching-row lookup theorems are complete.
+no-matching-row lookup theorems are complete. The direct runtime is also proved
+pointwise equal to the existing certified runtime on every folded
+configuration; only run-level lifting and the certificate switch remain.
 
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.

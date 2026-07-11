@@ -33,13 +33,30 @@ def rowsForLabel (tc : Turing.ToPartrec.Code) (q : SourceLabel tc) :
 def rows (tc : Turing.ToPartrec.Code) : List PostTransition :=
   (partrecStartedTM0LabelList tc).flatMap (rowsForLabel tc)
 
-/-- The direct folded program for one fixed translated Mathlib TM0 machine. -/
-def program (tc : Turing.ToPartrec.Code) : PostProgram where
+/-- Package a row list with the fixed folded alphabet and state support. -/
+def programWithTable (tc : Turing.ToPartrec.Code)
+    (table : List PostTransition) : PostProgram where
   symbols := foldedSymbolList
   states := foldedStateList tc
   blank := foldedBlank
   start := foldedSimStartState tc
-  table := rows tc
+  table := table
+
+@[simp] theorem programWithTable_table (tc : Turing.ToPartrec.Code)
+    (table : List PostTransition) :
+    (programWithTable tc table).table = table := rfl
+
+@[simp] theorem programWithTable_symbols (tc : Turing.ToPartrec.Code)
+    (table : List PostTransition) :
+    (programWithTable tc table).symbols = foldedSymbolList := rfl
+
+@[simp] theorem programWithTable_states (tc : Turing.ToPartrec.Code)
+    (table : List PostTransition) :
+    (programWithTable tc table).states = foldedStateList tc := rfl
+
+/-- The direct folded program for one fixed translated Mathlib TM0 machine. -/
+def program (tc : Turing.ToPartrec.Code) : PostProgram :=
+  programWithTable tc (rows tc)
 
 @[simp] theorem program_symbols (tc : Turing.ToPartrec.Code) :
     (program tc).symbols = foldedSymbolList := rfl
@@ -250,6 +267,72 @@ theorem rows_find?_eq_none_of_no_step
   unfold rows
   exact rows_find?_eq_none_of_no_step_aux (partrecStartedTM0LabelList tc)
     (fun _ h => h) hq side marked left right hstep
+
+theorem direct_transition?_of_step
+    {tc : Turing.ToPartrec.Code} {q q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) =
+      some (q', stmt)) :
+    (programWithTable tc (rows tc)).transition?
+        (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) =
+      some (simRowOfStep tc side marked q q' left right stmt) := by
+  unfold PostProgram.transition?
+  rw [programWithTable_table]
+  exact rows_find?_of_step hq hstep
+
+theorem direct_transition?_eq_none_of_no_step
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (side : FoldSide) (marked : Bool) (left right : SourceSymbol)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) = none) :
+    (programWithTable tc (rows tc)).transition?
+        (foldedSimStateCode tc side q) (foldedSymbolCode marked left right) = none := by
+  unfold PostProgram.transition?
+  rw [programWithTable_table]
+  exact rows_find?_eq_none_of_no_step hq side marked left right hstep
+
+theorem direct_step_of_source_step
+    {tc : Turing.ToPartrec.Code} {q q' : SourceLabel tc}
+    {side : FoldSide} {marked : Bool} {left right : SourceSymbol}
+    {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) =
+      some (q', stmt)) :
+    (programWithTable tc (rows tc)).step (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) =
+      some ((simRowOfStep tc side marked q q' left right stmt).next,
+        (simRowOfStep tc side marked q q' left right stmt).stmt) := by
+  let P := programWithTable tc (rows tc)
+  let row := simRowOfStep tc side marked q q' left right stmt
+  have htransition : P.transition? (foldedSimStateCode tc side q)
+      (foldedSymbolCode marked left right) = some row :=
+    direct_transition?_of_step hq hstep
+  have hqLabels := (mem_partrecStartedTM0LabelList tc q).1 hq
+  have hq'Labels := TM0FiniteCompiler.next_label_mem_of_step hqLabels hstep
+  have hq' := (mem_partrecStartedTM0LabelList tc q').2 hq'Labels
+  have hnext : row.next ∈ P.states := by
+    change row.next ∈ foldedStateList tc
+    exact simRowOfStep_next_mem_states tc side marked q hq' left right stmt
+  have hwrite : match row.stmt with
+      | PostStmt.move _ => True
+      | PostStmt.write b => b ∈ P.symbols := by
+    change match row.stmt with
+      | PostStmt.move _ => True
+      | PostStmt.write b => b ∈ foldedSymbolList
+    exact simRowOfStep_write_mem_symbols tc side marked q q' left right stmt
+  exact PostProgram.step_of_transition?_eq_some htransition hnext hwrite
+
+theorem direct_step_eq_none_of_no_source_step
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (side : FoldSide) (marked : Bool) (left right : SourceSymbol)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) = none) :
+    (programWithTable tc (rows tc)).step (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) = none := by
+  exact PostProgram.step_eq_none_of_transition?_eq_none
+    (direct_transition?_eq_none_of_no_step hq side marked left right hstep)
 
 end TM0FixedDirectProgram
 end LeanWang

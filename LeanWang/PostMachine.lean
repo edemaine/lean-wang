@@ -228,6 +228,28 @@ def step (P : PostProgram) (q a : Nat) : Option (Nat × PostStmt) :=
       else
         none
 
+theorem step_of_transition?_eq_some {P : PostProgram} {q a : Nat}
+    {e : PostTransition} (htransition : P.transition? q a = some e)
+    (hnext : e.next ∈ P.states)
+    (hwrite : match e.stmt with
+      | PostStmt.move _ => True
+      | PostStmt.write b => b ∈ P.symbols) :
+    P.step q a = some (e.next, e.stmt) := by
+  unfold step
+  rw [htransition]
+  simp only [hnext, ↓reduceDIte]
+  cases hstmt : e.stmt with
+  | move direction => simp
+  | write symbol =>
+      rw [hstmt] at hwrite
+      simp [hwrite]
+
+theorem step_eq_none_of_transition?_eq_none {P : PostProgram} {q a : Nat}
+    (htransition : P.transition? q a = none) :
+    P.step q a = none := by
+  unfold step
+  rw [htransition]
+
 end PostProgram
 
 /-- Instantaneous description for a one-sided Post/TM0-style machine. -/
@@ -258,6 +280,13 @@ def nextID (P : PostProgram) (c : PostID) : PostID :=
       | some (q', stmt) =>
           let r := applyStmt stmt c.tape c.head
           { tape := r.1, head := r.2, state := some q' }
+
+theorem nextID_eq_of_state_some_of_steps_eq
+    {P Q : PostProgram} {c : PostID} {q : Nat}
+    (hstate : c.state = some q)
+    (hstep : P.step q (c.tape c.head) = Q.step q (c.tape c.head)) :
+    P.nextID c = Q.nextID c := by
+  simp [nextID, hstate, hstep]
 
 def runEmpty (P : PostProgram) (n : Nat) : PostID :=
   Nat.iterate P.nextID n P.initialID
