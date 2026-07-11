@@ -352,6 +352,12 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   results can be consumed directly by the recursive geometry proof. The
   array-backed multi-source flood is sound as well, so all candidate segments
   below one parent can share a single traversal from its board-side ports.
+- The first two-substitution refinement certificates are finite and checked
+  for all 104 parents. Every old quarter component is retained in the
+  southwest `2 x 2` corner of its refined `8 x 8` macrocell, and every live
+  east or north port there has an even-parity path to the matching external
+  macrocell port. These local connectors are the basis for lifting recursive
+  odd-path certificates without rerunning graph search at every depth.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to
