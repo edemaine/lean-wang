@@ -23,12 +23,11 @@ namespace TM0DirectInput
 
 open TM0FoldedCompiler
 
-def inputWord (input : List SourceSymbol) : List Nat :=
-  (List.range input.length).map
-    fun position => if position = 0 then
-      foldedOriginSymbol (inputSymbolFor input 0)
-    else
-      foldedSymbolCode false default (inputSymbolFor input position)
+def inputWord : List SourceSymbol → List Nat
+  | [] => []
+  | first :: rest =>
+      foldedOriginSymbol first ::
+        rest.map (foldedSymbolCode false default)
 
 theorem foldedCellOfTapeAt_init_right_zero
     (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) (position : Nat) :
@@ -75,15 +74,19 @@ theorem inputWord_tape_eq_foldedCell
         (Turing.TM0.init (Λ := SourceLabel tc) input).Tape
         FoldSide.right 0 position := by
   rw [foldedCellOfTapeAt_init_right_zero]
-  by_cases hzero : position = 0
-  · subst position
-    simp [MachineInput.tape, inputWord, List.length_pos_of_ne_nil hinput]
-  · by_cases hposition : position < input.length
-    · simp [MachineInput.tape, inputWord, hzero, hposition]
-    · have hdefault : input.getI position = default :=
-        List.getI_eq_default (l := input) (by omega)
-      simp [MachineInput.tape, inputWord, hzero, hposition,
-        foldedBlank, inputSymbolFor, hdefault]
+  cases input with
+  | nil => contradiction
+  | cons first rest =>
+      cases position with
+      | zero => simp [MachineInput.tape, inputWord, inputSymbolFor]
+      | succ position =>
+          by_cases hposition : position < rest.length
+          · simp [MachineInput.tape, inputWord, inputSymbolFor, hposition,
+              List.getI_eq_getElem rest hposition]
+          · have hdefault : rest.getI position = default :=
+              List.getI_eq_default (l := rest) (by omega)
+            simp [MachineInput.tape, inputWord, inputSymbolFor, hposition,
+              foldedBlank, hdefault]
 
 def program (tc : Turing.ToPartrec.Code) : PostProgram :=
   { positionProgramData tc with
@@ -115,17 +118,27 @@ theorem input_supported
     MachineInput.Supported (program tc).toTableProgram.toMachine
       (inputWord input) := by
   intro symbol hsymbol
-  rw [inputWord, List.mem_map] at hsymbol
-  rcases hsymbol with ⟨position, hposition, rfl⟩
-  simp only [List.mem_range] at hposition
-  change (if position = 0 then
-      foldedOriginSymbol (inputSymbolFor input 0)
-    else foldedSymbolCode false default (inputSymbolFor input position)) ∈
-      PostProgram.tableSupportedSymbols (program tc)
-  apply PostProgram.symbol_mem_tableSupportedSymbols
-  rw [program_symbols]
-  split_ifs <;> simp [foldedOriginSymbol_mem_symbols,
-    foldedSymbolCode_mem_symbols]
+  cases input with
+  | nil => simp [inputWord] at hsymbol
+  | cons first rest =>
+    simp only [inputWord, List.mem_cons, List.mem_map] at hsymbol
+    rcases hsymbol with rfl | ⟨symbol, _hmem, rfl⟩
+    · apply PostProgram.symbol_mem_tableSupportedSymbols
+      rw [program_symbols]
+      exact foldedOriginSymbol_mem_symbols first
+    · apply PostProgram.symbol_mem_tableSupportedSymbols
+      rw [program_symbols]
+      exact foldedSymbolCode_mem_symbols false default symbol
+
+theorem inputWord_symbol_mem {input : List SourceSymbol} {symbol : Nat}
+    (hmem : symbol ∈ inputWord input) : symbol ∈ foldedSymbolList := by
+  cases input with
+  | nil => simp [inputWord] at hmem
+  | cons first rest =>
+      simp only [inputWord, List.mem_cons, List.mem_map] at hmem
+      rcases hmem with rfl | ⟨source, _hsource, rfl⟩
+      · exact foldedOriginSymbol_mem_symbols first
+      · exact foldedSymbolCode_mem_symbols false default source
 
 theorem initialID_eq_tableID
     (tc : Turing.ToPartrec.Code) (input : List SourceSymbol) :
@@ -155,10 +168,7 @@ theorem initialPostID_tapeSupported
       rw [program_symbols]
       have hmem : symbol ∈ inputWord input :=
         List.mem_iff_getElem?.2 ⟨position, hget⟩
-      rw [inputWord, List.mem_map] at hmem
-      rcases hmem with ⟨index, _hindex, rfl⟩
-      split_ifs <;> simp [foldedOriginSymbol_mem_symbols,
-        foldedSymbolCode_mem_symbols]
+      exact inputWord_symbol_mem hmem
 
 theorem foldedConfigRel_initial
     (tc : Turing.ToPartrec.Code) {input : List SourceSymbol}

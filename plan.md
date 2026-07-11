@@ -76,7 +76,9 @@ specializes this to one literal fixed `Machine` and proves the resulting
 seeded Wang instance tiles exactly when `Nat.Partrec.Code.eval code 0` is
 undefined.  Its proof now uses the fixed `positionProgramData` relation
 directly and no longer imports the parameterized initializer correctness
-chain.  The generic
+chain.  Its input encoding is just a marked folded head followed by a mapped
+finite tail, so only the small initializer data module remains imported for
+the shared `inputSymbolFor` definition.  The generic
 `PostProgram.toTableProgram` stuttering simulation has already been extended
 from blank input to any supported Post configuration, so the folded bridge can
 start directly at its simulation configuration.  Once switched, the old
