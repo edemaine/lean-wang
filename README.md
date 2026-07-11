@@ -15,8 +15,8 @@ The machine side is complete. It uses one fixed universal Mathlib TM0 machine:
 ```text
 Nat.Partrec.Code c
   -> encode c on the initial tape of one fixed universal TM0 machine
-  -> a finite folded one-sided program
-  -> a fixed-corner Wang instance
+  -> fold that finite word for one fixed one-sided Post program
+  -> force the word directly on the bottom row of a fixed-corner Wang instance
   -> combine with any certified Robinson scaffold
 ```
 
@@ -41,13 +41,14 @@ proof task.
   and natural-number encodings.
 - `LeanWang.Compactness` proves compactness for centered boxes, squares, and
   seeded quarter-plane tilings.
-- `LeanWang.Machine`, `LeanWang.MachineTiles`, and `LeanWang.PostMachine` prove
-  the finite machine-to-Wang correspondence.
+- `LeanWang.MachineInputTiles` and `LeanWang.MachineInputTilesData` prove the
+  finite-input machine-to-Wang correspondence and compute its tile lists.
 - `LeanWang.UniversalCode` and `LeanWang.UniversalTM0` construct one fixed
   universal evaluator and place the source code on its initial tape.
-- `LeanWang.TM0FoldedProgram`, `LeanWang.TM0FoldedCompiler`, and
-  `LeanWang.TM0FoldedInput` prove correctness and computability of the folded
-  finite program for variable initial input.
+- `LeanWang.TM0DirectInput` starts the fixed folded simulation directly on that
+  finite tape, without an input-specific write/rewind initializer.
+- `LeanWang.UniversalDirectReduction` computes the resulting fixed-corner Wang
+  instance and proves it tiles exactly when the source computation diverges.
 - `LeanWang.UniversalFoldedReduction` proves the fixed-corner and plane-tiling
   reductions and derives undecidability from Mathlib's halting problem.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.

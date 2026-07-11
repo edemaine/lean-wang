@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.TM0FoldedCompiler.Correctness
-import LeanWang.TM0FoldedGeneratedInit
 
 /-!
 Local write and move simulation lemmas for the generated position-coded folded

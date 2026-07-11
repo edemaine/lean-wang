@@ -40,49 +40,27 @@ argument.
    Mathlib's `ToPartrec`, TM2, TM1, and TM0 route.
 3. `UniversalTM0.input c` writes `Nat.pair (encode c) 0` as the varying initial
    tape. Its construction is computable.
-4. `TM0FoldedInput` proves that the parameterized initializer writes that word,
-   rewinds to the origin, and enters the fixed TM0 simulation.
-5. `UniversalFoldedReduction.program_haltsEmpty_iff` proves that the folded
-   finite program halts exactly when `Nat.Partrec.Code.eval c 0` is defined.
-6. `MachineTiles` and the scaffold reduction turn nonhalting into plane tiling.
-7. The direct `IsRoutedScaffold` reduction preserves the horizontal and
+4. `TM0DirectInput` folds that finite word and starts the fixed simulation
+   control directly on it. No machine initializer writes or rewinds the input.
+5. `MachineInputTiles` forces the finite word in a position-tagged bottom Wang
+   row, followed by one self-looping blank-tail tile. It proves seeded
+   quarter-plane tiling equivalent to nonhalting on that input.
+6. `MachineInputTilesData` computes the finite tile list and seed, while its
+   membership theorems identify them with the semantic history tiles.
+7. `UniversalDirectReduction.fixedDominoData_correct` proves that this
+   computable Wang instance tiles exactly when
+   `Nat.Partrec.Code.eval c 0` is undefined.
+8. `UniversalFoldedReduction` exposes that direct construction to the existing
+   scaffold reductions; the generated input-specific initializer is no longer
+   in this public reduction path.
+9. The direct `IsRoutedScaffold` reduction preserves the horizontal and
    vertical channel constraints used by the Robinson board construction.
-8. Mathlib's `ComputablePred.halting_problem` yields both undecidability
+10. Mathlib's `ComputablePred.halting_problem` yields both undecidability
    theorems.
 
 There is no remaining source-uniform compiler, descriptor decoder, or generated
-position-row obligation in the final theorem.
-
-### Direct finite-input simplification in progress
-
-The retained fixed-universal route still uses a generated write/rewind prelude
-to place the varying input on an otherwise blank machine tape.  A cleaner
-replacement is now being built: `MachineInput` starts the same fixed machine
-directly on a finite input word, and `MachineInputHistory` proves that its
-space-time diagram uses the existing finite local-history tile language.
-`MachineInputTiles` now forces that word with a finite position-tagged bottom
-row followed by one self-looping blank-tail tile, and proves that every
-nonhalting run gives a seeded quarter-plane tiling.  Its reverse decoder proves
-that the bottom row is exactly the prescribed input history, propagates the
-unique machine run through every positive row, and rules out a tiling at the
-first halting step.  Thus seeded tiling is now equivalent to nonhalting on a
-supported finite input.  The remaining machine-side steps are the fixed
-folded-machine input bridge, a computable finite-data version of these tiles,
-and switching `UniversalFoldedReduction` to this interface.  `TM0DirectInput`
-now identifies the finite bottom word with the completed folded TM0 tape,
-starts the table simulation directly in its simulation state, and proves
-halting equivalent to Mathlib's TM0 evaluation.  `UniversalDirectReduction`
-specializes this to one literal fixed `Machine` and proves the resulting
-seeded Wang instance tiles exactly when `Nat.Partrec.Code.eval code 0` is
-undefined.  Its proof now uses the fixed `positionProgramData` relation
-directly and no longer imports the parameterized initializer correctness
-chain.  Its input encoding is just a marked folded head followed by a mapped
-finite tail, so only the small initializer data module remains imported for
-the shared `inputSymbolFor` definition.  The generic
-`PostProgram.toTableProgram` stuttering simulation has already been extended
-from blank input to any supported Post configuration, so the folded bridge can
-start directly at its simulation configuration.  Once switched, the old
-folded initializer modules can be removed from the final dependency graph.
+position-row obligation or input-specific machine control in the final
+reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
 
 ## Completed general tiling infrastructure
 

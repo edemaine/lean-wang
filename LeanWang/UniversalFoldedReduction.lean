@@ -6,21 +6,20 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.RoutedScaffold
 import LeanWang.Theorems
-import LeanWang.TM0FoldedInput.Halting
-import LeanWang.TM0FoldedInput.Computability
-import LeanWang.UniversalTM0
+import LeanWang.UniversalDirectReduction
 import Mathlib.Computability.Reduce
 
 /-!
-# Fixed-universal-machine Wang reduction
+# Direct-input fixed-universal-machine Wang reduction
 
-This is the simplified machine side of the domino reduction.  The simulation
-control and all simulation rows below are constants.  A source code changes
-only the finite input word written by the initialization prelude.
+The simulation control and all normal simulation rows are constants. A source
+code changes only the finite input word forced directly along the bottom Wang
+row; no machine initializer writes or rewinds that input.
 
 Compared with the old source-program route, no theorem here needs to decode a
 dependent `Turing.ToPartrec.Code` statement or prove that such a decoder is
-uniformly primitive recursive.
+uniformly primitive recursive. Compared with the generated-initializer route,
+the executable reduction also avoids compiling input-specific machine states.
 -/
 
 noncomputable section
@@ -31,59 +30,18 @@ namespace UniversalFoldedReduction
 
 open Nat.Partrec (Code)
 
-/-- Numeric state support of the one fixed universal TM0 machine. -/
-def stateCount : Nat :=
-  TM0Route.partrecStartedTM0StateCount UniversalTM0.code
-
-/-- Position-coded simulation descriptors of the fixed universal control. -/
-def simulationSteps : List TM0FoldedCompiler.SimStepData :=
-  TM0FoldedCompiler.simStepDataByLabelIndexWithPositionCode UniversalTM0.code
-
-/--
-The finite folded program for source code `c`.  Its simulation rows are fixed;
-only `UniversalTM0.input c` is compiled into initialization rows.
--/
-def program (c : Code) : FiniteTM0Program :=
-  TM0FoldedCompiler.positionProgramDataOnInput UniversalTM0.code
-    (UniversalTM0.input c)
-
-theorem program_computable : Computable program := by
-  exact
-    (TM0FoldedCompiler.positionProgramDataForInput_computable_fixed
-      stateCount simulationSteps).comp UniversalTM0.input_computable
-
-/--
-Correctness of the varying-input prelude followed by the fixed folded
-simulation.  This is the only machine-simulation theorem needed by the new
-route.
--/
-theorem program_haltsEmpty_iff (c : Code) :
-    (program c).HaltsEmpty ↔ (Nat.Partrec.Code.eval c 0).Dom := by
-  exact
-    (TM0FoldedCompiler.positionProgramDataOnInput_haltsEmpty_iff_tm0_eval_dom
-      UniversalTM0.code (UniversalTM0.input_ne_nil c)).trans
-        (UniversalTM0.eval_dom_iff c)
-
-/-- Fixed-corner Wang instance generated from the fixed universal program. -/
+/-- Fixed-corner Wang instance with the source input forced on its bottom row. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  tableProgramFixedDominoData (PostProgram.toTableProgram (program c))
+  UniversalDirectReduction.fixedDominoData c
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  exact tableProgramFixedDominoData_computable.comp
-    (PostProgram.toTableProgram_computable.comp program_computable)
+  exact UniversalDirectReduction.fixedDominoData_computable
 
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1
         (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  unfold fixedDominoReduction
-  rw [tableProgramFixedDominoData_seed_eq]
-  rw [tilesQuarterWithSeed_congr
-    (tableProgramFixedDominoData_mem_iff
-      (PostProgram.toTableProgram (program c)))]
-  rw [tableProgramFixedDomino_correct]
-  rw [PostProgram.toTableProgram_toMachine_haltsEmpty_iff]
-  rw [program_haltsEmpty_iff]
+  exact UniversalDirectReduction.fixedDominoData_correct c
 
 /-- Plane-tiling instance after applying any proved scaffold. -/
 def dominoReduction (S : Scaffold) (c : Code) : TileSet :=

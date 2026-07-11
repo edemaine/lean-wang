@@ -5,8 +5,8 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.MachineInputTiles
 import LeanWang.PostMachineInput
-import LeanWang.TM0FoldedInput
-import LeanWang.TM0FoldedPositionCorrect.Halting
+import LeanWang.TM0FoldedProgram.ProgramData
+import LeanWang.TM0FoldedPositionCorrect.HaltingCore
 
 /-!
 # Starting the folded TM0 simulation directly from its finite input tape
@@ -22,6 +22,10 @@ namespace LeanWang
 namespace TM0DirectInput
 
 open TM0FoldedCompiler
+
+private def directInputSymbolFor (input : List SourceSymbol) (position : Nat) :
+    SourceSymbol :=
+  input.getI position
 
 def inputWord : List SourceSymbol → List Nat
   | [] => []
@@ -57,9 +61,9 @@ theorem foldedCellOfTapeAt_init_right_zero
         (Turing.TM0.init (Λ := SourceLabel tc) input).Tape
         FoldSide.right 0 position =
       if position = 0 then
-        foldedOriginSymbol (inputSymbolFor input 0)
+        foldedOriginSymbol (directInputSymbolFor input 0)
       else
-        foldedSymbolCode false default (inputSymbolFor input position) := by
+        foldedSymbolCode false default (directInputSymbolFor input position) := by
   cases position with
   | zero =>
       have hleft : sourceOffset FoldSide.right 0 (leftAbs 0) = Int.negSucc 0 := by
@@ -70,7 +74,7 @@ theorem foldedCellOfTapeAt_init_right_zero
       rw [hleft, hright]
       have hget : input.headI = input.getI 0 :=
         (List.getI_zero_eq_headI (l := input)).symm
-      simp [foldedOriginSymbol, inputSymbolFor, Turing.TM0.init,
+      simp [foldedOriginSymbol, directInputSymbolFor, Turing.TM0.init,
         Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk', Turing.Tape.nth,
         hget]
   | succ position =>
@@ -85,7 +89,7 @@ theorem foldedCellOfTapeAt_init_right_zero
       rw [hleft, hright]
       have hget : input.tail.getI position = input.getI (position + 1) := by
         cases input <;> rfl
-      simp [inputSymbolFor, Turing.TM0.init, Turing.Tape.mk₁,
+      simp [directInputSymbolFor, Turing.TM0.init, Turing.Tape.mk₁,
         Turing.Tape.mk₂, Turing.Tape.mk', Turing.Tape.nth, hget]
 
 theorem inputWord_tape_eq_foldedCell
@@ -100,14 +104,14 @@ theorem inputWord_tape_eq_foldedCell
   | nil => contradiction
   | cons first rest =>
       cases position with
-      | zero => simp [MachineInput.tape, inputWord, inputSymbolFor]
+      | zero => simp [MachineInput.tape, inputWord, directInputSymbolFor]
       | succ position =>
           by_cases hposition : position < rest.length
-          · simp [MachineInput.tape, inputWord, inputSymbolFor, hposition,
+          · simp [MachineInput.tape, inputWord, directInputSymbolFor, hposition,
               List.getI_eq_getElem rest hposition]
           · have hdefault : rest.getI position = default :=
               List.getI_eq_default (l := rest) (by omega)
-            simp [MachineInput.tape, inputWord, inputSymbolFor, hposition,
+            simp [MachineInput.tape, inputWord, directInputSymbolFor, hposition,
               foldedBlank, hdefault]
 
 def program (tc : Turing.ToPartrec.Code) : PostProgram :=
