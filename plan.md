@@ -401,6 +401,12 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   audit must still retain the chosen source descriptor (or certify both live
   endpoint sides), because a row/column certificate existentially chooses its
   endpoint.
+- `ShadedFreeLineProjectionCandidates` resolves that endpoint choice without
+  trusting search. A physically live executable candidate is backed by the
+  retained source chosen for the same row or column; if the sides differ, a
+  straight even link connects them before refinement. `CandidateFamily`
+  packages cycle, row, and column candidate lists with this backing proof, and
+  any total-odd weighted node reached from such a family yields `ProjectsTo`.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to
