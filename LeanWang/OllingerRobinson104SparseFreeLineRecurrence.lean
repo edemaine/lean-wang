@@ -10,9 +10,9 @@ import LeanWang.OllingerRobinson104SparseFreeLineOffsets
 /-!
 # Reduced graph recurrence for unbounded free grids
 
-This recurrence retains only `depth + 1` even offsets.  It is sufficient for
-the scaffold theorem and avoids the one coupled odd-child case needed by the
-exact `2^(depth+2)-2`-line recurrence.
+This recurrence retains both children of its unique even offset and only the
+second child of every odd offset.  It is sufficient for the scaffold theorem
+and discards the one coupled odd-child case from the exact recurrence.
 -/
 
 namespace LeanWang
@@ -81,6 +81,43 @@ def ProjectionStep : Prop :=
         (west phase (depth + 1)) (east phase (depth + 1))
         (west phase (depth + 1)) (east phase (depth + 1))
         (lineCoordinate phase (depth + 1) offset))
+
+/-- Every retained child inherits row and column certificates from its parent line. -/
+def ChildStep : Prop :=
+  ∀ phase depth parent offset child,
+    offset ∈ offsets depth →
+    child ∈ children offset →
+    LiveRowCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveColumnCertificate (localGrid phase depth parent)
+      (west phase depth) (east phase depth)
+      (west phase depth) (east phase depth)
+      (lineCoordinate phase depth offset) →
+    LiveRowCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) child) ∧
+    LiveColumnCertificate (localGrid phase (depth + 1) parent)
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (west phase (depth + 1)) (east phase (depth + 1))
+      (lineCoordinate phase (depth + 1) child)
+
+theorem projectionStep_of_childStep (childrenProject : ChildStep) :
+    ProjectionStep := by
+  intro phase depth parent rows columns
+  constructor
+  · intro offset hoffset
+    rcases mem_offsets_succ_cases depth hoffset with
+      ⟨oldOffset, hold, hchild⟩
+    exact (childrenProject phase depth parent oldOffset offset hold hchild
+      (rows oldOffset hold) (columns oldOffset hold)).1
+  · intro offset hoffset
+    rcases mem_offsets_succ_cases depth hoffset with
+      ⟨oldOffset, hold, hchild⟩
+    exact (childrenProject phase depth parent oldOffset offset hold hchild
+      (rows oldOffset hold) (columns oldOffset hold)).2
 
 theorem graphHolds_succ (step : ProjectionStep)
     {phase : Phase} {depth : Nat} (holds : GraphHolds phase depth) :

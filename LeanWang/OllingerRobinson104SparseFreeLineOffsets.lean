@@ -8,12 +8,11 @@ import LeanWang.OllingerRobinson104BorderCoverageOffsets
 /-!
 # A reduced unbounded free-line pattern
 
-The exact Robinson recurrence retains every child of every old free line.  For
-the scaffold reduction, it is enough to retain an unbounded subfamily.  We keep
-only even offsets: each old offset refines to its first child `4 * offset`, and
-each level adds the new even right-side line.  Consequently the family grows by
-one line per level, while every persistent child's physical coordinate is
-exactly the sparse copy of its parent coordinate in both phases.
+The exact Robinson recurrence retains both children of every old free line.
+For the scaffold reduction, it is enough to retain an unbounded subfamily.  An
+even offset retains both children; an odd offset retains only its second child.
+There is exactly one even offset at every level, so this boundary-free family
+grows by one line per refinement.
 -/
 
 namespace LeanWang
@@ -25,47 +24,81 @@ namespace SparseFreeLineOffsets
 open RedShadeCycles RedShadeGraphRefinement ShadedFreeLineOffsets
   ShadedFreeLineRecurrence BorderCoverageOffsets
 
+def children (offset : Nat) : List Nat :=
+  if offset % 2 = 0 then [4 * offset, 4 * offset + 1]
+  else [4 * offset + 3]
+
+def evenCount : List Nat → Nat
+  | [] => 0
+  | offset :: rest => (if offset % 2 = 0 then 1 else 0) + evenCount rest
+
 def offsets : Nat → List Nat
   | 0 => [2]
-  | depth + 1 =>
-      (offsets depth).map (fun offset => 4 * offset) ++
-        [4 ^ (depth + 2) - 2]
+  | depth + 1 => (offsets depth).flatMap children
 
 @[simp] theorem offsets_zero : offsets 0 = [2] := rfl
 
 @[simp] theorem offsets_succ (depth : Nat) :
     offsets (depth + 1) =
-      (offsets depth).map (fun offset => 4 * offset) ++
-        [4 ^ (depth + 2) - 2] := rfl
+      (offsets depth).flatMap children := rfl
 
-theorem rightOffset_even (depth : Nat) :
-    (4 ^ (depth + 2) - 2) % 2 = 0 := by
-  rw [show 4 ^ (depth + 2) = 4 * 4 ^ (depth + 1) by
-    simp [pow_succ, mul_comm]]
-  have hpositive : 0 < 4 ^ (depth + 1) := pow_pos (by decide) _
-  have heq : 4 * 4 ^ (depth + 1) - 2 =
-      2 * (2 * 4 ^ (depth + 1) - 1) := by omega
-  rw [heq]
-  simp
+theorem children_subset_expandOffset (offset : Nat) :
+    ∀ child ∈ children offset, child ∈ expandOffset offset := by
+  intro child hchild
+  by_cases heven : offset % 2 = 0
+  · simpa [children, expandOffset, heven] using hchild
+  · simp only [children, heven, if_false, List.mem_singleton] at hchild
+    subst child
+    simp [expandOffset, heven]
 
-theorem offsets_even (depth : Nat) :
-    ∀ offset ∈ offsets depth, offset % 2 = 0 := by
+theorem children_length (offset : Nat) :
+    (children offset).length = if offset % 2 = 0 then 2 else 1 := by
+  by_cases heven : offset % 2 = 0 <;> simp [children, heven]
+
+theorem evenCount_children (offset : Nat) :
+    evenCount (children offset) = if offset % 2 = 0 then 1 else 0 := by
+  by_cases heven : offset % 2 = 0 <;>
+    simp [children, evenCount, heven, Nat.add_mod, Nat.mul_mod]
+
+theorem evenCount_append (first second : List Nat) :
+    evenCount (first ++ second) = evenCount first + evenCount second := by
+  induction first with
+  | nil => simp [evenCount]
+  | cons value values ih =>
+      simp [evenCount, ih, Nat.add_assoc]
+
+theorem evenCount_flatMap_children (values : List Nat) :
+    evenCount (values.flatMap children) = evenCount values := by
+  induction values with
+  | nil => rfl
+  | cons offset rest ih =>
+      simp only [List.flatMap_cons]
+      rw [evenCount_append]
+      rw [evenCount_children, ih]
+      rfl
+
+theorem length_flatMap_children (values : List Nat) :
+    (values.flatMap children).length = values.length + evenCount values := by
+  induction values with
+  | nil => rfl
+  | cons offset rest ih =>
+      simp only [List.flatMap_cons, List.length_append, List.length_cons]
+      rw [children_length, ih]
+      by_cases heven : offset % 2 = 0 <;>
+        simp [evenCount, heven] <;> omega
+
+theorem offsets_evenCount (depth : Nat) : evenCount (offsets depth) = 1 := by
   induction depth with
-  | zero => simp [offsets]
+  | zero => simp [offsets, evenCount]
   | succ depth ih =>
-      intro offset hoffset
-      rw [offsets_succ, List.mem_append] at hoffset
-      rcases hoffset with hoffset | hoffset
-      · rcases List.mem_map.1 hoffset with ⟨oldOffset, hold, rfl⟩
-        omega
-      · simp only [List.mem_singleton] at hoffset
-        subst offset
-        exact rightOffset_even depth
+      rw [offsets_succ, evenCount_flatMap_children, ih]
 
-theorem rightOffset_mem_freeOffsets (depth : Nat) :
-    4 ^ (depth + 2) - 2 ∈ freeOffsets (depth + 1) := by
-  rw [freeOffsets_succ_decompose]
-  simp
+theorem offsets_length (depth : Nat) :
+    (offsets depth).length = depth + 1 := by
+  induction depth with
+  | zero => rfl
+  | succ depth ih =>
+      rw [offsets_succ, length_flatMap_children, offsets_evenCount, ih]
 
 theorem offsets_mem_freeOffsets (depth : Nat) :
     ∀ offset ∈ offsets depth, offset ∈ freeOffsets depth := by
@@ -77,45 +110,41 @@ theorem offsets_mem_freeOffsets (depth : Nat) :
       norm_num [freeOffsets, extendedOffsets]
   | succ depth ih =>
       intro offset hoffset
-      rw [offsets_succ, List.mem_append] at hoffset
-      rcases hoffset with hoffset | hoffset
-      · rcases List.mem_map.1 hoffset with ⟨oldOffset, hold, rfl⟩
-        apply mem_freeOffsets_succ_of_child depth (ih oldOffset hold)
-        have heven := offsets_even depth oldOffset hold
-        simp [expandOffset, heven]
-      · simp only [List.mem_singleton] at hoffset
-        subst offset
-        exact rightOffset_mem_freeOffsets depth
-
-theorem offsets_length (depth : Nat) :
-    (offsets depth).length = depth + 1 := by
-  induction depth with
-  | zero => rfl
-  | succ depth ih =>
-      simp [offsets_succ, ih]
+      rw [offsets_succ, List.mem_flatMap] at hoffset
+      rcases hoffset with ⟨oldOffset, hold, hchild⟩
+      exact mem_freeOffsets_succ_of_child depth (ih oldOffset hold)
+        (children_subset_expandOffset oldOffset offset hchild)
 
 theorem offsets_pairwise (depth : Nat) :
     (offsets depth).Pairwise (· < ·) := by
   induction depth with
   | zero => simp [offsets]
   | succ depth ih =>
-      rw [offsets_succ, List.pairwise_append]
-      refine ⟨?_, by simp, ?_⟩
-      · rw [List.pairwise_map]
-        exact ih.imp fun hlt => by omega
-      · intro mapped hmapped right hright
-        simp only [List.mem_map] at hmapped
-        rcases hmapped with ⟨oldOffset, hold, rfl⟩
-        simp only [List.mem_singleton] at hright
-        subst right
-        have hbound := mem_freeOffsets_lt_last depth
-          (offsets_mem_freeOffsets depth oldOffset hold)
-        rw [show 4 ^ (depth + 2) = 4 * 4 ^ (depth + 1) by
-          simp [pow_succ, mul_comm]]
-        omega
+      rw [offsets_succ, List.pairwise_flatMap]
+      constructor
+      · intro offset _
+        by_cases heven : offset % 2 = 0 <;>
+          simp [children, heven]
+      · exact ih.imp fun hlt first hfirst second hsecond =>
+          expandOffset_separated hlt first
+            (children_subset_expandOffset _ _ hfirst) second
+            (children_subset_expandOffset _ _ hsecond)
 
 theorem offsets_nodup (depth : Nat) : (offsets depth).Nodup :=
   (offsets_pairwise depth).imp fun hlt => Nat.ne_of_lt hlt
+
+/-- Every successor offset is one of the retained children of an old offset. -/
+theorem mem_offsets_succ_cases (depth : Nat) {offset : Nat}
+    (hoffset : offset ∈ offsets (depth + 1)) :
+    ∃ oldOffset ∈ offsets depth, offset ∈ children oldOffset := by
+  simpa [offsets_succ, List.mem_flatMap] using hoffset
+
+theorem mem_offsets_succ_of_child (depth : Nat)
+    {oldOffset child : Nat} (hold : oldOffset ∈ offsets depth)
+    (hchild : child ∈ children oldOffset) :
+    child ∈ offsets (depth + 1) := by
+  rw [offsets_succ, List.mem_flatMap]
+  exact ⟨oldOffset, hold, hchild⟩
 
 theorem lineCoordinate_evenOffset_sparse
     (phase : Phase) (depth offset : Nat) (heven : offset % 2 = 0) :
@@ -139,13 +168,73 @@ theorem lineCoordinate_evenOffset_sparse
       lineCoordinate_odd depth offset, pow_succ]
     omega
 
-theorem lineCoordinate_mem_sparse
-    (phase : Phase) (depth : Nat) {offset : Nat}
-    (hoffset : offset ∈ offsets depth) :
-    lineCoordinate phase (depth + 1) (4 * offset) =
-      sparseCoordinate (lineCoordinate phase depth offset) :=
-  lineCoordinate_evenOffset_sparse phase depth offset
-    (offsets_even depth offset hoffset)
+theorem exitCoordinate_eq_sparse_add_six {coordinate : Nat}
+    (hodd : coordinate % 2 = 1) :
+    exitCoordinate coordinate = sparseCoordinate coordinate + 6 := by
+  simp [exitCoordinate, localCoordinate, hodd, sparseCoordinate, macroOrigin]
+
+/-- In the even phase a retained child is at the sparse row or its successor. -/
+theorem even_child_coordinate
+    (depth offset child : Nat) (hchild : child ∈ children offset) :
+    lineCoordinate .even (depth + 1) child =
+        sparseCoordinate (lineCoordinate .even depth offset) ∨
+      lineCoordinate .even (depth + 1) child =
+        sparseCoordinate (lineCoordinate .even depth offset) + 1 := by
+  by_cases heven : offset % 2 = 0
+  · simp only [children, heven, if_true, List.mem_cons,
+      List.not_mem_nil, or_false] at hchild
+    rcases hchild with rfl | rfl
+    · exact Or.inl (lineCoordinate_evenOffset_sparse .even depth offset heven)
+    · right
+      have hsparse := lineCoordinate_evenOffset_sparse .even depth offset heven
+      rw [lineCoordinate_even, lineCoordinate_even, pow_succ] at hsparse ⊢
+      omega
+  · have hodd : offset % 2 = 1 := by omega
+    simp only [children, heven, if_false, List.mem_singleton] at hchild
+    subst child
+    left
+    have hcoordinate : (lineCoordinate .even depth offset) % 2 = 0 := by
+      rw [lineCoordinate_even]
+      omega
+    have hsparse := sparseCoordinate_of_even hcoordinate
+    rw [lineCoordinate_even] at hsparse
+    rw [lineCoordinate_even (depth + 1) (4 * offset + 3),
+      lineCoordinate_even depth offset, pow_succ]
+    omega
+
+/-- In the odd phase retained children use the sparse, near, or exit row. -/
+theorem odd_child_coordinate
+    (depth offset child : Nat) (hchild : child ∈ children offset) :
+    lineCoordinate .odd (depth + 1) child =
+        sparseCoordinate (lineCoordinate .odd depth offset) ∨
+      lineCoordinate .odd (depth + 1) child =
+        sparseCoordinate (lineCoordinate .odd depth offset) + 2 ∨
+      lineCoordinate .odd (depth + 1) child =
+        exitCoordinate (lineCoordinate .odd depth offset) := by
+  have hcoordinate : (lineCoordinate .odd depth offset) % 2 = 1 := by
+    rw [lineCoordinate_odd]
+    omega
+  have hsparse := sparseCoordinate_of_odd hcoordinate
+  by_cases heven : offset % 2 = 0
+  · simp only [children, heven, if_true, List.mem_cons,
+      List.not_mem_nil, or_false] at hchild
+    rcases hchild with rfl | rfl
+    · exact Or.inl (lineCoordinate_evenOffset_sparse .odd depth offset heven)
+    · right
+      left
+      rw [lineCoordinate_odd] at hsparse
+      rw [lineCoordinate_odd (depth + 1) (4 * offset + 1),
+        lineCoordinate_odd depth offset, pow_succ]
+      omega
+  · simp only [children, heven, if_false, List.mem_singleton] at hchild
+    subst child
+    right
+    right
+    rw [exitCoordinate_eq_sparse_add_six hcoordinate]
+    rw [lineCoordinate_odd] at hsparse
+    rw [lineCoordinate_odd (depth + 1) (4 * offset + 3),
+      lineCoordinate_odd depth offset, pow_succ]
+    omega
 
 end SparseFreeLineOffsets
 end Closed104
