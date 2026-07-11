@@ -186,11 +186,24 @@ def row? (q : SourceLabel) (side : Side) (marked : Bool)
   (tm0 q (read side left right)).map fun (q', stmt) =>
     rowOfStep q q' side marked left right stmt
 
+abbrev Input := (Side × Bool) × (SourceSymbol × SourceSymbol)
+
+def inputs : List Input :=
+  (sides ×ˢ [false, true]) ×ˢ (symbols ×ˢ symbols)
+
+theorem inputs_nodup : inputs.Nodup := by
+  exact (List.Nodup.product (by simp [sides]) (by simp)).product
+    (List.Nodup.product (Finset.nodup_toList _) (Finset.nodup_toList _))
+
+theorem mem_inputs (side : Side) (marked : Bool) (left right : SourceSymbol) :
+    ((side, marked), (left, right)) ∈ inputs := by
+  simp [inputs, mem_sides, mem_symbols]
+
+def rowForInput (q : SourceLabel) (input : Input) : Option PostTransition :=
+  row? q input.1.1 input.1.2 input.2.1 input.2.2
+
 def rowsFor (q : SourceLabel) : List PostTransition :=
-  sides.flatMap fun side =>
-    [false, true].flatMap fun marked =>
-      symbols.flatMap fun left => symbols.filterMap fun right =>
-        row? q side marked left right
+  inputs.filterMap (rowForInput q)
 
 def rows : List PostTransition := labels.flatMap rowsFor
 
@@ -209,11 +222,133 @@ theorem rowOfStep_matches (q q' : SourceLabel) (side : Side) (marked : Bool)
 
 theorem rowsFor_state {q : SourceLabel} {row : PostTransition}
     (hrow : row ∈ rowsFor q) : ∃ side, row.state = foldedState side q := by
-  simp only [rowsFor, List.mem_flatMap, List.mem_filterMap] at hrow
-  rcases hrow with ⟨side, _, marked, _, left, _, right, _, hrow⟩
-  simp only [row?, Option.map_eq_some_iff] at hrow
+  simp only [rowsFor, List.mem_filterMap] at hrow
+  rcases hrow with ⟨⟨⟨side, marked⟩, ⟨left, right⟩⟩, _, hrow⟩
+  simp only [rowForInput, row?, Option.map_eq_some_iff] at hrow
   rcases hrow with ⟨⟨q', stmt⟩, _, rfl⟩
   exact ⟨side, by cases stmt <;> rfl⟩
+
+theorem rowOfStep_mem_rowsFor {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    rowOfStep q q' side marked left right stmt ∈ rowsFor q := by
+  rw [rowsFor, List.mem_filterMap]
+  refine ⟨((side, marked), (left, right)), mem_inputs side marked left right, ?_⟩
+  simp [rowForInput, row?, hstep]
+
+def inputState (q : SourceLabel) (input : Input) : Nat :=
+  foldedState input.1.1 q
+
+def inputSymbol (input : Input) : Nat :=
+  foldedSymbol input.1.2 input.2.1 input.2.2
+
+theorem inputKey_injective (q : SourceLabel) :
+    Function.Injective fun input : Input => (inputState q input, inputSymbol input) := by
+  rintro ⟨⟨side, marked⟩, ⟨left, right⟩⟩
+    ⟨⟨side', marked'⟩, ⟨left', right'⟩⟩ h
+  have hstate := congrArg Prod.fst h
+  have hsymbol := congrArg Prod.snd h
+  have hsides : side = side' := by
+    have hp := Nat.pair_eq_pair.mp hstate
+    cases side <;> cases side' <;> simp_all [inputState, foldedState, sideCode]
+  have hsymbols := foldedSymbol_injective hsymbol.symm
+  rcases hsymbols with ⟨rfl, rfl, rfl⟩
+  subst side'
+  rfl
+
+theorem rowForInput_key {q : SourceLabel} {input : Input} {row : PostTransition}
+    (hrow : rowForInput q input = some row) :
+    (row.state, row.read) = (inputState q input, inputSymbol input) := by
+  rcases input with ⟨⟨side, marked⟩, ⟨left, right⟩⟩
+  simp only [rowForInput, row?, Option.map_eq_some_iff] at hrow
+  rcases hrow with ⟨⟨q', stmt⟩, _, rfl⟩
+  cases stmt <;> rfl
+
+private theorem find?_filterMap_rowForInput
+    (q : SourceLabel) (target : Input) (targetRow : PostTransition)
+    (hrow : rowForInput q target = some targetRow) :
+    ∀ xs : List Input, xs.Nodup → target ∈ xs →
+      (xs.filterMap (rowForInput q)).find? (fun row =>
+        row.matchesInput (inputState q target) (inputSymbol target)) = some targetRow
+  | [], _, hmem => by simp at hmem
+  | input :: xs, hnodup, hmem => by
+      simp only [List.nodup_cons] at hnodup
+      by_cases htarget : input = target
+      · subst input
+        rw [List.filterMap_cons_some hrow, List.find?_cons]
+        have hmatch : targetRow.matchesInput
+            (inputState q target) (inputSymbol target) = true := by
+          unfold PostTransition.matchesInput
+          have hkey := rowForInput_key hrow
+          rw [Bool.and_eq_true, beq_iff_eq, beq_iff_eq]
+          exact ⟨congrArg Prod.fst hkey, congrArg Prod.snd hkey⟩
+        rw [hmatch]
+      · have htargetMem : target ∈ xs := by
+          simp only [List.mem_cons] at hmem
+          exact hmem.resolve_left (Ne.symm htarget)
+        cases hinput : rowForInput q input with
+        | none =>
+            simp only [List.filterMap_cons_none hinput]
+            exact find?_filterMap_rowForInput q target targetRow hrow xs
+              hnodup.2 htargetMem
+        | some row =>
+            have hkeyNe : (row.state, row.read) ≠
+                (inputState q target, inputSymbol target) := by
+              intro hkey
+              apply htarget
+              apply inputKey_injective q
+              change (inputState q input, inputSymbol input) =
+                (inputState q target, inputSymbol target)
+              exact (rowForInput_key hinput).symm.trans hkey
+            have hmatch : row.matchesInput
+                (inputState q target) (inputSymbol target) = false := by
+              unfold PostTransition.matchesInput
+              by_cases hs : row.state = inputState q target
+              · have hr : row.read ≠ inputSymbol target := fun hr => hkeyNe (by simp [hs, hr])
+                simp [hs, hr]
+              · simp [hs]
+            simp only [List.filterMap_cons_some hinput, List.find?_cons, hmatch]
+            exact find?_filterMap_rowForInput q target targetRow hrow xs
+              hnodup.2 htargetMem
+
+theorem rowsFor_find?_of_step {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    (rowsFor q).find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) =
+      some (rowOfStep q q' side marked left right stmt) := by
+  let target : Input := ((side, marked), (left, right))
+  have hrow : rowForInput q target =
+      some (rowOfStep q q' side marked left right stmt) := by
+    simp [target, rowForInput, row?, hstep]
+  exact find?_filterMap_rowForInput q target
+    (rowOfStep q q' side marked left right stmt) hrow inputs inputs_nodup
+      (mem_inputs side marked left right)
+
+theorem rowsFor_find?_of_no_step {q : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol}
+    (hstep : tm0 q (read side left right) = none) :
+    (rowsFor q).find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) = none := by
+  rw [List.find?_eq_none]
+  intro row hrow hmatch
+  unfold PostTransition.matchesInput at hmatch
+  simp only [Bool.and_eq_true, beq_iff_eq] at hmatch
+  simp only [rowsFor, List.mem_filterMap] at hrow
+  rcases hrow with ⟨⟨⟨side', marked'⟩, ⟨left', right'⟩⟩, _, hrow⟩
+  simp only [rowForInput, row?, Option.map_eq_some_iff] at hrow
+  rcases hrow with ⟨⟨r, sourceStmt⟩, hsource, rfl⟩
+  have hside : side' = side := by
+    have hp : sideCode side' = sideCode side := by
+      cases sourceStmt <;> exact (Nat.pair_eq_pair.mp hmatch.1).1
+    cases side' <;> cases side <;> simp_all [sideCode]
+  have hcell : foldedSymbol marked' left' right' =
+      foldedSymbol marked left right := by
+    cases sourceStmt <;> exact hmatch.2
+  rcases foldedSymbol_injective hcell with ⟨rfl, rfl, rfl⟩
+  subst side'
+  rw [hstep] at hsource
+  contradiction
 
 theorem rowsFor_find?_eq_none_of_label_ne {q r : SourceLabel}
     (hq : q ∈ labels) (hr : r ∈ labels) (hne : r ≠ q)
@@ -228,6 +363,121 @@ theorem rowsFor_find?_eq_none_of_label_ne {q r : SourceLabel}
   simp only [Bool.and_eq_true, beq_iff_eq] at hmatch
   rw [hstate] at hmatch
   exact hne (foldedState_injective_on_labels hr hq hmatch.1).2
+
+private theorem find?_append_of_some {α : Type} (xs ys : List α)
+    (p : α → Bool) {a : α} (h : xs.find? p = some a) :
+    (xs ++ ys).find? p = some a := by simp [h]
+
+private theorem find?_append_of_none {α : Type} (xs ys : List α)
+    (p : α → Bool) (h : xs.find? p = none) :
+    (xs ++ ys).find? p = ys.find? p := by simp [h]
+
+private theorem rows_find?_of_step_aux {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (qs : List SourceLabel) (hqs : ∀ r ∈ qs, r ∈ labels) (hq : q ∈ qs)
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    (qs.flatMap rowsFor).find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) =
+      some (rowOfStep q q' side marked left right stmt) := by
+  induction qs with
+  | nil => contradiction
+  | cons r qs ih =>
+      simp only [List.mem_cons] at hq
+      by_cases hrq : r = q
+      · subst r
+        exact find?_append_of_some _ _ _ (rowsFor_find?_of_step hstep)
+      · have hqtail : q ∈ qs := hq.resolve_left (Ne.symm hrq)
+        have hnone := rowsFor_find?_eq_none_of_label_ne
+          (hqs q (by simp [hqtail])) (hqs r (by simp)) hrq
+          side marked left right
+        rw [List.flatMap_cons, find?_append_of_none _ _ _ hnone]
+        exact ih (fun s hs => hqs s (by simp [hs])) hqtail
+
+theorem rows_find?_of_step {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    rows.find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) =
+      some (rowOfStep q q' side marked left right stmt) := by
+  exact rows_find?_of_step_aux labels (fun _ h => h) hq hstep
+
+private theorem rows_find?_of_no_step_aux {q : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol}
+    (qs : List SourceLabel) (hqs : ∀ r ∈ qs, r ∈ labels) (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = none) :
+    (qs.flatMap rowsFor).find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) = none := by
+  induction qs with
+  | nil => simp
+  | cons r qs ih =>
+      by_cases hrq : r = q
+      · subst r
+        rw [List.flatMap_cons, find?_append_of_none _ _ _
+          (rowsFor_find?_of_no_step hstep)]
+        exact ih (fun s hs => hqs s (by simp [hs]))
+      · have hnone := rowsFor_find?_eq_none_of_label_ne
+          hq (hqs r (by simp)) hrq side marked left right
+        rw [List.flatMap_cons, find?_append_of_none _ _ _ hnone]
+        exact ih (fun s hs => hqs s (by simp [hs]))
+
+theorem rows_find?_of_no_step {q : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = none) :
+    rows.find? (fun row => row.matchesInput
+      (foldedState side q) (foldedSymbol marked left right)) = none := by
+  exact rows_find?_of_no_step_aux labels (fun _ h => h) hq hstep
+
+theorem transition?_of_step {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    program.transition? (foldedState side q) (foldedSymbol marked left right) =
+      some (rowOfStep q q' side marked left right stmt) := by
+  exact rows_find?_of_step hq hstep
+
+theorem transition?_of_no_step {q : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = none) :
+    program.transition? (foldedState side q) (foldedSymbol marked left right) = none := by
+  exact rows_find?_of_no_step hq hstep
+
+theorem rowOfStep_next_mem {q q' : SourceLabel} {side : Side} {marked : Bool}
+    {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq' : q' ∈ labels) :
+    (rowOfStep q q' side marked left right stmt).next ∈ foldedStates := by
+  cases stmt with
+  | write => exact foldedState_mem side hq'
+  | move dir => exact foldedState_mem (nextSide side marked dir) hq'
+
+theorem rowOfStep_write_mem {q q' : SourceLabel} {side : Side} {marked : Bool}
+    {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol} :
+    match (rowOfStep q q' side marked left right stmt).stmt with
+    | .move _ => True
+    | .write symbol => symbol ∈ foldedSymbols := by
+  cases stmt with
+  | write new => cases side <;> exact foldedSymbol_mem marked _ _
+  | move dir =>
+      cases side <;> cases marked <;> cases dir <;>
+        simp [rowOfStep, moveStmt, foldedSymbol_mem]
+
+theorem step_of_source_step {q q' : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} {stmt : Turing.TM0.Stmt SourceSymbol}
+    (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = some (q', stmt)) :
+    program.step (foldedState side q) (foldedSymbol marked left right) =
+      some ((rowOfStep q q' side marked left right stmt).next,
+        (rowOfStep q q' side marked left right stmt).stmt) := by
+  apply PostProgram.step_of_transition?_eq_some (transition?_of_step hq hstep)
+  · exact rowOfStep_next_mem (next_mem_labels hq hstep)
+  · exact rowOfStep_write_mem
+
+theorem step_of_no_source_step {q : SourceLabel} {side : Side}
+    {marked : Bool} {left right : SourceSymbol} (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = none) :
+    program.step (foldedState side q) (foldedSymbol marked left right) = none := by
+  exact PostProgram.step_eq_none_of_transition?_eq_none
+    (transition?_of_no_step hq hstep)
 
 end UniversalTM0Folded
 end LeanWang
