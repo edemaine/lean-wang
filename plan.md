@@ -68,9 +68,11 @@ unique machine run through every positive row, and rules out a tiling at the
 first halting step.  Thus seeded tiling is now equivalent to nonhalting on a
 supported finite input.  The remaining machine-side steps are the fixed
 folded-machine input bridge, a computable finite-data version of these tiles,
-and switching `UniversalFoldedReduction` to this interface.  Once switched,
-the old folded initializer modules can be removed from the final dependency
-graph.
+and switching `UniversalFoldedReduction` to this interface.  The generic
+`PostProgram.toTableProgram` stuttering simulation has already been extended
+from blank input to any supported Post configuration, so the folded bridge can
+start directly at its simulation configuration.  Once switched, the old
+folded initializer modules can be removed from the final dependency graph.
 
 ## Completed general tiling infrastructure
 

@@ -7,6 +7,7 @@ import LeanWang.MachineInputHistory
 import LeanWang.MachineInputTiles
 import LeanWang.MachineTiles
 import LeanWang.PostMachine
+import LeanWang.PostMachineInput
 import LeanWang.PartrecToTM2Support
 import LeanWang.PartrecToTM2SupportList
 import LeanWang.ToPartrecEncoding
