@@ -68,7 +68,10 @@ unique machine run through every positive row, and rules out a tiling at the
 first halting step.  Thus seeded tiling is now equivalent to nonhalting on a
 supported finite input.  The remaining machine-side steps are the fixed
 folded-machine input bridge, a computable finite-data version of these tiles,
-and switching `UniversalFoldedReduction` to this interface.  The generic
+and switching `UniversalFoldedReduction` to this interface.  `TM0DirectInput`
+now identifies the finite bottom word with the completed folded TM0 tape,
+starts the table simulation directly in its simulation state, and proves
+halting equivalent to Mathlib's TM0 evaluation.  The generic
 `PostProgram.toTableProgram` stuttering simulation has already been extended
 from blank input to any supported Post configuration, so the folded bridge can
 start directly at its simulation configuration.  Once switched, the old

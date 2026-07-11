@@ -32,6 +32,7 @@ import LeanWang.TM0FoldedInput.WriteMove
 import LeanWang.TM0FoldedInput.LocalStep
 import LeanWang.TM0FoldedInput.Reach
 import LeanWang.TM0FoldedInput.Halting
+import LeanWang.TM0DirectInput
 import LeanWang.TM0FoldedGeneratedInit
 import LeanWang.TM0FoldedCompiler
 import LeanWang.Theorems
