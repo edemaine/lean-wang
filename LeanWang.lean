@@ -23,6 +23,7 @@ import LeanWang.UniversalDirectReduction
 import LeanWang.TM0DirectInput
 import LeanWang.TM0FixedDirectProgram
 import LeanWang.TM0FixedDirectCorrect
+import LeanWang.TM0FixedDirectInput
 import LeanWang.Theorems
 import LeanWang.RoutedScaffold
 import LeanWang.RoutedPlaneDecode

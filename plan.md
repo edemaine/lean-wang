@@ -38,17 +38,19 @@ The reduction now consumes a four-field `UniversalMachineCertificate`: one
 constant finite table program, a computable source-dependent input word, a
 support proof, and the halting equivalence. All machine-to-Wang and scaffold
 reasoning depends only on this certificate. The existing folded construction
-is confined to one witness and can be replaced independently by a smaller
-fixed-TM0 simulation.
+is now used only as a semantic bridge proving the replacement runtime correct;
+it is not part of the certificate data.
 
-`TM0FixedDirectProgram` begins that replacement. It emits semantic folded rows
+`TM0FixedDirectProgram` implements that replacement. It emits semantic folded rows
 directly over the finite reachable-label support and proves their transition
-lookup without position codes or generated descriptor decoding. The remaining
-work is the generic folded configuration simulation, after which this direct
-program replaces the legacy certificate witness. Both the matching-row and
-no-matching-row lookup theorems are complete. The direct runtime is also proved
-pointwise equal to the existing certified runtime on every folded
-configuration; only run-level lifting and the certificate switch remain.
+lookup without position codes or generated descriptor decoding. Both the
+matching-row and no-matching-row cases are complete. The direct runtime is
+proved pointwise equal to the existing certified runtime on every folded
+configuration and this is lifted to the full halting equivalence. The universal
+certificate now uses the direct finite program; position codes and generated
+descriptor decoding are absent from the actual reduction data. Extracting the
+shared folded-tape geometry will also remove those legacy files from the proof
+dependency graph.
 
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
@@ -56,8 +58,8 @@ configuration; only run-level lifting and the certificate switch remain.
    Mathlib's `ToPartrec`, TM2, TM1, and TM0 route.
 3. `UniversalTM0.input c` writes `Nat.pair (encode c) 0` as the varying initial
    tape. Its construction is computable.
-4. `TM0DirectInput` folds that finite word and starts the fixed simulation
-   control directly on it. No machine initializer writes or rewinds the input.
+4. `TM0FixedDirectInput` folds that finite word and starts the direct fixed
+   simulation control on it. No machine initializer writes or rewinds the input.
 5. `MachineInputTiles` forces the finite word in a position-tagged bottom Wang
    row, followed by one self-looping blank-tail tile. It proves seeded
    quarter-plane tiling equivalent to nonhalting on that input.

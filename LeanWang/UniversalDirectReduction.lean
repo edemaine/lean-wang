@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.MachineInputTilesData
-import LeanWang.TM0DirectInput
+import LeanWang.TM0FixedDirectInput
 import LeanWang.UniversalTM0
 import LeanWang.UniversalMachineCertificate
 
@@ -24,13 +24,13 @@ namespace UniversalDirectReduction
 open Nat.Partrec (Code)
 
 def postProgram : PostProgram :=
-  TM0DirectInput.program UniversalTM0.code
+  TM0FixedDirectInput.program UniversalTM0.code
 
 def inputWord (code : Code) : List Nat :=
-  TM0DirectInput.inputWord (UniversalTM0.input code)
+  TM0FixedDirectInput.inputWord (UniversalTM0.input code)
 
 theorem inputWord_primrec : Primrec inputWord :=
-  TM0DirectInput.inputWord_primrec.comp UniversalTM0.input_primrec
+  TM0FixedDirectInput.inputWord_primrec.comp UniversalTM0.input_primrec
 
 theorem inputWord_computable : Computable inputWord :=
   inputWord_primrec.to_comp
@@ -40,16 +40,17 @@ def machine : Machine :=
 
 theorem input_supported (code : Code) :
     MachineInput.Supported machine (inputWord code) := by
-  exact TM0DirectInput.input_supported UniversalTM0.code (UniversalTM0.input code)
+  exact TM0FixedDirectInput.input_supported
+    UniversalTM0.code (UniversalTM0.input code)
 
 theorem machine_halts_iff (code : Code) :
     MachineInput.Halts machine (inputWord code) ↔
       (Nat.Partrec.Code.eval code 0).Dom := by
-  exact (TM0DirectInput.machine_halts_iff_tm0_eval_dom
+  exact (TM0FixedDirectInput.machine_halts_iff_tm0_eval_dom
     UniversalTM0.code (UniversalTM0.input_ne_nil code)).trans
       (UniversalTM0.eval_dom_iff code)
 
-/-- The legacy folded construction packaged behind the fixed-machine interface. -/
+/-- The direct fixed-TM0 construction packaged behind the fixed-machine interface. -/
 def certificate : UniversalMachineCertificate where
   program := postProgram.toTableProgram
   input := inputWord
