@@ -74,6 +74,29 @@ theorem mem_rowsForLabel_state {tc : Turing.ToPartrec.Code}
     refine ⟨side, ?_⟩
     cases stmt <;> rfl
 
+theorem mem_rowsForLabel_step {tc : Turing.ToPartrec.Code}
+    {q : SourceLabel tc} {e : PostTransition}
+    (he : e ∈ rowsForLabel tc q) :
+    ∃ side marked left right q' stmt,
+      partrecStartedTM0Machine tc q (foldedRead side left right) =
+        some (q', stmt) ∧
+      e = simRowOfStep tc side marked q q' left right stmt := by
+  unfold rowsForLabel at he
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨side, _hside, he⟩
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨marked, _hmarked, he⟩
+  rw [List.mem_flatMap] at he
+  rcases he with ⟨left, _hleft, he⟩
+  rw [List.mem_filterMap] at he
+  rcases he with ⟨right, _hright, htransition⟩
+  unfold simTransitionOfStep at htransition
+  split at htransition
+  · contradiction
+  · rename_i q' stmt hstep
+    cases htransition
+    exact ⟨side, marked, left, right, q', stmt, hstep, rfl⟩
+
 theorem foldedSimStateCode_ne_of_label_ne
     {tc : Turing.ToPartrec.Code} {q r : SourceLabel tc}
     (hq : q ∈ partrecStartedTM0LabelList tc)
@@ -151,6 +174,82 @@ theorem rows_find?_of_step
   unfold rows
   exact rows_find?_of_step_aux (partrecStartedTM0LabelList tc)
     (fun _ h => h) hq hstep
+
+theorem rowsForLabel_find?_eq_none_of_no_step
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (side : FoldSide) (marked : Bool) (left right : SourceSymbol)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) = none) :
+    (rowsForLabel tc q).find? (fun e =>
+      e.matchesInput (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right)) = none := by
+  apply program_find?_eq_none_of_forall_matchesInput_false
+  intro e he
+  rcases mem_rowsForLabel_step he with
+    ⟨side', marked', left', right', q', stmt, hsource, rfl⟩
+  by_cases hmatch :
+      (simRowOfStep tc side' marked' q q' left' right' stmt).matchesInput
+        (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right) = false
+  · exact hmatch
+  · have htrue :
+        (simRowOfStep tc side' marked' q q' left' right' stmt).matchesInput
+          (foldedSimStateCode tc side q)
+          (foldedSymbolCode marked left right) = true :=
+      Bool.eq_true_of_not_eq_false hmatch
+    unfold PostTransition.matchesInput at htrue
+    simp only [Bool.and_eq_true, beq_iff_eq] at htrue
+    have hstate : foldedSimStateCode tc side' q =
+        foldedSimStateCode tc side q := by
+      cases stmt <;> exact htrue.1
+    have hread : foldedSymbolCode marked' left' right' =
+        foldedSymbolCode marked left right := by
+      cases stmt <;> exact htrue.2
+    have hside : side' = side :=
+      foldedSimStateCode_side_of_same_label_eq hstate
+    have hparts := foldedSymbolCode_eq hread
+    subst side'
+    rcases hparts with ⟨rfl, rfl, rfl⟩
+    rw [hstep] at hsource
+    contradiction
+
+private theorem rows_find?_eq_none_of_no_step_aux
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (labels : List (SourceLabel tc))
+    (hlabels : ∀ r ∈ labels, r ∈ partrecStartedTM0LabelList tc)
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (side : FoldSide) (marked : Bool) (left right : SourceSymbol)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) = none) :
+    (labels.flatMap (rowsForLabel tc)).find? (fun e =>
+      e.matchesInput (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right)) = none := by
+  induction labels with
+  | nil => simp
+  | cons r labels ih =>
+      by_cases hrq : r = q
+      · subst r
+        have hhead := rowsForLabel_find?_eq_none_of_no_step
+          side marked left right hstep
+        simp only [List.flatMap_cons]
+        rw [program_find?_append_of_eq_none hhead]
+        exact ih (fun s hs => hlabels s (by simp [hs]))
+      · have hhead := rowsForLabel_find?_eq_none_of_label_ne
+          hq (hlabels r (by simp)) hrq
+          side marked left right
+        simp only [List.flatMap_cons]
+        rw [program_find?_append_of_eq_none hhead]
+        exact ih (fun s hs => hlabels s (by simp [hs]))
+
+theorem rows_find?_eq_none_of_no_step
+    {tc : Turing.ToPartrec.Code} {q : SourceLabel tc}
+    (hq : q ∈ partrecStartedTM0LabelList tc)
+    (side : FoldSide) (marked : Bool) (left right : SourceSymbol)
+    (hstep : partrecStartedTM0Machine tc q (foldedRead side left right) = none) :
+    (rows tc).find? (fun e =>
+      e.matchesInput (foldedSimStateCode tc side q)
+        (foldedSymbolCode marked left right)) = none := by
+  unfold rows
+  exact rows_find?_eq_none_of_no_step_aux (partrecStartedTM0LabelList tc)
+    (fun _ h => h) hq side marked left right hstep
 
 end TM0FixedDirectProgram
 end LeanWang

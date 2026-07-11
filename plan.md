@@ -44,9 +44,9 @@ fixed-TM0 simulation.
 `TM0FixedDirectProgram` begins that replacement. It emits semantic folded rows
 directly over the finite reachable-label support and proves their transition
 lookup without position codes or generated descriptor decoding. The remaining
-work is the corresponding no-transition lookup and the generic folded
-configuration simulation, after which this direct program replaces the legacy
-certificate witness.
+work is the generic folded configuration simulation, after which this direct
+program replaces the legacy certificate witness. Both the matching-row and
+no-matching-row lookup theorems are complete.
 
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
