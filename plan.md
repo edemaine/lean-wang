@@ -327,6 +327,11 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   distinguished `(0, southwest)` quarter. Dropping the first two rows and
   columns therefore gives a checked `4 x 4` free grid whose lower-left payload
   is forced to the seed by the routed corner marker.
+- Bounded graph-search soundness now retains bounds for every intermediate
+  port. Substitution locality transports those bounded paths from the constant
+  finite audit to any actual depth-four refined block with the same parent.
+  Thus every light parent-0 occurrence in an arbitrary hierarchy carries the
+  same absolute-coordinate marked `4 x 4` free grid.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.

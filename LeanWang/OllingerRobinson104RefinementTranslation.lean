@@ -23,6 +23,54 @@ def shiftGrid (grid : Nat → Nat → Index) (blockX blockY : Nat) :
     Nat → Nat → Index :=
   fun x y => grid (blockX + x) (blockY + y)
 
+/-- A refined block only depends on its single coarse parent tile. -/
+theorem iterateRefine_shift_eq_constant : ∀ (depth : Nat)
+    (grid : Nat → Nat → Index) (blockX blockY x y : Nat),
+    x < 2 ^ depth → y < 2 ^ depth →
+      iterateRefine depth (shiftGrid grid blockX blockY) x y =
+        iterateRefine depth (fun _ _ => grid blockX blockY) x y := by
+  intro depth
+  induction depth with
+  | zero =>
+      intro grid blockX blockY x y hx hy
+      have hxzero : x = 0 := by simpa using hx
+      have hyzero : y = 0 := by simpa using hy
+      subst x
+      subst y
+      rfl
+  | succ depth ih =>
+      intro grid blockX blockY x y hx hy
+      have hxdiv : x / 2 < 2 ^ depth := by
+        rw [pow_succ] at hx
+        omega
+      have hydiv : y / 2 < 2 ^ depth := by
+        rw [pow_succ] at hy
+        omega
+      change childBlock
+          (iterateRefine depth (shiftGrid grid blockX blockY) (x / 2) (y / 2))
+          (parityOffset x) (parityOffset y) =
+        childBlock
+          (iterateRefine depth (fun _ _ => grid blockX blockY) (x / 2) (y / 2))
+          (parityOffset x) (parityOffset y)
+      rw [ih grid blockX blockY (x / 2) (y / 2) hxdiv hydiv]
+
+/-- Quarter components inside one refined block have the same locality. -/
+theorem componentAt_shift_eq_constant (depth : Nat)
+    (grid : Nat → Nat → Index) (blockX blockY quarterX quarterY : Nat)
+    (hx : quarterX < 2 ^ (depth + 1))
+    (hy : quarterY < 2 ^ (depth + 1)) :
+    componentAt (iterateRefine depth (shiftGrid grid blockX blockY))
+        quarterX quarterY =
+      componentAt (iterateRefine depth (fun _ _ => grid blockX blockY))
+        quarterX quarterY := by
+  unfold componentAt
+  apply congrArg (fun index => (components index).2.1)
+  apply iterateRefine_shift_eq_constant
+  · rw [pow_succ] at hx
+    omega
+  · rw [pow_succ] at hy
+    omega
+
 theorem iterateRefine_shift : ∀ (depth : Nat) (grid : Nat → Nat → Index)
     (blockX blockY x y : Nat),
     iterateRefine depth (shiftGrid grid blockX blockY) x y =

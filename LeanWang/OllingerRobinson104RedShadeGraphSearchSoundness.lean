@@ -267,6 +267,223 @@ theorem exploreFast_sound
   · simp
   · exact hnode
 
+def PortInBounds (port : Port) (width height : Nat) : Prop :=
+  port.x < width ∧ port.y < height
+
+/-- A graph path retaining the search box bound at every intermediate port. -/
+inductive BoundedPath (indexGrid : Nat → Nat → Index)
+    (width height : Nat) : Port → Port → Bool → Prop where
+  | refl (port : Port) (hport : PortInBounds port width height) :
+      BoundedPath indexGrid width height port port false
+  | ofLink {first second : Port} {parity : Bool}
+      (link : Link indexGrid first second parity)
+      (hfirst : PortInBounds first width height)
+      (hsecond : PortInBounds second width height) :
+      BoundedPath indexGrid width height first second parity
+  | trans {first second third : Port} {firstParity secondParity : Bool}
+      (firstPath : BoundedPath indexGrid width height
+        first second firstParity)
+      (secondPath : BoundedPath indexGrid width height
+        second third secondParity) :
+      BoundedPath indexGrid width height first third
+        (Bool.xor firstParity secondParity)
+
+theorem BoundedPath.path
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {first second : Port} {parity : Bool}
+    (path : BoundedPath indexGrid width height first second parity) :
+    Path indexGrid first second parity := by
+  induction path with
+  | refl port _ => exact Path.refl port
+  | ofLink link _ _ => exact Path.ofLink link
+  | trans _ _ firstIH secondIH => exact Path.trans firstIH secondIH
+
+theorem BoundedPath.first_inBounds
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {first second : Port} {parity : Bool}
+    (path : BoundedPath indexGrid width height first second parity) :
+    PortInBounds first width height := by
+  induction path with
+  | refl _ hport => exact hport
+  | ofLink _ hfirst _ => exact hfirst
+  | trans _ _ firstIH _ => exact firstIH
+
+theorem BoundedPath.second_inBounds
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {first second : Port} {parity : Bool}
+    (path : BoundedPath indexGrid width height first second parity) :
+    PortInBounds second width height := by
+  induction path with
+  | refl _ hport => exact hport
+  | ofLink _ _ hsecond => exact hsecond
+  | trans _ _ _ secondIH => exact secondIH
+
+def BoundedSoundFromSome (indexGrid : Nat → Nat → Index)
+    (width height : Nat) (starts : List Port) (node : Node) : Prop :=
+  node.origin ∈ starts ∧
+    BoundedPath indexGrid width height
+      node.origin node.current node.parity
+
+theorem advance_boundedSoundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} {node next : Node} {move : CertificateMove}
+    (sound : BoundedSoundFromSome indexGrid width height starts node)
+    (hadvance : advance indexGrid width height node move = some next) :
+    BoundedSoundFromSome indexGrid width height starts next := by
+  unfold advance at hadvance
+  split at hadvance
+  · rename_i hvalid
+    simp only [Bool.and_eq_true, decide_eq_true_eq] at hvalid
+    simp only [Option.some.injEq] at hadvance
+    subst next
+    constructor
+    · exact sound.1
+    · have hlink := RedShadeGraphCertificate.Move.link_of_valid move
+          hvalid.1.2
+      rw [hvalid.1.1] at hlink
+      have hnextBound :
+          PortInBounds (RedShadeGraphCertificate.Move.second move)
+            width height := by
+        simpa [PortInBounds, inBounds, Bool.and_eq_true] using hvalid.2
+      exact BoundedPath.trans sound.2
+        (BoundedPath.ofLink hlink sound.2.second_inBounds hnextBound)
+  · contradiction
+
+theorem nextNodes_boundedSoundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} {node next : Node}
+    (sound : BoundedSoundFromSome indexGrid width height starts node)
+    (hnext : next ∈ nextNodes indexGrid width height node) :
+    BoundedSoundFromSome indexGrid width height starts next := by
+  rw [nextNodes, List.mem_filterMap] at hnext
+  rcases hnext with ⟨move, _, hadvance⟩
+  exact advance_boundedSoundFromSome sound hadvance
+
+theorem foldl_markFresh_boundedSoundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} :
+    ∀ (nodes : List Node) (accumulator : List Node × Array Bool),
+      (∀ node ∈ nodes,
+        BoundedSoundFromSome indexGrid width height starts node) →
+      (∀ node ∈ accumulator.1,
+        BoundedSoundFromSome indexGrid width height starts node) →
+      ∀ node ∈ (nodes.foldl (markFresh width) accumulator).1,
+        BoundedSoundFromSome indexGrid width height starts node := by
+  intro nodes
+  induction nodes with
+  | nil =>
+      intro accumulator _ haccumulator node hnode
+      exact haccumulator node (by simpa using hnode)
+  | cons first rest ih =>
+      intro accumulator hnodes haccumulator node hnode
+      have hfirst := hnodes first (by simp)
+      have hrest : ∀ candidate ∈ rest,
+          BoundedSoundFromSome indexGrid width height starts candidate := by
+        intro candidate hcandidate
+        exact hnodes candidate (by simp [hcandidate])
+      simp only [List.foldl_cons] at hnode
+      cases hlookup : accumulator.2[stateCode width first.state]? with
+      | none =>
+          apply ih (first :: accumulator.1,
+            accumulator.2.setIfInBounds
+              (stateCode width first.state) true) hrest
+          · intro candidate hcandidate
+            simp only [List.mem_cons] at hcandidate
+            rcases hcandidate with rfl | hcandidate
+            · exact hfirst
+            · exact haccumulator candidate hcandidate
+          · simpa [markFresh, hlookup] using hnode
+      | some present =>
+          cases present with
+          | false =>
+              apply ih (first :: accumulator.1,
+                accumulator.2.setIfInBounds
+                  (stateCode width first.state) true) hrest
+              · intro candidate hcandidate
+                simp only [List.mem_cons] at hcandidate
+                rcases hcandidate with rfl | hcandidate
+                · exact hfirst
+                · exact haccumulator candidate hcandidate
+              · simpa [markFresh, hlookup] using hnode
+          | true =>
+              apply ih accumulator hrest haccumulator
+              simpa [markFresh, hlookup] using hnode
+
+theorem markFreshList_boundedSoundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} {nodes : List Node} {visited : Array Bool}
+    (sound : ∀ node ∈ nodes,
+      BoundedSoundFromSome indexGrid width height starts node) :
+    ∀ node ∈ (markFreshList width visited nodes).1,
+      BoundedSoundFromSome indexGrid width height starts node := by
+  intro node hnode
+  exact foldl_markFresh_boundedSoundFromSome nodes ([], visited) sound
+    (by simp) node (by simpa [markFreshList] using hnode)
+
+theorem exploreFastAux_boundedSound
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} :
+    ∀ (fuel : Nat) (stack : List Node) (visited : Array Bool)
+      (found : List Node),
+      (∀ node ∈ stack,
+        BoundedSoundFromSome indexGrid width height starts node) →
+      (∀ node ∈ found,
+        BoundedSoundFromSome indexGrid width height starts node) →
+      ∀ node ∈ exploreFastAux indexGrid width height fuel
+        stack visited found,
+        BoundedSoundFromSome indexGrid width height starts node := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro stack visited found _ hfound node hnode
+      exact hfound node (by simpa [exploreFastAux] using hnode)
+  | succ fuel ih =>
+      intro stack visited found hstack hfound node hnode
+      cases stack with
+      | nil => exact hfound node (by simpa [exploreFastAux] using hnode)
+      | cons first rest =>
+          rw [exploreFastAux] at hnode
+          let marked := markFreshList width visited
+            (nextNodes indexGrid width height first)
+          apply ih (marked.1 ++ rest) marked.2 (first :: found)
+          · intro candidate hcandidate
+            rw [List.mem_append] at hcandidate
+            rcases hcandidate with hcandidate | hcandidate
+            · exact markFreshList_boundedSoundFromSome
+                (nodes := nextNodes indexGrid width height first)
+                (visited := visited)
+                (fun next hnext => nextNodes_boundedSoundFromSome
+                  (hstack first (by simp)) hnext)
+                candidate hcandidate
+            · exact hstack candidate (by simp [hcandidate])
+          · intro candidate hcandidate
+            simp only [List.mem_cons] at hcandidate
+            rcases hcandidate with rfl | hcandidate
+            · exact hstack _ (by simp)
+            · exact hfound candidate hcandidate
+          · exact hnode
+
+/-- Fast-search paths retain all intermediate search-box bounds. -/
+theorem exploreFast_bounded_sound
+    {indexGrid : Nat → Nat → Index} {width height fuel : Nat}
+    {starts : List Port} {node : Node}
+    (hstarts : ∀ port ∈ starts, PortInBounds port width height)
+    (hnode : node ∈ exploreFast indexGrid width height fuel starts) :
+    BoundedSoundFromSome indexGrid width height starts node := by
+  unfold exploreFast at hnode
+  let nodes : List Node := starts.map fun start =>
+    { origin := start, current := start, parity := false, reverseMoves := [] }
+  let emptyVisited := Array.replicate (width * height * 8) false
+  let marked := markFreshList width emptyVisited nodes
+  apply exploreFastAux_boundedSound fuel marked.1 marked.2 []
+  · exact markFreshList_boundedSoundFromSome
+      (nodes := nodes) (visited := emptyVisited) (by
+        intro initial hinitial
+        rcases List.mem_map.1 hinitial with ⟨start, hstart, rfl⟩
+        exact ⟨hstart, BoundedPath.refl start (hstarts start hstart)⟩)
+  · simp
+  · exact hnode
+
 end RedShadeGraphSearchSoundness
 end Closed104
 end Figure13Layers
