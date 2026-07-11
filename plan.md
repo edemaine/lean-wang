@@ -314,8 +314,11 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   base is discharged by the existing finite graph certificates. For either
   parity, a base certificate plus one phase-preserving two-substitution
   periodicity lemma now yields `OffsetsFree` at every depth and packages it as
-  an ordered `FreeGrid`. The remaining recurrence work is therefore exactly
-  the odd base and the common periodic successor theorem.
+  an ordered `FreeGrid`. The odd parity now starts at the genuinely minimal
+  level-one board: a cached all-parent graph audit proves its two scaled
+  depth-zero offsets free and graph-search soundness exposes `holds_odd_zero`.
+  Thus the common periodic successor theorem is the only remaining
+  board/free-line recurrence obligation.
 - Red-wire propagation is factored through a finite port graph. Straight
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality

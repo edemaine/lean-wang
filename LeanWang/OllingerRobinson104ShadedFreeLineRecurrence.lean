@@ -161,20 +161,17 @@ def freeGridOfOffsetsFree
 
 /-- Robinson periodicity at one step is the sole remaining recurrence lemma. -/
 def PeriodicStep : Prop :=
-  ∀ phase depth, 1 ≤ depth → Holds phase depth → Holds phase (depth + 1)
+  ∀ phase depth, Holds phase depth → Holds phase (depth + 1)
 
-set_option maxHeartbeats 1000000 in
--- Unfolding the higher-order `Holds` predicate through the dependent induction.
-theorem holds_all (phase : Phase) (base : Holds phase 1)
-    (step : PeriodicStep) :
-    ∀ depth, 1 ≤ depth → Holds phase depth := by
-  intro depth hdepth
-  obtain ⟨extra, rfl⟩ := Nat.exists_eq_add_of_le hdepth
+theorem holds_from (phase : Phase) (baseDepth : Nat)
+    (base : Holds phase baseDepth) (step : PeriodicStep) :
+    ∀ extra, Holds phase (baseDepth + extra) := by
+  intro extra
   induction extra with
-  | zero => simpa using base
+  | zero => simpa
   | succ extra ih =>
-      rw [show 1 + (extra + 1) = (1 + extra) + 1 by omega]
-      exact step phase (1 + extra) (by omega) (ih (by omega))
+      rw [show baseDepth + (extra + 1) = (baseDepth + extra) + 1 by omega]
+      exact step phase (baseDepth + extra) ih
 
 end ShadedFreeLineRecurrence
 end Closed104
