@@ -300,6 +300,14 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   instantiate this constructor at depth one in every translated parent block,
   so the remaining induction step is precisely a two-refinement lift of the
   row and column graph certificates along `expandOffset`.
+- Robinson's Section 7 proof identifies the cleaner induction invariant: the
+  whole free-line pattern repeats periodically inside the next board, rather
+  than individual quarter-graph ports refining spatially. The exact Lean list
+  decomposition is now proved: a successor pattern consists of the new first
+  side line, both descendants of every old offset, and the new last side line.
+  Consequently every offset is strictly below the removed outer endpoint.
+  The semantic step should prove this whole-pattern periodicity directly and
+  avoid any retained depth-two exhaustive search.
 - Red-wire propagation is factored through a finite port graph. Straight
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality

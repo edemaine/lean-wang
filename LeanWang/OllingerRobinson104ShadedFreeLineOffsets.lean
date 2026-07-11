@@ -135,6 +135,83 @@ theorem extendedOffsets_starts_zero (depth : Nat) :
       simp [expandOffset]
 
 set_option linter.flexible false in
+theorem extendedOffsets_decompose (depth : Nat) :
+    extendedOffsets depth =
+      0 :: (freeOffsets depth ++ [4 ^ (depth + 1) - 1]) := by
+  induction depth with
+  | zero => decide
+  | succ depth ih =>
+      change (extendedOffsets depth).flatMap expandOffset =
+        0 :: freeOffsets (depth + 1) ++ [4 ^ (depth + 2) - 1]
+      rw [freeOffsets]
+      change (extendedOffsets depth).flatMap expandOffset =
+        0 :: (((extendedOffsets depth).flatMap expandOffset).drop 1).dropLast ++
+          [4 ^ (depth + 2) - 1]
+      rw [ih]
+      have hpow : 4 ^ (depth + 1) = 4 * 4 ^ depth := by
+        simp [pow_succ, mul_comm]
+      have hodd : (4 ^ (depth + 1) - 1) % 2 ≠ 0 := by
+        rw [hpow]
+        have hpositive : 0 < 4 ^ depth := pow_pos (by decide) _
+        have heq : 4 * 4 ^ depth - 1 = 2 * (2 * 4 ^ depth - 1) + 1 := by
+          omega
+        rw [heq]
+        simp
+      simp only [List.flatMap_cons, List.flatMap_append, List.flatMap_nil]
+      simp [expandOffset, hodd]
+      rw [show 4 ^ (depth + 2) = 4 * 4 ^ (depth + 1) by
+        simp [pow_succ, mul_comm]]
+      have hpositive : 0 < 4 ^ (depth + 1) := pow_pos (by decide) _
+      conv_rhs =>
+        rw [show
+          1 :: ((freeOffsets depth).flatMap expandOffset ++
+            [4 * (4 ^ (depth + 1) - 1) + 2,
+              4 * (4 ^ (depth + 1) - 1) + 3]) =
+            ((1 :: (freeOffsets depth).flatMap expandOffset) ++
+              [4 * (4 ^ (depth + 1) - 1) + 2]) ++
+                [4 * (4 ^ (depth + 1) - 1) + 3] by simp,
+          List.dropLast_concat]
+      simp only [List.cons_append, List.append_assoc, List.append_cancel_left_eq,
+        List.cons.injEq]
+      simp only [true_and, List.nil_append, List.cons.injEq, and_true]
+      rw [Nat.mul_sub_left_distrib]
+      omega
+
+set_option linter.flexible false in
+/-- One recurrence step adds the two side lines and expands every old line. -/
+theorem freeOffsets_succ_decompose (depth : Nat) :
+    freeOffsets (depth + 1) =
+      1 :: (freeOffsets depth).flatMap expandOffset ++
+        [4 ^ (depth + 2) - 2] := by
+  rw [freeOffsets, extendedOffsets, extendedOffsets_decompose depth]
+  have hpow : 4 ^ (depth + 1) = 4 * 4 ^ depth := by
+    simp [pow_succ, mul_comm]
+  have hodd : (4 ^ (depth + 1) - 1) % 2 ≠ 0 := by
+    rw [hpow]
+    have hpositive : 0 < 4 ^ depth := pow_pos (by decide) _
+    have heq : 4 * 4 ^ depth - 1 = 2 * (2 * 4 ^ depth - 1) + 1 := by
+      omega
+    rw [heq]
+    simp
+  simp [expandOffset, hodd]
+  rw [show 4 ^ (depth + 2) = 4 * 4 ^ (depth + 1) by
+    simp [pow_succ, mul_comm]]
+  have hpositive : 0 < 4 ^ (depth + 1) := pow_pos (by decide) _
+  rw [show
+    1 :: ((freeOffsets depth).flatMap expandOffset ++
+      [4 * (4 ^ (depth + 1) - 1) + 2,
+        4 * (4 ^ (depth + 1) - 1) + 3]) =
+      ((1 :: (freeOffsets depth).flatMap expandOffset) ++
+        [4 * (4 ^ (depth + 1) - 1) + 2]) ++
+          [4 * (4 ^ (depth + 1) - 1) + 3] by simp,
+    List.dropLast_concat]
+  simp only [List.cons_append, List.append_cancel_left_eq,
+    List.cons.injEq]
+  simp only [true_and, and_true]
+  rw [Nat.mul_sub_left_distrib]
+  omega
+
+set_option linter.flexible false in
 theorem mem_extendedOffsets_lt (depth : Nat) {offset : Nat}
     (hmem : offset ∈ extendedOffsets depth) :
     offset < 4 ^ (depth + 1) := by
@@ -168,6 +245,16 @@ theorem mem_freeOffsets_bounds (depth : Nat) {offset : Nat}
   rw [hrest, List.pairwise_cons] at hordered
   exact hordered.1 offset htail
 
+theorem mem_freeOffsets_lt_last (depth : Nat) {offset : Nat}
+    (hmem : offset ∈ freeOffsets depth) :
+    offset < 4 ^ (depth + 1) - 1 := by
+  have hordered := extendedOffsets_pairwise depth
+  rw [extendedOffsets_decompose] at hordered
+  have htail : (freeOffsets depth ++ [4 ^ (depth + 1) - 1]).Pairwise (· < ·) := by
+    simpa only [List.tail_cons] using hordered.tail
+  rw [List.pairwise_append] at htail
+  exact htail.2.2 offset hmem (4 ^ (depth + 1) - 1) (by simp)
+
 def offsetAtDepth (depth : Nat)
     (index : Fin (freeOffsets depth).length) : Nat :=
   (freeOffsets depth).get index
@@ -187,6 +274,11 @@ theorem offsetAtDepth_bounds (depth : Nat)
     0 < offsetAtDepth depth index ∧
       offsetAtDepth depth index < 4 ^ (depth + 1) :=
   mem_freeOffsets_bounds depth (offsetAtDepth_mem depth index)
+
+theorem offsetAtDepth_lt_last (depth : Nat)
+    (index : Fin (freeOffsets depth).length) :
+    offsetAtDepth depth index < 4 ^ (depth + 1) - 1 :=
+  mem_freeOffsets_lt_last depth (offsetAtDepth_mem depth index)
 
 theorem depth_le_freeOffsets_length (depth : Nat) :
     depth ≤ (freeOffsets depth).length := by

@@ -417,15 +417,13 @@ def freeGridOfOffsets_one_shift
     (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
     4 12 4 12 1
     (fun index => by
-      have hmem := offsetAtDepth_mem 1 index
-      rw [freeOffsets_one] at hmem
-      simp only [List.mem_cons, List.not_mem_nil, or_false] at hmem
+      have hbound := offsetAtDepth_lt_last 1 index
+      norm_num at hbound
       simp only [quarterWest, quarterEast]
       omega)
     (fun index => by
-      have hmem := offsetAtDepth_mem 1 index
-      rw [freeOffsets_one] at hmem
-      simp only [List.mem_cons, List.not_mem_nil, or_false] at hmem
+      have hbound := offsetAtDepth_lt_last 1 index
+      norm_num at hbound
       simp only [quarterSouth, quarterNorth]
       omega)
     (freeColumn_offsetAtDepth_one_shift grid blockX blockY hparent valid shaded)
