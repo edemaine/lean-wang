@@ -358,6 +358,11 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   east or north port there has an even-parity path to the matching external
   macrocell port. These local connectors are the basis for lifting recursive
   odd-path certificates without rerunning graph search at every depth.
+- A side-sensitive sparse port embedding now composes those connectors across
+  neighboring macrocells. Every red-graph `Link` constructor, including
+  matching edges and parity-reversing crossings, lifts through two
+  substitutions to a path with exactly the same parity. Induction therefore
+  lifts arbitrary finite path certificates at every recurrence depth.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to

@@ -275,7 +275,7 @@ theorem portPresent_coarseGrid_local (grid : Nat → Nat → Index)
   rw [hquadrantLocal]
   cases port.side <;> rfl
 
-theorem Path.symm {grid : Nat → Nat → Index} {first second : Port}
+theorem path_symm {grid : Nat → Nat → Index} {first second : Port}
     {parity : Bool} (path : Path grid first second parity) :
     Path grid second first parity := by
   induction path with
