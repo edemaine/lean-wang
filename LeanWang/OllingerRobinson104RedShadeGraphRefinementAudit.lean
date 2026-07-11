@@ -65,6 +65,15 @@ def connectorMoves? (parent : Index) (side : ExitSide) (offset : Nat) :
       if finish = externalPort side offset then some moves else none
   | _ => none
 
+def connectorNodes (parent : Index) (side : ExitSide) (offset : Nat) :
+    List Node :=
+  exploreFast (fineGrid parent) 8 8 1000 [internalPort side offset]
+
+def connectorNode? (parent : Index) (side : ExitSide) (offset : Nat) :
+    Option Node :=
+  (connectorNodes parent side offset).find? fun node =>
+    decide (node.current = externalPort side offset) && !node.parity
+
 def completeFor (parent : Index) : Bool :=
   exitSides.all fun side =>
     (List.range 2).all fun offset =>
@@ -75,8 +84,22 @@ def completeFor (parent : Index) : Bool :=
 def complete : Bool :=
   (List.finRange 104).all completeFor
 
+def boundedCompleteFor (parent : Index) : Bool :=
+  exitSides.all fun side =>
+    (List.range 2).all fun offset =>
+      if portPresent (coarseGrid parent) (internalPort side offset) then
+        (connectorNode? parent side offset).isSome
+      else true
+
+def boundedComplete : Bool :=
+  (List.finRange 104).all boundedCompleteFor
+
 set_option linter.style.nativeDecide false in
 theorem complete_eq_true : complete = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem boundedComplete_eq_true : boundedComplete = true := by
   native_decide
 
 end RedShadeGraphRefinement

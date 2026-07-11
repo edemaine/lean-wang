@@ -29,6 +29,15 @@ theorem completeFor_eq_true (parent : Index) : completeFor parent = true := by
     simpa [complete, List.all_eq_true] using complete_eq_true
   exact hall parent (List.mem_finRange parent)
 
+set_option maxHeartbeats 1000000 in
+-- Projecting one parent from the native bounded-connector table.
+theorem boundedCompleteFor_eq_true (parent : Index) :
+    boundedCompleteFor parent = true := by
+  have hall : ∀ candidate ∈ List.finRange 104,
+      boundedCompleteFor candidate = true := by
+    simpa [boundedComplete, List.all_eq_true] using boundedComplete_eq_true
+  exact hall parent (List.mem_finRange parent)
+
 set_option linter.style.nativeDecide false in
 /-- Two substitutions retain the old quarter component at local coordinates. -/
 theorem componentAt_fineGrid_southwest (parent : Index)
@@ -86,6 +95,45 @@ theorem connectorPath (parent : Index) (side : ExitSide)
   rcases connectorMoves_exists parent side hoffset hpresent with
     ⟨moves, hsearch⟩
   exact search_sound hsearch
+
+/-- The same connector with every intermediate port retained inside its macrocell. -/
+theorem boundedConnectorPath (parent : Index) (side : ExitSide)
+    {offset : Nat} (hoffset : offset < 2)
+    (hpresent : portPresent (coarseGrid parent)
+      (internalPort side offset) = true) :
+    BoundedPath (fineGrid parent) 8 8 (internalPort side offset)
+      (externalPort side offset) false := by
+  have hcomplete := boundedCompleteFor_eq_true parent
+  simp only [boundedCompleteFor, List.all_eq_true] at hcomplete
+  have hside : side ∈ exitSides := by cases side <;> simp [exitSides]
+  have hoffsetMem : offset ∈ List.range 2 := by simpa using hoffset
+  have hcase := hcomplete side hside offset hoffsetMem
+  rw [hpresent] at hcase
+  simp only [if_true] at hcase
+  cases hnode : connectorNode? parent side offset with
+  | none => simp [hnode] at hcase
+  | some node =>
+      have hmem : node ∈ connectorNodes parent side offset := by
+        unfold connectorNode? at hnode
+        exact List.mem_of_find?_eq_some hnode
+      have haccept := List.find?_some hnode
+      simp only [Bool.and_eq_true, decide_eq_true_eq] at haccept
+      have hsound := exploreFast_bounded_sound
+        (indexGrid := fineGrid parent) (width := 8) (height := 8)
+        (fuel := 1000) (starts := [internalPort side offset])
+        (by
+          intro port hport
+          simp only [List.mem_singleton] at hport
+          subst port
+          cases side <;> simp [PortInBounds, internalPort] <;> omega)
+        hmem
+      have horigin : node.origin = internalPort side offset := by
+        simpa using hsound.1
+      have hparity : node.parity = false := by
+        cases hparity : node.parity with
+        | false => rfl
+        | true => simp [hparity] at haccept
+      simpa [horigin, haccept.1, hparity] using hsound.2
 
 end RedShadeGraphRefinement
 end Closed104
