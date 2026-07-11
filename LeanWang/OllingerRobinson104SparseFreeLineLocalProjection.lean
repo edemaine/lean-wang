@@ -21,6 +21,9 @@ namespace Closed104
 namespace SparseFreeLineLocalProjection
 
 open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
+  RedShadeGraphWeightedSearch
+  RedShadeGraphTranslation
+  BorderCoverageLocalAudit
   ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineProjectionCandidates Signals.FreeCellLocal
   SparseFreeLineLocalStates
@@ -50,7 +53,7 @@ theorem live_endpoint_of_verticalInterior
   cases component <;> cases quadrant <;>
     simp_all [Signals.verticalInterior?, portPresent, RedShades.hasSouth,
       RedShades.hasNorth, RedShades.hasVertical, RedShades.cornerSouth,
-      RedShades.cornerNorth]
+      RedShades.cornerNorth, Quadrant.xBit]
 
 theorem live_endpoint_of_horizontalInterior
     {grid : Nat → Nat → Index} {x y : Nat}
@@ -63,7 +66,179 @@ theorem live_endpoint_of_horizontalInterior
   cases component <;> cases quadrant <;>
     simp_all [Signals.horizontalInterior?, portPresent, RedShades.hasWest,
       RedShades.hasEast, RedShades.hasHorizontal, RedShades.cornerWest,
-      RedShades.cornerEast]
+      RedShades.cornerEast, Quadrant.yBit]
+
+theorem verticalInterior_of_live_endpoint
+    {grid : Nat → Nat → Index} {x y : Nat}
+    (live : portPresent grid ⟨x, y, .south⟩ = true ∨
+      portPresent grid ⟨x, y, .north⟩ = true) :
+    Signals.verticalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none := by
+  generalize hcomponent : componentAt grid x y = component at *
+  generalize hquadrant : quadrantAt x y = quadrant at *
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.verticalInterior?, portPresent, RedShades.hasSouth,
+      RedShades.hasNorth, RedShades.hasVertical, RedShades.cornerSouth,
+      RedShades.cornerNorth, Quadrant.xBit]
+
+theorem horizontalInterior_of_live_endpoint
+    {grid : Nat → Nat → Index} {x y : Nat}
+    (live : portPresent grid ⟨x, y, .west⟩ = true ∨
+      portPresent grid ⟨x, y, .east⟩ = true) :
+    Signals.horizontalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none := by
+  generalize hcomponent : componentAt grid x y = component at *
+  generalize hquadrant : quadrantAt x y = quadrant at *
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.horizontalInterior?, portPresent, RedShades.hasWest,
+      RedShades.hasEast, RedShades.hasHorizontal, RedShades.cornerWest,
+      RedShades.cornerEast, Quadrant.yBit]
+
+theorem alignedRowStart_backed
+    {grid : Nat → Nat → Index} {west east south north oldRow : Nat}
+    (row : LiveRowCertificate grid west east south north oldRow)
+    (hodd : oldRow % 2 = 1) (blockX localX : Nat)
+    (hwest : quarterWest (4 * west) < 8 * blockX + localX)
+    (heast : 8 * blockX + localX < quarterEast (4 * east))
+    {start : WeightedStart}
+    (hstart : start ∈ alignedRowStarts
+      (grid blockX (oldRow / 2)) 1 localX) :
+    ∃ candidate : Candidate,
+      candidate.parity = true ∧
+      candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ∧
+      translatePort start.port (8 * blockX) (8 * (oldRow / 2)) =
+        sparsePort candidate.port := by
+  rcases mem_alignedRowStarts hstart with
+    ⟨sourceX, hsourceX, sourceCoordinate, startOdd,
+      endpoints⟩
+  have oldRowEq : 2 * (oldRow / 2) + 1 = oldRow := by
+    have hdecompose := Nat.mod_add_div oldRow 2
+    omega
+  have sparseOldRow : sparseCoordinate oldRow = 8 * (oldRow / 2) + 1 := by
+    simp [sparseCoordinate, macroOrigin, localCoordinate, hodd]
+  let oldX := 2 * blockX + sourceX
+  have oldCoordinate : sparseCoordinate oldX = 8 * blockX + localX := by
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockX sourceX hsourceX, sourceCoordinate]
+  have oldWest : quarterWest west < oldX := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hwest
+  have oldEast : oldX < quarterEast east := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using heast
+  rcases endpoints with endpoint | endpoint
+  · let candidate : Candidate := ⟨⟨oldX, oldRow, .south⟩, true⟩
+    have candidateLive : portPresent grid candidate.port = true := by
+      have localLive := endpoint.2
+      rw [SparseFreeLineLocalTransport.portPresent_old_block
+        grid blockX (oldRow / 2) ⟨sourceX, 1, .south⟩
+        hsourceX (show (1 : Nat) < 2 by decide)] at localLive
+      simpa only [candidate, oldX, translatePort, oldRowEq] using localLive
+    have interior : Signals.verticalInterior?
+        (componentAt grid oldX oldRow) (quadrantAt oldX oldRow) ≠ none :=
+      verticalInterior_of_live_endpoint (Or.inl candidateLive)
+    have backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) :=
+      backedBy_row row oldWest oldEast interior (Or.inl rfl) candidateLive
+    refine ⟨candidate, rfl, backed, ?_⟩
+    rw [endpoint.1]
+    simp only [candidate, oldX, sparsePort, translatePort, sparseOldRow]
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockX sourceX hsourceX]
+    simp [sparseCoordinate, macroOrigin, localCoordinate]
+  · let candidate : Candidate := ⟨⟨oldX, oldRow, .north⟩, true⟩
+    have candidateLive : portPresent grid candidate.port = true := by
+      have localLive := endpoint.2
+      rw [SparseFreeLineLocalTransport.portPresent_old_block
+        grid blockX (oldRow / 2) ⟨sourceX, 1, .north⟩
+        hsourceX (show (1 : Nat) < 2 by decide)] at localLive
+      simpa only [candidate, oldX, translatePort, oldRowEq] using localLive
+    have interior : Signals.verticalInterior?
+        (componentAt grid oldX oldRow) (quadrantAt oldX oldRow) ≠ none :=
+      verticalInterior_of_live_endpoint (Or.inr candidateLive)
+    have backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) :=
+      backedBy_row row oldWest oldEast interior (Or.inr rfl) candidateLive
+    refine ⟨candidate, rfl, backed, ?_⟩
+    rw [endpoint.1]
+    simp only [candidate, oldX, sparsePort, translatePort, sparseOldRow]
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockX sourceX hsourceX]
+    simp [sparseCoordinate, macroOrigin, localCoordinate]
+
+theorem alignedColumnStart_backed
+    {grid : Nat → Nat → Index} {west east south north oldColumn : Nat}
+    (column : LiveColumnCertificate grid west east south north oldColumn)
+    (hodd : oldColumn % 2 = 1) (blockY localY : Nat)
+    (hsouth : quarterSouth (4 * south) < 8 * blockY + localY)
+    (hnorth : 8 * blockY + localY < quarterNorth (4 * north))
+    {start : WeightedStart}
+    (hstart : start ∈ alignedColumnStarts
+      (grid (oldColumn / 2) blockY) 1 localY) :
+    ∃ candidate : Candidate,
+      candidate.parity = true ∧
+      candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ∧
+      translatePort start.port (8 * (oldColumn / 2)) (8 * blockY) =
+        sparsePort candidate.port := by
+  rcases mem_alignedColumnStarts hstart with
+    ⟨sourceY, hsourceY, sourceCoordinate, startOdd, endpoints⟩
+  have oldColumnEq : 2 * (oldColumn / 2) + 1 = oldColumn := by
+    have hdecompose := Nat.mod_add_div oldColumn 2
+    omega
+  have sparseOldColumn :
+      sparseCoordinate oldColumn = 8 * (oldColumn / 2) + 1 := by
+    simp [sparseCoordinate, macroOrigin, localCoordinate, hodd]
+  let oldY := 2 * blockY + sourceY
+  have oldCoordinate : sparseCoordinate oldY = 8 * blockY + localY := by
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockY sourceY hsourceY, sourceCoordinate]
+  have oldSouth : quarterSouth south < oldY := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hsouth
+  have oldNorth : oldY < quarterNorth north := by
+    rw [← sparseCoordinate_lt_iff]
+    simpa [oldCoordinate] using hnorth
+  rcases endpoints with endpoint | endpoint
+  · let candidate : Candidate := ⟨⟨oldColumn, oldY, .west⟩, true⟩
+    have candidateLive : portPresent grid candidate.port = true := by
+      have localLive := endpoint.2
+      rw [SparseFreeLineLocalTransport.portPresent_old_block
+        grid (oldColumn / 2) blockY ⟨1, sourceY, .west⟩
+        (show (1 : Nat) < 2 by decide) hsourceY] at localLive
+      simpa only [candidate, oldY, translatePort, oldColumnEq] using localLive
+    have interior : Signals.horizontalInterior?
+        (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none :=
+      horizontalInterior_of_live_endpoint (Or.inl candidateLive)
+    have backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) :=
+      backedBy_column column oldSouth oldNorth interior (Or.inl rfl) candidateLive
+    refine ⟨candidate, rfl, backed, ?_⟩
+    rw [endpoint.1]
+    simp only [candidate, oldY, sparsePort, translatePort, sparseOldColumn]
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockY sourceY hsourceY]
+    simp [sparseCoordinate, macroOrigin, localCoordinate]
+  · let candidate : Candidate := ⟨⟨oldColumn, oldY, .east⟩, true⟩
+    have candidateLive : portPresent grid candidate.port = true := by
+      have localLive := endpoint.2
+      rw [SparseFreeLineLocalTransport.portPresent_old_block
+        grid (oldColumn / 2) blockY ⟨1, sourceY, .east⟩
+        (show (1 : Nat) < 2 by decide) hsourceY] at localLive
+      simpa only [candidate, oldY, translatePort, oldColumnEq] using localLive
+    have interior : Signals.horizontalInterior?
+        (componentAt grid oldColumn oldY) (quadrantAt oldColumn oldY) ≠ none :=
+      horizontalInterior_of_live_endpoint (Or.inr candidateLive)
+    have backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) :=
+      backedBy_column column oldSouth oldNorth interior (Or.inr rfl) candidateLive
+    refine ⟨candidate, rfl, backed, ?_⟩
+    rw [endpoint.1]
+    simp only [candidate, oldY, sparsePort, translatePort, sparseOldColumn]
+    rw [SparseFreeLineLocalTransport.sparseCoordinate_two_block
+      blockY sourceY hsourceY]
+    simp [sparseCoordinate, macroOrigin, localCoordinate]
 
 theorem projectsTo_of_backedCandidate
     {grid : Nat → Nat → Index} {west east south north : Nat}

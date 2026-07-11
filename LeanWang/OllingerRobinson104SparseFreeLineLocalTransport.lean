@@ -72,6 +72,39 @@ theorem boundedPath_two_block
   simpa using path_translate (depth := 2) (grid := grid)
     (blockX := blockX) (blockY := blockY) shifted
 
+theorem portPresent_old_block
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    (port : Port) (hx : port.x < 2) (hy : port.y < 2) :
+    portPresent (coarseGrid (grid blockX blockY)) port =
+      portPresent grid
+        (translatePort port (2 * blockX) (2 * blockY)) := by
+  rcases port with ⟨x, y, side⟩
+  have hcomponent : componentAt (coarseGrid (grid blockX blockY)) x y =
+      componentAt grid (2 * blockX + x) (2 * blockY + y) := by
+    change componentAt (coarseGrid (grid blockX blockY)) x y =
+      componentAt (iterateRefine 0 grid) (2 * blockX + x) (2 * blockY + y)
+    exact (componentAt_old_block grid 0 blockX blockY x y hx hy).symm
+  have hquadrant := quadrantAt_old_block blockX blockY x y hx hy
+  cases side <;> simp only [portPresent, translatePort] <;>
+    rw [hcomponent, hquadrant]
+
+theorem portPresent_two_block
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    (port : Port) (hx : port.x < 8) (hy : port.y < 8) :
+    portPresent (fineGrid (grid blockX blockY)) port =
+      portPresent (iterateRefine 2 grid)
+        (translatePort port (8 * blockX) (8 * blockY)) := by
+  rcases port with ⟨x, y, side⟩
+  have hcomponent : componentAt (fineGrid (grid blockX blockY)) x y =
+      componentAt (iterateRefine 2 grid)
+        (8 * blockX + x) (8 * blockY + y) := by
+    change componentAt
+        (iterateRefine 2 (fun _ _ => iterateRefine 0 grid blockX blockY)) x y = _
+    exact (componentAt_two_block grid 0 blockX blockY x y hx hy).symm
+  have hquadrant := quadrantAt_block blockX blockY x y
+  cases side <;> simp only [portPresent, translatePort] <;>
+    rw [hcomponent, hquadrant]
+
 /-- A checked local vertical ancestor becomes an old-grid sparse ancestor. -/
 theorem verticalAncestor_two_block
     (grid : Nat → Nat → Index) (level blockX blockY : Nat)
