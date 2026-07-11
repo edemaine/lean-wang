@@ -22,7 +22,9 @@ Nat.Partrec.Code c
 
 Only the finite initial tape depends on `c`; the machine control and simulation
 rows are fixed. This avoids the obsolete source-dependent compiler/decoder
-route entirely.
+route entirely. The generated initializer, position-code compiler, and their
+correctness modules have been removed from the repository; the retained proof
+constructs the fixed semantic transition rows directly.
 
 The public theorem surface is [`LeanWang.Final`](LeanWang/Final.lean):
 

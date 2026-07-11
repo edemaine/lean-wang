@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.TM0FoldedProgram.InitSearch
+import LeanWang.TM0FoldedProgram.SimCore
 
 /-!
 Semantic folded simulation rows and descriptor generation.
@@ -14,6 +14,29 @@ namespace LeanWang
 namespace TM0FoldedCompiler
 
 open TM0Route
+
+private theorem find?_append_of_eq_none {α : Type} {xs ys : List α}
+    {p : α → Bool} (h : xs.find? p = none) :
+    (xs ++ ys).find? p = ys.find? p := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · simp [hx] at h
+      · simp [hx]
+        simpa [hx] using ih (by simpa [hx] using h)
+
+private theorem find?_append_of_eq_some {α : Type} {xs ys : List α}
+    {p : α → Bool} {a : α} (h : xs.find? p = some a) :
+    (xs ++ ys).find? p = some a := by
+  induction xs with
+  | nil => simp at h
+  | cons x xs ih =>
+      by_cases hx : p x = true
+      · have hxa : x = a := by simpa [hx] using h
+        subst a
+        simp [hx]
+      · simp [hx, ih (by simpa [hx] using h)]
 
 def simRowOfStep (tc : Turing.ToPartrec.Code)
     (side : FoldSide) (marked : Bool)
@@ -308,7 +331,7 @@ private theorem find?_flatMap_simTransition_left_of_step_aux
           (tc := tc) (q := q) (q' := q') (side := side) (marked := marked)
           (left := left) (right := right) (stmt := stmt) hstep
         simp only [List.flatMap_cons]
-        exact program_find?_append_of_eq_some hhead
+        exact find?_append_of_eq_some hhead
       · have hleft_tail : left ∈ lefts := by
           rcases hleft with h | h
           · exact False.elim (hll h.symm)
@@ -328,7 +351,7 @@ private theorem find?_flatMap_simTransition_left_of_step_aux
               exact hll (foldedSymbolCode_eq hcode).2.1)
         have htail := ih hleft_tail
         simp only [List.flatMap_cons]
-        rw [program_find?_append_of_eq_none hhead]
+        rw [find?_append_of_eq_none hhead]
         exact htail
 
 theorem simRowsForLabel_left_find?_of_step
@@ -378,7 +401,7 @@ private theorem find?_flatMap_simTransition_left_eq_none_of_read_ne_aux
           (marked' := marked') (left := left) (right := right) (left' := l)
           TM0Route.partrecStartedTM0SymbolList (hread l)
       simp only [List.flatMap_cons]
-      rw [program_find?_append_of_eq_none hhead]
+      rw [find?_append_of_eq_none hhead]
       exact ih
 
 private theorem find?_flatMap_simTransition_left_eq_none_of_side_ne_aux
@@ -408,7 +431,7 @@ private theorem find?_flatMap_simTransition_left_eq_none_of_side_ne_aux
           (marked := marked) (marked' := marked') (left := left) (right := right)
           (left' := l) TM0Route.partrecStartedTM0SymbolList hside
       simp only [List.flatMap_cons]
-      rw [program_find?_append_of_eq_none hhead]
+      rw [find?_append_of_eq_none hhead]
       exact ih
 
 private theorem find?_flatMap_simTransition_marked_of_step_aux
@@ -438,7 +461,7 @@ private theorem find?_flatMap_simTransition_marked_of_step_aux
           (tc := tc) (q := q) (q' := q') (side := side) (marked := marked)
           (left := left) (right := right) (stmt := stmt) hstep
         simp only [List.flatMap_cons]
-        exact program_find?_append_of_eq_some hhead
+        exact find?_append_of_eq_some hhead
       · have hmarked_tail : marked ∈ markers := by
           rcases hmarked with h | h
           · exact False.elim (hmm h.symm)
@@ -458,7 +481,7 @@ private theorem find?_flatMap_simTransition_marked_of_step_aux
               exact hmm (foldedSymbolCode_eq hcode).1)
         have htail := ih hmarked_tail
         simp only [List.flatMap_cons]
-        rw [program_find?_append_of_eq_none hhead]
+        rw [find?_append_of_eq_none hhead]
         exact htail
 
 theorem simRowsForLabel_marked_find?_of_step
@@ -507,7 +530,7 @@ private theorem find?_flatMap_simTransition_marked_eq_none_of_side_ne_aux
           (marked := marked) (marked' := m) (left := left) (right := right)
           TM0Route.partrecStartedTM0SymbolList hside
       simp only [List.flatMap_cons]
-      rw [program_find?_append_of_eq_none hhead]
+      rw [find?_append_of_eq_none hhead]
       exact ih
 
 theorem program_find?_flatMap_simTransition_side_of_step_aux
@@ -538,7 +561,7 @@ theorem program_find?_flatMap_simTransition_side_of_step_aux
           (tc := tc) (q := q) (q' := q') (side := side) (marked := marked)
           (left := left) (right := right) (stmt := stmt) hstep
         simp only [List.flatMap_cons]
-        exact program_find?_append_of_eq_some hhead
+        exact find?_append_of_eq_some hhead
       · have hside_tail : side ∈ sides := by
           rcases hside_mem with h | h
           · exact False.elim (hss h.symm)
@@ -569,7 +592,7 @@ theorem program_find?_flatMap_simTransition_side_of_step_aux
                 e.matchesInput (foldedSimStateCode tc side q)
                   (foldedSymbolCode marked left right)) =
             some (simRowOfStep tc side marked q q' left right stmt)
-        rw [program_find?_append_of_eq_none hhead]
+        rw [find?_append_of_eq_none hhead]
         exact htail
 
 /-- Numeric descriptor for one semantic folded simulation step. -/

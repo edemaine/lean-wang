@@ -75,7 +75,10 @@ the generated position compiler nor its correctness proof.
 
 There is no remaining source-uniform compiler, descriptor decoder, or generated
 position-row obligation or input-specific machine control in the final
-reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
+reduction. The obsolete generated initializer, position-code compiler, and
+their correctness modules have been deleted. The retained fixed TM0-to-Post
+reduction consists only of the folded alphabet and tape geometry, direct
+semantic transition rows, and their step/halting simulation.
 
 ## Completed general tiling infrastructure
 
