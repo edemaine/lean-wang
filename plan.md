@@ -295,6 +295,10 @@ position-row obligation in the final theorem.
   from the requested start by a proposition-level parity path. Finite template
   discovery is therefore outside the trusted boundary, while successful
   results can be consumed directly by the recursive geometry proof.
+- Strict ports along all four sides of a uniformly shaded oriented board are
+  represented explicitly. Path soundness now gives the central semantic rule:
+  every odd-parity path from a light board side ends on a dark edge, ready to
+  discharge the shaded obstruction selector at candidate free coordinates.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
