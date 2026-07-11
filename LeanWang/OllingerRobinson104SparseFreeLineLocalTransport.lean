@@ -153,7 +153,7 @@ theorem verticalAncestor_two_block
     change Signals.verticalInterior?
       (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
       (quadrantAt targetX targetY) ≠ none
-    simpa only [parent] using interior
+    simpa only [parent, iterateRefine] using interior
   rcases verticalCheck_sound checked targetX htargetX localInterior with
     ⟨sourceX, hsourceX, coordinate, sourceInterior⟩
   refine ⟨sourceX, hsourceX, ?_, ?_⟩
@@ -192,7 +192,7 @@ theorem horizontalAncestor_two_block
     change Signals.horizontalInterior?
       (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
       (quadrantAt targetX targetY) ≠ none
-    simpa only [parent] using interior
+    simpa only [parent, iterateRefine] using interior
   rcases horizontalCheck_sound checked targetY htargetY localInterior with
     ⟨sourceY, hsourceY, coordinate, sourceInterior⟩
   refine ⟨sourceY, hsourceY, ?_, ?_⟩
@@ -202,6 +202,112 @@ theorem horizontalAncestor_two_block
     rw [quadrantAt_old_block blockX blockY sourceX sourceY
       hsourceX hsourceY]
     exact sourceInterior
+
+/-- A checked north-exit ancestor transports with both endpoint witnesses. -/
+theorem verticalNorthAncestor_two_block
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    (sourceY targetY targetX : Nat)
+    (hsourceY : sourceY < 2) (htargetY : targetY < 8)
+    (htargetX : targetX < 8)
+    (checked : verticalNorthCheck sourceY targetY (grid blockX blockY) = true)
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid)
+        (8 * blockX + targetX) (8 * blockY + targetY))
+      (quadrantAt (8 * blockX + targetX) (8 * blockY + targetY)) ≠ none) :
+    ∃ sourceX, sourceX < 2 ∧
+      sparseCoordinate (2 * blockX + sourceX) = 8 * blockX + targetX ∧
+      Signals.verticalInterior?
+        (componentAt grid
+          (2 * blockX + sourceX) (2 * blockY + sourceY))
+        (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none ∧
+      portPresent grid
+        ⟨2 * blockX + sourceX, 2 * blockY + sourceY, .north⟩ = true ∧
+      portPresent (iterateRefine 2 grid)
+        ⟨8 * blockX + targetX, 8 * blockY + targetY, .north⟩ = true := by
+  let parent := grid blockX blockY
+  have localInterior : Signals.verticalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none := by
+    rw [componentAt_two_block grid 0 blockX blockY targetX targetY
+      htargetX htargetY] at interior
+    rw [quadrantAt_block] at interior
+    rw [show iterateRefine 0 grid = grid by rfl] at interior
+    change Signals.verticalInterior?
+      (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none
+    simpa only [parent] using interior
+  rcases verticalNorthCheck_sound checked targetX htargetX localInterior with
+    ⟨sourceX, hsourceX, coordinate, sourceInterior, oldLive, targetLive⟩
+  refine ⟨sourceX, hsourceX, ?_, ?_, ?_, ?_⟩
+  · rw [sparseCoordinate_two_block blockX sourceX hsourceX, coordinate]
+  · change Signals.verticalInterior?
+      (componentAt (iterateRefine 0 grid)
+        (2 * blockX + sourceX) (2 * blockY + sourceY))
+      (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none
+    rw [componentAt_old_block grid 0 blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    rw [quadrantAt_old_block blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    exact sourceInterior
+  · rw [portPresent_old_block grid blockX blockY
+      ⟨sourceX, sourceY, .north⟩ hsourceX hsourceY] at oldLive
+    simpa only [translatePort] using oldLive
+  · rw [portPresent_two_block grid blockX blockY
+      ⟨targetX, targetY, .north⟩ htargetX htargetY] at targetLive
+    simpa only [translatePort] using targetLive
+
+/-- A checked east-exit ancestor transports with both endpoint witnesses. -/
+theorem horizontalEastAncestor_two_block
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    (sourceX targetX targetY : Nat)
+    (hsourceX : sourceX < 2) (htargetX : targetX < 8)
+    (htargetY : targetY < 8)
+    (checked : horizontalEastCheck sourceX targetX (grid blockX blockY) = true)
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid)
+        (8 * blockX + targetX) (8 * blockY + targetY))
+      (quadrantAt (8 * blockX + targetX) (8 * blockY + targetY)) ≠ none) :
+    ∃ sourceY, sourceY < 2 ∧
+      sparseCoordinate (2 * blockY + sourceY) = 8 * blockY + targetY ∧
+      Signals.horizontalInterior?
+        (componentAt grid
+          (2 * blockX + sourceX) (2 * blockY + sourceY))
+        (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none ∧
+      portPresent grid
+        ⟨2 * blockX + sourceX, 2 * blockY + sourceY, .east⟩ = true ∧
+      portPresent (iterateRefine 2 grid)
+        ⟨8 * blockX + targetX, 8 * blockY + targetY, .east⟩ = true := by
+  let parent := grid blockX blockY
+  have localInterior : Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none := by
+    rw [componentAt_two_block grid 0 blockX blockY targetX targetY
+      htargetX htargetY] at interior
+    rw [quadrantAt_block] at interior
+    rw [show iterateRefine 0 grid = grid by rfl] at interior
+    change Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 (fun _ _ => parent)) targetX targetY)
+      (quadrantAt targetX targetY) ≠ none
+    simpa only [parent] using interior
+  rcases horizontalEastCheck_sound checked targetY htargetY localInterior with
+    ⟨sourceY, hsourceY, coordinate, sourceInterior, oldLive, targetLive⟩
+  refine ⟨sourceY, hsourceY, ?_, ?_, ?_, ?_⟩
+  · rw [sparseCoordinate_two_block blockY sourceY hsourceY, coordinate]
+  · change Signals.horizontalInterior?
+      (componentAt (iterateRefine 0 grid)
+        (2 * blockX + sourceX) (2 * blockY + sourceY))
+      (quadrantAt (2 * blockX + sourceX) (2 * blockY + sourceY)) ≠ none
+    rw [componentAt_old_block grid 0 blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    rw [quadrantAt_old_block blockX blockY sourceX sourceY
+      hsourceX hsourceY]
+    exact sourceInterior
+  · rw [portPresent_old_block grid blockX blockY
+      ⟨sourceX, sourceY, .east⟩ hsourceX hsourceY] at oldLive
+    simpa only [translatePort] using oldLive
+  · rw [portPresent_two_block grid blockX blockY
+      ⟨targetX, targetY, .east⟩ htargetX htargetY] at targetLive
+    simpa only [translatePort] using targetLive
 
 end SparseFreeLineLocalTransport
 end Closed104

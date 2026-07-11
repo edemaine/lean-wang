@@ -897,6 +897,110 @@ theorem horizontalProjectionAt_refineExit
   exact projectsTo_refineEast previous oldSouth oldNorth oldInterior
     oldEastLive (by rw [targetCoordinate]; exact refinedEastLive)
 
+/-- Per-macrocell endpoint checks give exact ancestors on a north exit row. -/
+theorem verticalExitAncestors_of_checks
+    {grid : Nat → Nat → Index} {oldRow : Nat}
+    (hodd : oldRow % 2 = 1)
+    (checks : ∀ blockX,
+      verticalNorthCheck 1 7 (grid blockX (oldRow / 2)) = true) :
+    VerticalExitAncestors grid oldRow (exitCoordinate oldRow) := by
+  intro x interior
+  let blockX := x / 8
+  let localX := x % 8
+  let blockY := oldRow / 2
+  have hlocalX : localX < 8 := Nat.mod_lt _ (by decide)
+  have hx : 8 * blockX + localX = x := by
+    have := Nat.mod_add_div x 8
+    dsimp [blockX, localX]
+    omega
+  have holdRow : 2 * blockY + 1 = oldRow := by
+    have := Nat.mod_add_div oldRow 2
+    dsimp [blockY]
+    omega
+  have hfineRow : 8 * blockY + 7 = exitCoordinate oldRow := by
+    simp [exitCoordinate, macroOrigin, localCoordinate, blockY, hodd]
+  have localInterior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid)
+        (8 * blockX + localX) (8 * blockY + 7))
+      (quadrantAt (8 * blockX + localX) (8 * blockY + 7)) ≠ none := by
+    simpa [hx, hfineRow] using interior
+  rcases SparseFreeLineLocalTransport.verticalNorthAncestor_two_block
+      grid blockX blockY 1 7 localX (by decide) (by decide) hlocalX
+      (checks blockX) localInterior with
+    ⟨sourceX, hsourceX, sourceCoordinate, sourceInterior,
+      oldLive, targetLive⟩
+  refine ⟨2 * blockX + sourceX, ?_, ?_, ?_, ?_⟩
+  · simpa [hx] using sourceCoordinate
+  · simpa [holdRow] using sourceInterior
+  · simpa [holdRow] using oldLive
+  · simpa [hx, hfineRow] using targetLive
+
+/-- Per-macrocell endpoint checks give exact ancestors on an east exit column. -/
+theorem horizontalExitAncestors_of_checks
+    {grid : Nat → Nat → Index} {oldColumn : Nat}
+    (hodd : oldColumn % 2 = 1)
+    (checks : ∀ blockY,
+      horizontalEastCheck 1 7 (grid (oldColumn / 2) blockY) = true) :
+    HorizontalExitAncestors grid oldColumn (exitCoordinate oldColumn) := by
+  intro y interior
+  let blockX := oldColumn / 2
+  let blockY := y / 8
+  let localY := y % 8
+  have hlocalY : localY < 8 := Nat.mod_lt _ (by decide)
+  have hy : 8 * blockY + localY = y := by
+    have := Nat.mod_add_div y 8
+    dsimp [blockY, localY]
+    omega
+  have holdColumn : 2 * blockX + 1 = oldColumn := by
+    have := Nat.mod_add_div oldColumn 2
+    dsimp [blockX]
+    omega
+  have hfineColumn : 8 * blockX + 7 = exitCoordinate oldColumn := by
+    simp [exitCoordinate, macroOrigin, localCoordinate, blockX, hodd]
+  have localInterior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid)
+        (8 * blockX + 7) (8 * blockY + localY))
+      (quadrantAt (8 * blockX + 7) (8 * blockY + localY)) ≠ none := by
+    simpa [hy, hfineColumn] using interior
+  rcases SparseFreeLineLocalTransport.horizontalEastAncestor_two_block
+      grid blockX blockY 1 7 localY (by decide) (by decide) hlocalY
+      (checks blockY) localInterior with
+    ⟨sourceY, hsourceY, sourceCoordinate, sourceInterior,
+      oldLive, targetLive⟩
+  refine ⟨2 * blockY + sourceY, ?_, ?_, ?_, ?_⟩
+  · simpa [hy] using sourceCoordinate
+  · simpa [holdColumn] using sourceInterior
+  · simpa [holdColumn] using oldLive
+  · simpa [hy, hfineColumn] using targetLive
+
+/-- Checked upper-row exits instantiate the recursive vertical projection. -/
+theorem verticalProjectionAt_refineExit_of_checks
+    {grid : Nat → Nat → Index} {west east south north oldRow : Nat}
+    (previous : VerticalProjectionAt grid west east south north oldRow)
+    (hodd : oldRow % 2 = 1)
+    (checks : ∀ blockX,
+      verticalNorthCheck 1 7
+        (iterateRefine 2 grid blockX (oldRow / 2)) = true) :
+    VerticalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north)
+      (exitCoordinate oldRow) :=
+  verticalProjectionAt_refineExit previous rfl
+    (verticalExitAncestors_of_checks hodd checks)
+
+/-- Checked right-column exits instantiate the recursive horizontal projection. -/
+theorem horizontalProjectionAt_refineExit_of_checks
+    {grid : Nat → Nat → Index} {west east south north oldColumn : Nat}
+    (previous : HorizontalProjectionAt grid west east south north oldColumn)
+    (hodd : oldColumn % 2 = 1)
+    (checks : ∀ blockY,
+      horizontalEastCheck 1 7
+        (iterateRefine 2 grid (oldColumn / 2) blockY) = true) :
+    HorizontalProjectionAt (iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north)
+      (exitCoordinate oldColumn) :=
+  horizontalProjectionAt_refineExit previous rfl
+    (horizontalExitAncestors_of_checks hodd checks)
+
 /-- Per-macrocell vertical checks give exact ancestors on a sparse row. -/
 theorem verticalSparseAncestors_of_checks
     {grid : Nat → Nat → Index} {oldRow : Nat}

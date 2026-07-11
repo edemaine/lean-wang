@@ -88,11 +88,47 @@ def horizontalAncestorAt (sourceX targetX : Nat) (parent : Index)
           (componentAt (coarseGrid parent) sourceX sourceY)
           (quadrantAt sourceX sourceY)).isSome
 
+/-- A target vertical segment is the live north exit of a sparse old segment. -/
+def verticalNorthAncestorAt (sourceY targetY : Nat) (parent : Index)
+    (targetX : Nat) : Bool :=
+  !(Signals.verticalInterior? (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY)).isSome ||
+    (List.range 2).any fun sourceX =>
+      decide (sparseCoordinate sourceX = targetX) &&
+        (Signals.verticalInterior?
+          (componentAt (coarseGrid parent) sourceX sourceY)
+          (quadrantAt sourceX sourceY)).isSome &&
+        decide (portPresent (coarseGrid parent)
+          ⟨sourceX, sourceY, .north⟩ = true) &&
+        decide (portPresent (fineGrid parent)
+          ⟨targetX, targetY, .north⟩ = true)
+
+/-- A target horizontal segment is the live east exit of a sparse old segment. -/
+def horizontalEastAncestorAt (sourceX targetX : Nat) (parent : Index)
+    (targetY : Nat) : Bool :=
+  !(Signals.horizontalInterior? (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY)).isSome ||
+    (List.range 2).any fun sourceY =>
+      decide (sparseCoordinate sourceY = targetY) &&
+        (Signals.horizontalInterior?
+          (componentAt (coarseGrid parent) sourceX sourceY)
+          (quadrantAt sourceX sourceY)).isSome &&
+        decide (portPresent (coarseGrid parent)
+          ⟨sourceX, sourceY, .east⟩ = true) &&
+        decide (portPresent (fineGrid parent)
+          ⟨targetX, targetY, .east⟩ = true)
+
 def verticalCheck (sourceY targetY : Nat) (parent : Index) : Bool :=
   (List.range 8).all (verticalAncestorAt sourceY targetY parent)
 
 def horizontalCheck (sourceX targetX : Nat) (parent : Index) : Bool :=
   (List.range 8).all (horizontalAncestorAt sourceX targetX parent)
+
+def verticalNorthCheck (sourceY targetY : Nat) (parent : Index) : Bool :=
+  (List.range 8).all (verticalNorthAncestorAt sourceY targetY parent)
+
+def horizontalEastCheck (sourceX targetX : Nat) (parent : Index) : Bool :=
+  (List.range 8).all (horizontalEastAncestorAt sourceX targetX parent)
 
 set_option linter.flexible false in
 theorem verticalCheck_sound {sourceY targetY : Nat} {parent : Index}
@@ -144,6 +180,74 @@ theorem horizontalCheck_sound {sourceX targetX : Nat} {parent : Index}
   exact ⟨sourceY, hsource, coordinate,
     Option.isSome_iff_ne_none.mp source⟩
 
+set_option linter.flexible false in
+theorem verticalNorthCheck_sound {sourceY targetY : Nat} {parent : Index}
+    (checked : verticalNorthCheck sourceY targetY parent = true) :
+    ∀ targetX, targetX < 8 →
+      Signals.verticalInterior?
+        (componentAt (fineGrid parent) targetX targetY)
+        (quadrantAt targetX targetY) ≠ none →
+      ∃ sourceX, sourceX < 2 ∧ sparseCoordinate sourceX = targetX ∧
+        Signals.verticalInterior?
+          (componentAt (coarseGrid parent) sourceX sourceY)
+          (quadrantAt sourceX sourceY) ≠ none ∧
+        portPresent (coarseGrid parent) ⟨sourceX, sourceY, .north⟩ = true ∧
+        portPresent (fineGrid parent) ⟨targetX, targetY, .north⟩ = true := by
+  simp only [verticalNorthCheck, List.all_eq_true, List.mem_range] at checked
+  intro targetX htarget interior
+  have covered := checked targetX htarget
+  have required : (Signals.verticalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [verticalNorthAncestorAt, required, Bool.not_true, Bool.false_or,
+    List.any_eq_true, List.mem_range] at covered
+  rcases covered with ⟨sourceX, hsource, hall⟩
+  have clean : ((sparseCoordinate sourceX = targetX ∧
+      (Signals.verticalInterior?
+        (componentAt (coarseGrid parent) sourceX sourceY)
+        (quadrantAt sourceX sourceY)).isSome = true) ∧
+      portPresent (coarseGrid parent) ⟨sourceX, sourceY, .north⟩ = true) ∧
+      portPresent (fineGrid parent) ⟨targetX, targetY, .north⟩ = true := by
+    simpa only [Bool.and_eq_true, decide_eq_true_eq] using hall
+  rcases clean with ⟨⟨⟨coordinate, source⟩, oldLive⟩, targetLive⟩
+  exact ⟨sourceX, hsource, coordinate,
+    Option.isSome_iff_ne_none.mp source, oldLive, targetLive⟩
+
+set_option linter.flexible false in
+theorem horizontalEastCheck_sound {sourceX targetX : Nat} {parent : Index}
+    (checked : horizontalEastCheck sourceX targetX parent = true) :
+    ∀ targetY, targetY < 8 →
+      Signals.horizontalInterior?
+        (componentAt (fineGrid parent) targetX targetY)
+        (quadrantAt targetX targetY) ≠ none →
+      ∃ sourceY, sourceY < 2 ∧ sparseCoordinate sourceY = targetY ∧
+        Signals.horizontalInterior?
+          (componentAt (coarseGrid parent) sourceX sourceY)
+          (quadrantAt sourceX sourceY) ≠ none ∧
+        portPresent (coarseGrid parent) ⟨sourceX, sourceY, .east⟩ = true ∧
+        portPresent (fineGrid parent) ⟨targetX, targetY, .east⟩ = true := by
+  simp only [horizontalEastCheck, List.all_eq_true, List.mem_range] at checked
+  intro targetY htarget interior
+  have covered := checked targetY htarget
+  have required : (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX targetY)
+      (quadrantAt targetX targetY)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [horizontalEastAncestorAt, required, Bool.not_true, Bool.false_or,
+    List.any_eq_true, List.mem_range] at covered
+  rcases covered with ⟨sourceY, hsource, hall⟩
+  have clean : ((sparseCoordinate sourceY = targetY ∧
+      (Signals.horizontalInterior?
+        (componentAt (coarseGrid parent) sourceX sourceY)
+        (quadrantAt sourceX sourceY)).isSome = true) ∧
+      portPresent (coarseGrid parent) ⟨sourceX, sourceY, .east⟩ = true) ∧
+      portPresent (fineGrid parent) ⟨targetX, targetY, .east⟩ = true := by
+    simpa only [Bool.and_eq_true, decide_eq_true_eq] using hall
+  rcases clean with ⟨⟨⟨coordinate, source⟩, oldLive⟩, targetLive⟩
+  exact ⟨sourceY, hsource, coordinate,
+    Option.isSome_iff_ne_none.mp source, oldLive, targetLive⟩
+
 set_option linter.style.nativeDecide false in
 /-- Lower-row symbols preserve source row `0` at the sparse target row. -/
 theorem lowerRow_sparse_zero :
@@ -169,6 +273,12 @@ theorem upperRow_exit :
   native_decide
 
 set_option linter.style.nativeDecide false in
+/-- Upper-row exits retain both the old and refined north endpoints. -/
+theorem upperRow_northExit :
+    ∀ parent ∈ rowChildren 1, verticalNorthCheck 1 7 parent = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
 /-- Left-column symbols preserve source column `0` at the sparse target column. -/
 theorem leftColumn_sparse_zero :
     ∀ parent ∈ columnChildren 0, horizontalCheck 0 0 parent = true := by
@@ -190,6 +300,12 @@ set_option linter.style.nativeDecide false in
 /-- Right-column symbols project source column `1` to the macrocell exit column. -/
 theorem rightColumn_exit :
     ∀ parent ∈ columnChildren 1, horizontalCheck 1 7 parent = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+/-- Right-column exits retain both the old and refined east endpoints. -/
+theorem rightColumn_eastExit :
+    ∀ parent ∈ columnChildren 1, horizontalEastCheck 1 7 parent = true := by
   native_decide
 
 set_option linter.style.nativeDecide false in
