@@ -196,13 +196,13 @@ set_option linter.style.nativeDecide false in
 /-- The four nontrivial local route classes have bounded even paths. -/
 theorem boundedRouteClasses :
     (∀ parent ∈ rowChildren 0,
-      BorderCoverageLocalAudit.rowCheck parent .retained 1 2 = true) ∧
+      BorderCoverageLocalAudit.alignedRowCheck parent 1 2 = true) ∧
     (∀ parent ∈ rowChildren 1,
-      BorderCoverageLocalAudit.rowCheck parent .retained 1 7 = true) ∧
+      BorderCoverageLocalAudit.alignedRowCheck parent 1 7 = true) ∧
     (∀ parent ∈ columnChildren 0,
-      BorderCoverageLocalAudit.columnCheck parent .retained 1 2 = true) ∧
+      BorderCoverageLocalAudit.alignedColumnCheck parent 1 2 = true) ∧
     (∀ parent ∈ columnChildren 1,
-      BorderCoverageLocalAudit.columnCheck parent .retained 1 7 = true) := by
+      BorderCoverageLocalAudit.alignedColumnCheck parent 1 7 = true) := by
   native_decide
 
 end SparseFreeLineLocalStates

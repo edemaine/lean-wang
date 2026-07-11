@@ -20,7 +20,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineLocalTransport
 
-open RedCycles RedShadeGraphRefinement Signals.FreeCellLocal
+open RedCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphSearchSoundness
+  RedShadeGraphTranslation RefinementTranslation Signals.FreeCellLocal
   Signals.FreeCellEmbedding SparseFreeLineLocalStates
 
 set_option maxRecDepth 20000
@@ -51,6 +52,25 @@ theorem quadrantAt_old_block (blockX blockY localX localY : Nat)
   have hyCases : localY = 0 ∨ localY = 1 := by omega
   rcases hxCases with rfl | rfl <;> rcases hyCases with rfl | rfl <;>
     simp [quadrantAt]
+
+/-- A bounded local path translates into the corresponding arbitrary macrocell. -/
+theorem boundedPath_two_block
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {first target : Port} {parity : Bool}
+    (path : BoundedPath (fineGrid (grid blockX blockY)) 8 8
+      first target parity) :
+    Path (iterateRefine 2 grid)
+      (translatePort first (8 * blockX) (8 * blockY))
+      (translatePort target (8 * blockX) (8 * blockY)) parity := by
+  have componentsEq : ∀ x y, x < 8 → y < 8 →
+      componentAt (fineGrid (grid blockX blockY)) x y =
+        componentAt (iterateRefine 2 (shiftGrid grid blockX blockY)) x y := by
+    intro x y hx hy
+    exact (componentAt_shift_eq_constant 2 grid blockX blockY x y hx hy).symm
+  have shifted :=
+    (BoundedPath.congr_of_component_eq componentsEq path).path
+  simpa using path_translate (depth := 2) (grid := grid)
+    (blockX := blockX) (blockY := blockY) shifted
 
 /-- A checked local vertical ancestor becomes an old-grid sparse ancestor. -/
 theorem verticalAncestor_two_block

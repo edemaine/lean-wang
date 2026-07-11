@@ -63,6 +63,142 @@ def columnStarts (parent : Index) (kind : SourceKind)
   weightedSparseStarts parent kind
     (localCoordinates.flatMap fun y => columnSourcePorts kind sourceX y)
 
+theorem mem_rowStarts_retained
+    {parent : Index} {sourceY : Nat} {start : WeightedStart}
+    (hstart : start ∈ rowStarts parent .retained sourceY) :
+    ∃ sourceX, sourceX < 2 ∧ start.parity = true ∧
+      ((start.port = sparsePort ⟨sourceX, sourceY, .south⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .south⟩ = true) ∨
+        (start.port = sparsePort ⟨sourceX, sourceY, .north⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .north⟩ = true)) := by
+  rw [rowStarts, weightedSparseStarts, List.mem_map] at hstart
+  rcases hstart with ⟨port, hport, rfl⟩
+  simp only [List.mem_filter] at hport
+  rcases hport with ⟨hport, hpresent⟩
+  simp only [localCoordinates, List.flatMap_cons, List.flatMap_nil,
+    List.append_nil, rowSourcePorts, List.mem_append, List.mem_cons,
+    List.not_mem_nil, or_false] at hport
+  rcases hport with (rfl | rfl) | rfl | rfl
+  · exact ⟨0, by decide, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨0, by decide, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+  · exact ⟨1, by decide, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨1, by decide, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+
+theorem mem_columnStarts_retained
+    {parent : Index} {sourceX : Nat} {start : WeightedStart}
+    (hstart : start ∈ columnStarts parent .retained sourceX) :
+    ∃ sourceY, sourceY < 2 ∧ start.parity = true ∧
+      ((start.port = sparsePort ⟨sourceX, sourceY, .west⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .west⟩ = true) ∨
+        (start.port = sparsePort ⟨sourceX, sourceY, .east⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .east⟩ = true)) := by
+  rw [columnStarts, weightedSparseStarts, List.mem_map] at hstart
+  rcases hstart with ⟨port, hport, rfl⟩
+  simp only [List.mem_filter] at hport
+  rcases hport with ⟨hport, hpresent⟩
+  simp only [localCoordinates, List.flatMap_cons, List.flatMap_nil,
+    List.append_nil, columnSourcePorts, List.mem_append, List.mem_cons,
+    List.not_mem_nil, or_false] at hport
+  rcases hport with (rfl | rfl) | rfl | rfl
+  · exact ⟨0, by decide, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨0, by decide, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+  · exact ⟨1, by decide, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨1, by decide, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+
+theorem rowStarts_retained_one_inBounds (parent : Index) :
+    ∀ start ∈ rowStarts parent .retained 1, PortInBounds start.port 8 8 := by
+  intro start hstart
+  rcases mem_rowStarts_retained hstart with
+    ⟨sourceX, hsourceX, _, (⟨hport, _⟩ | ⟨hport, _⟩)⟩ <;>
+    rw [hport] <;>
+    simp [PortInBounds, sparsePort, sparseCoordinate, macroOrigin,
+      localCoordinate] <;> omega
+
+theorem columnStarts_retained_one_inBounds (parent : Index) :
+    ∀ start ∈ columnStarts parent .retained 1, PortInBounds start.port 8 8 := by
+  intro start hstart
+  rcases mem_columnStarts_retained hstart with
+    ⟨sourceY, hsourceY, _, (⟨hport, _⟩ | ⟨hport, _⟩)⟩ <;>
+    rw [hport] <;>
+    simp [PortInBounds, sparsePort, sparseCoordinate, macroOrigin,
+      localCoordinate] <;> omega
+
+/-- Retained row starts restricted to the old segment at the target `x`. -/
+def alignedRowStarts (parent : Index) (sourceY targetX : Nat) :
+    List WeightedStart :=
+  weightedSparseStarts parent .retained
+    (((List.range 2).filter fun sourceX => sparseCoordinate sourceX = targetX).flatMap
+      fun sourceX => rowSourcePorts .retained sourceX sourceY)
+
+/-- Retained column starts restricted to the old segment at the target `y`. -/
+def alignedColumnStarts (parent : Index) (sourceX targetY : Nat) :
+    List WeightedStart :=
+  weightedSparseStarts parent .retained
+    (((List.range 2).filter fun sourceY => sparseCoordinate sourceY = targetY).flatMap
+      fun sourceY => columnSourcePorts .retained sourceX sourceY)
+
+theorem mem_alignedRowStarts
+    {parent : Index} {sourceY targetX : Nat} {start : WeightedStart}
+    (hstart : start ∈ alignedRowStarts parent sourceY targetX) :
+    ∃ sourceX, sourceX < 2 ∧ sparseCoordinate sourceX = targetX ∧
+      start.parity = true ∧
+      ((start.port = sparsePort ⟨sourceX, sourceY, .south⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .south⟩ = true) ∨
+        (start.port = sparsePort ⟨sourceX, sourceY, .north⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .north⟩ = true)) := by
+  rw [alignedRowStarts, weightedSparseStarts, List.mem_map] at hstart
+  rcases hstart with ⟨port, hport, rfl⟩
+  simp only [List.mem_filter] at hport
+  rcases hport with ⟨hport, hpresent⟩
+  rw [List.mem_flatMap] at hport
+  rcases hport with ⟨sourceX, hsourceX, hport⟩
+  simp only [List.mem_filter, List.mem_range] at hsourceX
+  have hcoordinate := decide_eq_true_eq.mp hsourceX.2
+  simp only [rowSourcePorts, List.mem_cons, List.not_mem_nil, or_false] at hport
+  rcases hport with rfl | rfl
+  · exact ⟨sourceX, hsourceX.1, hcoordinate, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨sourceX, hsourceX.1, hcoordinate, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+
+theorem mem_alignedColumnStarts
+    {parent : Index} {sourceX targetY : Nat} {start : WeightedStart}
+    (hstart : start ∈ alignedColumnStarts parent sourceX targetY) :
+    ∃ sourceY, sourceY < 2 ∧ sparseCoordinate sourceY = targetY ∧
+      start.parity = true ∧
+      ((start.port = sparsePort ⟨sourceX, sourceY, .west⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .west⟩ = true) ∨
+        (start.port = sparsePort ⟨sourceX, sourceY, .east⟩ ∧
+          portPresent (coarseGrid parent) ⟨sourceX, sourceY, .east⟩ = true)) := by
+  rw [alignedColumnStarts, weightedSparseStarts, List.mem_map] at hstart
+  rcases hstart with ⟨port, hport, rfl⟩
+  simp only [List.mem_filter] at hport
+  rcases hport with ⟨hport, hpresent⟩
+  rw [List.mem_flatMap] at hport
+  rcases hport with ⟨sourceY, hsourceY, hport⟩
+  simp only [List.mem_filter, List.mem_range] at hsourceY
+  have hcoordinate := decide_eq_true_eq.mp hsourceY.2
+  simp only [columnSourcePorts, List.mem_cons, List.not_mem_nil, or_false] at hport
+  rcases hport with rfl | rfl
+  · exact ⟨sourceY, hsourceY.1, hcoordinate, rfl, Or.inl ⟨rfl, hpresent⟩⟩
+  · exact ⟨sourceY, hsourceY.1, hcoordinate, rfl, Or.inr ⟨rfl, hpresent⟩⟩
+
+theorem alignedRowStarts_one_inBounds (parent : Index) (targetX : Nat) :
+    ∀ start ∈ alignedRowStarts parent 1 targetX, PortInBounds start.port 8 8 := by
+  intro start hstart
+  rcases mem_alignedRowStarts hstart with
+    ⟨sourceX, hsourceX, _, _, (⟨hport, _⟩ | ⟨hport, _⟩)⟩ <;>
+    rw [hport] <;>
+    simp [PortInBounds, sparsePort, sparseCoordinate, macroOrigin,
+      localCoordinate] <;> omega
+
+theorem alignedColumnStarts_one_inBounds (parent : Index) (targetY : Nat) :
+    ∀ start ∈ alignedColumnStarts parent 1 targetY, PortInBounds start.port 8 8 := by
+  intro start hstart
+  rcases mem_alignedColumnStarts hstart with
+    ⟨sourceY, hsourceY, _, _, (⟨hport, _⟩ | ⟨hport, _⟩)⟩ <;>
+    rw [hport] <;>
+    simp [PortInBounds, sparsePort, sparseCoordinate, macroOrigin,
+      localCoordinate] <;> omega
+
 def reached (parent : Index) (starts : List WeightedStart)
     (target : Port) : Bool :=
   let nodes := exploreFastWeighted (fineGrid parent) 8 8 1000 starts
@@ -130,6 +266,24 @@ def columnCheck (parent : Index) (kind : SourceKind)
       reached parent starts ⟨targetX, y, .west⟩ ||
       reached parent starts ⟨targetX, y, .east⟩
 
+def alignedRowCheck (parent : Index) (sourceY targetY : Nat) : Bool :=
+  (List.range 8).all fun x =>
+    let required := (Signals.verticalInterior?
+      (componentAt (fineGrid parent) x targetY)
+      (quadrantAt x targetY)).isSome
+    !required ||
+      reached parent (alignedRowStarts parent sourceY x) ⟨x, targetY, .south⟩ ||
+      reached parent (alignedRowStarts parent sourceY x) ⟨x, targetY, .north⟩
+
+def alignedColumnCheck (parent : Index) (sourceX targetX : Nat) : Bool :=
+  (List.range 8).all fun y =>
+    let required := (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX y)
+      (quadrantAt targetX y)).isSome
+    !required ||
+      reached parent (alignedColumnStarts parent sourceX y) ⟨targetX, y, .west⟩ ||
+      reached parent (alignedColumnStarts parent sourceX y) ⟨targetX, y, .east⟩
+
 set_option linter.flexible false in
 theorem rowCheck_sound
     {parent : Index} {kind : SourceKind} {sourceY targetY : Nat}
@@ -179,6 +333,114 @@ theorem columnCheck_sound
   rcases covered with covered | covered
   · exact Or.inl (reached_sound covered)
   · exact Or.inr (reached_sound covered)
+
+set_option linter.flexible false in
+theorem retainedRowCheck_bounded_sound
+    {parent : Index} {targetY : Nat}
+    (checked : rowCheck parent .retained 1 targetY = true) :
+    ∀ x, x < 8 →
+      Signals.verticalInterior?
+        (componentAt (fineGrid parent) x targetY)
+        (quadrantAt x targetY) ≠ none →
+      BoundedLocalRoute parent (rowStarts parent .retained 1)
+          ⟨x, targetY, .south⟩ ∨
+        BoundedLocalRoute parent (rowStarts parent .retained 1)
+          ⟨x, targetY, .north⟩ := by
+  simp only [rowCheck, List.all_eq_true, List.mem_range] at checked
+  intro x hx interior
+  have covered := checked x hx
+  have required : (Signals.verticalInterior?
+      (componentAt (fineGrid parent) x targetY)
+      (quadrantAt x targetY)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or,
+    Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_bounded_sound
+      (rowStarts_retained_one_inBounds parent) covered)
+  · exact Or.inr (reached_bounded_sound
+      (rowStarts_retained_one_inBounds parent) covered)
+
+set_option linter.flexible false in
+theorem retainedColumnCheck_bounded_sound
+    {parent : Index} {targetX : Nat}
+    (checked : columnCheck parent .retained 1 targetX = true) :
+    ∀ y, y < 8 →
+      Signals.horizontalInterior?
+        (componentAt (fineGrid parent) targetX y)
+        (quadrantAt targetX y) ≠ none →
+      BoundedLocalRoute parent (columnStarts parent .retained 1)
+          ⟨targetX, y, .west⟩ ∨
+        BoundedLocalRoute parent (columnStarts parent .retained 1)
+          ⟨targetX, y, .east⟩ := by
+  simp only [columnCheck, List.all_eq_true, List.mem_range] at checked
+  intro y hy interior
+  have covered := checked y hy
+  have required : (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX y)
+      (quadrantAt targetX y)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or,
+    Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_bounded_sound
+      (columnStarts_retained_one_inBounds parent) covered)
+  · exact Or.inr (reached_bounded_sound
+      (columnStarts_retained_one_inBounds parent) covered)
+
+set_option linter.flexible false in
+theorem alignedRowCheck_bounded_sound
+    {parent : Index} {targetY : Nat}
+    (checked : alignedRowCheck parent 1 targetY = true) :
+    ∀ x, x < 8 →
+      Signals.verticalInterior?
+        (componentAt (fineGrid parent) x targetY)
+        (quadrantAt x targetY) ≠ none →
+      BoundedLocalRoute parent (alignedRowStarts parent 1 x)
+          ⟨x, targetY, .south⟩ ∨
+        BoundedLocalRoute parent (alignedRowStarts parent 1 x)
+          ⟨x, targetY, .north⟩ := by
+  simp only [alignedRowCheck, List.all_eq_true, List.mem_range] at checked
+  intro x hx interior
+  have covered := checked x hx
+  have required : (Signals.verticalInterior?
+      (componentAt (fineGrid parent) x targetY)
+      (quadrantAt x targetY)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or,
+    Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_bounded_sound
+      (alignedRowStarts_one_inBounds parent x) covered)
+  · exact Or.inr (reached_bounded_sound
+      (alignedRowStarts_one_inBounds parent x) covered)
+
+set_option linter.flexible false in
+theorem alignedColumnCheck_bounded_sound
+    {parent : Index} {targetX : Nat}
+    (checked : alignedColumnCheck parent 1 targetX = true) :
+    ∀ y, y < 8 →
+      Signals.horizontalInterior?
+        (componentAt (fineGrid parent) targetX y)
+        (quadrantAt targetX y) ≠ none →
+      BoundedLocalRoute parent (alignedColumnStarts parent 1 y)
+          ⟨targetX, y, .west⟩ ∨
+        BoundedLocalRoute parent (alignedColumnStarts parent 1 y)
+          ⟨targetX, y, .east⟩ := by
+  simp only [alignedColumnCheck, List.all_eq_true, List.mem_range] at checked
+  intro y hy interior
+  have covered := checked y hy
+  have required : (Signals.horizontalInterior?
+      (componentAt (fineGrid parent) targetX y)
+      (quadrantAt targetX y)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or,
+    Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reached_bounded_sound
+      (alignedColumnStarts_one_inBounds parent y) covered)
+  · exact Or.inr (reached_bounded_sound
+      (alignedColumnStarts_one_inBounds parent y) covered)
 
 /-- Whether a coarse row or column contributes no source, a board side, or a retained free line. -/
 inductive LineKind where
