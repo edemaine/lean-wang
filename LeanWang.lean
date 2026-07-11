@@ -4,6 +4,7 @@ import LeanWang.Compactness
 import LeanWang.Machine
 import LeanWang.MachineInput
 import LeanWang.MachineInputHistory
+import LeanWang.MachineInputTiles
 import LeanWang.MachineTiles
 import LeanWang.PostMachine
 import LeanWang.PartrecToTM2Support

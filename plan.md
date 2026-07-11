@@ -59,11 +59,14 @@ The retained fixed-universal route still uses a generated write/rewind prelude
 to place the varying input on an otherwise blank machine tape.  A cleaner
 replacement is now being built: `MachineInput` starts the same fixed machine
 directly on a finite input word, and `MachineInputHistory` proves that its
-space-time diagram uses the existing finite local-history tile language.  The
-remaining machine-side step is to force that finite word with a position-tagged
-bottom Wang row, prove the resulting seeded tiling equivalence, and switch
-`UniversalFoldedReduction` to that interface.  Once switched, the old folded
-initializer modules can be removed from the final dependency graph.
+space-time diagram uses the existing finite local-history tile language.
+`MachineInputTiles` now forces that word with a finite position-tagged bottom
+row followed by one self-looping blank-tail tile, and proves that every
+nonhalting run gives a seeded quarter-plane tiling.  The remaining machine-side
+steps are the converse decoding theorem, the fixed folded-machine input bridge,
+and switching `UniversalFoldedReduction` to this interface.  Once switched,
+the old folded initializer modules can be removed from the final dependency
+graph.
 
 ## Completed general tiling infrastructure
 
