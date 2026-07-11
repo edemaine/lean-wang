@@ -288,7 +288,9 @@ position-row obligation in the final theorem.
   or opposition from its accumulated crossing parity, giving the recursive
   geometry proof a compact certificate language. A Boolean move-list checker
   is proved sound for this graph, allowing native finite geometry searches to
-  return ordinary proposition-level path proofs.
+  return ordinary proposition-level path proofs. Link and path certificates
+  also translate from a refined local block to its exact absolute coordinates
+  in an arbitrary refined grid, preserving crossing parity.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
