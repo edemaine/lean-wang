@@ -31,7 +31,7 @@ set_option maxRecDepth 100000
 
 def RawReached (grid : Nat → Nat → Index) (candidates : List Candidate)
     (width height fuel : Nat) (target : Port) : Prop :=
-  ∃ node ∈ exploreFastWeighted (iterateRefine 2 grid)
+  ∃ node ∈ exploreFastWeightedReach (iterateRefine 2 grid)
       width height fuel (candidates.map Candidate.weightedStart),
     node.parity = true ∧ node.current = target ∧
       portPresent (iterateRefine 2 grid) target = true
@@ -105,7 +105,7 @@ theorem rawReached_iff_of_congr
       RawReached second secondCandidates width height fuel target := by
   unfold RawReached
   rw [candidates,
-    BorderGeometry.exploreFastWeighted_congr sameFine width height fuel,
+    BorderGeometry.exploreFastWeightedReach_congr sameFine width height fuel,
     BorderGeometry.portPresent_congr sameFine target]
 
 theorem rawCovers_of_congr

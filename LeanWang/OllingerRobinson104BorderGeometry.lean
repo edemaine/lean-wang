@@ -161,6 +161,48 @@ theorem exploreFastWeighted_congr
   unfold exploreFastWeighted
   exact exploreFastAux_congr same width height fuel _ _ _
 
+theorem advanceReach_congr
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (width height : Nat) (node : ReachNode) (move : CertificateMove) :
+    advanceReach first width height node move =
+      advanceReach second width height node move := by
+  unfold advanceReach
+  rw [moveValid_congr same]
+
+theorem nextReachNodes_congr
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (width height : Nat) (node : ReachNode) :
+    nextReachNodes first width height node =
+      nextReachNodes second width height node := by
+  unfold nextReachNodes
+  apply List.filterMap_congr
+  intro move _
+  exact advanceReach_congr same width height node move
+
+theorem exploreWeightedReachAux_congr
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (width height fuel : Nat) (stack : List ReachNode) (visited : Array Bool)
+    (found : List ReachNode) :
+    exploreWeightedReachAux first width height fuel stack visited found =
+      exploreWeightedReachAux second width height fuel stack visited found := by
+  induction fuel generalizing stack visited found with
+  | zero => rfl
+  | succ fuel ih =>
+      cases stack with
+      | nil => rfl
+      | cons node stack =>
+          simp only [exploreWeightedReachAux]
+          rw [nextReachNodes_congr same]
+          exact ih _ _ _
+
+theorem exploreFastWeightedReach_congr
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (width height fuel : Nat) (starts : List WeightedStart) :
+    exploreFastWeightedReach first width height fuel starts =
+      exploreFastWeightedReach second width height fuel starts := by
+  unfold exploreFastWeightedReach
+  exact exploreWeightedReachAux_congr same width height fuel _ _ _
+
 theorem rowPorts_congr
     {first second : Nat → Nat → Index} (same : SameComponents first second)
     (west east row : Nat) :

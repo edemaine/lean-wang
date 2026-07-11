@@ -296,11 +296,37 @@ theorem projectsTo_of_familyNode
   projectsTo_of_candidateNode family.candidates family.backed hnode
     hparity hcurrent targetLive
 
+theorem projectsTo_of_candidateReachNode
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (candidates : List Candidate)
+    (backed : ∀ candidate ∈ candidates,
+      Candidate.BackedBy (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) candidate)
+    {width height fuel : Nat} {node : ReachNode} {target : Port}
+    (hnode : node ∈ exploreFastWeightedReach (iterateRefine 2 grid)
+      width height fuel (candidates.map Candidate.weightedStart))
+    (hparity : node.parity = true) (hcurrent : node.current = target)
+    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases exploreFastWeightedReach_sound hnode with
+    ⟨start, hstart, tail⟩
+  rcases List.mem_map.1 hstart with ⟨candidate, hcandidates, rfl⟩
+  rcases backed candidate hcandidates with ⟨source, sourceParity, head⟩
+  refine ⟨{
+    source := source
+    path := ?_
+    targetLive := targetLive
+  }⟩
+  rw [hcurrent] at tail
+  have path := Path.trans head tail
+  simpa [Candidate.weightedStart, sourceParity, hparity] using path
+
 def Family.Reached
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (family : Family grid west east south north)
     (width height fuel : Nat) (target : Port) : Prop :=
-  ∃ node ∈ exploreFastWeighted (iterateRefine 2 grid)
+  ∃ node ∈ exploreFastWeightedReach (iterateRefine 2 grid)
       width height fuel (family.candidates.map Candidate.weightedStart),
     node.parity = true ∧ node.current = target ∧
       portPresent (iterateRefine 2 grid) target = true
@@ -313,7 +339,8 @@ theorem Family.Reached.projectsTo
     Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
       (south := south) (north := north) target) := by
   rcases reached with ⟨node, hnode, hparity, hcurrent, targetLive⟩
-  exact projectsTo_of_familyNode family hnode hparity hcurrent targetLive
+  exact projectsTo_of_candidateReachNode family.candidates family.backed
+    hnode hparity hcurrent targetLive
 
 /-- Weighted coverage of every requested target supplies a pattern projection. -/
 theorem patternProjection_of_familyCoverage

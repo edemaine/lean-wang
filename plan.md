@@ -433,6 +433,13 @@ semantic transition rows, and their step/halting simulation.
   representatives. The remaining quotient work is the unbounded depth
   parameter, to be discharged by a finite periodic audit or an induction on
   the border substitution.
+- Coverage audits now use a lightweight `(port, parity)` flood with a separate
+  soundness proof; executable nodes no longer retain unused reverse path lists.
+  `BorderCoverageAudit.coverageCheck_sound` converts one accepted finite flood
+  into `RawCovers`. Full-board audits remain diagnostic rather than the final
+  proof method: even the first all-state board is too large to serve as a
+  maintainable certificate, confirming that the next proof must localize the
+  successor offset cases to bounded substitution neighborhoods.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
