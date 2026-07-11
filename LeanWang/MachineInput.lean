@@ -59,5 +59,18 @@ theorem run_state_ne_halt_of_not_halts {M : Machine} {input : List Nat}
   intro hhalt
   exact notHalts ⟨steps, hhalt⟩
 
+theorem run_state_eq_halt_of_le {M : Machine} {input : List Nat}
+    {first second : Nat} (hle : first ≤ second)
+    (hhalt : (run M input first).state = M.halt) :
+    (run M input second).state = M.halt := by
+  rcases Nat.exists_eq_add_of_le hle with ⟨extra, rfl⟩
+  clear hle
+  induction extra with
+  | zero => simpa using hhalt
+  | succ extra ih =>
+      rw [show first + (extra + 1) = first + extra + 1 by omega, run_succ]
+      rw [Machine.nextID_of_halt M _ ih]
+      exact ih
+
 end MachineInput
 end LeanWang

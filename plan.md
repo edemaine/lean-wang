@@ -62,8 +62,12 @@ directly on a finite input word, and `MachineInputHistory` proves that its
 space-time diagram uses the existing finite local-history tile language.
 `MachineInputTiles` now forces that word with a finite position-tagged bottom
 row followed by one self-looping blank-tail tile, and proves that every
-nonhalting run gives a seeded quarter-plane tiling.  The remaining machine-side
-steps are the converse decoding theorem, the fixed folded-machine input bridge,
+nonhalting run gives a seeded quarter-plane tiling.  Its reverse decoder proves
+that the bottom row is exactly the prescribed input history, propagates the
+unique machine run through every positive row, and rules out a tiling at the
+first halting step.  Thus seeded tiling is now equivalent to nonhalting on a
+supported finite input.  The remaining machine-side steps are the fixed
+folded-machine input bridge, a computable finite-data version of these tiles,
 and switching `UniversalFoldedReduction` to this interface.  Once switched,
 the old folded initializer modules can be removed from the final dependency
 graph.
