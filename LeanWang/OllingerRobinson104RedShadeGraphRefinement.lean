@@ -201,18 +201,34 @@ theorem connectorPath_translate (grid : Nat → Nat → Index)
 def sparsePort (port : Port) : Port :=
   ⟨sparseCoordinate port.x, sparseCoordinate port.y, port.side⟩
 
+def exitCoordinate (coordinate : Nat) : Nat :=
+  if localCoordinate coordinate = 1 then macroOrigin coordinate + 7
+  else sparseCoordinate coordinate
+
 def refinedPort (port : Port) : Port :=
   match port.side with
-  | .east =>
-      if localCoordinate port.x = 1 then
-        ⟨macroOrigin port.x + 7, sparseCoordinate port.y, .east⟩
-      else sparsePort port
-  | .north =>
-      if localCoordinate port.y = 1 then
-        ⟨sparseCoordinate port.x, macroOrigin port.y + 7, .north⟩
-      else sparsePort port
+  | .east => ⟨exitCoordinate port.x, sparseCoordinate port.y, .east⟩
+  | .north => ⟨sparseCoordinate port.x, exitCoordinate port.y, .north⟩
   | .west => sparsePort port
   | .south => sparsePort port
+
+theorem exitCoordinate_succ (coordinate : Nat) :
+    exitCoordinate coordinate + 1 = sparseCoordinate (coordinate + 1) := by
+  have hmod := Nat.mod_lt coordinate (by decide : 0 < 2)
+  have hnextMod := Nat.mod_lt (coordinate + 1) (by decide : 0 < 2)
+  have hdecompose := Nat.mod_add_div coordinate 2
+  have hnextDecompose := Nat.mod_add_div (coordinate + 1) 2
+  by_cases heven : coordinate % 2 = 0
+  · have hnextOdd : (coordinate + 1) % 2 = 1 := by omega
+    have hnextDiv : (coordinate + 1) / 2 = coordinate / 2 := by omega
+    simp [exitCoordinate, sparseCoordinate, macroOrigin, localCoordinate,
+      heven, hnextOdd, hnextDiv]
+  · have hodd : coordinate % 2 = 1 := by omega
+    have hnextEven : (coordinate + 1) % 2 = 0 := by omega
+    have hnextDiv : (coordinate + 1) / 2 = coordinate / 2 + 1 := by omega
+    simp [exitCoordinate, sparseCoordinate, macroOrigin, localCoordinate,
+      hodd, hnextEven, hnextDiv]
+    omega
 
 theorem sparseCoordinate_mod_two (coordinate : Nat) :
     sparseCoordinate coordinate % 2 = coordinate % 2 := by
@@ -292,13 +308,17 @@ theorem livePortPath (grid : Nat → Nat → Index) (port : Port)
           simpa [localCoordinate] using hexit
         have connector := connectorPath_translate grid (port.x / 2) (port.y / 2)
           .east (localCoordinate_lt_two port.y) hpresent
-        simpa [sparsePort, refinedPort, hside, hexit', internalPort, externalPort,
+        simpa [sparsePort, refinedPort, exitCoordinate, hside, hexit',
+          internalPort, externalPort,
           translatePort, sparseCoordinate, macroOrigin, localCoordinate]
           using connector
       · have hexit' : port.x % 2 ≠ 1 := by
           simpa [localCoordinate] using hexit
-        simpa [refinedPort, hside, hexit, hexit'] using
-          (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+        have hrefined : refinedPort port = sparsePort port := by
+          rcases port with ⟨portX, portY, portSide⟩
+          simp_all [refinedPort, exitCoordinate, sparsePort]
+        rw [hrefined]
+        exact Path.refl _
   | north =>
       by_cases hexit : localCoordinate port.y = 1
       · have hpresent : portPresent
@@ -310,13 +330,17 @@ theorem livePortPath (grid : Nat → Nat → Index) (port : Port)
           simpa [localCoordinate] using hexit
         have connector := connectorPath_translate grid (port.x / 2) (port.y / 2)
           .north (localCoordinate_lt_two port.x) hpresent
-        simpa [sparsePort, refinedPort, hside, hexit', internalPort, externalPort,
+        simpa [sparsePort, refinedPort, exitCoordinate, hside, hexit',
+          internalPort, externalPort,
           translatePort, sparseCoordinate, macroOrigin, localCoordinate]
           using connector
       · have hexit' : port.y % 2 ≠ 1 := by
           simpa [localCoordinate] using hexit
-        simpa [refinedPort, hside, hexit, hexit'] using
-          (Path.refl (indexGrid := iterateRefine 2 grid) (sparsePort port))
+        have hrefined : refinedPort port = sparsePort port := by
+          rcases port with ⟨portX, portY, portSide⟩
+          simp_all [refinedPort, exitCoordinate, sparsePort]
+        rw [hrefined]
+        exact Path.refl _
 
 end RedShadeGraphRefinement
 end Closed104
