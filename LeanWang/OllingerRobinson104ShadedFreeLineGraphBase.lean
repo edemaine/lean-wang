@@ -22,6 +22,7 @@ open RedCycles OrientedRedBoardTranslations RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphBoards RedShadeCycles
   RedShadePaths RedShadeGraphTranslation RefinementTranslation
   ShadedFreeLineGraph ShadedFreeGrid ShadedFreeLineTranslation
+  ShadedPlaneSignalGrid
   ShadedFreeLineOffsets Signals.FreeCellLocal
 
 set_option maxRecDepth 100000
@@ -359,6 +360,76 @@ def freeGrid_shift (grid : Nat → Nat → Index) (blockX blockY : Nat)
     let cycle := at_scale (shiftGrid grid blockX blockY) 2 0 0
     exact isFreeRow_of_certificate valid cycle shaded
       (rowCertificate_shift grid blockX blockY hparent (offsetAt_mem index))
+
+def depthOneIndex
+    (index : Fin (freeOffsets 1).length) : Fin 6 :=
+  ⟨index.val, by simpa [freeOffsets_length] using index.isLt⟩
+
+theorem offsetAtDepth_one_eq (index : Fin (freeOffsets 1).length) :
+    offsetAtDepth 1 index = offsetAt (depthOneIndex index) := by
+  unfold offsetAtDepth offsetAt depthOneIndex
+  congr
+
+theorem freeColumn_offsetAtDepth_one_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {parent : Index} (hparent : grid blockX blockY = parent)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid
+      (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid)
+    (shaded : CycleShade stateGrid 4 12 4 12 .light)
+    (index : Fin (freeOffsets 1).length) :
+    IsFreeColumn (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+      4 12 (9 + offsetAtDepth 1 index) := by
+  have free := (freeGrid_shift grid blockX blockY hparent valid shaded).freeColumn
+    (depthOneIndex index)
+  change IsFreeColumn (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+    4 12 (9 + offsetAt (depthOneIndex index)) at free
+  simpa only [offsetAtDepth_one_eq] using free
+
+theorem freeRow_offsetAtDepth_one_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {parent : Index} (hparent : grid blockX blockY = parent)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid
+      (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid)
+    (shaded : CycleShade stateGrid 4 12 4 12 .light)
+    (index : Fin (freeOffsets 1).length) :
+    IsFreeRow (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+      4 12 (9 + offsetAtDepth 1 index) := by
+  have free := (freeGrid_shift grid blockX blockY hparent valid shaded).freeRow
+    (depthOneIndex index)
+  change IsFreeRow (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+    4 12 (9 + offsetAt (depthOneIndex index)) at free
+  simpa only [offsetAtDepth_one_eq] using free
+
+/-- The audited graph certificates realize the Figure 18 offset recurrence at
+its first nontrivial depth. -/
+def freeGridOfOffsets_one_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {parent : Index} (hparent : grid blockX blockY = parent)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid
+      (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid)
+    (shaded : CycleShade stateGrid 4 12 4 12 .light) :
+    FreeGrid (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+      4 12 4 12 (freeOffsets 1).length :=
+  freeGridOfOffsets
+    (iterateRefine 4 (shiftGrid grid blockX blockY)) stateGrid
+    4 12 4 12 1
+    (fun index => by
+      have hmem := offsetAtDepth_mem 1 index
+      rw [freeOffsets_one] at hmem
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hmem
+      simp only [quarterWest, quarterEast]
+      omega)
+    (fun index => by
+      have hmem := offsetAtDepth_mem 1 index
+      rw [freeOffsets_one] at hmem
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hmem
+      simp only [quarterSouth, quarterNorth]
+      omega)
+    (freeColumn_offsetAtDepth_one_shift grid blockX blockY hparent valid shaded)
+    (freeRow_offsetAtDepth_one_shift grid blockX blockY hparent valid shaded)
 
 /-- Drop the two southwest audited lines, placing the marker at index zero. -/
 def cornerGridIndex (index : Fin 4) : Fin 6 :=

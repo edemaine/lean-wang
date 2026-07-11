@@ -20,6 +20,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedFreeLineOffsets
 
+open RedShadeCycles RedShadePaths ShadedFreeGrid ShadedPlaneSignalGrid
+
 def expandOffset (offset : Nat) : List Nat :=
   if offset % 2 = 0 then [4 * offset, 4 * offset + 1]
   else [4 * offset + 2, 4 * offset + 3]
@@ -122,6 +124,120 @@ theorem freeOffsets_two :
     freeOffsets 2 = [1, 6, 7, 24, 25, 30, 31,
       32, 33, 38, 39, 56, 57, 62] := by
   native_decide
+
+theorem extendedOffsets_starts_zero (depth : Nat) :
+    ∃ rest : List Nat, extendedOffsets depth = 0 :: rest := by
+  induction depth with
+  | zero => exact ⟨[1, 2, 3], rfl⟩
+  | succ depth ih =>
+      rcases ih with ⟨rest, hrest⟩
+      rw [extendedOffsets, hrest]
+      simp [expandOffset]
+
+set_option linter.flexible false in
+theorem mem_extendedOffsets_lt (depth : Nat) {offset : Nat}
+    (hmem : offset ∈ extendedOffsets depth) :
+    offset < 4 ^ (depth + 1) := by
+  induction depth generalizing offset with
+  | zero =>
+      simp [extendedOffsets] at hmem
+      rcases hmem with rfl | rfl | rfl | rfl <;> norm_num
+  | succ depth ih =>
+      rw [extendedOffsets, List.mem_flatMap] at hmem
+      rcases hmem with ⟨parent, hparent, hchild⟩
+      have hparentBound := ih hparent
+      by_cases heven : parent % 2 = 0 <;>
+        simp [expandOffset, heven] at hchild <;>
+        rcases hchild with rfl | rfl <;>
+        rw [show depth + 1 + 1 = depth + 2 by omega,
+          show 4 ^ (depth + 2) = 4 * 4 ^ (depth + 1) by
+            simp [pow_succ, mul_comm]] <;>
+        omega
+
+theorem mem_freeOffsets_bounds (depth : Nat) {offset : Nat}
+    (hmem : offset ∈ freeOffsets depth) :
+    0 < offset ∧ offset < 4 ^ (depth + 1) := by
+  have hextended : offset ∈ extendedOffsets depth := by
+    exact List.mem_of_mem_drop (List.mem_of_mem_dropLast hmem)
+  refine ⟨?_, mem_extendedOffsets_lt depth hextended⟩
+  rcases extendedOffsets_starts_zero depth with ⟨rest, hrest⟩
+  have htail : offset ∈ rest := by
+    rw [freeOffsets, hrest] at hmem
+    simpa using List.mem_of_mem_dropLast hmem
+  have hordered := extendedOffsets_pairwise depth
+  rw [hrest, List.pairwise_cons] at hordered
+  exact hordered.1 offset htail
+
+def offsetAtDepth (depth : Nat)
+    (index : Fin (freeOffsets depth).length) : Nat :=
+  (freeOffsets depth).get index
+
+theorem offsetAtDepth_mem (depth : Nat)
+    (index : Fin (freeOffsets depth).length) :
+    offsetAtDepth depth index ∈ freeOffsets depth :=
+  List.get_mem _ _
+
+theorem offsetAtDepth_strictMono (depth : Nat)
+    {first second : Fin (freeOffsets depth).length} (hlt : first < second) :
+    offsetAtDepth depth first < offsetAtDepth depth second :=
+  (freeOffsets_pairwise depth).rel_get_of_lt hlt
+
+theorem offsetAtDepth_bounds (depth : Nat)
+    (index : Fin (freeOffsets depth).length) :
+    0 < offsetAtDepth depth index ∧
+      offsetAtDepth depth index < 4 ^ (depth + 1) :=
+  mem_freeOffsets_bounds depth (offsetAtDepth_mem depth index)
+
+theorem depth_le_freeOffsets_length (depth : Nat) :
+    depth ≤ (freeOffsets depth).length := by
+  induction depth with
+  | zero => simp
+  | succ depth ih =>
+      rw [show depth + 1 = depth + 1 by rfl,
+        freeOffsets_length_succ]
+      omega
+
+/-- Package semantic freedom of all Figure 18 offsets as an ordered grid. -/
+def freeGridOfOffsets
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (west east south north depth : Nat)
+    (column_east : ∀ index : Fin (freeOffsets depth).length,
+      quarterWest west + offsetAtDepth depth index < quarterEast east)
+    (row_north : ∀ index : Fin (freeOffsets depth).length,
+      quarterSouth south + offsetAtDepth depth index < quarterNorth north)
+    (freeColumn : ∀ index : Fin (freeOffsets depth).length,
+      IsFreeColumn indexGrid shadeGrid south north
+        (quarterWest west + offsetAtDepth depth index))
+    (freeRow : ∀ index : Fin (freeOffsets depth).length,
+      IsFreeRow indexGrid shadeGrid west east
+        (quarterSouth south + offsetAtDepth depth index)) :
+    FreeGrid indexGrid shadeGrid west east south north
+      (freeOffsets depth).length where
+  columnAt := fun index => quarterWest west + offsetAtDepth depth index
+  rowAt := fun index => quarterSouth south + offsetAtDepth depth index
+  column_strictMono := by
+    intro first second hlt
+    exact Nat.add_lt_add_left (offsetAtDepth_strictMono depth hlt) _
+  row_strictMono := by
+    intro first second hlt
+    exact Nat.add_lt_add_left (offsetAtDepth_strictMono depth hlt) _
+  column_west := by
+    intro index
+    have := (offsetAtDepth_bounds depth index).1
+    omega
+  column_east := by
+    intro index
+    exact column_east index
+  row_south := by
+    intro index
+    have := (offsetAtDepth_bounds depth index).1
+    omega
+  row_north := by
+    intro index
+    exact row_north index
+  freeColumn := freeColumn
+  freeRow := freeRow
 
 end ShadedFreeLineOffsets
 end Closed104

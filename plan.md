@@ -293,6 +293,13 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   coordinates, every offset `x` expands to `4x, 4x+1` when `x` is even and to
   `4x+2, 4x+3` when `x` is odd. Removing the borders gives `6, 14, 30, ...`
   candidate rows and columns, with the proved recurrence `F(k+1) = 2F(k)+2`.
+- These offsets now have a typed index API with proved membership, strict
+  monotonicity, interior bounds, and enough cardinality for every requested
+  finite square. A generic constructor packages semantic freedom at all
+  indexed offsets into an ordered `FreeGrid`. The six audited graph lines
+  instantiate this constructor at depth one in every translated parent block,
+  so the remaining induction step is precisely a two-refinement lift of the
+  row and column graph certificates along `expandOffset`.
 - Red-wire propagation is factored through a finite port graph. Straight
   segments, matching edges, and corner turns preserve shade; switching wires
   at a crossing reverses it. Every graph path therefore proves shade equality
