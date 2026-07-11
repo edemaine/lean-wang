@@ -277,6 +277,11 @@ position-row obligation in the final theorem.
   and uses the crossing rule to force that segment dark. Thus every translated
   scale-2 light board has a certified singleton `FreeGrid`, without assuming
   that the raw center geometry is empty.
+- The Figure 18 free-line coordinates are now represented by a strictly
+  increasing recursive offset list. Retaining the two enclosing border
+  coordinates, every offset `x` expands to `4x, 4x+1` when `x` is even and to
+  `4x+2, 4x+3` when `x` is odd. Removing the borders gives `6, 14, 30, ...`
+  candidate rows and columns, with the proved recurrence `F(k+1) = 2F(k)+2`.
 - Iterated refinement is now proved equivariant under arbitrary coarse-grid
   translations, including exact quarter-component and obstruction-selector
   transport.
