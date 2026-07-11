@@ -416,6 +416,12 @@ reduction. The fixed TM0-to-Post simulation remains the only machine compiler.
   candidate field definitionally. Finite quotient audits can evaluate this raw
   list without constructing certificate proofs, while
   `patternFamily_candidates` reconnects the same data to its backing theorem.
+- The border substitution now factors through the `(thin, thick)` component
+  pair; a finite theorem proves all 104 child symbols agree with this factor,
+  and induction lifts the equality through every refinement depth. There are
+  only 56 reachable border states. Canonical representatives preserve the
+  thick component, so black-layer variants can be erased from future geometry
+  quotients.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
