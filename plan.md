@@ -294,7 +294,9 @@ position-row obligation in the final theorem.
 - Bounded graph search itself is proved sound: every returned node is reached
   from the requested start by a proposition-level parity path. Finite template
   discovery is therefore outside the trusted boundary, while successful
-  results can be consumed directly by the recursive geometry proof.
+  results can be consumed directly by the recursive geometry proof. The
+  array-backed multi-source flood is sound as well, so all candidate segments
+  below one parent can share a single traversal from its board-side ports.
 - Strict ports along all four sides of a uniformly shaded oriented board are
   represented explicitly. Path soundness now gives the central semantic rule:
   every odd-parity path from a light board side ends on a dark edge, ready to

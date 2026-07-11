@@ -121,6 +121,152 @@ theorem search_sound
           exact ⟨rfl, Path.refl start⟩) hresult).2
   · contradiction
 
+def SoundFromSome (indexGrid : Nat → Nat → Index)
+    (starts : List Port) (node : Node) : Prop :=
+  node.origin ∈ starts ∧ Path indexGrid node.origin node.current node.parity
+
+theorem advance_soundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} {node next : Node} {move : CertificateMove}
+    (sound : SoundFromSome indexGrid starts node)
+    (hadvance : advance indexGrid width height node move = some next) :
+    SoundFromSome indexGrid starts next := by
+  have preserved := advance_sound
+    (start := node.origin) ⟨rfl, sound.2⟩ hadvance
+  constructor
+  · rw [preserved.1]
+    exact sound.1
+  · rw [preserved.1]
+    exact preserved.2
+
+theorem nextNodes_soundFromSome
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} {node next : Node}
+    (sound : SoundFromSome indexGrid starts node)
+    (hnext : next ∈ nextNodes indexGrid width height node) :
+    SoundFromSome indexGrid starts next := by
+  rw [nextNodes, List.mem_filterMap] at hnext
+  rcases hnext with ⟨move, _, hadvance⟩
+  exact advance_soundFromSome sound hadvance
+
+theorem foldl_markFresh_soundFromSome
+    {indexGrid : Nat → Nat → Index} {width : Nat}
+    {starts : List Port} :
+    ∀ (nodes : List Node) (accumulator : List Node × Array Bool),
+      (∀ node ∈ nodes, SoundFromSome indexGrid starts node) →
+      (∀ node ∈ accumulator.1, SoundFromSome indexGrid starts node) →
+      ∀ node ∈ (nodes.foldl (markFresh width) accumulator).1,
+        SoundFromSome indexGrid starts node := by
+  intro nodes
+  induction nodes with
+  | nil =>
+      intro accumulator _ haccumulator node hnode
+      exact haccumulator node (by simpa using hnode)
+  | cons first rest ih =>
+      intro accumulator hnodes haccumulator node hnode
+      have hfirst := hnodes first (by simp)
+      have hrest : ∀ candidate ∈ rest,
+          SoundFromSome indexGrid starts candidate := by
+        intro candidate hcandidate
+        exact hnodes candidate (by simp [hcandidate])
+      simp only [List.foldl_cons] at hnode
+      cases hlookup : accumulator.2[stateCode width first.state]? with
+      | none =>
+          apply ih (first :: accumulator.1,
+            accumulator.2.setIfInBounds
+              (stateCode width first.state) true) hrest
+          · intro candidate hcandidate
+            simp only [List.mem_cons] at hcandidate
+            rcases hcandidate with rfl | hcandidate
+            · exact hfirst
+            · exact haccumulator candidate hcandidate
+          · simpa [markFresh, hlookup] using hnode
+      | some present =>
+          cases present with
+          | false =>
+              apply ih (first :: accumulator.1,
+                accumulator.2.setIfInBounds
+                  (stateCode width first.state) true) hrest
+              · intro candidate hcandidate
+                simp only [List.mem_cons] at hcandidate
+                rcases hcandidate with rfl | hcandidate
+                · exact hfirst
+                · exact haccumulator candidate hcandidate
+              · simpa [markFresh, hlookup] using hnode
+          | true =>
+              apply ih accumulator hrest haccumulator
+              simpa [markFresh, hlookup] using hnode
+
+theorem markFreshList_soundFromSome
+    {indexGrid : Nat → Nat → Index} {width : Nat}
+    {starts : List Port} {nodes : List Node} {visited : Array Bool}
+    (sound : ∀ node ∈ nodes, SoundFromSome indexGrid starts node) :
+    ∀ node ∈ (markFreshList width visited nodes).1,
+      SoundFromSome indexGrid starts node := by
+  intro node hnode
+  exact foldl_markFresh_soundFromSome nodes ([], visited) sound
+    (by simp) node (by simpa [markFreshList] using hnode)
+
+theorem exploreFastAux_sound
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {starts : List Port} :
+    ∀ (fuel : Nat) (stack : List Node) (visited : Array Bool)
+      (found : List Node),
+      (∀ node ∈ stack, SoundFromSome indexGrid starts node) →
+      (∀ node ∈ found, SoundFromSome indexGrid starts node) →
+      ∀ node ∈ exploreFastAux indexGrid width height fuel
+        stack visited found, SoundFromSome indexGrid starts node := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro stack visited found _ hfound node hnode
+      exact hfound node (by simpa [exploreFastAux] using hnode)
+  | succ fuel ih =>
+      intro stack visited found hstack hfound node hnode
+      cases stack with
+      | nil => exact hfound node (by simpa [exploreFastAux] using hnode)
+      | cons first rest =>
+          rw [exploreFastAux] at hnode
+          let marked := markFreshList width visited
+            (nextNodes indexGrid width height first)
+          apply ih (marked.1 ++ rest) marked.2 (first :: found)
+          · intro candidate hcandidate
+            rw [List.mem_append] at hcandidate
+            rcases hcandidate with hcandidate | hcandidate
+            · exact markFreshList_soundFromSome
+                (nodes := nextNodes indexGrid width height first)
+                (visited := visited)
+                (fun next hnext => nextNodes_soundFromSome
+                  (hstack first (by simp)) hnext)
+                candidate hcandidate
+            · exact hstack candidate (by simp [hcandidate])
+          · intro candidate hcandidate
+            simp only [List.mem_cons] at hcandidate
+            rcases hcandidate with rfl | hcandidate
+            · exact hstack _ (by simp)
+            · exact hfound candidate hcandidate
+          · exact hnode
+
+/-- Every node retained by the fast multi-source flood has a genuine path. -/
+theorem exploreFast_sound
+    {indexGrid : Nat → Nat → Index} {width height fuel : Nat}
+    {starts : List Port} {node : Node}
+    (hnode : node ∈ exploreFast indexGrid width height fuel starts) :
+    SoundFromSome indexGrid starts node := by
+  unfold exploreFast at hnode
+  let nodes : List Node := starts.map fun start =>
+    { origin := start, current := start, parity := false, reverseMoves := [] }
+  let emptyVisited := Array.replicate (width * height * 8) false
+  let marked := markFreshList width emptyVisited nodes
+  apply exploreFastAux_sound fuel marked.1 marked.2 []
+  · exact markFreshList_soundFromSome
+      (nodes := nodes) (visited := emptyVisited) (by
+        intro initial hinitial
+        rcases List.mem_map.1 hinitial with ⟨start, hstart, rfl⟩
+        exact ⟨hstart, Path.refl start⟩)
+  · simp
+  · exact hnode
+
 end RedShadeGraphSearchSoundness
 end Closed104
 end Figure13Layers
