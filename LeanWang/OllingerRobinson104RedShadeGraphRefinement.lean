@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104RedShadeGraphRefinementAudit
 import LeanWang.OllingerRobinson104RedShadeGraphSearchSoundness
+import LeanWang.OllingerRobinson104RedShadeGraphTranslation
 
 /-!
 Proof-facing two-substitution red-path refinement lemmas.
@@ -16,8 +17,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphRefinement
 
-open RedShadeGraph RedShadeGraphSearch RedShadeGraphSearchSoundness
-  Signals.FreeCellLocal
+open RedCycles RedShadeGraph RedShadeGraphSearch RedShadeGraphSearchSoundness
+  RedShadeGraphTranslation RefinementTranslation Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -134,6 +135,68 @@ theorem boundedConnectorPath (parent : Index) (side : ExitSide)
         | false => rfl
         | true => simp [hparity] at haccept
       simpa [horigin, haccept.1, hparity] using hsound.2
+
+def macroOrigin (coordinate : Nat) : Nat :=
+  8 * (coordinate / 2)
+
+def localCoordinate (coordinate : Nat) : Nat :=
+  coordinate % 2
+
+def sparseCoordinate (coordinate : Nat) : Nat :=
+  macroOrigin coordinate + localCoordinate coordinate
+
+theorem localCoordinate_lt_two (coordinate : Nat) :
+    localCoordinate coordinate < 2 := by
+  exact Nat.mod_lt coordinate (by decide)
+
+/-- Exact sparse copy of every coarse quarter after two substitutions. -/
+theorem componentAt_iterateRefine_two_sparse
+    (grid : Nat → Nat → Index) (x y : Nat) :
+    componentAt (iterateRefine 2 grid) (sparseCoordinate x) (sparseCoordinate y) =
+      componentAt grid x y := by
+  let blockX := x / 2
+  let blockY := y / 2
+  let localX := localCoordinate x
+  let localY := localCoordinate y
+  have hx : localX < 2 := localCoordinate_lt_two x
+  have hy : localY < 2 := localCoordinate_lt_two y
+  calc
+    componentAt (iterateRefine 2 grid) (sparseCoordinate x) (sparseCoordinate y) =
+        componentAt (iterateRefine 2 (shiftGrid grid blockX blockY))
+          localX localY := by
+      rw [componentAt_iterateRefine_shift]
+      simp [sparseCoordinate, macroOrigin, blockX, blockY, localX, localY]
+    _ = componentAt (fineGrid (grid blockX blockY)) localX localY := by
+      rw [componentAt_shift_eq_constant 2 grid blockX blockY localX localY]
+      · rfl
+      · omega
+      · omega
+    _ = componentAt (coarseGrid (grid blockX blockY)) localX localY :=
+      componentAt_fineGrid_southwest _ hx hy
+    _ = componentAt grid x y := by
+      simp [componentAt, coarseGrid, blockX, blockY]
+
+/-- A local connector transplanted into any two-level refined macrocell. -/
+theorem connectorPath_translate (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) (side : ExitSide) {offset : Nat}
+    (hoffset : offset < 2)
+    (hpresent : portPresent (coarseGrid (grid blockX blockY))
+      (internalPort side offset) = true) :
+    Path (iterateRefine 2 grid)
+      (translatePort (internalPort side offset) (8 * blockX) (8 * blockY))
+      (translatePort (externalPort side offset) (8 * blockX) (8 * blockY))
+      false := by
+  have localPath := boundedConnectorPath (grid blockX blockY) side hoffset hpresent
+  have componentsEq : ∀ x y, x < 8 → y < 8 →
+      componentAt (fineGrid (grid blockX blockY)) x y =
+        componentAt (iterateRefine 2 (shiftGrid grid blockX blockY)) x y := by
+    intro x y hx hy
+    exact (componentAt_shift_eq_constant 2 grid blockX blockY x y hx hy).symm
+  have shifted :=
+    (RedShadeGraphTranslation.BoundedPath.congr_of_component_eq
+      componentsEq localPath).path
+  simpa using path_translate (depth := 2) (grid := grid)
+    (blockX := blockX) (blockY := blockY) shifted
 
 end RedShadeGraphRefinement
 end Closed104
