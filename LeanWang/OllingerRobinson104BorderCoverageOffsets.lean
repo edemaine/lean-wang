@@ -127,6 +127,98 @@ theorem childLine_boundedDisplacement
   · exact childLine_even_boundedDisplacement depth oldOffset child hchild
   · exact childLine_odd_boundedDisplacement depth oldOffset child hchild
 
+theorem leftLine_even_displacement (depth : Nat) :
+    lineCoordinate .even (depth + 1) 1 =
+      sparseCoordinate (quarterWest (west .even depth)) + 1 := by
+  have hparity : (quarterWest (west .even depth)) % 2 = 1 := by
+    simp [west, scale, Phase.factor, quarterWest]
+  have hsparse := sparseCoordinate_of_odd hparity
+  rw [show quarterWest (west .even depth) = 2 * 4 ^ depth + 1 by
+    simp [west, scale, Phase.factor, quarterWest]] at hsparse
+  have hsparse' : sparseCoordinate (quarterWest (west .even depth)) =
+      8 * 4 ^ depth + 1 := by
+    rw [show quarterWest (west .even depth) = 2 * 4 ^ depth + 1 by
+      simp [west, scale, Phase.factor, quarterWest]]
+    omega
+  rw [hsparse']
+  rw [lineCoordinate_even, pow_succ]
+  omega
+
+theorem leftLine_odd_displacement (depth : Nat) :
+    lineCoordinate .odd (depth + 1) 1 =
+      sparseCoordinate (quarterWest (west .odd depth)) + 2 := by
+  have hparity : (quarterWest (west .odd depth)) % 2 = 1 := by
+    simp [west, scale, Phase.factor, quarterWest]
+  have hsparse := sparseCoordinate_of_odd hparity
+  rw [show quarterWest (west .odd depth) = 4 * 4 ^ depth + 1 by
+    simp [west, scale, Phase.factor, quarterWest]
+    omega] at hsparse
+  have hsparse' : sparseCoordinate (quarterWest (west .odd depth)) =
+      16 * 4 ^ depth + 1 := by
+    rw [show quarterWest (west .odd depth) = 4 * 4 ^ depth + 1 by
+      simp [west, scale, Phase.factor, quarterWest]
+      omega]
+    omega
+  rw [hsparse']
+  rw [lineCoordinate_odd, pow_succ]
+  omega
+
+theorem leftLine_boundedDisplacement (phase : Phase) (depth : Nat) :
+    ∃ delta ≤ 2,
+      lineCoordinate phase (depth + 1) 1 =
+        sparseCoordinate (quarterWest (west phase depth)) + delta := by
+  cases phase
+  · exact ⟨1, by decide, leftLine_even_displacement depth⟩
+  · exact ⟨2, by decide, leftLine_odd_displacement depth⟩
+
+theorem rightLine_even_displacement (depth : Nat) :
+    lineCoordinate .even (depth + 1) (4 ^ (depth + 2) - 2) + 1 =
+      sparseCoordinate (quarterEast (east .even depth)) := by
+  have hpositive : 0 < 4 ^ depth := pow_pos (by decide) depth
+  have hparity : (quarterEast (east .even depth)) % 2 = 0 := by
+    simp [east, scale, Phase.factor, quarterEast]
+  have hsparse := sparseCoordinate_of_even hparity
+  rw [show quarterEast (east .even depth) = 6 * 4 ^ depth by
+    simp [east, scale, Phase.factor, quarterEast]
+    omega] at hsparse
+  have hsparse' : sparseCoordinate (quarterEast (east .even depth)) =
+      24 * 4 ^ depth := by
+    rw [show quarterEast (east .even depth) = 6 * 4 ^ depth by
+      simp [east, scale, Phase.factor, quarterEast]
+      omega]
+    omega
+  rw [hsparse']
+  rw [lineCoordinate_even, pow_succ, pow_succ]
+  omega
+
+theorem rightLine_odd_displacement (depth : Nat) :
+    lineCoordinate .odd (depth + 1) (4 ^ (depth + 2) - 2) + 3 =
+      sparseCoordinate (quarterEast (east .odd depth)) := by
+  have hpositive : 0 < 4 ^ depth := pow_pos (by decide) depth
+  have hparity : (quarterEast (east .odd depth)) % 2 = 0 := by
+    simp [east, scale, Phase.factor, quarterEast]
+  have hsparse := sparseCoordinate_of_even hparity
+  rw [show quarterEast (east .odd depth) = 12 * 4 ^ depth by
+    simp [east, scale, Phase.factor, quarterEast]
+    omega] at hsparse
+  have hsparse' : sparseCoordinate (quarterEast (east .odd depth)) =
+      48 * 4 ^ depth := by
+    rw [show quarterEast (east .odd depth) = 12 * 4 ^ depth by
+      simp [east, scale, Phase.factor, quarterEast]
+      omega]
+    omega
+  rw [hsparse']
+  rw [lineCoordinate_odd, pow_succ, pow_succ]
+  omega
+
+theorem rightLine_boundedDisplacement (phase : Phase) (depth : Nat) :
+    ∃ delta ≤ 3,
+      lineCoordinate phase (depth + 1) (4 ^ (depth + 2) - 2) + delta =
+        sparseCoordinate (quarterEast (east phase depth)) := by
+  cases phase
+  · exact ⟨1, by decide, rightLine_even_displacement depth⟩
+  · exact ⟨3, by decide, rightLine_odd_displacement depth⟩
+
 end BorderCoverageOffsets
 end Closed104
 end Figure13Layers
