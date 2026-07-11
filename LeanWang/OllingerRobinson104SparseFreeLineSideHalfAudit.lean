@@ -115,22 +115,24 @@ theorem windowCheck_sound {window : Window}
   · exact Or.inl (reached_sound covered)
   · exact Or.inr (reached_sound covered)
 
+/-- Enumerate all strict target blocks for one predecessor row. -/
+def windowsIn (grid : Nat → Nat → Index)
+    (oldWest oldEast oldRow : Nat) : List Window :=
+  let lowerBlockY := oldRow / 2 - 1
+  let firstBlock := quarterWest (4 * oldWest) / 8
+  let blockCount := quarterEast (4 * oldEast) / 8 - firstBlock + 1
+  (List.range blockCount).map fun delta =>
+    let blockX := firstBlock + delta
+    let originX := blockX - 1
+    (List.range 2).flatMap fun y =>
+      (List.range 3).map fun x =>
+        grid (originX + x) (lowerBlockY + y)
+
 /-- The distinct side-half windows in all 104 first recursive boards. -/
 def recurrenceWindows : List Window :=
   ((List.finRange 104).flatMap fun parent =>
-    let grid := localGrid .odd 1 parent
-    let oldWest := west .odd 1
-    let oldEast := east .odd 1
-    let oldRow := lineCoordinate .odd 1 9
-    let lowerBlockY := oldRow / 2 - 1
-    let firstBlock := quarterWest (4 * oldWest) / 8
-    let blockCount := quarterEast (4 * oldEast) / 8 - firstBlock + 1
-    (List.range blockCount).map fun delta =>
-      let blockX := firstBlock + delta
-      let originX := blockX - 1
-      (List.range 2).flatMap fun y =>
-        (List.range 3).map fun x =>
-          grid (originX + x) (lowerBlockY + y)).eraseDups
+    windowsIn (localGrid .odd 1 parent)
+      (west .odd 1) (east .odd 1) (lineCoordinate .odd 1 9)).eraseDups
 
 /-- Erase the graph-invisible black layer pointwise. -/
 def canonicalWindow (window : Window) : Window :=
