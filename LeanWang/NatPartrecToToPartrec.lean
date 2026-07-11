@@ -591,58 +591,6 @@ theorem prec_mem_trace {f g : Code} {a k : Nat} {v : List Nat}
   refine ⟨base, x, ?_, hbaseOut, hrun⟩
   simpa [hfinal] using hv
 
-theorem primrec_precG : Primrec precG := by
-  unfold precG
-  exact Code.primrec₂_cons.comp (Primrec.const Code.tail)
-    (Code.primrec₂_cons.comp (Primrec.const Code.succ)
-      (Code.primrec₂_cons.comp (Primrec.const (Code.comp Code.pred Code.tail))
-        (Code.primrec₂_cons.comp
-          (Code.primrec₂_comp.comp Primrec.id
-            (Primrec.const (Code.cons Code.id (Code.comp Code.tail Code.tail))))
-          (Primrec.const (Code.comp Code.tail (Code.comp Code.tail Code.tail))))))
-
-theorem primrec₂_prec : Primrec (fun p : Code × Code => Code.prec p.1 p.2) := by
-  have hF : Primrec (fun g : Code =>
-      Code.case Code.id <|
-        Code.comp (Code.comp (Code.comp Code.tail Code.tail) (Code.fix (precG g))) Code.zero') := by
-    exact Code.primrec₂_case.comp (Primrec.const Code.id)
-      (Code.primrec₂_comp.comp
-        (Code.primrec₂_comp.comp (Primrec.const (Code.comp Code.tail Code.tail))
-          (Code.primrec_fix.comp primrec_precG))
-        (Primrec.const Code.zero'))
-  rw [show (fun p : Code × Code => Code.prec p.1 p.2) =
-      (fun p : Code × Code =>
-        let F := Code.case Code.id <|
-          Code.comp (Code.comp (Code.comp Code.tail Code.tail) (Code.fix (precG p.2))) Code.zero'
-        Code.cons (Code.comp F (Code.cons Code.head <|
-          Code.cons (Code.comp p.1 Code.tail) Code.tail)) Code.nil) by
-    funext p
-    rw [prec_eq]]
-  exact Code.primrec₂_cons.comp
-    (Code.primrec₂_comp.comp (hF.comp Primrec.snd)
-      (Code.primrec₂_cons.comp (Primrec.const Code.head)
-        (Code.primrec₂_cons.comp
-          (Code.primrec₂_comp.comp Primrec.fst (Primrec.const Code.tail))
-          (Primrec.const Code.tail))))
-    (Primrec.const Code.nil)
-
-theorem primrec_rfindBody : Primrec rfindBody := by
-  unfold rfindBody
-  exact Code.primrec₂_comp.comp
-    (Code.primrec₂_case.comp (Primrec.const Code.zero')
-      (Primrec.const
-        (Code.cons one (Code.cons (Code.succ.comp Code.second) (Code.tail.comp Code.tail)))))
-    (Code.primrec₂_cons.comp
-      (Code.primrec₂_comp.comp Primrec.id (Primrec.const Code.rfindTestArg))
-      (Primrec.const Code.id))
-
-theorem primrec_rfindFrom : Primrec rfindFrom := by
-  unfold rfindFrom
-  exact Code.primrec₂_comp.comp (Primrec.const Code.addFirstSecond)
-    (Code.primrec₂_comp.comp
-      (Code.primrec_fix.comp primrec_rfindBody)
-      (Primrec.const (Code.zero'.comp Code.unpairListSwap)))
-
 end TCode
 
 open Turing.ToPartrec
@@ -700,63 +648,6 @@ theorem translate_prec (cf cg : Nat.Partrec.Code) :
 theorem translate_rfind' (cf : Nat.Partrec.Code) :
     translate (.rfind' cf) = TCode.rfindFrom (translate cf) :=
   rfl
-
-theorem translate_eq_rec (c : Nat.Partrec.Code) :
-    translate c =
-      Nat.Partrec.Code.rec Code.zero Code.succ Code.unpairLeft Code.unpairRight
-        (fun _ _ hf hg => Code.singletonPair hf hg)
-        (fun _ _ hf hg => hf.comp hg)
-        (fun _ _ hf hg => (Code.prec hf (hg.comp Code.precStepArg)).comp
-          Code.unpairListSwap)
-        (fun _ hf => TCode.rfindFrom hf) c := by
-  induction c <;> simp [translate, *]
-
-theorem translate_primrec : Primrec translate := by
-  have hListPair : Primrec (fun p : Code × Code => Code.listPair p.1 p.2) := by
-    unfold Code.listPair
-    exact Code.primrec₂_cons.comp Primrec.fst
-      (Code.primrec₂_cons.comp Primrec.snd (Primrec.const Code.nil))
-  have hSingletonPair :
-      Primrec (fun p : Code × Code => Code.singletonPair p.1 p.2) := by
-    unfold Code.singletonPair
-    exact Code.primrec₂_comp.comp (Primrec.const Code.pairNat) hListPair
-  have hrec := Nat.Partrec.Code.primrec_recOn (α := Nat.Partrec.Code)
-    (σ := Code)
-    (c := fun c : Nat.Partrec.Code => c) Primrec.id
-    (z := fun _ : Nat.Partrec.Code => Code.zero) (Primrec.const Code.zero)
-    (s := fun _ : Nat.Partrec.Code => Code.succ) (Primrec.const Code.succ)
-    (l := fun _ : Nat.Partrec.Code => Code.unpairLeft) (Primrec.const Code.unpairLeft)
-    (r := fun _ : Nat.Partrec.Code => Code.unpairRight) (Primrec.const Code.unpairRight)
-    (pr := fun _ _ _ hf hg => Code.singletonPair hf hg)
-    (by
-      exact hSingletonPair.comp
-        (Primrec.pair
-          (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
-          (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
-    (co := fun _ _ _ hf hg => hf.comp hg)
-    (by
-      exact Code.primrec₂_comp.comp
-        (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
-        (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))
-    (pc := fun _ _ _ hf hg =>
-      (Code.prec hf (hg.comp Code.precStepArg)).comp Code.unpairListSwap)
-    (by
-      exact Code.primrec₂_comp.comp
-        (TCode.primrec₂_prec.comp
-          (Primrec.pair
-            (Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
-            (Code.primrec₂_comp.comp
-              (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
-              (Primrec.const Code.precStepArg))))
-        (Primrec.const Code.unpairListSwap))
-    (rf := fun _ _ hf => TCode.rfindFrom hf)
-    (by
-      exact TCode.primrec_rfindFrom.comp
-        (Primrec.snd.comp Primrec.snd))
-  exact hrec.of_eq fun c => (translate_eq_rec c).symm
-
-theorem translate_computable : Computable translate :=
-  translate_primrec.to_comp
 
 /--
 Semantic correctness predicate for a translated unary partial-recursive code.

@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.MachineInput
 import LeanWang.PostMachineInput
 import LeanWang.UniversalTM0Semantic
 
@@ -99,6 +100,11 @@ def sideCode : Side → Nat
 def foldedSymbol (marked : Bool) (left right : SourceSymbol) : Nat :=
   Nat.pair (if marked then 1 else 0)
     (Nat.pair (symbolCode left) (symbolCode right))
+
+theorem foldedSymbol_primrec :
+    Primrec (fun p : Bool × SourceSymbol × SourceSymbol =>
+      foldedSymbol p.1 p.2.1 p.2.2) := by
+  exact Primrec.dom_finite _
 
 theorem foldedSymbol_injective {marked marked' : Bool}
     {left right left' right' : SourceSymbol}
@@ -478,6 +484,488 @@ theorem step_of_no_source_step {q : SourceLabel} {side : Side}
     program.step (foldedState side q) (foldedSymbol marked left right) = none := by
   exact PostProgram.step_eq_none_of_transition?_eq_none
     (transition?_of_no_step hq hstep)
+
+def rightAbs (i : Nat) : Int := i
+
+def leftAbs (i : Nat) : Int := -((i : Int) + 1)
+
+def activeAbs : Side → Nat → Int
+  | .right, head => rightAbs head
+  | .left, head => leftAbs head
+
+def sourceOffset (side : Side) (head : Nat) (absolute : Int) : Int :=
+  absolute - activeAbs side head
+
+def foldedCellOfTapeAt (tape : Turing.Tape SourceSymbol)
+    (side : Side) (head position : Nat) : Nat :=
+  foldedSymbol (decide (position = 0))
+    (tape.nth (sourceOffset side head (leftAbs position)))
+    (tape.nth (sourceOffset side head (rightAbs position)))
+
+def FoldedTapeRel (tape : Turing.Tape SourceSymbol)
+    (side : Side) (head : Nat) (foldedTape : Nat → Nat) : Prop :=
+  ∀ position, foldedTape position = foldedCellOfTapeAt tape side head position
+
+def FoldedConfigRel (cfg : Turing.TM0.Cfg SourceSymbol SourceLabel)
+    (id : PostID) : Prop :=
+  ∃ side : Side, cfg.q ∈ labels ∧
+    id.state = some (foldedState side cfg.q) ∧
+    FoldedTapeRel cfg.Tape side id.head id.tape
+
+@[simp] theorem sourceOffset_right_head (head : Nat) :
+    sourceOffset .right head (rightAbs head) = 0 := by
+  simp [sourceOffset, activeAbs, rightAbs]
+
+@[simp] theorem sourceOffset_left_head (head : Nat) :
+    sourceOffset .left head (leftAbs head) = 0 := by
+  simp [sourceOffset, activeAbs, leftAbs]
+
+theorem read_active_cell (tape : Turing.Tape SourceSymbol)
+    (side : Side) (head : Nat) :
+    read side
+      (tape.nth (sourceOffset side head (leftAbs head)))
+      (tape.nth (sourceOffset side head (rightAbs head))) = tape.head := by
+  cases side <;> simp [read, Turing.Tape.nth_zero]
+
+theorem sourceOffset_right_left_head_ne_zero (head : Nat) :
+    sourceOffset .right head (leftAbs head) ≠ 0 := by
+  simp [sourceOffset, activeAbs, rightAbs, leftAbs]
+  omega
+
+theorem sourceOffset_left_right_head_ne_zero (head : Nat) :
+    sourceOffset .left head (rightAbs head) ≠ 0 := by
+  simp [sourceOffset, activeAbs, rightAbs, leftAbs]
+  omega
+
+theorem foldedCellOfTapeAt_write_active (tape : Turing.Tape SourceSymbol)
+    (side : Side) (head : Nat) (new : SourceSymbol) :
+    foldedCellOfTapeAt (tape.write new) side head head =
+      writeCell side (decide (head = 0)) new
+        (tape.nth (sourceOffset side head (leftAbs head)))
+        (tape.nth (sourceOffset side head (rightAbs head))) := by
+  cases side <;> by_cases h : head = 0
+  all_goals
+    simp [foldedCellOfTapeAt, writeCell, sourceOffset_right_left_head_ne_zero,
+      sourceOffset_left_right_head_ne_zero, h]
+  all_goals rfl
+
+theorem sourceOffset_left_ne_zero_of_ne_head
+    (side : Side) {head position : Nat} (h : position ≠ head) :
+    sourceOffset side head (leftAbs position) ≠ 0 := by
+  cases side <;> simp [sourceOffset, activeAbs, leftAbs, rightAbs] <;> omega
+
+theorem sourceOffset_right_ne_zero_of_ne_head
+    (side : Side) {head position : Nat} (h : position ≠ head) :
+    sourceOffset side head (rightAbs position) ≠ 0 := by
+  cases side <;> simp [sourceOffset, activeAbs, leftAbs, rightAbs] <;> omega
+
+theorem foldedCellOfTapeAt_write_inactive (tape : Turing.Tape SourceSymbol)
+    (side : Side) {head position : Nat} (new : SourceSymbol) (h : position ≠ head) :
+    foldedCellOfTapeAt (tape.write new) side head position =
+      foldedCellOfTapeAt tape side head position := by
+  simp [foldedCellOfTapeAt, sourceOffset_left_ne_zero_of_ne_head side h,
+    sourceOffset_right_ne_zero_of_ne_head side h]
+
+theorem FoldedTapeRel_write {tape : Turing.Tape SourceSymbol} {side : Side}
+    {head : Nat} {foldedTape : Nat → Nat} (new : SourceSymbol)
+    (hrel : FoldedTapeRel tape side head foldedTape) :
+    FoldedTapeRel (tape.write new) side head
+      (Function.update foldedTape head
+        (writeCell side (decide (head = 0)) new
+          (tape.nth (sourceOffset side head (leftAbs head)))
+          (tape.nth (sourceOffset side head (rightAbs head))))) := by
+  intro position
+  by_cases h : position = head
+  · subst position
+    simp [foldedCellOfTapeAt_write_active]
+  · rw [Function.update_of_ne h, hrel position]
+    exact (foldedCellOfTapeAt_write_inactive tape side new h).symm
+
+def moveHead (side : Side) (marked : Bool) (head : Nat) (dir : Turing.Dir) : Nat :=
+  match side, marked, dir with
+  | .right, true, .left => head
+  | .left, true, .right => head
+  | .right, _, .right => head + 1
+  | .right, _, .left => head.pred
+  | .left, _, .left => head + 1
+  | .left, _, .right => head.pred
+
+theorem activeAbs_moveHead (side : Side) (head : Nat) (dir : Turing.Dir) :
+    activeAbs (nextSide side (decide (head = 0)) dir)
+        (moveHead side (decide (head = 0)) head dir) =
+      activeAbs side head + match dir with
+      | .left => -1
+      | .right => 1 := by
+  cases side <;> cases dir <;> by_cases h : head = 0
+  all_goals subst_vars
+  all_goals simp_all [nextSide, moveHead, activeAbs, leftAbs, rightAbs]
+  all_goals try omega
+
+theorem sourceOffset_moveHead (side : Side) (head : Nat) (dir : Turing.Dir)
+    (absolute : Int) :
+    sourceOffset (nextSide side (decide (head = 0)) dir)
+        (moveHead side (decide (head = 0)) head dir) absolute =
+      sourceOffset side head absolute - match dir with
+      | .left => -1
+      | .right => 1 := by
+  unfold sourceOffset
+  rw [activeAbs_moveHead]
+  cases dir <;> omega
+
+theorem foldedCellOfTapeAt_move (tape : Turing.Tape SourceSymbol)
+    (side : Side) (head position : Nat) (dir : Turing.Dir) :
+    foldedCellOfTapeAt (tape.move dir)
+        (nextSide side (decide (head = 0)) dir)
+        (moveHead side (decide (head = 0)) head dir) position =
+      foldedCellOfTapeAt tape side head position := by
+  cases dir <;> simp [foldedCellOfTapeAt, sourceOffset_moveHead]
+
+theorem FoldedTapeRel_move {tape : Turing.Tape SourceSymbol} {side : Side}
+    {head : Nat} {foldedTape : Nat → Nat} (dir : Turing.Dir)
+    (hrel : FoldedTapeRel tape side head foldedTape) :
+    FoldedTapeRel (tape.move dir)
+      (nextSide side (decide (head = 0)) dir)
+      (moveHead side (decide (head = 0)) head dir) foldedTape := by
+  intro position
+  rw [hrel position, foldedCellOfTapeAt_move]
+
+theorem nextID_write {q q' : SourceLabel} {side : Side} {marked : Bool}
+    {left right new : SourceSymbol} {id : PostID}
+    (hstate : id.state = some (foldedState side q))
+    (hcell : id.tape id.head = foldedSymbol marked left right)
+    (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = some (q', Turing.TM0.Stmt.write new)) :
+    program.nextID id =
+      { tape := Function.update id.tape id.head (writeCell side marked new left right)
+        head := id.head
+        state := some (foldedState side q') } := by
+  rw [PostProgram.nextID_of_running hstate, hcell]
+  rw [step_of_source_step hq hstep]
+  rfl
+
+theorem nextID_move {q q' : SourceLabel} {side : Side} {marked : Bool}
+    {left right : SourceSymbol} {dir : Turing.Dir} {id : PostID}
+    (hstate : id.state = some (foldedState side q))
+    (hcell : id.tape id.head = foldedSymbol marked left right)
+    (hq : q ∈ labels)
+    (hstep : tm0 q (read side left right) = some (q', Turing.TM0.Stmt.move dir)) :
+    program.nextID id =
+      { tape := id.tape
+        head := moveHead side marked id.head dir
+        state := some (foldedState (nextSide side marked dir) q') } := by
+  rw [PostProgram.nextID_of_running hstate, hcell]
+  rw [step_of_source_step hq hstep]
+  cases side <;> cases marked <;> cases dir <;>
+    simp [rowOfStep, moveStmt, moveHead, nextSide, PostProgram.applyStmt,
+      Move.apply, hcell]
+
+theorem nextID_halt {q : SourceLabel} {side : Side} {marked : Bool}
+    {left right : SourceSymbol} {id : PostID}
+    (hstate : id.state = some (foldedState side q))
+    (hcell : id.tape id.head = foldedSymbol marked left right)
+    (hq : q ∈ labels) (hstep : tm0 q (read side left right) = none) :
+    (program.nextID id).state = none := by
+  rw [PostProgram.nextID_of_running hstate, hcell]
+  rw [step_of_no_source_step hq hstep]
+
+theorem FoldedConfigRel_write_step
+    {cfg : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    {q' : SourceLabel} {new : SourceSymbol} (hrel : FoldedConfigRel cfg id)
+    (hstep : tm0 cfg.q cfg.Tape.head = some (q', Turing.TM0.Stmt.write new)) :
+    FoldedConfigRel { q := q', Tape := cfg.Tape.write new } (program.nextID id) := by
+  rcases hrel with ⟨side, hq, hstate, htape⟩
+  let left := cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head))
+  let right := cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))
+  have hread : read side left right = cfg.Tape.head := by
+    exact read_active_cell cfg.Tape side id.head
+  have hstep' : tm0 cfg.q (read side left right) =
+      some (q', Turing.TM0.Stmt.write new) := by simpa [hread] using hstep
+  have hcell : id.tape id.head =
+      foldedSymbol (decide (id.head = 0)) left right := by
+    rw [htape id.head]
+    rfl
+  rw [nextID_write hstate hcell hq hstep']
+  exact ⟨side, next_mem_labels hq hstep, rfl, FoldedTapeRel_write new htape⟩
+
+theorem FoldedConfigRel_move_step
+    {cfg : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    {q' : SourceLabel} {dir : Turing.Dir} (hrel : FoldedConfigRel cfg id)
+    (hstep : tm0 cfg.q cfg.Tape.head = some (q', Turing.TM0.Stmt.move dir)) :
+    FoldedConfigRel { q := q', Tape := cfg.Tape.move dir } (program.nextID id) := by
+  rcases hrel with ⟨side, hq, hstate, htape⟩
+  let marked := decide (id.head = 0)
+  let left := cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head))
+  let right := cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))
+  have hread : read side left right = cfg.Tape.head :=
+    read_active_cell cfg.Tape side id.head
+  have hstep' : tm0 cfg.q (read side left right) =
+      some (q', Turing.TM0.Stmt.move dir) := by simpa [hread] using hstep
+  have hcell : id.tape id.head = foldedSymbol marked left right := by
+    rw [htape id.head]
+    rfl
+  rw [nextID_move hstate hcell hq hstep']
+  exact ⟨nextSide side marked dir, next_mem_labels hq hstep, rfl,
+    FoldedTapeRel_move dir htape⟩
+
+theorem FoldedConfigRel_step
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    (hrel : FoldedConfigRel cfg id) (hstep : Turing.TM0.step tm0 cfg = some cfg') :
+    FoldedConfigRel cfg' (program.nextID id) := by
+  cases hm : tm0 cfg.q cfg.Tape.head with
+  | none => simp [Turing.TM0.step, hm] at hstep
+  | some next =>
+      rcases next with ⟨q', stmt⟩
+      cases stmt with
+      | write new =>
+          have hcfg : cfg' = { q := q', Tape := cfg.Tape.write new } := by
+            simpa [Turing.TM0.step, hm] using hstep.symm
+          subst cfg'
+          exact FoldedConfigRel_write_step hrel hm
+      | move dir =>
+          have hcfg : cfg' = { q := q', Tape := cfg.Tape.move dir } := by
+            simpa [Turing.TM0.step, hm] using hstep.symm
+          subst cfg'
+          exact FoldedConfigRel_move_step hrel hm
+
+theorem FoldedConfigRel_halt_step
+    {cfg : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    (hrel : FoldedConfigRel cfg id) (hstep : Turing.TM0.step tm0 cfg = none) :
+    (program.nextID id).state = none := by
+  rcases hrel with ⟨side, hq, hstate, htape⟩
+  let marked := decide (id.head = 0)
+  let left := cfg.Tape.nth (sourceOffset side id.head (leftAbs id.head))
+  let right := cfg.Tape.nth (sourceOffset side id.head (rightAbs id.head))
+  have hread : read side left right = cfg.Tape.head :=
+    read_active_cell cfg.Tape side id.head
+  have hm : tm0 cfg.q cfg.Tape.head = none := by
+    cases hm : tm0 cfg.q cfg.Tape.head with
+    | none => rfl
+    | some next => simp [Turing.TM0.step, hm] at hstep
+  have hm' : tm0 cfg.q (read side left right) = none := by simpa [hread] using hm
+  have hcell : id.tape id.head = foldedSymbol marked left right := by
+    rw [htape id.head]
+    rfl
+  exact nextID_halt hstate hcell hq hm'
+
+theorem FoldedConfigRel_reaches
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    (hrel : FoldedConfigRel cfg id)
+    (hreach : StateTransition.Reaches (Turing.TM0.step tm0) cfg cfg') :
+    ∃ steps, FoldedConfigRel cfg' (Nat.iterate program.nextID steps id) := by
+  induction hreach with
+  | refl => exact ⟨0, hrel⟩
+  | tail _ hstep ih =>
+      rcases ih with ⟨steps, hrel'⟩
+      refine ⟨steps + 1, ?_⟩
+      rw [Function.iterate_succ_apply']
+      exact FoldedConfigRel_step hrel' (by simpa using hstep)
+
+theorem FoldedConfigRel_reaches_halt
+    {cfg cfg' : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    (hrel : FoldedConfigRel cfg id)
+    (hreach : StateTransition.Reaches (Turing.TM0.step tm0) cfg cfg')
+    (hhalt : Turing.TM0.step tm0 cfg' = none) :
+    ∃ steps, (Nat.iterate program.nextID steps id).state = none := by
+  rcases FoldedConfigRel_reaches hrel hreach with ⟨steps, hrel'⟩
+  refine ⟨steps + 1, ?_⟩
+  rw [Function.iterate_succ_apply']
+  exact FoldedConfigRel_halt_step hrel' hhalt
+
+theorem tm0_reaches_halt_of_post_halts
+    {cfg : Turing.TM0.Cfg SourceSymbol SourceLabel} {id : PostID}
+    (hrel : FoldedConfigRel cfg id) : ∀ steps,
+    (Nat.iterate program.nextID steps id).state = none →
+      ∃ cfg', StateTransition.Reaches (Turing.TM0.step tm0) cfg cfg' ∧
+        Turing.TM0.step tm0 cfg' = none
+  | 0, hhalt => by
+      rcases hrel with ⟨side, _hq, hstate, _htape⟩
+      simp [hstate] at hhalt
+  | steps + 1, hhalt => by
+      cases hstep : Turing.TM0.step tm0 cfg with
+      | none => exact ⟨cfg, Relation.ReflTransGen.refl, hstep⟩
+      | some cfg' =>
+          have hrel' := FoldedConfigRel_step hrel hstep
+          have hhalt' :
+              (Nat.iterate program.nextID steps (program.nextID id)).state = none := by
+            simpa [Function.iterate_succ_apply] using hhalt
+          rcases tm0_reaches_halt_of_post_halts hrel' steps hhalt' with
+            ⟨terminal, hreach, hterminal⟩
+          exact ⟨terminal, Relation.ReflTransGen.head (by simpa using hstep) hreach,
+            hterminal⟩
+
+def inputWord : List SourceSymbol → List Nat
+  | [] => []
+  | first :: rest =>
+      foldedSymbol true default first ::
+        rest.map (foldedSymbol false default)
+
+private theorem foldedOrigin_primrec :
+    Primrec (fun source : SourceSymbol => foldedSymbol true default source) := by
+  unfold foldedSymbol
+  exact Primrec₂.natPair.comp (Primrec.const 1)
+    (Primrec₂.natPair.comp (Primrec.const (symbolCode default)) symbolCode_primrec)
+
+private theorem foldedRight_primrec :
+    Primrec (fun source : SourceSymbol => foldedSymbol false default source) := by
+  unfold foldedSymbol
+  exact Primrec₂.natPair.comp (Primrec.const 0)
+    (Primrec₂.natPair.comp (Primrec.const (symbolCode default)) symbolCode_primrec)
+
+theorem inputWord_primrec : Primrec inputWord := by
+  have hrest : Primrec (fun rest : List SourceSymbol =>
+      rest.map (foldedSymbol false default)) := by
+    refine Primrec.list_map Primrec.id ?_
+    apply Primrec₂.mk
+    exact foldedRight_primrec.comp Primrec.snd
+  have hcons : Primrec₂ (fun (_ : List SourceSymbol) =>
+      fun p : SourceSymbol × List SourceSymbol =>
+        foldedSymbol true default p.1 ::
+          p.2.map (foldedSymbol false default)) := by
+    apply Primrec₂.mk
+    exact Primrec.list_cons.comp
+      (foldedOrigin_primrec.comp (Primrec.fst.comp Primrec.snd))
+      (hrest.comp (Primrec.snd.comp Primrec.snd))
+  exact (Primrec.list_casesOn Primrec.id (Primrec.const []) hcons).of_eq
+    fun input => by cases input <;> rfl
+
+theorem inputWord_computable : Computable inputWord := inputWord_primrec.to_comp
+
+def initialPostID (input : List SourceSymbol) : PostID where
+  tape := MachineInput.tape foldedBlank (inputWord input)
+  head := 0
+  state := some (foldedState .right default)
+
+private def inputAt (input : List SourceSymbol) (position : Nat) : SourceSymbol :=
+  input.getI position
+
+theorem foldedCellOfTapeAt_init (input : List SourceSymbol) (position : Nat) :
+    foldedCellOfTapeAt (Turing.TM0.init (Λ := SourceLabel) input).Tape .right 0 position =
+      if position = 0 then foldedSymbol true default (inputAt input 0)
+      else foldedSymbol false default (inputAt input position) := by
+  cases position with
+  | zero =>
+      have hleft : sourceOffset .right 0 (leftAbs 0) = Int.negSucc 0 := by
+        simp [sourceOffset, activeAbs, leftAbs, rightAbs]
+      have hright : sourceOffset .right 0 (rightAbs 0) = 0 := by
+        simp [sourceOffset, activeAbs, rightAbs]
+      rw [foldedCellOfTapeAt, hleft, hright]
+      have hget : input.headI = input.getI 0 := (List.getI_zero_eq_headI (l := input)).symm
+      simp [inputAt, Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂,
+        Turing.Tape.mk', Turing.Tape.nth, hget]
+  | succ position =>
+      have hleft : sourceOffset .right 0 (leftAbs (position + 1)) =
+          Int.negSucc (position + 1) := by
+        simp [sourceOffset, activeAbs, leftAbs, rightAbs]
+        omega
+      have hright : sourceOffset .right 0 (rightAbs (position + 1)) =
+          Int.ofNat (position + 1) := by
+        simp [sourceOffset, activeAbs, rightAbs]
+      rw [foldedCellOfTapeAt, hleft, hright]
+      have hget : input.tail.getI position = input.getI (position + 1) := by
+        cases input <;> rfl
+      simp [inputAt, Turing.TM0.init, Turing.Tape.mk₁, Turing.Tape.mk₂,
+        Turing.Tape.mk', Turing.Tape.nth, hget]
+
+theorem inputWord_tape_eq_foldedCell {input : List SourceSymbol}
+    (hinput : input ≠ []) (position : Nat) :
+    MachineInput.tape foldedBlank (inputWord input) position =
+      foldedCellOfTapeAt (Turing.TM0.init (Λ := SourceLabel) input).Tape .right 0 position := by
+  rw [foldedCellOfTapeAt_init]
+  cases input with
+  | nil => contradiction
+  | cons first rest =>
+      cases position with
+      | zero => simp [MachineInput.tape, inputWord, inputAt]
+      | succ position =>
+          by_cases hposition : position < rest.length
+          · simp [MachineInput.tape, inputWord, inputAt, hposition,
+              List.getI_eq_getElem rest hposition]
+          · have hdefault : rest.getI position = default :=
+              List.getI_eq_default (l := rest) (by omega)
+            simp [MachineInput.tape, inputWord, inputAt, hposition, foldedBlank, hdefault]
+
+theorem FoldedConfigRel_initial {input : List SourceSymbol} (hinput : input ≠ []) :
+    FoldedConfigRel (Turing.TM0.init (Λ := SourceLabel) input) (initialPostID input) := by
+  refine ⟨.right, ?_, rfl, ?_⟩
+  · exact default_mem_labels
+  · intro position
+    exact inputWord_tape_eq_foldedCell hinput position
+
+theorem inputWord_symbol_mem {input : List SourceSymbol} {symbol : Nat}
+    (hmem : symbol ∈ inputWord input) : symbol ∈ foldedSymbols := by
+  cases input with
+  | nil => simp [inputWord] at hmem
+  | cons first rest =>
+      simp only [inputWord, List.mem_cons, List.mem_map] at hmem
+      rcases hmem with rfl | ⟨source, _, rfl⟩
+      · exact foldedSymbol_mem true default first
+      · exact foldedSymbol_mem false default source
+
+theorem initialPostID_tapeSupported (input : List SourceSymbol) :
+    PostProgram.TapeSupported program (initialPostID input) := by
+  intro position
+  change MachineInput.tape foldedBlank (inputWord input) position ∈
+    PostProgram.tableSupportedSymbols program
+  cases hget : (inputWord input)[position]? with
+  | none =>
+      rw [MachineInput.tape, hget]
+      exact PostProgram.blank_mem_tableSupportedSymbols program
+  | some symbol =>
+      rw [MachineInput.tape, hget]
+      apply PostProgram.symbol_mem_tableSupportedSymbols
+      exact inputWord_symbol_mem (List.mem_iff_getElem?.2 ⟨position, hget⟩)
+
+theorem initialID_eq_tableID (input : List SourceSymbol) :
+    MachineInput.initialID program.toTableProgram.toMachine (inputWord input) =
+      PostProgram.tableIDOfPostID (initialPostID input) := by
+  apply ID.ext <;> rfl
+
+theorem machine_halts_iff_tableHalts (input : List SourceSymbol) :
+    MachineInput.Halts program.toTableProgram.toMachine (inputWord input) ↔
+      PostMachineInput.tableHalts program (initialPostID input) := by
+  unfold MachineInput.Halts PostMachineInput.tableHalts
+  apply exists_congr
+  intro steps
+  simp only [MachineInput.run, PostMachineInput.tableRun]
+  rw [initialID_eq_tableID]
+  rfl
+
+private theorem part_dom_map_iff {α β : Type} (f : α → β) (p : Part α) :
+    (f <$> p).Dom ↔ p.Dom := by
+  rw [Part.map_eq_map]
+  rfl
+
+theorem postHalts_iff_tm0_eval_dom {input : List SourceSymbol} (hinput : input ≠ []) :
+    PostMachineInput.postHalts program (initialPostID input) ↔
+      (Turing.TM0.eval tm0 input).Dom := by
+  let step := Turing.TM0.step tm0
+  let initCfg := Turing.TM0.init (Λ := SourceLabel) input
+  have hinitial : FoldedConfigRel initCfg (initialPostID input) :=
+    FoldedConfigRel_initial hinput
+  constructor
+  · rintro ⟨steps, hhalt⟩
+    rcases tm0_reaches_halt_of_post_halts hinitial steps hhalt with
+      ⟨cfg, hreach, hterminal⟩
+    rw [Turing.TM0.eval]
+    apply (part_dom_map_iff (fun c => c.Tape.right₀)
+      (StateTransition.eval step initCfg)).2
+    exact Part.dom_iff_mem.2 ⟨cfg, StateTransition.mem_eval.2 ⟨hreach, hterminal⟩⟩
+  · intro hdom
+    have hdomState : (StateTransition.eval step initCfg).Dom := by
+      rw [Turing.TM0.eval] at hdom
+      exact (part_dom_map_iff (fun c => c.Tape.right₀)
+        (StateTransition.eval step initCfg)).1 hdom
+    let haltCfg := (StateTransition.eval step initCfg).get hdomState
+    have hmem : haltCfg ∈ StateTransition.eval step initCfg := Part.get_mem hdomState
+    rcases StateTransition.mem_eval.1 hmem with ⟨hreach, hterminal⟩
+    exact FoldedConfigRel_reaches_halt hinitial hreach hterminal
+
+theorem machine_halts_iff_tm0_eval_dom {input : List SourceSymbol} (hinput : input ≠ []) :
+    MachineInput.Halts program.toTableProgram.toMachine (inputWord input) ↔
+      (Turing.TM0.eval tm0 input).Dom := by
+  rw [machine_halts_iff_tableHalts]
+  rw [PostMachineInput.tableHalts_iff_postHalts (initialPostID_tapeSupported input)]
+  exact postHalts_iff_tm0_eval_dom hinput
 
 end UniversalTM0Folded
 end LeanWang

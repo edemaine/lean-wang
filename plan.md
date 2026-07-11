@@ -39,24 +39,21 @@ constant finite table program, a computable source-dependent input word, a
 support proof, and the halting equivalence. All machine-to-Wang and scaffold
 reasoning depends only on this certificate.
 
-`TM0FixedDirectProgram` implements that replacement. It emits semantic folded rows
-directly over the finite reachable-label support and proves their transition
-lookup without position codes or generated descriptor decoding. Both the
-matching-row and no-matching-row cases are complete. `TM0FixedDirectGeometry`
-states the folded-tape invariant independently, and
-`TM0FixedDirectExecution` gives exact write, move, and halt equations for the
-direct table. These yield the runtime and halting equivalence directly from TM0
-semantics. The universal reduction's proof dependency graph contains neither
-the generated position compiler nor its correctness proof.
+`UniversalTM0Semantic` relabels the one fixed evaluator, carries Mathlib's
+native finite supports through TM2, TM1, and TM0, and proves the varying binary
+input primitive recursive. `UniversalTM0Folded` enumerates the fixed support
+once, emits the semantic folded rows directly, proves exact transition lookup,
+and proves the two-sided-TM0 to one-sided-Post simulation in both directions.
+No translated statement syntax is encoded or decoded.
 
 1. `UniversalCode.universalCode` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
-2. `UniversalTM0.code` translates this universal evaluator once through
-   Mathlib's `ToPartrec`, TM2, TM1, and TM0 route.
-3. `UniversalTM0.input c` writes `Nat.pair (encode c) 0` as the varying initial
-   tape. Its construction is computable.
-4. `TM0FixedDirectInput` folds that finite word and starts the direct fixed
-   simulation control on it. No machine initializer writes or rewinds the input.
+2. `UniversalTM0Semantic.code` translates this evaluator once and uses
+   Mathlib's finite-support TM2-to-TM1-to-TM0 transformations.
+3. `UniversalTM0Semantic.input c` writes `Nat.pair (encode c) 0` as the varying
+   initial tape. Its construction is computable.
+4. `UniversalTM0Folded.inputWord` folds that finite word and starts the constant
+   Post control directly on it. No initializer writes or rewinds the input.
 5. `MachineInputTiles` forces the finite word in a position-tagged bottom Wang
    row, followed by one self-looping blank-tail tile. It proves seeded
    quarter-plane tiling equivalent to nonhalting on that input.
@@ -73,20 +70,13 @@ the generated position compiler nor its correctness proof.
 10. Mathlib's `ComputablePred.halting_problem` yields both undecidability
    theorems.
 
-There is no remaining source-uniform compiler, descriptor decoder, or generated
-position-row obligation or input-specific machine control in the final
-reduction. The obsolete generated initializer, position-code compiler, and
-their correctness modules have been deleted. The retained fixed TM0-to-Post
-reduction consists only of the folded alphabet and tape geometry, direct
-semantic transition rows, and their step/halting simulation.
-
-A smaller fixed-only route is now available in `UniversalTM0Semantic`. It
-avoids the code-parametric support-list and started-machine compiler entirely:
-the fixed universal evaluator is relabeled once, Mathlib's native finite
-support transformers carry it through TM2, TM1, and TM0, and only the varying
-binary input receives a primitive-recursiveness proof. The remaining machine
-cleanup is to redirect the folded TM0 simulation to this fixed support and then
-delete the obsolete code-parametric route.
+There is no remaining source-uniform compiler, descriptor decoder, generated
+position-row obligation, code-parametric support-list construction, or
+input-specific machine control in the final reduction. More than twenty
+thousand lines of the obsolete route have been deleted. The retained fixed
+TM0-to-Post reduction consists only of native finite supports, the folded
+alphabet and tape geometry, direct semantic transition rows, and their
+step/halting simulation.
 
 ## Completed general tiling infrastructure
 
