@@ -127,10 +127,10 @@ theorem coverageCheck_sound
       simpa [nodes] using covered
 
 def auditWidth (phase : Phase) (depth : Nat) : Nat :=
-  quarterEast (4 * east phase depth)
+  quarterEast (4 * east phase depth) + 1
 
 def auditHeight (phase : Phase) (depth : Nat) : Nat :=
-  quarterNorth (4 * east phase depth)
+  quarterNorth (4 * east phase depth) + 1
 
 def auditFuel (phase : Phase) (depth : Nat) : Nat :=
   8 * auditWidth phase depth * auditHeight phase depth + 1
@@ -152,9 +152,11 @@ theorem rawCoverageAt_of_audit
     {phase : Phase} {depth : Nat} {parent : Index}
     (checked : audit phase depth parent = true) :
     RawCoverageAt phase depth parent := by
-  apply coverageCheck_sound
-  · rfl
-  · rfl
+  refine coverageCheck_sound
+    (width := auditWidth phase depth) (height := auditHeight phase depth)
+    (fuel := auditFuel phase depth) ?_ ?_ ?_
+  · simp [auditWidth]
+  · simp [auditHeight]
   · exact checked
 
 end BorderCoverageAudit
