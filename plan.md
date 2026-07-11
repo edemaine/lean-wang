@@ -452,6 +452,12 @@ semantic transition rows, and their step/halting simulation.
   each orientation. `graphPeriodicStep_of_localProjectionStep` reconnects
   those bounded cases to the unbounded free-grid induction via the proved
   successor-offset decomposition.
+- `BorderCoverageLocalAudit` now supplies sound `8 x 8` route checks for cycle
+  and retained sources in either orientation. The first audits confirm that a
+  side target may require the intersecting retained column/row source in
+  addition to the outer-cycle source. Thus the finite template state must
+  record the local row and column source classes together, matching the
+  whole-pattern invariant rather than treating lines independently.
 - `patternFamily` concatenates the cycle and every retained row/column family
   into one executable source set. `Family.CoversPattern` is now the sole
   concrete weighted-search obligation, and `projectionStep_of_coverageStep`
