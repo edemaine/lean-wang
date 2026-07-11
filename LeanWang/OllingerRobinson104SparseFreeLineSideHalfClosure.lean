@@ -144,7 +144,7 @@ theorem windowGrid_canonicalWindow (window : Window) (x y : Nat) :
       BorderSubstitution.canonicalIndex (windowGrid window x y) := by
   simp only [windowGrid, canonicalWindow, List.getElem?_map]
   cases hentry : window[y * 3 + x]? <;>
-    simp [hentry, canonicalIndex_zero]
+    simp [canonicalIndex_zero]
 
 theorem canonicalWindow_refineWindow (window : Window) (residueX : Nat) :
     canonicalWindow (refineWindow window residueX) =
@@ -241,6 +241,165 @@ theorem canonicalWindow_windowAt_mem_closedWindows
       rw [windowAt_succ, hblock, canonicalWindow_refineWindow]
       apply refineWindow_mem_closedWindows (ih oldDelta holdDelta)
       exact Nat.mod_lt _ (by decide)
+
+theorem boundaryWindow_eq (parent : Index) (delta : Nat) :
+    boundaryWindow parent delta =
+      windowAt 0 parent (firstBlock 0 + delta) := by
+  rfl
+
+theorem canonical_boundary_mem (parent : Index) (delta : Nat) :
+    canonicalWindow (windowAt 0 parent (firstBlock 0 + delta)) ∈
+      boundaryBase delta := by
+  rw [← boundaryWindow_eq, boundaryBase, List.mem_eraseDups, List.mem_map]
+  exact ⟨parent, by simp, rfl⟩
+
+theorem mem_closeWindowsAt_self {residues : List Nat} {windows : List Window}
+    {window : Window} (hwindow : window ∈ windows) :
+    window ∈ closeWindowsAt residues windows := by
+  rw [closeWindowsAt, List.mem_eraseDups, List.mem_append]
+  exact Or.inl hwindow
+
+theorem mem_closeWindowsAt_refine {residues : List Nat} {windows : List Window}
+    {window : Window} (hwindow : window ∈ windows) {residue : Nat}
+    (hresidue : residue ∈ residues) :
+    canonicalWindow (refineWindow window residue) ∈
+      closeWindowsAt residues windows := by
+  rw [closeWindowsAt, List.mem_eraseDups, List.mem_append]
+  right
+  rw [List.mem_flatMap]
+  refine ⟨window, hwindow, ?_⟩
+  rw [List.mem_map]
+  exact ⟨residue, hresidue, rfl⟩
+
+theorem canonical_refine_mem_of_closedAt
+    {residues : List Nat} {windows : List Window} {window : Window} {residue : Nat}
+    (hclosed : closeWindowsAt residues windows = windows)
+    (hwindow : window ∈ windows) (hresidue : residue ∈ residues) :
+    canonicalWindow (refineWindow window residue) ∈ windows := by
+  rw [← hclosed]
+  exact mem_closeWindowsAt_refine hwindow hresidue
+
+theorem canonical_leftmost_mem (depth : Nat) (parent : Index) :
+    canonicalWindow (windowAt depth parent (firstBlock depth)) ∈
+      leftmostWindows := by
+  induction depth with
+  | zero =>
+      apply mem_closeWindowsAt_self
+      exact canonical_boundary_mem parent 0
+  | succ depth ih =>
+      have hblock :
+          (firstBlock (depth + 1) - 1) / 4 + 1 = firstBlock depth := by
+        rw [firstBlock_succ, firstBlock_eq]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      have hresidue : (firstBlock (depth + 1) - 1) % 4 = 3 := by
+        rw [firstBlock_succ, firstBlock_eq]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      rw [windowAt_succ, hblock, hresidue, canonicalWindow_refineWindow]
+      exact canonical_refine_mem_of_closedAt leftmostWindows_closed ih (by simp)
+
+theorem canonical_nextLeft_mem (depth : Nat) (parent : Index) :
+    canonicalWindow (windowAt depth parent (firstBlock depth + 1)) ∈
+      nextLeftWindows := by
+  induction depth with
+  | zero =>
+      apply mem_closeWindowsAt_self
+      exact canonical_boundary_mem parent 1
+  | succ depth ih =>
+      have hblock :
+          (firstBlock (depth + 1) + 1 - 1) / 4 + 1 =
+            firstBlock depth + 1 := by
+        rw [firstBlock_succ]
+        omega
+      have hresidue : (firstBlock (depth + 1) + 1 - 1) % 4 = 0 := by
+        rw [firstBlock_succ]
+        omega
+      rw [windowAt_succ, hblock, hresidue, canonicalWindow_refineWindow]
+      exact canonical_refine_mem_of_closedAt nextLeftWindows_closed ih (by simp)
+
+def lastBlock (depth : Nat) : Nat :=
+  firstBlock depth + blockCount depth - 1
+
+def lastRelevantBlock (depth : Nat) : Nat :=
+  firstBlock depth + blockCount depth - 2
+
+theorem lastBlock_eq (depth : Nat) : lastBlock depth = 24 * 4 ^ depth := by
+  rw [lastBlock, firstBlock_eq, blockCount_eq]
+  omega
+
+theorem lastRelevantBlock_eq (depth : Nat) :
+    lastRelevantBlock depth = 24 * 4 ^ depth - 1 := by
+  rw [lastRelevantBlock, firstBlock_eq, blockCount_eq]
+  omega
+
+theorem canonical_rightEdge_mem (depth : Nat) (parent : Index) :
+    canonicalWindow (windowAt depth parent (lastBlock depth)) ∈
+      rightEdgeWindows := by
+  induction depth with
+  | zero =>
+      apply mem_closeWindowsAt_self
+      have hdelta : quarterEast (4 * east .odd 1) / 8 -
+          quarterWest (4 * west .odd 1) / 8 = blockCount 0 - 1 := by
+        norm_num [blockCount, firstBlock, west, east, scale, Phase.factor,
+          quarterWest, quarterEast]
+      rw [hdelta]
+      have hblock : firstBlock 0 + blockCount 0 - 1 =
+          firstBlock 0 + (blockCount 0 - 1) := by
+        rw [blockCount_eq]
+        omega
+      rw [lastBlock, hblock]
+      exact canonical_boundary_mem parent (blockCount 0 - 1)
+  | succ depth ih =>
+      have hlast : lastBlock (depth + 1) = 4 * lastBlock depth := by
+        rw [lastBlock_eq, lastBlock_eq, pow_succ]
+        omega
+      have hblock : (lastBlock (depth + 1) - 1) / 4 + 1 =
+          lastBlock depth := by
+        rw [hlast, lastBlock_eq]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      have hresidue : (lastBlock (depth + 1) - 1) % 4 = 3 := by
+        rw [hlast, lastBlock_eq]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      rw [windowAt_succ, hblock, hresidue, canonicalWindow_refineWindow]
+      exact canonical_refine_mem_of_closedAt rightEdgeWindows_closed ih (by simp)
+
+theorem canonical_rightmostRelevant_mem (depth : Nat) (parent : Index) :
+    canonicalWindow (windowAt depth parent (lastRelevantBlock depth)) ∈
+      rightmostRelevantWindows := by
+  cases depth with
+  | zero =>
+      rw [rightmostRelevantWindows, List.mem_eraseDups, List.mem_append]
+      left
+      have hdelta : quarterEast (4 * east .odd 1) / 8 -
+          quarterWest (4 * west .odd 1) / 8 - 1 = blockCount 0 - 2 := by
+        norm_num [blockCount, firstBlock, west, east, scale, Phase.factor,
+          quarterWest, quarterEast]
+      rw [hdelta]
+      have hblock : firstBlock 0 + blockCount 0 - 2 =
+          firstBlock 0 + (blockCount 0 - 2) := by
+        rw [blockCount_eq]
+        omega
+      rw [lastRelevantBlock, hblock]
+      exact canonical_boundary_mem parent (blockCount 0 - 2)
+  | succ depth =>
+      have hblock : (lastRelevantBlock (depth + 1) - 1) / 4 + 1 =
+          lastBlock depth := by
+        rw [lastRelevantBlock_eq, lastBlock_eq, pow_succ]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      have hresidue : (lastRelevantBlock (depth + 1) - 1) % 4 = 2 := by
+        rw [lastRelevantBlock_eq, pow_succ]
+        have hpower : 0 < 4 ^ depth := pow_pos (by decide) depth
+        omega
+      rw [windowAt_succ, hblock, hresidue, canonicalWindow_refineWindow]
+      rw [rightmostRelevantWindows, List.mem_eraseDups, List.mem_append]
+      right
+      rw [List.mem_map]
+      exact ⟨canonicalWindow (windowAt depth parent (lastBlock depth)),
+        canonical_rightEdge_mem depth parent, rfl⟩
 
 end SparseFreeLineSideHalfClosure
 end Closed104

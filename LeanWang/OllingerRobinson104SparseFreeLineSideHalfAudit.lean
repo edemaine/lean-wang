@@ -115,6 +115,79 @@ theorem windowCheck_sound {window : Window}
   · exact Or.inl (reached_sound covered)
   · exact Or.inr (reached_sound covered)
 
+/-- Restrict local sources to those whose translated old-row coordinate is
+strictly inside the old board. -/
+def windowStartsIn (window : Window) (lower upper : Nat) :
+    List WeightedStart :=
+  (windowStarts window).filter fun start =>
+    lower ≤ start.port.x && start.port.x < upper
+
+def windowNodesIn (window : Window) (lower upper : Nat) : List Node :=
+  exploreFastWeighted (iterateRefine 2 (windowGrid window))
+    24 16 4000 (windowStartsIn window lower upper)
+
+def reachedIn (window : Window) (lower upper : Nat) (target : Port) : Bool :=
+  portPresent (iterateRefine 2 (windowGrid window)) target &&
+    (windowNodesIn window lower upper).any fun node =>
+      node.parity && decide (node.current = target)
+
+def RouteIn (window : Window) (lower upper : Nat) (target : Port) : Prop :=
+  BoundedRouteIn (iterateRefine 2 (windowGrid window))
+    24 16 (windowStartsIn window lower upper) target
+
+set_option maxHeartbeats 1000000 in
+-- Unfolding the filtered executable start list needs more elaboration work.
+theorem reachedIn_sound {window : Window} {lower upper : Nat} {target : Port}
+    (checked : reachedIn window lower upper target = true) :
+    RouteIn window lower upper target := by
+  simp only [reachedIn, windowNodesIn, Bool.and_eq_true, List.any_eq_true,
+    decide_eq_true_eq] at checked
+  rcases checked.2 with ⟨node, hnode, hparity, hcurrent⟩
+  rcases exploreFastWeighted_bounded_sound
+      (fun start hstart => windowStarts_inBounds window start
+        (List.mem_of_mem_filter hstart)) hnode with ⟨start, hstart, path⟩
+  refine ⟨start, hstart, ?_, checked.1⟩
+  rw [hcurrent] at path
+  simpa [hparity] using path
+
+/-- Check only the strict targets belonging to this boundary-window class. -/
+def windowCheckIn (window : Window) (lower upper targetLower targetUpper : Nat) :
+    Bool :=
+  (List.range 8).all fun x =>
+    if targetLower ≤ x && x < targetUpper then
+      let targetX := 8 + x
+      let required := (Signals.verticalInterior?
+        (componentAt (iterateRefine 2 (windowGrid window)) targetX 3)
+        (quadrantAt targetX 3)).isSome
+      !required || reachedIn window lower upper ⟨targetX, 3, .south⟩ ||
+        reachedIn window lower upper ⟨targetX, 3, .north⟩
+    else true
+
+set_option linter.flexible false in
+theorem windowCheckIn_sound {window : Window}
+    {lower upper targetLower targetUpper : Nat}
+    (checked : windowCheckIn window lower upper targetLower targetUpper = true) :
+    ∀ x, x < 8 → targetLower ≤ x → x < targetUpper →
+      Signals.verticalInterior?
+        (componentAt (iterateRefine 2 (windowGrid window)) (8 + x) 3)
+        (quadrantAt (8 + x) 3) ≠ none →
+      RouteIn window lower upper ⟨8 + x, 3, .south⟩ ∨
+        RouteIn window lower upper ⟨8 + x, 3, .north⟩ := by
+  simp only [windowCheckIn, List.all_eq_true, List.mem_range] at checked
+  intro x hx htargetLower htargetUpper interior
+  have covered := checked x hx
+  simp only [htargetLower, htargetUpper, decide_true, Bool.true_and,
+    if_true] at covered
+  have required : (Signals.verticalInterior?
+      (componentAt (iterateRefine 2 (windowGrid window)) (8 + x) 3)
+      (quadrantAt (8 + x) 3)).isSome = true :=
+    Option.isSome_iff_ne_none.mpr interior
+  simp only [required, Bool.not_true, Bool.false_or,
+    Bool.or_eq_true] at covered
+  rcases covered with covered | covered
+  · exact Or.inl (reachedIn_sound covered)
+  · exact Or.inr (reachedIn_sound covered)
+
 /-- Enumerate all strict target blocks for one predecessor row. -/
 def windowsIn (grid : Nat → Nat → Index)
     (oldWest oldEast oldRow : Nat) : List Window :=
@@ -156,9 +229,73 @@ def closeWindows (windows : List Window) : List Window :=
 /-- The stable 80-state quotient used by the side-half induction. -/
 def closedWindows : List Window := closeWindows canonicalWindows
 
+def boundaryWindow (parent : Index) (delta : Nat) : Window :=
+  let grid := localGrid .odd 1 parent
+  let oldWest := west .odd 1
+  let oldRow := lineCoordinate .odd 1 9
+  let blockX := quarterWest (4 * oldWest) / 8 + delta
+  let originX := blockX - 1
+  (List.range 2).flatMap fun y =>
+    (List.range 3).map fun x =>
+      grid (originX + x) (oldRow / 2 - 1 + y)
+
+def boundaryBase (delta : Nat) : List Window :=
+  ((List.finRange 104).map fun parent =>
+    canonicalWindow (boundaryWindow parent delta)).eraseDups
+
+def closeWindowsAt (residues : List Nat) (windows : List Window) : List Window :=
+  (windows ++ windows.flatMap fun window => residues.map fun residue =>
+    canonicalWindow (refineWindow window residue)).eraseDups
+
+def leftmostWindows : List Window := closeWindowsAt [3] (boundaryBase 0)
+
+def nextLeftWindows : List Window := closeWindowsAt [0] (boundaryBase 1)
+
+def rightEdgeWindows : List Window :=
+  let last :=
+    quarterEast (4 * east .odd 1) / 8 - quarterWest (4 * west .odd 1) / 8
+  closeWindowsAt [3] (boundaryBase last)
+
+def rightmostRelevantWindows : List Window :=
+  let lastRelevant :=
+    quarterEast (4 * east .odd 1) / 8 - quarterWest (4 * west .odd 1) / 8 - 1
+  (boundaryBase lastRelevant ++ rightEdgeWindows.map fun window =>
+    canonicalWindow (refineWindow window 2)).eraseDups
+
 set_option linter.style.nativeDecide false in
 theorem closedWindows_complete :
     ∀ window ∈ closedWindows, windowCheck window = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem leftmostWindows_complete :
+    ∀ window ∈ leftmostWindows, windowCheckIn window 10 24 2 8 = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem nextLeftWindows_complete :
+    ∀ window ∈ nextLeftWindows, windowCheckIn window 2 24 0 8 = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem rightmostRelevantWindows_complete :
+    ∀ window ∈ rightmostRelevantWindows,
+      windowCheckIn window 0 16 0 8 = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem leftmostWindows_closed :
+    closeWindowsAt [3] leftmostWindows = leftmostWindows := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem nextLeftWindows_closed :
+    closeWindowsAt [0] nextLeftWindows = nextLeftWindows := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem rightEdgeWindows_closed :
+    closeWindowsAt [3] rightEdgeWindows = rightEdgeWindows := by
   native_decide
 
 set_option linter.style.nativeDecide false in
