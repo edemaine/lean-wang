@@ -202,8 +202,9 @@ theorem projectsTo_of_shiftedCreatedRoute
 /-- A routed created segment in a recursive row window projects from the
 canonical cycle. -/
 theorem verticalWindowRoute_projectsTo
-    {depth : Nat} {parent : Index} {blockX : Nat} {target : Port}
-    (hblockX : blockX ≤ blockCount depth)
+    {depth : Nat} {parent : Index} {blockX delta : Nat} {target : Port}
+    (hblockX : blockX = firstBlock depth + delta)
+    (hdelta : delta ≤ blockCount depth)
     (route : Route (verticalWindowAt depth parent blockX) target) :
     Nonempty (ProjectsTo (grid := oldGrid depth parent)
       (west := west .even (depth + 1)) (east := east .even (depth + 1))
@@ -211,13 +212,17 @@ theorem verticalWindowRoute_projectsTo
       (translatePort target (8 * (blockX - 1))
         (8 * (centerBlock depth - 1)))) := by
   apply projectsTo_of_shiftedCreatedRoute
-  · have hcount : blockCount depth = 8 * 4 ^ depth := by
+  · have hfirst : firstBlock depth = 4 * 4 ^ depth := by
+      rw [firstBlock, pow_succ]
+      ac_rfl
+    have hcount : blockCount depth = 8 * 4 ^ depth := by
       rw [blockCount_eq, pow_succ]
       omega
     have hroot : 4 ^ (depth + 2) = 16 * 4 ^ depth := by
       rw [show depth + 2 = (depth + 1) + 1 by omega, pow_succ, pow_succ]
       omega
-    rw [hcount] at hblockX
+    rw [hfirst] at hblockX
+    rw [hcount] at hdelta
     rw [hroot]
     have hpow : 0 < 4 ^ depth := pow_pos (by decide) _
     omega
@@ -232,8 +237,9 @@ theorem verticalWindowRoute_projectsTo
 /-- A routed created segment in a recursive column window projects from the
 canonical cycle. -/
 theorem horizontalWindowRoute_projectsTo
-    {depth : Nat} {parent : Index} {blockY : Nat} {target : Port}
-    (hblockY : blockY ≤ blockCount depth)
+    {depth : Nat} {parent : Index} {blockY delta : Nat} {target : Port}
+    (hblockY : blockY = firstBlock depth + delta)
+    (hdelta : delta ≤ blockCount depth)
     (route : Route (horizontalWindowAt depth parent blockY) target) :
     Nonempty (ProjectsTo (grid := oldGrid depth parent)
       (west := west .even (depth + 1)) (east := east .even (depth + 1))
@@ -247,13 +253,17 @@ theorem horizontalWindowRoute_projectsTo
     rw [centerBlock, firstBlock, pow_succ, hroot]
     have hpow : 0 < 4 ^ depth := pow_pos (by decide) _
     omega
-  · have hcount : blockCount depth = 8 * 4 ^ depth := by
+  · have hfirst : firstBlock depth = 4 * 4 ^ depth := by
+      rw [firstBlock, pow_succ]
+      ac_rfl
+    have hcount : blockCount depth = 8 * 4 ^ depth := by
       rw [blockCount_eq, pow_succ]
       omega
     have hroot : 4 ^ (depth + 2) = 16 * 4 ^ depth := by
       rw [show depth + 2 = (depth + 1) + 1 by omega, pow_succ, pow_succ]
       omega
-    rw [hcount] at hblockY
+    rw [hfirst] at hblockY
+    rw [hcount] at hdelta
     rw [hroot]
     have hpow : 0 < 4 ^ depth := pow_pos (by decide) _
     omega
