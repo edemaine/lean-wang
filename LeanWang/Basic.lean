@@ -732,6 +732,17 @@ def TileableFixedCornerSquare (T : TileSet) (seed : WangTile) (n : Nat) : Prop :
   ∃ hn : 0 < n, ∃ x : Rectangle n n,
     ValidRectangle T x ∧ x ⟨0, hn⟩ ⟨0, hn⟩ = seed
 
+/-- Restrict a fixed-corner square to a smaller nonempty southwest square. -/
+theorem tileableFixedCornerSquare_crop
+    {T : TileSet} {seed : WangTile} {m n : Nat}
+    (hm : 0 < m) (hmn : m ≤ n) :
+    TileableFixedCornerSquare T seed n →
+      TileableFixedCornerSquare T seed m := by
+  rintro ⟨_, rectangle, valid, corner⟩
+  refine ⟨hm, Rectangle.crop rectangle hmn hmn,
+    validRectangle_crop valid hmn hmn, ?_⟩
+  exact corner
+
 theorem tileableFixedCornerSquare_product_of_tileableFixedCornerSquare
     {base payload : TileSet} {baseSeed payloadSeed : WangTile} {n : Nat} :
     TileableFixedCornerSquare base baseSeed n →
