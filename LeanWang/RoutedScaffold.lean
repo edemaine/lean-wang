@@ -228,6 +228,75 @@ theorem combineWithRoutedScaffold_computable (S : RoutedScaffold) :
       combineWithRoutedScaffold S input.1 input.2) :=
   (combineWithRoutedScaffold_primrec S).to_comp
 
+/-- A finite centered routed-product patch, separated into scaffold and payload
+layers.  The concrete Robinson realization only has to construct these finite
+objects; product matching and compactness are generic. -/
+structure RoutedCombinedBoxLayerPatch
+    (S : RoutedScaffold) (T : TileSet) (seed : WangTile) (r : Nat) where
+  base : BoxPattern S.tiles r
+  payload : Box r → WangTile
+  base_valid : ValidBoxTiling S.tiles r base
+  payload_mem : ∀ p : Box r,
+    payload p ∈ routedPayloads S T seed (base p).1
+  payload_hmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+    WangTile.HMatches (payload p)
+      (payload ⟨(p.1.1 + 1, p.1.2), hp⟩)
+  payload_vmatch : ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+    WangTile.VMatches (payload p)
+      (payload ⟨(p.1.1, p.1.2 + 1), hp⟩)
+
+namespace RoutedCombinedBoxLayerPatch
+
+theorem product_mem
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCombinedBoxLayerPatch S T seed r) (p : Box r) :
+    WangTile.product (patch.base p).1 (patch.payload p) ∈
+      combineWithRoutedScaffold S T seed := by
+  rw [mem_combineWithRoutedScaffold_iff]
+  exact ⟨(patch.base p).1, (patch.base p).2, patch.payload p,
+    patch.payload_mem p, rfl⟩
+
+/-- Assemble the separated routed layers into an ordinary finite box. -/
+def toBoxPattern
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCombinedBoxLayerPatch S T seed r) :
+    BoxPattern (combineWithRoutedScaffold S T seed) r :=
+  fun p => ⟨WangTile.product (patch.base p).1 (patch.payload p),
+    patch.product_mem p⟩
+
+theorem validBoxTiling_toBoxPattern
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCombinedBoxLayerPatch S T seed r) :
+    ValidBoxTiling (combineWithRoutedScaffold S T seed) r
+      patch.toBoxPattern := by
+  constructor
+  · intro p hp
+    exact (WangTile.HMatches_product_iff
+      (patch.base p).1 (patch.payload p)
+      (patch.base ⟨(p.1.1 + 1, p.1.2), hp⟩).1
+      (patch.payload ⟨(p.1.1 + 1, p.1.2), hp⟩)).2
+        ⟨patch.base_valid.1 p hp, patch.payload_hmatch p hp⟩
+  · intro p hp
+    exact (WangTile.VMatches_product_iff
+      (patch.base p).1 (patch.payload p)
+      (patch.base ⟨(p.1.1, p.1.2 + 1), hp⟩).1
+      (patch.payload ⟨(p.1.1, p.1.2 + 1), hp⟩)).2
+        ⟨patch.base_valid.2 p hp, patch.payload_vmatch p hp⟩
+
+theorem tileableBox
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCombinedBoxLayerPatch S T seed r) :
+    TileableBox (combineWithRoutedScaffold S T seed) r :=
+  ⟨patch.toBoxPattern, patch.validBoxTiling_toBoxPattern⟩
+
+end RoutedCombinedBoxLayerPatch
+
+/-- Finite-patch form of the backward routed scaffold construction. -/
+def HasRoutedCombinedBoxLayerPatches (S : RoutedScaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      ∀ r : Nat, Nonempty (RoutedCombinedBoxLayerPatch S T seed r)
+
 /-- The abstract property required of a channel-aware routed scaffold. -/
 def IsRoutedScaffold (S : RoutedScaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
@@ -246,6 +315,18 @@ def ForcesRoutedFixedCornerSquares (S : RoutedScaffold) : Prop :=
     TilesPlane (combineWithRoutedScaffold S T seed) →
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
 
+/-- Finite routed layer patches realize every family of fixed-corner squares
+by Wang compactness. -/
+theorem realizesRoutedFixedCornerSquares_of_combinedBoxLayerPatches
+    {S : RoutedScaffold}
+    (patches : HasRoutedCombinedBoxLayerPatches S) :
+    RealizesRoutedFixedCornerSquares S := by
+  intro T seed hsquares
+  apply tilesPlane_of_all_tileableBoxes
+  intro r
+  rcases patches T seed hsquares r with ⟨patch⟩
+  exact patch.tileableBox
+
 theorem isRoutedScaffold_of_realizes_of_forces
     {S : RoutedScaffold}
     (realizes : RealizesRoutedFixedCornerSquares S)
@@ -253,6 +334,15 @@ theorem isRoutedScaffold_of_realizes_of_forces
     IsRoutedScaffold S := by
   intro T seed
   exact ⟨forces, realizes T seed⟩
+
+theorem isRoutedScaffold_of_combinedBoxLayerPatches_of_forces
+    {S : RoutedScaffold}
+    (patches : HasRoutedCombinedBoxLayerPatches S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
+    IsRoutedScaffold S :=
+  isRoutedScaffold_of_realizes_of_forces
+    (realizesRoutedFixedCornerSquares_of_combinedBoxLayerPatches patches)
+    forces
 
 /-- Correctness theorem exposed by any certified routed scaffold. -/
 theorem routedScaffold_reduction_correct {S : RoutedScaffold}
