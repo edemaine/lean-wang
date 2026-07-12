@@ -266,27 +266,32 @@ theorem oddMainChildStep_of_odd :
     simpa [localGrid_succ, west_succ, east_succ] using
       liveColumnCertificate_of_horizontalProjectionAt horizontal
 
-/-- The remaining main-child case crosses the board network in the even phase. -/
-def EvenOddMainStep : Prop :=
-  ∀ depth parent offset,
-    offset ∈ offsets depth →
-    offset % 2 = 1 →
-    LiveRowCertificate (localGrid .even depth parent)
-      (west .even depth) (east .even depth)
-      (west .even depth) (east .even depth)
-      (lineCoordinate .even depth offset) →
-    LiveColumnCertificate (localGrid .even depth parent)
-      (west .even depth) (east .even depth)
-      (west .even depth) (east .even depth)
-      (lineCoordinate .even depth offset) →
-    LiveRowCertificate (localGrid .even (depth + 1) parent)
-      (west .even (depth + 1)) (east .even (depth + 1))
-      (west .even (depth + 1)) (east .even (depth + 1))
-      (lineCoordinate .even (depth + 1) (mainChild offset)) ∧
-    LiveColumnCertificate (localGrid .even (depth + 1) parent)
-      (west .even (depth + 1)) (east .even (depth + 1))
-      (west .even (depth + 1)) (east .even (depth + 1))
-      (lineCoordinate .even (depth + 1) (mainChild offset))
+/--
+The unique nonlocal even-phase main child may use the complete old sparse
+pattern. Finite diagnostics show that its per-line strengthening is false.
+-/
+def EvenExtraMainStep : Prop :=
+  ∀ depth parent,
+    (∀ offset ∈ offsets (depth + 1),
+      LiveRowCertificate (localGrid .even (depth + 1) parent)
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (lineCoordinate .even (depth + 1) offset)) →
+    (∀ offset ∈ offsets (depth + 1),
+      LiveColumnCertificate (localGrid .even (depth + 1) parent)
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (west .even (depth + 1)) (east .even (depth + 1))
+        (lineCoordinate .even (depth + 1) offset)) →
+    LiveRowCertificate (localGrid .even (depth + 2) parent)
+        (west .even (depth + 2)) (east .even (depth + 2))
+        (west .even (depth + 2)) (east .even (depth + 2))
+        (lineCoordinate .even (depth + 2)
+          (mainChild (extraChild (pivot depth)))) ∧
+      LiveColumnCertificate (localGrid .even (depth + 2) parent)
+        (west .even (depth + 2)) (east .even (depth + 2))
+        (west .even (depth + 2)) (east .even (depth + 2))
+        (lineCoordinate .even (depth + 2)
+          (mainChild (extraChild (pivot depth))))
 
 /-- The remaining extra-child case crosses the board network in the odd phase. -/
 def OddPivotExtraStep : Prop :=
@@ -308,31 +313,12 @@ def OddPivotExtraStep : Prop :=
       (west .odd (depth + 1)) (east .odd (depth + 1))
       (lineCoordinate .odd (depth + 1) (extraChild (pivot depth)))
 
-theorem mainChildStep_of_evenOdd
-    (remaining : EvenOddMainStep) : MainChildStep := by
-  intro phase depth parent offset hold row column
-  by_cases heven : offset % 2 = 0
-  · exact evenMainChildStep phase depth parent offset hold heven row column
-  · have hodd : offset % 2 = 1 := by omega
-    cases phase
-    · exact remaining depth parent offset hold hodd row column
-    · exact oddMainChildStep_of_odd depth parent offset hold hodd row column
-
 theorem pivotExtraStep_of_odd
     (remaining : OddPivotExtraStep) : PivotExtraStep := by
   intro phase depth parent row column
   cases phase
   · exact evenPivotExtraStep depth parent row column
   · exact remaining depth parent row column
-
-/-- The sparse recurrence now reduces exactly to the two board-network cases. -/
-theorem projectionStep_of_nonlocal
-    (evenOdd : EvenOddMainStep) (oddExtra : OddPivotExtraStep) :
-    SparseFreeLineRecurrence.ProjectionStep :=
-  projectionStep_of_childStep
-    (childStep_of_main_of_extra
-      (mainChildStep_of_evenOdd evenOdd)
-      (extraChildStep_of_pivot (pivotExtraStep_of_odd oddExtra)))
 
 end SparseFreeLineLocalRecurrence
 end Closed104
