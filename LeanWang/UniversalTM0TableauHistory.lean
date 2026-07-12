@@ -166,6 +166,22 @@ theorem runHistoryTile_hMatches (input : List Symbol) (time position : Nat) :
   rw [HistoryTile.hMatches_toWangTile_iff]
   simp [runHistoryTile, HistoryTile.leftMachineCell, Config.cellAtLeft]
 
+theorem runHistoryTile_hOverlap (input : List Symbol) (time position : Nat) :
+    let left := runHistoryTile input time position
+    let right := runHistoryTile input time (position + 1)
+    left.prevCenter.toMachineCell =
+        HistoryTile.leftMachineCell right.atOrigin right.prevLeft ∧
+      left.prevRight.toMachineCell = right.prevCenter.toMachineCell ∧
+      left.nextCenter.toMachineCell =
+        HistoryTile.leftMachineCell right.atOrigin right.nextLeft ∧
+      left.nextRight.toMachineCell = right.nextCenter.toMachineCell := by
+  have h := (HistoryTile.hMatches_toWangTile_iff
+    (runHistoryTile input time position)
+    (runHistoryTile input time (position + 1))
+    normalRowTag normalRowTag normalRowTag normalRowTag).1
+      (runHistoryTile_hMatches input time position)
+  exact ⟨h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2⟩
+
 theorem runHistoryTile_vMatches (input : List Symbol) (time position : Nat) :
     WangTile.VMatches
       ((runHistoryTile input time position).toWangTile normalRowTag normalRowTag)
@@ -173,6 +189,20 @@ theorem runHistoryTile_vMatches (input : List Symbol) (time position : Nat) :
         normalRowTag normalRowTag) := by
   rw [HistoryTile.vMatches_toWangTile_iff]
   simp [runHistoryTile]
+
+theorem runHistoryTile_vOverlap (input : List Symbol) (time position : Nat) :
+    let lower := runHistoryTile input time position
+    let upper := runHistoryTile input (time + 1) position
+    HistoryTile.leftMachineCell lower.atOrigin lower.nextLeft =
+        HistoryTile.leftMachineCell upper.atOrigin upper.prevLeft ∧
+      lower.nextCenter.toMachineCell = upper.prevCenter.toMachineCell ∧
+      lower.nextRight.toMachineCell = upper.prevRight.toMachineCell := by
+  have h := (HistoryTile.vMatches_toWangTile_iff
+    (runHistoryTile input time position)
+    (runHistoryTile input (time + 1) position)
+    normalRowTag normalRowTag normalRowTag normalRowTag).1
+      (runHistoryTile_vMatches input time position)
+  exact ⟨h.2.1, h.2.2.1, h.2.2.2⟩
 
 end UniversalTM0Tableau
 end LeanWang
