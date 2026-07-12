@@ -22,6 +22,19 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
 
 set_option maxRecDepth 20000
 
+structure MarkedFreeGrid
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (west east south north size : Nat) where
+  grid : FreeGrid indexGrid shadeGrid west east south north size
+  positive : 0 < size
+  lowerLeftMarker :
+    (indexGrid (grid.columnAt ⟨0, positive⟩ / 2)
+        (grid.rowAt ⟨0, positive⟩ / 2),
+      quadrantAt (grid.columnAt ⟨0, positive⟩)
+        (grid.rowAt ⟨0, positive⟩)) ∈
+      ShadedSignals.markerQuarters
+
 private theorem finCons_strictMono {size first : Nat} {rest : Fin size → Nat}
     (first_lt : ∀ index, first < rest index)
     (rest_strictMono : ∀ {i j}, i < j → rest i < rest j) :
@@ -318,6 +331,45 @@ theorem oddMarkedFreeGrid_lowerLeft_marker
   rw [(oddMarkedFreeGrid_lowerLeft size grid valid cycle shaded).1,
     (oddMarkedFreeGrid_lowerLeft size grid valid cycle shaded).2]
   exact SparseFreeLinePlaneMarker.markerAtCoordinate size grid
+
+set_option maxHeartbeats 1000000 in
+-- Packaging the dependent lower-left index unfolds the marked-grid cast.
+def evenMarkedWitness
+    (size : Nat) (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (refinedGrid .even (1 + size) grid) stateGrid)
+    (cycle : CycleOn (refinedGrid .even (1 + size) grid)
+      (west .even (1 + size)) (east .even (1 + size))
+      (west .even (1 + size)) (east .even (1 + size)))
+    (shaded : CycleShade stateGrid
+      (west .even (1 + size)) (east .even (1 + size))
+      (west .even (1 + size)) (east .even (1 + size)) .light) :
+    MarkedFreeGrid (refinedGrid .even (1 + size) grid) stateGrid
+      (west .even (1 + size)) (east .even (1 + size))
+      (west .even (1 + size)) (east .even (1 + size)) (size + 3) where
+  grid := evenMarkedFreeGrid size grid valid cycle shaded
+  positive := by omega
+  lowerLeftMarker := evenMarkedFreeGrid_lowerLeft_marker
+    size grid valid cycle shaded
+
+set_option maxHeartbeats 1000000 in
+-- Packaging the dependent lower-left index unfolds the marked-grid cast.
+def oddMarkedWitness
+    (size : Nat) (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (refinedGrid .odd size grid) stateGrid)
+    (cycle : CycleOn (refinedGrid .odd size grid)
+      (west .odd size) (east .odd size) (west .odd size) (east .odd size))
+    (shaded : CycleShade stateGrid
+      (west .odd size) (east .odd size)
+      (west .odd size) (east .odd size) .light) :
+    MarkedFreeGrid (refinedGrid .odd size grid) stateGrid
+      (west .odd size) (east .odd size)
+      (west .odd size) (east .odd size) (size + 2) where
+  grid := oddMarkedFreeGrid size grid valid cycle shaded
+  positive := by omega
+  lowerLeftMarker := oddMarkedFreeGrid_lowerLeft_marker
+    size grid valid cycle shaded
 
 end SparseFreeLinePlaneMarkedGrid
 end Closed104
