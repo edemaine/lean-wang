@@ -486,6 +486,82 @@ theorem horizontal_actual_route {window : Window}
   · exact Or.inl (route_of_canonicalWindow route)
   · exact Or.inr (route_of_canonicalWindow route)
 
+theorem componentAt_iterateRefine_two_congr_at
+    {first second : Nat → Nat → Index} {x y : Nat}
+    (hcell : first (x / 2 / 2 / 2) (y / 2 / 2 / 2) =
+      second (x / 2 / 2 / 2) (y / 2 / 2 / 2)) :
+    componentAt (iterateRefine 2 first) x y =
+      componentAt (iterateRefine 2 second) x y := by
+  unfold componentAt
+  simp only [iterateRefine, refineIndexGrid]
+  rw [hcell]
+
+theorem sameComponents_verticalWindowAt_shift
+    (depth : Nat) (parent : Index) (blockX : Nat) :
+    ∀ x y, x < 24 → y < 24 →
+      componentAt
+          (iterateRefine 2 (windowGrid (verticalWindowAt depth parent blockX)))
+          x y =
+        componentAt
+          (iterateRefine 2 (shiftGrid (oldGrid depth parent)
+            (blockX - 1) (centerBlock depth - 1))) x y := by
+  intro x y hx hy
+  apply componentAt_iterateRefine_two_congr_at
+  rw [windowGrid_verticalWindowAt]
+  · simp [shiftGrid]
+  · omega
+  · omega
+
+theorem sameComponents_horizontalWindowAt_shift
+    (depth : Nat) (parent : Index) (blockY : Nat) :
+    ∀ x y, x < 24 → y < 24 →
+      componentAt
+          (iterateRefine 2 (windowGrid (horizontalWindowAt depth parent blockY)))
+          x y =
+        componentAt
+          (iterateRefine 2 (shiftGrid (oldGrid depth parent)
+            (centerBlock depth - 1) (blockY - 1))) x y := by
+  intro x y hx hy
+  apply componentAt_iterateRefine_two_congr_at
+  rw [windowGrid_horizontalWindowAt]
+  · simp [shiftGrid]
+  · omega
+  · omega
+
+/-- Transport a vertical-window route to its shifted recursive neighborhood. -/
+theorem shiftedRoute_of_verticalWindowAt
+    {depth : Nat} {parent : Index} {blockX : Nat} {target : Port}
+    (route : Route (verticalWindowAt depth parent blockX) target) :
+    SparseFreeLineLocalProjection.ShiftedBoundedRoute
+      (oldGrid depth parent) (blockX - 1) (centerBlock depth - 1)
+      24 24 (windowStarts (verticalWindowAt depth parent blockX)) target := by
+  have same := sameComponents_verticalWindowAt_shift depth parent blockX
+  rcases route with ⟨witness⟩
+  have htarget := witness.path.second_inBounds
+  refine ⟨witness.start, witness.start_mem,
+    BoundedPath.congr_of_component_eq same witness.path, ?_⟩
+  have targetLive := witness.targetLive
+  simp only [portPresent] at targetLive ⊢
+  rw [← same target.x target.y htarget.1 htarget.2]
+  exact targetLive
+
+/-- Transport a horizontal-window route to its shifted recursive neighborhood. -/
+theorem shiftedRoute_of_horizontalWindowAt
+    {depth : Nat} {parent : Index} {blockY : Nat} {target : Port}
+    (route : Route (horizontalWindowAt depth parent blockY) target) :
+    SparseFreeLineLocalProjection.ShiftedBoundedRoute
+      (oldGrid depth parent) (centerBlock depth - 1) (blockY - 1)
+      24 24 (windowStarts (horizontalWindowAt depth parent blockY)) target := by
+  have same := sameComponents_horizontalWindowAt_shift depth parent blockY
+  rcases route with ⟨witness⟩
+  have htarget := witness.path.second_inBounds
+  refine ⟨witness.start, witness.start_mem,
+    BoundedPath.congr_of_component_eq same witness.path, ?_⟩
+  have targetLive := witness.targetLive
+  simp only [portPresent] at targetLive ⊢
+  rw [← same target.x target.y htarget.1 htarget.2]
+  exact targetLive
+
 end SparseFreeLineEvenExtraCreatedWindowClosure
 end Closed104
 end Figure13Layers
