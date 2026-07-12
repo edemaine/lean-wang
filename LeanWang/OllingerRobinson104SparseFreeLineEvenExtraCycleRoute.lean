@@ -73,6 +73,39 @@ theorem projectsTo_of_evenBridgeTail
   exact ⟨projectsTo_of_refinedCyclePath oldCycle fineCycle sourceOnCycle
     fineStartOnCycle path targetLive⟩
 
+/-- Rebase a descendant weighted source across an even ancestor bridge. -/
+theorem weightedSource_of_evenBridge
+    {grid : Nat → Nat → Index}
+    {ancestorWest ancestorEast ancestorSouth ancestorNorth : Nat}
+    {descendantWest descendantEast descendantSouth descendantNorth : Nat}
+    (ancestorCycle : CycleOn grid
+      ancestorWest ancestorEast ancestorSouth ancestorNorth)
+    (descendantCycle : CycleOn grid
+      descendantWest descendantEast descendantSouth descendantNorth)
+    (bridge : EvenCycleBridge grid
+      ancestorWest ancestorEast ancestorSouth ancestorNorth
+      descendantWest descendantEast descendantSouth descendantNorth)
+    (source : WeightedSource grid descendantWest descendantEast
+      descendantSouth descendantNorth) :
+    ∃ rebased : WeightedSource grid ancestorWest ancestorEast
+        ancestorSouth ancestorNorth,
+      rebased.port = source.port ∧ rebased.parity = source.parity := by
+  rcases bridge with ⟨ancestorStart, descendantEntry, ancestorStartOnCycle,
+    descendantEntryOnCycle, bridgePath⟩
+  have alongDescendant := onCycle_connected descendantCycle
+    descendantEntryOnCycle source.onCycle
+  refine ⟨{
+    port := source.port
+    parity := source.parity
+    start := ancestorStart
+    onCycle := ancestorStartOnCycle
+    path := ?_
+    startLive := portPresent_of_onCycle ancestorCycle ancestorStartOnCycle
+    portLive := source.portLive
+  }, rfl, rfl⟩
+  simpa [Bool.xor_assoc] using
+    Path.trans bridgePath (Path.trans alongDescendant source.path)
+
 end SparseFreeLineEvenExtraCycleRoute
 end Closed104
 end Figure13Layers
