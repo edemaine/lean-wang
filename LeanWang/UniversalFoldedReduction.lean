@@ -6,7 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.RoutedScaffold
 import LeanWang.Theorems
-import LeanWang.UniversalDirectReduction
+import LeanWang.UniversalTM0TableauData
 import Mathlib.Computability.Reduce
 
 /-!
@@ -30,22 +30,21 @@ namespace UniversalFoldedReduction
 
 open Nat.Partrec (Code)
 
-/-- The sole machine-side input to the generic Wang reduction. -/
-def universalMachine : UniversalMachineCertificate :=
-  UniversalDirectReduction.certificate
-
 /-- Fixed-corner Wang instance with the source input forced on its bottom row. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  universalMachine.fixedDominoData c
+  UniversalTM0Tableau.fixedDominoData (UniversalTM0Semantic.input c)
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  exact universalMachine.fixedDominoData_computable
+  exact UniversalTM0Tableau.fixedDominoData_computable.comp
+    UniversalTM0Semantic.input_computable
 
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1
         (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  exact universalMachine.fixedDominoData_correct c
+  exact (UniversalTM0Tableau.tilesQuarterWithSeed_iff_not_dom
+    (UniversalTM0Semantic.input c)).trans
+      (not_congr (UniversalTM0Semantic.tm0_eval_dom_iff c))
 
 /-- Plane-tiling instance after applying any proved scaffold. -/
 def dominoReduction (S : Scaffold) (c : Code) : TileSet :=

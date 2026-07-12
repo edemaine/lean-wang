@@ -34,18 +34,13 @@ The reduction has three independent parts:
 The source-dependent machine compiler has been replaced by a fixed universal
 argument.
 
-The reduction now consumes a four-field `UniversalMachineCertificate`: one
-constant finite table program, a computable source-dependent input word, a
-support proof, and the halting equivalence. All machine-to-Wang and scaffold
-reasoning depends only on this certificate.
-
 `UniversalTM0Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
 to the universal partial function, relabels that one fixed evaluator, carries
 Mathlib's native finite supports through TM2, TM1, and TM0, and proves the
-varying binary input primitive recursive. `UniversalTM0Folded` enumerates the
-fixed support once, emits the semantic folded rows directly, proves exact
-transition lookup, and proves the two-sided-TM0 to one-sided-Post simulation in
-both directions. No source syntax is translated, encoded, or decoded.
+varying binary input primitive recursive. The direct tableau folds the
+two-sided tape into paired cells and applies the fixed TM0 instruction set as a
+radius-one local rule. No extra Post machine, table program, source compiler,
+or descriptor decoder occurs in the retained reduction.
 
 1. `UniversalCode.universalEval` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
@@ -54,19 +49,18 @@ both directions. No source syntax is translated, encoded, or decoded.
    finite-support TM2-to-TM1-to-TM0 transformations.
 3. `UniversalTM0Semantic.input c` writes `Nat.pair (encode c) 0` as the varying
    initial tape. Its construction is computable.
-4. `UniversalTM0Folded.inputWord` folds that finite word and starts the constant
-   Post control directly on it. No initializer writes or rewinds the input.
-5. `MachineInputTiles` forces the finite word in a position-tagged bottom Wang
-   row, followed by one self-looping blank-tail tile. It proves seeded
-   quarter-plane tiling equivalent to nonhalting on that input.
-6. `MachineInputTilesData` computes the finite tile list and seed, while its
-   membership theorems identify them with the semantic history tiles.
-7. `UniversalDirectReduction.fixedDominoData_correct` proves that this
-   computable Wang instance tiles exactly when
+4. `UniversalTM0TableauCells` and `UniversalTM0TableauDynamics` define the
+   finite paired-cell alphabet and its deterministic radius-one update.
+5. `UniversalTM0TableauInitial` forces the input in a position-tagged bottom
+   Wang row followed by one self-looping blank-tail tile.
+6. `UniversalTM0TableauDecode` proves that every seeded tiling is the unique
+   nonhalting TM0 history; together with the forward history construction this
+   gives the exact seeded quarter-plane equivalence.
+7. `UniversalTM0TableauData` computes the finite tile list and seed, so the
+   resulting Wang instance tiles exactly when
    `Nat.Partrec.Code.eval c 0` is undefined.
-8. `UniversalFoldedReduction` exposes that direct construction to the existing
-   scaffold reductions; the generated input-specific initializer is no longer
-   in this public reduction path.
+8. `UniversalFoldedReduction` exposes that construction to the existing
+   scaffold reductions.
 9. The direct `IsRoutedScaffold` reduction preserves the horizontal and
    vertical channel constraints used by the Robinson board construction.
 10. Mathlib's `ComputablePred.halting_problem` yields both undecidability

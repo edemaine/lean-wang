@@ -43,16 +43,15 @@ proof task.
   and natural-number encodings.
 - `LeanWang.Compactness` proves compactness for centered boxes, squares, and
   seeded quarter-plane tilings.
-- `LeanWang.MachineInputTiles` and `LeanWang.MachineInputTilesData` prove the
-  finite-input machine-to-Wang correspondence and compute its tile lists.
+- `LeanWang.MachineInputTiles` supplies the reusable position and row colors
+  used to force a finite bottom row.
 - `LeanWang.UniversalCode` defines the universal partial function, and
   `LeanWang.UniversalTM0Semantic` uses Mathlib's completeness theorem to choose
   one evaluator code directly, carries its finite supports through TM2, TM1,
   and TM0, and places the source code on its initial tape.
-- `LeanWang.UniversalTM0Folded` constructs the constant one-sided Post table
-  directly from that fixed TM0 machine and proves its folded-tape simulation.
-- `LeanWang.UniversalDirectReduction` computes the resulting fixed-corner Wang
-  instance and proves it tiles exactly when the source computation diverges.
+- `LeanWang.UniversalTM0Tableau*` folds the two-sided TM0 tape into paired
+  cells, proves the radius-one Wang history construction in both directions,
+  and computes the finite bottom-row tile list and seed.
 - `LeanWang.UniversalFoldedReduction` proves the fixed-corner and plane-tiling
   reductions and derives undecidability from Mathlib's halting problem.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.
