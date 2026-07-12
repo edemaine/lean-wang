@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedRoutedScaffoldForward
+import LeanWang.OllingerRobinson104ShadedObstructionGeometryOddBaseBoundedSoundness
 
 /-!
 # Pair-cover recurrence for canonical Robinson boards
@@ -46,6 +47,26 @@ theorem even_one : Holds .even 1 := by
   simpa [refinedGrid, refinementDepth, Phase.extra, west, east, scale,
     Phase.factor] using cover
 
+/-- The checked odd obstruction audit supplies the odd base in every coarse
+grid. -/
+theorem odd_zero : Holds .odd 0 := by
+  intro grid shadeGrid valid
+  have valid' : ValidShadeGrid (iterateRefine 3 grid) shadeGrid := by
+    simpa [refinedGrid, refinementDepth, Phase.extra] using valid
+  have geometry :=
+    ShadedObstructionGeometryOddBaseBoundedSoundness.geometry_shift
+      grid valid' 0 0
+  have cover := pairCover_of_geometry geometry
+  have hgrid : RefinementTranslation.shiftGrid grid 0 0 = grid :=
+    shiftGrid_zero grid
+  have hshade : ShadedFreeLineTranslation.shiftQuarterGrid shadeGrid 0 0 =
+      shadeGrid := by
+    funext x y
+    simp [ShadedFreeLineTranslation.shiftQuarterGrid]
+  rw [hgrid, hshade] at cover
+  simpa only [refinedGrid, refinementDepth, Phase.extra,
+    west, east, scale, Phase.factor, pow_zero, mul_one] using cover
+
 /-- One common two-substitution recurrence advances either shade phase. -/
 def Step : Prop :=
   ∀ (phase : Phase) (depth : Nat), Holds phase depth → Holds phase (depth + 1)
@@ -65,6 +86,9 @@ theorem allHolds_of_bases_of_step
   · induction size with
     | zero => exact odd_zero
     | succ size ih => simpa using step .odd size ih
+
+theorem allHolds_of_step (step : Step) : AllHolds :=
+  allHolds_of_bases_of_step odd_zero step
 
 set_option maxHeartbeats 1000000 in
 -- Normalizing the even and odd recurrence grids against the common tower grid.
@@ -123,13 +147,12 @@ theorem lightBoardPairCovers_of_allHolds
   · intro _
     simpa only [hgridOdd, hwestOdd, heastOdd] using oddCover
 
-/-- The odd base and common recurrence are sufficient for routed forcing. -/
-theorem forcesRoutedFixedCornerSquares_of_oddBase_of_step
-    (odd_zero : Holds .odd 0) (step : Step) :
+/-- The common recurrence is now the sole forward scaffold obligation. -/
+theorem forcesRoutedFixedCornerSquares_of_step (step : Step) :
     ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares
     (lightBoardPairCovers_of_allHolds
-      (allHolds_of_bases_of_step odd_zero step))
+      (allHolds_of_step step))
 
 end ShadedObstructionPairCoverRecurrence
 end Closed104
