@@ -95,6 +95,103 @@ structure PairCover
         Geometry indexGrid shadeGrid
           localWest localEast localSouth localNorth
 
+/-- A pair cover whose returned geometry stays inside the ambient board in
+both axes.  The recurrence uses this stronger invariant; the final obstruction
+argument only needs the asymmetric `PairCover` projection. -/
+structure ContainedPairCover
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (west east south north : Nat) : Prop where
+  vertical : ∀ {column row boundary : Nat},
+    quarterWest west < column → column < quarterEast east →
+    quarterSouth south < row → row < quarterNorth north →
+    quarterSouth south < boundary → boundary < quarterNorth north →
+    ShadedSignals.selectedHorizontalFor
+      (componentAt indexGrid column boundary) (quadrantAt column boundary)
+      (shadeGrid column boundary) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterWest west ≤ quarterWest localWest ∧
+        quarterEast localEast ≤ quarterEast east ∧
+        quarterSouth south ≤ quarterSouth localSouth ∧
+        quarterNorth localNorth ≤ quarterNorth north ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterSouth localSouth < boundary ∧
+        boundary < quarterNorth localNorth ∧
+        Geometry indexGrid shadeGrid
+          localWest localEast localSouth localNorth
+  horizontal : ∀ {column row boundary : Nat},
+    quarterWest west < column → column < quarterEast east →
+    quarterSouth south < row → row < quarterNorth north →
+    quarterWest west < boundary → boundary < quarterEast east →
+    ShadedSignals.selectedVerticalFor
+      (componentAt indexGrid boundary row) (quadrantAt boundary row)
+      (shadeGrid boundary row) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterWest west ≤ quarterWest localWest ∧
+        quarterEast localEast ≤ quarterEast east ∧
+        quarterSouth south ≤ quarterSouth localSouth ∧
+        quarterNorth localNorth ≤ quarterNorth north ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterWest localWest < boundary ∧
+        boundary < quarterEast localEast ∧
+        Geometry indexGrid shadeGrid
+          localWest localEast localSouth localNorth
+
+theorem ContainedPairCover.toPairCover
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (cover : ContainedPairCover indexGrid shadeGrid west east south north) :
+    PairCover indexGrid shadeGrid west east south north := by
+  constructor
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth hselected
+    rcases cover.vertical hwest heast hsouth hnorth hboundarySouth
+      hboundaryNorth hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterWest, houterEast, _, _, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalSouth,
+        hboundaryLocalNorth, geometry⟩
+    exact ⟨localWest, localEast, localSouth, localNorth,
+      houterWest, houterEast, hlocalWest, hlocalEast,
+      hlocalSouth, hlocalNorth, hboundaryLocalSouth,
+      hboundaryLocalNorth, geometry⟩
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast hselected
+    rcases cover.horizontal hwest heast hsouth hnorth hboundaryWest
+      hboundaryEast hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        _, _, houterSouth, houterNorth, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalWest,
+        hboundaryLocalEast, geometry⟩
+    exact ⟨localWest, localEast, localSouth, localNorth,
+      houterSouth, houterNorth, hlocalWest, hlocalEast,
+      hlocalSouth, hlocalNorth, hboundaryLocalWest,
+      hboundaryLocalEast, geometry⟩
+
+/-- One geometry board is a fully contained pair cover of itself. -/
+theorem containedPairCover_of_geometry
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (geometry : Geometry indexGrid shadeGrid west east south north) :
+    ContainedPairCover indexGrid shadeGrid west east south north := by
+  constructor
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth _
+    exact ⟨west, east, south, north,
+      le_rfl, le_rfl, le_rfl, le_rfl,
+      hwest, heast, hsouth, hnorth,
+      hboundarySouth, hboundaryNorth, geometry⟩
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast _
+    exact ⟨west, east, south, north,
+      le_rfl, le_rfl, le_rfl, le_rfl,
+      hwest, heast, hsouth, hnorth,
+      hboundaryWest, hboundaryEast, geometry⟩
+
 /-- One geometry board covers every coordinate pair in its own interior. -/
 theorem pairCover_of_geometry
     {indexGrid : Nat → Nat → Index}
@@ -204,6 +301,20 @@ theorem pairCover_at_block
       (16 * blockX + 4) (16 * blockX + 12)
       (16 * blockY + 4) (16 * blockY + 12) :=
   pairCover_of_geometry
+    (ShadedObstructionGeometryTranslation.geometry_at_block
+      grid valid blockX blockY)
+
+/-- Every translated depth-four audit block supplies the fully contained
+recurrence invariant. -/
+theorem containedPairCover_at_block
+    (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine 4 grid) shadeGrid)
+    (blockX blockY : Nat) :
+    ContainedPairCover (iterateRefine 4 grid) shadeGrid
+      (16 * blockX + 4) (16 * blockX + 12)
+      (16 * blockY + 4) (16 * blockY + 12) :=
+  containedPairCover_of_geometry
     (ShadedObstructionGeometryTranslation.geometry_at_block
       grid valid blockX blockY)
 
